@@ -1,0 +1,477 @@
+package karika.distribucija.ba.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.gotham_bold
+import karikav2.composeapp.generated.resources.gotham_book
+import karikav2.composeapp.generated.resources.gotham_light
+import karikav2.composeapp.generated.resources.gotham_medium
+import karikav2.composeapp.generated.resources.gotham_thin
+import karikav2.composeapp.generated.resources.ic_eye
+import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.vectorResource
+
+@Composable
+fun KarikaText(
+    text: String,
+    modifier: Modifier = Modifier,
+    textSize: TextUnit = 14.sp,
+    color: Color = KarikaColors.White,
+    textAlign: TextAlign = TextAlign.Start,
+    textOverflow: TextOverflow = TextOverflow.Ellipsis,
+    fontWeight: FontWeight = FontWeight.Normal,
+    maxLines: Int = Int.MAX_VALUE,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle = FontStyle.Normal,
+    decoration: TextDecoration = TextDecoration.None
+) {
+    Text(
+        modifier = modifier,
+        text = text,
+        fontSize = textSize,
+        color = color,
+        textAlign = textAlign,
+        overflow = textOverflow,
+        maxLines = maxLines,
+        lineHeight = lineHeight,
+        fontStyle = fontStyle,
+        fontWeight = fontWeight,
+        fontFamily = KarikaFonts(),
+        style = LocalTextStyle.current.copy(
+            textDecoration = decoration
+        )
+    )
+}
+
+@Composable
+fun KarikaText(
+    atext: AnnotatedString,
+    modifier: Modifier = Modifier,
+    textSize: TextUnit = 14.sp,
+    color: Color = KarikaColors.White,
+    textAlign: TextAlign = TextAlign.Start,
+    textOverflow: TextOverflow = TextOverflow.Ellipsis,
+    fontWeight: FontWeight = FontWeight.Normal,
+    maxLines: Int = Int.MAX_VALUE,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle = FontStyle.Normal,
+    decoration: TextDecoration = TextDecoration.None,
+) {
+    Text(
+        modifier = modifier,
+        text = atext,
+        fontSize = textSize,
+        color = color,
+        textAlign = textAlign,
+        overflow = textOverflow,
+        fontWeight = fontWeight,
+        maxLines = maxLines,
+        lineHeight = lineHeight,
+        fontStyle = fontStyle,
+        style = LocalTextStyle.current.copy(
+            textDecoration = decoration
+        ),
+        fontFamily = KarikaFonts()
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun KarikaTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    textStyle: TextStyle = LocalTextStyle.current,
+    label: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    prefix: @Composable (() -> Unit)? = null,
+    suffix: @Composable (() -> Unit)? = null,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    singleLine: Boolean = false,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    minLines: Int = 1,
+    interactionSource: MutableInteractionSource? = null,
+    shape: Shape = TextFieldDefaults.shape,
+    colors: TextFieldColors = TextFieldDefaults.colors()
+) {
+    @Suppress("NAME_SHADOWING")
+    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+    val mergedTextStyle = textStyle.merge(TextStyle(color = textStyle.color))
+    CompositionLocalProvider(LocalTextSelectionColors provides colors.textSelectionColors) {
+        BasicTextField(
+            value = value,
+            modifier = modifier,
+            onValueChange = onValueChange,
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = mergedTextStyle,
+            visualTransformation = visualTransformation,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            interactionSource = interactionSource,
+            singleLine = singleLine,
+            maxLines = maxLines,
+            minLines = minLines,
+            decorationBox =
+            @Composable { innerTextField ->
+                // places leading icon, text field with label and placeholder, trailing icon
+                TextFieldDefaults.DecorationBox(
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
+                    ),
+                    value = value,
+                    visualTransformation = visualTransformation,
+                    innerTextField = innerTextField,
+                    placeholder = placeholder,
+                    label = label,
+                    leadingIcon = leadingIcon,
+                    trailingIcon = trailingIcon,
+                    prefix = prefix,
+                    suffix = suffix,
+                    supportingText = supportingText,
+                    shape = shape,
+                    singleLine = singleLine,
+                    enabled = enabled,
+                    isError = isError,
+                    interactionSource = interactionSource,
+                    colors = colors
+                )
+            }
+        )
+    }
+}
+
+@Composable
+fun KarikaTextField1(
+    modifier: Modifier = Modifier,
+    title: String = "",
+    value: MutableState<String> = mutableStateOf(""),
+    placeholder: String = "",
+    placeholderColor: Color = KarikaColors.Placeholder,
+    placeholderSize: TextUnit = 14.sp,
+    textColor: Color = KarikaColors.Black,
+    textSize: TextUnit = 14.sp,
+    fontWeight: FontWeight = FontWeight.Normal,
+    fontStyle: FontStyle = FontStyle.Normal,
+    maxLines: Int = Int.MAX_VALUE,
+    maxLength: Int = Int.MAX_VALUE,
+    onValueChange: (String) -> Unit = {},
+    enabled: Boolean = true,
+    imeAction: ImeAction = ImeAction.Done,
+    doneAction: (() -> Unit)? = null,
+    trailingIcons: @Composable (() -> Unit)? = null,
+    error: MutableState<String> = mutableStateOf("")
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        KarikaText(
+            text = title,
+            color = KarikaColors.Gray4,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W400
+        )
+        TextField(
+            modifier = modifier
+                .border(
+                    width = 1.dp,
+                    color = if (error.value.isNotEmpty()) KarikaColors.Error else KarikaColors.Border,
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .background(
+                    color = KarikaColors.White,
+                    shape = RoundedCornerShape(4.dp)
+                ),
+            placeholder = {
+                KarikaText(
+                    text = placeholder,
+                    color = placeholderColor,
+                    textSize = placeholderSize,
+                    fontWeight = FontWeight.W400
+                )
+            },
+            enabled = enabled,
+            value = value.value,
+            onValueChange = {
+                if (it.length > maxLength) {
+                    return@TextField
+                }
+                value.value = it
+                onValueChange.invoke(it)
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = imeAction,
+                keyboardType = KeyboardType.Text,
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (doneAction != null) {
+                        if (value.value.isEmpty()) {
+                            keyboardController?.hide()
+                        }
+                        doneAction.invoke()
+                    } else {
+                        keyboardController?.hide()
+                    }
+                }
+            ),
+            maxLines = maxLines,
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = textColor,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent
+            ),
+            textStyle = LocalTextStyle.current.copy(
+                fontWeight = fontWeight,
+                fontStyle = fontStyle,
+                fontSize = textSize,
+                fontFamily = KarikaFonts()
+            ),
+            trailingIcon = {
+                trailingIcons?.invoke()
+            }
+        )
+        KarikaText(
+            text = error.value,
+            color = KarikaColors.Error,
+            textSize = 12.sp,
+            fontWeight = FontWeight.W400
+        )
+    }
+}
+
+@Composable
+fun KarikaPasswordTextField(
+    modifier: Modifier = Modifier,
+    title: String = "",
+    value: MutableState<String> = mutableStateOf(""),
+    placeholder: String = "",
+    placeholderColor: Color = KarikaColors.Placeholder,
+    placeholderSize: TextUnit = 14.sp,
+    textColor: Color = KarikaColors.Black,
+    textSize: TextUnit = 14.sp,
+    fontWeight: FontWeight = FontWeight.Normal,
+    fontStyle: FontStyle = FontStyle.Normal,
+    maxLines: Int = Int.MAX_VALUE,
+    maxLength: Int = Int.MAX_VALUE,
+    onValueChange: (String) -> Unit = {},
+    enabled: Boolean = true,
+    imeAction: ImeAction = ImeAction.Done,
+    doneAction: (() -> Unit)? = null,
+    error: MutableState<String> = mutableStateOf("")
+) {
+    var passwordVisibility by remember { mutableStateOf(false) }
+    val text = remember { value }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        KarikaText(
+            text = title,
+            color = KarikaColors.Gray4,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W400
+        )
+        TextField(
+            modifier = modifier
+                .border(
+                    width = 1.dp,
+                    color = if (error.value.isNotEmpty()) KarikaColors.Error else KarikaColors.Border,
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .background(
+                    color = KarikaColors.White,
+                    shape = RoundedCornerShape(4.dp)
+                ),
+            placeholder = {
+                KarikaText(
+                    text = placeholder,
+                    color = placeholderColor,
+                    textSize = placeholderSize,
+                    fontWeight = FontWeight.W400
+                )
+            },
+            enabled = enabled,
+            value = text.value,
+            onValueChange = {
+                if (it.length > maxLength) {
+                    return@TextField
+                }
+                text.value = it
+                onValueChange.invoke(it)
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = imeAction,
+                keyboardType = KeyboardType.Text,
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (doneAction != null) {
+                        if (text.value.isEmpty()) {
+                            keyboardController?.hide()
+                        }
+                        doneAction.invoke()
+                    } else {
+                        keyboardController?.hide()
+                    }
+                }
+            ),
+            maxLines = maxLines,
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = textColor,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent
+            ),
+            textStyle = LocalTextStyle.current.copy(
+                fontWeight = fontWeight,
+                fontStyle = fontStyle,
+                fontSize = textSize,
+                fontFamily = KarikaFonts()
+            ),
+            trailingIcon = {
+                Icon(
+                    modifier = Modifier
+                        .clickable {
+                            passwordVisibility = !passwordVisibility
+                        },
+                    imageVector = vectorResource(if (passwordVisibility) Res.drawable.ic_eye else Res.drawable.ic_eye),
+                    contentDescription = ""
+                )
+            },
+            visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+        )
+        KarikaText(
+            text = error.value,
+            color = KarikaColors.Error,
+            textSize = 12.sp,
+            fontWeight = FontWeight.W400
+        )
+    }
+}
+
+@Composable
+fun IconTextItem(
+    modifier: Modifier = Modifier
+        .fillMaxWidth(),
+    icon: ImageVector,
+    iconColor: Color = KarikaColors.Secondary,
+    iconSize: Dp = 24.dp,
+    text: String?,
+    textColor: Color = KarikaColors.Secondary,
+    fontWeight: FontWeight = FontWeight.W500,
+    textSize: TextUnit = 16.sp,
+    textAlign: TextAlign = TextAlign.Center
+) {
+    if (!text.isNullOrEmpty()) {
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = Modifier
+                    .size(iconSize),
+                imageVector = icon,
+                tint = iconColor,
+                contentDescription = ""
+            )
+            XSpacer8()
+            Box(
+                modifier = Modifier
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .padding(horizontal = 6.dp),
+                    text = text,
+                    textSize = textSize,
+                    lineHeight = textSize,
+                    textAlign = textAlign,
+                    fontWeight = fontWeight,
+                    color = textColor
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun KarikaFonts() = FontFamily(
+    Font(Res.font.gotham_book, FontWeight.Normal),
+    Font(Res.font.gotham_bold, FontWeight.Bold),
+    Font(Res.font.gotham_thin, FontWeight.Thin),
+    Font(Res.font.gotham_light, FontWeight.Light),
+    Font(Res.font.gotham_medium, FontWeight.Medium),
+)
