@@ -4,10 +4,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.DEFAULT
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.observer.ResponseObserver
 import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.client.request.header
@@ -16,11 +12,28 @@ import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpHeaders.Authorization
+import io.ktor.http.content.ByteArrayContent
+import io.ktor.http.content.TextContent
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object HttpClientProvider {
+    private const val HOST = "https://karika.ba/magento"
+    private const val BASE_URL = "$HOST/rest/V1/"
+
+    fun url(arg: String): String {
+        return BASE_URL + arg
+    }
+
     var token: String? = null
+    fun imageUrl(name: String?): String {
+        return if (name != null && name.contains("media")) {
+            "$HOST/$name"
+        } else {
+            "$HOST/media/catalog/product$name"
+        }
+    }
+
     val client: HttpClient by lazy {
         HttpClient {
             defaultRequest {
@@ -60,6 +73,7 @@ object HttpClientProvider {
                     println(
                         """
                     Request: ${it.request.method.value} ${it.status} ${it.request.url}
+                    ${(it.request.content as? TextContent)?.text}
                     Authorization: ${it.request.headers[Authorization]}
                     Response: ${it.bodyAsText()}
                 """.trimIndent()

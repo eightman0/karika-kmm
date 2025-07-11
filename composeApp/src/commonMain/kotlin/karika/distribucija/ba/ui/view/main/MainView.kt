@@ -1,7 +1,5 @@
 package karika.distribucija.ba.ui.view.main
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -15,30 +13,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import karika.distribucija.ba.Screen
+import com.arkivanov.decompose.extensions.compose.stack.Children
 import karika.distribucija.ba.ui.components.BottomBar
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.TopBar
-import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.view.main.cart.CartView
-import karika.distribucija.ba.ui.view.main.cart.CartViewModel
+import karika.distribucija.ba.ui.view.main.cart.nextstep.ShippingDetailsView
+import karika.distribucija.ba.ui.view.main.cart.success.CartSuccessView
 import karika.distribucija.ba.ui.view.main.home.HomeView
-import karika.distribucija.ba.ui.view.main.home.HomeViewModel
 import karika.distribucija.ba.ui.view.main.menu.MenuView
-import karika.distribucija.ba.ui.view.main.menu.MenuViewModel
 import karika.distribucija.ba.ui.view.main.profile.ProfileView
-import karika.distribucija.ba.ui.view.main.profile.ProfileViewModel
 import karika.distribucija.ba.ui.view.main.vendor.VendorView
-import karika.distribucija.ba.ui.view.main.vendor.VendorViewModel
 
 @Composable
-fun MainView(viewModel: MainViewModel) {
-    val navController = rememberNavController()
-
+fun MainView(component: MainComponent) {
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -54,49 +43,25 @@ fun MainView(viewModel: MainViewModel) {
             modifier = Modifier
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .fillMaxSize(),
-            hostState = viewModel.snackbarHostState,
-            topBar = { TopBar() },
-            bottomBar = { BottomBar(navController) },
-            viewModel = viewModel
-        ) {
-            NavHost(
+            topBar = { TopBar(component) },
+            bottomBar = { BottomBar(component) },
+            component = component
+        ) { padding ->
+            Children(
                 modifier = Modifier
-                    .padding(it),
-                navController = navController,
-                startDestination = Screen.Home.route,
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None }
+                    .padding(padding),
+                stack = component.stack
             ) {
-                composable(Screen.Home.route) {
-                    HomeView(HomeViewModel(navController, viewModel.stateHolder).asState())
-                }
-                composable(Screen.Menu.route) {
-                    MenuView(
-                        MenuViewModel(navController, viewModel.stateHolder) {
-                            viewModel.navigate(it)
-                        }.asState()
-                    )
-                }
-                composable(Screen.Vendor.route) {
-                    VendorView(
-                        VendorViewModel(navController, viewModel.stateHolder) {
-                            viewModel.navigate(it)
-                        }.asState()
-                    )
-                }
-                composable(Screen.Cart.route) {
-                    CartView(
-                        CartViewModel(navController, viewModel.stateHolder) {
-                            viewModel.navigate(it)
-                        }.asState()
-                    )
-                }
-                composable(Screen.Profile.route) {
-                    ProfileView(
-                        ProfileViewModel(navController, viewModel.stateHolder) {
-                            viewModel.navigate(it)
-                        }.asState()
-                    )
+                when (val child = it.instance) {
+                    is MainChild.Home -> HomeView(child.component)
+                    is MainChild.Vendor -> VendorView(child.component)
+                    is MainChild.Menu -> MenuView(child.component)
+
+                    is MainChild.Cart -> CartView(child.component)
+                    is MainChild.CartShippingDetails -> ShippingDetailsView(child.component)
+                    is MainChild.CartSuccess -> CartSuccessView(child.component)
+
+                    is MainChild.Profile -> ProfileView(child.component)
                 }
             }
         }

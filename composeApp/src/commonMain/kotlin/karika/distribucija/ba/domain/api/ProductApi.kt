@@ -1,0 +1,239 @@
+package karika.distribucija.ba.domain.api
+
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
+import karika.distribucija.ba.domain.HttpClientProvider
+import karika.distribucija.ba.domain.HttpClientProvider.url
+import karika.distribucija.ba.domain.model.Product
+import karika.distribucija.ba.domain.model.ProductResponse
+import karika.distribucija.ba.domain.model.PromotedVendor
+import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.util.addConditionally
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+
+internal class ProductApi {
+    suspend fun newArrivals(
+        pageSize: Int = 10,
+        currentPage: Int,
+        searchText: String = "",
+        from: String = "",
+        to: String = "",
+        onlyWithImage: Boolean = false,
+    ): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.get(
+            url("products") +
+                    "?searchCriteria[sortOrders][0][field]=created_at" +
+                    "&searchCriteria[sortOrders][0][direction]=DESC" +
+                    "&searchCriteria[pageSize]=$pageSize" +
+                    "&searchCriteria[currentPage]=$currentPage" +
+
+                    if (to.isNotEmpty()) {
+                        "&searchCriteria[filterGroups][0][filters][0][field]=created_at" +
+                                "&searchCriteria[filterGroups][0][filters][0][condition_type]=gteq" +
+                                "&searchCriteria[filterGroups][0][filters][0][value]=$from" +
+                                "&searchCriteria[filterGroups][1][filters][0][field]=created_at" +
+                                "&searchCriteria[filterGroups][1][filters][0][condition_type]=lteq" +
+                                "&searchCriteria[filterGroups][1][filters][0][value]=$to"
+                    } else {
+                        ""
+                    } +
+
+                    if (searchText.isNotEmpty()) {
+                        "&searchCriteria[filterGroups][2][filters][0][field]=name" +
+                                "&searchCriteria[filterGroups][2][filters][0][value]=%25$searchText%25" +
+                                "&searchCriteria[filterGroups][2][filters][0][conditionType]=like"
+                    } else {
+                        ""
+                    } +
+
+                    if (onlyWithImage) {
+                        "&searchCriteria[filterGroups][3][filters][0][field]=image" +
+                                "&searchCriteria[filterGroups][3][filters][0][value]=no_selection" +
+                                "&searchCriteria[filterGroups][3][filters][0][condition_type]=neq"
+                    } else ""
+        )
+    }
+
+    suspend fun promotedVendors(): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.get(
+            url("mobile/vendors/promoted")
+        )
+    }
+
+    suspend fun search(
+        categoryId: String? = null,
+        vendorId: Int? = null,
+        from: String? = null,
+        to: String? = null,
+        pageSize: Int = 10,
+        currentPage: Int = 1,
+        searchText: String = "",
+        sortBy: String = "price",
+        sortType: String = "ASC",
+    ): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.get(
+            url(
+                "" +
+                        "mobile/product/search" +
+                        "?query=$searchText" +
+                        "&page=$currentPage" +
+                        "&pageSize=$pageSize"
+                            .addConditionally(
+                                categoryId != null,
+                                categoryId?.split(",")?.joinToString(
+                                    separator = "&categoriesId[]=",
+                                    prefix = "&categoriesId[]="
+                                ) ?: ""
+                            )
+                            .addConditionally(
+                                vendorId != null,
+                                "&vendorId=$vendorId"
+                            )
+                            .addConditionally(
+                                from?.isNotEmpty() == true,
+                                "&from=$from"
+                            )
+                            .addConditionally(
+                                to?.isNotEmpty() == true,
+                                "&to=$to"
+                            )
+                            .addConditionally(
+                                sortBy.isNotEmpty(),
+                                "&sortBy=$sortBy"
+                            )
+                            .addConditionally(
+                                sortType.isNotEmpty(),
+                                "&sortDirection=$sortType"
+                            )
+            )
+        )
+    }
+}
+
+class ProductRepository internal constructor() {
+    fun newArrivals(
+        pageSize: Int = 10,
+        currentPage: Int,
+        searchText: String = "",
+        from: String = "",
+        to: String = "",
+        onlyWithImage: Boolean = false,
+    ): Flow<ResultState<ProductResponse>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = ProductApi()
+                .newArrivals(
+                    pageSize,
+                    currentPage,
+                    searchText,
+                    from,
+                    to,
+                    onlyWithImage
+                )
+                .getOrNull()
+
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body()))
+                return@flow
+            }
+
+            emit(ResultState.Error(response?.bodyAsText() ?: ""))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message ?: ""))
+        }
+    }
+
+    fun promotedVendors(): Flow<ResultState<List<PromotedVendor>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = ProductApi().promotedVendors().getOrNull()
+
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body()))
+                return@flow
+            }
+
+            emit(ResultState.Error(response?.bodyAsText() ?: ""))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message ?: ""))
+        }
+    }
+
+    fun search(
+        categoryId: String? = null,
+        vendorId: Int? = null,
+        from: String? = null,
+        to: String? = null,
+        pageSize: Int = 10,
+        currentPage: Int = 1,
+        searchText: String = "",
+        sortBy: String = "price",
+        sortType: String = "ASC",
+    ): Flow<ResultState<ProductResponse>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = ProductApi()
+                .search(
+                    categoryId,
+                    vendorId,
+                    from,
+                    to,
+                    pageSize,
+                    currentPage,
+                    searchText,
+                    sortBy,
+                    sortType
+                ).getOrNull()
+
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body()))
+                return@flow
+            }
+
+            emit(ResultState.Error(response?.bodyAsText() ?: ""))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message ?: ""))
+        }
+    }
+
+    fun searchProductsByCategory(
+        categoryId: String? = null,
+        vendorId: Int? = null,
+        from: String? = null,
+        to: String? = null,
+        pageSize: Int = 10,
+        currentPage: Int = 1,
+        searchText: String = "",
+        sortBy: String = "price",
+        sortType: String = "ASC",
+    ): Flow<ResultState<List<Product>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = ProductApi()
+                .search(
+                    categoryId,
+                    vendorId,
+                    from,
+                    to,
+                    pageSize,
+                    currentPage,
+                    searchText,
+                    sortBy,
+                    sortType
+                ).getOrNull()
+
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body()))
+                return@flow
+            }
+
+            emit(ResultState.Error(response?.bodyAsText() ?: ""))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message ?: ""))
+        }
+    }
+}

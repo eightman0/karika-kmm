@@ -8,27 +8,35 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.PrimaryButton
 import karika.distribucija.ba.ui.components.YSpacer16
 import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_gift
 import karikav2.composeapp.generated.resources.ic_logout
+import karikav2.composeapp.generated.resources.ic_messages
 import karikav2.composeapp.generated.resources.ic_navigation_profile
+import karikav2.composeapp.generated.resources.ic_notifications
+import karikav2.composeapp.generated.resources.ic_orders
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
-fun ProfileView(viewModel: ProfileViewModel) {
+fun ProfileView(component: ProfileComponent) {
     Box(
         modifier = Modifier
             .background(color = KarikaColors.Background)
@@ -40,14 +48,15 @@ fun ProfileView(viewModel: ProfileViewModel) {
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Header(viewModel)
-            Actions(viewModel)
+            Header(component)
+            Actions(component)
         }
     }
 }
 
 @Composable
-private fun Header(viewModel: ProfileViewModel) {
+private fun Header(component: ProfileComponent) {
+    val profile by component.stateHolder.userDetails.collectAsState()
     Box(
         modifier = Modifier
             .background(color = KarikaColors.White)
@@ -79,7 +88,7 @@ private fun Header(viewModel: ProfileViewModel) {
                 color = KarikaColors.Black,
                 fontWeight = FontWeight.W700,
                 textSize = 18.sp,
-                text = "Karika d.o.o"
+                text = profile.companyName()
             )
         }
     }
@@ -87,7 +96,7 @@ private fun Header(viewModel: ProfileViewModel) {
 }
 
 @Composable
-private fun Actions(viewModel: ProfileViewModel) {
+private fun Actions(component: ProfileComponent) {
     Column(
         modifier = Modifier
             .background(color = KarikaColors.White)
@@ -100,25 +109,27 @@ private fun Actions(viewModel: ProfileViewModel) {
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             PrimaryButton(
                 modifier = Modifier
+                    .height(50.dp)
                     .weight(1f),
                 title = "Moj nalog",
                 icon = Res.drawable.ic_navigation_profile,
                 color = KarikaColors.Gray2
             ) {
-
+                component.appNavigate(AppConfig.Account)
             }
             PrimaryButton(
                 modifier = Modifier
+                    .height(50.dp)
                     .weight(1f),
                 title = "Moje narudžbe",
-                icon = Res.drawable.ic_navigation_profile,
+                icon = Res.drawable.ic_orders,
                 color = KarikaColors.Gray2
             ) {
-
+                component.appNavigate(AppConfig.Orders)
             }
         }
         YSpacer16()
@@ -127,37 +138,59 @@ private fun Actions(viewModel: ProfileViewModel) {
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             PrimaryButton(
                 modifier = Modifier
+                    .height(50.dp)
                     .weight(1f),
                 title = "Poruke admina",
-                icon = Res.drawable.ic_navigation_profile,
+                icon = Res.drawable.ic_messages,
                 color = KarikaColors.Gray2
             ) {
-
+                component.appNavigate(AppConfig.AdminMessages)
             }
             PrimaryButton(
                 modifier = Modifier
+                    .height(50.dp)
                     .weight(1f),
                 title = "Poruke dobavljača",
                 icon = Res.drawable.ic_navigation_profile,
                 color = KarikaColors.Gray2
             ) {
-
+                component.appNavigate(AppConfig.VendorMessages)
             }
         }
         YSpacer16()
-        PrimaryButton(
+        Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp),
-            title = "Moji bodovi",
-            icon = Res.drawable.ic_navigation_profile,
-            color = KarikaColors.Gray2
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-
+            PrimaryButton(
+                modifier = Modifier
+                    .height(50.dp)
+                    .weight(1f),
+                title = "Moji bodovi",
+                icon = Res.drawable.ic_gift,
+                color = KarikaColors.Gray2
+            ) {
+                component.appNavigate(AppConfig.Points)
+            }
+            PrimaryButton(
+                modifier = Modifier
+                    .height(50.dp)
+                    .weight(1f),
+                title = "Notifikacije",
+                icon = Res.drawable.ic_notifications,
+                color = KarikaColors.Gray2
+            ) {
+                component.appNavigate(AppConfig.Notifications)
+            }
         }
+
         YSpacer16()
     }
     Box(
@@ -173,7 +206,7 @@ private fun Actions(viewModel: ProfileViewModel) {
             color = KarikaColors.Primary,
             textSize = 16.sp,
         ) {
-
+            component.logout()
         }
     }
 }

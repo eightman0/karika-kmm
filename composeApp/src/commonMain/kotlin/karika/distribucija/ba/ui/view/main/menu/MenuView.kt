@@ -21,7 +21,7 @@ import karika.distribucija.ba.ui.components.TextItem
 import karika.distribucija.ba.ui.components.YSpacer16
 
 @Composable
-fun MenuView(viewModel: MenuViewModel) {
+fun MenuView(component: MenuComponent) {
     Column(
         modifier = Modifier
             .background(color = KarikaColors.White)
@@ -50,9 +50,8 @@ fun MenuView(viewModel: MenuViewModel) {
             color = KarikaColors.Divider
         )
         YSpacer16()
-        TextArrowItem("Kategorije proizvoda", viewModel::categories)
-        TextItem("Dobavljači", viewModel::vendors)
-        TextItem("Blog", viewModel::blog)
-        TextItem("Samo na Kariki", viewModel::karika)
+        TextArrowItem("Kategorije proizvoda", component::categories)
+        //TextItem("Blog", component::blog)
+        TextItem("Samo na Kariki", component::karika)
     }
 }

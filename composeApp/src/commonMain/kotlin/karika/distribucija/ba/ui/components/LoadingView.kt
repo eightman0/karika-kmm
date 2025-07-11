@@ -11,10 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import karika.distribucija.ba.ui.common.CommonViewModel
+import karika.distribucija.ba.ui.common.CommonComponent
 
 @Composable
-fun LoadingView1(viewModel: CommonViewModel) {
+fun LoadingView1(viewModel: CommonComponent) {
     val state = viewModel.loader.collectAsState()
     if (state.value) {
         Box(
@@ -32,8 +32,8 @@ fun LoadingView1(viewModel: CommonViewModel) {
 }
 
 @Composable
-fun LoadingView(viewModel: CommonViewModel) {
-    val state = viewModel.loader.collectAsState()
+fun LoadingView(component: CommonComponent) {
+    val state = component.loader.collectAsState()
     if (state.value) {
         Dialog(
             onDismissRequest = { },

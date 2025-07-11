@@ -1,18 +1,27 @@
 import UIKit
 import SwiftUI
-import ComposeApp
+import Karika
 
 struct ComposeView: UIViewControllerRepresentable {
+    let component: AppComponent
+    let backDispatcher: BackDispatcher
+
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController()
+        MainViewControllerKt.MainViewController(
+            component: component,
+            backDispatcher: backDispatcher
+        )
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
 struct ContentView: View {
+    let backDispatcher: BackDispatcher
+    let component: AppComponent
+    
     var body: some View {
-        ComposeView()
+        ComposeView(component: component, backDispatcher: backDispatcher)
                 .ignoresSafeArea(.all) // Compose has own keyboard handler
     }
 }

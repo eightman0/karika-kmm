@@ -14,6 +14,7 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,9 +29,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun KarikaSwitch(
     title: String,
-    checked: Boolean = false
+    checked: MutableState<Boolean>
 ) {
-    val checkedState = remember { mutableStateOf(checked) }
     Row(
         modifier = Modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -41,15 +41,15 @@ fun KarikaSwitch(
                 .width(44.dp)
                 .height(28.dp)
                 .background(
-                    color = if (checkedState.value) KarikaColors.Blue else KarikaColors.Error,
+                    color = if (checked.value) KarikaColors.Blue else KarikaColors.Error,
                     shape = RoundedCornerShape(100)
                 ),
             contentAlignment = Alignment.Center
         ) {
             Switch(
-                checked = checkedState.value,
+                checked = checked.value,
                 onCheckedChange = {
-                    checkedState.value = it
+                    checked.value = it
                 },
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = KarikaColors.Blue,

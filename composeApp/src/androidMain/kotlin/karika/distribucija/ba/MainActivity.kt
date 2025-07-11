@@ -11,12 +11,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
+import com.arkivanov.decompose.defaultComponentContext
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { _: Boolean -> }
+    private lateinit var appComponent: AppComponent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -32,7 +34,10 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            App()
+            if (!::appComponent.isInitialized) {
+                appComponent = AppComponent(defaultComponentContext())
+            }
+            App(appComponent)
         }
     }
 

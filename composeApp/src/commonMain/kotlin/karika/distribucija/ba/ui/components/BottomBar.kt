@@ -11,6 +11,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -18,26 +20,30 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import karika.distribucija.ba.Screen
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import karika.distribucija.ba.ui.view.main.MainChild
+import karika.distribucija.ba.ui.view.main.MainComponent
+import karika.distribucija.ba.ui.view.main.MainConfig
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_navigation_cart
-import karikav2.composeapp.generated.resources.ic_navigation_category
 import karikav2.composeapp.generated.resources.ic_navigation_home
 import karikav2.composeapp.generated.resources.ic_navigation_menu
 import karikav2.composeapp.generated.resources.ic_navigation_profile
+import karikav2.composeapp.generated.resources.ic_navigation_vendors
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
-fun BottomBar(navController: NavController) {
+fun BottomBar(
+    component: MainComponent
+) {
+    val cart by component.stateHolder.cart.collectAsState()
     Column {
         NavigationBar(
             modifier = Modifier
                 .shadow(12.dp),
             containerColor = KarikaColors.White
         ) {
-            NavigationButtons(navController) { isSelected, selectedIcon, unselectedIcon, text, onClick ->
+            NavigationButtons(component) { isSelected, selectedIcon, unselectedIcon, text, onClick ->
                 NavigationBarItem(
                     selected = isSelected,
                     onClick = onClick,
@@ -51,30 +57,32 @@ fun BottomBar(navController: NavController) {
                                 imageVector = if (isSelected) selectedIcon else unselectedIcon,
                                 contentDescription = text,
                             )
-                            if (selectedIcon == vectorResource(Res.drawable.ic_navigation_cart)) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    contentAlignment = Alignment.TopEnd
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .background(
-                                                color = KarikaColors.Red,
-                                                shape = CircleShape
-                                            )
-                                            .size(16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        KarikaText(
-                                            text = "1",
-                                            color = KarikaColors.White,
-                                            fontWeight = FontWeight.W700,
-                                            textSize = 12.sp
-                                        )
-                                    }
-                                }
-                            }
+                           if (cart.items.isNotEmpty()) {
+                               if (selectedIcon == vectorResource(Res.drawable.ic_navigation_cart)) {
+                                   Box(
+                                       modifier = Modifier
+                                           .fillMaxSize(),
+                                       contentAlignment = Alignment.TopEnd
+                                   ) {
+                                       Box(
+                                           modifier = Modifier
+                                               .background(
+                                                   color = KarikaColors.Red,
+                                                   shape = CircleShape
+                                               )
+                                               .size(16.dp),
+                                           contentAlignment = Alignment.Center
+                                       ) {
+                                           KarikaText(
+                                               text = "${cart.items.size}",
+                                               color = KarikaColors.White,
+                                               fontWeight = FontWeight.W700,
+                                               textSize = 12.sp
+                                           )
+                                       }
+                                   }
+                               }
+                           }
                         }
                     },
                     label = {
@@ -100,7 +108,7 @@ fun BottomBar(navController: NavController) {
 
 @Composable
 private fun <T> T.NavigationButtons(
-    navController: NavController,
+    component: MainComponent,
     content: @Composable T.(
         isSelected: Boolean,
         selectedIcon: ImageVector,
@@ -109,36 +117,48 @@ private fun <T> T.NavigationButtons(
         onClick: () -> Unit,
     ) -> Unit,
 ) {
-    val state = navController.currentBackStackEntryAsState()
+    val stack by component.stack.subscribeAsState()
+    val activeChild = stack.active.instance
 
     content(
-        state.value?.destination?.route == Screen.Home.route,
+        activeChild is MainChild.Home,
         vectorResource(Res.drawable.ic_navigation_home),
         vectorResource(Res.drawable.ic_navigation_home),
         "Početna"
-    ) { navController.navigate(Screen.Home.route) }
+    ) {
+        component.navigate(MainConfig.Home)
+    }
     content(
-        state.value?.destination?.route == Screen.Vendor.route,
-        vectorResource(Res.drawable.ic_navigation_category),
-        vectorResource(Res.drawable.ic_navigation_category),
+        activeChild is MainChild.Vendor,
+        vectorResource(Res.drawable.ic_navigation_vendors),
+        vectorResource(Res.drawable.ic_navigation_vendors),
         "Dobavljači"
-    ) { navController.navigate(Screen.Vendor.route) }
+    ) {
+        component.navigate(MainConfig.Vendor)
+    }
     content(
-        state.value?.destination?.route == Screen.Menu.route,
+        activeChild is MainChild.Menu,
         vectorResource(Res.drawable.ic_navigation_menu),
         vectorResource(Res.drawable.ic_navigation_menu),
         "Meni"
-    ) { navController.navigate(Screen.Menu.route) }
+    ) {
+        component.navigate(MainConfig.Menu)
+    }
     content(
-        state.value?.destination?.route == Screen.Cart.route,
+        activeChild is MainChild.Cart,
         vectorResource(Res.drawable.ic_navigation_cart),
         vectorResource(Res.drawable.ic_navigation_cart),
         "Korpa"
-    ) { navController.navigate(Screen.Cart.route) }
+    ) {
+        component.reloadCart()
+        component.navigate(MainConfig.Cart)
+    }
     content(
-        state.value?.destination?.route == Screen.Profile.route,
+        activeChild is MainChild.Profile,
         vectorResource(Res.drawable.ic_navigation_profile),
         vectorResource(Res.drawable.ic_navigation_profile),
         "Profil"
-    ) { navController.navigate(Screen.Profile.route) }
+    ) {
+        component.navigate(MainConfig.Profile)
+    }
 }

@@ -1,11 +1,18 @@
 package karika.distribucija.ba.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import karika.distribucija.ba.ui.common.CommonViewModel
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import karika.distribucija.ba.ui.common.CommonComponent
 
 
 @Composable
@@ -20,5 +27,58 @@ fun Modifier.onClick(callback: () -> Unit): Modifier {
     }
 }
 
+fun Modifier.bgWhite() = this.background(color = KarikaColors.White)
+
 @Composable
-fun <T : CommonViewModel> T.asState(): T = remember { this }
+fun <T : CommonComponent> T.asState(): T = remember { this }
+
+fun MutableState<Boolean>.negate() {
+    this.value = !this.value
+}
+
+fun String.isEmailFormat(): Boolean {
+    val emailRegex = Regex("^\\S+@\\S+\\.\\S+\$")
+    return emailRegex.matches(this)
+}
+
+@Composable
+fun Modifier.hideKeyboard(): Modifier {
+    val keyboard = LocalSoftwareKeyboardController.current
+    return this.clickable(
+        interactionSource = null,
+        indication = null
+    ) {
+        keyboard?.hide()
+    }
+}
+
+@Composable
+fun Modifier.roundedWithBorder(
+    color: Color = KarikaColors.White,
+    borderColor: Color = KarikaColors.Placeholder,
+    shape: Dp = 100.dp
+): Modifier {
+    return this
+        .background(
+            color = color,
+            shape = RoundedCornerShape(shape)
+        )
+        .border(
+            width = 1.dp,
+            color = borderColor,
+            shape = RoundedCornerShape(shape)
+        )
+
+}
+
+@Composable
+fun Modifier.rounded(
+    color: Color = KarikaColors.White,
+    shape: Dp = 4.dp
+): Modifier {
+    return this
+        .background(
+            color = color,
+            shape = RoundedCornerShape(shape)
+        )
+}

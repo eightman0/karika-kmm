@@ -11,17 +11,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.Screen
 import karika.distribucija.ba.ui.components.KarikaBox
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaLogo
@@ -33,17 +35,19 @@ import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.components.onClick
 
 
 @Composable
-fun LoginView(viewModel: LoginViewModel) {
+fun LoginView(component: LoginComponent) {
+    val emailValid = remember { mutableStateOf("") }
+    val formValid = component.formValid.asState()
     KarikaBox {
         KarikaScaffold(
-            hostState = viewModel.snackbarHostState,
             containerColor = KarikaColors.Transparent,
             contentWindowInsets = WindowInsets.systemBars,
-            viewModel = viewModel
+            component = component
         ) {
             Box(
                 modifier = Modifier
@@ -69,15 +73,31 @@ fun LoginView(viewModel: LoginViewModel) {
                         modifier = Modifier
                             .fillMaxWidth(),
                         title = "Email Adresa",
-                        value = viewModel.email.asState(),
-                        placeholder = "Email Adresa"
+                        value = component.email.asState(),
+                        placeholder = "Email Adresa",
+                        error = emailValid,
+                        onValueChange = {
+                            emailValid.value = if (component.email.value.isEmailFormat()) {
+                                formValid.value = component.pass.value.isNotEmpty()
+                                ""
+                            } else {
+                                "Unesite valjanu email adresu (npr. johndoe@domain.com)."
+                            }
+                        },
+                        imeAction = ImeAction.Next
                     )
                     KarikaPasswordTextField(
                         modifier = Modifier
                             .fillMaxWidth(),
                         title = "Šifra",
-                        value = viewModel.pass.asState(),
-                        placeholder = "Šifra"
+                        value = component.pass.asState(),
+                        placeholder = "Šifra",
+                        onValueChange = {
+                            formValid.value =
+                                component.pass.value.isNotEmpty() && component.email.value.isEmailFormat()
+                        },
+                        imeAction = ImeAction.Done,
+                        doneAction = { component.login() }
                     )
                     Row(
                         modifier = Modifier
@@ -85,13 +105,14 @@ fun LoginView(viewModel: LoginViewModel) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         KarikaSwitch(
-                            title = "Zapamti me"
+                            title = "Zapamti me",
+                            checked = component.rememberMe.asState()
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         KarikaText(
                             modifier = Modifier
                                 .onClick {
-                                    viewModel.forgotPassword()
+                                    component.forgotPassword()
                                 },
                             text = "Zaboravili ste šifru?",
                             color = KarikaColors.Gray4,
@@ -102,14 +123,15 @@ fun LoginView(viewModel: LoginViewModel) {
                     }
                     YSpacer16()
                     PrimaryButtonFilled(
-                        title = "Prijavi se"
+                        title = "Prijavi se",
+                        enabled = formValid.value
                     ) {
-                        viewModel.login()
+                        component.login()
                     }
                     KarikaText(
                         modifier = Modifier
                             .onClick {
-                                viewModel.navigate(Screen.Registration)
+                                component.navigateRegistration()
                             }
                             .fillMaxWidth(),
                         atext = buildAnnotatedString {

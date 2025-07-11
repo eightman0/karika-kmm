@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,7 +17,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.Screen
 import karika.distribucija.ba.ui.components.HorizontalButtons
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaBox
@@ -36,13 +33,12 @@ import org.jetbrains.compose.resources.vectorResource
 
 
 @Composable
-fun LandingView(viewModel: LandingViewModel) {
+fun LandingView(component: LandingComponent) {
     KarikaBox {
         KarikaScaffold(
-            hostState = viewModel.snackbarHostState,
             containerColor = KarikaColors.Transparent,
             contentWindowInsets = WindowInsets.systemBars,
-            viewModel = viewModel
+            component = component
         ) {
             Box(
                 modifier = Modifier
@@ -128,9 +124,9 @@ fun LandingView(viewModel: LandingViewModel) {
                         textAlign = TextAlign.Center
                     )
                     HorizontalButtons(
-                        "Kupac", "Dobavljač"
+                        "Kupac"//, "Dobavljač"
                     ) {
-                        viewModel.navigate(Screen.Login)
+                        component.navigateLogin()
                     }
                     YSpacer16()
                     LandingBanner()
