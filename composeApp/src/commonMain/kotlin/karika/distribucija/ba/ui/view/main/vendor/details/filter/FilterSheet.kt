@@ -17,7 +17,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,22 +25,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.components.KarikaCheckbox
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.RadioGroup
 import karika.distribucija.ba.ui.components.SecondaryButton
 import karika.distribucija.ba.ui.components.YSpacer32
+import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
-import karika.distribucija.ba.util.KarikaConstants
+import karika.distribucija.ba.ui.view.main.vendor.VendorComponent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterSheet(showState: MutableState<Boolean>, callback: (String, String, String) -> Unit) {
+fun FilterSheet(component: VendorComponent) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val selectedEntity = remember { mutableStateOf(Pair("Svi entiteti", -1)) }
-    val checkedElements = remember { mutableStateOf<List<String>>(emptyList()) }
+    val selectedRegion = remember { mutableStateOf(Pair("", 0)) }
+    val showState = component.showFilter.asState()
+    val checkedElements = component.selectedRegion.asState()
 
     if (showState.value) {
         ModalBottomSheet(
@@ -87,120 +89,55 @@ fun FilterSheet(showState: MutableState<Boolean>, callback: (String, String, Str
                     KarikaText(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
-                        text = "Entiteti",
+                        text = "Regije",
                         color = KarikaColors.Gray2,
                         textSize = 16.sp,
                         fontWeight = FontWeight.W700,
                         textAlign = TextAlign.Center
                     )
-                    RadioGroup(
-                        selected = selectedEntity,
-                        items = KarikaConstants.entries
-                            .map {
-                                if (it.id == -1) {
-                                    Pair("Svi entiteti", it.id)
-                                } else {
-                                    Pair(it.name, it.id)
-                                }
-                            },
-                        onChange = {
-                            checkedElements.value = emptyList()
-                        }
-                    )
-                    if (selectedEntity.value.second != -1) {
-                        KarikaText(
+                    component.stateHolder.config.value.customerRegionList.forEach {
+                        Row(
                             modifier = Modifier
-                                .padding(horizontal = 16.dp),
-                            text = when (selectedEntity.value.second) {
-                                1 -> "KANTON"
-                                2 -> "OPĆINA"
-                                else -> "OPŠTINA"
-                            },
-                            color = KarikaColors.Gray2,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W700
-                        )
-                        val list = mutableListOf(
-                            when (selectedEntity.value.second) {
-                                1 -> "Svi kantoni"
-                                2 -> "Sve općine"
-                                else -> "Sve opštine"
-                            }
-                        ).apply {
-                            addAll(KarikaConstants.cantons(selectedEntity.value.first, true))
-                        }
-                        list.forEach {
-                            Row(
+                                .clickable(
+                                    interactionSource = null, indication = null
+                                ) {
+                                    if (checkedElements.value.contains(it)) {
+                                        checkedElements.value =
+                                            checkedElements.value.filter { it1 -> it1 != it }
+                                    } else {
+                                        checkedElements.value =
+                                            checkedElements.value.plus(it)
+                                    }
+                                },
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(0.dp)
+                        ) {
+                            Checkbox(
                                 modifier = Modifier
-                                    .clickable(
-                                        interactionSource = null, indication = null
-                                    ) {
-                                        if (listOf(
-                                                "Svi kantoni",
-                                                "Sve općine",
-                                                "Sve opštine"
-                                            ).contains(it)
-                                        ) {
-                                            if (checkedElements.value.contains(it)) {
-                                                checkedElements.value = emptyList()
-                                            } else {
-                                                checkedElements.value = list
-                                            }
-                                            return@clickable
-                                        }
-
-                                        if (checkedElements.value.contains(it)) {
-                                            checkedElements.value = checkedElements.value
-                                                .filter { f -> f != it }
-                                        } else {
-                                            checkedElements.value =
-                                                checkedElements.value.plus(it)
-                                        }
-                                    },
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(0.dp)
-                            ) {
-                                Checkbox(
-                                    modifier = Modifier
-                                        .height(24.dp)
-                                        .padding(vertical = 0.dp),
-                                    checked = checkedElements.value.contains(it),
-                                    onCheckedChange = { _ ->
-                                        if (listOf(
-                                                "Svi kantoni",
-                                                "Sve općine",
-                                                "Sve opštine"
-                                            ).contains(it)
-                                        ) {
-                                            if (checkedElements.value.contains(it)) {
-                                                checkedElements.value = emptyList()
-                                            } else {
-                                                checkedElements.value = list
-                                            }
-                                            return@Checkbox
-                                        }
-
-                                        if (checkedElements.value.contains(it)) {
-                                            checkedElements.value = checkedElements.value
-                                                .filter { f -> f != it }
-                                        } else {
-                                            checkedElements.value =
-                                                checkedElements.value.plus(it)
-                                        }
-                                    },
-                                    colors = CheckboxDefaults.colors(
-                                        checkedColor = KarikaColors.Primary,
-                                        uncheckedColor = KarikaColors.Gray7
-                                    ),
-                                    enabled = true
-                                )
-                                KarikaText(
-                                    text = it,
-                                    color = KarikaColors.Gray2,
-                                    textSize = 16.sp,
-                                    fontWeight = FontWeight.W400,
-                                )
-                            }
+                                    .height(24.dp)
+                                    .padding(vertical = 0.dp),
+                                checked = checkedElements.value.contains(it),
+                                onCheckedChange = { _ ->
+                                    if (checkedElements.value.contains(it)) {
+                                        checkedElements.value =
+                                            checkedElements.value.filter { it1 -> it1 != it }
+                                    } else {
+                                        checkedElements.value =
+                                            checkedElements.value.plus(it)
+                                    }
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = KarikaColors.Primary,
+                                    uncheckedColor = KarikaColors.Gray7
+                                ),
+                                enabled = true
+                            )
+                            KarikaText(
+                                text = it.label(),
+                                color = KarikaColors.Gray2,
+                                textSize = 16.sp,
+                                fontWeight = FontWeight.W400,
+                            )
                         }
                     }
                 }
@@ -231,67 +168,7 @@ fun FilterSheet(showState: MutableState<Boolean>, callback: (String, String, Str
                         title = "Filtriraj"
                     ) {
                         showState.negate()
-                        when {
-                            selectedEntity.value.second == -1 -> {
-                                callback("", "", "")
-                            }
-                            selectedEntity.value.second == 1
-                                    && (checkedElements.value.isEmpty()
-                                    || checkedElements.value.contains("Svi kantoni")) -> {
-                                callback(
-                                    "b2b_vendor_entitet",
-                                    selectedEntity.value.first,
-                                    selectedEntity.value.second.toString()
-                                )
-                                return@PrimaryButtonFilled
-                            }
-                            selectedEntity.value.second == 1 -> {
-                                callback(
-                                    "b2b_vendor_kanton",
-                                    "",
-                                    checkedElements.value.firstOrNull() ?: ""
-                                )
-                                return@PrimaryButtonFilled
-                            }
-
-                            selectedEntity.value.second == 2
-                                    && (checkedElements.value.isEmpty()
-                                    || checkedElements.value.contains("Sve općine")) -> {
-                                callback(
-                                    "b2b_vendor_entitet",
-                                    selectedEntity.value.first,
-                                    selectedEntity.value.second.toString()
-                                )
-                                return@PrimaryButtonFilled
-                            }
-                            selectedEntity.value.second == 2 -> {
-                                callback(
-                                    "b2b_vendor_opcina",
-                                    "",
-                                    checkedElements.value.firstOrNull() ?: ""
-                                )
-                                return@PrimaryButtonFilled
-                            }
-
-                            selectedEntity.value.second == 3
-                                    && (checkedElements.value.isEmpty()
-                                    || checkedElements.value.contains("Sve opštine")) -> {
-                                callback(
-                                    "b2b_vendor_entitet",
-                                    selectedEntity.value.first,
-                                    selectedEntity.value.second.toString()
-                                )
-                                return@PrimaryButtonFilled
-                            }
-                            selectedEntity.value.second == 2 -> {
-                                callback(
-                                    "b2b_vendor_grad",
-                                    "",
-                                    checkedElements.value.firstOrNull() ?: ""
-                                )
-                                return@PrimaryButtonFilled
-                            }
-                        }
+                        component.loadNextPage(reset = true)
                     }
                 }
             }

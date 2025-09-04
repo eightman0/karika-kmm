@@ -24,6 +24,18 @@ internal class NotificationApi {
             url("mobile/customer/notification/mark_read?notificationId=$id")
         )
     }
+
+    suspend fun save(pushHandle: String?, tokenId: String?): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.post(
+            url("mobile/push/token?token=$pushHandle&tokenId=${tokenId}")
+        )
+    }
+
+    suspend fun getCp(pushHandle: String, tokenId: String?): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.post(
+            url("mobile/push/token?token=$pushHandle&tokenId=${tokenId}")
+        )
+    }
 }
 
 class NotificationRepository internal constructor() {
@@ -50,6 +62,24 @@ class NotificationRepository internal constructor() {
         try {
             val response = NotificationApi()
                 .put(id)
+                .getOrNull()
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(true))
+            } else {
+                emit(
+                    ResultState.Error("error")
+                )
+            }
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }
+
+    fun savePushHandle(pushHandle: String?, tokenId: String?): Flow<ResultState<Boolean>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = NotificationApi()
+                .save(pushHandle, tokenId)
                 .getOrNull()
             if (response != null && response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(true))

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -75,19 +76,27 @@ fun TextItem(text: String, onClick: () -> Unit = {}) {
 @Composable
 fun RoundedItem(
     title: String,
+    select: Boolean = false,
     onClick: () -> Unit = {}
 ) {
+    val selected = mutableStateOf(select).asState()
     Box(
         modifier = Modifier
-            .onClick { onClick() }
-            .roundedWithBorder(),
+            .onClick {
+                selected.negate()
+                onClick()
+            }
+            .roundedWithBorder(
+                color = if (selected.value) KarikaColors.Primary else KarikaColors.White,
+                borderColor = if (selected.value) KarikaColors.Primary else KarikaColors.Placeholder,
+            ),
         contentAlignment = Alignment.Center
     ) {
         KarikaText(
             modifier = Modifier
                 .padding(vertical = 8.dp, horizontal = 16.dp),
             text = title,
-            color = KarikaColors.Gray2,
+            color = if (selected.value) KarikaColors.White else KarikaColors.Gray2,
             textSize = 14.sp,
             fontWeight = FontWeight.W600
         )

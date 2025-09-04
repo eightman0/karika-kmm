@@ -4,20 +4,17 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
-import karika.distribucija.ba.domain.model.Blog
-import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.KarikaFilePicker
 import karika.distribucija.ba.ui.common.KarikaStateHolder
 import karika.distribucija.ba.ui.view.main.MainComponent
 import karika.distribucija.ba.ui.view.main.menu.blog.BlogsComponent
 import karika.distribucija.ba.ui.view.main.menu.blog.overview.BlogOverviewComponent
-import karika.distribucija.ba.ui.view.main.menu.categories.CategoriesComponent
-import karika.distribucija.ba.ui.view.main.menu.categories.products.ProductByCategoryComponent
 import karika.distribucija.ba.ui.view.main.product.ProductComponent
 import karika.distribucija.ba.ui.view.main.profile.account.AccountComponent
 import karika.distribucija.ba.ui.view.main.profile.messages.admin.AdminMessagesComponent
@@ -28,7 +25,6 @@ import karika.distribucija.ba.ui.view.main.profile.order.OrdersComponent
 import karika.distribucija.ba.ui.view.main.profile.order.comments.CommentsComponent
 import karika.distribucija.ba.ui.view.main.profile.order.details.OrderDetailsComponent
 import karika.distribucija.ba.ui.view.main.profile.points.PointsComponent
-import karika.distribucija.ba.ui.view.main.search.SearchComponent
 import karika.distribucija.ba.ui.view.main.vendor.details.VendorDetailsComponent
 import karika.distribucija.ba.ui.view.prelogin.PreLoginComponent
 import kotlinx.serialization.Serializable
@@ -82,15 +78,6 @@ sealed class AppConfig {
 
     @Serializable
     data object Notifications : AppConfig()
-
-    @Serializable
-    data object Categories : AppConfig()
-
-    @Serializable
-    data class CategoryProducts(val category: Category) : AppConfig()
-
-    @Serializable
-    data object Search : AppConfig()
 }
 
 sealed class Child {
@@ -114,16 +101,22 @@ sealed class Child {
 
     class Points(val component: PointsComponent) : Child()
     class Notifications(val component: NotificationsComponent) : Child()
-
-    class Categories(val component: CategoriesComponent) : Child()
-    class CategoryProducts(val component: ProductByCategoryComponent) : Child()
-
-    class Search(val component: SearchComponent) : Child()
 }
 
 class AppComponent(
     componentContext: ComponentContext,
-) : CommonComponent(componentContext, KarikaStateHolder()) {
+    filePicker: KarikaFilePicker
+) : CommonComponent(componentContext, KarikaStateHolder(filePicker)) {
+    companion object {
+        var refreshHandler: () -> Unit = {}
+    }
+
+    init {
+        refreshHandler = {
+            stateHolder.notificationReceived()
+        }
+    }
+
     val stack: Value<ChildStack<*, Child>> =
         childStack(
             source = stateHolder.appNavigation,
@@ -198,18 +191,6 @@ class AppComponent(
 
             is AppConfig.Notifications -> Child.Notifications(
                 NotificationsComponent(componentContext, stateHolder)
-            )
-
-            is AppConfig.Categories -> Child.Categories(
-                CategoriesComponent(componentContext, stateHolder)
-            )
-
-            is AppConfig.CategoryProducts -> Child.CategoryProducts(
-                ProductByCategoryComponent(componentContext, stateHolder, appConfig.category)
-            )
-
-            is AppConfig.Search -> Child.Search(
-                SearchComponent(componentContext, stateHolder)
             )
         }
 }

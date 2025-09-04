@@ -12,14 +12,14 @@ import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpHeaders.Authorization
-import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.content.TextContent
 import io.ktor.serialization.kotlinx.json.json
+import karika.distribucija.ba.ui.common.getEnvPrefix
 import kotlinx.serialization.json.Json
 
 object HttpClientProvider {
-    private const val HOST = "https://karika.ba/magento"
-    private const val BASE_URL = "$HOST/rest/V1/"
+    private val HOST = "https://${getEnvPrefix()}karika.ba/magento"
+    private val BASE_URL = "$HOST/rest/V1/"
 
     fun url(arg: String): String {
         return BASE_URL + arg
@@ -32,6 +32,14 @@ object HttpClientProvider {
         } else {
             "$HOST/media/catalog/product$name"
         }
+    }
+
+    fun chatImage(name: String): String {
+        return "$HOST/media/csmessaging/chat_images/$name"
+    }
+
+    fun commentAttachment(name: String?): String {
+        return "$HOST/$name"
     }
 
     val client: HttpClient by lazy {

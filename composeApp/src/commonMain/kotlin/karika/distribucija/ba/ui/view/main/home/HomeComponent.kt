@@ -7,6 +7,7 @@ import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.util.KarikaConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,19 +18,49 @@ class HomeComponent(
     stateHolder: KarikaStateHolder,
 ) : CommonComponent(componentContext, stateHolder) {
 
-    private val repository = ProductRepository()
     private val _newArrivals = MutableStateFlow<List<Product>>(emptyList())
     val newArrivals = _newArrivals.asStateFlow()
 
-    private val _promotedVendors =
-        MutableStateFlow<List<Pair<PromotedVendor, PromotedVendor>>>(emptyList())
-    val promotedVendors = _promotedVendors.asStateFlow()
-
     fun loadData() {
         iOScope.launch {
-            repository.searchProductsByCategory(
-                categoryId = "439",
-                currentPage = 1
+            productRepository.promotedVendors().collect { result ->
+                when (result) {
+                    is ResultState.Loading -> {
+                        showLoader()
+                    }
+
+                    is ResultState.Success -> {
+                        hideLoader()
+                        _promotedVendors.update {
+                            result.data
+                                .filter { f -> f.promoteVendorBanner }
+                                .filter { f -> f.companyBanner != null }
+                        }
+                        _promotedLogos.update {
+                            result.data
+                                .filter { f -> f.promoteVendorLogo }
+                                .filter { f -> f.companyLogo != null }
+                        }
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message ?: "")
+                    }
+                }
+            }
+        }
+
+        loadNextPage(true)
+    }
+
+    override fun loadNextPage(reset: Boolean) {
+        iOScope.launch {
+            productRepository.searchProductsByCategory(
+                categoryId = "${KarikaConfig.getKarikaProductsId()}",
+                currentPage = 1,
+                pageSize = 12,
+                sortBy = "created_at"
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> {
@@ -48,37 +79,6 @@ class HomeComponent(
                 }
             }
 
-            repository.promotedVendors().collect { result ->
-                when (result) {
-                    is ResultState.Loading -> {
-                        showLoader()
-                    }
-
-                    is ResultState.Success -> {
-                        hideLoader()
-                        _promotedVendors.update {
-                            result.data
-                                .filter { f -> f.promoteVendorBanner }
-                                .filter { f -> f.companyBanner != null }
-                                .toMutableList()
-                                .apply {
-                                    if (isNotEmpty()) {
-                                        repeat(4 - this.size % 4) { index ->
-                                            add(this[index])
-                                        }
-                                    }
-                                }
-                                .chunked(2)
-                                .map { it[0] to it[1] }
-                        }
-                    }
-
-                    is ResultState.Error -> {
-                        hideLoader()
-                        showMessage(result.message ?: "")
-                    }
-                }
-            }
         }
     }
 }

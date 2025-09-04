@@ -15,10 +15,12 @@ data class PromotedVendor(
     @SerialName("company_banner") var companyBanner: String?,
 ) {
     fun name() = name ?: ""
-    fun image() = imageUrl(companyLogo)
+    fun bannerImage() = imageUrl(companyBanner)
+    fun logoImage() = imageUrl(companyLogo)
     fun toVendor() = Vendor(
         publicName = name(),
         entityId = entityId?.toIntOrNull() ?: 0,
-        companyLogo = companyLogo
+        companyLogo = companyLogo,
+        companyBanner = companyBanner
     )
 }

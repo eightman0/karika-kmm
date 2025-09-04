@@ -3,25 +3,31 @@ package karika.distribucija.ba.ui.common
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.pop
-import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.api.CartRepository
 import karika.distribucija.ba.domain.api.MessagesRepository
+import karika.distribucija.ba.domain.api.NotificationRepository
 import karika.distribucija.ba.domain.api.OrdersRepository
+import karika.distribucija.ba.domain.api.ProductRepository
 import karika.distribucija.ba.domain.api.UserRepository
+import karika.distribucija.ba.domain.api.VendorRepository
 import karika.distribucija.ba.domain.model.AddToCart
 import karika.distribucija.ba.domain.model.CartItem
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.Product
+import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.view.main.MainConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
@@ -37,6 +43,14 @@ open class CommonComponent(
     val userRepository = UserRepository()
     val orderRepository = OrdersRepository()
     val messagesRepository = MessagesRepository()
+    val vendorRepository = VendorRepository()
+    val productRepository = ProductRepository()
+    private val notificationRepository = NotificationRepository()
+
+    val _promotedVendors = MutableStateFlow<List<PromotedVendor>>(emptyList())
+    val promotedVendors = _promotedVendors.asStateFlow()
+    val _promotedLogos = MutableStateFlow<List<PromotedVendor>>(emptyList())
+    val promotedLogos = _promotedLogos.asStateFlow()
 
     fun showMessage(message: String?) {
         mainScope.launch {
@@ -48,19 +62,20 @@ open class CommonComponent(
     }
 
     fun logout() {
+        removePushHandle()
         stateHolder.logout()
         stateHolder.appNavigation.replaceAll(AppConfig.PreLogin)
     }
 
-    fun showVendor(vendor: Vendor) {
+    open fun showVendor(vendor: Vendor) {
         mainScope.launch {
-            stateHolder.appNavigation.pushNew(AppConfig.VendorDetails(vendor))
+            stateHolder.mainNavigation.bringToFront(MainConfig.VendorDetails(vendor))
         }
     }
 
     fun navigateToProduct(product: Product) {
         mainScope.launch {
-            stateHolder.appNavigation.pushNew(AppConfig.ProductDetails(product))
+            stateHolder.mainNavigation.bringToFront(MainConfig.ProductDetails(product))
         }
     }
 
@@ -94,7 +109,37 @@ open class CommonComponent(
         }
     }
 
-    fun updateCart(product: Product, qty: Int = 1) {
+    fun addToCartWithPut(product: Product, qty: Int = 1, showSnack: Boolean = true) {
+        iOScope.launch {
+            cartRepository.addToCart(
+                AddToCart(
+                    CartItem(
+                        sku = product.sku ?: return@launch,
+                        qty = 1,
+                        quoteId = stateHolder.cartId
+                    )
+                )
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> showLoader()
+                    is ResultState.Success -> {
+                        updateCart(product.copy(itemId = result.data.itemId), qty) {
+                            if (showSnack) {
+                                showMessage("Proizvod dodan u korpu!")
+                            }
+                        }
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message ?: "")
+                    }
+                }
+            }
+        }
+    }
+
+    fun updateCart(product: Product, qty: Int = 1, successCallback: () -> Unit = {}) {
         if (product.itemId == null) {
             addToCart(product, qty)
             return
@@ -114,6 +159,7 @@ open class CommonComponent(
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
+                        successCallback.invoke()
                         hideLoader()
                         reloadCart()
                     }
@@ -150,7 +196,7 @@ open class CommonComponent(
 
     var currentPage: Int = 1
     var hasNextPage = true
-    var pageSize = 10
+    var pageSize = 30
 
     open fun loadNextPage(reset: Boolean = false) {
 
@@ -169,7 +215,12 @@ open class CommonComponent(
     }
 
     fun sendMessageToVendor(product: Product) {
-
+        navigateToMessagesOverview(
+            Conversation(
+                vendorId = product.vendorId,
+                receiverName = product.vendorName
+            )
+        )
     }
 
     fun showHome() {
@@ -261,5 +312,30 @@ open class CommonComponent(
 
     fun navigateToMessagesOverview(item: Conversation) {
         appNavigate(AppConfig.MessagesOverview(item))
+    }
+
+    fun savePushHandle() {
+        stateHolder.filePicker.getPushHandle { fId, token ->
+            println("TEST_TEST: FCM_TOKEN: $token")
+            iOScope.launch {
+                notificationRepository
+                    .savePushHandle(token, fId)
+                    .collect()
+            }
+        }
+    }
+
+    private fun removePushHandle() {
+        stateHolder.filePicker.getPushHandle { fId, _ ->
+            iOScope.launch {
+                notificationRepository
+                    .savePushHandle(null, fId)
+                    .collect()
+            }
+        }
+    }
+
+    fun showImagePreview(imageUrl: String) {
+        stateHolder.imagePreview.value = imageUrl
     }
 }

@@ -14,6 +14,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,9 +47,9 @@ fun SearchBox(
     onClose: (String) -> Unit = {},
     onSearchExecute: (String) -> Unit,
     focusRequester: FocusRequester = FocusRequester(),
+    searchText: MutableState<String> = mutableStateOf(""),
     enabled: Boolean = true
 ) {
-    var searchText by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
     KarikaTextField(
         modifier = modifier
@@ -62,15 +63,15 @@ fun SearchBox(
         placeholder = {
             KarikaText(
                 modifier = Modifier,
-                text = "Pretraži proidzvode...",
+                text = "Pretraži proizvode...",
                 color = KarikaColors.Gray1,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
             )
         },
-        value = searchText,
+        value = searchText.value,
         onValueChange = {
-            searchText = it
+            searchText.value = it
             onValueChange.invoke(it)
             if (it.isEmpty()) {
                 onClose.invoke("")
@@ -82,7 +83,7 @@ fun SearchBox(
         ),
         keyboardActions = KeyboardActions(
             onSearch = {
-                onSearchExecute(searchText)
+                onSearchExecute(searchText.value)
                 keyboardController?.hide()
             },
         ),
@@ -111,7 +112,7 @@ fun SearchBox(
     )
 
     LaunchedEffect(Unit) {
-        snapshotFlow { searchText }
+        snapshotFlow { searchText.value }
             .debounce(500)
             .distinctUntilChanged()
             .collectLatest { newQuery ->
@@ -129,7 +130,7 @@ fun SearchBoxBorder(
     onValueChange: (String) -> Unit,
     onClose: (String) -> Unit = {},
     onSearchExecute: (String) -> Unit,
-    placeholder: String = "Pretraži prodizvode..",
+    placeholder: String = "Pretraži proizvode..",
     focusRequester: FocusRequester = FocusRequester(),
     preselected: String = ""
 ) {

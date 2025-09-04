@@ -3,15 +3,18 @@ package karika.distribucija.ba.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -37,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -74,10 +78,13 @@ fun KarikaText(
     textOverflow: TextOverflow = TextOverflow.Ellipsis,
     fontWeight: FontWeight = FontWeight.Normal,
     maxLines: Int = Int.MAX_VALUE,
-    lineHeight: TextUnit = TextUnit.Unspecified,
+    lineHeight: TextUnit = textSize,
     fontStyle: FontStyle = FontStyle.Normal,
     decoration: TextDecoration = TextDecoration.None
 ) {
+    if (text.isNullOrEmpty()) {
+        return
+    }
     Text(
         modifier = modifier,
         text = text ?: "",
@@ -153,7 +160,8 @@ fun KarikaTextField(
     minLines: Int = 1,
     interactionSource: MutableInteractionSource? = null,
     shape: Shape = TextFieldDefaults.shape,
-    colors: TextFieldColors = TextFieldDefaults.colors()
+    colors: TextFieldColors = TextFieldDefaults.colors(),
+    contentPadding: PaddingValues = PaddingValues(8.dp)
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
@@ -177,7 +185,7 @@ fun KarikaTextField(
             @Composable { innerTextField ->
                 // places leading icon, text field with label and placeholder, trailing icon
                 TextFieldDefaults.DecorationBox(
-                    contentPadding = PaddingValues(8.dp),
+                    contentPadding = contentPadding,
                     value = value,
                     visualTransformation = visualTransformation,
                     innerTextField = innerTextField,
@@ -193,7 +201,7 @@ fun KarikaTextField(
                     enabled = enabled,
                     isError = isError,
                     interactionSource = interactionSource,
-                    colors = colors
+                    colors = colors,
                 )
             }
         )
@@ -421,6 +429,53 @@ fun KarikaTextField2(
 }
 
 @Composable
+fun KarikaTextField3(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    KarikaTextField(
+        modifier = modifier
+            .focusable()
+            .background(
+                color = KarikaColors.White,
+                shape = RoundedCornerShape(20.dp)
+            ),
+        value = value,
+        onValueChange = onValueChange,
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done,
+            keyboardType = KeyboardType.Number,
+        ),
+        maxLines = 1,
+        colors = TextFieldDefaults.colors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent
+        ),
+        textStyle = LocalTextStyle.current.copy(
+            color = KarikaColors.Gray2,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.W600,
+            textAlign = TextAlign.Center,
+            lineHeight = 24.sp
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                focusManager.clearFocus()
+                keyboardController?.hide()
+            }
+        ),
+        contentPadding = PaddingValues(top = 6.dp)
+    )
+}
+
+@Composable
 fun KarikaPasswordTextField(
     modifier: Modifier = Modifier,
     title: String = "",
@@ -540,7 +595,8 @@ fun IconTextItem(
     fontWeight: FontWeight = FontWeight.W500,
     textSize: TextUnit = 16.sp,
     textAlign: TextAlign = TextAlign.Center,
-    iconPosition: FabPosition = FabPosition.Start
+    iconPosition: FabPosition = FabPosition.Start,
+    badge: Int = 0
 ) {
     if (!text.isNullOrEmpty()) {
         Row(
@@ -548,13 +604,42 @@ fun IconTextItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (iconPosition == FabPosition.Start) {
-                Icon(
+                Box(
                     modifier = Modifier
-                        .size(iconSize),
-                    imageVector = icon,
-                    tint = iconColor,
-                    contentDescription = ""
-                )
+                        .size(iconSize + if (badge > 0) 10.dp else 0.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(iconSize),
+                        imageVector = icon,
+                        tint = iconColor,
+                        contentDescription = ""
+                    )
+                    if (badge > 0) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .background(color = KarikaColors.Red, shape = CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                KarikaText(
+                                    modifier = Modifier
+                                        .padding(0.dp),
+                                    text = "$badge",
+                                    textSize = 10.sp,
+                                    fontWeight = FontWeight.W400,
+                                    color = KarikaColors.White
+                                )
+                            }
+                        }
+                    }
+                }
                 XSpacer8()
             }
             Box(

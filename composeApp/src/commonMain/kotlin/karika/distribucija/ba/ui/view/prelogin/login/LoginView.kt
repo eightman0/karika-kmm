@@ -37,6 +37,7 @@ import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.view.prelogin.login.component.ForgotPasswordSheet
 
 
 @Composable
@@ -158,6 +159,8 @@ fun LoginView(component: LoginComponent) {
                     )
                     YSpacer16()
                 }
+
+                ForgotPasswordSheet(component)
             }
         }
     }

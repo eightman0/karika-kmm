@@ -58,21 +58,16 @@ fun ShippingDetailsView(component: ShippingDetailsComponent) {
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxWidth(),
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 AddressBox(component)
-                Cart(
-                    modifier = Modifier
-                        .weight(1f), component
-                )
+                Cart(modifier = Modifier, component)
             }
             PinnedFooter(component)
         }
+        LoadingView1(component)
     }
-
-    LoadingView1(component)
 }
 
 @Composable
@@ -99,26 +94,25 @@ private fun Cart(modifier: Modifier, component: ShippingDetailsComponent) {
 
 @Composable
 private fun VendorItem(entry: Map.Entry<Vendor, List<Pair<Product, Int>>>) {
-    Row(
+    Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .background(color = KarikaColors.Gray10, shape = RoundedCornerShape(4.dp))
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         KarikaText(
             modifier = Modifier
-                .padding(16.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
             color = KarikaColors.Gray2,
-            text = entry.value.firstOrNull()?.first?.vendorName() ?: "-",
+            text = entry.key.name(),
             fontWeight = FontWeight.W600,
             textSize = 16.sp
         )
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .weight(1f),
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {

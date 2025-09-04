@@ -4,16 +4,17 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.FabPosition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +30,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.RoundedItem
 import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
@@ -45,7 +47,6 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun VendorDetailsView(component: VendorDetailsComponent) {
     val vendor by component.vendor.collectAsState()
-    val searchText = component.searchText.asState()
 
     key(vendor.hashCode()) {
         KarikaScaffold(
@@ -54,7 +55,7 @@ fun VendorDetailsView(component: VendorDetailsComponent) {
             component = component,
             topBar = {
                 TopBarWithBack(vendor.name()) {
-                    component.appBack()
+                    component.mainBack()
                 }
             }
         ) {
@@ -65,54 +66,75 @@ fun VendorDetailsView(component: VendorDetailsComponent) {
                     .fillMaxSize()
                     .padding(it)
             ) {
-                VendorImage(component)
-                YSpacer16()
-                VendorInfo(component)
-                KarikaText(
-                    modifier = Modifier
-                        .padding(vertical = 16.dp),
-                    color = KarikaColors.Black,
-                    text = "Najprodavaniji proizvodi:",
-                    textSize = 20.sp,
-                    fontWeight = FontWeight.W700
-                )
-                SearchBoxBorder(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    onValueChange = { text ->
-                        searchText.value = text
-                    },
-                    onClose = {
-                        searchText.value = ""
-                        component.loadNextPage(true)
-                    },
-                    onSearchExecute = {
-                        component.loadNextPage(true)
-                    }
-                )
-                YSpacer16()
                 VendorProducts(modifier = Modifier.weight(1f), component)
             }
         }
     }
-
-
 }
 
 @Composable
 private fun VendorProducts(modifier: Modifier, component: VendorDetailsComponent) {
     val products = component.products.collectAsState()
-    val state = rememberLazyGridState()
+    val state = rememberLazyListState()
+    val searchText = component.searchText.asState()
 
-    LazyVerticalGrid(
+    LazyColumn(
         modifier = modifier,
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = state
     ) {
-        items(items = products.value) { item ->
-            ProductItem(item, component)
+        item {
+            VendorImage(component)
+            YSpacer16()
+            VendorInfo(component)
+            YSpacer16()
+            VendorCategories(component)
+            //KarikaText(
+            //    modifier = Modifier
+            //        .padding(vertical = 16.dp),
+            //    color = KarikaColors.Black,
+            //    text = "Najprodavaniji proizvodi:",
+            //    textSize = 20.sp,
+            //    fontWeight = FontWeight.W700
+            //)
+            YSpacer16()
+            SearchBoxBorder(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onValueChange = { text ->
+                    searchText.value = text
+                },
+                onClose = {
+                    searchText.value = ""
+                    component.loadNextPage(true)
+                },
+                onSearchExecute = {
+                    component.loadNextPage(true)
+                }
+            )
+            YSpacer16()
+        }
+        items(items = products.value.chunked(2)) { item ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item.forEach {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        ProductItem(it, component, true)
+                    }
+                }
+                if (item.size == 1) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    )
+                }
+            }
         }
     }
 
@@ -125,24 +147,24 @@ private fun VendorProducts(modifier: Modifier, component: VendorDetailsComponent
 
 @Composable
 private fun VendorCategories(component: VendorDetailsComponent) {
-    /*  val vendor by component.vendor.collectAsState()
-    val products by component.products.collectAsState()
+    val categories by component.vendorCategories.collectAsState()
 
     LazyRow(
         modifier = Modifier
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            RoundedItem("Brašno i proizvodi od brašna")
+        items(items = categories) {
+            RoundedItem(it.name, component.selectedCategories.value.contains(it)) {
+                if (component.selectedCategories.value.contains(it)) {
+                    component.selectedCategories.value -= it
+                } else {
+                    component.selectedCategories.value += it
+                }
+                component.loadNextPage(true)
+            }
         }
-        item {
-            RoundedItem("Mliječni proizvodi")
-        }
-        item {
-            RoundedItem("Lisnato tijesto")
-        }
-    }*/
+    }
 }
 
 @Composable
@@ -201,6 +223,9 @@ private fun VendorImage(component: VendorDetailsComponent) {
     ) {
         KarikaImage(
             modifier = Modifier
+                .onClick {
+                    component.showImagePreview(vendor.image())
+                }
                 .fillMaxSize(),
             model = vendor.image()
         )

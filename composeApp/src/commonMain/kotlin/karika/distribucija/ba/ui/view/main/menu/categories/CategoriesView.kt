@@ -41,7 +41,7 @@ fun CategoriesView(component: CategoriesComponent) {
         contentWindowInsets = WindowInsets.systemBars,
         topBar = {
             TopBarWithBack("Kategorije proizvoda") {
-                component.appBack()
+                component.mainBack()
             }
         },
         component = component

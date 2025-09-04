@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
@@ -29,6 +32,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -36,9 +41,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.domain.HttpClientProvider.chatImage
+import karika.distribucija.ba.domain.model.FileData
 import karika.distribucija.ba.domain.model.Message
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
@@ -51,8 +59,10 @@ import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_attachment
 import karikav2.composeapp.generated.resources.ic_tertiary
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -137,6 +147,12 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
         inputField = {
             KarikaTextField1(
                 modifier = Modifier
+                    .onFocusChanged {
+                        if (it.isFocused) {
+                            expand.value = true
+                            component.vendors(searchText.value, loadImmediately = true)
+                        }
+                    }
                     .fillMaxWidth(),
                 title = "Dobavljač",
                 value = searchText,
@@ -144,7 +160,10 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                 imeAction = ImeAction.Search,
                 maxLines = 1,
                 onValueChange = {
-                    //component.vendors(subject.value)
+                    if (searchText.value.length > 2) {
+                        expand.value = true
+                        component.vendors(searchText.value)
+                    }
                 },
                 enabled = conversation.value.id == null,
                 trailingIcons = {
@@ -153,8 +172,9 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                             modifier = Modifier
                                 .onClick {
                                     searchText.value = ""
-                                    expand.value = false
+                                    expand.value = true
                                     component.clear()
+                                    component.vendors(searchText.value, loadImmediately = true)
                                 }
                                 .size(32.dp),
                             imageVector = vectorResource(Res.drawable.ic_tertiary),
@@ -194,32 +214,37 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                 fontWeight = FontWeight.W600
             )
         } else {
-            vendors.forEach {
-                Box(
-                    modifier = Modifier
-                        .onClick {
-                            expand.negate()
-                            searchText.value = it.name()
-                            conversation.value = conversation.value.copy(
-                                vendorId = it.entityId.toString(),
-                                receiverName = it.name(),
-                                senderName = it.name()
-                            )
-                        }
-                        .background(color = KarikaColors.Gray12)
-                        .fillMaxWidth()
-                ) {
-                    KarikaText(
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+            ) {
+                vendors.forEach {
+                    Box(
                         modifier = Modifier
-                            .padding(8.dp),
-                        text = it.name(),
-                        color = KarikaColors.Black,
-                        textSize = 14.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.W600
-                    )
+                            .onClick {
+                                expand.negate()
+                                searchText.value = it.name()
+                                conversation.value = conversation.value.copy(
+                                    vendorId = it.entityId.toString(),
+                                    receiverName = it.name(),
+                                    senderName = it.name()
+                                )
+                            }
+                            .background(color = KarikaColors.Gray12)
+                            .fillMaxWidth()
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(8.dp),
+                            text = it.name(),
+                            color = KarikaColors.Black,
+                            textSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.W600
+                        )
+                    }
+                    YSpacer8()
                 }
-                YSpacer8()
             }
         }
     }
@@ -252,7 +277,18 @@ private fun EnterComment(component: MessagesOverviewComponent) {
             value = comment,
             placeholder = "Napiši komentar",
             keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Done
+            imeAction = ImeAction.Done,
+            trailingIcons = {
+                Icon(
+                    modifier = Modifier
+                        .onClick {
+                            component.pickFile()
+                        },
+                    imageVector = vectorResource(Res.drawable.ic_attachment),
+                    tint = KarikaColors.Gray2,
+                    contentDescription = ""
+                )
+            }
         )
         PrimaryButtonFilled(
             modifier = Modifier
@@ -287,21 +323,42 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                     ),
                 horizontalAlignment = Alignment.End
             ) {
-                /*KarikaText(
-                    modifier = Modifier
-                        .padding(16.dp),
-                    text = message.message,
-                    color = KarikaColors.White,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W400
-                )*/
-                HtmlTextWithStyles(
-                    modifier = Modifier
-                        .padding(16.dp),
-                    html = message.message ?: "",
-                    textColor = KarikaColors.White,
-                    background = KarikaColors.MineMessage
-                )
+                message.images
+                    ?.takeIf { image -> image.isNotEmpty() }
+                    ?.let {
+                        Json.decodeFromString<FileData>(it).filename?.firstOrNull()?.let { image ->
+                            KarikaImage(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .width(150.dp)
+                                    .onClick {
+                                        component.showImagePreview(chatImage(image))
+                                    },
+                                model = chatImage(image),
+                                contentScale = ContentScale.Inside
+                            )
+                        }
+                    }
+                if (!message.message.isNullOrEmpty()) {
+                    if (message.message?.contains("<") == true) {
+                        HtmlTextWithStyles(
+                            modifier = Modifier
+                                .padding(16.dp),
+                            html = message.message ?: "",
+                            textColor = KarikaColors.White,
+                            background = KarikaColors.MineMessage
+                        )
+                    } else {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(16.dp),
+                            text = message.message,
+                            color = KarikaColors.White,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                }
                 KarikaText(
                     modifier = Modifier
                         .padding(horizontal = 16.dp),
@@ -332,21 +389,43 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                     ),
                 horizontalAlignment = Alignment.Start
             ) {
-                /*KarikaText(
-                    modifier = Modifier
-                        .padding(16.dp),
-                    text = message.message,
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W400
-                )*/
-                HtmlTextWithStyles(
-                    modifier = Modifier
-                        .padding(16.dp),
-                    html = message.message ?: "",
-                    textColor = KarikaColors.Gray2,
-                    background = KarikaColors.NotMineMessage
-                )
+                message.images
+                    ?.takeIf { image -> image.isNotEmpty() }
+                    ?.let {
+                        Json.decodeFromString<FileData>(it).filename?.firstOrNull()?.let { image ->
+                            KarikaImage(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .width(150.dp)
+                                    .onClick {
+                                        component.showImagePreview(chatImage(image))
+                                    },
+                                model = chatImage(image),
+                                contentScale = ContentScale.Inside
+                            )
+                        }
+                    }
+                if (!message.message.isNullOrEmpty()) {
+                    if (message.message?.contains("<") == true) {
+                        HtmlTextWithStyles(
+                            modifier = Modifier
+                                .padding(16.dp),
+                            html = message.message ?: "",
+                            textColor = KarikaColors.Gray2,
+                            background = KarikaColors.NotMineMessage
+                        )
+                    } else {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(16.dp),
+                            text = message.message,
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+
+                }
                 KarikaText(
                     modifier = Modifier
                         .padding(horizontal = 16.dp),

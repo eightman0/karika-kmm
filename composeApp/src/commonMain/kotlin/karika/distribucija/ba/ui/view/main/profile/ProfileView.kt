@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +34,7 @@ import karikav2.composeapp.generated.resources.ic_messages
 import karikav2.composeapp.generated.resources.ic_navigation_profile
 import karikav2.composeapp.generated.resources.ic_notifications
 import karikav2.composeapp.generated.resources.ic_orders
+import kotlinx.coroutines.flow.asStateFlow
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -97,6 +99,10 @@ private fun Header(component: ProfileComponent) {
 
 @Composable
 private fun Actions(component: ProfileComponent) {
+    val notificationCount = component.stateHolder.notificationCount.asStateFlow()
+    val adminCount = component.stateHolder.messageUnreadCountAdmin.asStateFlow()
+    val userCount = component.stateHolder.messageUnreadCountUser.asStateFlow()
+
     Column(
         modifier = Modifier
             .background(color = KarikaColors.White)
@@ -117,7 +123,8 @@ private fun Actions(component: ProfileComponent) {
                     .weight(1f),
                 title = "Moj nalog",
                 icon = Res.drawable.ic_navigation_profile,
-                color = KarikaColors.Gray2
+                color = KarikaColors.Gray2,
+                contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.Account)
             }
@@ -127,7 +134,8 @@ private fun Actions(component: ProfileComponent) {
                     .weight(1f),
                 title = "Moje narudžbe",
                 icon = Res.drawable.ic_orders,
-                color = KarikaColors.Gray2
+                color = KarikaColors.Gray2,
+                contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.Orders)
             }
@@ -146,7 +154,9 @@ private fun Actions(component: ProfileComponent) {
                     .weight(1f),
                 title = "Poruke admina",
                 icon = Res.drawable.ic_messages,
-                color = KarikaColors.Gray2
+                color = KarikaColors.Gray2,
+                badge = adminCount.value,
+                contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.AdminMessages)
             }
@@ -156,7 +166,9 @@ private fun Actions(component: ProfileComponent) {
                     .weight(1f),
                 title = "Poruke dobavljača",
                 icon = Res.drawable.ic_navigation_profile,
-                color = KarikaColors.Gray2
+                color = KarikaColors.Gray2,
+                badge = userCount.value,
+                contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.VendorMessages)
             }
@@ -175,7 +187,8 @@ private fun Actions(component: ProfileComponent) {
                     .weight(1f),
                 title = "Moji bodovi",
                 icon = Res.drawable.ic_gift,
-                color = KarikaColors.Gray2
+                color = KarikaColors.Gray2,
+                contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.Points)
             }
@@ -185,7 +198,9 @@ private fun Actions(component: ProfileComponent) {
                     .weight(1f),
                 title = "Notifikacije",
                 icon = Res.drawable.ic_notifications,
-                color = KarikaColors.Gray2
+                color = KarikaColors.Gray2,
+                badge = notificationCount.value,
+                contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.Notifications)
             }

@@ -5,6 +5,7 @@ import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.view.main.MainConfig
 
 class MenuComponent(
     componentContext: ComponentContext,
@@ -12,7 +13,7 @@ class MenuComponent(
 ) : CommonComponent(componentContext, stateHolder) {
 
     fun categories() {
-        appNavigate(AppConfig.Categories)
+        mainNavigate(MainConfig.Categories)
     }
 
     fun vendors() {
@@ -24,8 +25,8 @@ class MenuComponent(
     }
 
     fun karika() {
-        appNavigate(
-            AppConfig.CategoryProducts(
+        mainNavigate(
+            MainConfig.CategoryProducts(
                 Category(
                     id = 319,
                     name = "Samo na Kariki"

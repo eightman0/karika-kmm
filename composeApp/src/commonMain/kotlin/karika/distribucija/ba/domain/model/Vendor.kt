@@ -44,6 +44,7 @@ data class Vendor(
     @SerialName("vendor_bank_account_number") var bankAccountNumber: String? = null,
     @SerialName("vendor_min_order_amount") var minOrderAmount: String? = null,
     @SerialName("min_order_amount") var minOrderAmount1: String? = null,
+    @SerialName("category_ids") var categories: List<String>? = null,
 ) {
     fun name() = publicName ?: ""
     fun image() = imageUrl(companyLogo)
@@ -53,4 +54,7 @@ data class Vendor(
     }
 
     fun minOrderAmount() = minOrderAmount ?: minOrderAmount1
+
+    override fun hashCode(): Int = entityId.hashCode()
+
 }

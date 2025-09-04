@@ -26,8 +26,10 @@ import kotlinx.coroutines.withContext
 import platform.CoreGraphics.CGRectZero
 import platform.CoreGraphics.CGSizeMake
 import platform.Foundation.NSAttributedString
+import platform.Foundation.NSBundle
 import platform.Foundation.NSData
 import platform.Foundation.NSString
+import platform.Foundation.NSURL
 import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.create
 import platform.Foundation.dataUsingEncoding
@@ -35,6 +37,7 @@ import platform.UIKit.NSCharacterEncodingDocumentAttribute
 import platform.UIKit.NSDocumentTypeDocumentAttribute
 import platform.UIKit.NSHTMLTextDocumentType
 import platform.UIKit.NSStringDrawingUsesLineFragmentOrigin
+import platform.UIKit.UIApplication
 import platform.UIKit.UIColor
 import platform.UIKit.UIFont
 import platform.UIKit.UIScreen
@@ -126,6 +129,14 @@ actual fun HtmlTextWithStyles(
                     blue = background.blue.toDouble(),
                     alpha = background.alpha.toDouble()
                 )
+                textView.setTextColor(
+                    UIColor(
+                        red = textColor.red.toDouble(),
+                        green = textColor.green.toDouble(),
+                        blue = textColor.blue.toDouble(),
+                        alpha = textColor.alpha.toDouble()
+                    )
+                )
             },
             onReset = { textView ->
                 textView.backgroundColor = UIColor(
@@ -134,6 +145,14 @@ actual fun HtmlTextWithStyles(
                     blue = background.blue.toDouble(),
                     alpha = background.alpha.toDouble()
                 )
+                textView.setTextColor(
+                    UIColor(
+                        red = textColor.red.toDouble(),
+                        green = textColor.green.toDouble(),
+                        blue = textColor.blue.toDouble(),
+                        alpha = textColor.alpha.toDouble()
+                    )
+                )
             },
             onRelease = { textView ->
                 textView.backgroundColor = UIColor(
@@ -141,6 +160,14 @@ actual fun HtmlTextWithStyles(
                     green = background.green.toDouble(),
                     blue = background.blue.toDouble(),
                     alpha = background.alpha.toDouble()
+                )
+                textView.setTextColor(
+                    UIColor(
+                        red = textColor.red.toDouble(),
+                        green = textColor.green.toDouble(),
+                        blue = textColor.blue.toDouble(),
+                        alpha = textColor.alpha.toDouble()
+                    )
                 )
             }
         )
@@ -164,5 +191,22 @@ object HtmlEntityDecoder {
             result = result.replace(entity, char)
         }
         return result
+    }
+}
+
+actual fun openPdf(url: String) {
+    val nsUrl = NSURL.URLWithString(url) ?: return
+    val app = UIApplication.sharedApplication
+    app.openURL(url = nsUrl, completionHandler = {}, options = mapOf<Any?, String>())
+}
+
+actual fun getEnvPrefix(): String {
+    val currentEnv =
+        NSBundle.mainBundle.objectForInfoDictionaryKey("APP_ENV") as? String ?: "prod"
+    println("TEST_TEST: APP_ENV: $currentEnv")
+    return when (currentEnv) {
+        "prod" -> ""
+        "demo" -> "demo."
+        else -> "test."
     }
 }

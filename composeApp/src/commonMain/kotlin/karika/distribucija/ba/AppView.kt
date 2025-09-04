@@ -5,14 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import coil3.compose.setSingletonImageLoaderFactory
 import com.arkivanov.decompose.extensions.compose.stack.Children
+import karika.distribucija.ba.ui.components.ImagePreview
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.LoadingView
 import karika.distribucija.ba.ui.view.main.MainView
 import karika.distribucija.ba.ui.view.main.menu.blog.BlogsView
 import karika.distribucija.ba.ui.view.main.menu.blog.overview.BlogOverviewView
-import karika.distribucija.ba.ui.view.main.menu.categories.CategoriesView
-import karika.distribucija.ba.ui.view.main.menu.categories.products.ProductByCategoryView
 import karika.distribucija.ba.ui.view.main.product.ProductView
 import karika.distribucija.ba.ui.view.main.profile.account.AccountView
 import karika.distribucija.ba.ui.view.main.profile.messages.admin.AdminMessagesView
@@ -23,7 +22,6 @@ import karika.distribucija.ba.ui.view.main.profile.order.OrdersView
 import karika.distribucija.ba.ui.view.main.profile.order.comments.CommentsView
 import karika.distribucija.ba.ui.view.main.profile.order.details.OrderDetailsView
 import karika.distribucija.ba.ui.view.main.profile.points.PointsView
-import karika.distribucija.ba.ui.view.main.search.SearchView
 import karika.distribucija.ba.ui.view.main.vendor.details.VendorDetailsView
 import karika.distribucija.ba.ui.view.prelogin.PreLoginView
 import karika.distribucija.ba.util.asyncImageLoader
@@ -69,13 +67,9 @@ fun App(component: AppComponent) {
 
                     is Child.Points -> PointsView(child.component)
                     is Child.Notifications -> NotificationsView(child.component)
-
-                    is Child.Categories -> CategoriesView(child.component)
-                    is Child.CategoryProducts -> ProductByCategoryView(child.component)
-
-                    is Child.Search -> SearchView(child.component)
                 }
             }
+            ImagePreview(component)
         }
     }
 }

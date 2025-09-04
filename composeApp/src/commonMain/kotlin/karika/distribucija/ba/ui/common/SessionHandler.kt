@@ -3,7 +3,11 @@ package karika.distribucija.ba.ui.common
 import androidx.compose.runtime.mutableStateOf
 import karika.distribucija.ba.di.PersistenceManager
 import karika.distribucija.ba.domain.HttpClientProvider
+import karika.distribucija.ba.domain.api.CategoryRepository
+import karika.distribucija.ba.domain.api.MessagesRepository
+import karika.distribucija.ba.domain.api.NotificationRepository
 import karika.distribucija.ba.domain.api.UserRepository
+import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.Config
 import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.ResultState
@@ -26,12 +30,19 @@ open class SessionHandler : KoinComponent {
     val userDetails = _userDetails.asStateFlow()
     private val _config = MutableStateFlow(Config())
     val config = _config.asStateFlow()
+    private val _categories = MutableStateFlow<List<Category>>(emptyList())
+    val categories = _categories.asStateFlow()
+    val messageUnreadCountAdmin = MutableStateFlow(0)
+    val messageUnreadCountUser = MutableStateFlow(0)
+    val notificationCount = MutableStateFlow(0)
 
     init {
         HttpClientProvider.token = accessToken.value
         if (accessToken.value.isNotEmpty()) {
             getUserDetails()
             getConfig()
+            fetchCategories()
+            notificationReceived()
         }
     }
 
@@ -74,6 +85,39 @@ open class SessionHandler : KoinComponent {
                 .collect { result ->
                     if (result is ResultState.Success) {
                         _config.update { result.data }
+                    }
+                }
+        }
+    }
+
+    fun fetchCategories() {
+        CoroutineScope(Dispatchers.IO).launch {
+            CategoryRepository().get()
+                .collect { result ->
+                    if (result is ResultState.Success) {
+                        _categories.update { result.data.childrenData }
+                    }
+                }
+        }
+    }
+
+    fun notificationReceived() {
+        println("TEST_TEST: PUSH RECEIVED")
+        CoroutineScope(Dispatchers.IO).launch {
+            MessagesRepository()
+                .messageUnreadCount()
+                .collect {
+                    if (it is ResultState.Success) {
+                        messageUnreadCountAdmin.value = it.data.admin()
+                        messageUnreadCountUser.value = it.data.user()
+                    }
+                }
+
+            NotificationRepository()
+                .get()
+                .collect {
+                    if (it is ResultState.Success) {
+                        notificationCount.value = it.data.count { it1 -> it1.isRead == "true" }
                     }
                 }
         }

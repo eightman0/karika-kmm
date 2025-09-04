@@ -203,7 +203,11 @@ fun KarikaPickerSmall(
                     leadingIcon = {
                         KarikaRadioButton(
                             selected = it == value.value
-                        ) { _ -> }
+                        ) { _ ->
+                            value.value = it
+                            expanded.negate()
+                            onChange.invoke()
+                        }
                     }
                 )
             }

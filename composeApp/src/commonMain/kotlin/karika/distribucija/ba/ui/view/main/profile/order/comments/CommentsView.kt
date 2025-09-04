@@ -1,33 +1,41 @@
 package karika.distribucija.ba.ui.view.main.profile.order.comments
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.domain.HttpClientProvider.chatImage
+import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField2
@@ -35,6 +43,11 @@ import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.components.onClick
+import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_attachment
+import karikav2.composeapp.generated.resources.ic_pdf
+import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun CommentsView(component: CommentsComponent) {
@@ -93,7 +106,18 @@ private fun EnterComment(component: CommentsComponent) {
             value = comment,
             placeholder = "Napiši komentar",
             keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Done
+            imeAction = ImeAction.Done,
+           // trailingIcons = {
+           //     Icon(
+           //         modifier = Modifier
+           //             .onClick {
+           //                 component.pickFile()
+           //             },
+           //         imageVector = vectorResource(Res.drawable.ic_attachment),
+           //         tint = KarikaColors.Gray2,
+           //         contentDescription = ""
+           //     )
+           // }
         )
         PrimaryButtonFilled(
             modifier = Modifier
@@ -128,24 +152,49 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                     ),
                 horizontalAlignment = Alignment.End
             ) {
-                if (comment.message == null) {
-                    KarikaText(
-                        modifier = Modifier
-                            .padding(16.dp),
-                        text = comment.files?.firstOrNull()?.name,
-                        color = KarikaColors.Primary,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                } else {
-                    KarikaText(
-                        modifier = Modifier
-                            .padding(16.dp),
-                        text = comment.message,
-                        color = KarikaColors.White,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W400
-                    )
+                KarikaText(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    text = comment.message,
+                    color = KarikaColors.White,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W400
+                )
+                comment.files?.forEach {
+                    if (it.type?.startsWith("image") == true) {
+                        KarikaImage(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .width(150.dp)
+                                .onClick {
+                                    component.showImagePreview(imageUrl(it.url ?: ""))
+                                },
+                            model = imageUrl(it.url ?: ""),
+                            contentScale = ContentScale.Inside
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .clickable {
+                                    component.downloadReceipt(it)
+                                },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.ic_pdf),
+                                tint = KarikaColors.Primary,
+                                contentDescription = null
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            KarikaText(
+                                text = it.name ?: "",
+                                fontWeight = FontWeight.Bold,
+                                textSize = 12.sp,
+                                color = KarikaColors.Primary
+                            )
+                        }
+                    }
                 }
                 KarikaText(
                     modifier = Modifier
@@ -177,24 +226,49 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                     ),
                 horizontalAlignment = Alignment.Start
             ) {
-                if (comment.message == null) {
-                    KarikaText(
-                        modifier = Modifier
-                            .padding(16.dp),
-                        text = comment.files?.firstOrNull()?.name,
-                        color = KarikaColors.Primary,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                } else {
-                    KarikaText(
-                        modifier = Modifier
-                            .padding(16.dp),
-                        text = comment.message,
-                        color = KarikaColors.Gray2,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W400
-                    )
+                KarikaText(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    text = comment.message,
+                    color = KarikaColors.Gray2,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W400
+                )
+                comment.files?.forEach {
+                    if (it.type?.startsWith("image") == true) {
+                        KarikaImage(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .width(150.dp)
+                                .onClick {
+                                    component.showImagePreview(imageUrl(it.url ?: ""))
+                                },
+                            model = imageUrl(it.url ?: ""),
+                            contentScale = ContentScale.Inside
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .clickable {
+                                    component.downloadReceipt(it)
+                                },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.ic_pdf),
+                                tint = KarikaColors.Primary,
+                                contentDescription = null
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            KarikaText(
+                                text = it.name ?: "",
+                                fontWeight = FontWeight.Bold,
+                                textSize = 12.sp,
+                                color = KarikaColors.Primary
+                            )
+                        }
+                    }
                 }
                 KarikaText(
                     modifier = Modifier

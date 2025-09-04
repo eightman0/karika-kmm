@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -7,11 +6,12 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinxSerialization)
+    alias(libs.plugins.gms)
+    alias(libs.plugins.crashlytics)
 }
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -45,6 +45,14 @@ kotlin {
 
             implementation(libs.ktor.client.okhttp)
             implementation(libs.kotlinx.coroutines.android)
+
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.crashlytics)
+            implementation(libs.firebase.analytics)
+            implementation(libs.firebase.messaging.ktx)
+
+            implementation(libs.app.update)
+            implementation(libs.app.update.ktx)
         }
 
         commonMain.dependencies {
@@ -93,8 +101,8 @@ android {
         applicationId = "karika.distribucija.ba"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 3
-        versionName = "1.0"
+        versionCode = 200
+        versionName = "2.0"
     }
     packaging {
         resources {
@@ -104,11 +112,33 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    flavorDimensions += "karika"
+    productFlavors {
+        create("demo") {
+            applicationId = "karika.distribucija.ba"
+            dimension = "karika"
+        }
+        create("uat") {
+            applicationId = "karika.distribucija.ba"
+            dimension = "karika"
+        }
+        create("prod") {
+            applicationId = "karika.distribucija.ba"
+            dimension = "karika"
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    buildFeatures {
+        buildConfig = true
     }
     lint {
         disable.add("NullSafeMutableLiveData")

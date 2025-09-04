@@ -3,145 +3,175 @@ package karika.distribucija.ba.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.PromotedVendor
+import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.view.main.home.HomeComponent
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.yield
 
 @Composable
-fun Carousel(component: HomeComponent) {
+fun CarouselBanners(component: HomeComponent) {
     val promotedVendors by component.promotedVendors.collectAsState()
 
     if (promotedVendors.isNotEmpty()) {
-        val pagerState = rememberPagerState(
-            initialPage = 0,
-            pageCount = { promotedVendors.size })
-
-        HorizontalPager(
+        BoxWithConstraints(
             modifier = Modifier
-                .height(120.dp)
-                .fillMaxWidth(),
-            state = pagerState,
-            pageSpacing = 16.dp
+                .fillMaxWidth()
         ) {
-            CarouselDoubleItem(
-                pair = promotedVendors[it],
-                component = component
-            )
-        }
+            val cardWidth = maxWidth * (1f - 0.2f) - 16.dp
 
-        LaunchedEffect(Unit) {
-            while (true) {
-                yield()
-                delay(3000L)
-
-                while (pagerState.isScrollInProgress) {
-                    delay(100)
+            LazyRow(
+                modifier = Modifier
+                    .height(200.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(items = promotedVendors) {
+                    CarouselBannerItem(
+                        modifier = Modifier
+                            .width(cardWidth),
+                        promotedVendor = it
+                    ) {
+                        component.showVendor(it.toVendor())
+                    }
                 }
-                val nextPage = (pagerState.currentPage + 1) % promotedVendors.size
-                pagerState.animateScrollToPage(nextPage)
             }
         }
     }
 }
 
 @Composable
-private fun CarouselItem(
+private fun CarouselBannerItem(
     modifier: Modifier,
     promotedVendor: PromotedVendor,
     onClick: () -> Unit = {}
 ) {
-    Box(
-        modifier = modifier
-            .onClick {
-                onClick()
-            }
-            .clip(RoundedCornerShape(2.dp))
-            .background(color = KarikaColors.Secondary)
-            .fillMaxHeight(),
-        contentAlignment = Alignment.BottomCenter
+    Card(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp,
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        KarikaImage(
-            modifier = Modifier
-                .fillMaxSize(),
-            model = promotedVendor.image()
-        )
         Box(
-            modifier = Modifier
-                .shadow(
-                    elevation = 5.dp,
-                    shape = RoundedCornerShape(8.dp),
-                    ambientColor = Color(0x26000000),
-                    spotColor = Color(0x26000000)
-                )
-                .fillMaxSize()
-        )
-        Box(
-            modifier = Modifier
-                .height(23.dp)
-                .background(color = KarikaColors.Blue1)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
+            modifier = modifier
+                .onClick {
+                    onClick()
+                }
+                .background(color = KarikaColors.Secondary)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.BottomCenter
         ) {
-            KarikaText(
+            KarikaImage(
                 modifier = Modifier
-                    .padding(horizontal = 2.dp),
-                color = KarikaColors.Black,
-                text = promotedVendor.name(),
-                textAlign = TextAlign.Center,
-                textSize = 10.sp,
-                fontWeight = FontWeight.W700
+                    .fillMaxSize(),
+                model = promotedVendor.bannerImage()
             )
+            Box(
+                modifier = Modifier
+                    .height(23.dp)
+                    .background(color = KarikaColors.Blue1)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .padding(horizontal = 2.dp),
+                    color = KarikaColors.White,
+                    text = promotedVendor.name(),
+                    textAlign = TextAlign.Center,
+                    textSize = 10.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }
         }
     }
 }
 
 @Composable
-fun CarouselDoubleItem(
-    pair: Pair<PromotedVendor, PromotedVendor>,
-    component: HomeComponent,
-) {
-    Row(
-        modifier = Modifier
-            .height(120.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        CarouselItem(
+fun CarouselLogos(component: CommonComponent) {
+    val promotedLogos by component.promotedLogos.collectAsState()
+
+    if (promotedLogos.isNotEmpty()) {
+        LazyRow(
             modifier = Modifier
-                .weight(1f),
-            pair.first
+                .height(100.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            component.showVendor(pair.first.toVendor())
+            items(items = promotedLogos) {
+                CarouselLogoItem(
+                    modifier = Modifier,
+                    promotedVendor = it
+                ) {
+                    component.showVendor(it.toVendor())
+                }
+            }
         }
-        CarouselItem(
-            modifier = Modifier
-                .weight(1f),
-            pair.second
+    }
+}
+
+@Composable
+private fun CarouselLogoItem(
+    modifier: Modifier,
+    promotedVendor: PromotedVendor,
+    onClick: () -> Unit = {}
+) {
+    Card(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp,
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Box(
+            modifier = modifier
+                .onClick {
+                    onClick()
+                }
+                .background(color = KarikaColors.Secondary)
+                .height(100.dp)
+                .aspectRatio(1f),
+            contentAlignment = Alignment.BottomCenter
         ) {
-            component.showVendor(pair.second.toVendor())
+            KarikaImage(
+                modifier = Modifier
+                    .fillMaxSize(),
+                model = promotedVendor.logoImage()
+            )
+            /*Box(
+                modifier = Modifier
+                    .height(23.dp)
+                    .background(color = KarikaColors.Blue1)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .padding(horizontal = 2.dp),
+                    color = KarikaColors.White,
+                    text = promotedVendor.name(),
+                    textAlign = TextAlign.Center,
+                    textSize = 10.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }*/
         }
     }
 }

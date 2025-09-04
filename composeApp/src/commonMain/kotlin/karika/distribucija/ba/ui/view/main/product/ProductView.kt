@@ -25,6 +25,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -41,17 +42,20 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.KarikaTextField3
 import karika.distribucija.ba.ui.components.PrimaryButton
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.bgWhite
+import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.main.home.DiscountView
 import karika.distribucija.ba.ui.view.main.home.NewView
 import karika.distribucija.ba.ui.view.main.home.ProductItem
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_down
+import karikav2.composeapp.generated.resources.ic_arrow_up
 import karikav2.composeapp.generated.resources.ic_gift
 import karikav2.composeapp.generated.resources.ic_navigation_cart
 import org.jetbrains.compose.resources.vectorResource
@@ -67,7 +71,7 @@ fun ProductView(component: ProductComponent) {
             component = component,
             topBar = {
                 TopBarWithBack(product.name()) {
-                    component.back()
+                    component.mainBack()
                 }
             }
         ) {
@@ -126,13 +130,13 @@ fun VendorName(product: Product, component: CommonComponent) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray6,
-            text = "Dobavljač:",
-            textSize = 14.sp,
-            fontWeight = FontWeight.W400
-        )
+        //KarikaText(
+        //    modifier = Modifier,
+        //    color = KarikaColors.Gray6,
+        //    text = "Dobavljač:",
+        //    textSize = 14.sp,
+        //    fontWeight = FontWeight.W400
+        //)
         KarikaText(
             modifier = Modifier,
             color = KarikaColors.Blue,
@@ -158,12 +162,12 @@ fun ProductName(viewModel: ProductComponent) {
 }
 
 @Composable
-fun ProductImage(viewModel: ProductComponent) {
-    val product by viewModel.product.collectAsState()
+fun ProductImage(component: ProductComponent) {
+    val product by component.product.collectAsState()
     Box(
         modifier = Modifier
             .onClick {
-                viewModel.navigateToProduct(product)
+                component.navigateToProduct(product)
             }
             .fillMaxWidth()
             .border(width = 1.dp, color = KarikaColors.Gray5)
@@ -171,6 +175,9 @@ fun ProductImage(viewModel: ProductComponent) {
     ) {
         KarikaImage(
             modifier = Modifier
+                .onClick {
+                    component.showImagePreview(product.image())
+                }
                 .fillMaxSize(),
             model = product.image()
         )
@@ -236,11 +243,19 @@ fun ProductDescription(viewModel: ProductComponent) {
     if (product.description.isNullOrEmpty()) {
         return
     }
+    val showDescription = mutableStateOf(false).asState()
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        HtmlTextWithStyles(
+            html = product.shortDescription ?: "",
+            textColor = KarikaColors.Gray2
+        )
         IconTextItem(
-            modifier = Modifier,
-            icon = vectorResource(Res.drawable.ic_arrow_down),
+            modifier = Modifier
+                .onClick {
+                    showDescription.negate()
+                },
+            icon = vectorResource(if (showDescription.value) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
             iconColor = KarikaColors.Gray2,
             textColor = KarikaColors.Gray2,
             textSize = 18.sp,
@@ -256,10 +271,12 @@ fun ProductDescription(viewModel: ProductComponent) {
              textSize = 16.sp,
              fontWeight = FontWeight.W400
          )*/
-        HtmlTextWithStyles(
-            html = product.description ?: "",
-            textColor = KarikaColors.Gray2
-        )
+        if (showDescription.value) {
+            HtmlTextWithStyles(
+                html = product.description ?: "",
+                textColor = KarikaColors.Gray2
+            )
+        }
     }
 }
 
@@ -358,14 +375,17 @@ fun ProductButtons(component: ProductComponent) {
     val product by component.product.collectAsState()
     val productQty by component.productQty.asState()
 
-    PrimaryButtonFilled(
-        modifier = Modifier
-            .height(56.dp)
-            .fillMaxWidth(),
-        title = "Dodaj u Korpu",
-        icon = Res.drawable.ic_navigation_cart
-    ) {
-        component.addToCart(product, productQty)
+    if (product.hasOnStock()) {
+        PrimaryButtonFilled(
+            modifier = Modifier
+                .height(56.dp)
+                .fillMaxWidth(),
+            title = "Dodaj u Korpu",
+            icon = Res.drawable.ic_navigation_cart,
+            enabled = product.hasOnStock()
+        ) {
+            component.addToCartWithPut(product, productQty)
+        }
     }
 
     PrimaryButton(
@@ -461,12 +481,16 @@ fun ProductQtyAction(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            KarikaText(
-                modifier = Modifier,
-                color = KarikaColors.Gray2,
-                text = qty.value.toString(),
-                textSize = 24.sp,
-                fontWeight = FontWeight.W600
+            KarikaTextField3(
+                modifier = Modifier
+                    .fillMaxSize(),
+                value = qty.value.toString(),
+                onValueChange = {
+                    if ((it.toIntOrNull() ?: 0) < product.minQty()) {
+                        return@KarikaTextField3
+                    }
+                    qty.value = it.toIntOrNull() ?: qty.value
+                }
             )
         }
         Box(

@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.ProductRepository
 import karika.distribucija.ba.domain.model.Category
+import karika.distribucija.ba.domain.model.KarikaUnit
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
@@ -35,7 +36,7 @@ class ProductByCategoryComponent(
     var filterPriceFrom = mutableStateOf("")
     var filterPriceTo = mutableStateOf("")
     var selectedVendor = mutableStateOf(Pair("", 0))
-    val selectedRegion = mutableStateOf<List<String>>(listOf())
+    val selectedRegion = mutableStateOf<List<KarikaUnit>>(listOf())
 
     override fun loadNextPage(reset: Boolean) {
         if (reset) {
@@ -51,6 +52,7 @@ class ProductByCategoryComponent(
                 vendorId = if (selectedVendor.value.second == 0) null else selectedVendor.value.second,
                 searchText = searchText.value,
                 categoryId = category.value.getAllCategoryIds(),
+                regionId = selectedRegion.value.joinToString(separator = ",") { it.unit() },
                 currentPage = currentPage,
                 from = filterPriceFrom.value,
                 to = filterPriceTo.value,

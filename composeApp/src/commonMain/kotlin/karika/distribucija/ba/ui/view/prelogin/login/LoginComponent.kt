@@ -10,6 +10,7 @@ import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import kotlinx.coroutines.launch
 
@@ -18,6 +19,7 @@ class LoginComponent(
     stateHolder: KarikaStateHolder
 ) : CommonComponent(componentContext, stateHolder) {
 
+    val forgotPassSheet = mutableStateOf(false)
     val email = mutableStateOf(stateHolder.getUserUsername())
     val pass = mutableStateOf(stateHolder.getUserPassword())
     val rememberMe = mutableStateOf(stateHolder.getUserPassword().isNotEmpty())
@@ -42,6 +44,7 @@ class LoginComponent(
                                 LoginDto(email.value, pass.value),
                                 rememberMe.value
                             )
+                            savePushHandle()
                             stateHolder.reloadCart()
                             navigatePostLogin()
                         }
@@ -55,8 +58,28 @@ class LoginComponent(
         }
     }
 
-    fun forgotPassword() {
+    fun forgotPassword(email: String) {
+        iOScope.launch {
+            userRepository.forgotPass(email)
+                .collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            hideLoader()
+                            showMessage(result.data)
+                        }
 
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showMessage(result.message)
+                        }
+                    }
+                }
+        }
+    }
+
+    fun forgotPassword() {
+        forgotPassSheet.negate()
     }
 
     fun navigateRegistration() {

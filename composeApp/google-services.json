@@ -1,0 +1,155 @@
+{
+  "project_info": {
+    "project_number": "854446114305",
+    "project_id": "karika-distribucija",
+    "storage_bucket": "karika-distribucija.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854446114305:android:4fc13079529b978641a200",
+        "android_client_info": {
+          "package_name": "karika.distribucija.ba"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhXruU2GPjiEDLP9XInSWTnrTptpgy8jQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854446114305:android:521604861c05382f41a200",
+        "android_client_info": {
+          "package_name": "karika.distribucija.ba.analytics"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhXruU2GPjiEDLP9XInSWTnrTptpgy8jQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854446114305:android:6473bd0d9987785241a200",
+        "android_client_info": {
+          "package_name": "karika.distribucija.ba.demo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhXruU2GPjiEDLP9XInSWTnrTptpgy8jQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854446114305:android:544456b7a907b41a41a200",
+        "android_client_info": {
+          "package_name": "karika.distribucija.ba.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhXruU2GPjiEDLP9XInSWTnrTptpgy8jQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854446114305:android:a38ce4db9b64b82841a200",
+        "android_client_info": {
+          "package_name": "karika.distribucija.ba.kiosk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhXruU2GPjiEDLP9XInSWTnrTptpgy8jQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

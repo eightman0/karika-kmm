@@ -4,8 +4,12 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.popToFirst
+import com.arkivanov.decompose.router.stack.popWhile
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackCallback
+import karika.distribucija.ba.domain.model.Category
+import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaStateHolder
 import karika.distribucija.ba.ui.view.main.cart.CartComponent
@@ -13,8 +17,13 @@ import karika.distribucija.ba.ui.view.main.cart.nextstep.ShippingDetailsComponen
 import karika.distribucija.ba.ui.view.main.cart.success.CartSuccessComponent
 import karika.distribucija.ba.ui.view.main.home.HomeComponent
 import karika.distribucija.ba.ui.view.main.menu.MenuComponent
+import karika.distribucija.ba.ui.view.main.menu.categories.CategoriesComponent
+import karika.distribucija.ba.ui.view.main.menu.categories.products.ProductByCategoryComponent
+import karika.distribucija.ba.ui.view.main.product.ProductComponent
 import karika.distribucija.ba.ui.view.main.profile.ProfileComponent
+import karika.distribucija.ba.ui.view.main.search.SearchComponent
 import karika.distribucija.ba.ui.view.main.vendor.VendorComponent
+import karika.distribucija.ba.ui.view.main.vendor.details.VendorDetailsComponent
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -39,6 +48,21 @@ sealed class MainConfig {
 
     @Serializable
     data object Profile : MainConfig()
+
+    @Serializable
+    data class VendorDetails(val vendor: karika.distribucija.ba.domain.model.Vendor) : MainConfig()
+
+    @Serializable
+    data class ProductDetails(val product: Product) : MainConfig()
+
+    @Serializable
+    data object Search : MainConfig()
+
+    @Serializable
+    data object Categories : MainConfig()
+
+    @Serializable
+    data class CategoryProducts(val category: Category) : MainConfig()
 }
 
 sealed class MainChild {
@@ -51,6 +75,12 @@ sealed class MainChild {
     class CartSuccess(val component: CartSuccessComponent) : MainChild()
 
     class Profile(val component: ProfileComponent) : MainChild()
+
+    class VendorDetails(val component: VendorDetailsComponent) : MainChild()
+    class ProductDetails(val component: ProductComponent) : MainChild()
+    class Search(val component: SearchComponent) : MainChild()
+    class Categories(val component: CategoriesComponent) : MainChild()
+    class CategoryProducts(val component: ProductByCategoryComponent) : MainChild()
 }
 
 class MainComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
@@ -66,6 +96,10 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
         )
 
     private val backCallback = BackCallback {
+        if (stateHolder.imagePreview.value.isNotEmpty()) {
+            stateHolder.imagePreview.value = ""
+            return@BackCallback
+        }
         when (stack.value.active.instance) {
             is MainChild.CartSuccess -> {
 
@@ -113,6 +147,26 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
 
             is MainConfig.Profile -> MainChild.Profile(
                 ProfileComponent(componentContext, stateHolder)
+            )
+
+            is MainConfig.VendorDetails -> MainChild.VendorDetails(
+                VendorDetailsComponent(componentContext, stateHolder, config.vendor)
+            )
+
+            is MainConfig.ProductDetails -> MainChild.ProductDetails(
+                ProductComponent(componentContext, stateHolder, config.product)
+            )
+
+            is MainConfig.Search -> MainChild.Search(
+                SearchComponent(componentContext, stateHolder)
+            )
+
+            is MainConfig.Categories -> MainChild.Categories(
+                CategoriesComponent(componentContext, stateHolder)
+            )
+
+            is MainConfig.CategoryProducts -> MainChild.CategoryProducts(
+                ProductByCategoryComponent(componentContext, stateHolder, config.category)
             )
         }
 

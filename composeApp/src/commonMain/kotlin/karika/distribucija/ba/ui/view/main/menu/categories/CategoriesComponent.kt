@@ -7,6 +7,7 @@ import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.view.main.MainConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -51,7 +52,7 @@ class CategoriesComponent(componentContext: ComponentContext, stateHolder: Karik
     }
 
     fun showProducts(category: Category?) {
-        appNavigate(AppConfig.CategoryProducts(category ?: return))
+        mainNavigate(MainConfig.CategoryProducts(category ?: return))
     }
 
     fun reset() {

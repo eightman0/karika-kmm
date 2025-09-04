@@ -2,8 +2,7 @@ package karika.distribucija.ba.ui.view.main.vendor.details
 
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
-import karika.distribucija.ba.domain.api.ProductRepository
-import karika.distribucija.ba.domain.api.VendorRepository
+import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
@@ -20,16 +19,23 @@ class VendorDetailsComponent(
     vendor: Vendor,
 ) : CommonComponent(componentContext, stateHolder) {
 
-    private val vendorRepository = VendorRepository()
-    private val productRepository = ProductRepository()
     private val _vendor = MutableStateFlow(vendor)
     val vendor = _vendor.asStateFlow()
+    private val _vendorCategories = MutableStateFlow<List<Category>>(emptyList())
+    val vendorCategories = _vendorCategories.asStateFlow()
     private val _products = MutableStateFlow<List<Product>>(emptyList())
     val products = _products.asStateFlow()
     val searchText = mutableStateOf("")
+    val selectedCategories = mutableStateOf<List<Category>>(emptyList())
 
     init {
         getVendor()
+        _vendorCategories.update {
+            stateHolder.categories.value.plus(stateHolder.categories.value.flatMap { it.childrenData.flatMap { it.childrenData.flatMap { it.childrenData } } })
+                .filter {
+                    vendor.categories?.contains(it.id.toString()) ?: false
+                }
+        }
     }
 
     override fun loadNextPage(reset: Boolean) {
@@ -45,9 +51,10 @@ class VendorDetailsComponent(
         iOScope.launch {
             productRepository.searchProductsByCategory(
                 currentPage = currentPage,
-                pageSize = 10,
+                pageSize = pageSize,
                 vendorId = vendor.value.entityId,
-                searchText = searchText.value
+                categoryId = selectedCategories.value.joinToString(",") { it.id.toString() }.ifEmpty { null },
+                searchText = searchText.value,
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> {
@@ -58,7 +65,7 @@ class VendorDetailsComponent(
                         hideLoader()
                         _products.update {
                             if (reset) {
-                                emptyList()
+                                result.data
                             } else {
                                 it.plus(result.data)
                             }
@@ -88,7 +95,7 @@ class VendorDetailsComponent(
                     }
 
                     is ResultState.Success -> {
-                       // hideLoader()
+                        // hideLoader()
                         result.data.firstOrNull()?.let { v ->
                             _vendor.update { v }
                         }
@@ -96,7 +103,7 @@ class VendorDetailsComponent(
 
                     is ResultState.Error -> {
                         //hideLoader()
-                       // showMessage(result.message ?: "")
+                        // showMessage(result.message ?: "")
                     }
                 }
             }

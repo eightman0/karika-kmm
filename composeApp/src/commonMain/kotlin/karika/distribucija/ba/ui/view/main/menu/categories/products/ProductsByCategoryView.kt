@@ -12,10 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.runtime.Composable
@@ -36,6 +35,7 @@ import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.TopBarWithBack
+import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
@@ -53,7 +53,7 @@ fun ProductByCategoryView(component: ProductByCategoryComponent) {
         contentWindowInsets = WindowInsets.systemBars,
         topBar = {
             TopBarWithBack(component.category.value.name) {
-                component.appBack()
+                component.mainBack()
             }
         },
         component = component
@@ -62,7 +62,6 @@ fun ProductByCategoryView(component: ProductByCategoryComponent) {
             modifier = Modifier
                 .padding(it)
         ) {
-            Filter(component)
             Products(component)
         }
     }
@@ -70,22 +69,39 @@ fun ProductByCategoryView(component: ProductByCategoryComponent) {
 
 @Composable
 private fun Products(component: ProductByCategoryComponent) {
-    val category by component.category.collectAsState()
     val products by component.products.collectAsState()
-    val state = rememberLazyGridState()
+    val state = rememberLazyListState()
 
-    LazyVerticalGrid(
+    LazyColumn(
         state = state,
         modifier = Modifier
             .padding(16.dp),
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(
-            items = products.toList()
-        ) {
-            ProductItem(it, component)
+        item {
+            Filter(component)
+        }
+        items(items = products.chunked(2)) { item ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item.forEach {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        ProductItem(it, component)
+                    }
+                }
+                if (item.size == 1) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    )
+                }
+            }
         }
     }
 
@@ -107,7 +123,6 @@ private fun Filter(component: ProductByCategoryComponent) {
 
     SearchBoxBorder(
         modifier = Modifier
-            .padding(16.dp)
             .fillMaxWidth(),
         onValueChange = {
             searchText.value = it
@@ -120,9 +135,9 @@ private fun Filter(component: ProductByCategoryComponent) {
             component.loadNextPage(true)
         }
     )
+    YSpacer16()
     Row(
         modifier = Modifier
-            .padding(16.dp)
             .height(32.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -159,7 +174,7 @@ private fun Filter(component: ProductByCategoryComponent) {
                 listOf(
                     "Najjeftiniji",
                     "Najskuplji",
-                    "Minimalna količina",
+                    "Min. Količina",
                     "Po datumu"
                 )
             ).asState()
@@ -171,15 +186,15 @@ private fun Filter(component: ProductByCategoryComponent) {
     if (filter.value.first.isNotBlank()
         || selectedRegions.value.isNotEmpty() || selectedVendor.value.second != 0
     ) {
+        YSpacer16()
         FlowRow(
-            modifier = Modifier
-                .padding(horizontal = 16.dp),
+            modifier = Modifier,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             KarikaText(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .padding(vertical = 4.dp),
                 color = KarikaColors.Black,
                 textSize = 16.sp,
                 fontWeight = FontWeight.W700,
@@ -223,7 +238,7 @@ private fun Filter(component: ProductByCategoryComponent) {
                         icon = vectorResource(Res.drawable.ic_tertiary),
                         iconColor = KarikaColors.Black1,
                         iconSize = 16.dp,
-                        text = it,
+                        text = it.label(),
                         textColor = KarikaColors.Gray2,
                         textSize = 16.sp,
                         fontWeight = FontWeight.W700,

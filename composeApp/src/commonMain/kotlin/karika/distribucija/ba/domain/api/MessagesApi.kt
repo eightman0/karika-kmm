@@ -15,6 +15,7 @@ import io.ktor.http.content.PartData
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.model.Conversation
+import karika.distribucija.ba.domain.model.MessagesCount
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.SendMessageRequest
 import karika.distribucija.ba.domain.model.SendMessageResponse
@@ -40,6 +41,18 @@ internal class MessagesApi {
     ): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
             url("mobile/message/thread?threadId=$threadId&admin=$admin")
+        )
+    }
+
+    suspend fun getMessageUnread(): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.get(
+            url("mobile/message/count")
+        )
+    }
+
+    suspend fun markAsRead(threadId: String?): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.post(
+            url("mobile/message/markAsRead?threadId=$threadId")
         )
     }
 
@@ -177,6 +190,40 @@ class MessagesRepository internal constructor() {
             }
 
             emit(ResultState.Error(response?.bodyAsText() ?: ""))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message ?: ""))
+        }
+    }
+
+    fun messageUnreadCount(): Flow<ResultState<MessagesCount>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = MessagesApi()
+                .getMessageUnread().getOrNull()
+
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body()))
+                return@flow
+            }
+
+            emit(ResultState.Error(response?.bodyAsText() ?: ""))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message ?: ""))
+        }
+    }
+
+    fun markAsRead(id: String?): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = MessagesApi()
+                .markAsRead(id).getOrNull()
+
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(""))
+                return@flow
+            }
+
+            emit(ResultState.Error(""))
         } catch (e: Exception) {
             emit(ResultState.Error(e.message ?: ""))
         }

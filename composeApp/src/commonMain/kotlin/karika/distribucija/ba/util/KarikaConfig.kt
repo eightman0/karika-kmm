@@ -4,6 +4,7 @@ import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.DeliveryPrice
 import karika.distribucija.ba.domain.model.Faq
 import karika.distribucija.ba.domain.model.KarikaUnit
+import karika.distribucija.ba.ui.common.getEnvPrefix
 
 class KarikaConfig {
 
@@ -56,6 +57,27 @@ class KarikaConfig {
         fun getCustomerRegionList(): List<KarikaUnit> {
             return customerRegionList
         }
+
+        fun getOutletId(): Int =
+            when (getEnvPrefix()) {
+                "test." -> 303
+                "demo." -> 303
+                else -> 303
+            }
+
+        fun getActionId(): Int =
+            when (getEnvPrefix()) {
+                "test." -> 301
+                "demo." -> 301
+                else -> 301
+            }
+
+        fun getKarikaProductsId(): Int =
+            when (getEnvPrefix()) {
+                "test." -> 363
+                "demo." -> 301
+                else -> 439
+            }
 
         /*   fun getCustomerGroupList(): List<KarikaUnit> {
                return customerGroupList

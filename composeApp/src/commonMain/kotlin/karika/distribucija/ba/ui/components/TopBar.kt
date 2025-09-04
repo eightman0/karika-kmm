@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,11 +24,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
-import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.ui.view.main.MainChild
 import karika.distribucija.ba.ui.view.main.MainComponent
+import karika.distribucija.ba.ui.view.main.MainConfig
 import karika.distribucija.ba.ui.view.main.search.SearchComponent
+import karika.distribucija.ba.util.KarikaConfig
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_action
 import karikav2.composeapp.generated.resources.ic_arrow_back
@@ -36,7 +38,11 @@ import org.jetbrains.compose.resources.vectorResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBarWithBack(title: String, back: () -> Unit) {
+fun TopBarWithBack(
+    title: String,
+    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
+    back: () -> Unit
+) {
     TopAppBar(
         modifier = Modifier
             .fillMaxWidth(),
@@ -69,6 +75,7 @@ fun TopBarWithBack(title: String, back: () -> Unit) {
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = KarikaColors.Primary
         ),
+        windowInsets = windowInsets
     )
 }
 
@@ -103,6 +110,22 @@ fun TopBar1(component: MainComponent) {
 fun TopBar(component: MainComponent) {
     val state by component.stack.subscribeAsState()
 
+    if (state.active.instance is MainChild.VendorDetails) {
+        return
+    }
+    if (state.active.instance is MainChild.ProductDetails) {
+        return
+    }
+    if (state.active.instance is MainChild.Search) {
+        return
+    }
+    if (state.active.instance is MainChild.Categories) {
+        return
+    }
+    if (state.active.instance is MainChild.CategoryProducts) {
+        return
+    }
+
     if (state.active.instance is MainChild.Profile) {
         TopBar1(component)
     } else {
@@ -116,7 +139,7 @@ fun TopBar(component: MainComponent) {
                         enabled = false,
                         modifier = Modifier
                             .onClick {
-                                component.appNavigate(AppConfig.Search)
+                                component.mainNavigate(MainConfig.Search)
                             }
                             .padding(end = 16.dp)
                             .fillMaxWidth(),
@@ -125,7 +148,7 @@ fun TopBar(component: MainComponent) {
                         },
                         onSearchExecute = {
 
-                        }
+                        },
                     )
                 },
                 actions = {
@@ -136,7 +159,7 @@ fun TopBar(component: MainComponent) {
                 ),
             )
             YSpacer8()
-            if (state.active.instance !is MainChild.Menu) {
+            if (state.active.instance is MainChild.Home) {
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth(),
                     color = KarikaColors.White,
@@ -170,14 +193,15 @@ fun TopBarSearch(component: SearchComponent) {
                 onClose = {
                     component.search(true)
                 },
-                focusRequester = focusRequester
+                focusRequester = focusRequester,
+                searchText = component.searchText
             )
         },
         navigationIcon = {
             Icon(
                 modifier = Modifier
                     .onClick {
-                        component.appBack()
+                        component.mainBack()
                     },
                 imageVector = vectorResource(Res.drawable.ic_arrow_back),
                 contentDescription = "",
@@ -209,10 +233,10 @@ fun ActionBar(component: MainComponent) {
         IconTextItem(
             modifier = Modifier
                 .onClick {
-                    component.appNavigate(
-                        AppConfig.CategoryProducts(
+                    component.mainNavigate(
+                        MainConfig.CategoryProducts(
                             Category(
-                                id = 303,
+                                id = KarikaConfig.getOutletId(),
                                 name = "OUTLET"
                             )
                         )
@@ -230,10 +254,10 @@ fun ActionBar(component: MainComponent) {
         IconTextItem(
             modifier = Modifier
                 .onClick {
-                    component.appNavigate(
-                        AppConfig.CategoryProducts(
+                    component.mainNavigate(
+                        MainConfig.CategoryProducts(
                             Category(
-                                id = 301,
+                                id = KarikaConfig.getActionId(),
                                 name = "AKCIJE"
                             )
                         )

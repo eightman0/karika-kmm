@@ -1,11 +1,14 @@
 package karika.distribucija.ba.ui.view.main.profile.order.details
 
 import com.arkivanov.decompose.ComponentContext
+import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
+import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class OrderDetailsComponent(
     componentContext: ComponentContext,
@@ -24,6 +27,33 @@ class OrderDetailsComponent(
         super.orderAgain(order) {
             appBack()
             appBack()
+        }
+    }
+
+    fun attachBill(order: Order?, message: String, file: Pair<String, ByteArray>) {
+        iOScope.launch {
+            orderRepository.sendBill(
+                orderId = order?.orderId ?: return@launch,
+                vendorId = order.vendorId.toString(),
+                comment = message,
+                attachment = file.second,
+                filename = file.first
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> showLoader()
+                    is ResultState.Success -> {
+                        hideLoader()
+                        showMessage("Predračun je uspješno poslan!")
+                        pageSize *= currentPage
+                        loadNextPage(true)
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message)
+                    }
+                }
+            }
         }
     }
 }

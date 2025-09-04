@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.flow
 
 internal class ProductApi {
     suspend fun newArrivals(
-        pageSize: Int = 10,
+        pageSize: Int = 30,
         currentPage: Int,
         searchText: String = "",
         from: String = "",
@@ -66,10 +66,11 @@ internal class ProductApi {
 
     suspend fun search(
         categoryId: String? = null,
+        regionId: String? = null,
         vendorId: Int? = null,
         from: String? = null,
         to: String? = null,
-        pageSize: Int = 10,
+        pageSize: Int = 30,
         currentPage: Int = 1,
         searchText: String = "",
         sortBy: String = "price",
@@ -90,16 +91,23 @@ internal class ProductApi {
                                 ) ?: ""
                             )
                             .addConditionally(
+                                !regionId.isNullOrEmpty(),
+                                regionId?.split(",")?.joinToString(
+                                    separator = "&regionsId[]=",
+                                    prefix = "&regionsId[]="
+                                ) ?: ""
+                            )
+                            .addConditionally(
                                 vendorId != null,
                                 "&vendorId=$vendorId"
                             )
                             .addConditionally(
                                 from?.isNotEmpty() == true,
-                                "&from=$from"
+                                "&priceFrom=$from"
                             )
                             .addConditionally(
                                 to?.isNotEmpty() == true,
-                                "&to=$to"
+                                "&priceTo=$to"
                             )
                             .addConditionally(
                                 sortBy.isNotEmpty(),
@@ -116,7 +124,7 @@ internal class ProductApi {
 
 class ProductRepository internal constructor() {
     fun newArrivals(
-        pageSize: Int = 10,
+        pageSize: Int = 30,
         currentPage: Int,
         searchText: String = "",
         from: String = "",
@@ -163,49 +171,13 @@ class ProductRepository internal constructor() {
         }
     }
 
-    fun search(
-        categoryId: String? = null,
-        vendorId: Int? = null,
-        from: String? = null,
-        to: String? = null,
-        pageSize: Int = 10,
-        currentPage: Int = 1,
-        searchText: String = "",
-        sortBy: String = "price",
-        sortType: String = "ASC",
-    ): Flow<ResultState<ProductResponse>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = ProductApi()
-                .search(
-                    categoryId,
-                    vendorId,
-                    from,
-                    to,
-                    pageSize,
-                    currentPage,
-                    searchText,
-                    sortBy,
-                    sortType
-                ).getOrNull()
-
-            if (response != null && response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
-                return@flow
-            }
-
-            emit(ResultState.Error(response?.bodyAsText() ?: ""))
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message ?: ""))
-        }
-    }
-
     fun searchProductsByCategory(
         categoryId: String? = null,
+        regionId: String? = null,
         vendorId: Int? = null,
         from: String? = null,
         to: String? = null,
-        pageSize: Int = 10,
+        pageSize: Int = 30,
         currentPage: Int = 1,
         searchText: String = "",
         sortBy: String = "price",
@@ -216,6 +188,7 @@ class ProductRepository internal constructor() {
             val response = ProductApi()
                 .search(
                     categoryId,
+                    regionId,
                     vendorId,
                     from,
                     to,

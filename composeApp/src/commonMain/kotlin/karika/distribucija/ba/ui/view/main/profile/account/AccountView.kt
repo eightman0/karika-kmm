@@ -67,6 +67,7 @@ fun AccountView(component: AccountComponent) {
                 ShippingAddress(component)
             }
         }
+        ChangePasswordSheet(component)
     }
 }
 
@@ -198,6 +199,9 @@ private fun ContactInfo(component: AccountComponent) {
         )
         KarikaText(
             modifier = Modifier
+                .onClick {
+                    component.showChangePass()
+                }
                 .padding(16.dp),
             text = "Promijeni lozinku",
             color = KarikaColors.Primary,
@@ -210,7 +214,6 @@ private fun ContactInfo(component: AccountComponent) {
 @Composable
 private fun BillingAddress(component: AccountComponent) {
     val profile by component.stateHolder.userDetails.collectAsState()
-    val editAddress = component.editAddress.asState()
 
     Column(
         modifier = Modifier
@@ -233,7 +236,7 @@ private fun BillingAddress(component: AccountComponent) {
             )
             KarikaText(
                 modifier = Modifier
-                    .onClick { component.edit("Informacije za naplatu") }
+                    .onClick { component.edit("Informacije za naplatu", false) }
                     .padding(16.dp),
                 text = "Uredi",
                 color = KarikaColors.Primary,
@@ -256,7 +259,7 @@ private fun BillingAddress(component: AccountComponent) {
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(0.5f),
-                text = "Ime",
+                text = "Naziv pravnog lica",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
@@ -265,37 +268,7 @@ private fun BillingAddress(component: AccountComponent) {
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
-                text = profile.billingAddress()?.firstname,
-                color = KarikaColors.Gray2,
-                textSize = 14.sp,
-                fontWeight = FontWeight.W700
-            )
-        }
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth(),
-            thickness = 1.dp,
-            color = KarikaColors.Gray11
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            KarikaText(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .weight(0.5f),
-                text = "Prezime",
-                color = KarikaColors.Gray2,
-                textSize = 14.sp,
-                fontWeight = FontWeight.W400
-            )
-            KarikaText(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(16.dp),
-                text = profile.billingAddress()?.lastname,
+                text = profile.companyName(),
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
@@ -427,7 +400,6 @@ private fun BillingAddress(component: AccountComponent) {
 @Composable
 private fun ShippingAddress(component: AccountComponent) {
     val profile by component.stateHolder.userDetails.collectAsState()
-    val editAddress = component.editAddress.asState()
 
     Column(
         modifier = Modifier
@@ -644,8 +616,11 @@ private fun ShippingAddress(component: AccountComponent) {
 @Composable
 private fun UpdateAddress(component: AccountComponent) {
     var editAddress by component.editAddress.asState()
+    val editableFields by component.editableFields.asState()
+
     Column(
-        modifier = Modifier
+        modifier = Modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         KarikaText(
             modifier = Modifier
@@ -657,24 +632,39 @@ private fun UpdateAddress(component: AccountComponent) {
             fontWeight = FontWeight.W600
         )
 
-        KarikaTextField1(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = "Ime*",
-            value = component.firstname.asState(),
-            placeholder = "Ime",
-            allowedChars = KarikaConstants.lettersSpace,
-            imeAction = ImeAction.Next
-        )
-        KarikaTextField1(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = "Prezime*",
-            value = component.lastname.asState(),
-            placeholder = "Prezime",
-            allowedChars = KarikaConstants.lettersSpace,
-            imeAction = ImeAction.Next
-        )
+        if (editAddress == "Adresa za dostavu") {
+            KarikaTextField1(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                title = "Ime*",
+                value = component.firstname.asState(),
+                placeholder = "Ime",
+                allowedChars = KarikaConstants.lettersSpace,
+                imeAction = ImeAction.Next,
+                enabled = editableFields
+            )
+            KarikaTextField1(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                title = "Prezime*",
+                value = component.lastname.asState(),
+                placeholder = "Prezime",
+                allowedChars = KarikaConstants.lettersSpace,
+                imeAction = ImeAction.Next,
+                enabled = editableFields
+            )
+        } else {
+            KarikaTextField1(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                title = "Naziv pravnog lica*",
+                value = component.firstname.asState(),
+                placeholder = "Naziv pravnog lica",
+                allowedChars = KarikaConstants.lettersSpace,
+                imeAction = ImeAction.Next,
+                enabled = editableFields
+            )
+        }
         KarikaTextField1(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -682,7 +672,8 @@ private fun UpdateAddress(component: AccountComponent) {
             value = component.city.asState(),
             placeholder = "Grad",
             allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
-            imeAction = ImeAction.Next
+            imeAction = ImeAction.Next,
+            enabled = editableFields
         )
         KarikaTextField1(
             modifier = Modifier
@@ -691,7 +682,8 @@ private fun UpdateAddress(component: AccountComponent) {
             value = component.address.asState(),
             placeholder = "Adresa i broj ulice",
             allowedChars = KarikaConstants.numbersAndLettersSpace,
-            imeAction = ImeAction.Next
+            imeAction = ImeAction.Next,
+            enabled = editableFields
         )
         KarikaTextField1(
             modifier = Modifier
@@ -701,7 +693,8 @@ private fun UpdateAddress(component: AccountComponent) {
             placeholder = "Poštanski broj",
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Next
+            imeAction = ImeAction.Next,
+            enabled = editableFields
         )
         KarikaTextField1(
             modifier = Modifier
@@ -715,6 +708,7 @@ private fun UpdateAddress(component: AccountComponent) {
         )
 
         HorizontalButtons(
+            modifier = Modifier,
             primaryTitle = "Sačuvaj izmjene",
             secondaryTitle = "Odustani"
         ) {
@@ -732,7 +726,8 @@ private fun UpdateAddress(component: AccountComponent) {
 private fun UpdateContactInfo(component: AccountComponent) {
     var editContact by component.editContact.asState()
     Column(
-        modifier = Modifier
+        modifier = Modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         KarikaText(
             modifier = Modifier
@@ -771,8 +766,18 @@ private fun UpdateContactInfo(component: AccountComponent) {
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next
         )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Broj telefona*",
+            value = component.telephone.asState(),
+            placeholder = "Broj telefona",
+            keyboardType = KeyboardType.Phone,
+            imeAction = ImeAction.Next
+        )
 
         HorizontalButtons(
+            modifier = Modifier,
             primaryTitle = "Sačuvaj izmjene",
             secondaryTitle = "Odustani"
         ) {

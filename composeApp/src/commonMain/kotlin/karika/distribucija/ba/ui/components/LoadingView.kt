@@ -2,13 +2,17 @@ package karika.distribucija.ba.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import karika.distribucija.ba.ui.common.CommonComponent
@@ -19,14 +23,21 @@ fun LoadingView1(viewModel: CommonComponent) {
     if (state.value) {
         Box(
             modifier = Modifier
-                .background(color = KarikaColors.Black_20)
                 .fillMaxSize()
                 .wrapContentSize(Alignment.Center)
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier,
-                color = KarikaColors.White
-            )
+            Box(
+                modifier = Modifier
+                    .width(120.dp)
+                    .aspectRatio(1f)
+                    .background(color = KarikaColors.Black.copy(alpha = 0.5f), shape = RoundedCornerShape(16.dp))
+                    .wrapContentSize(Alignment.Center)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier,
+                    color = KarikaColors.White
+                )
+            }
         }
     }
 }

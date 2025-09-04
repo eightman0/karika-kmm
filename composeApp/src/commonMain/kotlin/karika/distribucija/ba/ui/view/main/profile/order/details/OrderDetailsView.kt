@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
@@ -39,15 +40,18 @@ import karika.distribucija.ba.ui.components.HorizontalButtons
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rounded
+import karika.distribucija.ba.ui.view.main.profile.order.components.AttachBillModal
 import karika.distribucija.ba.ui.view.main.profile.order.components.CancelOrderModal
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_down
 import org.jetbrains.compose.resources.vectorResource
+import kotlin.math.max
 
 @Composable
 fun OrderDetailsView(component: OrderDetailsComponent) {
@@ -106,16 +110,21 @@ private fun OrderCommon(component: OrderDetailsComponent) {
         YSpacer16()
         PriceBox(order)
         YSpacer16()
-        HorizontalButtons(
-            modifier = Modifier,
-            primaryTitle = "Naruči ponovo",
-            secondaryTitle = "Isprintaj"
-        ) {
-            if (it == "Naruči ponovo") {
-                component.orderAgain(order)
-            } else {
+       //HorizontalButtons(
+       //    modifier = Modifier,
+       //    primaryTitle = "Naruči ponovo",
+       //    secondaryTitle = "Isprintaj"
+       //) {
+       //    if (it == "Naruči ponovo") {
+       //        component.orderAgain(order)
+       //    } else {
 
-            }
+       //    }
+       //}
+        PrimaryButtonFilled(
+            title = "Naruči ponovo",
+        ) {
+            component.orderAgain(order)
         }
         YSpacer16()
         VendorOrder(order, component)
@@ -126,6 +135,8 @@ private fun OrderCommon(component: OrderDetailsComponent) {
 fun VendorOrder(order: OrdersResponse, component: OrderDetailsComponent) {
     val comment = remember { mutableStateOf("") }
     val cancelModal = remember { mutableStateOf<Order?>(null) }
+    val attachBillModal = remember { mutableStateOf<Order?>(null) }
+
     KarikaText(
         modifier = Modifier,
         color = KarikaColors.Black,
@@ -240,13 +251,13 @@ fun VendorOrder(order: OrdersResponse, component: OrderDetailsComponent) {
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    modifier = Modifier
-                        .padding(end = 16.dp),
-                    imageVector = vectorResource(Res.drawable.ic_arrow_down),
-                    tint = KarikaColors.Black1,
-                    contentDescription = ""
-                )
+                //Icon(
+                //    modifier = Modifier
+                //        .padding(end = 16.dp),
+                //    imageVector = vectorResource(Res.drawable.ic_arrow_down),
+                //    tint = KarikaColors.Black1,
+                //    contentDescription = ""
+                //)
             }
             YSpacer8()
             TableHeaderRow()
@@ -287,6 +298,28 @@ fun VendorOrder(order: OrdersResponse, component: OrderDetailsComponent) {
                     textAlign = TextAlign.Center
                 )
             }
+            if (it.showAddBill()) {
+                YSpacer8()
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    KarikaText(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .onClick {
+                                attachBillModal.value = it
+                            },
+                        text = "Pošalji predračun",
+                        fontWeight = FontWeight.W600,
+                        color = KarikaColors.Primary,
+                        textSize = 16.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                YSpacer8()
+            }
         }
         YSpacer16()
     }
@@ -305,6 +338,23 @@ fun VendorOrder(order: OrdersResponse, component: OrderDetailsComponent) {
             },
             onCancel = {
                 cancelModal.value = null
+            }
+        )
+    }
+
+    if (attachBillModal.value != null) {
+        AttachBillModal(
+            component = component,
+            onSubmit = { message, file ->
+                component.attachBill(
+                    attachBillModal.value,
+                    message,
+                    file
+                )
+                attachBillModal.value = null
+            },
+            onCancel = {
+                attachBillModal.value = null
             }
         )
     }

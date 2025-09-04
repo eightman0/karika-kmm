@@ -3,11 +3,12 @@ package karika.distribucija.ba.ui.view.main.profile.order
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.api.OrdersRepository
+import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
-import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaStateHolder
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,21 +21,25 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
     private val _orders = MutableStateFlow<Set<OrdersResponse>>(emptySet())
     val orders = _orders.asStateFlow()
     var status = ""
+    var sortDirection = "DESC"
+
     override fun loadNextPage(reset: Boolean) {
         if (reset) {
             hasNextPage = true
             currentPage = 1
         }
 
-        if (!hasNextPage || loader.value) {
+        if (!hasNextPage) {
             return
         }
 
         iOScope.launch {
-            repository.vendors(
+            repository.orders(
                 currentPage = currentPage,
                 pageSize = pageSize,
-                filterValue = status
+                filterValue = status,
+                sortBy = "created_at",
+                sortDirection = sortDirection
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
@@ -73,6 +78,33 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
     ) {
         super.cancelOrder(orderId, vendorId, reason, com) {
             loadNextPage(true)
+        }
+    }
+
+    fun attachBill(order: Order?, message: String, file: Pair<String, ByteArray>) {
+        iOScope.launch {
+            orderRepository.sendBill(
+                orderId = order?.orderId ?: return@launch,
+                vendorId = order.vendorId.toString(),
+                comment = message,
+                attachment = file.second,
+                filename = file.first
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> showLoader()
+                    is ResultState.Success -> {
+                        hideLoader()
+                        showMessage("Predračun je uspješno poslan!")
+                        pageSize *= currentPage
+                        loadNextPage(true)
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message)
+                    }
+                }
+            }
         }
     }
 }

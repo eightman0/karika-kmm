@@ -28,5 +28,5 @@ data class KarikaUnit(
     @SerialName("value") var unit: String? = null
 ) {
     fun label() = label ?: ""
-    fun unit() = unit ?: ""
+    fun unit() = unit?.replace("|","")?.trim() ?: ""
 }

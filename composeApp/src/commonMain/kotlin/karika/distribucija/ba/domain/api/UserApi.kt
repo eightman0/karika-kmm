@@ -9,7 +9,9 @@ import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.model.Blog
+import karika.distribucija.ba.domain.model.ChangePasswordRequest
 import karika.distribucija.ba.domain.model.Config
+import karika.distribucija.ba.domain.model.ForgotPasswordRequest
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.UpdateCustomerRequest
 import karika.distribucija.ba.domain.model.UserDetails
@@ -47,6 +49,27 @@ internal class UserApi {
         return@runCatching HttpClientProvider.client.get(
             url("mobile/config")
         )
+    }
+
+    suspend fun forgotPass(email: String): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.put(
+            url("customers/password")
+        ) {
+            setBody(
+                ForgotPasswordRequest(
+                    email = email,
+                    template = "email_reset"
+                )
+            )
+        }
+    }
+
+    suspend fun change(old: String, new: String): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.put(
+            url("customers/me/password")
+        ) {
+            setBody(ChangePasswordRequest(old, new))
+        }
     }
 }
 
@@ -131,6 +154,46 @@ class UserRepository internal constructor() {
                 .getOrNull()
             if (response != null && response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
+            } else {
+                emit(
+                    ResultState.Error("error")
+                )
+            }
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }
+
+    fun forgotPass(email: String): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = UserApi()
+                .forgotPass(email)
+                .getOrNull()
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(
+                    ResultState.Success(
+                        "Ako postoji nalog povezan sa '$email', dobićete e-poruku sa vezom za resetovanje vaše lozinke."
+                    )
+                )
+            } else {
+                emit(
+                    ResultState.Error("Vaš račun je privremeno onemogućen.")
+                )
+            }
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }
+
+    fun changePass(old: String, new: String): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = UserApi()
+                .change(old, new)
+                .getOrNull()
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(""))
             } else {
                 emit(
                     ResultState.Error("error")

@@ -52,7 +52,7 @@ object KarikaColors {
     val Error = Color(0xFFCC1818)
 
     val Blue = Color(0xFF3575E2)
-    val Blue1 = Color(0xFF7A9E9F)
+    val Blue1 = Color(0xFF3290DA)
 
     val Green = Color(0xFFB7DFB9)
     val Green1 = Color(0xFF4CAF50)

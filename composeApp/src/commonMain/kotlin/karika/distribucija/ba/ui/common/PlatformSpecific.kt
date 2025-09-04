@@ -12,3 +12,7 @@ expect fun HtmlTextWithStyles(
     background: Color = KarikaColors.White,
     textColor: Color = KarikaColors.White
 )
+
+expect fun openPdf(url: String)
+
+expect fun getEnvPrefix() : String

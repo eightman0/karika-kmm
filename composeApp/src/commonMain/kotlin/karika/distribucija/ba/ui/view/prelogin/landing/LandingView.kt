@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.components.CarouselLogos
 import karika.distribucija.ba.ui.components.HorizontalButtons
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaBox
@@ -65,7 +67,7 @@ fun LandingView(component: LandingComponent) {
                         atext = buildAnnotatedString {
                             withStyle(
                                 style = SpanStyle(
-                                    fontWeight = FontWeight.W400,
+                                    fontWeight = FontWeight.W700,
                                     color = KarikaColors.Primary,
                                     fontSize = 18.sp
                                 )
@@ -79,41 +81,59 @@ fun LandingView(component: LandingComponent) {
                                     fontSize = 18.sp
                                 )
                             ) {
-                                append("povezuje kupce i provjere ne dobavljače robe široke potrošnje.")
+                                append("povezuje kupce i provjerene dobavljače robe široke potrošnje.")
                             }
                         },
                         textAlign = TextAlign.Center
                     )
                     YSpacer16()
                     IconTextItem(
-                        modifier = Modifier,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        icon = vectorResource(Res.drawable.ic_checked_circle),
+                        iconColor = KarikaColors.Primary,
+                        iconSize = 20.dp,
+                        text = "Samo za pravna lica!",
+                        textColor = KarikaColors.Black,
+                        textSize = 16.sp,
+                        fontWeight = FontWeight.W400,
+                        textAlign = TextAlign.Start
+                    )
+                    IconTextItem(
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         icon = vectorResource(Res.drawable.ic_checked_circle),
                         iconColor = KarikaColors.Primary,
                         iconSize = 20.dp,
                         text = "Direktna komunikacija kupaca i dobavljača",
                         textColor = KarikaColors.Black,
                         textSize = 16.sp,
-                        fontWeight = FontWeight.W400
+                        fontWeight = FontWeight.W400,
+                        textAlign = TextAlign.Start
                     )
                     IconTextItem(
-                        modifier = Modifier,
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         icon = vectorResource(Res.drawable.ic_checked_circle),
                         iconColor = KarikaColors.Primary,
                         iconSize = 20.dp,
                         text = "Direktna isporuka od strane dobavljača",
                         textColor = KarikaColors.Black,
                         textSize = 16.sp,
-                        fontWeight = FontWeight.W400
+                        fontWeight = FontWeight.W400,
+                        textAlign = TextAlign.Start
                     )
                     IconTextItem(
-                        modifier = Modifier,
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         icon = vectorResource(Res.drawable.ic_checked_circle),
                         iconColor = KarikaColors.Primary,
                         iconSize = 20.dp,
                         text = "Efikasnost i optimizacija poslovanja",
                         textColor = KarikaColors.Black,
                         textSize = 16.sp,
-                        fontWeight = FontWeight.W400
+                        fontWeight = FontWeight.W400,
+                        textAlign = TextAlign.Start
                     )
                     YSpacer8()
                     KarikaText(
@@ -129,7 +149,15 @@ fun LandingView(component: LandingComponent) {
                         component.navigateLogin()
                     }
                     YSpacer16()
-                    LandingBanner()
+                    //LandingBanner()
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Black,
+                        text = "Dobavljači",
+                        textSize = 20.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                    CarouselLogos(component)
                 }
             }
         }

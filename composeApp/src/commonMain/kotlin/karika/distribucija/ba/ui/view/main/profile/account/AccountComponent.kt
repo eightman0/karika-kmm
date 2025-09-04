@@ -12,8 +12,10 @@ import kotlinx.coroutines.launch
 class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
     CommonComponent(componentContext, stateHolder) {
 
+    val changePassSheet = mutableStateOf(false)
     val editAddress = mutableStateOf("")
     val editContact = mutableStateOf(false)
+    val editableFields = mutableStateOf(true)
     val firstname = mutableStateOf("")
     val lastname = mutableStateOf("")
     val address = mutableStateOf("")
@@ -92,8 +94,10 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                     customer = stateHolder.userDetails.value
                         .copy(
                             firstname = firstname.value,
-                            lastname =  lastname.value,
-                            email = email.value
+                            lastname = lastname.value,
+                            email = email.value,
+                            addresses = stateHolder.userDetails.value.addresses
+                                .map { it.copy(telephone = telephone.value) }
                         )
                 )
             ).collect { result ->
@@ -116,11 +120,12 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
         }
     }
 
-    fun edit(value: String) {
+    fun edit(value: String, edit: Boolean = true) {
         if (value == "Kontakt informacije") {
             firstname.value = stateHolder.userDetails.value.firstname ?: ""
             lastname.value = stateHolder.userDetails.value.lastname ?: ""
             email.value = stateHolder.userDetails.value.email ?: ""
+            telephone.value = stateHolder.userDetails.value.addresses.firstOrNull()?.telephone ?: ""
             editContact.value = true
             return
         }
@@ -132,15 +137,41 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
             city.value = stateHolder.userDetails.value.shippingAddress()?.city ?: ""
             postal.value = stateHolder.userDetails.value.shippingAddress()?.postcode ?: ""
             telephone.value = stateHolder.userDetails.value.shippingAddress()?.telephone ?: ""
+            editableFields.value = edit
         } else {
-            firstname.value = stateHolder.userDetails.value.billingAddress()?.firstname ?: ""
+            firstname.value = stateHolder.userDetails.value.companyName()
             lastname.value = stateHolder.userDetails.value.billingAddress()?.lastname ?: ""
             address.value =
                 stateHolder.userDetails.value.billingAddress()?.street?.firstOrNull() ?: ""
             city.value = stateHolder.userDetails.value.billingAddress()?.city ?: ""
             postal.value = stateHolder.userDetails.value.billingAddress()?.postcode ?: ""
             telephone.value = stateHolder.userDetails.value.billingAddress()?.telephone ?: ""
+            editableFields.value = edit
         }
         editAddress.value = value
+    }
+
+    fun showChangePass() {
+        changePassSheet.value = true
+    }
+
+    fun changePass(oldPass: String, newPass: String) {
+        iOScope.launch {
+            userRepository.changePass(oldPass, newPass)
+                .collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            hideLoader()
+                            showMessage("Lozinka uspješno promijenjena!")
+                        }
+
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showMessage(result.message)
+                        }
+                    }
+                }
+        }
     }
 }

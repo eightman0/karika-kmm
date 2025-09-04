@@ -3,6 +3,7 @@ package karika.distribucija.ba.ui.view.main.vendor
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.VendorRepository
+import karika.distribucija.ba.domain.model.KarikaUnit
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
@@ -20,9 +21,10 @@ class VendorComponent(
 
     private val _vendors = MutableStateFlow<List<Vendor>>(emptyList())
     val vendors = _vendors.asStateFlow()
-    var filter = mutableStateOf(Triple("", "", ""))
     var sort = mutableStateOf("A - Z")
     val searchText = mutableStateOf("")
+    val showFilter = mutableStateOf(false)
+    val selectedRegion = mutableStateOf<List<KarikaUnit>>(listOf())
 
     override fun loadNextPage(reset: Boolean) {
         if (reset) {
@@ -38,9 +40,10 @@ class VendorComponent(
         iOScope.launch {
             repository.vendors(
                 currentPage = currentPage,
-                pageSize = 10,
-                filterBy = filter.value.first,
-                filterValue = filter.value.second,
+                pageSize = pageSize,
+                filterBy = selectedRegion.value.takeIf { it.isNotEmpty() }?.let { "regions" } ?: "",
+                filterValue = selectedRegion.value.takeIf { it.isNotEmpty() }
+                    ?.let { selectedRegion.value.joinToString(",") { it.unit() } } ?: "",
                 searchText = searchText.value,
                 sortType = if (sort.value.startsWith("A")) "ASC" else "DESC"
             ).collect { result ->

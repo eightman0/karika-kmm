@@ -50,6 +50,7 @@ import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rounded
 import karika.distribucija.ba.ui.components.roundedWithBorder
+import karika.distribucija.ba.ui.view.main.profile.order.components.AttachBillModal
 import karika.distribucija.ba.ui.view.main.profile.order.components.CancelOrderModal
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_down
@@ -96,12 +97,25 @@ private fun FilterView(component: OrdersComponent) {
             modifier = Modifier
                 .weight(1f),
             value = statusSort,
-            values = mutableStateOf(listOf("Sve", "Odobreno", "Na čekanju", "Obijeno")).asState()
+            values = mutableStateOf(
+                listOf(
+                    "Sve",
+                    "Na čekanju",
+                    "Odobrena",
+                    "Otkazana",
+                    "Odbijena",
+                    "Čekanje na uplatu",
+                    "Uplaćena"
+                )
+            ).asState()
         ) {
             component.status = when (statusSort.value) {
-                "Odobreno" -> "approved"
+                "Odobrena" -> "approved"
                 "Na čekanju" -> "pending"
-                "Obijeno" -> "rejected"
+                "Odbijena" -> "rejected"
+                "Otkazana" -> "cancelled"
+                "Čekanje na uplatu" -> "estimate-sent"
+                "Uplaćena" -> "bill-sent"
                 else -> ""
             }
             component.loadNextPage(reset = true)
@@ -110,8 +124,9 @@ private fun FilterView(component: OrdersComponent) {
             modifier = Modifier
                 .weight(1f),
             value = dateSort,
-            values = mutableStateOf(listOf("Najnovije", "Najstarije", "Relevantno")).asState()
+            values = mutableStateOf(listOf("Najnovije", "Najstarije")).asState()
         ) {
+            component.sortDirection = if (dateSort.value == "Najnovije") "DESC" else "ASC"
             component.loadNextPage(reset = true)
         }
     }
@@ -282,6 +297,7 @@ private fun OrderItem(order: OrdersResponse, component: OrdersComponent) {
 @Composable
 private fun VendorItem(order: Order, component: OrdersComponent) {
     val cancelModal = remember { mutableStateOf<Order?>(null) }
+    val attachBillModal = remember { mutableStateOf<Order?>(null) }
     val showAdditionalOptions = mutableStateOf(false).asState()
     Column(
         modifier = Modifier
@@ -312,12 +328,12 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
                         tag = "",
                         styles = TextLinkStyles(),
                         linkInteractionListener = {
-                           component.showVendor(
-                               Vendor(
-                                   entityId = order.vendorId ?: 0,
-                                   publicName = order.vendorName
-                               )
-                           )
+                            component.showVendor(
+                                Vendor(
+                                    entityId = order.vendorId ?: 0,
+                                    publicName = order.vendorName
+                                )
+                            )
                         }
                     )
                 ) {
@@ -426,8 +442,8 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
         if (showAdditionalOptions.value) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -459,6 +475,26 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
                 )
             }
         }
+        if (order.showAddBill()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .onClick {
+                            attachBillModal.value = order
+                        },
+                    text = "Pošalji predračun",
+                    fontWeight = FontWeight.W600,
+                    color = KarikaColors.Primary,
+                    textSize = 16.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
         YSpacer8()
     }
 
@@ -475,6 +511,23 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
             },
             onCancel = {
                 cancelModal.value = null
+            }
+        )
+    }
+
+    if (attachBillModal.value != null) {
+        AttachBillModal(
+            component = component,
+            onSubmit = { message, file ->
+                component.attachBill(
+                    attachBillModal.value,
+                    message,
+                    file
+                )
+                attachBillModal.value = null
+            },
+            onCancel = {
+                attachBillModal.value = null
             }
         )
     }

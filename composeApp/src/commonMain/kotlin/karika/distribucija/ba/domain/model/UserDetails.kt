@@ -77,3 +77,15 @@ data class Attributes(
 data class UpdateCustomerRequest(
     val customer: UserDetails
 )
+
+@Serializable
+data class ForgotPasswordRequest(
+    val email: String,
+    val template: String
+)
+
+@Serializable
+data class ChangePasswordRequest(
+    val currentPassword: String,
+    val newPassword: String
+)

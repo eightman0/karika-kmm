@@ -54,10 +54,4 @@ class ProductComponent(
             }
         }
     }
-
-    fun back() {
-        mainScope.launch {
-            stateHolder.appNavigation.pop()
-        }
-    }
 }

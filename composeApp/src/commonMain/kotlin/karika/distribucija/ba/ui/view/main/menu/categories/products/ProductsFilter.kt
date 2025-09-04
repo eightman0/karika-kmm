@@ -4,30 +4,25 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -38,24 +33,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.KarikaTextField2
+import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.RadioGroup
+import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.SecondaryButton
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
-import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.util.KarikaConstants
-import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_tertiary
-import org.jetbrains.compose.resources.vectorResource
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 fun ProductsFilterSheet(
     showState: MutableState<Boolean>,
@@ -66,7 +62,6 @@ fun ProductsFilterSheet(
     val endPrice = component.filterPriceTo.asState()
     val searchText = mutableStateOf("").asState()
     val vendors by component.vendors.collectAsState()
-    val expand = mutableStateOf(false).asState()
     val selectedVendor = component.selectedVendor.asState()
     val checkedElements = component.selectedRegion.asState()
 
@@ -159,75 +154,46 @@ fun ProductsFilterSheet(
                         textSize = 16.sp,
                         fontWeight = FontWeight.W700
                     )
-                    SearchBar(
+                    SearchBoxBorder(
                         modifier = Modifier
-                            .heightIn(max = (vendors.size * 50).coerceAtLeast(100).dp.plus(32.dp))
-                            .padding(horizontal = 16.dp),
-                        inputField = {
-                            KarikaTextField1(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                value = searchText,
-                                placeholder = "Prtražite dobavljača",
-                                imeAction = ImeAction.Search,
-                                maxLines = 1,
-                                onValueChange = {},
-                                trailingIcons = {
-                                    if (searchText.value.isNotEmpty()) {
-                                        Icon(
-                                            modifier = Modifier
-                                                .onClick {
-                                                    searchText.value = ""
-                                                    expand.value = false
-                                                    component.clear()
-                                                }
-                                                .size(32.dp),
-                                            imageVector = vectorResource(Res.drawable.ic_tertiary),
-                                            contentDescription = "",
-                                            tint = KarikaColors.Gray2
-                                        )
-                                    }
-                                },
-                                doneAction = {
-                                    if (searchText.value.length > 2) {
-                                        expand.value = true
-                                        component.vendors(searchText.value)
-                                    }
-                                }
-                            )
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .height(50.dp),
+                        onValueChange = {
+                            searchText.value = it
                         },
-                        expanded = expand.value,
-                        onExpandedChange = {},
-                        shadowElevation = 0.dp,
-                        tonalElevation = 0.dp,
-                        colors = SearchBarDefaults.colors(
-                            containerColor = KarikaColors.White,
-                            dividerColor = KarikaColors.White
-                        ),
-                        shape = RoundedCornerShape(0.dp),
-                        windowInsets = WindowInsets(0.dp)
-                    ) {
-                        if (vendors.isEmpty()) {
-                            KarikaText(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                text = "Nema rezultata za unijeti pojam '${searchText.value}'",
-                                color = KarikaColors.Primary,
-                                textSize = 14.sp,
-                                textAlign = TextAlign.Center,
-                                fontWeight = FontWeight.W600
-                            )
-                        } else {
-                            RadioGroup(
-                                selected = selectedVendor,
-                                items = vendors.map { Pair(it.name(), it.entityId) },
-                                onChange = {
-                                    expand.negate()
-                                }
-                            )
-                        }
+                        onClose = {
+                            searchText.value = ""
+                            component.clear()
+                        },
+                        onSearchExecute = {
+                            component.vendors(searchText.value)
+                        },
+                        placeholder = "Pretraži dobavljače.."
+                    )
+
+                    if (vendors.isEmpty() && searchText.value.length > 2) {
+                        KarikaText(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            text = "Nema rezultata za unijeti pojam '${searchText.value}'",
+                            color = KarikaColors.Primary,
+                            textSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.W600
+                        )
+                    } else {
+                        RadioGroup(
+                            selected = selectedVendor,
+                            items = vendors.map { Pair(it.name(), it.entityId) },
+                            onChange = {
+                                searchText.value = ""
+                                component.clear()
+                            }
+                        )
                     }
+
                     if (selectedVendor.value.first.isNotEmpty()) {
                         Row(
                             modifier = Modifier
@@ -283,12 +249,12 @@ fun ProductsFilterSheet(
                                 .clickable(
                                     interactionSource = null, indication = null
                                 ) {
-                                    if (checkedElements.value.contains(it.label())) {
+                                    if (checkedElements.value.contains(it)) {
                                         checkedElements.value =
-                                            checkedElements.value.filter { it1 -> it1 != it.label() }
+                                            checkedElements.value.filter { it1 -> it1 != it }
                                     } else {
                                         checkedElements.value =
-                                            checkedElements.value.plus(it.label())
+                                            checkedElements.value.plus(it)
                                     }
                                 },
                             verticalAlignment = Alignment.CenterVertically,
@@ -298,14 +264,14 @@ fun ProductsFilterSheet(
                                 modifier = Modifier
                                     .height(24.dp)
                                     .padding(vertical = 0.dp),
-                                checked = checkedElements.value.contains(it.label),
+                                checked = checkedElements.value.contains(it),
                                 onCheckedChange = { _ ->
-                                    if (checkedElements.value.contains(it.label())) {
+                                    if (checkedElements.value.contains(it)) {
                                         checkedElements.value =
-                                            checkedElements.value.filter { it1 -> it1 != it.label() }
+                                            checkedElements.value.filter { it1 -> it1 != it }
                                     } else {
                                         checkedElements.value =
-                                            checkedElements.value.plus(it.label())
+                                            checkedElements.value.plus(it)
                                     }
                                 },
                                 colors = CheckboxDefaults.colors(
@@ -353,7 +319,20 @@ fun ProductsFilterSheet(
                         component.loadNextPage(reset = true)
                     }
                 }
+                LaunchedEffect(Unit) {
+                    snapshotFlow { searchText.value }
+                        .debounce(500)
+                        .distinctUntilChanged()
+                        .collectLatest { newQuery ->
+                            if (newQuery.isNotEmpty()) {
+                                if (searchText.value.length > 2) {
+                                    component.vendors(searchText.value)
+                                }
+                            }
+                        }
+                }
             }
+            LoadingView1(component)
         }
     }
 }

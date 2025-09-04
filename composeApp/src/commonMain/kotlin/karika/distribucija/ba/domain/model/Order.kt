@@ -96,6 +96,8 @@ data class Order(
     }
 
     fun canceled() = listOf("cancelled", "rejected", "approved").contains(status)
+
+    fun showAddBill() = status == "estimate-sent"
 }
 
 @Serializable

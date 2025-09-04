@@ -1,10 +1,16 @@
 package karika.distribucija.ba.domain.api
 
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
@@ -16,12 +22,14 @@ import kotlinx.coroutines.flow.flow
 
 internal class OrdersApi {
     suspend fun orders(
-        pageSize: Int = 10,
+        pageSize: Int = 30,
         currentPage: Int = 1,
         filterValue: String = "",
+        sortBy: String = "",
+        sortDirection: String = "",
     ): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
-            url("mobile/orders?pageSize=$pageSize&currentPage=$currentPage&status=$filterValue")
+            url("mobile/orders?pageSize=$pageSize&currentPage=$currentPage&status=$filterValue&sortBy=$sortBy&sortDirection=$sortDirection")
         )
     }
 
@@ -44,6 +52,41 @@ internal class OrdersApi {
         )
     }
 
+    suspend fun sendBill(
+        orderId: String,
+        vendorId: String,
+        comment: String?,
+        attachment: ByteArray?,
+        filename: String,
+    ): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.post(
+            url("mobile/orders/add_bill")
+        ) {
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("orderId", orderId)
+                        append("vendorId", vendorId)
+                        append("message", comment ?: "")
+                        attachment?.let {
+                            append("file", it, Headers.build {
+                                append(
+                                    HttpHeaders.ContentType,
+                                    ContentType.Application.Pdf.contentType
+                                )
+                                append(
+                                    HttpHeaders.ContentDisposition,
+                                    "filename=\"$filename\""
+                                )
+                            })
+                        }
+                    }.withLog(),
+                    boundary = "WebAppBoundary"
+                )
+            )
+        }
+    }
+
     suspend fun cancel(
         orderId: String?,
         vendorId: String?,
@@ -56,10 +99,12 @@ internal class OrdersApi {
 }
 
 class OrdersRepository internal constructor() {
-    fun vendors(
-        pageSize: Int = 10,
+    fun orders(
+        pageSize: Int = 30,
         currentPage: Int = 1,
-        filterValue: String = ""
+        filterValue: String = "",
+        sortBy: String = "",
+        sortDirection: String = "",
     ): Flow<ResultState<List<OrdersResponse>>> = flow {
         emit(ResultState.Loading)
         try {
@@ -67,7 +112,9 @@ class OrdersRepository internal constructor() {
                 .orders(
                     pageSize,
                     currentPage,
-                    filterValue
+                    filterValue,
+                    sortBy,
+                    sortDirection
                 ).getOrNull()
 
             if (response != null && response.status == HttpStatusCode.OK) {
@@ -116,6 +163,35 @@ class OrdersRepository internal constructor() {
                     orderId,
                     vendorId,
                     comment
+                ).getOrNull()
+
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(""))
+                return@flow
+            }
+
+            emit(ResultState.Error(response?.bodyAsText() ?: ""))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message ?: ""))
+        }
+    }
+
+    fun sendBill(
+        orderId: String,
+        vendorId: String,
+        comment: String?,
+        attachment: ByteArray?,
+        filename: String,
+    ): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = OrdersApi()
+                .sendBill(
+                    orderId,
+                    vendorId,
+                    comment,
+                    attachment,
+                    filename
                 ).getOrNull()
 
             if (response != null && response.status == HttpStatusCode.OK) {

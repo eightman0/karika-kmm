@@ -20,7 +20,7 @@ internal class PointsApi {
     }
 
     suspend fun trx(
-        pageSize: Int = 10,
+        pageSize: Int = 30,
         currentPage: Int = 1
     ): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
@@ -50,7 +50,7 @@ class PointsRepository internal constructor() {
     }
 
     fun trx(
-        pageSize: Int = 10,
+        pageSize: Int = 30,
         currentPage: Int = 1
     ): Flow<ResultState<List<Transaction>>> = flow {
         emit(ResultState.Loading)

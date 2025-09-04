@@ -31,6 +31,7 @@ class MessagesOverviewComponent(
 
     init {
         getMessages()
+        vendors("", true)
     }
 
     private fun getMessages(threadId: String? = conversationState.value.id) {
@@ -58,10 +59,20 @@ class MessagesOverviewComponent(
                     }
                 }
             }
+
+            messagesRepository.markAsRead(conversationState.value.id)
+                .collect {
+                    if (conversationState.value.admin) {
+                        stateHolder.reloadAdminMessages()
+                    } else {
+                        stateHolder.reloadVendorMessages()
+                    }
+                }
+            stateHolder.notificationReceived()
         }
     }
 
-    fun sendMessage() {
+    fun sendMessage(attachment: ByteArray? = null) {
         iOScope.launch {
             messagesRepository.send(
                 SendMessageRequest(
@@ -70,7 +81,7 @@ class MessagesOverviewComponent(
                     subject = subject.value,
                     receiverId = conversationState.value.receiverId(),
                     threadId = conversationState.value.id?.toIntOrNull(),
-                    image = null
+                    image = attachment
                 )
             ).collect { result ->
                 when (result) {
@@ -98,8 +109,8 @@ class MessagesOverviewComponent(
         }
     }
 
-    fun vendors(searchText: String) {
-        if (searchText.length < 3) {
+    fun vendors(searchText: String, loadImmediately: Boolean = false) {
+        if (!loadImmediately && searchText.length < 3) {
             return
         }
         iOScope.launch {
@@ -124,5 +135,11 @@ class MessagesOverviewComponent(
 
     fun clear() {
         _vendors.update { emptyList() }
+    }
+
+    fun pickFile() {
+        stateHolder.filePicker.pickFile { name, data ->
+            sendMessage(data)
+        }
     }
 }

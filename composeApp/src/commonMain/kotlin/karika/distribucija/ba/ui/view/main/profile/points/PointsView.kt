@@ -61,8 +61,8 @@ fun PointsView(component: PointsComponent) {
             item {
                 ActiveBonus(component)
                 YSpacer16()
-                PendingBonus(component)
-                YSpacer16()
+                //PendingBonus(component)
+                //YSpacer16()
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -127,21 +127,12 @@ private fun ActiveBonus(component: PointsComponent) {
                 textSize = 20.sp,
                 text = "Iznos ostvarenih bodova"
             )
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_info),
-                contentDescription = "",
-                tint = KarikaColors.Black
-            )
+           // Icon(
+           //     imageVector = vectorResource(Res.drawable.ic_info),
+           //     contentDescription = "",
+           //     tint = KarikaColors.Black
+           // )
         }
-        YSpacer16()
-        KarikaText(
-            modifier = Modifier
-                .padding(horizontal = 16.dp),
-            color = KarikaColors.Gray13,
-            fontWeight = FontWeight.W600,
-            textSize = 12.sp,
-            text = "Zaključno sa 31.05.2025."
-        )
         YSpacer16()
         KarikaText(
             modifier = Modifier

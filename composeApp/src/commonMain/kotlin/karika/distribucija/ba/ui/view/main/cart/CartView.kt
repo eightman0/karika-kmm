@@ -104,9 +104,8 @@ fun CartView(component: CartComponent) {
                 PinnedFooter(component)
             }
         }
+        LoadingView1(component)
     }
-
-    LoadingView1(component)
 }
 
 @Composable
@@ -147,9 +146,13 @@ private fun PinnedFooter(component: CartComponent) {
         title = "Nastavi dalje",
         fontWeight = FontWeight.W700,
         textSize = 18.sp,
-        enabled = cart.isNotEmpty()
+        enabled = true
     ) {
-        component.shippingDetails()
+        if (cart.orderValid()) {
+            component.shippingDetails()
+        } else {
+            component.showMessage("Nije zadovoljna minimalna količina po dobavljaču!")
+        }
     }
 }
 
@@ -440,4 +443,10 @@ private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.progress(): Pair<Float, 
         (current / min).toFloat(),
         1f - (current / min).toFloat()
     )
+}
+
+private fun Map<Vendor, List<Pair<Product, Int>>>.orderValid(): Boolean {
+    return all {
+        it.minAmountRestValue().toDouble() == 0.0
+    }
 }

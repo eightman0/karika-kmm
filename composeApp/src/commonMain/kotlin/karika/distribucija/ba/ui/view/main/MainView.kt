@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.stack.Children
+import karika.distribucija.ba.Child
 import karika.distribucija.ba.ui.components.BottomBar
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
@@ -23,8 +25,13 @@ import karika.distribucija.ba.ui.view.main.cart.nextstep.ShippingDetailsView
 import karika.distribucija.ba.ui.view.main.cart.success.CartSuccessView
 import karika.distribucija.ba.ui.view.main.home.HomeView
 import karika.distribucija.ba.ui.view.main.menu.MenuView
+import karika.distribucija.ba.ui.view.main.menu.categories.CategoriesView
+import karika.distribucija.ba.ui.view.main.menu.categories.products.ProductByCategoryView
+import karika.distribucija.ba.ui.view.main.product.ProductView
 import karika.distribucija.ba.ui.view.main.profile.ProfileView
+import karika.distribucija.ba.ui.view.main.search.SearchView
 import karika.distribucija.ba.ui.view.main.vendor.VendorView
+import karika.distribucija.ba.ui.view.main.vendor.details.VendorDetailsView
 
 @Composable
 fun MainView(component: MainComponent) {
@@ -62,6 +69,12 @@ fun MainView(component: MainComponent) {
                     is MainChild.CartSuccess -> CartSuccessView(child.component)
 
                     is MainChild.Profile -> ProfileView(child.component)
+
+                    is MainChild.VendorDetails -> VendorDetailsView(child.component)
+                    is MainChild.ProductDetails -> ProductView(child.component)
+                    is MainChild.Search -> SearchView(child.component)
+                    is MainChild.Categories -> CategoriesView(child.component)
+                    is MainChild.CategoryProducts -> ProductByCategoryView(child.component)
                 }
             }
         }

@@ -6,6 +6,7 @@ import karika.distribucija.ba.domain.model.Notification
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.util.PushHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -58,8 +59,9 @@ class NotificationsComponent(componentContext: ComponentContext, stateHolder: Ka
                             }
                         }
                     }
+                stateHolder.notificationReceived()
             }
         }
-        // navigate to route
+        PushHandler.handleNewPushIfExists(item.route, this)
     }
 }

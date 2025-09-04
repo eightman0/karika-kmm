@@ -57,7 +57,7 @@ data class Product(
     }
 
     override fun hashCode(): Int {
-        return id ?: 0
+        return id.hashCode()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -172,6 +172,13 @@ data class Product(
             stockData = extensionAttributes?.stockData
         }
         return if (stockData?.isInStock == "1") "Na zalihama" else "Nije na zalihama"
+    }
+
+    fun hasOnStock(): Boolean {
+        if (stockData == null) {
+            stockData = extensionAttributes?.stockData
+        }
+        return stockData?.isInStock == "1"
     }
 
     fun minQty(): Int {

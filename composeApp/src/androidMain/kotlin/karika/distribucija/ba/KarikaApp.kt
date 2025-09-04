@@ -5,7 +5,6 @@ import karika.distribucija.ba.di.initKoinAndroid
 import org.koin.android.ext.koin.androidContext
 
 class KarikaApp : Application() {
-
     override fun onCreate() {
         super.onCreate()
         initKoinAndroid {
