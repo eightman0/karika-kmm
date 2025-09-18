@@ -6,9 +6,20 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Config(
     @SerialName("quantity_unit_options") var unitOptions: List<KarikaUnit> = listOf(),
-    @SerialName("a2b_price_list") var a2bPriceList: List<DeliveryPrice> = listOf(),
     @SerialName("customer_region_list") var customerRegionList: List<KarikaUnit> = listOf(),
     @SerialName("customer_group_list") var customerGroupList: List<KarikaUnit> = listOf(),
+    @SerialName("shipping_proveders") var shippingProveders: List<DeliveryProvider> = listOf(),
+) {
+    fun a2b() = shippingProveders.find { it.code == "A2B" }?.price
+    fun express() = shippingProveders.find { it.code == "EURO_EXPRESS" }?.price
+}
+
+@Serializable
+data class DeliveryProvider(
+    @SerialName("code") var code: String? = null,
+    @SerialName("name") var name: String? = null,
+    @SerialName("shipping_price_increase_percentage") var percent: String? = null,
+    @SerialName("price_list") var price: List<DeliveryPrice> = emptyList()
 )
 
 @Serializable
@@ -28,5 +39,5 @@ data class KarikaUnit(
     @SerialName("value") var unit: String? = null
 ) {
     fun label() = label ?: ""
-    fun unit() = unit?.replace("|","")?.trim() ?: ""
+    fun unit() = unit?.replace("|", "")?.trim() ?: ""
 }

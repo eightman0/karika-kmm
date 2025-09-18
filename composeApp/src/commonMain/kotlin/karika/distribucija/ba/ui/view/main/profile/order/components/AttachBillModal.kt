@@ -72,7 +72,7 @@ fun AttachBillModal(
                     KarikaText(
                         modifier = Modifier
                             .weight(1f),
-                        text = "Pošalji predračun",
+                        text = "Pošalji uplatnicu",
                         color = KarikaColors.Gray2,
                         textSize = 18.sp,
                         fontWeight = FontWeight.W700
@@ -92,7 +92,7 @@ fun AttachBillModal(
                 Column(
                     modifier = Modifier
                         .onClick {
-                            component.stateHolder.filePicker.pickFile(arrayOf("application/pdf")) { name, data ->
+                            component.stateHolder.filePicker.pickFile(arrayOf("application/pdf", "image/png", "image/jpeg")) { name, data ->
                                 attachedFile.value = Pair(name, data)
                             }
                         }
@@ -109,7 +109,7 @@ fun AttachBillModal(
                     )
                     KarikaText(
                         modifier = Modifier,
-                        text = "Dodaj predračun",
+                        text = "Dodaj uplatnicu",
                         color = KarikaColors.Gray2,
                         textSize = 16.sp,
                         fontWeight = FontWeight.W600
@@ -144,11 +144,11 @@ fun AttachBillModal(
                 YSpacer16()
                 HorizontalButtons(
                     modifier = Modifier,
-                    primaryTitle = "Pošalji predračun",
+                    primaryTitle = "Pošalji uplatnicu",
                     secondaryTitle = "Odustani",
                     primaryEnabled = attachedFile.value.first.isNotEmpty()
                 ) {
-                    if (it == "Pošalji predračun") {
+                    if (it == "Pošalji uplatnicu") {
                         onSubmit(
                             reason.value,
                             attachedFile.value

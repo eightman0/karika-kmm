@@ -58,6 +58,51 @@ fun RadioGroup(
 }
 
 @Composable
+fun RadioGroupSecondary(
+    items: List<Pair<String, Int>>,
+    selected: MutableState<Pair<String, Int>>,
+    enabled: Boolean = true,
+    onChange: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        items.forEach {
+            Row(
+                modifier = Modifier
+                    .onClick {
+                        selected.value = it
+                        onChange.invoke()
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(
+                    enabled = enabled,
+                    selected = selected.value.first == it.first,
+                    onClick = {
+                        selected.value = it
+                        onChange.invoke()
+                    },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = KarikaColors.Blue,
+                        unselectedColor = KarikaColors.Gray8
+                    )
+                )
+                KarikaText(
+                    modifier = Modifier,
+                    text = it.first,
+                    color = KarikaColors.Gray2,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W600
+                )
+            }
+
+        }
+    }
+}
+
+@Composable
 fun KarikaRadioButton(
     title: String = "",
     selected: Boolean,

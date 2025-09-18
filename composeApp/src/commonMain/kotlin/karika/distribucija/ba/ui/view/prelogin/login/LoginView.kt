@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +41,9 @@ import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.prelogin.login.component.ForgotPasswordSheet
+import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_arrow_back
+import org.jetbrains.compose.resources.vectorResource
 
 
 @Composable
@@ -58,13 +64,14 @@ fun LoginView(component: LoginComponent) {
             ) {
                 Column(
                     modifier = Modifier
+                        .verticalScroll(rememberScrollState())
                         .padding(it),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     KarikaLogo()
                     KarikaText(
-                        text = "Prijava kupac",
+                        text = component.title(),
                         color = KarikaColors.Black,
                         fontWeight = FontWeight.W700,
                         textSize = 24.sp,
@@ -162,6 +169,18 @@ fun LoginView(component: LoginComponent) {
 
                 ForgotPasswordSheet(component)
             }
+
+            Icon(
+                modifier = Modifier
+                    .onClick {
+                        component.preLoginBack()
+                    }
+                    .padding(it)
+                    .padding(16.dp),
+                imageVector = vectorResource(Res.drawable.ic_arrow_back),
+                tint = KarikaColors.Primary,
+                contentDescription = ""
+            )
         }
     }
 }

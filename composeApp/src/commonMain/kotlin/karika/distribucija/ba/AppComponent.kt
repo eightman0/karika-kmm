@@ -12,6 +12,7 @@ import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaFilePicker
 import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardComponent
 import karika.distribucija.ba.ui.view.main.MainComponent
 import karika.distribucija.ba.ui.view.main.menu.blog.BlogsComponent
 import karika.distribucija.ba.ui.view.main.menu.blog.overview.BlogOverviewComponent
@@ -78,6 +79,11 @@ sealed class AppConfig {
 
     @Serializable
     data object Notifications : AppConfig()
+
+    // vendor_side
+
+    @Serializable
+    data object Dashboard : AppConfig()
 }
 
 sealed class Child {
@@ -101,6 +107,9 @@ sealed class Child {
 
     class Points(val component: PointsComponent) : Child()
     class Notifications(val component: NotificationsComponent) : Child()
+
+    //vendor_side
+    class Dashboard(val component: DashboardComponent) : Child()
 }
 
 class AppComponent(
@@ -121,7 +130,7 @@ class AppComponent(
         childStack(
             source = stateHolder.appNavigation,
             serializer = AppConfig.serializer(),
-            initialConfiguration = if (stateHolder.hasJWT()) AppConfig.Main else AppConfig.PreLogin,
+            initialConfiguration = stateHolder.appConfig(),
             handleBackButton = true,
             childFactory = ::child,
         )
@@ -191,6 +200,10 @@ class AppComponent(
 
             is AppConfig.Notifications -> Child.Notifications(
                 NotificationsComponent(componentContext, stateHolder)
+            )
+
+            is AppConfig.Dashboard -> Child.Dashboard(
+                DashboardComponent(componentContext, stateHolder)
             )
         }
 }

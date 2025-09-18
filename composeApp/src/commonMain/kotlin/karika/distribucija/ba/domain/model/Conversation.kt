@@ -19,7 +19,7 @@ data class Conversation(
     @SerialName("updated_at") var updatedAt: String? = null,
     @SerialName("unread") var unRead: String? = null,
     @SerialName("messages") var messages: List<List<Message>> = emptyList(),
-    @Transient var admin: Boolean = true
+    @Transient var admin: Boolean = false
 ) {
     fun isRead(): Boolean {
         return (unRead?.toIntOrNull() ?: 0) <= 0
@@ -68,6 +68,13 @@ data class Message(
 
     fun isAdminMessage(): Boolean {
         return "0" == senderId
+    }
+
+    fun isMine(id: Int?): Boolean {
+        if (sender == "vendor") return true
+        if (senderId == id.toString()) return true
+
+        return false
     }
 }
 

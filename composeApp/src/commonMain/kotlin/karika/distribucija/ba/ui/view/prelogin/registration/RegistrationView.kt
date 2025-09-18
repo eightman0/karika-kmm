@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.ui.components.KarikaBox
 import karika.distribucija.ba.ui.components.KarikaCheckbox
+import karika.distribucija.ba.ui.components.KarikaCheckboxSecondary
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaPasswordTextField
 import karika.distribucija.ba.ui.components.KarikaPicker
@@ -36,6 +38,7 @@ import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
+import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
@@ -54,15 +57,15 @@ fun RegistrationView(component: RegistrationComponent) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp)
-                    .background(color = KarikaColors.Primary)
+                    .background(color = component.getColor())
             )
         }
         KarikaScaffold(
             containerColor = KarikaColors.Transparent,
             contentWindowInsets = WindowInsets.systemBars,
             topBar = {
-                TopBarWithBack("Registracija kupca") {
-                    component.back()
+                TopBarWithBack(component.title, color = component.getColor()) {
+                    component.preLoginBack()
                 }
             },
             component = component
@@ -88,10 +91,18 @@ fun RegistrationView(component: RegistrationComponent) {
                     YSpacer16()
                     LoginInfo(component)
                     YSpacer16()
-                    PrimaryButtonFilled(
-                        title = "Prijavi se",
-                    ) {
-                        component.register()
+                    if (component.userType.isShop()) {
+                        PrimaryButtonFilled(
+                            title = "Prijavi se",
+                        ) {
+                            component.register()
+                        }
+                    } else {
+                        SecondaryButtonFilled(
+                            title = "Prijavi se",
+                        ) {
+                            component.register()
+                        }
                     }
                 }
             }
@@ -100,7 +111,10 @@ fun RegistrationView(component: RegistrationComponent) {
 }
 
 @Composable
-private fun CompanyInfo(viewModel: RegistrationComponent) {
+private fun CompanyInfo(component: RegistrationComponent) {
+    val customerGroups = component.customerGroups.asState()
+    val customerRegions = component.customerRegions.asState()
+
     KarikaText(
         modifier = Modifier
             .fillMaxWidth(),
@@ -114,7 +128,7 @@ private fun CompanyInfo(viewModel: RegistrationComponent) {
         modifier = Modifier
             .fillMaxWidth(),
         title = "Naziv pravnog lica*",
-        value = viewModel.companyName.asState(),
+        value = component.companyName.asState(),
         placeholder = "Naziv pravnog lica",
         allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
         keyboardType = KeyboardType.Text,
@@ -124,7 +138,7 @@ private fun CompanyInfo(viewModel: RegistrationComponent) {
         modifier = Modifier
             .fillMaxWidth(),
         title = "ID broj*",
-        value = viewModel.companyId.asState(),
+        value = component.companyId.asState(),
         placeholder = "ID broj",
         keyboardType = KeyboardType.Number,
         allowedChars = KarikaConstants.numbers,
@@ -134,39 +148,131 @@ private fun CompanyInfo(viewModel: RegistrationComponent) {
         modifier = Modifier
             .fillMaxWidth(),
         title = "PDV broj",
-        value = viewModel.companyPdv.asState(),
+        value = component.companyPdv.asState(),
         placeholder = "PDV broj",
         allowedChars = KarikaConstants.numbers,
         keyboardType = KeyboardType.Number,
         imeAction = ImeAction.Next
     )
-    CompanyAddress(viewModel)
-    KarikaPicker(
-        title = "Veličina objekta*",
-        placeholder = "Veličina objekta*",
-        value = viewModel.companySize.asState(),
-        values = mutableStateOf(KarikaConstants.companySizes).asState()
-    )
-    KarikaPicker(
-        title = "Tip objekta*",
-        placeholder = "Tip objekta",
-        value = viewModel.companyType.asState(),
-        values = mutableStateOf(KarikaConstants.companyTypes).asState()
-    )
-    KarikaTextField1(
-        modifier = Modifier
-            .fillMaxWidth(),
-        title = "Broj zaposlenih",
-        value = viewModel.companyEmployees.asState(),
-        placeholder = "Broj zaposlenih",
-        allowedChars = KarikaConstants.numbers,
-        keyboardType = KeyboardType.Number,
-        imeAction = ImeAction.Next
-    )
+    CompanyAddress(component)
+    if (component.userType.isShop()) {
+        KarikaPicker(
+            title = "Veličina objekta*",
+            placeholder = "Veličina objekta*",
+            value = component.companySize.asState(),
+            values = mutableStateOf(KarikaConstants.companySizes).asState()
+        )
+        KarikaPicker(
+            title = "Tip objekta*",
+            placeholder = "Tip objekta",
+            value = component.companyType.asState(),
+            values = mutableStateOf(KarikaConstants.companyTypes).asState()
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Broj zaposlenih",
+            value = component.companyEmployees.asState(),
+            placeholder = "Broj zaposlenih",
+            allowedChars = KarikaConstants.numbers,
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Next
+        )
+    } else {
+        KarikaText(
+            modifier = Modifier
+                .fillMaxWidth(),
+            text = "Ciljana grupa kupaca",
+            color = KarikaColors.Gray4,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W400
+        )
+        component.stateHolder.config.value.customerGroupList.chunked(2).forEach {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                it.forEach { it1 ->
+                    if (component.userType.isShop()) {
+                        KarikaCheckbox(
+                            modifier = Modifier.weight(1f),
+                            title = it1.label(),
+                            value = customerGroups.value.contains(it1)
+                        ) {
+                            if (customerGroups.value.contains(it1)) {
+                                customerGroups.value -= it1
+                            } else {
+                                customerGroups.value += it1
+                            }
+                        }
+                    } else {
+                        KarikaCheckboxSecondary(
+                            modifier = Modifier.weight(1f),
+                            title = it1.label(),
+                            value = customerGroups.value.contains(it1)
+                        ) {
+                            if (customerGroups.value.contains(it1)) {
+                                customerGroups.value -= it1
+                            } else {
+                                customerGroups.value += it1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        YSpacer8()
+        KarikaText(
+            modifier = Modifier
+                .fillMaxWidth(),
+            text = "Ciljana region kupaca",
+            color = KarikaColors.Gray4,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W400
+        )
+        component.stateHolder.config.value.customerRegionList.chunked(2).forEach {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                it.forEach { it1 ->
+                    if (component.userType.isShop()) {
+                        KarikaCheckbox(
+                            modifier = Modifier.weight(1f),
+                            title = it1.label(),
+                            value = customerRegions.value.contains(it1)
+                        ) {
+                            if (customerRegions.value.contains(it1)) {
+                                customerRegions.value -= it1
+                            } else {
+                                customerRegions.value += it1
+                            }
+                        }
+                    } else {
+                        KarikaCheckboxSecondary(
+                            modifier = Modifier.weight(1f),
+                            title = it1.label(),
+                            value = customerRegions.value.contains(it1)
+                        ) {
+                            if (customerRegions.value.contains(it1)) {
+                                customerRegions.value -= it1
+                            } else {
+                                customerRegions.value += it1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
-private fun ContactInfo(viewModel: RegistrationComponent) {
+private fun ContactInfo(component: RegistrationComponent) {
     KarikaText(
         modifier = Modifier
             .fillMaxWidth(),
@@ -179,7 +285,7 @@ private fun ContactInfo(viewModel: RegistrationComponent) {
         modifier = Modifier
             .fillMaxWidth(),
         title = "Ime*",
-        value = viewModel.contactFirstname.asState(),
+        value = component.contactFirstname.asState(),
         placeholder = "Ime",
         allowedChars = KarikaConstants.lettersSpace,
         imeAction = ImeAction.Next
@@ -188,35 +294,37 @@ private fun ContactInfo(viewModel: RegistrationComponent) {
         modifier = Modifier
             .fillMaxWidth(),
         title = "Prezime*",
-        value = viewModel.contactLastname.asState(),
+        value = component.contactLastname.asState(),
         placeholder = "Prezime",
         allowedChars = KarikaConstants.lettersSpace,
         imeAction = ImeAction.Next
     )
-    KarikaTextField1(
-        modifier = Modifier
-            .fillMaxWidth(),
-        title = "Adresa i broj ulice*",
-        value = viewModel.contactAddress.asState(),
-        placeholder = "Adresa i broj ulice",
-        allowedChars = KarikaConstants.numbersAndLettersSpace,
-        imeAction = ImeAction.Next
-    )
-    KarikaTextField1(
-        modifier = Modifier
-            .fillMaxWidth(),
-        title = "Poštanski broj*",
-        value = viewModel.contactPostal.asState(),
-        placeholder = "Poštanski broj",
-        allowedChars = KarikaConstants.numbers,
-        keyboardType = KeyboardType.Number,
-        imeAction = ImeAction.Next
-    )
+    if (component.userType.isShop()) {
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Adresa i broj ulice*",
+            value = component.contactAddress.asState(),
+            placeholder = "Adresa i broj ulice",
+            allowedChars = KarikaConstants.numbersAndLettersSpace,
+            imeAction = ImeAction.Next
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Poštanski broj*",
+            value = component.contactPostal.asState(),
+            placeholder = "Poštanski broj",
+            allowedChars = KarikaConstants.numbers,
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Next
+        )
+    }
     KarikaTextField1(
         modifier = Modifier
             .fillMaxWidth(),
         title = "Broj telefona*",
-        value = viewModel.contactPhone.asState(),
+        value = component.contactPhone.asState(),
         placeholder = "Broj telefona",
         allowedChars = KarikaConstants.numbers,
         keyboardType = KeyboardType.Phone,
@@ -260,58 +368,114 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
         placeholder = "Potvrdi šifru",
         imeAction = ImeAction.Done
     )
-    KarikaCheckbox(
-        atitle = buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.W400,
-                    color = KarikaColors.Gray4,
-                    fontSize = 14.sp
-                )
-            ) {
-                append("Slažem se sa")
+    if (viewModel.userType.isShop()) {
+        KarikaCheckbox(
+            atitle = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaColors.Gray4,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append("Slažem se sa")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaColors.Gray4,
+                        fontSize = 14.sp,
+                        textDecoration = TextDecoration.Underline
+                    )
+                ) {
+                    append(" uslovima korištenja ")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaColors.Gray4,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append("i")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaColors.Gray4,
+                        fontSize = 14.sp,
+                        textDecoration = TextDecoration.Underline
+                    )
+                ) {
+                    append(" politikom privatnosti")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaColors.Gray4,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append(" i prihvatam da Karika sačuva moje lične podatke.")
+                }
             }
-            withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.W400,
-                    color = KarikaColors.Gray4,
-                    fontSize = 14.sp,
-                    textDecoration = TextDecoration.Underline
-                )
-            ) {
-                append(" uslovima korištenja ")
-            }
-            withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.W400,
-                    color = KarikaColors.Gray4,
-                    fontSize = 14.sp
-                )
-            ) {
-                append("i")
-            }
-            withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.W400,
-                    color = KarikaColors.Gray4,
-                    fontSize = 14.sp,
-                    textDecoration = TextDecoration.Underline
-                )
-            ) {
-                append(" politikom privatnosti")
-            }
-            withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.W400,
-                    color = KarikaColors.Gray4,
-                    fontSize = 14.sp
-                )
-            ) {
-                append(" i prihvatam da Karika sačuva moje lične podatke.")
-            }
+        ) {
+            agree.value = it
         }
-    ) {
-        agree.value = it
+    } else {
+        KarikaCheckboxSecondary(
+            atitle = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaColors.Gray4,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append("Slažem se sa")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaColors.Gray4,
+                        fontSize = 14.sp,
+                        textDecoration = TextDecoration.Underline
+                    )
+                ) {
+                    append(" uslovima korištenja ")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaColors.Gray4,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append("i")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaColors.Gray4,
+                        fontSize = 14.sp,
+                        textDecoration = TextDecoration.Underline
+                    )
+                ) {
+                    append(" politikom privatnosti")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaColors.Gray4,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append(" i prihvatam da Karika sačuva moje lične podatke.")
+                }
+            }
+        ) {
+            agree.value = it
+        }
     }
 }
 

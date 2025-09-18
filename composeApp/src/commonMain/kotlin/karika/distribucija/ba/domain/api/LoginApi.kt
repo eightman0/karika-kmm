@@ -9,13 +9,14 @@ import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.ui.view.prelogin.registration.isShop
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 internal class LoginApi {
     suspend fun login(loginDto: LoginDto): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.post(
-            url("integration/customer/token?type=customer")
+            url("integration/customer/token?type=${loginDto.getType()}")
         ) {
             setBody(loginDto)
         }
@@ -30,16 +31,14 @@ class LoginRepository internal constructor() {
                 .login(loginDto)
                 .getOrNull()
             if (response != null && response.status == HttpStatusCode.OK) {
-                HttpClientProvider.token = response.bodyAsText().replace("\"", "")
-                HttpClientProvider.token = response.bodyAsText().replace("\"", "")
-                emit(ResultState.Success(HttpClientProvider.token ?: ""))
+                emit(ResultState.Success(response.bodyAsText().replace("\"", "")))
             } else {
                 emit(
                     ResultState.Error(
                         if (response?.bodyAsText()
                                 ?.contains("You're not allowed to login here") == true
                         ) {
-                            if (loginDto.userType == "customer")
+                            if (loginDto.userType.isShop())
                                 "Ovaj ${loginDto.username} račun je napravljen samo za dobavljača, prijavite se kao dobavljač"
                             else "Ovaj ${loginDto.username} račun je napravljen samo za kupca, prijavite se kao kupac"
                         } else {

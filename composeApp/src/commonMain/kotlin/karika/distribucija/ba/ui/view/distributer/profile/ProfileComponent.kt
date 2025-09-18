@@ -1,0 +1,143 @@
+package karika.distribucija.ba.ui.view.distributer.profile
+
+import androidx.compose.runtime.mutableStateOf
+import com.arkivanov.decompose.ComponentContext
+import karika.distribucija.ba.domain.HttpClientProvider.profileImage
+import karika.distribucija.ba.domain.api.DashRepository
+import karika.distribucija.ba.domain.model.KarikaUnit
+import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.util.KarikaConstants
+import kotlinx.coroutines.launch
+
+class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
+    CommonComponent(componentContext, stateHolder) {
+
+    val customerRegions = mutableStateOf(
+        stateHolder.vendorDetails.value.targetCustomerRegion
+            ?.replace("|", "")
+            ?.trim()
+            ?.split(",")
+            ?.map { KarikaUnit(label = it, it) }
+            ?: emptyList()
+    )
+    val customerGroups = mutableStateOf(
+        stateHolder.vendorDetails.value.b2bTargetCustomerGroup
+            ?.replace("|", "")
+            ?.trim()
+            ?.split(",")
+            ?.map { KarikaUnit(label = it, unit = it) }
+            ?: emptyList()
+    )
+
+    val companyName = mutableStateOf(stateHolder.vendorDetails.value.publicName ?: "")
+    val companyId = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorId ?: "")
+    val companyPdv = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorPdvBroj ?: "")
+    val companyEntity = mutableStateOf(
+        KarikaConstants.entries.find { it.id == stateHolder.vendorDetails.value.b2bVendorEntitet }?.name
+            ?: ""
+    )
+    val companyCanton = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorKanton ?: "")
+    val companyCity = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorGrad ?: "")
+    val companyMunicipality = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorOpicina ?: "")
+    val companyPhone = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorPhone ?: "")
+
+    val minOrderAmount = mutableStateOf(stateHolder.vendorDetails.value.minOrderAmount ?: "")
+    val bankAccountNumber = mutableStateOf(stateHolder.vendorDetails.value.bankAccountNumber ?: "")
+    val contactName = mutableStateOf(stateHolder.vendorDetails.value.name ?: "")
+
+    val companyLogo =
+        mutableStateOf(
+            Triple<String, String, Any?>(
+                "",
+                "",
+                profileImage(stateHolder.vendorDetails.value.companyLogo)
+            )
+        )
+    val companyBanner =
+        mutableStateOf(
+            Triple<String, String, Any?>(
+                "",
+                "",
+                profileImage(stateHolder.vendorDetails.value.companyBanner)
+            )
+        )
+
+    val changePassSheet = mutableStateOf(false)
+
+    fun changePass(oldPass: String, newPass: String) {
+        iOScope.launch {
+            userRepository.changePass(oldPass, newPass)
+                .collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            hideLoader()
+                            showMessage("Lozinka uspješno promijenjena!")
+                        }
+
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showMessage(result.message)
+                        }
+                    }
+                }
+        }
+    }
+
+    fun updateProfile() {
+        if (bankAccountNumber.value.isNotEmpty() && bankAccountNumber.value.length != 16) {
+            showMessage("Broj računa mora imati 16 cifara.")
+            return
+        }
+
+        iOScope.launch {
+            DashRepository()
+                .updateProfile(
+                    phone = companyPhone.value,
+                    groupCustomers = customerGroups.value.joinToString(separator = ",") { it.unit() }
+                        .trimIndent(),
+                    groupRegions = customerRegions.value.joinToString(separator = ",") { it.unit() }
+                        .trimIndent(),
+                    name = contactName.value,
+                    minOrderAmount = minOrderAmount.value,
+                    bankAccountNumber = bankAccountNumber.value,
+                    logo = if (companyLogo.value.first == "NEW") Pair(
+                        companyLogo.value.second,
+                        companyLogo.value.third as? ByteArray ?: return@launch
+                    ) else null,
+                    banner = if (companyBanner.value.first == "NEW") Pair(
+                        companyBanner.value.second,
+                        companyBanner.value.third as? ByteArray ?: return@launch
+                    ) else null
+                )
+                .collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            hideLoader()
+                            showMessage("Informacije profila su sačuvane.")
+                            stateHolder.getVendorDetails()
+                        }
+
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showMessage(result.message)
+                        }
+                    }
+                }
+        }
+    }
+
+    fun pickImage(value: Int) {
+        stateHolder.filePicker.pickFile { name, data ->
+            if (value == 1) {
+                companyLogo.value = Triple("NEW", name, data)
+                return@pickFile
+            }
+
+            companyBanner.value = Triple("NEW", name, data)
+        }
+    }
+}

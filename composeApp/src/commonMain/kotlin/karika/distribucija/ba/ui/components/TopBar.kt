@@ -2,12 +2,16 @@ package karika.distribucija.ba.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -15,16 +19,19 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import karika.distribucija.ba.domain.model.Category
+import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardComponent
 import karika.distribucija.ba.ui.view.main.MainChild
 import karika.distribucija.ba.ui.view.main.MainComponent
 import karika.distribucija.ba.ui.view.main.MainConfig
@@ -33,7 +40,10 @@ import karika.distribucija.ba.util.KarikaConfig
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_action
 import karikav2.composeapp.generated.resources.ic_arrow_back
+import karikav2.composeapp.generated.resources.ic_menu
+import karikav2.composeapp.generated.resources.ic_notifications
 import karikav2.composeapp.generated.resources.ic_outlet
+import kotlinx.coroutines.flow.asStateFlow
 import org.jetbrains.compose.resources.vectorResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +51,7 @@ import org.jetbrains.compose.resources.vectorResource
 fun TopBarWithBack(
     title: String,
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
+    color: Color = KarikaColors.Primary,
     back: () -> Unit
 ) {
     TopAppBar(
@@ -73,7 +84,7 @@ fun TopBarWithBack(
 
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = KarikaColors.Primary
+            containerColor = color
         ),
         windowInsets = windowInsets
     )
@@ -270,6 +281,85 @@ fun ActionBar(component: MainComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W600,
             text = "AKCIJE"
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBarDashboard(
+    component: DashboardComponent,
+    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
+    menu: () -> Unit,
+    action: () -> Unit
+) {
+    val badge by component.stateHolder.notificationCount.collectAsState()
+
+    Column {
+        TopAppBar(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    KarikaLogo(size = 40)
+                }
+            },
+            navigationIcon = {
+                Icon(
+                    modifier = Modifier
+                        .onClick {
+                            menu()
+                        }
+                        .padding(horizontal = 4.dp),
+                    imageVector = vectorResource(Res.drawable.ic_menu),
+                    contentDescription = "",
+                    tint = KarikaColors.Gray2
+                )
+            },
+            actions = {
+                Box(modifier = Modifier) {
+                    Icon(
+                        modifier = Modifier
+                            .onClick {
+                                action()
+                            }
+                            .padding(horizontal = 4.dp),
+                        imageVector = vectorResource(Res.drawable.ic_notifications),
+                        contentDescription = "",
+                        tint = KarikaColors.Gray2
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .offset(16.dp, (-8).dp)
+                            .background(color = KarikaColors.Red, shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(0.dp),
+                            text = "$badge",
+                            textSize = 10.sp,
+                            fontWeight = FontWeight.W400,
+                            color = KarikaColors.White
+                        )
+                    }
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = KarikaColors.White
+            ),
+            windowInsets = windowInsets
+        )
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            thickness = 1.dp,
+            color = KarikaColors.Gray11
         )
     }
 }

@@ -43,25 +43,35 @@ object KarikaColors {
     val Gray17 = Color(0xFF101828)
     val Gray18 = Color(0xFF2A303A)
     val Gray19 = Color(0xFFE3E3E3)
+    val Gray20 = Color(0xFFF5F5F5)
+    val Gray21 = Color(0xFFEAEAEA)
+    val Gray22 = Color(0xFF716F6F)
 
     val Red = Color(0xFFE00000)
     val Red1 = Color(0xFFFFD4E7)
     val Red2 = Color(0xFFFFEAF3)
     val Red3 = Color(0xFFB30000)
+    val Red4 = Color(0xFFe7000b)
+    val Red4_10 = Color(0xFFe7000b).copy(alpha = 0.1f)
 
     val Error = Color(0xFFCC1818)
 
     val Blue = Color(0xFF3575E2)
     val Blue1 = Color(0xFF3290DA)
+    val Blue2 = Color(0xFF3397C1)
+    val Blue3 = Color(0xFF2b7fff)
+    val Blue3_10 = Color(0x2b7fff).copy(alpha = 0.1f)
 
     val Green = Color(0xFFB7DFB9)
     val Green1 = Color(0xFF4CAF50)
     val Green2 = Color(0xFF49694B)
     val Green3 = Color(0xFF1A7431)
     val Green4 = Color(0xFFEDF7E4)
+    val Green5 = Color(0xFF018E25)
 
 
     val Orange = Color(0xFFF26419)
+    val Orange1 = Color(0xFFf54a00)
 
     //status
     val Pending = Color(0xFFFEEFE8)

@@ -19,6 +19,7 @@ import karika.distribucija.ba.domain.model.MessagesCount
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.SendMessageRequest
 import karika.distribucija.ba.domain.model.SendMessageResponse
+import karika.distribucija.ba.domain.model.Shop
 import karika.distribucija.ba.domain.model.Vendor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -73,6 +74,27 @@ internal class MessagesApi {
 
                 else ->
                     url("mobile/vendors?searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
+            }
+        )
+    }
+
+    suspend fun shops(
+        searchText: String = "",
+        pageSize: Int = 10000,
+        currentPage: Int = 1,
+        filterBy: String = "",
+        filterValue: String = "",
+    ): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.get(
+            when {
+                filterBy.isNotEmpty() ->
+                    url("mobile/vendor/customers?searchCriteria[filterGroups][0][filters][0][field]=$filterBy&searchCriteria[filterGroups][0][filters][0][value]=$filterValue&searchCriteria[filterGroups][0][filters][0][conditionType]=equals&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
+
+                searchText.isNotEmpty() ->
+                    url("mobile/vendor/customers?searchCriteria[filterGroups][0][filters][0][field]=b2b_pravno_lice&searchCriteria[filterGroups][0][filters][0][value]=$searchText&searchCriteria[filterGroups][0][filters][0][conditionType]=like&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
+
+                else ->
+                    url("mobile/vendor/customers?searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
             }
         )
     }
@@ -163,6 +185,30 @@ class MessagesRepository internal constructor() {
         try {
             val response = MessagesApi()
                 .vendors(searchText, pageSize, currentPage, filterBy, filterValue)
+                .getOrNull()
+
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body()))
+                return@flow
+            }
+
+            emit(ResultState.Error(response?.bodyAsText() ?: ""))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message ?: ""))
+        }
+    }
+
+    fun shops(
+        searchText: String = "",
+        pageSize: Int = 10000,
+        currentPage: Int = 1,
+        filterBy: String = "",
+        filterValue: String = "",
+    ): Flow<ResultState<List<Shop>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = MessagesApi()
+                .shops(searchText, pageSize, currentPage, filterBy, filterValue)
                 .getOrNull()
 
             if (response != null && response.status == HttpStatusCode.OK) {

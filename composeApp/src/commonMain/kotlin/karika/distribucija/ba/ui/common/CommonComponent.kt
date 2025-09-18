@@ -21,6 +21,7 @@ import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
+import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
 import karika.distribucija.ba.ui.view.main.MainConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -202,6 +203,12 @@ open class CommonComponent(
 
     }
 
+    fun preLoginBack() {
+        mainScope.launch {
+            stateHolder.preLoginNavigation.pop()
+        }
+    }
+
     fun appBack() {
         mainScope.launch {
             stateHolder.appNavigation.pop()
@@ -310,7 +317,7 @@ open class CommonComponent(
         }
     }
 
-    fun navigateToMessagesOverview(item: Conversation) {
+    open fun navigateToMessagesOverview(item: Conversation) {
         appNavigate(AppConfig.MessagesOverview(item))
     }
 
@@ -337,5 +344,17 @@ open class CommonComponent(
 
     fun showImagePreview(imageUrl: String) {
         stateHolder.imagePreview.value = imageUrl
+    }
+
+    fun dashNavigate(config: DashConfig, replace: Boolean = false) {
+       //if (replace) {
+       //    stateHolder.dashNavigation.replaceAll(config)
+       //    return
+       //}
+        stateHolder.dashNavigation.bringToFront(config)
+    }
+
+    fun dashBack() {
+        stateHolder.dashNavigation.pop()
     }
 }

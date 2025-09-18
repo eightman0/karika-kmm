@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karikav2.composeapp.generated.resources.Res
@@ -132,6 +133,7 @@ fun SearchBoxBorder(
     onSearchExecute: (String) -> Unit,
     placeholder: String = "Pretraži proizvode..",
     focusRequester: FocusRequester = FocusRequester(),
+    borderShape: Dp = 12.dp,
     preselected: String = ""
 ) {
     var searchText by remember { mutableStateOf(preselected) }
@@ -143,11 +145,11 @@ fun SearchBoxBorder(
             .border(
                 width = 1.dp,
                 color = KarikaColors.Divider,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(borderShape)
             )
             .background(
                 color = KarikaColors.White,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(borderShape)
             ),
         placeholder = {
             KarikaText(

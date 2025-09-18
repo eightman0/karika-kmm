@@ -1,9 +1,10 @@
 package karika.distribucija.ba.ui.common
 
-import androidx.compose.runtime.mutableStateOf
+import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.di.PersistenceManager
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.api.CategoryRepository
+import karika.distribucija.ba.domain.api.DashRepository
 import karika.distribucija.ba.domain.api.MessagesRepository
 import karika.distribucija.ba.domain.api.NotificationRepository
 import karika.distribucija.ba.domain.api.UserRepository
@@ -12,6 +13,8 @@ import karika.distribucija.ba.domain.model.Config
 import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.UserDetails
+import karika.distribucija.ba.domain.model.Vendor
+import karika.distribucija.ba.ui.view.prelogin.registration.isShop
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -24,7 +27,6 @@ import org.koin.core.component.get
 
 open class SessionHandler : KoinComponent {
     private val persistenceManager: PersistenceManager = get()
-    var accessToken = mutableStateOf(persistenceManager.get("JWT_TOKEN"))
     private val userRepository = UserRepository()
     private val _userDetails = MutableStateFlow(UserDetails())
     val userDetails = _userDetails.asStateFlow()
@@ -36,14 +38,31 @@ open class SessionHandler : KoinComponent {
     val messageUnreadCountUser = MutableStateFlow(0)
     val notificationCount = MutableStateFlow(0)
 
+    private val dashRepository = DashRepository()
+    private val _vendorDetails = MutableStateFlow(Vendor())
+    val vendorDetails = _vendorDetails.asStateFlow()
+    var appType: AppConfig =
+        if (persistenceManager.get("user_type").isShop()) AppConfig.Main else AppConfig.Dashboard
+
     init {
-        HttpClientProvider.token = accessToken.value
-        if (accessToken.value.isNotEmpty()) {
+        persistenceManager.get("JWT_TOKEN")
+            .takeIf { it.isNotEmpty() }
+            ?.let {
+                setAccessToken(it)
+            }
+    }
+
+    open fun setAccessToken(accessToken: String) {
+        HttpClientProvider.token = accessToken
+        if (appType == AppConfig.Main) {
             getUserDetails()
-            getConfig()
-            fetchCategories()
-            notificationReceived()
+        } else {
+            getVendorDetails()
         }
+
+        fetchCategories()
+        notificationReceived()
+        getConfig()
     }
 
     fun saveJWT(jwt: String, loginDto: LoginDto, rememberMe: Boolean) {
@@ -55,16 +74,40 @@ open class SessionHandler : KoinComponent {
     }
 
     private fun rememberLogin(loginDto: LoginDto) {
-        persistenceManager.save("user_username", loginDto.username)
-        persistenceManager.save("user_password", loginDto.password)
+        persistenceManager.save(
+            "user_username".appendUserType(loginDto.userType),
+            loginDto.username
+        )
+        persistenceManager.save(
+            "user_password".appendUserType(loginDto.userType),
+            loginDto.password
+        )
         persistenceManager.save("user_type", loginDto.userType)
     }
 
-    fun getUserUsername() = persistenceManager.get("user_username")
-    fun getUserPassword() = persistenceManager.get("user_password")
-    fun hasJWT() = accessToken.value.isNotEmpty()
+    fun getUserUsername(userType: String) =
+        persistenceManager.get("user_username".appendUserType(userType))
+
+    fun getUserPassword(userType: String) =
+        persistenceManager.get("user_password".appendUserType(userType))
+
+    private fun hasJWT() = HttpClientProvider.token?.isNotEmpty() ?: false
     open fun logout() {
         persistenceManager.save("JWT_TOKEN", "")
+    }
+
+    fun appConfig(): AppConfig {
+        return if (hasJWT()) {
+            if (persistenceManager.get("user_type").isShop()) {
+                appType = AppConfig.Main
+                AppConfig.Main
+            } else {
+                appType = AppConfig.Dashboard
+                AppConfig.Dashboard
+            }
+        } else {
+            AppConfig.PreLogin
+        }
     }
 
     fun getUserDetails(callback: () -> Unit = {}) {
@@ -102,7 +145,6 @@ open class SessionHandler : KoinComponent {
     }
 
     fun notificationReceived() {
-        println("TEST_TEST: PUSH RECEIVED")
         CoroutineScope(Dispatchers.IO).launch {
             MessagesRepository()
                 .messageUnreadCount()
@@ -113,13 +155,38 @@ open class SessionHandler : KoinComponent {
                     }
                 }
 
-            NotificationRepository()
-                .get()
-                .collect {
-                    if (it is ResultState.Success) {
-                        notificationCount.value = it.data.count { it1 -> it1.isRead == "true" }
+            if (appType == AppConfig.Main) {
+                NotificationRepository()
+                    .get()
+                    .collect {
+                        if (it is ResultState.Success) {
+                            notificationCount.value = it.data.count { it1 -> it1.isRead == "true" }
+                        }
+                    }
+            } else {
+                DashRepository()
+                    .notifications()
+                    .collect {
+                        if (it is ResultState.Success) {
+                            notificationCount.value = it.data.count { it1 -> it1.isRead == "0" }
+                        }
+                    }
+            }
+        }
+    }
+
+    fun getVendorDetails(callback: () -> Unit = {}) {
+        CoroutineScope(Dispatchers.IO).launch {
+            dashRepository.getProfile()
+                .collect { result ->
+                    callback.invoke()
+                    if (result is ResultState.Success) {
+                        _vendorDetails.update { result.data }
                     }
                 }
         }
     }
 }
+
+private fun String.appendUserType(userType: String): String =
+    if (userType.isShop()) this else this.plus("_$userType")

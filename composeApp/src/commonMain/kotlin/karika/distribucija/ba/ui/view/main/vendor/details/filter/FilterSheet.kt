@@ -25,11 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.ui.components.KarikaCheckbox
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
-import karika.distribucija.ba.ui.components.RadioGroup
 import karika.distribucija.ba.ui.components.SecondaryButton
 import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.asState

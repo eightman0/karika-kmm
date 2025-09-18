@@ -23,8 +23,15 @@ internal class VendorApi {
     ): Result<HttpResponse> = runCatching {
         val url =
             when {
-                filterBy.isNotEmpty() ->
-                    url("mobile/vendors?searchCriteria[filterGroups][0][filters][0][field]=$filterBy&searchCriteria[filterGroups][0][filters][0][value]=$filterValue&searchCriteria[filterGroups][0][filters][0][conditionType]=equals&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
+                filterValue.isNotEmpty() ->
+                    url("mobile/vendors?" +
+                            (filterValue.takeIf { it.isNotEmpty() }?.let {
+                                "searchCriteria[filterGroups][0][filters][0][field]=region_uid" +
+                                        "&searchCriteria[filterGroups][0][filters][0][value]=$it" +
+                                        "&searchCriteria[filterGroups][0][filters][0][conditionType]=in"
+                            } ?: "") +
+
+                            "&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
 
                 searchText.isNotEmpty() ->
                     url("mobile/vendors?searchCriteria[filterGroups][0][filters][0][field]=public_name&searchCriteria[filterGroups][0][filters][0][value]=$searchText&searchCriteria[filterGroups][0][filters][0][conditionType]=like&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")

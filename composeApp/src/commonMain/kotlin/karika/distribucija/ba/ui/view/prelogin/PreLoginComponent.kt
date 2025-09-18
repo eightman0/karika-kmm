@@ -17,10 +17,10 @@ sealed class PreLoginConfig {
     data object Landing : PreLoginConfig()
 
     @Serializable
-    data object Login : PreLoginConfig()
+    data class Login(val userType: String = "shop") : PreLoginConfig()
 
     @Serializable
-    data object Registration : PreLoginConfig()
+    data class Registration(val userType: String = "shop") : PreLoginConfig()
 }
 
 sealed class PreLoginChild {
@@ -49,11 +49,11 @@ class PreLoginComponent(
             )
 
             is PreLoginConfig.Login -> PreLoginChild.Login(
-                LoginComponent(componentContext, stateHolder)
+                LoginComponent(componentContext, stateHolder, config.userType)
             )
 
             is PreLoginConfig.Registration -> PreLoginChild.Registration(
-                RegistrationComponent(componentContext, stateHolder)
+                RegistrationComponent(componentContext, stateHolder, config.userType)
             )
         }
 }

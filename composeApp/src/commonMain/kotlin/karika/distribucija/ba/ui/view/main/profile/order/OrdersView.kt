@@ -487,7 +487,7 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
                         .onClick {
                             attachBillModal.value = order
                         },
-                    text = "Pošalji predračun",
+                    text = "Pošalji uplatnicu",
                     fontWeight = FontWeight.W600,
                     color = KarikaColors.Primary,
                     textSize = 16.sp,

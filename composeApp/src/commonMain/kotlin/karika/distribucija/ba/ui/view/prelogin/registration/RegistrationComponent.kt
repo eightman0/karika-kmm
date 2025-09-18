@@ -1,17 +1,18 @@
 package karika.distribucija.ba.ui.view.prelogin.registration
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.router.stack.pop
 import karika.distribucija.ba.domain.api.RegistrationRepository
 import karika.distribucija.ba.domain.model.Addresses
 import karika.distribucija.ba.domain.model.CustomAttributes
 import karika.distribucija.ba.domain.model.Customer
+import karika.distribucija.ba.domain.model.KarikaUnit
 import karika.distribucija.ba.domain.model.RegisterDto
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.VendorRegisterRequest
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.launch
@@ -19,12 +20,13 @@ import kotlinx.serialization.json.JsonPrimitive
 
 class RegistrationComponent(
     componentContext: ComponentContext,
-    stateHolder: KarikaStateHolder
+    stateHolder: KarikaStateHolder,
+    val userType: String,
 ) : CommonComponent(componentContext, stateHolder) {
     private val repository = RegistrationRepository()
 
     override val title: String
-        get() = "Registracija kupca"
+        get() = if (userType.isShop()) "Registracija kupca" else "Registracija dobavljača"
 
     val companyName = mutableStateOf("")
     val companyId = mutableStateOf("")
@@ -52,10 +54,8 @@ class RegistrationComponent(
     val canton = mutableStateOf<List<String>>(emptyList())
     val city = mutableStateOf<List<String>>(emptyList())
     val municipality = mutableStateOf<List<String>>(emptyList())
-
-    fun forgotPassword() {
-
-    }
+    val customerRegions = mutableStateOf<List<KarikaUnit>>(emptyList())
+    val customerGroups = mutableStateOf<List<KarikaUnit>>(emptyList())
 
     fun register() {
         if (companyName.value.isEmpty()) {
@@ -94,13 +94,15 @@ class RegistrationComponent(
             }
         }
 
-        if (companySize.value.isEmpty()) {
-            showMessage("Veličina objekta je obavezno polje!")
-            return
-        }
-        if (companyType.value.isEmpty()) {
-            showMessage("Tip objekta je obavezno polje!")
-            return
+        if (userType.isShop()) {
+            if (companySize.value.isEmpty()) {
+                showMessage("Veličina objekta je obavezno polje!")
+                return
+            }
+            if (companyType.value.isEmpty()) {
+                showMessage("Tip objekta je obavezno polje!")
+                return
+            }
         }
         if (contactFirstname.value.isEmpty()) {
             showMessage("Ime je obavezno polje!")
@@ -110,13 +112,15 @@ class RegistrationComponent(
             showMessage("Prezime je obavezno polje!")
             return
         }
-        if (contactAddress.value.isEmpty()) {
-            showMessage("Adresa je obavezno polje!")
-            return
-        }
-        if (contactPostal.value.isEmpty()) {
-            showMessage("Poštanski broj je obavezno polje!")
-            return
+        if (userType.isShop()) {
+            if (contactAddress.value.isEmpty()) {
+                showMessage("Adresa je obavezno polje!")
+                return
+            }
+            if (contactPostal.value.isEmpty()) {
+                showMessage("Poštanski broj je obavezno polje!")
+                return
+            }
         }
         if (contactPhone.value.isEmpty()) {
             showMessage("Broj telefona je obavezno polje!")
@@ -142,6 +146,14 @@ class RegistrationComponent(
             showMessage("Morate prihvatiti uslove korištenja!")
             return
         }
+        if (userType.isShop()) {
+            registerShop()
+            return
+        }
+        registerVendor()
+    }
+
+    private fun registerShop() {
         iOScope.launch {
             repository.register(
                 RegisterDto(
@@ -223,7 +235,7 @@ class RegistrationComponent(
                             "Dobrodošli na Karika.ba\n" +
                                     "Nakon provjere informacija za registraciju, vaš nalog će biti odobren."
                         )
-                        back()
+                        preLoginBack()
                     }
 
                     else -> {
@@ -235,9 +247,51 @@ class RegistrationComponent(
         }
     }
 
-    fun back() {
-        mainScope.launch {
-            stateHolder.preLoginNavigation.pop()
+    private fun registerVendor() {
+        iOScope.launch {
+            repository.registerVendor(
+                VendorRegisterRequest(
+                    customerGroups.value.joinToString(separator = ",") { it.unit() }
+                        .trimIndent(),
+                    customerRegions.value.joinToString(separator = ",") { it.unit() }
+                        .trimIndent(),
+                    companyEntity.value.trim(),
+                    companyCanton.value.trim(),
+                    companyMunicipality.value.trim(),
+                    companyName.value.trim(),
+                    companyPdv.value.trim(),
+                    companyId.value.trim(),
+                    email.value.trim(),
+                    password.value,
+                    confirmPassword.value,
+                    contactFirstname.value.trim(),
+                    contactLastname.value.trim(),
+                    contactPhone.value.trim()
+                )
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> {
+                        showLoader()
+                    }
+
+                    is ResultState.Success -> {
+                        hideLoader()
+                        showMessage(
+                            "Registracija je uspješna, dobrodošli na Karika.ba. Nakon provjere validnosti unesenih podataka Vaš nalog će biti odobren."
+                        )
+                        preLoginBack()
+                    }
+
+                    else -> {
+                        hideLoader()
+                        showMessage("Email adresa već postoji u sistemu, molimo pokušajte sa drugom adresom.")
+                    }
+                }
+            }
         }
     }
+
+    fun getColor() = if (userType.isShop()) KarikaColors.Primary else KarikaColors.Blue
 }
+
+fun String.isShop() = this == "shop"

@@ -229,7 +229,8 @@ fun KarikaTextField1(
     keyboardType: KeyboardType = KeyboardType.Text,
     trailingIcons: @Composable (() -> Unit)? = null,
     allowedChars: List<String> = emptyList(),
-    error: MutableState<String> = mutableStateOf("")
+    error: MutableState<String> = mutableStateOf(""),
+    leadingZero: Boolean = true
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
@@ -266,6 +267,9 @@ fun KarikaTextField1(
             enabled = enabled,
             value = value.value,
             onValueChange = {
+                if (!leadingZero && it.startsWith("0")) {
+                    return@TextField
+                }
                 if (it.startsWith(" ")) {
                     return@TextField
                 }

@@ -38,3 +38,21 @@ data class CustomAttributes(
     val attributeCode: String? = null,
     val value: JsonElement? = null
 )
+
+@Serializable
+data class VendorRegisterRequest(
+    val customerGroup: String,
+    val customersRegion: String,
+    val entity: String,
+    val canton: String,
+    val municipality: String,
+    val companyName: String,
+    val pdvNumber: String,
+    val idNumber: String,
+    val email: String,
+    val pass: String,
+    val repeatPass: String,
+    val firstname: String,
+    val lastname: String,
+    val phone: String
+)

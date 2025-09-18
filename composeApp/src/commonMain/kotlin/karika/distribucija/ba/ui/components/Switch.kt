@@ -74,15 +74,63 @@ fun KarikaSwitch(
 }
 
 @Composable
+fun KarikaSwitch1(
+    title: String,
+    checked: MutableState<Boolean>
+) {
+    Row(
+        modifier = Modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        KarikaText(
+            text = title,
+            color = KarikaColors.Gray4,
+            fontWeight = FontWeight.W400,
+            textSize = 14.sp
+        )
+        Box(
+            modifier = Modifier
+                .width(44.dp)
+                .height(28.dp)
+                .background(
+                    color = if (checked.value) KarikaColors.Blue else KarikaColors.Error,
+                    shape = RoundedCornerShape(100)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Switch(
+                checked = checked.value,
+                onCheckedChange = {
+                    checked.value = it
+                },
+                colors = SwitchDefaults.colors(
+                    checkedTrackColor = KarikaColors.Blue,
+                    uncheckedTrackColor = KarikaColors.Error,
+                    checkedThumbColor = KarikaColors.White,
+                    uncheckedThumbColor = KarikaColors.White,
+                    checkedBorderColor = KarikaColors.Blue,
+                    uncheckedBorderColor = KarikaColors.Error
+                ),
+                modifier = Modifier
+                    .width(40.dp)
+                    .height(20.dp)
+            )
+        }
+    }
+}
+
+@Composable
 fun KarikaCheckbox(
+    modifier: Modifier = Modifier
+        .fillMaxWidth(),
     title: String,
     value: Boolean = false,
     onCheckedChange: (Boolean) -> Unit
 ) {
     var checked by remember { mutableStateOf(value) }
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -101,6 +149,53 @@ fun KarikaCheckbox(
             )
         )
         KarikaText(
+            modifier = Modifier
+                .onClick {
+                    checked = !checked
+                    onCheckedChange.invoke(checked.not())
+                },
+            text = title,
+            color = KarikaColors.Gray4,
+            fontWeight = FontWeight.W400,
+            textSize = 14.sp
+        )
+    }
+}
+
+@Composable
+fun KarikaCheckboxSecondary(
+    modifier: Modifier = Modifier
+        .fillMaxWidth(),
+    title: String,
+    value: Boolean = false,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    var checked by remember { mutableStateOf(value) }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Checkbox(
+            modifier = Modifier
+                .size(16.dp),
+            checked = checked,
+            onCheckedChange = {
+                checked = it
+                onCheckedChange.invoke(it)
+            },
+            colors = CheckboxDefaults.colors(
+                uncheckedColor = KarikaColors.Gray4,
+                checkedColor = KarikaColors.Blue,
+                checkmarkColor = KarikaColors.White
+            )
+        )
+        KarikaText(
+            modifier = Modifier
+                .onClick {
+                    checked = !checked
+                    onCheckedChange.invoke(checked.not())
+                },
             text = title,
             color = KarikaColors.Gray4,
             fontWeight = FontWeight.W400,
@@ -133,6 +228,42 @@ fun KarikaCheckbox(
             colors = CheckboxDefaults.colors(
                 uncheckedColor = KarikaColors.Gray4,
                 checkedColor = KarikaColors.Primary,
+                checkmarkColor = KarikaColors.White
+            )
+        )
+        KarikaText(
+            atext = atitle,
+            color = KarikaColors.Gray4,
+            fontWeight = FontWeight.W400,
+            textSize = 14.sp
+        )
+    }
+}
+
+@Composable
+fun KarikaCheckboxSecondary(
+    atitle: AnnotatedString,
+    value: Boolean = false,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    var checked by remember { mutableStateOf(value) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Checkbox(
+            modifier = Modifier
+                .size(16.dp),
+            checked = checked,
+            onCheckedChange = {
+                checked = it
+                onCheckedChange.invoke(it)
+            },
+            colors = CheckboxDefaults.colors(
+                uncheckedColor = KarikaColors.Gray4,
+                checkedColor = KarikaColors.Blue,
                 checkmarkColor = KarikaColors.White
             )
         )

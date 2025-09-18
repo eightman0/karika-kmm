@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 internal class ProductApi {
-    suspend fun newArrivals(
+    suspend fun karikaProducts(
         pageSize: Int = 30,
         currentPage: Int,
         searchText: String = "",
@@ -25,36 +25,9 @@ internal class ProductApi {
         onlyWithImage: Boolean = false,
     ): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
-            url("products") +
-                    "?searchCriteria[sortOrders][0][field]=created_at" +
-                    "&searchCriteria[sortOrders][0][direction]=DESC" +
-                    "&searchCriteria[pageSize]=$pageSize" +
-                    "&searchCriteria[currentPage]=$currentPage" +
-
-                    if (to.isNotEmpty()) {
-                        "&searchCriteria[filterGroups][0][filters][0][field]=created_at" +
-                                "&searchCriteria[filterGroups][0][filters][0][condition_type]=gteq" +
-                                "&searchCriteria[filterGroups][0][filters][0][value]=$from" +
-                                "&searchCriteria[filterGroups][1][filters][0][field]=created_at" +
-                                "&searchCriteria[filterGroups][1][filters][0][condition_type]=lteq" +
-                                "&searchCriteria[filterGroups][1][filters][0][value]=$to"
-                    } else {
-                        ""
-                    } +
-
-                    if (searchText.isNotEmpty()) {
-                        "&searchCriteria[filterGroups][2][filters][0][field]=name" +
-                                "&searchCriteria[filterGroups][2][filters][0][value]=%25$searchText%25" +
-                                "&searchCriteria[filterGroups][2][filters][0][conditionType]=like"
-                    } else {
-                        ""
-                    } +
-
-                    if (onlyWithImage) {
-                        "&searchCriteria[filterGroups][3][filters][0][field]=image" +
-                                "&searchCriteria[filterGroups][3][filters][0][value]=no_selection" +
-                                "&searchCriteria[filterGroups][3][filters][0][condition_type]=neq"
-                    } else ""
+            url(
+                "products?searchCriteria[filterGroups][0][filters][0][field]=is_karika_suggestion&searchCriteria[filterGroups][0][filters][0][value]=1&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage"
+            )
         )
     }
 
@@ -123,7 +96,7 @@ internal class ProductApi {
 }
 
 class ProductRepository internal constructor() {
-    fun newArrivals(
+    fun karikaProducts(
         pageSize: Int = 30,
         currentPage: Int,
         searchText: String = "",
@@ -134,7 +107,7 @@ class ProductRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = ProductApi()
-                .newArrivals(
+                .karikaProducts(
                     pageSize,
                     currentPage,
                     searchText,

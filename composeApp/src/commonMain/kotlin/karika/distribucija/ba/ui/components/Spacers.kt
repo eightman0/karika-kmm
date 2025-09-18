@@ -24,6 +24,13 @@ fun YSpacer8() {
 }
 
 @Composable
+fun YSpacer24() {
+    Spacer(
+        modifier = Modifier
+            .height(24.dp)
+    )
+}
+@Composable
 fun YSpacer32() {
     Spacer(
         modifier = Modifier

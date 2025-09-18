@@ -41,7 +41,6 @@ class VendorComponent(
             repository.vendors(
                 currentPage = currentPage,
                 pageSize = pageSize,
-                filterBy = selectedRegion.value.takeIf { it.isNotEmpty() }?.let { "regions" } ?: "",
                 filterValue = selectedRegion.value.takeIf { it.isNotEmpty() }
                     ?.let { selectedRegion.value.joinToString(",") { it.unit() } } ?: "",
                 searchText = searchText.value,

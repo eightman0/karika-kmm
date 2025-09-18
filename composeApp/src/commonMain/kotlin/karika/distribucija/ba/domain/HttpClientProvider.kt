@@ -25,6 +25,10 @@ object HttpClientProvider {
         return BASE_URL + arg
     }
 
+    fun urlInternal(query: String): String {
+        return "https://${getEnvPrefix()}karika.ba/internal/V1/ai/suggestions?query=$query"
+    }
+
     var token: String? = null
     fun imageUrl(name: String?): String {
         return if (name != null && name.contains("media")) {
@@ -34,12 +38,24 @@ object HttpClientProvider {
         }
     }
 
+    fun profileImage(name: String?): String? {
+        if (name.isNullOrEmpty()) {
+            return null
+        }
+
+        return "$HOST/media/$name"
+    }
+
     fun chatImage(name: String): String {
         return "$HOST/media/csmessaging/chat_images/$name"
     }
 
     fun commentAttachment(name: String?): String {
         return "$HOST/$name"
+    }
+
+    fun orderPdf(name: String?): String {
+        return "$HOST/media/order_pdf/$name"
     }
 
     val client: HttpClient by lazy {

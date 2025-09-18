@@ -79,6 +79,7 @@ fun PrimaryButtonFilled(
     color: Color = KarikaColors.White,
     icon: DrawableResource? = null,
     textSize: TextUnit = 14.sp,
+    iconPosition: FabPosition = FabPosition.Start,
     onClick: () -> Unit
 ) {
     Button(
@@ -99,7 +100,44 @@ fun PrimaryButtonFilled(
             text = title,
             fontWeight = fontWeight,
             textSize = textSize,
-            iconPosition = if (icon == null) FabPosition.EndOverlay else FabPosition.Start
+            iconPosition = if (icon == null) FabPosition.EndOverlay else iconPosition
+        )
+    }
+}
+
+@Composable
+fun SecondaryButtonFilled(
+    modifier: Modifier = Modifier
+        .height(48.dp)
+        .fillMaxWidth(),
+    title: String,
+    enabled: Boolean = true,
+    fontWeight: FontWeight = FontWeight.W600,
+    color: Color = KarikaColors.White,
+    icon: DrawableResource? = null,
+    textSize: TextUnit = 14.sp,
+    iconPosition: FabPosition = FabPosition.Start,
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = modifier,
+        shape = RoundedCornerShape(100.dp),
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = KarikaColors.Blue,
+            disabledContentColor = KarikaColors.Secondary
+        ),
+        enabled = enabled
+    ) {
+        IconTextItem(
+            modifier = Modifier,
+            icon = vectorResource(icon ?: Res.drawable.ic_gift),
+            iconColor = color,
+            textColor = color,
+            text = title,
+            fontWeight = fontWeight,
+            textSize = textSize,
+            iconPosition = if (icon == null) FabPosition.EndOverlay else iconPosition
         )
     }
 }
@@ -191,6 +229,54 @@ fun HorizontalButtons(
             onClick(secondaryTitle)
         }
         PrimaryButtonFilled(
+            modifier = Modifier
+                .onGloballyPositioned {
+                    secondary.value = it.size.height
+                    buttonHeight.value = max(primary.value, secondary.value)
+                }
+                .heightIn(min = with(LocalDensity.current) { buttonHeight.value.toDp() })
+                .weight(1f),
+            title = primaryTitle,
+            enabled = primaryEnabled
+        ) {
+            onClick(primaryTitle)
+        }
+    }
+}
+
+@Composable
+fun HorizontalSecondaryButtons(
+    modifier: Modifier = Modifier
+        .padding(horizontal = 16.dp),
+    primaryTitle: String,
+    secondaryTitle: String,
+    primaryEnabled: Boolean = true,
+    secondaryEnabled: Boolean = true,
+    onClick: (String) -> Unit
+) {
+    val primary = mutableStateOf(0).asState()
+    val secondary = mutableStateOf(0).asState()
+    val buttonHeight = mutableStateOf(40).asState()
+    Row(
+        modifier = modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        PrimaryButton(
+            modifier = Modifier
+                .onGloballyPositioned {
+                    primary.value = it.size.height
+                    buttonHeight.value = max(primary.value, secondary.value)
+                }
+                .heightIn(min = with(LocalDensity.current) { buttonHeight.value.toDp() })
+                .weight(1f),
+            title = secondaryTitle,
+            enabled = secondaryEnabled,
+            color = KarikaColors.Blue
+        ) {
+            onClick(secondaryTitle)
+        }
+        SecondaryButtonFilled(
             modifier = Modifier
                 .onGloballyPositioned {
                     secondary.value = it.size.height

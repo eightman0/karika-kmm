@@ -9,6 +9,7 @@ import karika.distribucija.ba.ui.components.ImagePreview
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.LoadingView
+import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardView
 import karika.distribucija.ba.ui.view.main.MainView
 import karika.distribucija.ba.ui.view.main.menu.blog.BlogsView
 import karika.distribucija.ba.ui.view.main.menu.blog.overview.BlogOverviewView
@@ -67,6 +68,10 @@ fun App(component: AppComponent) {
 
                     is Child.Points -> PointsView(child.component)
                     is Child.Notifications -> NotificationsView(child.component)
+
+
+                    //vendor_side
+                    is Child.Dashboard -> DashboardView(child.component)
                 }
             }
             ImagePreview(component)

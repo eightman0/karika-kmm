@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.common
 
+import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.api.CartRepository
 import karika.distribucija.ba.domain.model.Cart
 import karika.distribucija.ba.domain.model.Product
@@ -15,7 +16,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
 open class CartHandler : SessionHandler(), KoinComponent {
-    private val cartRepository = CartRepository()
     var cartId: String = ""
     private val _cart = MutableStateFlow(Cart())
     val cart = _cart.asStateFlow()
@@ -23,24 +23,34 @@ open class CartHandler : SessionHandler(), KoinComponent {
     private val _cart1 = MutableStateFlow<Map<Vendor, List<Pair<Product, Int>>>>(mapOf())
     val cart1 = _cart1.asStateFlow()
 
-    init {
-        if (accessToken.value.isNotEmpty()) {
+    override fun setAccessToken(accessToken: String) {
+        super.setAccessToken(accessToken)
+        initCart()
+    }
+
+    private fun initCart() {
+        if (appType == AppConfig.Main) {
             CoroutineScope(Dispatchers.IO).launch {
-                cartRepository.createCart()
+                CartRepository().createCart()
                     .collect { result ->
                         if (result is ResultState.Success) {
                             cartId = result.data
                         }
                     }
             }
-
-            reloadCart()
         }
+
+        reloadCart()
     }
 
+
     fun reloadCart() {
+        if (appType == AppConfig.Dashboard) {
+            return
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
-            cartRepository.getCart()
+            CartRepository().getCart()
                 .collect { result ->
                     if (result is ResultState.Success) {
                         _cart.update { result.data }
@@ -81,7 +91,7 @@ open class CartHandler : SessionHandler(), KoinComponent {
 
     fun placedOrder() {
         CoroutineScope(Dispatchers.IO).launch {
-            cartRepository.createCart()
+            CartRepository().createCart()
                 .collect { result ->
                     if (result is ResultState.Success) {
                         cartId = result.data
