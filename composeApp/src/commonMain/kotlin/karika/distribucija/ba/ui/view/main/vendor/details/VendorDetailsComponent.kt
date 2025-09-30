@@ -7,7 +7,7 @@ import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -31,7 +31,7 @@ class VendorDetailsComponent(
     init {
         getVendor()
         _vendorCategories.update {
-            stateHolder.categories.value.plus(stateHolder.categories.value.flatMap { it.childrenData.flatMap { it.childrenData.flatMap { it.childrenData } } })
+            stateHolder.commonHandler.categories.value.plus(stateHolder.commonHandler.categories.value.flatMap { it.childrenData.flatMap { it.childrenData.flatMap { it.childrenData } } })
                 .filter {
                     vendor.categories?.contains(it.id.toString()) ?: false
                 }

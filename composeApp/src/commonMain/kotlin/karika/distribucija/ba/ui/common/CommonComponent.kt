@@ -5,6 +5,7 @@ import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.AppConfig
+import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.api.CartRepository
 import karika.distribucija.ba.domain.api.MessagesRepository
 import karika.distribucija.ba.domain.api.NotificationRepository
@@ -21,6 +22,7 @@ import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
 import karika.distribucija.ba.ui.view.main.MainConfig
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +37,7 @@ import org.koin.core.component.KoinComponent
 open class CommonComponent(
     componentContext: ComponentContext,
     val stateHolder: KarikaStateHolder,
-) : LoaderViewComponent(), KoinComponent, ComponentContext by componentContext {
+) : KoinComponent, ComponentContext by componentContext {
     open val title: String = ""
     val snackbarHostState = stateHolder.hostState
     val mainScope = CoroutineScope(Dispatchers.Main)
@@ -52,6 +54,7 @@ open class CommonComponent(
     val promotedVendors = _promotedVendors.asStateFlow()
     val _promotedLogos = MutableStateFlow<List<PromotedVendor>>(emptyList())
     val promotedLogos = _promotedLogos.asStateFlow()
+    val loader = stateHolder.loaderHandler.loader
 
     fun showMessage(message: String?) {
         mainScope.launch {
@@ -64,8 +67,9 @@ open class CommonComponent(
 
     fun logout() {
         removePushHandle()
+        stateHolder.sessionHandler.logout()
+        HttpClientProvider.token = null
         stateHolder.logout()
-        stateHolder.appNavigation.replaceAll(AppConfig.PreLogin)
     }
 
     open fun showVendor(vendor: Vendor) {
@@ -87,7 +91,7 @@ open class CommonComponent(
                     CartItem(
                         sku = product.sku ?: return@launch,
                         qty = qty,
-                        quoteId = stateHolder.cartId
+                        quoteId = stateHolder.cartHandler.cartId
                     )
                 )
             ).collect { result ->
@@ -117,7 +121,7 @@ open class CommonComponent(
                     CartItem(
                         sku = product.sku ?: return@launch,
                         qty = 1,
-                        quoteId = stateHolder.cartId
+                        quoteId = stateHolder.cartHandler.cartId
                     )
                 )
             ).collect { result ->
@@ -152,7 +156,7 @@ open class CommonComponent(
                     CartItem(
                         sku = product.sku ?: return@launch,
                         qty = qty,
-                        quoteId = stateHolder.cartId,
+                        quoteId = stateHolder.cartHandler.cartId,
                         itemId = product.itemId
                     )
                 )
@@ -249,14 +253,14 @@ open class CommonComponent(
     }
 
     fun placedOrder(id: String) {
-        stateHolder.placedOrder()
+        stateHolder.cartHandler.placedOrder()
         mainScope.launch {
             stateHolder.mainNavigation.bringToFront(MainConfig.CartSuccess(id))
         }
     }
 
     fun reloadCart() {
-        stateHolder.reloadCart()
+        stateHolder.cartHandler.reloadCart()
     }
 
     fun navigateToComments(it: Order) {
@@ -347,14 +351,22 @@ open class CommonComponent(
     }
 
     fun dashNavigate(config: DashConfig, replace: Boolean = false) {
-       //if (replace) {
-       //    stateHolder.dashNavigation.replaceAll(config)
-       //    return
-       //}
+        //if (replace) {
+        //    stateHolder.dashNavigation.replaceAll(config)
+        //    return
+        //}
         stateHolder.dashNavigation.bringToFront(config)
     }
 
     fun dashBack() {
         stateHolder.dashNavigation.pop()
+    }
+
+    fun showLoader() {
+        stateHolder.loaderHandler.showLoader()
+    }
+
+    fun hideLoader() {
+        stateHolder.loaderHandler.hideLoader()
     }
 }

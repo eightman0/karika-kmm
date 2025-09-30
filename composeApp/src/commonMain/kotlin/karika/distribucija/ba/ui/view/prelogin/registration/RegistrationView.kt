@@ -187,7 +187,7 @@ private fun CompanyInfo(component: RegistrationComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.config.value.customerGroupList.chunked(2).forEach {
+        component.stateHolder.commonHandler.config.value.customerGroupList.chunked(2).forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -232,7 +232,7 @@ private fun CompanyInfo(component: RegistrationComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.config.value.customerRegionList.chunked(2).forEach {
+        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(2).forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),

@@ -33,7 +33,6 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaRadioButton
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.onClick
@@ -66,13 +65,12 @@ fun ShippingDetailsView(component: ShippingDetailsComponent) {
             }
             PinnedFooter(component)
         }
-        LoadingView1(component)
     }
 }
 
 @Composable
 private fun Cart(modifier: Modifier, component: ShippingDetailsComponent) {
-    val cart = component.stateHolder.cart1.collectAsState()
+    val cart = component.stateHolder.cartHandler.cart.collectAsState()
     Column(
         modifier = modifier
             .fillMaxWidth(),
@@ -168,7 +166,7 @@ private fun VendorItem(entry: Map.Entry<Vendor, List<Pair<Product, Int>>>) {
 
 @Composable
 private fun AddressBox(component: ShippingDetailsComponent) {
-    val profile by component.stateHolder.userDetails.collectAsState()
+    val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
     val newAddress = component.newAddress.asState()
     val addresses = component.addresses.collectAsState()
     val selectedAddress = component.selectedAddress.asState()

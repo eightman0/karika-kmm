@@ -1,8 +1,6 @@
-package karika.distribucija.ba.ui.common
+package karika.distribucija.ba.ui.common.state.customer
 
-import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.api.CartRepository
-import karika.distribucija.ba.domain.model.Cart
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
@@ -13,48 +11,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
 
-open class CartHandler : SessionHandler(), KoinComponent {
-    var cartId: String = ""
-    private val _cart = MutableStateFlow(Cart())
+class CartHandler {
+    private val _cart = MutableStateFlow<Map<Vendor, List<Pair<Product, Int>>>>(mapOf())
     val cart = _cart.asStateFlow()
-
-    private val _cart1 = MutableStateFlow<Map<Vendor, List<Pair<Product, Int>>>>(mapOf())
-    val cart1 = _cart1.asStateFlow()
-
-    override fun setAccessToken(accessToken: String) {
-        super.setAccessToken(accessToken)
-        initCart()
-    }
-
-    private fun initCart() {
-        if (appType == AppConfig.Main) {
-            CoroutineScope(Dispatchers.IO).launch {
-                CartRepository().createCart()
-                    .collect { result ->
-                        if (result is ResultState.Success) {
-                            cartId = result.data
-                        }
-                    }
-            }
-        }
-
-        reloadCart()
-    }
-
+    var cartId: String = ""
 
     fun reloadCart() {
-        if (appType == AppConfig.Dashboard) {
-            return
-        }
-
         CoroutineScope(Dispatchers.IO).launch {
             CartRepository().getCart()
                 .collect { result ->
                     if (result is ResultState.Success) {
-                        _cart.update { result.data }
-                        _cart1.update {
+                        cartId = result.data.id.toString()
+                        _cart.update {
                             result.data.items.groupBy {
                                 Vendor(
                                     entityId = it.extensionAttributes?.vendorId?.toIntOrNull() ?: 0,
@@ -94,7 +63,6 @@ open class CartHandler : SessionHandler(), KoinComponent {
             CartRepository().createCart()
                 .collect { result ->
                     if (result is ResultState.Success) {
-                        cartId = result.data
                         reloadCart()
                     }
                 }

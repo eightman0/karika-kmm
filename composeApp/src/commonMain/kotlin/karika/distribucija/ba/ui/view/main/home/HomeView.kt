@@ -33,7 +33,6 @@ import karika.distribucija.ba.ui.components.CarouselLogos
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.onClick
@@ -81,7 +80,6 @@ fun HomeView(component: HomeComponent) {
                 CarouselLogos(component)
             }
         }
-        LoadingView1(component)
     }
 
     LaunchedEffect(Unit) {

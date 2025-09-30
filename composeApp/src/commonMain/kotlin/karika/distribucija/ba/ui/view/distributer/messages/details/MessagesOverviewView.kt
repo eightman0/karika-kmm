@@ -51,7 +51,6 @@ import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.KarikaTextField2
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
@@ -109,7 +108,6 @@ fun MessagesOverviewView(component: MessagesOverviewComponent) {
         EnterComment(component)
     }
 
-    LoadingView1(component)
     LaunchedEffect(comments.value) {
         component.mainScope.launch {
             state.scrollToItem(comments.value.size)
@@ -310,7 +308,7 @@ private fun EnterComment(component: MessagesOverviewComponent) {
 
 @Composable
 fun MessageItem(message: Message, component: MessagesOverviewComponent) {
-    if (message.isMine(component.stateHolder.vendorDetails.value.entityId)) {
+    if (message.isMine(component.stateHolder.vendorSpecificHandler.vendorDetails.value.entityId)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(),

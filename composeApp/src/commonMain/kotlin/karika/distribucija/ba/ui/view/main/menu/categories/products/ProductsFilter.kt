@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField2
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.RadioGroup
 import karika.distribucija.ba.ui.components.SearchBoxBorder
@@ -243,7 +242,7 @@ fun ProductsFilterSheet(
                         textSize = 16.sp,
                         fontWeight = FontWeight.W700
                     )
-                    component.stateHolder.config.value.customerRegionList.forEach {
+                    component.stateHolder.commonHandler.config.value.customerRegionList.forEach {
                         Row(
                             modifier = Modifier
                                 .clickable(
@@ -332,7 +331,6 @@ fun ProductsFilterSheet(
                         }
                 }
             }
-            LoadingView1(component)
         }
     }
 }

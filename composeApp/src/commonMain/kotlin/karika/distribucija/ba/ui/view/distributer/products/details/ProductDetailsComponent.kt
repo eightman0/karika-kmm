@@ -8,7 +8,7 @@ import karika.distribucija.ba.domain.model.MediaGallery
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.view.distributer.orders.toDate1
 import kotlinx.coroutines.async
@@ -147,7 +147,7 @@ class ProductDetailsComponent(
                     status = approveProduct.value.toStatus(),
                     name = name.value,
                     minQty = minQty.value,
-                    minQtyUnit = stateHolder.config.value.unitOptions.find { it.label == minQtyUnit.value }
+                    minQtyUnit = stateHolder.commonHandler.config.value.unitOptions.find { it.label == minQtyUnit.value }
                         ?.unit(),
                     qty = availableQty.value,
                     manageStock = "1",
@@ -215,7 +215,7 @@ class ProductDetailsComponent(
     }
 
     private fun minQtyUnit(product: VendorProduct): String {
-        return stateHolder.config.value.unitOptions.find {
+        return stateHolder.commonHandler.config.value.unitOptions.find {
             it.unit() == product.minQtyUnit
         }?.label() ?: "kom"
     }
@@ -247,7 +247,7 @@ class ProductDetailsComponent(
 
     fun categories(product: VendorProduct): List<Category> {
         val categories = ArrayDeque<Category>()
-        val tmp = stateHolder.categories.value
+        val tmp = stateHolder.commonHandler.categories.value
         tmp.forEach { d1 ->
             categories.add(d1)
             d1.childrenData.forEach { d2 ->

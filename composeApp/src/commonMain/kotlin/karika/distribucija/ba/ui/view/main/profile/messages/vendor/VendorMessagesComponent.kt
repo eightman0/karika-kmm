@@ -2,7 +2,7 @@ package karika.distribucija.ba.ui.view.main.profile.messages.vendor
 
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.main.profile.messages.admin.AdminMessagesComponent
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -11,7 +11,7 @@ class VendorMessagesComponent(componentContext: ComponentContext, stateHolder: K
     AdminMessagesComponent(componentContext, stateHolder) {
     init {
         iOScope.launch {
-            stateHolder.vendorMessagesReloadState.collect {
+            stateHolder.messageHandler.vendorMessagesReloadState.collect {
                 loadNextPage()
             }
         }

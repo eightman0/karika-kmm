@@ -58,7 +58,7 @@ fun ProfileView(component: ProfileComponent) {
 
 @Composable
 private fun Header(component: ProfileComponent) {
-    val profile by component.stateHolder.userDetails.collectAsState()
+    val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
     Box(
         modifier = Modifier
             .background(color = KarikaColors.White)
@@ -99,9 +99,9 @@ private fun Header(component: ProfileComponent) {
 
 @Composable
 private fun Actions(component: ProfileComponent) {
-    val notificationCount = component.stateHolder.notificationCount.asStateFlow()
-    val adminCount = component.stateHolder.messageUnreadCountAdmin.asStateFlow()
-    val userCount = component.stateHolder.messageUnreadCountUser.asStateFlow()
+    val notificationCount = component.stateHolder.customerNotificationHandler.notificationCount.asStateFlow()
+    val adminCount = component.stateHolder.customerNotificationHandler.messageUnreadCountAdmin.asStateFlow()
+    val userCount = component.stateHolder.customerNotificationHandler.messageUnreadCountUser.asStateFlow()
 
     Column(
         modifier = Modifier

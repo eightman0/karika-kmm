@@ -73,7 +73,7 @@ fun AccountView(component: AccountComponent) {
 
 @Composable
 private fun ContactInfo(component: AccountComponent) {
-    val profile by component.stateHolder.userDetails.collectAsState()
+    val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
 
     Column(
         modifier = Modifier
@@ -213,7 +213,7 @@ private fun ContactInfo(component: AccountComponent) {
 
 @Composable
 private fun BillingAddress(component: AccountComponent) {
-    val profile by component.stateHolder.userDetails.collectAsState()
+    val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
 
     Column(
         modifier = Modifier
@@ -399,7 +399,7 @@ private fun BillingAddress(component: AccountComponent) {
 
 @Composable
 private fun ShippingAddress(component: AccountComponent) {
-    val profile by component.stateHolder.userDetails.collectAsState()
+    val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
 
     Column(
         modifier = Modifier

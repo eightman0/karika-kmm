@@ -8,7 +8,7 @@ import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.SetShippingAddressRequest
 import karika.distribucija.ba.domain.model.ShippingAddress
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,11 +20,11 @@ class ShippingDetailsComponent(
     stateHolder: KarikaStateHolder,
 ) : CommonComponent(componentContext, stateHolder) {
     private val repository = CartRepository()
-    private val _addresses = MutableStateFlow(stateHolder.userDetails.value.shippingAddresses())
+    private val _addresses = MutableStateFlow(stateHolder.customerSpecificHandler.userDetails.value.shippingAddresses())
     val addresses = _addresses.asStateFlow()
 
     val selectedAddress =
-        mutableStateOf(stateHolder.userDetails.value.addresses.find { it.defaultShipping == "true" }?.id.toString())
+        mutableStateOf(stateHolder.customerSpecificHandler.userDetails.value.addresses.find { it.defaultShipping == "true" }?.id.toString())
     val newAddress = mutableStateOf(false)
 
     val firstname = mutableStateOf("")

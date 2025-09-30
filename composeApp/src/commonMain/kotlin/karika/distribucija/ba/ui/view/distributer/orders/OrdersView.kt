@@ -28,7 +28,6 @@ import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.negate
@@ -126,7 +125,6 @@ fun OrdersView(component: OrdersComponent) {
             OrderItem(component, it)
         }
     }
-    LoadingView1(component)
 
     OrderFilterSheet(component)
 

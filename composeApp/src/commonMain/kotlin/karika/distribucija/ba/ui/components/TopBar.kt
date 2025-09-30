@@ -293,7 +293,7 @@ fun TopBarDashboard(
     menu: () -> Unit,
     action: () -> Unit
 ) {
-    val badge by component.stateHolder.notificationCount.collectAsState()
+    val badge by component.stateHolder.vendorNotificationHandler.notificationCount.collectAsState()
 
     Column {
         TopAppBar(

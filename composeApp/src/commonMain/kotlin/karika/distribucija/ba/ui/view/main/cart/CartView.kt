@@ -34,7 +34,6 @@ import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer32
@@ -51,7 +50,7 @@ import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun CartView(component: CartComponent) {
-    val items = component.stateHolder.cart1.collectAsState()
+    val items = component.stateHolder.cartHandler.cart.collectAsState()
 
     Box(
         modifier = Modifier
@@ -104,13 +103,12 @@ fun CartView(component: CartComponent) {
                 PinnedFooter(component)
             }
         }
-        LoadingView1(component)
     }
 }
 
 @Composable
 private fun PinnedFooter(component: CartComponent) {
-    val cart by component.stateHolder.cart1.collectAsState()
+    val cart by component.stateHolder.cartHandler.cart.collectAsState()
 
     HorizontalDivider(
         modifier = Modifier.fillMaxWidth(),

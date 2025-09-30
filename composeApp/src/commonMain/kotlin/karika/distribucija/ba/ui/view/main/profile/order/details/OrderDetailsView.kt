@@ -2,6 +2,7 @@ package karika.distribucija.ba.ui.view.main.profile.order.details
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,12 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,6 +23,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
@@ -36,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrderProduct
 import karika.distribucija.ba.domain.model.OrdersResponse
-import karika.distribucija.ba.ui.components.HorizontalButtons
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
@@ -48,10 +49,6 @@ import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rounded
 import karika.distribucija.ba.ui.view.main.profile.order.components.AttachBillModal
 import karika.distribucija.ba.ui.view.main.profile.order.components.CancelOrderModal
-import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_arrow_down
-import org.jetbrains.compose.resources.vectorResource
-import kotlin.math.max
 
 @Composable
 fun OrderDetailsView(component: OrderDetailsComponent) {
@@ -110,17 +107,17 @@ private fun OrderCommon(component: OrderDetailsComponent) {
         YSpacer16()
         PriceBox(order)
         YSpacer16()
-       //HorizontalButtons(
-       //    modifier = Modifier,
-       //    primaryTitle = "Naruči ponovo",
-       //    secondaryTitle = "Isprintaj"
-       //) {
-       //    if (it == "Naruči ponovo") {
-       //        component.orderAgain(order)
-       //    } else {
+        //HorizontalButtons(
+        //    modifier = Modifier,
+        //    primaryTitle = "Naruči ponovo",
+        //    secondaryTitle = "Isprintaj"
+        //) {
+        //    if (it == "Naruči ponovo") {
+        //        component.orderAgain(order)
+        //    } else {
 
-       //    }
-       //}
+        //    }
+        //}
         PrimaryButtonFilled(
             title = "Naruči ponovo",
         ) {
@@ -260,9 +257,16 @@ fun VendorOrder(order: OrdersResponse, component: OrderDetailsComponent) {
                 //)
             }
             YSpacer8()
-            TableHeaderRow()
-            it.products.forEach { vp ->
-                TableRow(vp)
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                Column {
+                    TableHeaderRow1()
+                    it.products.forEach { vp ->
+                        TableRow1(vp)
+                    }
+                }
             }
             Row(
                 modifier = Modifier
@@ -311,7 +315,7 @@ fun VendorOrder(order: OrdersResponse, component: OrderDetailsComponent) {
                             .onClick {
                                 attachBillModal.value = it
                             },
-                        text = "Pošalji predračun",
+                        text = "Pošalji uplatnicu",
                         fontWeight = FontWeight.W600,
                         color = KarikaColors.Primary,
                         textSize = 16.sp,
@@ -573,6 +577,239 @@ private fun TableRow(order: OrderProduct) {
                 .weight(1f)
                 .border(width = 0.5.dp, color = KarikaColors.Border),
             contentAlignment = Alignment.CenterStart
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray17,
+                fontWeight = FontWeight.W600,
+                textSize = 12.sp,
+                text = order.total()
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun TableHeaderRow1() {
+    Row(
+        modifier = Modifier
+            .background(color = KarikaColors.Gray16)
+            .border(width = 0.5.dp, color = KarikaColors.Border)
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .width(150.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray15,
+                fontWeight = FontWeight.W600,
+                textSize = 10.sp,
+                text = "ARTIKAL"
+            )
+        }
+        Box(
+            modifier = Modifier
+                .width(100.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray15,
+                fontWeight = FontWeight.W600,
+                textSize = 10.sp,
+                text = "RABAT %"
+            )
+        }
+        Box(
+            modifier = Modifier
+                .width(100.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray15,
+                fontWeight = FontWeight.W600,
+                textSize = 10.sp,
+                text = "VPC"
+            )
+        }
+        Box(
+            modifier = Modifier
+                .width(150.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray15,
+                fontWeight = FontWeight.W600,
+                textSize = 10.sp,
+                text = "KOLIČINA"
+            )
+        }
+        Box(
+            modifier = Modifier
+                .width(100.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray15,
+                fontWeight = FontWeight.W600,
+                textSize = 10.sp,
+                text = "UKUPNO"
+            )
+        }
+    }
+}
+
+@Composable
+private fun TableRow1(order: OrderProduct) {
+    val height = remember { mutableStateOf(0) }
+    Row(
+        modifier = Modifier
+            .background(color = KarikaColors.White)
+            .border(width = 0.5.dp, color = KarikaColors.Border)
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .onGloballyPositioned {
+                    height.value = it.size.height
+                }
+                .width(150.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                atext = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.W600,
+                            color = KarikaColors.Gray15,
+                            fontSize = 12.sp
+                        )
+                    ) {
+                        append(order.name).append("\n")
+                    }
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.W400,
+                            color = KarikaColors.Gray15,
+                            fontSize = 12.sp
+                        )
+                    ) {
+                        append(order.vendorName())
+                    }
+                }
+            )
+        }
+        Box(
+            modifier = Modifier
+                .height(with(LocalDensity.current) { height.value.toDp() })
+                .width(100.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (order.rabat() != "0") {
+                    KarikaText(
+                        modifier = Modifier.drawBehind {
+                            drawLine(
+                                color = KarikaColors.Gray1,
+                                strokeWidth = 1.dp.toPx(),
+                                start = Offset(0f, size.height / 2),
+                                end = Offset(size.width, size.height / 2)
+                            )
+                        },
+                        color = KarikaColors.Gray17,
+                        fontWeight = FontWeight.W600,
+                        textSize = 12.sp,
+                        text = "0"
+                    )
+                }
+                KarikaText(
+                    modifier = Modifier
+                        .padding(8.dp),
+                    color = KarikaColors.Gray17,
+                    fontWeight = FontWeight.W600,
+                    textSize = 12.sp,
+                    text = order.rabat()
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .height(with(LocalDensity.current) { height.value.toDp() })
+                .width(100.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray17,
+                fontWeight = FontWeight.W600,
+                textSize = 12.sp,
+                text = order.vpc()
+            )
+        }
+        Box(
+            modifier = Modifier
+                .height(with(LocalDensity.current) { height.value.toDp() })
+                .width(150.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (order.qtyChanged()) {
+                    KarikaText(
+                        modifier = Modifier.drawBehind {
+                            drawLine(
+                                color = KarikaColors.Gray1,
+                                strokeWidth = 1.dp.toPx(),
+                                start = Offset(0f, size.height / 2),
+                                end = Offset(size.width, size.height / 2)
+                            )
+                        },
+                        color = KarikaColors.Gray17,
+                        fontWeight = FontWeight.W600,
+                        textSize = 12.sp,
+                        text = order.originalQty()
+                    )
+                }
+                KarikaText(
+                    modifier = Modifier
+                        .padding(8.dp),
+                    color = KarikaColors.Gray17,
+                    fontWeight = FontWeight.W600,
+                    textSize = 12.sp,
+                    text = order.qty()
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .height(with(LocalDensity.current) { height.value.toDp() })
+                .width(100.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border),
+            contentAlignment = Alignment.CenterEnd
         ) {
             KarikaText(
                 modifier = Modifier

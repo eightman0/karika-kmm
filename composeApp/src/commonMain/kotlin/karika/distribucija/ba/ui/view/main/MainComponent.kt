@@ -4,14 +4,12 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.childStack
-import com.arkivanov.decompose.router.stack.popToFirst
-import com.arkivanov.decompose.router.stack.popWhile
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackCallback
 import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.main.cart.CartComponent
 import karika.distribucija.ba.ui.view.main.cart.nextstep.ShippingDetailsComponent
 import karika.distribucija.ba.ui.view.main.cart.success.CartSuccessComponent
@@ -85,6 +83,13 @@ sealed class MainChild {
 
 class MainComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
     CommonComponent(componentContext, stateHolder) {
+
+    init {
+        stateHolder.customerSpecificHandler.getUserDetails()
+        stateHolder.cartHandler.reloadCart()
+        stateHolder.customerNotificationHandler.notificationReceived()
+        stateHolder.commonHandler.fetchCategories()
+    }
 
     val stack: Value<ChildStack<*, MainChild>> =
         childStack(

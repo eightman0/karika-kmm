@@ -26,8 +26,6 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaDatePicker
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField2
-import karika.distribucija.ba.ui.components.LoadingView1
-import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.SecondaryButton
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
@@ -299,7 +297,6 @@ fun OrderFilterSheet(
                         }
                     }
                 }
-                LoadingView1(component)
             }
             KarikaDatePicker(
                 showPicker = showDateDialogFrom,

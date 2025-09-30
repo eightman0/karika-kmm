@@ -4,7 +4,7 @@ import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.main.MainConfig
 
 class MenuComponent(

@@ -9,7 +9,7 @@ import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.board.BoardComponent
 import karika.distribucija.ba.ui.view.distributer.messages.admin.AdminMessagesComponent
 import karika.distribucija.ba.ui.view.distributer.messages.customer.CustomerMessagesComponent
@@ -20,7 +20,6 @@ import karika.distribucija.ba.ui.view.distributer.orders.details.OrderDetailsCom
 import karika.distribucija.ba.ui.view.distributer.products.ProductsComponent
 import karika.distribucija.ba.ui.view.distributer.products.details.ProductDetailsComponent
 import karika.distribucija.ba.ui.view.distributer.profile.ProfileComponent
-import karika.distribucija.ba.ui.view.main.MainChild
 import kotlinx.serialization.Serializable
 
 class DashboardComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
@@ -38,6 +37,10 @@ class DashboardComponent(componentContext: ComponentContext, stateHolder: Karika
                 }
             }
         })
+
+        stateHolder.vendorSpecificHandler.getVendorDetails()
+        stateHolder.vendorNotificationHandler.notificationReceived()
+        stateHolder.commonHandler.fetchCategories()
     }
 
     val stack: Value<ChildStack<*, DashChild>> =

@@ -9,7 +9,6 @@ import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.ui.view.prelogin.registration.isShop
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

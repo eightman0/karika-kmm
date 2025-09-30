@@ -8,7 +8,7 @@ import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.SendMessageRequest
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -63,12 +63,12 @@ class MessagesOverviewComponent(
             messagesRepository.markAsRead(conversationState.value.id)
                 .collect {
                     if (conversationState.value.admin) {
-                        stateHolder.reloadAdminMessages()
+                        stateHolder.messageHandler.reloadAdminMessages()
                     } else {
-                        stateHolder.reloadVendorMessages()
+                        stateHolder.messageHandler.reloadVendorMessages()
                     }
                 }
-            stateHolder.notificationReceived()
+            stateHolder.customerNotificationHandler.notificationReceived()
         }
     }
 
@@ -89,8 +89,8 @@ class MessagesOverviewComponent(
                     is ResultState.Success -> {
                         hideLoader()
                         if (conversationState.value.id == null) {
-                            stateHolder.reloadAdminMessages()
-                            stateHolder.reloadVendorMessages()
+                            stateHolder.messageHandler.reloadAdminMessages()
+                            stateHolder.messageHandler.reloadVendorMessages()
                             conversationState.value = conversationState.value.copy(
                                 id = result.data.threadId,
                                 subject = subject.value

@@ -26,8 +26,6 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.LoadingView1
-import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
@@ -108,7 +106,6 @@ fun ProductsView(component: ProductsComponent) {
             component.dashNavigate(DashConfig.ProductDetails(VendorProduct()))
         }
     }
-    LoadingView1(component)
 
     LaunchedEffect(state.canScrollForward) {
         if (!state.canScrollForward) {

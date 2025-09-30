@@ -36,7 +36,6 @@ import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.negate
@@ -64,7 +63,6 @@ fun VendorView(viewModel: VendorComponent) {
         ) {
             Vendors(viewModel)
         }
-        LoadingView1(viewModel)
     }
 }
 

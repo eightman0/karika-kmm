@@ -6,7 +6,7 @@ import karika.distribucija.ba.domain.model.Address
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.UpdateCustomerRequest
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.launch
 
 class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
@@ -28,9 +28,9 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
         iOScope.launch {
             userRepository.put(
                 UpdateCustomerRequest(
-                    customer = stateHolder.userDetails.value
+                    customer = stateHolder.customerSpecificHandler.userDetails.value
                         .copy(
-                            addresses = stateHolder.userDetails.value
+                            addresses = stateHolder.customerSpecificHandler.userDetails.value
                                 .addresses.filter {
                                     if (editAddress.value == "Adresa za dostavu") {
                                         it.defaultBilling == "true"
@@ -38,7 +38,7 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                                         it.defaultShipping == "true"
                                     }
                                 }.plus(
-                                    stateHolder.userDetails.value.addresses.firstOrNull {
+                                    stateHolder.customerSpecificHandler.userDetails.value.addresses.firstOrNull {
                                         if (editAddress.value == "Adresa za dostavu") {
                                             it.defaultShipping == "true"
                                         } else {
@@ -62,7 +62,7 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                                         street = listOf(address.value),
                                         defaultShipping = "${editAddress.value == "Adresa za dostavu"}",
                                         defaultBilling = "${editAddress.value == "Informacije za naplatu"}",
-                                        countryId = stateHolder.userDetails.value.addresses.firstOrNull()?.countryId
+                                        countryId = stateHolder.customerSpecificHandler.userDetails.value.addresses.firstOrNull()?.countryId
                                             ?: ""
                                     )
                                 )
@@ -72,7 +72,7 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
-                        stateHolder.getUserDetails {
+                        stateHolder.customerSpecificHandler.getUserDetails {
                             hideLoader()
                             editAddress.value = ""
                         }
@@ -91,12 +91,12 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
         iOScope.launch {
             userRepository.put(
                 UpdateCustomerRequest(
-                    customer = stateHolder.userDetails.value
+                    customer = stateHolder.customerSpecificHandler.userDetails.value
                         .copy(
                             firstname = firstname.value,
                             lastname = lastname.value,
                             email = email.value,
-                            addresses = stateHolder.userDetails.value.addresses
+                            addresses = stateHolder.customerSpecificHandler.userDetails.value.addresses
                                 .map { it.copy(telephone = telephone.value) }
                         )
                 )
@@ -104,7 +104,7 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
-                        stateHolder.getUserDetails {
+                        stateHolder.customerSpecificHandler.getUserDetails {
                             hideLoader()
                             editAddress.value = ""
                             editContact.value = false
@@ -122,30 +122,45 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
 
     fun edit(value: String, edit: Boolean = true) {
         if (value == "Kontakt informacije") {
-            firstname.value = stateHolder.userDetails.value.firstname ?: ""
-            lastname.value = stateHolder.userDetails.value.lastname ?: ""
-            email.value = stateHolder.userDetails.value.email ?: ""
-            telephone.value = stateHolder.userDetails.value.addresses.firstOrNull()?.telephone ?: ""
+            firstname.value = stateHolder.customerSpecificHandler.userDetails.value.firstname ?: ""
+            lastname.value = stateHolder.customerSpecificHandler.userDetails.value.lastname ?: ""
+            email.value = stateHolder.customerSpecificHandler.userDetails.value.email ?: ""
+            telephone.value =
+                stateHolder.customerSpecificHandler.userDetails.value.addresses.firstOrNull()?.telephone
+                    ?: ""
             editContact.value = true
             return
         }
         if (value == "Adresa za dostavu") {
-            firstname.value = stateHolder.userDetails.value.shippingAddress()?.firstname ?: ""
-            lastname.value = stateHolder.userDetails.value.shippingAddress()?.lastname ?: ""
+            firstname.value =
+                stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.firstname
+                    ?: ""
+            lastname.value =
+                stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.lastname ?: ""
             address.value =
-                stateHolder.userDetails.value.shippingAddress()?.street?.firstOrNull() ?: ""
-            city.value = stateHolder.userDetails.value.shippingAddress()?.city ?: ""
-            postal.value = stateHolder.userDetails.value.shippingAddress()?.postcode ?: ""
-            telephone.value = stateHolder.userDetails.value.shippingAddress()?.telephone ?: ""
+                stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.street?.firstOrNull()
+                    ?: ""
+            city.value =
+                stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.city ?: ""
+            postal.value =
+                stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.postcode ?: ""
+            telephone.value =
+                stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.telephone
+                    ?: ""
             editableFields.value = edit
         } else {
-            firstname.value = stateHolder.userDetails.value.companyName()
-            lastname.value = stateHolder.userDetails.value.billingAddress()?.lastname ?: ""
+            firstname.value = stateHolder.customerSpecificHandler.userDetails.value.companyName()
+            lastname.value =
+                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.lastname ?: ""
             address.value =
-                stateHolder.userDetails.value.billingAddress()?.street?.firstOrNull() ?: ""
-            city.value = stateHolder.userDetails.value.billingAddress()?.city ?: ""
-            postal.value = stateHolder.userDetails.value.billingAddress()?.postcode ?: ""
-            telephone.value = stateHolder.userDetails.value.billingAddress()?.telephone ?: ""
+                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.street?.firstOrNull()
+                    ?: ""
+            city.value =
+                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.city ?: ""
+            postal.value =
+                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.postcode ?: ""
+            telephone.value =
+                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.telephone ?: ""
             editableFields.value = edit
         }
         editAddress.value = value

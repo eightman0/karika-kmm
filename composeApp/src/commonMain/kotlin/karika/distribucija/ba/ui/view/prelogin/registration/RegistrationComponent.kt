@@ -11,7 +11,8 @@ import karika.distribucija.ba.domain.model.RegisterDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorRegisterRequest
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.util.KarikaConstants
@@ -21,7 +22,7 @@ import kotlinx.serialization.json.JsonPrimitive
 class RegistrationComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
-    val userType: String,
+    val userType: KarikaType,
 ) : CommonComponent(componentContext, stateHolder) {
     private val repository = RegistrationRepository()
 
@@ -293,5 +294,3 @@ class RegistrationComponent(
 
     fun getColor() = if (userType.isShop()) KarikaColors.Primary else KarikaColors.Blue
 }
-
-fun String.isShop() = this == "shop"

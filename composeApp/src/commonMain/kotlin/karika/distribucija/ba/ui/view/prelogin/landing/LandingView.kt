@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.components.CarouselLogos
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaBox
@@ -159,7 +160,7 @@ fun LandingView(component: LandingComponent) {
                             fontWeight = FontWeight.W700,
                             textSize = 18.sp
                         ) {
-                            component.navigateLogin("Kupac")
+                            component.navigateLogin(KarikaType.SHOP)
                         }
                         SecondaryButtonFilled(
                             modifier = Modifier
@@ -169,7 +170,7 @@ fun LandingView(component: LandingComponent) {
                             fontWeight = FontWeight.W700,
                             textSize = 18.sp
                         ) {
-                            component.navigateLogin("Dobavljač")
+                            component.navigateLogin(KarikaType.VENDOR)
                         }
                     }
                     YSpacer16()

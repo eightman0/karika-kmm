@@ -49,13 +49,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.XSpacer32
 import karika.distribucija.ba.ui.components.YSpacer16
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_order_approved_total
 import karikav2.composeapp.generated.resources.ic_order_total
-import karikav2.composeapp.generated.resources.ic_report
 import karikav2.composeapp.generated.resources.ic_total
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.vectorResource
@@ -78,8 +76,6 @@ fun BoardView(component: BoardComponent) {
         Status(component)
         Products(component)
     }
-
-    LoadingView1(component)
 
     LaunchedEffect(Unit) {
         component.dash()
@@ -172,7 +168,7 @@ private fun Status(component: BoardComponent) {
             modifier = Modifier
                 .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                 .fillMaxWidth(),
-            text = "Status proizvoda",
+            text = "Status narudžbi",
             color = KarikaColors.Gray2,
             textSize = 16.sp,
             fontWeight = FontWeight.W700

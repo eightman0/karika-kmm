@@ -13,7 +13,7 @@ import karika.distribucija.ba.domain.model.VendorDeliveryServiceData
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.common.openPdf
 import karika.distribucija.ba.util.karikaPriceFormat
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -217,7 +217,7 @@ class OrderDetailsComponent(
         iOScope.launch {
             repository.createInvoice(
                 orderId = order.value.orderId ?: "",
-                bankAccountNumber = stateHolder.vendorDetails.value.bankAccountNumber ?: ""
+                bankAccountNumber = stateHolder.vendorSpecificHandler.vendorDetails.value.bankAccountNumber ?: ""
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
@@ -299,7 +299,7 @@ class OrderDetailsComponent(
         }
 
         a2b.value = karikaPriceFormat(
-            stateHolder.getPackageVolume(
+            stateHolder.commonHandler.getPackageVolume(
                 width = packageWidth.value.toDoubleOrNull() ?: 0.0,
                 height = packageHeight.value.toDoubleOrNull() ?: 0.0,
                 depth = packageDepth.value.toDoubleOrNull() ?: 0.0,
@@ -307,7 +307,7 @@ class OrderDetailsComponent(
             )
         )
         express.value = karikaPriceFormat(
-            stateHolder.getPackageVolume(
+            stateHolder.commonHandler.getPackageVolume(
                 width = packageWidth.value.toDoubleOrNull() ?: 0.0,
                 height = packageHeight.value.toDoubleOrNull() ?: 0.0,
                 depth = packageDepth.value.toDoubleOrNull() ?: 0.0,
@@ -352,7 +352,7 @@ class OrderDetailsComponent(
             snapshotFlow { packageWidth.value }
                 .collect {
                     a2b.value = karikaPriceFormat(
-                        stateHolder.getPackageVolume(
+                        stateHolder.commonHandler.getPackageVolume(
                             width = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             height = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             depth = packageWidth.value.toDoubleOrNull() ?: 0.0,
@@ -360,7 +360,7 @@ class OrderDetailsComponent(
                         )
                     )
                     express.value = karikaPriceFormat(
-                        stateHolder.getPackageVolume(
+                        stateHolder.commonHandler.getPackageVolume(
                             width = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             height = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             depth = packageWidth.value.toDoubleOrNull() ?: 0.0,
@@ -371,7 +371,7 @@ class OrderDetailsComponent(
             snapshotFlow { packageHeight.value }
                 .collect {
                     a2b.value = karikaPriceFormat(
-                        stateHolder.getPackageVolume(
+                        stateHolder.commonHandler.getPackageVolume(
                             width = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             height = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             depth = packageWidth.value.toDoubleOrNull() ?: 0.0,
@@ -379,7 +379,7 @@ class OrderDetailsComponent(
                         )
                     )
                     express.value = karikaPriceFormat(
-                        stateHolder.getPackageVolume(
+                        stateHolder.commonHandler.getPackageVolume(
                             width = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             height = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             depth = packageWidth.value.toDoubleOrNull() ?: 0.0,
@@ -390,7 +390,7 @@ class OrderDetailsComponent(
             snapshotFlow { packageDepth.value }
                 .collect {
                     a2b.value = karikaPriceFormat(
-                        stateHolder.getPackageVolume(
+                        stateHolder.commonHandler.getPackageVolume(
                             width = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             height = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             depth = packageWidth.value.toDoubleOrNull() ?: 0.0,
@@ -398,7 +398,7 @@ class OrderDetailsComponent(
                         )
                     )
                     express.value = karikaPriceFormat(
-                        stateHolder.getPackageVolume(
+                        stateHolder.commonHandler.getPackageVolume(
                             width = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             height = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             depth = packageWidth.value.toDoubleOrNull() ?: 0.0,
@@ -409,7 +409,7 @@ class OrderDetailsComponent(
             snapshotFlow { packageWeight.value }
                 .collect {
                     a2b.value = karikaPriceFormat(
-                        stateHolder.getPackageVolume(
+                        stateHolder.commonHandler.getPackageVolume(
                             width = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             height = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             depth = packageWidth.value.toDoubleOrNull() ?: 0.0,
@@ -417,7 +417,7 @@ class OrderDetailsComponent(
                         )
                     )
                     express.value = karikaPriceFormat(
-                        stateHolder.getPackageVolume(
+                        stateHolder.commonHandler.getPackageVolume(
                             width = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             height = packageWidth.value.toDoubleOrNull() ?: 0.0,
                             depth = packageWidth.value.toDoubleOrNull() ?: 0.0,

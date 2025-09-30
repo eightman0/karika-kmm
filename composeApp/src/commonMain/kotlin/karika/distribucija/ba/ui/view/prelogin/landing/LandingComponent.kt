@@ -2,12 +2,12 @@ package karika.distribucija.ba.ui.view.prelogin.landing
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.bringToFront
-import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -17,13 +17,8 @@ class LandingComponent(
     stateHolder: KarikaStateHolder
 ) : CommonComponent(componentContext, stateHolder) {
 
-    fun navigateLogin(type: String) {
-        stateHolder.appType = if (type == "shop") AppConfig.Main else AppConfig.Dashboard
-        stateHolder.preLoginNavigation.bringToFront(
-            PreLoginConfig.Login(
-                if (type == "Kupac") "shop" else "vendor"
-            )
-        )
+    fun navigateLogin(type: KarikaType) {
+        stateHolder.preLoginNavigation.bringToFront(PreLoginConfig.Login(type))
     }
 
     fun loadData() {

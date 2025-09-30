@@ -7,7 +7,7 @@ import karika.distribucija.ba.domain.api.DashRepository
 import karika.distribucija.ba.domain.model.KarikaUnit
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.launch
 
@@ -15,7 +15,7 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     CommonComponent(componentContext, stateHolder) {
 
     val customerRegions = mutableStateOf(
-        stateHolder.vendorDetails.value.targetCustomerRegion
+        stateHolder.vendorSpecificHandler.vendorDetails.value.targetCustomerRegion
             ?.replace("|", "")
             ?.trim()
             ?.split(",")
@@ -23,7 +23,7 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
             ?: emptyList()
     )
     val customerGroups = mutableStateOf(
-        stateHolder.vendorDetails.value.b2bTargetCustomerGroup
+        stateHolder.vendorSpecificHandler.vendorDetails.value.b2bTargetCustomerGroup
             ?.replace("|", "")
             ?.trim()
             ?.split(",")
@@ -31,28 +31,37 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
             ?: emptyList()
     )
 
-    val companyName = mutableStateOf(stateHolder.vendorDetails.value.publicName ?: "")
-    val companyId = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorId ?: "")
-    val companyPdv = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorPdvBroj ?: "")
+    val companyName =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.publicName ?: "")
+    val companyId =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorId ?: "")
+    val companyPdv =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorPdvBroj ?: "")
     val companyEntity = mutableStateOf(
-        KarikaConstants.entries.find { it.id == stateHolder.vendorDetails.value.b2bVendorEntitet }?.name
+        KarikaConstants.entries.find { it.id == stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorEntitet }?.name
             ?: ""
     )
-    val companyCanton = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorKanton ?: "")
-    val companyCity = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorGrad ?: "")
-    val companyMunicipality = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorOpicina ?: "")
-    val companyPhone = mutableStateOf(stateHolder.vendorDetails.value.b2bVendorPhone ?: "")
+    val companyCanton =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorKanton ?: "")
+    val companyCity =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorGrad ?: "")
+    val companyMunicipality =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorOpicina ?: "")
+    val companyPhone =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorPhone ?: "")
 
-    val minOrderAmount = mutableStateOf(stateHolder.vendorDetails.value.minOrderAmount ?: "")
-    val bankAccountNumber = mutableStateOf(stateHolder.vendorDetails.value.bankAccountNumber ?: "")
-    val contactName = mutableStateOf(stateHolder.vendorDetails.value.name ?: "")
+    val minOrderAmount =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.minOrderAmount ?: "")
+    val bankAccountNumber =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.bankAccountNumber ?: "")
+    val contactName = mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.name ?: "")
 
     val companyLogo =
         mutableStateOf(
             Triple<String, String, Any?>(
                 "",
                 "",
-                profileImage(stateHolder.vendorDetails.value.companyLogo)
+                profileImage(stateHolder.vendorSpecificHandler.vendorDetails.value.companyLogo)
             )
         )
     val companyBanner =
@@ -60,7 +69,7 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
             Triple<String, String, Any?>(
                 "",
                 "",
-                profileImage(stateHolder.vendorDetails.value.companyBanner)
+                profileImage(stateHolder.vendorSpecificHandler.vendorDetails.value.companyBanner)
             )
         )
 
@@ -118,7 +127,7 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                         is ResultState.Success -> {
                             hideLoader()
                             showMessage("Informacije profila su sačuvane.")
-                            stateHolder.getVendorDetails()
+                            stateHolder.vendorSpecificHandler.getVendorDetails()
                         }
 
                         is ResultState.Error -> {

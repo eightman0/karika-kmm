@@ -37,7 +37,7 @@ import org.jetbrains.compose.resources.vectorResource
 fun BottomBar(
     component: MainComponent
 ) {
-    val cart by component.stateHolder.cart.collectAsState()
+    val cart by component.stateHolder.cartHandler.cart.collectAsState()
     Column {
         NavigationBar(
             modifier = Modifier
@@ -58,7 +58,7 @@ fun BottomBar(
                                 imageVector = if (isSelected) selectedIcon else unselectedIcon,
                                 contentDescription = text,
                             )
-                           if (cart.items.isNotEmpty()) {
+                           if (cart.count { it.value.isNotEmpty() } > 0) {
                                if (selectedIcon == vectorResource(Res.drawable.ic_navigation_cart)) {
                                    Box(
                                        modifier = Modifier
@@ -75,7 +75,7 @@ fun BottomBar(
                                            contentAlignment = Alignment.Center
                                        ) {
                                            KarikaText(
-                                               text = "${cart.items.size}",
+                                               text = "${cart.count { it.value.isNotEmpty() }}",
                                                color = KarikaColors.White,
                                                fontWeight = FontWeight.W700,
                                                textSize = 12.sp

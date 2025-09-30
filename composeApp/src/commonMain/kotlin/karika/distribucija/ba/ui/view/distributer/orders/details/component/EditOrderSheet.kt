@@ -23,7 +23,6 @@ import karika.distribucija.ba.ui.components.KarikaCheckboxSecondary
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField2
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.SecondaryButton
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer8
@@ -163,6 +162,5 @@ fun EditOrderSheet(
                 }
             }
         }
-        LoadingView1(component)
     }
 }

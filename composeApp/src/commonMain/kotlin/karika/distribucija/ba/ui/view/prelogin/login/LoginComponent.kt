@@ -9,23 +9,25 @@ import karika.distribucija.ba.domain.api.LoginRepository
 import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
-import karika.distribucija.ba.ui.view.prelogin.registration.isShop
 import kotlinx.coroutines.launch
 
 class LoginComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
-    private val userType: String = "shop",
+    private val userType: KarikaType,
 ) : CommonComponent(componentContext, stateHolder) {
 
     val forgotPassSheet = mutableStateOf(false)
-    val email = mutableStateOf(stateHolder.getUserUsername(userType))
-    val pass = mutableStateOf(stateHolder.getUserPassword(userType))
-    val rememberMe = mutableStateOf(stateHolder.getUserPassword(userType).isNotEmpty())
-    val formValid = mutableStateOf(stateHolder.getUserPassword(userType).isNotEmpty())
+    val email = mutableStateOf(stateHolder.sessionHandler.getUserUsername(userType))
+    val pass = mutableStateOf(stateHolder.sessionHandler.getUserPassword(userType))
+    val rememberMe =
+        mutableStateOf(stateHolder.sessionHandler.getUserPassword(userType).isNotEmpty())
+    val formValid =
+        mutableStateOf(stateHolder.sessionHandler.getUserPassword(userType).isNotEmpty())
     private val repository = LoginRepository()
 
     fun login() {
@@ -40,14 +42,13 @@ class LoginComponent(
 
                         is ResultState.Success -> {
                             hideLoader()
-                            stateHolder.setAccessToken(result.data)
-                            stateHolder.saveJWT(
+                            stateHolder.sessionHandler.setAccessToken(result.data)
+                            stateHolder.sessionHandler.saveJWT(
                                 result.data,
                                 LoginDto(email.value, pass.value, userType),
                                 rememberMe.value
                             )
                             savePushHandle()
-                            stateHolder.reloadCart()
                             navigatePostLogin()
                         }
 

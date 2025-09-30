@@ -96,12 +96,12 @@ fun KarikaScaffold(
     ) { padding ->
         Box(
             modifier = Modifier
+                .hideKeyboard()
                 .padding(padding)
         ) {
             content.invoke(PaddingValues(0.dp))
         }
     }
-    LoadingView1(component)
 }
 
 @Composable

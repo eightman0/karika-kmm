@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
-import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
@@ -65,7 +64,7 @@ import org.jetbrains.compose.resources.vectorResource
 fun DashboardView(component: DashboardComponent) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val profile = component.stateHolder.vendorDetails.collectAsState()
+    val profile = component.stateHolder.vendorSpecificHandler.vendorDetails.collectAsState()
     val navState = component.stack.subscribeAsState()
 
     BoxWithConstraints(

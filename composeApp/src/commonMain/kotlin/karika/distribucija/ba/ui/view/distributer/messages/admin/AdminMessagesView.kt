@@ -24,8 +24,6 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.LoadingView1
-import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.onClick
@@ -53,29 +51,29 @@ fun AdminMessagesView(component: AdminMessagesComponent) {
                 fontWeight = FontWeight.W700
             )
             YSpacer16()
-           /* Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                SearchBoxBorder(
-                    modifier = Modifier
-                        .height(50.dp)
-                        .weight(1f),
-                    borderShape = 100.dp,
-                    onValueChange = {
-                        component.searchText.value = it
-                    },
-                    onClose = {
-                        component.searchText.value = ""
-                        component.loadNextPage(true)
-                    },
-                    onSearchExecute = {
-                        component.loadNextPage(true)
-                    },
-                    placeholder = "Pretraži poruke...",
-                    preselected = component.searchText.value
-                )
-            }*/
+            /* Row(
+                 verticalAlignment = Alignment.CenterVertically,
+                 horizontalArrangement = Arrangement.spacedBy(16.dp)
+             ) {
+                 SearchBoxBorder(
+                     modifier = Modifier
+                         .height(50.dp)
+                         .weight(1f),
+                     borderShape = 100.dp,
+                     onValueChange = {
+                         component.searchText.value = it
+                     },
+                     onClose = {
+                         component.searchText.value = ""
+                         component.loadNextPage(true)
+                     },
+                     onSearchExecute = {
+                         component.loadNextPage(true)
+                     },
+                     placeholder = "Pretraži poruke...",
+                     preselected = component.searchText.value
+                 )
+             }*/
         }
         items(items = messages.value) {
             MessageItem(it, component)
@@ -103,7 +101,6 @@ fun AdminMessagesView(component: AdminMessagesComponent) {
             )
         }
     }
-    LoadingView1(component)
 
     LaunchedEffect(Unit) {
         component.loadNextPage(true)

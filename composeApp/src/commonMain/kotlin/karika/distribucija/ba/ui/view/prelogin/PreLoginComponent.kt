@@ -5,7 +5,8 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.view.prelogin.landing.LandingComponent
 import karika.distribucija.ba.ui.view.prelogin.login.LoginComponent
 import karika.distribucija.ba.ui.view.prelogin.registration.RegistrationComponent
@@ -17,10 +18,10 @@ sealed class PreLoginConfig {
     data object Landing : PreLoginConfig()
 
     @Serializable
-    data class Login(val userType: String = "shop") : PreLoginConfig()
+    data class Login(val userType: KarikaType) : PreLoginConfig()
 
     @Serializable
-    data class Registration(val userType: String = "shop") : PreLoginConfig()
+    data class Registration(val userType: KarikaType) : PreLoginConfig()
 }
 
 sealed class PreLoginChild {

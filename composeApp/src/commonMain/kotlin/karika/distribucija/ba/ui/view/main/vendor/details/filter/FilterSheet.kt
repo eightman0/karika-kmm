@@ -93,7 +93,7 @@ fun FilterSheet(component: VendorComponent) {
                         fontWeight = FontWeight.W700,
                         textAlign = TextAlign.Center
                     )
-                    component.stateHolder.config.value.customerRegionList.forEach {
+                    component.stateHolder.commonHandler.config.value.customerRegionList.forEach {
                         Row(
                             modifier = Modifier
                                 .clickable(

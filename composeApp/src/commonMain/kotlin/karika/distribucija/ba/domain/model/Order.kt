@@ -10,6 +10,7 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.math.roundToInt
 
 @Serializable
 data class OrdersResponse(
@@ -110,6 +111,9 @@ data class OrderProduct(
     @SerialName("mp_reward_earn") var bonus: Double? = null,
     @SerialName("sku") var sku: String? = null,
     @SerialName("qty_ordered") var qty: Double? = null,
+    @SerialName("original_qty_ordered") var originalQty: Double? = null,
+    @SerialName("discount_percent") var discountPercent: Double? = null,
+    @SerialName("original_discount_amount") var originalDiscountAmount: Double? = null,
     @SerialName("product_options") var productOptions: ProductOptions? = null,
     @Transient var vendorName: String? = null
 ) {
@@ -119,9 +123,16 @@ data class OrderProduct(
     }
 
     fun qty(): String {
-        return "$qty ${qtyUnit()}"
+        return "${qty?.roundToInt() ?: 0} ${qtyUnit()}"
     }
 
+    fun originalQty(): String {
+        return  "${(originalQty ?: 0.0).roundToInt()} ${qtyUnit()}"
+    }
+
+    fun qtyChanged() = qty != originalQty
+
+    fun rabat() = discountPercent?.roundToInt()?.toString() ?: "0"
 
     fun vpc(): String {
         return karikaPriceFormat(

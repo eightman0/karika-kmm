@@ -37,7 +37,6 @@ import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaPasswordTextField
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.SecondaryButton
 import karika.distribucija.ba.ui.components.YSpacer16
@@ -72,8 +71,6 @@ fun ProfileView(component: ProfileComponent) {
         Images(component)
         ButtonsBox(component)
     }
-
-    LoadingView1(component)
 }
 
 @Composable
@@ -190,7 +187,7 @@ private fun CompanyInfo(component: ProfileComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.config.value.customerGroupList.chunked(2).forEach {
+        component.stateHolder.commonHandler.config.value.customerGroupList.chunked(2).forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -221,7 +218,7 @@ private fun CompanyInfo(component: ProfileComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.config.value.customerRegionList.chunked(2).forEach {
+        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(2).forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),

@@ -1,12 +1,10 @@
 package karika.distribucija.ba.ui.view.main.home
 
 import com.arkivanov.decompose.ComponentContext
-import karika.distribucija.ba.domain.api.ProductRepository
 import karika.distribucija.ba.domain.model.Product
-import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.util.KarikaConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

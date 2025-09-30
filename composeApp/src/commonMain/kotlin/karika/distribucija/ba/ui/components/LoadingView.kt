@@ -18,8 +18,8 @@ import androidx.compose.ui.window.DialogProperties
 import karika.distribucija.ba.ui.common.CommonComponent
 
 @Composable
-fun LoadingView1(viewModel: CommonComponent) {
-    val state = viewModel.loader.collectAsState()
+fun LoadingView1(commonComponent: CommonComponent) {
+    val state = commonComponent.loader.collectAsState()
     if (state.value) {
         Box(
             modifier = Modifier
@@ -30,7 +30,10 @@ fun LoadingView1(viewModel: CommonComponent) {
                 modifier = Modifier
                     .width(120.dp)
                     .aspectRatio(1f)
-                    .background(color = KarikaColors.Black.copy(alpha = 0.5f), shape = RoundedCornerShape(16.dp))
+                    .background(
+                        color = KarikaColors.Black.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(16.dp)
+                    )
                     .wrapContentSize(Alignment.Center)
             ) {
                 CircularProgressIndicator(
@@ -43,23 +46,20 @@ fun LoadingView1(viewModel: CommonComponent) {
 }
 
 @Composable
-fun LoadingView(component: CommonComponent) {
-    val state = component.loader.collectAsState()
-    if (state.value) {
-        Dialog(
-            onDismissRequest = { },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
+fun LoadingView() {
+    Dialog(
+        onDismissRequest = { },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier,
-                    color = KarikaColors.White
-                )
-            }
+            CircularProgressIndicator(
+                modifier = Modifier,
+                color = KarikaColors.White
+            )
         }
     }
 }

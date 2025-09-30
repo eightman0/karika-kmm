@@ -8,7 +8,7 @@ import com.arkivanov.decompose.extensions.compose.stack.Children
 import karika.distribucija.ba.ui.components.ImagePreview
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
-import karika.distribucija.ba.ui.components.LoadingView
+import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardView
 import karika.distribucija.ba.ui.view.main.MainView
 import karika.distribucija.ba.ui.view.main.menu.blog.BlogsView
@@ -48,7 +48,6 @@ fun App(component: AppComponent) {
                 stack = component.stack
             ) {
                 when (val child = it.instance) {
-                    is Child.Loading -> LoadingView(component)
                     is Child.PreLogin -> PreLoginView(child.component)
 
                     is Child.Main -> MainView(child.component)
@@ -75,6 +74,7 @@ fun App(component: AppComponent) {
                 }
             }
             ImagePreview(component)
+            LoadingView1(component)
         }
     }
 }

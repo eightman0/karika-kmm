@@ -1,7 +1,6 @@
 package karika.distribucija.ba.ui.view.distributer.products.details
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -25,7 +24,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,7 +39,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -59,7 +56,6 @@ import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaSwitch1
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
-import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
@@ -121,7 +117,6 @@ fun ProductDetailsView(component: ProductDetailsComponent) {
         }
         ButtonsBox(component)
     }
-    LoadingView1(component)
 }
 
 @Composable
@@ -458,7 +453,7 @@ private fun MinQtyBox(component: ProductDetailsComponent) {
                         dropdownState.negate()
                     }
                 ) {
-                    component.stateHolder.config.value.unitOptions
+                    component.stateHolder.commonHandler.config.value.unitOptions
                         .forEach {
                             DropdownMenuItem(
                                 onClick = {
@@ -547,7 +542,7 @@ private fun CategoriesBox(component: ProductDetailsComponent) {
                 IconTextItem(
                     modifier = Modifier
                         .onClick {
-                           categories.value-=it
+                            categories.value -= it
                         }
                         .padding(4.dp),
                     icon = vectorResource(Res.drawable.ic_tertiary),
@@ -564,7 +559,7 @@ private fun CategoriesBox(component: ProductDetailsComponent) {
     }
     if (showCategoryModal.value) {
         ChooseCategoryModal(
-            categories = component.stateHolder.categories.value,
+            categories = component.stateHolder.commonHandler.categories.value,
             selectedCategories = categories.value,
             onSubmit = {
                 categories.value = it

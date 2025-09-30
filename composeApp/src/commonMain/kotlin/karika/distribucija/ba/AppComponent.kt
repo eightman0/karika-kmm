@@ -11,7 +11,7 @@ import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaFilePicker
-import karika.distribucija.ba.ui.common.KarikaStateHolder
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardComponent
 import karika.distribucija.ba.ui.view.main.MainComponent
 import karika.distribucija.ba.ui.view.main.menu.blog.BlogsComponent
@@ -32,9 +32,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class AppConfig {
-    @Serializable
-    data object Loading : AppConfig()
-
     @Serializable
     data object Main : AppConfig()
 
@@ -87,7 +84,6 @@ sealed class AppConfig {
 }
 
 sealed class Child {
-    data object Loading : Child()
     class Main(val component: MainComponent) : Child()
     class PreLogin(val component: PreLoginComponent) : Child()
     class ProductDetails(val component: ProductComponent) : Child()
@@ -122,7 +118,8 @@ class AppComponent(
 
     init {
         refreshHandler = {
-            stateHolder.notificationReceived()
+            stateHolder.customerNotificationHandler.notificationReceived()
+            stateHolder.vendorNotificationHandler.notificationReceived()
         }
     }
 
@@ -130,15 +127,13 @@ class AppComponent(
         childStack(
             source = stateHolder.appNavigation,
             serializer = AppConfig.serializer(),
-            initialConfiguration = stateHolder.appConfig(),
+            initialConfiguration = stateHolder.sessionHandler.mainConfig(),
             handleBackButton = true,
             childFactory = ::child,
         )
 
     private fun child(appConfig: AppConfig, componentContext: ComponentContext): Child =
         when (appConfig) {
-            is AppConfig.Loading -> Child.Loading
-
             is AppConfig.Main -> Child.Main(
                 MainComponent(
                     componentContext,
