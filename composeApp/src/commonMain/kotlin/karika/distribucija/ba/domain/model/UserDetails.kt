@@ -86,6 +86,7 @@ data class ForgotPasswordRequest(
 
 @Serializable
 data class ChangePasswordRequest(
-    val currentPassword: String,
-    val newPassword: String
+    val old_password: String,
+    val password: String,
+    val password_confirmation: String,
 )

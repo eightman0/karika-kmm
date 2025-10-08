@@ -24,11 +24,6 @@ struct ContentView: View {
     var body: some View {
         ComposeView(component: component, backDispatcher: backDispatcher)
             .ignoresSafeArea(.all)
-            .onChange(of: scenePhase) { newPhase in
-                if newPhase == .active {
-                    AppVersionManager.shared.checkForUpdates()
-                }
-            }
     }
 }
 

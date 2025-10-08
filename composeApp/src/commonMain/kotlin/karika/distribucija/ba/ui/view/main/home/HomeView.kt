@@ -47,6 +47,7 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun HomeView(component: HomeComponent) {
     val state = rememberLazyListState()
+    val promotedLogos by component.promotedLogos.collectAsState()
     Box(
         modifier = Modifier
             .background(color = KarikaColors.White)
@@ -69,15 +70,17 @@ fun HomeView(component: HomeComponent) {
                 YSpacer8()
             }
             item {
-                KarikaText(
-                    modifier = Modifier,
-                    color = KarikaColors.Black,
-                    text = "Dobavljači",
-                    textSize = 20.sp,
-                    fontWeight = FontWeight.W700
-                )
-                YSpacer8()
-                CarouselLogos(component)
+                if (promotedLogos.isNotEmpty()) {
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Black,
+                        text = "Dobavljači",
+                        textSize = 20.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                    YSpacer8()
+                    CarouselLogos(component)
+                }
             }
         }
     }

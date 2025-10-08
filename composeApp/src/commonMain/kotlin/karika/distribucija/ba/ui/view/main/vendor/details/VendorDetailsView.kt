@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -21,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,7 @@ import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.bgWhite
+import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.main.home.ProductItem
 import karikav2.composeapp.generated.resources.Res
@@ -78,63 +81,59 @@ private fun VendorProducts(modifier: Modifier, component: VendorDetailsComponent
     val state = rememberLazyListState()
     val searchText = component.searchText.asState()
 
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        state = state
-    ) {
-        item {
-            VendorImage(component)
-            YSpacer16()
-            VendorInfo(component)
-            YSpacer16()
-            VendorCategories(component)
-            //KarikaText(
-            //    modifier = Modifier
-            //        .padding(vertical = 16.dp),
-            //    color = KarikaColors.Black,
-            //    text = "Najprodavaniji proizvodi:",
-            //    textSize = 20.sp,
-            //    fontWeight = FontWeight.W700
-            //)
-            YSpacer16()
-            SearchBoxBorder(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                onValueChange = { text ->
-                    searchText.value = text
-                },
-                onClose = {
-                    searchText.value = ""
-                    component.loadNextPage(true)
-                },
-                onSearchExecute = {
-                    component.loadNextPage(true)
-                }
-            )
-            YSpacer16()
-        }
-        items(items = products.value.chunked(2)) { item ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item.forEach {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        ProductItem(it, component, true)
+    Box(contentAlignment = Alignment.Center) {
+        LazyColumn(
+            modifier = modifier
+                .hideKeyboard(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            state = state
+        ) {
+            item {
+                VendorImage(component)
+                YSpacer16()
+                VendorInfo(component)
+                YSpacer16()
+                VendorCategories(component)
+                YSpacer16()
+                SearchBoxBorder(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onValueChange = { text ->
+                        searchText.value = text
+                    },
+                    onClose = {
+                        searchText.value = ""
+                        component.loadNextPage(true)
+                    },
+                    onSearchExecute = {
+                        component.loadNextPage(true)
+                    }
+                )
+                YSpacer16()
+            }
+            items(items = products.value.chunked(2)) { item ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item.forEach {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                        ) {
+                            ProductItem(it, component, true)
+                        }
+                    }
+                    if (item.size == 1) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                        )
                     }
                 }
-                if (item.size == 1) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    )
-                }
             }
+            item { EmptyState(component) }
         }
     }
 
@@ -243,4 +242,26 @@ private fun BreadCrumbs(component: VendorDetailsComponent) {
         textSize = 14.sp,
         fontWeight = FontWeight.W400
     )
+}
+
+@Composable
+private fun EmptyState(component: VendorDetailsComponent) {
+    val vendors by component.products.collectAsState()
+    if (vendors.isNotEmpty()) {
+        return
+    }
+    Box(
+        modifier = Modifier
+            .height(200.dp)
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        KarikaText(
+            modifier = Modifier,
+            color = KarikaColors.Primary,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W700,
+            text = "Nema rezultata."
+        )
+    }
 }

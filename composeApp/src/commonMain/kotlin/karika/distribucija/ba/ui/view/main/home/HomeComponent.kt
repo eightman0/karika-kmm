@@ -20,35 +20,7 @@ class HomeComponent(
     val newArrivals = _newArrivals.asStateFlow()
 
     fun loadData() {
-        iOScope.launch {
-            productRepository.promotedVendors().collect { result ->
-                when (result) {
-                    is ResultState.Loading -> {
-                        showLoader()
-                    }
-
-                    is ResultState.Success -> {
-                        hideLoader()
-                        _promotedVendors.update {
-                            result.data
-                                .filter { f -> f.promoteVendorBanner }
-                                .filter { f -> f.companyBanner != null }
-                        }
-                        _promotedLogos.update {
-                            result.data
-                                .filter { f -> f.promoteVendorLogo }
-                                .filter { f -> f.companyLogo != null }
-                        }
-                    }
-
-                    is ResultState.Error -> {
-                        hideLoader()
-                        showMessage(result.message ?: "")
-                    }
-                }
-            }
-        }
-
+        loadBanners()
         loadNextPage(true)
     }
 

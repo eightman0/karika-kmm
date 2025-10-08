@@ -44,6 +44,7 @@ fun ImagePreview(component: CommonComponent) {
     if (image.isNotEmpty()) {
         Box(
             modifier = Modifier
+                .hideKeyboard()
                 .background(color = KarikaColors.White)
                 .fillMaxSize()
         ) {

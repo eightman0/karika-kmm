@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
@@ -36,6 +37,7 @@ fun KarikaScaffold(
     bottomBar: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     disableSnackBar: Boolean = true,
+    ignoreImeTweak: Boolean = false,
     content: @Composable (PaddingValues) -> Unit
 ) {
     val imeVisible = rememberImeVisible()
@@ -86,6 +88,11 @@ fun KarikaScaffold(
         },
         topBar = topBar,
         bottomBar = {
+            if (ignoreImeTweak) {
+                bottomBar.invoke()
+                return@Scaffold
+            }
+
             if (!imeVisible) {
                 bottomBar.invoke()
             }
@@ -96,8 +103,8 @@ fun KarikaScaffold(
     ) { padding ->
         Box(
             modifier = Modifier
-                .hideKeyboard()
                 .padding(padding)
+
         ) {
             content.invoke(PaddingValues(0.dp))
         }

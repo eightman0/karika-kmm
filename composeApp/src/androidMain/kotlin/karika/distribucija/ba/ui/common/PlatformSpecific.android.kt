@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import android.text.Html
 import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatTextView
@@ -72,4 +73,9 @@ actual fun getEnvPrefix(): String {
         "demo" -> "demo."
         else -> "test."
     }
+}
+
+actual fun isKiosk() = BuildConfig.FLAVOR == "kiosk"
+actual fun appVersion(): String {
+    return ""
 }

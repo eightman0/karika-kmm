@@ -1,7 +1,6 @@
 package karika.distribucija.ba.domain.model
 
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
-import karika.distribucija.ba.util.KarikaConfig
 import karika.distribucija.ba.util.karikaPriceFormat
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
@@ -82,35 +81,10 @@ data class Product(
     }
 
     fun minQtyUnit(): String {
-        return KarikaConfig.getUnit(
-            customAttributes.find { it.attributeCode == "min_quantity_unit" }?.value?.jsonPrimitive?.content?.toIntOrNull()
-                ?: minQtyUnit?.toIntOrNull() ?: 1
-        )
+        return (customAttributes.find { it.attributeCode == "min_quantity_unit" }?.value?.jsonPrimitive?.content?.toIntOrNull()
+            ?: minQtyUnit?.toIntOrNull() ?: 1).toString()
+
     }
-
-    fun minQtyWithUnit(): String {
-        return "${minQty()} ${minQtyUnit()}"
-    }
-
-    /* fun shortDescription(): String {
-         if (shortDescription != null) {
-             return HtmlCompat.fromHtml(shortDescription ?: "", 0).trim().toString()
-         }
-
-         return HtmlCompat.fromHtml(
-             customAttributes
-                 .find { f -> f.attributeCode == "short_description" }
-                 ?.value?.jsonPrimitive?.content ?: "",
-             0
-         ).trim().toString()
-     }
-
-     fun description(): String {
-         return description
-             ?: customAttributes
-                 .find { f -> f.attributeCode == "description" }
-                 ?.value?.jsonPrimitive?.content ?: ""
-     }*/
 
     fun name() = name ?: "-"
     fun vendorName() = vendorName ?: extensionAttributes?.vendorData?.vendorName ?: "-"

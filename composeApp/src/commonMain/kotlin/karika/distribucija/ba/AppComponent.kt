@@ -1,16 +1,20 @@
 package karika.distribucija.ba
 
+import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
+import karika.distribucija.ba.domain.api.MandatoryUpdateRepository
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.Product
+import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.KarikaFilePicker
+import karika.distribucija.ba.ui.common.KarikaHandler
+import karika.distribucija.ba.ui.common.appVersion
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardComponent
 import karika.distribucija.ba.ui.view.main.MainComponent
@@ -28,6 +32,7 @@ import karika.distribucija.ba.ui.view.main.profile.order.details.OrderDetailsCom
 import karika.distribucija.ba.ui.view.main.profile.points.PointsComponent
 import karika.distribucija.ba.ui.view.main.vendor.details.VendorDetailsComponent
 import karika.distribucija.ba.ui.view.prelogin.PreLoginComponent
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -110,10 +115,14 @@ sealed class Child {
 
 class AppComponent(
     componentContext: ComponentContext,
-    filePicker: KarikaFilePicker
+    filePicker: KarikaHandler
 ) : CommonComponent(componentContext, KarikaStateHolder(filePicker)) {
+    val showScreenSaver = mutableStateOf(false)
+    val showMandatoryUpdate = mutableStateOf(false)
+
     companion object {
         var refreshHandler: () -> Unit = {}
+        var screensaverHandler: () -> Unit = {}
     }
 
     init {
@@ -121,6 +130,8 @@ class AppComponent(
             stateHolder.customerNotificationHandler.notificationReceived()
             stateHolder.vendorNotificationHandler.notificationReceived()
         }
+        screensaverHandler = { showScreenSaver.value = true }
+        stateHolder.commonHandler.init()
     }
 
     val stack: Value<ChildStack<*, Child>> =
@@ -201,4 +212,24 @@ class AppComponent(
                 DashboardComponent(componentContext, stateHolder)
             )
         }
+
+    fun checkForUpdate() {
+        appVersion()
+            .takeIf { it.isNotEmpty() }
+            ?.let { current ->
+                iOScope.launch {
+                    MandatoryUpdateRepository()
+                        .get()
+                        .collect { result ->
+                            if (result is ResultState.Success) {
+                                if (current.toDoubleOrZero() < result.data.iOS()) {
+                                    showMandatoryUpdate.value = true
+                                }
+                            }
+                        }
+                }
+            }
+    }
 }
+
+private fun String?.toDoubleOrZero() = this?.toDoubleOrNull() ?: 0.0

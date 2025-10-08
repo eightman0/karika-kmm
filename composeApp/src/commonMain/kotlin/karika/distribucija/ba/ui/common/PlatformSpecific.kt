@@ -15,4 +15,8 @@ expect fun HtmlTextWithStyles(
 
 expect fun openPdf(url: String)
 
-expect fun getEnvPrefix() : String
+expect fun getEnvPrefix(): String
+
+expect fun isKiosk(): Boolean
+
+expect fun appVersion(): String

@@ -138,7 +138,7 @@ class MessagesOverviewComponent(
     }
 
     fun pickFile() {
-        stateHolder.filePicker.pickFile { name, data ->
+        stateHolder.handler.pickFile { name, data ->
             sendMessage(data)
         }
     }

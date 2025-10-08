@@ -145,6 +145,7 @@ private fun Orders(component: OrdersComponent) {
         items(items = items.toList(), key = { it.orderId.toIntOrNull() ?: Random(10).nextInt() }) {
             OrderItem(it, component)
         }
+        item { EmptyState(component) }
     }
 
     LaunchedEffect(state.canScrollForward) {
@@ -529,6 +530,28 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
             onCancel = {
                 attachBillModal.value = null
             }
+        )
+    }
+}
+
+@Composable
+private fun EmptyState(component: OrdersComponent) {
+    val vendors by component.orders.collectAsState()
+    if (vendors.isNotEmpty()) {
+        return
+    }
+    Box(
+        modifier = Modifier
+            .height(200.dp)
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        KarikaText(
+            modifier = Modifier,
+            color = KarikaColors.Primary,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W700,
+            text = if (component.status.isEmpty()) "Nema narudžbi" else "Nema narudžbi za izabrani status."
         )
     }
 }

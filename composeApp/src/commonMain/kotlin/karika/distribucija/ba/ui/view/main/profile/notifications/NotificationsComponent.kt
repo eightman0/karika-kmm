@@ -52,6 +52,7 @@ class NotificationsComponent(componentContext: ComponentContext, stateHolder: Ka
                             is ResultState.Loading -> showLoader()
                             is ResultState.Success -> {
                                 hideLoader()
+                                get()
                             }
 
                             is ResultState.Error -> {

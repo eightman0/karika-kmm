@@ -29,22 +29,27 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
-import karika.distribucija.ba.ui.common.KarikaFilePicker
+import karika.distribucija.ba.ui.common.KarikaHandler
+import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.util.PushHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
-class MainActivity : ComponentActivity(), KarikaFilePicker {
+open class MainActivity : ComponentActivity(), KarikaHandler {
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { _: Boolean -> }
     private lateinit var appComponent: AppComponent
-    private lateinit var appUpdateManager: AppUpdateManager
+    lateinit var appUpdateManager: AppUpdateManager
     private val registerForActivityResult =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult ->
             if (result.resultCode != RESULT_OK) {
-                val builder = AlertDialog.Builder(this)
+                if (isKiosk()) {
+                    checkUpdate()
+                    return@registerForActivityResult
+                }
+                val builder = AlertDialog.Builder(this, R.style.KarikaAppCompat)
                 builder.setTitle("Ažuriranje otkazano")
                 builder.setMessage("Molimo vas da ažurirate aplikaciju kako biste je mogli koristiti.")
                 builder.setPositiveButton("Ažuriraj sada") { dialog, _ ->
@@ -63,7 +68,6 @@ class MainActivity : ComponentActivity(), KarikaFilePicker {
         askNotificationPermission()
         appUpdateManager = AppUpdateManagerFactory.create(this)
         super.onCreate(savedInstanceState)
-
         setContent {
             val systemUiController = rememberSystemUiController()
             SideEffect {
@@ -81,6 +85,7 @@ class MainActivity : ComponentActivity(), KarikaFilePicker {
             }
             App(appComponent)
             PushHandler.handleNewPushIfExists(intent.extras?.getString("route") ?: "", appComponent)
+            checkUpdate()
         }
     }
 

@@ -5,8 +5,9 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.common.KarikaType
+import karika.distribucija.ba.ui.common.isKiosk
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.prelogin.landing.LandingComponent
 import karika.distribucija.ba.ui.view.prelogin.login.LoginComponent
 import karika.distribucija.ba.ui.view.prelogin.registration.RegistrationComponent
@@ -38,7 +39,7 @@ class PreLoginComponent(
         childStack(
             source = stateHolder.preLoginNavigation,
             serializer = PreLoginConfig.serializer(),
-            initialConfiguration = PreLoginConfig.Landing,
+            initialConfiguration = if (isKiosk()) PreLoginConfig.Login(KarikaType.SHOP) else PreLoginConfig.Landing,
             handleBackButton = true,
             childFactory = ::child,
         )

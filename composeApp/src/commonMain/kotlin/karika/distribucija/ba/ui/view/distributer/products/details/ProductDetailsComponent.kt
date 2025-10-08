@@ -84,7 +84,7 @@ class ProductDetailsComponent(
     }
 
     fun pickImage() {
-        stateHolder.filePicker.pickFile { name, data ->
+        stateHolder.handler.pickFile { name, data ->
             if (product.value.mediaGallery.any { it.filename == name }) {
                 showMessage("Slika već dodana!")
                 return@pickFile

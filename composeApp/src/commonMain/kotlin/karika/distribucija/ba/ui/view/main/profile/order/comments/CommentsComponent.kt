@@ -75,7 +75,7 @@ class CommentsComponent(
     }
 
     fun pickFile() {
-        stateHolder.filePicker.pickFile(arrayOf("application/pdf")) { name, data ->
+        stateHolder.handler.pickFile(arrayOf("application/pdf")) { name, data ->
             iOScope.launch {
                 orderRepository.sendBill(
                     orderId = order.orderId ?: return@launch,

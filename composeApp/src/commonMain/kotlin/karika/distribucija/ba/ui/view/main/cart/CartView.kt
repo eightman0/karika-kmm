@@ -38,6 +38,7 @@ import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.YSpacer8
+import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.main.product.ProductQtyAction
 import karika.distribucija.ba.ui.view.main.product.VendorName
@@ -62,7 +63,7 @@ fun CartView(component: CartComponent) {
             KarikaText(
                 modifier = Modifier
                     .padding(horizontal = 16.dp),
-                color = KarikaColors.Gray2,
+                color = KarikaColors.Primary,
                 text = "Nema artikala u korpi.",
                 textSize = 16.sp,
                 fontWeight = FontWeight.W500
@@ -84,6 +85,7 @@ fun CartView(component: CartComponent) {
                 )
                 LazyColumn(
                     modifier = Modifier
+                        .hideKeyboard()
                         .padding(horizontal = 16.dp)
                         .weight(1f)
                 ) {

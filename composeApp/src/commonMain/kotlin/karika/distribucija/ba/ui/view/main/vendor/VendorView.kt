@@ -38,6 +38,7 @@ import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rounded
@@ -57,6 +58,7 @@ fun VendorView(viewModel: VendorComponent) {
     ) {
         Column(
             modifier = Modifier
+                .hideKeyboard()
                 .padding(16.dp)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -78,37 +80,40 @@ private fun Vendors(component: VendorComponent) {
         textSize = 20.sp,
         fontWeight = FontWeight.W700
     )
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        state = state
-    ) {
-        item {
-            Filter(component)
-        }
-        items(
-            items = vendors.chunked(2)
+    Box(modifier = Modifier) {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            state = state
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            item {
+                Filter(component)
+            }
+            items(
+                items = vendors.chunked(2)
             ) {
-                it.forEach { vendor ->
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        VendorItem(vendor, component)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    it.forEach { vendor ->
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                        ) {
+                            VendorItem(vendor, component)
+                        }
                     }
-                }
-                if (it.size == 1) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    )
+                    if (it.size == 1) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                        )
+                    }
                 }
             }
         }
+        EmptyState(component)
     }
 
     LaunchedEffect(state.canScrollForward) {
@@ -249,4 +254,25 @@ private fun Filter(component: VendorComponent) {
     }
 
     FilterSheet(component)
+}
+
+@Composable
+private fun EmptyState(component: VendorComponent) {
+    val vendors by component.vendors.collectAsState()
+    if (vendors.isNotEmpty()) {
+        return
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        KarikaText(
+            modifier = Modifier,
+            color = KarikaColors.Primary,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W700,
+            text = "Nema rezultata."
+        )
+    }
 }

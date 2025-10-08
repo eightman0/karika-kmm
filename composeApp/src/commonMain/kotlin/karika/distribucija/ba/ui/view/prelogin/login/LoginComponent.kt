@@ -9,8 +9,8 @@ import karika.distribucija.ba.domain.api.LoginRepository
 import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.common.KarikaType
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import kotlinx.coroutines.launch
@@ -99,5 +99,19 @@ class LoginComponent(
 
     fun title(): String {
         return if (userType.isShop()) "Prijava kupac" else "Prijava dobavljač"
+    }
+
+    fun wifi() {
+        stateHolder.handler.openWifi()
+    }
+
+    fun isShop() = userType == KarikaType.SHOP
+
+    private var exitCount = 0
+    fun exitKiosk() {
+        exitCount++
+        if (exitCount == 10) {
+            stateHolder.handler.exitKiosk()
+        }
     }
 }

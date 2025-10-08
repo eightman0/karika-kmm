@@ -26,9 +26,13 @@ data class DashboardData(
     @SerialName("latest_orders") var latestOrders: List<LatestOrders>? = listOf()
 ) {
     fun approved() = (approvedOrdersCount?.toFloatOrNull() ?: 0f) / total()
-    fun pending() = ((ordersPlacedTotal?.toFloatOrNull() ?: 0f) - (approvedOrdersCount?.toFloatOrNull() ?: 0f)) / total()
+    fun pending() =
+        ((ordersPlacedTotal?.toFloatOrNull() ?: 0f) - (approvedOrdersCount?.toFloatOrNull()
+            ?: 0f)) / total()
 
     fun total() = ordersPlacedTotal?.toFloatOrNull() ?: 0f
+
+    fun approvedTotal() = karikaPriceFormat(approvedOrdersTotal?.toDoubleOrNull() ?: 0.0)
 }
 
 @Serializable
@@ -46,7 +50,9 @@ data class BestSellerProducts(
     @SerialName("product_name") var productName: String? = null,
     @SerialName("product_price") var productPrice: String? = null,
     @SerialName("ordered_quantity") var orderedQuantity: String? = null
-)
+) {
+    fun price() = karikaPriceFormat(productPrice?.toDoubleOrNull() ?: 0.0)
+}
 
 @Serializable
 data class LatestOrders(

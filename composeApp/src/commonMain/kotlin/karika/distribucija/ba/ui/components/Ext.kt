@@ -8,7 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -42,14 +47,30 @@ fun String.isEmailFormat(): Boolean {
 }
 
 @Composable
-fun Modifier.hideKeyboard(): Modifier {
+fun Modifier.hideKeyboard(onlyClick: Boolean = false): Modifier {
     val keyboard = LocalSoftwareKeyboardController.current
-    return this.clickable(
-        interactionSource = null,
-        indication = null
-    ) {
-        keyboard?.hide()
+    val focusManager = LocalFocusManager.current
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                focusManager.clearFocus()
+                return Offset.Zero
+            }
+        }
     }
+    if (!onlyClick) {
+        this.nestedScroll(nestedScrollConnection)
+    }
+    return this
+        .clickable(
+            interactionSource = null,
+            indication = null
+        ) {
+            keyboard?.hide()
+        }
 }
 
 @Composable

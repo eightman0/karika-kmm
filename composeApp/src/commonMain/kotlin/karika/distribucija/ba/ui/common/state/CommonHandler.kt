@@ -20,7 +20,7 @@ class CommonHandler {
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
     val categories = _categories.asStateFlow()
 
-    fun getConfig() {
+    private fun getConfig() {
         CoroutineScope(Dispatchers.IO).launch {
             UserRepository().config()
                 .collect { result ->
@@ -31,7 +31,7 @@ class CommonHandler {
         }
     }
 
-    fun fetchCategories() {
+    private fun fetchCategories() {
         CoroutineScope(Dispatchers.IO).launch {
             CategoryRepository().get()
                 .collect { result ->
@@ -42,11 +42,20 @@ class CommonHandler {
         }
     }
 
+    fun getUnit(id: String): String {
+        return config.value.unitOptions.find { it.unit == id }?.label ?: "kom"
+    }
+
     fun getPackageVolume(width: Double, height: Double, depth: Double, weight: Double): Double {
         val volume = maxOf((width * height * depth) / 5000, weight)
         val price =
             config.value.a2b()?.find { it.min() <= volume && it.max() >= volume }?.price()
                 ?: config.value.a2b()?.lastOrNull()?.price() ?: 0.0
         return price + (price * 0.1)
+    }
+
+    fun init() {
+        fetchCategories()
+        getConfig()
     }
 }

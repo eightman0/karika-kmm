@@ -307,8 +307,8 @@ fun ProductAvailability(viewModel: ProductComponent) {
 }
 
 @Composable
-fun ProductMinQty(viewModel: ProductComponent) {
-    val product by viewModel.product.collectAsState()
+fun ProductMinQty(component: ProductComponent) {
+    val product by component.product.collectAsState()
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -325,7 +325,7 @@ fun ProductMinQty(viewModel: ProductComponent) {
         KarikaText(
             modifier = Modifier,
             color = KarikaColors.Black,
-            text = product.minQtyWithUnit(),
+            text = "${product.minQty()} ${component.getUnit(product.minQtyUnit())}",
             textSize = 14.sp,
             fontWeight = FontWeight.W700
         )

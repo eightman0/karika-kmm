@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
@@ -31,7 +33,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.HttpClientProvider.chatImage
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.ui.components.KarikaColors
@@ -45,7 +46,6 @@ import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.onClick
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_attachment
 import karikav2.composeapp.generated.resources.ic_pdf
 import org.jetbrains.compose.resources.vectorResource
 
@@ -62,6 +62,10 @@ fun CommentsView(component: CommentsComponent) {
                 component.appBack()
             }
         },
+        bottomBar = {
+            EnterComment(component)
+        },
+        ignoreImeTweak = true,
         component = component
     ) {
         Column(
@@ -71,7 +75,6 @@ fun CommentsView(component: CommentsComponent) {
         ) {
             LazyColumn(
                 modifier = Modifier
-                    .weight(1f)
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 state = state
@@ -80,7 +83,6 @@ fun CommentsView(component: CommentsComponent) {
                     CommentItem(item, component)
                 }
             }
-            EnterComment(component)
         }
     }
 
@@ -96,7 +98,9 @@ private fun EnterComment(component: CommentsComponent) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .imePadding()
+            .navigationBarsPadding(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -107,17 +111,17 @@ private fun EnterComment(component: CommentsComponent) {
             placeholder = "Napiši komentar",
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Done,
-           // trailingIcons = {
-           //     Icon(
-           //         modifier = Modifier
-           //             .onClick {
-           //                 component.pickFile()
-           //             },
-           //         imageVector = vectorResource(Res.drawable.ic_attachment),
-           //         tint = KarikaColors.Gray2,
-           //         contentDescription = ""
-           //     )
-           // }
+            // trailingIcons = {
+            //     Icon(
+            //         modifier = Modifier
+            //             .onClick {
+            //                 component.pickFile()
+            //             },
+            //         imageVector = vectorResource(Res.drawable.ic_attachment),
+            //         tint = KarikaColors.Gray2,
+            //         contentDescription = ""
+            //     )
+            // }
         )
         PrimaryButtonFilled(
             modifier = Modifier

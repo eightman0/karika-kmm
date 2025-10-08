@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,6 +24,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.TopBarSearch
+import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.view.main.home.ProductItem
 import karika.distribucija.ba.ui.view.main.vendor.VendorItem
 
@@ -41,6 +44,7 @@ fun SearchView(component: SearchComponent) {
         LazyColumn(
             state = state,
             modifier = Modifier
+                .hideKeyboard()
                 .padding(it)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -112,6 +116,7 @@ fun SearchView(component: SearchComponent) {
                     }
                 }
             }
+            item { EmptyState(component) }
         }
 
         LaunchedEffect(state.canScrollForward) {
@@ -119,5 +124,28 @@ fun SearchView(component: SearchComponent) {
                 component.search(false)
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyState(component: SearchComponent) {
+    val vendors by component.vendors.collectAsState()
+    val products by component.products.collectAsState()
+    if (vendors.isNotEmpty() && products.isNotEmpty()) {
+        return
+    }
+    Box(
+        modifier = Modifier
+            .height(200.dp)
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        KarikaText(
+            modifier = Modifier,
+            color = KarikaColors.Primary,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W700,
+            text = "Nema rezultata."
+        )
     }
 }

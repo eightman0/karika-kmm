@@ -1,6 +1,6 @@
 package karika.distribucija.ba.ui.common
 
-interface KarikaFilePicker {
+interface KarikaHandler {
     fun pickFile(
         mediaTypes: Array<String> = arrayOf("image/png", "image/jpeg"),
         callback: (String, ByteArray) -> Unit
@@ -13,4 +13,10 @@ interface KarikaFilePicker {
     )
 
     fun getPushHandle(callback: (String, String) -> Unit)
+
+    fun exitKiosk() {}
+
+    fun checkForUpdate() {}
+
+    fun openWifi() {}
 }

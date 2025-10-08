@@ -106,7 +106,7 @@ private fun Board(component: BoardComponent) {
     )
     Item(
         title = "Ukupan promet:",
-        value = (dash.value.approvedOrdersTotal ?: "0") + " KM",
+        value = dash.value.approvedTotal() + " KM",
         icon = Res.drawable.ic_total
     )
 }
@@ -227,6 +227,9 @@ private fun Status(component: BoardComponent) {
 @Composable
 private fun Products(component: BoardComponent) {
     val dash = component.dash.collectAsState()
+    if (dash.value.bestSellerProducts.isNullOrEmpty()) {
+        return
+    }
 
     Column(
         modifier = Modifier
@@ -248,7 +251,7 @@ private fun Products(component: BoardComponent) {
             TableRow(
                 name = (it.productName ?: ""),
                 qty = (it.orderedQuantity ?: "") + " kom",
-                price = (it.productPrice ?: "") + " KM"
+                price = it.price() + " KM"
             )
         }
         YSpacer16()
@@ -266,7 +269,7 @@ private fun TableHeaderRow() {
     ) {
         Box(
             modifier = Modifier
-                .weight(0.5f)
+                .weight(0.4f)
                 .border(width = 0.5.dp, color = KarikaColors.Border)
         ) {
             KarikaText(
@@ -280,7 +283,7 @@ private fun TableHeaderRow() {
         }
         Box(
             modifier = Modifier
-                .weight(0.25f)
+                .weight(0.3f)
                 .border(width = 0.5.dp, color = KarikaColors.Border)
         ) {
             KarikaText(
@@ -294,7 +297,7 @@ private fun TableHeaderRow() {
         }
         Box(
             modifier = Modifier
-                .weight(0.25f)
+                .weight(0.3f)
                 .border(width = 0.5.dp, color = KarikaColors.Border)
         ) {
             KarikaText(
@@ -324,7 +327,7 @@ private fun TableRow(name: String, qty: String, price: String) {
                 .onGloballyPositioned {
                     height.value = it.size.height
                 }
-                .weight(0.5f)
+                .weight(0.4f)
                 .border(width = 0.5.dp, color = KarikaColors.Border)
         ) {
             KarikaText(
@@ -339,7 +342,7 @@ private fun TableRow(name: String, qty: String, price: String) {
         Box(
             modifier = Modifier
                 .height(with(LocalDensity.current) { height.value.toDp() })
-                .weight(0.25f)
+                .weight(0.3f)
                 .border(width = 0.5.dp, color = KarikaColors.Border),
             contentAlignment = Alignment.CenterStart
         ) {
@@ -355,7 +358,7 @@ private fun TableRow(name: String, qty: String, price: String) {
         Box(
             modifier = Modifier
                 .height(with(LocalDensity.current) { height.value.toDp() })
-                .weight(0.25f)
+                .weight(0.3f)
                 .border(width = 0.5.dp, color = KarikaColors.Border),
             contentAlignment = Alignment.CenterStart
         ) {

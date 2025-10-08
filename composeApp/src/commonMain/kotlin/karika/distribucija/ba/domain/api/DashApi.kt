@@ -15,7 +15,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
-import karika.distribucija.ba.domain.HttpClientProvider.urlInternal
+import karika.distribucija.ba.domain.HttpClientProvider.urlV1
 import karika.distribucija.ba.domain.model.AIResponse
 import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.domain.model.DashboardData
@@ -455,7 +455,7 @@ internal class DashApi {
         name: String,
     ): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
-            urlInternal(name)
+            urlV1("ai/suggestions?query=$name")
         )
     }
 

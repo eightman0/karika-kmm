@@ -2,6 +2,8 @@ package karika.distribucija.ba
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import coil3.compose.setSingletonImageLoaderFactory
 import com.arkivanov.decompose.extensions.compose.stack.Children
@@ -9,6 +11,9 @@ import karika.distribucija.ba.ui.components.ImagePreview
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.LoadingView1
+import karika.distribucija.ba.ui.components.MandatoryUpdateModal
+import karika.distribucija.ba.ui.components.ScreenSaver
+import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardView
 import karika.distribucija.ba.ui.view.main.MainView
 import karika.distribucija.ba.ui.view.main.menu.blog.BlogsView
@@ -75,6 +80,22 @@ fun App(component: AppComponent) {
             }
             ImagePreview(component)
             LoadingView1(component)
+            ScreenSaver(component)
         }
+
+        MandatoryUpdate(component)
+    }
+}
+
+@Composable
+private fun MandatoryUpdate(component: AppComponent) {
+    val update by component.showMandatoryUpdate.asState()
+
+    if (update) {
+        MandatoryUpdateModal()
+    }
+
+    LaunchedEffect(Unit) {
+        component.checkForUpdate()
     }
 }

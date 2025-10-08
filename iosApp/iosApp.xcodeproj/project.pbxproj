@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		411BB8A82E77E33600DB17A4 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 411BB8A72E77E33600DB17A4 /* Alamofire */; };
 		41F3A1AD2E79A0B80023588F /* FirebaseInstallations in Frameworks */ = {isa = PBXBuildFile; productRef = 41F3A1AC2E79A0B80023588F /* FirebaseInstallations */; };
 		41F3A1AF2E79A0B80023588F /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 41F3A1AE2E79A0B80023588F /* FirebaseMessaging */; };
 /* End PBXBuildFile section */
@@ -48,7 +47,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				41F3A1AF2E79A0B80023588F /* FirebaseMessaging in Frameworks */,
-				411BB8A82E77E33600DB17A4 /* Alamofire in Frameworks */,
 				41F3A1AD2E79A0B80023588F /* FirebaseInstallations in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -94,7 +92,6 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
-				411BB8A72E77E33600DB17A4 /* Alamofire */,
 				41F3A1AC2E79A0B80023588F /* FirebaseInstallations */,
 				41F3A1AE2E79A0B80023588F /* FirebaseMessaging */,
 			);
@@ -127,7 +124,6 @@
 			mainGroup = B9DA97A82DC1472C00A4DA20;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				411BB8A62E77E33600DB17A4 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				41F3A1AB2E79A0B80023588F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -319,7 +315,7 @@
 				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = 7A4V326XC5;
 				ENABLE_PREVIEWS = YES;
@@ -360,7 +356,7 @@
 				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = 7A4V326XC5;
 				ENABLE_PREVIEWS = YES;
@@ -415,14 +411,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		411BB8A62E77E33600DB17A4 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.10.2;
-			};
-		};
 		41F3A1AB2E79A0B80023588F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
@@ -434,11 +422,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		411BB8A72E77E33600DB17A4 /* Alamofire */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 411BB8A62E77E33600DB17A4 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = Alamofire;
-		};
 		41F3A1AC2E79A0B80023588F /* FirebaseInstallations */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 41F3A1AB2E79A0B80023588F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

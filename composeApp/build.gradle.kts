@@ -101,8 +101,9 @@ android {
         applicationId = "karika.distribucija.ba"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 200
-        versionName = "2.0"
+        versionCode = 217
+
+        versionName = "2.1"
     }
     packaging {
         resources {
@@ -130,6 +131,10 @@ android {
         }
         create("prod") {
             applicationId = "karika.distribucija.ba"
+            dimension = "karika"
+        }
+        create("kiosk") {
+            applicationId = "karika.distribucija.ba.kiosk"
             dimension = "karika"
         }
     }

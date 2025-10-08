@@ -11,12 +11,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -36,9 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -86,18 +90,8 @@ import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun OrderDetailsView(component: OrderDetailsComponent) {
-    val focusManager = LocalSoftwareKeyboardController.current
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                focusManager?.hide()
-                return Offset.Zero
-            }
-        }
-    }
+    val scroll = rememberScrollState()
+
     Box(
         modifier = Modifier
             .background(color = KarikaColors.Gray20)
@@ -106,9 +100,13 @@ fun OrderDetailsView(component: OrderDetailsComponent) {
     Column(
         modifier = Modifier
             .padding(16.dp)
-            .hideKeyboard()
-            .nestedScroll(nestedScrollConnection)
-            .verticalScroll(rememberScrollState())
+            .hideKeyboard(true)
+            .windowInsetsPadding(
+                WindowInsets.ime
+                    .union(WindowInsets.navigationBars)
+                    .only(WindowInsetsSides.Bottom)
+            )
+            .verticalScroll(scroll)
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -142,9 +140,7 @@ private fun OrderInfo(component: OrderDetailsComponent) {
     val attachBillModal = remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
-            .onClick {
-
-            }
+            .hideKeyboard(true)
             .background(color = KarikaColors.White)
             .border(width = 1.dp, color = KarikaColors.Gray21, shape = RoundedCornerShape(4.dp)),
         verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -602,10 +598,8 @@ private fun OrderShipping(component: OrderDetailsComponent) {
     if (order.value.shouldShowShipping()) {
         Column(
             modifier = Modifier
+                .hideKeyboard(true)
                 .fillMaxWidth()
-                .onClick {
-
-                }
                 .background(color = KarikaColors.White)
                 .border(
                     width = 1.dp,
@@ -913,10 +907,8 @@ private fun OrderTax(component: OrderDetailsComponent) {
 
     Column(
         modifier = Modifier
+            .hideKeyboard(true)
             .fillMaxWidth()
-            .onClick {
-
-            }
             .background(color = KarikaColors.White)
             .border(width = 1.dp, color = KarikaColors.Gray21, shape = RoundedCornerShape(4.dp)),
     ) {
@@ -1326,13 +1318,9 @@ private fun TableRow(
 @Composable
 private fun Comments(component: OrderDetailsComponent) {
     val comments by component.comments.collectAsState()
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .onClick {
-
-            }
             .background(color = KarikaColors.White)
             .border(width = 1.dp, color = KarikaColors.Gray21, shape = RoundedCornerShape(4.dp)),
     ) {

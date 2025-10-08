@@ -6,10 +6,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -47,6 +54,7 @@ import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
 import karika.distribucija.ba.ui.view.distributer.products.details.dashedBorder
 import karika.distribucija.ba.util.KarikaConstants
 import karikav2.composeapp.generated.resources.Res
@@ -63,6 +71,12 @@ fun ProfileView(component: ProfileComponent) {
     )
     Column(
         modifier = Modifier
+            .hideKeyboard()
+            .windowInsetsPadding(
+                WindowInsets.ime
+                    .union(WindowInsets.navigationBars)
+                    .only(WindowInsetsSides.Bottom)
+            )
             .verticalScroll(rememberScrollState())
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -87,7 +101,7 @@ private fun ButtonsBox(component: ProfileComponent) {
             secondaryTitle = "Nazad"
         ) {
             if (it == "Nazad") {
-                component.dashBack()
+                component.dashNavigate(DashConfig.ControlBoard)
                 return@HorizontalSecondaryButtons
             }
 

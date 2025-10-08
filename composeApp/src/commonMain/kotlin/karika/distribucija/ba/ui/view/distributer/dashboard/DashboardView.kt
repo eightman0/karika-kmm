@@ -175,7 +175,7 @@ fun DashboardView(component: DashboardComponent) {
                             }
                         }
                     )
-                    NavigationDrawerItem(
+                   /* NavigationDrawerItem(
                         modifier = Modifier,
                         colors = NavigationDrawerItemDefaults.colors(
                             unselectedContainerColor = KarikaColors.White,
@@ -201,7 +201,7 @@ fun DashboardView(component: DashboardComponent) {
                                 drawerState.close()
                             }
                         }
-                    )
+                    )*/
                     NavigationDrawerItem(
                         modifier = Modifier,
                         colors = NavigationDrawerItemDefaults.colors(

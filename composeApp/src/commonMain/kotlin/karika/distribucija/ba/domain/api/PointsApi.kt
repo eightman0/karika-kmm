@@ -41,7 +41,7 @@ class PointsRepository internal constructor() {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
-                    ResultState.Error("error")
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
         } catch (e: Exception) {
@@ -62,7 +62,7 @@ class PointsRepository internal constructor() {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
-                    ResultState.Error("error")
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
         } catch (e: Exception) {

@@ -79,4 +79,6 @@ object KarikaColors {
 
     val MineMessage = Color(0xFF582BE8)
     val NotMineMessage = Color(0xFFF1F4F9)
+
+    val Yellow = Color(0xFFFFC107)
 }

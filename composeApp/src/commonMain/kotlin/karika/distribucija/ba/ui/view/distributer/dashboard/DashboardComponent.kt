@@ -40,7 +40,6 @@ class DashboardComponent(componentContext: ComponentContext, stateHolder: Karika
 
         stateHolder.vendorSpecificHandler.getVendorDetails()
         stateHolder.vendorNotificationHandler.notificationReceived()
-        stateHolder.commonHandler.fetchCategories()
     }
 
     val stack: Value<ChildStack<*, DashChild>> =

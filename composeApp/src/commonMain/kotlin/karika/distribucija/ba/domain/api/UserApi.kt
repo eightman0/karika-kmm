@@ -1,13 +1,20 @@
 package karika.distribucija.ba.domain.api
 
+import androidx.compose.foundation.content.MediaType
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.headers
+import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
+import karika.distribucija.ba.domain.HttpClientProvider.urlV1
 import karika.distribucija.ba.domain.model.Blog
 import karika.distribucija.ba.domain.model.ChangePasswordRequest
 import karika.distribucija.ba.domain.model.Config
@@ -52,8 +59,8 @@ internal class UserApi {
     }
 
     suspend fun forgotPass(email: String): Result<HttpResponse> = runCatching {
-        return@runCatching HttpClientProvider.client.put(
-            url("customers/password")
+        return@runCatching HttpClientProvider.client.post(
+            urlV1("auth/reset-password")
         ) {
             setBody(
                 ForgotPasswordRequest(
@@ -65,10 +72,11 @@ internal class UserApi {
     }
 
     suspend fun change(old: String, new: String): Result<HttpResponse> = runCatching {
-        return@runCatching HttpClientProvider.client.put(
-            url("customers/me/password")
+        return@runCatching HttpClientProvider.client.post(
+            urlV1("auth/change-password")
         ) {
-            setBody(ChangePasswordRequest(old, new))
+            header(HttpHeaders.Accept, "application/json")
+            setBody(ChangePasswordRequest(old, new, new))
         }
     }
 }
@@ -84,7 +92,7 @@ class UserRepository internal constructor() {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
-                    ResultState.Error("error")
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
         } catch (e: Exception) {
@@ -102,7 +110,7 @@ class UserRepository internal constructor() {
                 emit(ResultState.Success(""))
             } else {
                 emit(
-                    ResultState.Error("error")
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
         } catch (e: Exception) {
@@ -120,7 +128,7 @@ class UserRepository internal constructor() {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
-                    ResultState.Error("error")
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
         } catch (e: Exception) {
@@ -138,7 +146,7 @@ class UserRepository internal constructor() {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
-                    ResultState.Error("error")
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
         } catch (e: Exception) {
@@ -156,7 +164,7 @@ class UserRepository internal constructor() {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
-                    ResultState.Error("error")
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
         } catch (e: Exception) {
@@ -178,7 +186,7 @@ class UserRepository internal constructor() {
                 )
             } else {
                 emit(
-                    ResultState.Error("Vaš račun je privremeno onemogućen.")
+                    ResultState.Error("Ako postoji nalog povezan sa '$email', dobićete e-poruku sa vezom za resetovanje vaše lozinke.")
                 )
             }
         } catch (e: Exception) {
@@ -196,7 +204,7 @@ class UserRepository internal constructor() {
                 emit(ResultState.Success(""))
             } else {
                 emit(
-                    ResultState.Error("error")
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
         } catch (e: Exception) {

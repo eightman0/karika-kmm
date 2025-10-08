@@ -203,10 +203,15 @@ actual fun openPdf(url: String) {
 actual fun getEnvPrefix(): String {
     val currentEnv =
         NSBundle.mainBundle.objectForInfoDictionaryKey("APP_ENV") as? String ?: "prod"
-    println("TEST_TEST: APP_ENV: $currentEnv")
     return when (currentEnv) {
         "prod" -> ""
         "demo" -> "demo."
         else -> "test."
     }
+}
+
+actual fun isKiosk() = false
+
+actual fun appVersion(): String {
+    return NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String ?: "0.0"
 }

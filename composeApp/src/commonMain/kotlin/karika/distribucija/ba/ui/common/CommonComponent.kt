@@ -3,7 +3,6 @@ package karika.distribucija.ba.ui.common
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.pop
-import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.api.CartRepository
@@ -31,6 +30,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
@@ -50,9 +50,9 @@ open class CommonComponent(
     val productRepository = ProductRepository()
     private val notificationRepository = NotificationRepository()
 
-    val _promotedVendors = MutableStateFlow<List<PromotedVendor>>(emptyList())
+    private val _promotedVendors = MutableStateFlow<List<PromotedVendor>>(emptyList())
     val promotedVendors = _promotedVendors.asStateFlow()
-    val _promotedLogos = MutableStateFlow<List<PromotedVendor>>(emptyList())
+    private val _promotedLogos = MutableStateFlow<List<PromotedVendor>>(emptyList())
     val promotedLogos = _promotedLogos.asStateFlow()
     val loader = stateHolder.loaderHandler.loader
 
@@ -326,7 +326,7 @@ open class CommonComponent(
     }
 
     fun savePushHandle() {
-        stateHolder.filePicker.getPushHandle { fId, token ->
+        stateHolder.handler.getPushHandle { fId, token ->
             println("TEST_TEST: FCM_TOKEN: $token")
             iOScope.launch {
                 notificationRepository
@@ -337,7 +337,7 @@ open class CommonComponent(
     }
 
     private fun removePushHandle() {
-        stateHolder.filePicker.getPushHandle { fId, _ ->
+        stateHolder.handler.getPushHandle { fId, _ ->
             iOScope.launch {
                 notificationRepository
                     .savePushHandle(null, fId)
@@ -368,5 +368,40 @@ open class CommonComponent(
 
     fun hideLoader() {
         stateHolder.loaderHandler.hideLoader()
+    }
+
+    open fun loadBanners() {
+        iOScope.launch {
+            productRepository.promotedVendors().collect { result ->
+                when (result) {
+                    is ResultState.Loading -> {
+                        showLoader()
+                    }
+
+                    is ResultState.Success -> {
+                        hideLoader()
+                        _promotedVendors.update {
+                            result.data
+                                .filter { f -> f.promoteVendorBanner }
+                                .filter { f -> f.companyBanner != null }
+                        }
+                        _promotedLogos.update {
+                            result.data
+                                .filter { f -> f.promoteVendorLogo }
+                                .filter { f -> f.companyLogo != null }
+                        }
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message ?: "")
+                    }
+                }
+            }
+        }
+    }
+
+    fun getUnit(unit: String): String {
+        return stateHolder.commonHandler.getUnit(unit)
     }
 }

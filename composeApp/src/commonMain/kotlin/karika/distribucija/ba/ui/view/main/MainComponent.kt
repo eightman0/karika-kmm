@@ -88,7 +88,6 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
         stateHolder.customerSpecificHandler.getUserDetails()
         stateHolder.cartHandler.reloadCart()
         stateHolder.customerNotificationHandler.notificationReceived()
-        stateHolder.commonHandler.fetchCategories()
     }
 
     val stack: Value<ChildStack<*, MainChild>> =

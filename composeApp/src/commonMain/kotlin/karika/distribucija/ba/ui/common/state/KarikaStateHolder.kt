@@ -3,14 +3,14 @@ package karika.distribucija.ba.ui.common.state
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.AppConfig
-import karika.distribucija.ba.ui.common.KarikaFilePicker
+import karika.distribucija.ba.ui.common.KarikaHandler
 import karika.distribucija.ba.ui.common.state.customer.CartHandler
 import karika.distribucija.ba.ui.common.state.customer.CustomerNotificationHandler
 import karika.distribucija.ba.ui.common.state.customer.CustomerSpecificHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorNotificationHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorSpecificHandler
 
-class KarikaStateHolder(val filePicker: KarikaFilePicker) : NavigationHandler() {
+class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
     var cartHandler = CartHandler()
     var sessionHandler = SessionHandler()
     var messageHandler = MessageHandler()

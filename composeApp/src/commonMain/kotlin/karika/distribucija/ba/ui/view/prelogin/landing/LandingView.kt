@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -29,6 +31,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaLogo
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.LoadingView2
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
@@ -40,6 +43,7 @@ import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun LandingView(component: LandingComponent) {
+    val promotedLogos by component.promotedLogos.collectAsState()
     KarikaBox {
         KarikaScaffold(
             containerColor = KarikaColors.Transparent,
@@ -175,20 +179,34 @@ fun LandingView(component: LandingComponent) {
                     }
                     YSpacer16()
                     //LandingBanner()
-                    KarikaText(
-                        modifier = Modifier,
-                        color = KarikaColors.Black,
-                        text = "Dobavljači",
-                        textSize = 20.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                    CarouselLogos(component)
+                    Box(
+                        modifier = Modifier
+                            .height(130.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (promotedLogos.isNotEmpty()) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                KarikaText(
+                                    modifier = Modifier,
+                                    color = KarikaColors.Black,
+                                    text = "Dobavljači",
+                                    textSize = 20.sp,
+                                    fontWeight = FontWeight.W700
+                                )
+                                CarouselLogos(component)
+                            }
+                        }
+                        LoadingView2(component)
+                        LaunchedEffect(Unit) {
+                            component.loadBanners()
+                        }
+                    }
                 }
             }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        component.loadData()
     }
 }

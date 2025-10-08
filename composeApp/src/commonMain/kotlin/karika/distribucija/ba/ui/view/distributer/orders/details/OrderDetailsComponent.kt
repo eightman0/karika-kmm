@@ -119,7 +119,7 @@ class OrderDetailsComponent(
     }
 
     fun pickFile() {
-        stateHolder.filePicker.pickFile(arrayOf("application/pdf")) { name, data ->
+        stateHolder.handler.pickFile(arrayOf("application/pdf")) { name, data ->
             iOScope.launch {
                 repository.sendComment(
                     orderId = order.value.orderId ?: return@launch,

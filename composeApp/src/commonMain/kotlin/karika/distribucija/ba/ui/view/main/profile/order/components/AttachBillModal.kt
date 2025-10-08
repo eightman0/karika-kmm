@@ -92,7 +92,7 @@ fun AttachBillModal(
                 Column(
                     modifier = Modifier
                         .onClick {
-                            component.stateHolder.filePicker.pickFile(arrayOf("application/pdf", "image/png", "image/jpeg")) { name, data ->
+                            component.stateHolder.handler.pickFile(arrayOf("application/pdf", "image/png", "image/jpeg")) { name, data ->
                                 attachedFile.value = Pair(name, data)
                             }
                         }

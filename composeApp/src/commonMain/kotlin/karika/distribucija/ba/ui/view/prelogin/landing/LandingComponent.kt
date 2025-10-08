@@ -2,15 +2,12 @@ package karika.distribucija.ba.ui.view.prelogin.landing
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.bringToFront
-import karika.distribucija.ba.domain.HttpClientProvider
-import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.common.KarikaType
+import karika.distribucija.ba.ui.common.isKiosk
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class LandingComponent(
     componentContext: ComponentContext,
@@ -21,39 +18,14 @@ class LandingComponent(
         stateHolder.preLoginNavigation.bringToFront(PreLoginConfig.Login(type))
     }
 
-    fun loadData() {
-        iOScope.launch {
-            HttpClientProvider.token = null
-            productRepository.promotedVendors().collect { result ->
-                when (result) {
-                    is ResultState.Loading -> {
-                        showLoader()
-                    }
-
-                    is ResultState.Success -> {
-                        hideLoader()
-                        _promotedVendors.update {
-                            result.data
-                                .filter { f -> f.promoteVendorBanner }
-                                .filter { f -> f.companyBanner != null }
-                        }
-                        _promotedLogos.update {
-                            result.data
-                                .filter { f -> f.promoteVendorLogo }
-                                .filter { f -> f.companyLogo != null }
-                        }
-                    }
-
-                    is ResultState.Error -> {
-                        hideLoader()
-                        showMessage(result.message ?: "")
-                    }
-                }
-            }
-        }
-    }
-
     override fun showVendor(vendor: Vendor) {
 
+    }
+
+    override fun loadBanners() {
+        if (isKiosk()) {
+            return
+        }
+        super.loadBanners()
     }
 }

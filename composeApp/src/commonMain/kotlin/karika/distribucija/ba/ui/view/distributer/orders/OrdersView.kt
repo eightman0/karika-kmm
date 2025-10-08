@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.runtime.Composable
@@ -125,6 +127,7 @@ fun OrdersView(component: OrdersComponent) {
             OrderItem(component, it)
         }
     }
+    EmptyState(component)
 
     OrderFilterSheet(component)
 
@@ -157,13 +160,35 @@ private fun OrderItem(component: OrdersComponent, vendorOrder: VendorOrder) {
                 .weight(1f),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            KarikaText(
-                modifier = Modifier,
-                text = vendorOrder.b2bPravnoLice,
-                color = KarikaColors.Gray2,
-                textSize = 14.sp,
-                fontWeight = FontWeight.W700
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                KarikaText(
+                    modifier = Modifier,
+                    text = vendorOrder.b2bPravnoLice,
+                    color = KarikaColors.Gray2,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W700
+                )
+                if (vendorOrder.hasChanges()) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(color = KarikaColors.Red, shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(0.dp),
+                            text = "1",
+                            textSize = 10.sp,
+                            fontWeight = FontWeight.W400,
+                            color = KarikaColors.White
+                        )
+                    }
+                }
+            }
             Box(
                 modifier = Modifier
                     .rounded(color = vendorOrder.statusColor(), shape = 6.dp)
@@ -180,7 +205,7 @@ private fun OrderItem(component: OrdersComponent, vendorOrder: VendorOrder) {
             KarikaText(
                 modifier = Modifier
                     .fillMaxWidth(),
-                text = vendorOrder.createdAt,
+                text = vendorOrder.date(),
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W600
@@ -199,5 +224,26 @@ private fun OrderItem(component: OrdersComponent, vendorOrder: VendorOrder) {
                 fontWeight = FontWeight.W700
             )
         }
+    }
+}
+
+@Composable
+private fun EmptyState(component: OrdersComponent) {
+    val orders by component.orders.collectAsState()
+    if (orders.isNotEmpty()) {
+        return
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        KarikaText(
+            modifier = Modifier,
+            color = KarikaColors.Blue,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W700,
+            text = "Nema narudžbi."
+        )
     }
 }

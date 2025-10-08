@@ -25,8 +25,8 @@ object HttpClientProvider {
         return BASE_URL + arg
     }
 
-    fun urlInternal(query: String): String {
-        return "https://${getEnvPrefix()}karika.ba/internal/V1/ai/suggestions?query=$query"
+    fun urlV1(query: String): String {
+        return "https://${getEnvPrefix()}karika.ba/api/V1/$query"
     }
 
     var token: String? = null

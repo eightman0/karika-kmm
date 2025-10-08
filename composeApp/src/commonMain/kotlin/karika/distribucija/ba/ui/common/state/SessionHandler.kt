@@ -45,6 +45,8 @@ open class SessionHandler : KoinComponent {
         persistenceManager.save("JWT_TOKEN", "")
     }
 
+    fun hasJWT() = persistenceManager.get("JWT_TOKEN").isNotEmpty()
+
     fun mainConfig(): AppConfig {
         val type = persistenceManager.get("user_type")
         val jwt = persistenceManager.get("JWT_TOKEN")

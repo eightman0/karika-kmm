@@ -46,9 +46,12 @@ fun KarikaBox(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun KarikaLogo(size: Int = 88) {
+fun KarikaLogo(size: Int = 88, onClick: () -> Unit = {}) {
     Image(
         modifier = Modifier
+            .onClick {
+                onClick.invoke()
+            }
             .size(size.dp),
         imageVector = vectorResource(Res.drawable.ic_primary_logo),
         contentDescription = ""

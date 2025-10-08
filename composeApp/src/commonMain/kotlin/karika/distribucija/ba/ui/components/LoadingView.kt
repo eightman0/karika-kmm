@@ -46,6 +46,23 @@ fun LoadingView1(commonComponent: CommonComponent) {
 }
 
 @Composable
+fun LoadingView2(commonComponent: CommonComponent) {
+    val state = commonComponent.loader.collectAsState()
+    if (state.value) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize(Alignment.Center)
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier,
+                color = KarikaColors.Primary
+            )
+        }
+    }
+}
+
+@Composable
 fun LoadingView() {
     Dialog(
         onDismissRequest = { },

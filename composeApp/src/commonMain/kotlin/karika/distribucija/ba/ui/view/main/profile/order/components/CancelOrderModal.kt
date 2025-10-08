@@ -99,6 +99,7 @@ fun CancelOrderModal(
                         Pair("Ostalo", 1),
                     )
                 )
+
                 KarikaTextField1(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -107,6 +108,7 @@ fun CancelOrderModal(
                     placeholder = "Upiši razlog otkazivanja",
                     imeAction = ImeAction.Next
                 )
+                YSpacer16()
                 HorizontalButtons(
                     modifier = Modifier,
                     primaryTitle = "Potvrdi",

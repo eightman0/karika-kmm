@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,6 +38,7 @@ import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rounded
@@ -75,6 +77,7 @@ private fun Products(component: ProductByCategoryComponent) {
     LazyColumn(
         state = state,
         modifier = Modifier
+            .hideKeyboard()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -102,6 +105,9 @@ private fun Products(component: ProductByCategoryComponent) {
                     )
                 }
             }
+        }
+        item {
+            EmptyState(component)
         }
     }
 
@@ -250,4 +256,26 @@ private fun Filter(component: ProductByCategoryComponent) {
     }
 
     ProductsFilterSheet(showState, component)
+}
+
+@Composable
+private fun EmptyState(component: ProductByCategoryComponent) {
+    val products by component.products.collectAsState()
+    if (products.isNotEmpty()) {
+        return
+    }
+    Box(
+        modifier = Modifier
+            .height(200.dp)
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        KarikaText(
+            modifier = Modifier,
+            color = KarikaColors.Primary,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W700,
+            text = "Nema rezultata."
+        )
+    }
 }

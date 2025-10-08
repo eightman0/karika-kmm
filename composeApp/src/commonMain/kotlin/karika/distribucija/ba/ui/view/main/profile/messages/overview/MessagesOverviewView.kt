@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -70,6 +72,7 @@ fun MessagesOverviewView(component: MessagesOverviewComponent) {
     val comments = component.messages.collectAsState()
     val state = rememberLazyListState()
     val conversation by component.conversationState.asState()
+
     KarikaScaffold(
         containerColor = KarikaColors.White,
         contentWindowInsets = WindowInsets.systemBars,
@@ -78,6 +81,10 @@ fun MessagesOverviewView(component: MessagesOverviewComponent) {
                 component.appBack()
             }
         },
+        bottomBar = {
+            EnterComment(component)
+        },
+        ignoreImeTweak = true,
         component = component
     ) {
         Column(
@@ -100,13 +107,18 @@ fun MessagesOverviewView(component: MessagesOverviewComponent) {
                     MessageItem(item, component)
                 }
             }
-            EnterComment(component)
         }
     }
 
     LaunchedEffect(comments.value) {
         component.mainScope.launch {
             state.scrollToItem(comments.value.size)
+        }
+    }
+
+    LaunchedEffect(state.canScrollForward) {
+        if (comments.value.lastIndex > 0) {
+            state.scrollToItem(comments.value.lastIndex)
         }
     }
 }
@@ -135,7 +147,7 @@ private fun Subject(component: MessagesOverviewComponent) {
 @Composable
 private fun SearchForVendor(component: MessagesOverviewComponent) {
     val conversation = component.conversationState.asState()
-    if (conversation.value.id != null || conversation.value.admin) {
+    if (conversation.value.id != null || conversation.value.admin || conversation.value.vendorId != null) {
         return
     }
     val searchText = mutableStateOf("").asState()
@@ -267,6 +279,8 @@ private fun EnterComment(component: MessagesOverviewComponent) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .imePadding()
+            .navigationBarsPadding()
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
