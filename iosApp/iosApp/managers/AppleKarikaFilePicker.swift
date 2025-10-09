@@ -10,7 +10,7 @@ import UniformTypeIdentifiers
 import FirebaseMessaging
 import FirebaseInstallations
 
-class AppleKarikaFilePicker : KarikaFilePicker {
+class AppleKarikaHandler : KarikaHandler {
     func downloadFile(fileName: String, fileType: String, fileUrl: String) {
         
     }
@@ -121,5 +121,16 @@ class AppleKarikaFilePicker : KarikaFilePicker {
         }
     }
     
+    func exitKiosk() {
+        
+    }
+    
+    func checkForUpdate() {
+        
+    }
+    
+    func openWifi() {
+        
+    }
     
 }

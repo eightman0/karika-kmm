@@ -22,7 +22,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
             instanceKeeper: nil,
             backHandler: backDispatcher
         ),
-        filePicker: AppleKarikaFilePicker()
+        filePicker: AppleKarikaHandler()
     )
     
     func application(
