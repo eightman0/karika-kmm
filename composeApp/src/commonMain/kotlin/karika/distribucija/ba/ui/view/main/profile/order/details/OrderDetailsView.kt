@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrderProduct
 import karika.distribucija.ba.domain.model.OrdersResponse
+import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
@@ -257,14 +258,23 @@ fun VendorOrder(order: OrdersResponse, component: OrderDetailsComponent) {
                 //)
             }
             YSpacer8()
-            Row(
-                modifier = Modifier
-                    .horizontalScroll(rememberScrollState())
-            ) {
+            if (isKiosk()) {
                 Column {
-                    TableHeaderRow1()
+                    TableHeaderRow2()
                     it.products.forEach { vp ->
-                        TableRow1(vp)
+                        TableRow2(vp)
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    Column {
+                        TableHeaderRow1()
+                        it.products.forEach { vp ->
+                            TableRow1(vp)
+                        }
                     }
                 }
             }
@@ -808,6 +818,238 @@ private fun TableRow1(order: OrderProduct) {
             modifier = Modifier
                 .height(with(LocalDensity.current) { height.value.toDp() })
                 .width(100.dp)
+                .border(width = 0.5.dp, color = KarikaColors.Border),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray17,
+                fontWeight = FontWeight.W600,
+                textSize = 12.sp,
+                text = order.total()
+            )
+        }
+    }
+}
+
+@Composable
+private fun TableHeaderRow2() {
+    Row(
+        modifier = Modifier
+            .background(color = KarikaColors.Gray16)
+            .border(width = 0.5.dp, color = KarikaColors.Border)
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(0.4f)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray15,
+                fontWeight = FontWeight.W600,
+                textSize = 10.sp,
+                text = "ARTIKAL"
+            )
+        }
+        Box(
+            modifier = Modifier
+                .weight(0.15f)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray15,
+                fontWeight = FontWeight.W600,
+                textSize = 10.sp,
+                text = "RABAT %"
+            )
+        }
+        Box(
+            modifier = Modifier
+                .weight(0.15f)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray15,
+                fontWeight = FontWeight.W600,
+                textSize = 10.sp,
+                text = "VPC"
+            )
+        }
+        Box(
+            modifier = Modifier
+                .weight(0.15f)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray15,
+                fontWeight = FontWeight.W600,
+                textSize = 10.sp,
+                text = "KOLIČINA"
+            )
+        }
+        Box(
+            modifier = Modifier
+                .weight(0.15f)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray15,
+                fontWeight = FontWeight.W600,
+                textSize = 10.sp,
+                text = "UKUPNO"
+            )
+        }
+    }
+}
+
+@Composable
+private fun TableRow2(order: OrderProduct) {
+    val height = remember { mutableStateOf(0) }
+    Row(
+        modifier = Modifier
+            .background(color = KarikaColors.White)
+            .border(width = 0.5.dp, color = KarikaColors.Border)
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .onGloballyPositioned {
+                    height.value = it.size.height
+                }
+                .weight(0.4f)
+                .border(width = 0.5.dp, color = KarikaColors.Border)
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                atext = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.W600,
+                            color = KarikaColors.Gray15,
+                            fontSize = 12.sp
+                        )
+                    ) {
+                        append(order.name).append("\n")
+                    }
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.W400,
+                            color = KarikaColors.Gray15,
+                            fontSize = 12.sp
+                        )
+                    ) {
+                        append(order.vendorName())
+                    }
+                }
+            )
+        }
+        Box(
+            modifier = Modifier
+                .height(with(LocalDensity.current) { height.value.toDp() })
+                .weight(0.15f)
+                .border(width = 0.5.dp, color = KarikaColors.Border),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (order.rabat() != "0") {
+                    KarikaText(
+                        modifier = Modifier.drawBehind {
+                            drawLine(
+                                color = KarikaColors.Gray1,
+                                strokeWidth = 1.dp.toPx(),
+                                start = Offset(0f, size.height / 2),
+                                end = Offset(size.width, size.height / 2)
+                            )
+                        },
+                        color = KarikaColors.Gray17,
+                        fontWeight = FontWeight.W600,
+                        textSize = 12.sp,
+                        text = "0"
+                    )
+                }
+                KarikaText(
+                    modifier = Modifier
+                        .padding(8.dp),
+                    color = KarikaColors.Gray17,
+                    fontWeight = FontWeight.W600,
+                    textSize = 12.sp,
+                    text = order.rabat()
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .height(with(LocalDensity.current) { height.value.toDp() })
+                .weight(0.15f)
+                .border(width = 0.5.dp, color = KarikaColors.Border),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(8.dp),
+                color = KarikaColors.Gray17,
+                fontWeight = FontWeight.W600,
+                textSize = 12.sp,
+                text = order.vpc()
+            )
+        }
+        Box(
+            modifier = Modifier
+                .height(with(LocalDensity.current) { height.value.toDp() })
+                .weight(0.15f)
+                .border(width = 0.5.dp, color = KarikaColors.Border),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (order.qtyChanged()) {
+                    KarikaText(
+                        modifier = Modifier.drawBehind {
+                            drawLine(
+                                color = KarikaColors.Gray1,
+                                strokeWidth = 1.dp.toPx(),
+                                start = Offset(0f, size.height / 2),
+                                end = Offset(size.width, size.height / 2)
+                            )
+                        },
+                        color = KarikaColors.Gray17,
+                        fontWeight = FontWeight.W600,
+                        textSize = 12.sp,
+                        text = order.originalQty()
+                    )
+                }
+                KarikaText(
+                    modifier = Modifier
+                        .padding(8.dp),
+                    color = KarikaColors.Gray17,
+                    fontWeight = FontWeight.W600,
+                    textSize = 12.sp,
+                    text = order.qty()
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .height(with(LocalDensity.current) { height.value.toDp() })
+                .weight(0.15f)
                 .border(width = 0.5.dp, color = KarikaColors.Border),
             contentAlignment = Alignment.CenterEnd
         ) {

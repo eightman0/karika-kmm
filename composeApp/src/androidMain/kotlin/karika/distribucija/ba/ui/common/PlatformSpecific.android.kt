@@ -69,7 +69,7 @@ actual fun openPdf(url: String) {
 actual fun getEnvPrefix(): String {
     val flavour = BuildConfig.FLAVOR
     return when (flavour) {
-        "prod" -> ""
+        "prod", "kiosk" -> ""
         "demo" -> "demo."
         else -> "test."
     }
