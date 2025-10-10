@@ -32,6 +32,7 @@
             </intent-filter>
         </service>
 
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="KarikaNotificationChannelId" />
@@ -49,4 +50,12 @@
             android:value="true" />
     </application>
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.DIAL" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+        </intent>
+    </queries>
 </manifest>

@@ -29,7 +29,7 @@ class ProductByCategoryComponent(
     val products = _products.asStateFlow()
     val searchText = mutableStateOf("")
     val filter = mutableStateOf(Pair("", 0))
-    val sortBy = mutableStateOf("Po datumu")
+    val sortBy = mutableStateOf("Najnoviji")
 
     private val _vendors = MutableStateFlow<List<Vendor>>(emptyList())
     val vendors = _vendors.asStateFlow()
@@ -70,7 +70,7 @@ class ProductByCategoryComponent(
                                 it.plus(result.data)
                             }
                         }
-                        hasNextPage = result.data.isNotEmpty()
+                        hasNextPage = result.data.size == pageSize
                         currentPage++
                     }
 
@@ -114,6 +114,8 @@ class ProductByCategoryComponent(
 
 private fun String.sortBy(): String {
     return when (this) {
+        "Najnoviji" -> "created_at"
+        "Najstariji" -> "created_at"
         "Najjeftiniji" -> "price"
         "Najskuplji" -> "price"
         "Minimalna količina" -> "b2b_min_qty"
@@ -124,6 +126,8 @@ private fun String.sortBy(): String {
 
 private fun String.sortType(): String {
     return when (this) {
+        "Najnoviji" -> "ASC"
+        "Najstariji" -> "DESC"
         "Najjeftiniji" -> "ASC"
         "Najskuplji" -> "DESC"
         "Minimalna količina" -> "ASC"

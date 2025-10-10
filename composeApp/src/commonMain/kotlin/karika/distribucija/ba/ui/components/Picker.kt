@@ -3,6 +3,7 @@ package karika.distribucija.ba.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -121,6 +122,103 @@ fun KarikaPicker(
                     modifier = Modifier.fillMaxWidth(),
                     thickness = 1.dp,
                     color = KarikaColors.Divider
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun KarikaPickerSmall1(
+    modifier: Modifier,
+    values: MutableState<List<Pair<String, Color>>>,
+    value: MutableState<String>,
+    padding: Dp = 16.dp,
+    borderColor: Color = KarikaColors.Border,
+    onChange: () -> Unit
+) {
+    val expanded = remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        modifier = modifier,
+        expanded = expanded.value,
+        onExpandedChange = { expanded.value = it }
+    ) {
+        Row(
+            modifier = modifier
+                .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+                .border(
+                    width = 1.dp,
+                    color = borderColor,
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .background(
+                    color = KarikaColors.White,
+                    shape = RoundedCornerShape(4.dp)
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(padding),
+                text = value.value,
+                color = KarikaColors.Gray2,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W400,
+            )
+            Icon(
+                modifier = Modifier
+                    .padding(padding),
+                imageVector = vectorResource(Res.drawable.ic_arrow_down),
+                contentDescription = "",
+                tint = KarikaColors.Gray2
+            )
+        }
+        ExposedDropdownMenu(
+            modifier = Modifier,
+            shape = RoundedCornerShape(8.dp),
+            containerColor = KarikaColors.White,
+            expanded = expanded.value,
+            onDismissRequest = {
+                expanded.negate()
+            },
+        ) {
+            values.value.forEachIndexed { index, it ->
+                DropdownMenuItem(
+                    modifier = Modifier,
+                    onClick = {
+                        value.value = it.first
+                        expanded.negate()
+                        onChange.invoke()
+                    },
+                    text = {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = it.second.copy(alpha = 0.1f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                        ) {
+                            KarikaText(
+                                text = it.first,
+                                modifier = Modifier
+                                    .padding(4.dp),
+                                fontWeight = FontWeight.W700,
+                                textSize = 14.sp,
+                                color = it.second
+                            )
+                        }
+                    },
+                    leadingIcon = {
+                        KarikaRadioButton(
+                            selected = it.first == value.value
+                        ) { _ ->
+                            value.value = it.first
+                            expanded.negate()
+                            onChange.invoke()
+                        }
+                    }
                 )
             }
         }

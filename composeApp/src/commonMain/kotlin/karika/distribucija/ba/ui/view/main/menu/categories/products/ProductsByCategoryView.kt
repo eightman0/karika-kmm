@@ -178,6 +178,8 @@ private fun Filter(component: ProductByCategoryComponent) {
             value = sort,
             values = mutableStateOf(
                 listOf(
+                    "Najnoviji",
+                    "Najstariji",
                     "Najjeftiniji",
                     "Najskuplji",
                     "Min. Količina",

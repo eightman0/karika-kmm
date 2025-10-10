@@ -40,6 +40,7 @@ import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.components.HorizontalButtons
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaPickerSmall
+import karika.distribucija.ba.ui.components.KarikaPickerSmall1
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.TopBarWithBack
@@ -93,19 +94,19 @@ private fun FilterView(component: OrdersComponent) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        KarikaPickerSmall(
+        KarikaPickerSmall1(
             modifier = Modifier
                 .weight(1f),
             value = statusSort,
             values = mutableStateOf(
                 listOf(
-                    "Sve",
-                    "Na čekanju",
-                    "Odobrena",
-                    "Otkazana",
-                    "Odbijena",
-                    "Čekanje na uplatu",
-                    "Uplaćena"
+                    Pair("Sve", KarikaColors.Gray2),
+                    Pair("Na čekanju", KarikaColors.Blue),
+                    Pair("Odobrena", KarikaColors.Green3),
+                    Pair("Otkazana", KarikaColors.Gray2),
+                    Pair("Odbijena", KarikaColors.Red),
+                    Pair("Čekanje na uplatu", KarikaColors.Orange),
+                    Pair("Uplaćena", KarikaColors.Orange)
                 )
             ).asState()
         ) {

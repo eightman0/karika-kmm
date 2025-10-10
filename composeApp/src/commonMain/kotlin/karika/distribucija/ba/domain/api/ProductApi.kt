@@ -153,8 +153,8 @@ class ProductRepository internal constructor() {
         pageSize: Int = 30,
         currentPage: Int = 1,
         searchText: String = "",
-        sortBy: String = "price",
-        sortType: String = "ASC",
+        sortBy: String = "",
+        sortType: String = "",
     ): Flow<ResultState<List<Product>>> = flow {
         emit(ResultState.Loading)
         try {

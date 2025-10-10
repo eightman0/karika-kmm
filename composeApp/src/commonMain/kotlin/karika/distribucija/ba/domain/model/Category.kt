@@ -27,11 +27,13 @@ data class Category(
     }
 
     fun getAllCategoryIds(): String {
-        if (childrenData.isEmpty()) {
-            return "$id"
-        }
-        return childrenData
-            .flatMap { collectCategoryIds(it) }
-            .joinToString(",") { it.id.toString() }
+        return id.toString()
+
+        //if (childrenData.isEmpty()) {
+        //    return "$id"
+        //}
+        //return childrenData
+        //    .flatMap { collectCategoryIds(it) }
+        //    .joinToString(",") { it.id.toString() }
     }
 }

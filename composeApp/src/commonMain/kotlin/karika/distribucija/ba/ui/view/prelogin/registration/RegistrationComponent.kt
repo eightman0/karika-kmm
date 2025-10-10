@@ -15,6 +15,7 @@ import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.isEmailFormat
+import karika.distribucija.ba.ui.view.main.profile.account.isPassComplex
 import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
@@ -136,11 +137,19 @@ class RegistrationComponent(
             return
         }
         if (password.value.isEmpty()) {
-            showMessage("Šifra je obavezno polje!")
+            showMessage("Lozinka je obavezno polje!")
+            return
+        }
+        if (password.value.length < 8) {
+            showMessage("Lozinka mora imati najmanje 8 karaktera.")
+            return
+        }
+        if (!password.value.isPassComplex()) {
+            showMessage("Lozinka mora sadržavati najmanje jedno veliko slovo i jedan broj.")
             return
         }
         if (password.value != confirmPassword.value) {
-            showMessage("Ne poklapaju se šifre!")
+            showMessage("Lozinke se ne podudaraju.")
             return
         }
         if (!agree.value) {

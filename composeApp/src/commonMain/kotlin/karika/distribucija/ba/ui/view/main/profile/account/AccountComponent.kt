@@ -136,14 +136,16 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                 stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.firstname
                     ?: ""
             lastname.value =
-                stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.lastname ?: ""
+                stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.lastname
+                    ?: ""
             address.value =
                 stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.street?.firstOrNull()
                     ?: ""
             city.value =
                 stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.city ?: ""
             postal.value =
-                stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.postcode ?: ""
+                stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.postcode
+                    ?: ""
             telephone.value =
                 stateHolder.customerSpecificHandler.userDetails.value.shippingAddress()?.telephone
                     ?: ""
@@ -151,16 +153,19 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
         } else {
             firstname.value = stateHolder.customerSpecificHandler.userDetails.value.companyName()
             lastname.value =
-                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.lastname ?: ""
+                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.lastname
+                    ?: ""
             address.value =
                 stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.street?.firstOrNull()
                     ?: ""
             city.value =
                 stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.city ?: ""
             postal.value =
-                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.postcode ?: ""
+                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.postcode
+                    ?: ""
             telephone.value =
-                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.telephone ?: ""
+                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.telephone
+                    ?: ""
             editableFields.value = edit
         }
         editAddress.value = value

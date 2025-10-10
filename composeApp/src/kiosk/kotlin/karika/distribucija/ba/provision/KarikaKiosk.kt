@@ -11,7 +11,6 @@ import android.os.BatteryManager
 import android.os.UserManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
-import com.google.android.play.core.appupdate.AppUpdateManager
 import karika.distribucija.ba.MainActivityKiosk
 import karika.distribucija.ba.utils.KioskMode
 
@@ -206,8 +205,4 @@ class KarikaKiosk(private val context: ComponentActivity) : KioskMode {
     }
 
     override fun isAdmin() = devicePolicyManager.isDeviceOwnerApp(context.packageName)
-
-    override fun pauseKioskMode(activity: MainActivityKiosk, appUpdateManager: AppUpdateManager) {
-
-    }
 }

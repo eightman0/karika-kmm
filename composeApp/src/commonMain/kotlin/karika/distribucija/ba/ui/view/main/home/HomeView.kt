@@ -22,6 +22,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -111,17 +113,25 @@ fun ProductItem(
                 .border(width = 1.dp, color = KarikaColors.Gray5)
                 .aspectRatio(1f),
         ) {
-            KarikaImage(
+            Box(
                 modifier = Modifier
-                    .fillMaxSize(),
-                model = product.image()
-            )
+                    .fillMaxSize()
+                    .blur(radius = if (!product.hasOnStock()) 5.dp else 0.dp)
+                    .background(Color.Black.copy(alpha = 0.3f)),
+            ) {
+                KarikaImage(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    model = product.image()
+                )
+            }
             Column {
                 BonusView(product)
                 DiscountView(product)
                 NewView(product)
             }
             AddToCartButton(product, component)
+            NotAvailableOverlay(product)
         }
         KarikaText(
             modifier = Modifier,
@@ -264,6 +274,33 @@ private fun AddToCartButton(product: Product, component: CommonComponent) {
                     imageVector = vectorResource(Res.drawable.ic_cart_add),
                     tint = KarikaColors.White,
                     contentDescription = ""
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun NotAvailableOverlay(product: Product) {
+    if (!product.hasOnStock()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .background(color = KarikaColors.Primary, shape = RoundedCornerShape(4.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .padding(8.dp),
+                    color = KarikaColors.White,
+                    text = "RASPRODANO",
+                    textSize = 14.sp,
+                    maxLines = 1,
+                    fontWeight = FontWeight.W600
                 )
             }
         }

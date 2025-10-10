@@ -215,3 +215,15 @@ actual fun isKiosk() = false
 actual fun appVersion(): String {
     return NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String ?: "0.0"
 }
+
+actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
+    UIApplication.sharedApplication.openURL(
+        url = NSURL(string = "tel://$phoneNumber"),
+        options = mapOf<Any?, String>(),
+        completionHandler = {
+            if (!it) {
+                error.invoke(it.toString())
+            }
+        }
+    )
+}

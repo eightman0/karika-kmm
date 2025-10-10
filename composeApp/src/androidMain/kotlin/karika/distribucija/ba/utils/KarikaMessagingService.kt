@@ -13,7 +13,7 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import karika.distribucija.ba.AppComponent
-import karika.distribucija.ba.MainActivity
+import karika.distribucija.ba.KarikaActivity
 import karika.distribucija.ba.R
 import kotlin.random.Random
 
@@ -34,7 +34,7 @@ class KarikaMessagingService : FirebaseMessagingService() {
     ) {
         AppComponent.refreshHandler.invoke()
         val nextInt = Random.nextInt()
-        val intent = Intent(this, MainActivity::class.java).apply {
+        val intent = Intent(this, KarikaActivity::class.java).apply {
             addFlags(
                 Intent.FLAG_ACTIVITY_CLEAR_TASK or FLAG_ACTIVITY_CLEAR_TOP or
                         Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK

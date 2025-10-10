@@ -12,7 +12,7 @@ import karika.distribucija.ba.provision.KarikaKiosk
 import karika.distribucija.ba.ui.common.isKiosk
 
 
-class MainActivityKiosk : MainActivity(), InstallStateUpdatedListener {
+class MainActivityKiosk : KarikaActivity(), InstallStateUpdatedListener {
     private lateinit var kiosk: KarikaKiosk
     private val idleTimeout = 20000L
     private val handler = Handler(Looper.getMainLooper())

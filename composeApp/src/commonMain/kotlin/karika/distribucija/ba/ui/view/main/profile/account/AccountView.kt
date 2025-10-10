@@ -38,6 +38,7 @@ import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.util.KarikaConstants
 
@@ -45,6 +46,7 @@ import karika.distribucija.ba.util.KarikaConstants
 fun AccountView(component: AccountComponent) {
     val editAddress by component.editAddress.asState()
     val editContact by component.editContact.asState()
+    val showState = component.changePassSheet.asState()
 
     KarikaScaffold(
         containerColor = KarikaColors.White,
@@ -78,7 +80,17 @@ fun AccountView(component: AccountComponent) {
                 ShippingAddress(component)
             }
         }
-        ChangePasswordSheet(component)
+        if (showState.value) {
+            ChangePasswordSheet(
+                onCancel = {
+                    showState.negate()
+                },
+                onChange = { old, new ->
+                    showState.negate()
+                    component.changePass(old, new)
+                }
+            )
+        }
     }
 }
 

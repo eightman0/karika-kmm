@@ -27,11 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.domain.model.Product
+import karika.distribucija.ba.ui.common.openPhoneCall
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.PrimaryButton
 import karika.distribucija.ba.ui.components.RoundedItem
 import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.TopBarWithBack
@@ -189,7 +192,10 @@ private fun VendorInfo(component: VendorDetailsComponent) {
         iconPosition = FabPosition.Start
     )
     IconTextItem(
-        modifier = Modifier,
+        modifier = Modifier
+            .onClick {
+                openPhoneCall(vendor.b2bVendorPhone ?: return@onClick)
+            },
         icon = vectorResource(Res.drawable.ic_phone),
         iconColor = KarikaColors.Gray2,
         textColor = KarikaColors.Gray2,
@@ -214,20 +220,31 @@ private fun VendorInfo(component: VendorDetailsComponent) {
 private fun VendorImage(component: VendorDetailsComponent) {
     val vendor by component.vendor.collectAsState()
 
-    Box(
-        modifier = Modifier
-            .onClick {}
-            .size(100.dp)
-            .border(width = 1.dp, color = KarikaColors.Gray5)
-    ) {
-        KarikaImage(
+    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Box(
             modifier = Modifier
-                .onClick {
-                    component.showImagePreview(vendor.image())
-                }
-                .fillMaxSize(),
-            model = vendor.image()
-        )
+                .onClick {}
+                .size(100.dp)
+                .border(width = 1.dp, color = KarikaColors.Gray5)
+        ) {
+            KarikaImage(
+                modifier = Modifier
+                    .onClick {
+                        component.showImagePreview(vendor.image())
+                    }
+                    .fillMaxSize(),
+                model = vendor.image()
+            )
+        }
+        PrimaryButton(
+            modifier = Modifier
+                .height(48.dp),
+            title = "Pošalji poruku dobavljaču",
+        ) {
+            component.sendMessageToVendor(
+                Product(vendorId = vendor.b2bVendorId, vendorName = vendor.publicName)
+            )
+        }
     }
 }
 

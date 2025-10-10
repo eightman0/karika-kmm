@@ -52,7 +52,7 @@ class ProductsComponent(componentContext: ComponentContext, stateHolder: KarikaS
                             }
                         }
                         currentPage++
-                        hasNextPage = result.data.isNotEmpty()
+                        hasNextPage = result.data.size == pageSize
                     }
 
                     is ResultState.Error -> {

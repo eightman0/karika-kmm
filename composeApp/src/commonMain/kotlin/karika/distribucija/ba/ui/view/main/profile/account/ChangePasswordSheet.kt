@@ -29,130 +29,151 @@ import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
-import karika.distribucija.ba.ui.components.negate
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangePasswordSheet(
-    component: AccountComponent
-) {
-    val showState = component.changePassSheet.asState()
+fun ChangePasswordSheet(onCancel: () -> Unit, onChange: (String, String) -> Unit) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val pass = mutableStateOf("").asState()
     val newPass = mutableStateOf("").asState()
     val keyboard = LocalSoftwareKeyboardController.current
-
-    if (showState.value) {
-        ModalBottomSheet(
+    val error = mutableStateOf("").asState()
+    val enabled = mutableStateOf(false).asState()
+    ModalBottomSheet(
+        modifier = Modifier
+            .padding(top = 100.dp),
+        onDismissRequest = {
+            onCancel()
+        },
+        sheetState = sheetState,
+        containerColor = KarikaColors.White,
+        dragHandle = {
+            BottomSheetDefaults.DragHandle(
+                color = KarikaColors.Gray2,
+                width = 60.dp
+            )
+        }
+    ) {
+        Column(
             modifier = Modifier
-                .padding(top = 100.dp),
-            onDismissRequest = {
-                showState.negate()
-            },
-            sheetState = sheetState,
-            containerColor = KarikaColors.White,
-            dragHandle = {
-                BottomSheetDefaults.DragHandle(
-                    color = KarikaColors.Gray2,
-                    width = 60.dp
-                )
-            }
+                .hideKeyboard()
         ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+                text = "Promijeni lozinku",
+                color = KarikaColors.Gray2,
+                textSize = 18.sp,
+                fontWeight = FontWeight.W400,
+                textAlign = TextAlign.Center
+            )
+            YSpacer16()
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                thickness = 1.dp,
+                color = KarikaColors.Divider
+            )
+            YSpacer32()
             Column(
                 modifier = Modifier
-                    .hideKeyboard()
+                    .padding(horizontal = 16.dp)
             ) {
                 KarikaText(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
                         .fillMaxWidth(),
-                    text = "Promijeni lozinku",
+                    text = "Unesite staru lozinku",
                     color = KarikaColors.Gray2,
-                    textSize = 18.sp,
-                    fontWeight = FontWeight.W400,
-                    textAlign = TextAlign.Center
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W600
                 )
-                YSpacer16()
-                HorizontalDivider(
+                YSpacer8()
+                KarikaPasswordTextField(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    thickness = 1.dp,
-                    color = KarikaColors.Divider
+                    value = pass,
+                    placeholder = "Stara lozinku",
+                    imeAction = ImeAction.Next,
+                    onValueChange = {
+                        enabled.value = pass.value.isNotEmpty() &&
+                                newPass.value.length >= 8 &&
+                                newPass.value.isPassComplex()
+                    }
                 )
                 YSpacer32()
-                Column(
+                KarikaText(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth(),
+                    text = "Unesite novu lozinku",
+                    color = KarikaColors.Gray2,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W600
+                )
+                YSpacer8()
+                KarikaPasswordTextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    value = newPass,
+                    placeholder = "Nova lozinku",
+                    imeAction = ImeAction.Done,
+                    error = error,
+                    onValueChange = {
+                        enabled.value = false
+                        if (newPass.value.length < 8) {
+                            error.value = "Lozinka mora imati najmanje 8 karaktera."
+                            return@KarikaPasswordTextField
+                        }
+                        if (!newPass.value.isPassComplex()) {
+                            error.value =
+                                "Lozinka mora sadržavati najmanje jedno veliko slovo i jedan broj."
+                            return@KarikaPasswordTextField
+                        }
+                        error.value = ""
+                        enabled.value = pass.value.isNotEmpty() &&
+                                newPass.value.length >= 8 &&
+                                newPass.value.isPassComplex()
+                    }
+                )
+            }
+            YSpacer32()
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                thickness = 1.dp,
+                color = KarikaColors.Divider
+            )
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                SecondaryButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    title = "Zatvori",
+                    textSize = 16.sp
                 ) {
-                    KarikaText(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        text = "Unesite staru lozinku",
-                        color = KarikaColors.Gray2,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                    YSpacer8()
-                    KarikaPasswordTextField(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        value = pass,
-                        placeholder = "Stara lozinku",
-                        imeAction = ImeAction.Next
-                    )
-                    YSpacer32()
-                    KarikaText(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        text = "Unesite novu lozinku",
-                        color = KarikaColors.Gray2,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                    YSpacer8()
-                    KarikaPasswordTextField(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        value = newPass,
-                        placeholder = "Nova lozinku",
-                        imeAction = ImeAction.Done,
-                    )
+                    keyboard?.hide()
+                    onCancel()
                 }
-                YSpacer32()
-                HorizontalDivider(
+                PrimaryButtonFilled(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    thickness = 1.dp,
-                    color = KarikaColors.Divider
-                )
-                Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        .weight(1f),
+                    title = "Potvrdi",
+                    enabled = enabled.value
                 ) {
-                    SecondaryButton(
-                        modifier = Modifier
-                            .weight(1f),
-                        title = "Zatvori",
-                        textSize = 16.sp
-                    ) {
-                        keyboard?.hide()
-                        showState.negate()
-                    }
-                    PrimaryButtonFilled(
-                        modifier = Modifier
-                            .weight(1f),
-                        title = "Potvrdi",
-                        enabled = newPass.value.isNotEmpty() && pass.value.isNotEmpty()
-                    ) {
-                        keyboard?.hide()
-                        showState.negate()
-                        component.changePass(pass.value, newPass.value)
-                    }
+                    keyboard?.hide()
+                    onChange(pass.value, newPass.value)
                 }
             }
         }
     }
+}
+
+fun String.isPassComplex(): Boolean {
+    val passwordRegex = "^(?=.*[A-Z])(?=.*[0-9]).+\$".toRegex()
+    return this.matches(passwordRegex)
 }

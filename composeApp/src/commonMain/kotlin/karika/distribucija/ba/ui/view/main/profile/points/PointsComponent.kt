@@ -56,7 +56,7 @@ class PointsComponent(componentContext: ComponentContext, stateHolder: KarikaSta
                         hideLoader()
                         _transactions.update { it.plus(result.data) }
                         currentPage++
-                        hasNextPage = result.data.isNotEmpty()
+                        hasNextPage = result.data.size == pageSize
                     }
 
                     is ResultState.Error -> {

@@ -51,7 +51,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
                                 it.plus(result.data.toSet())
                             }
                         }
-                        hasNextPage = result.data.isNotEmpty()
+                        hasNextPage = result.data.size == pageSize
                         currentPage++
                     }
 

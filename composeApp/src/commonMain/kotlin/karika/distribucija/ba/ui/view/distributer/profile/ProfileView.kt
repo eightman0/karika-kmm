@@ -56,6 +56,7 @@ import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
 import karika.distribucija.ba.ui.view.distributer.products.details.dashedBorder
+import karika.distribucija.ba.ui.view.main.profile.account.ChangePasswordSheet
 import karika.distribucija.ba.util.KarikaConstants
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_delete
@@ -117,6 +118,7 @@ private fun CompanyInfo(component: ProfileComponent) {
     val companyCity = component.companyCity.asState()
     val companyCanton = component.companyCanton.asState()
     val companyMunicipality = component.companyMunicipality.asState()
+    val showState = component.changePassSheet.asState()
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp),
@@ -327,131 +329,16 @@ private fun CompanyInfo(component: ProfileComponent) {
             fontWeight = FontWeight.W600
         )
     }
-    ChangePasswordSheet(component)
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ChangePasswordSheet(
-    component: ProfileComponent
-) {
-    val showState = component.changePassSheet.asState()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val pass = mutableStateOf("").asState()
-    val newPass = mutableStateOf("").asState()
-    val keyboard = LocalSoftwareKeyboardController.current
-
     if (showState.value) {
-        ModalBottomSheet(
-            modifier = Modifier
-                .padding(top = 100.dp),
-            onDismissRequest = {
+        ChangePasswordSheet(
+            onCancel = {
                 showState.negate()
             },
-            sheetState = sheetState,
-            containerColor = KarikaColors.White,
-            dragHandle = {
-                BottomSheetDefaults.DragHandle(
-                    color = KarikaColors.Gray2,
-                    width = 60.dp
-                )
+            onChange = { old, new ->
+                showState.negate()
+                component.changePass(old, new)
             }
-        ) {
-            Column(
-                modifier = Modifier
-                    .hideKeyboard()
-            ) {
-                KarikaText(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .fillMaxWidth(),
-                    text = "Promijeni lozinku",
-                    color = KarikaColors.Gray2,
-                    textSize = 18.sp,
-                    fontWeight = FontWeight.W400,
-                    textAlign = TextAlign.Center
-                )
-                YSpacer16()
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    thickness = 1.dp,
-                    color = KarikaColors.Divider
-                )
-                YSpacer32()
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                ) {
-                    KarikaText(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        text = "Unesite staru lozinku",
-                        color = KarikaColors.Gray2,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                    YSpacer8()
-                    KarikaPasswordTextField(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        value = pass,
-                        placeholder = "Stara lozinku",
-                        imeAction = ImeAction.Next
-                    )
-                    YSpacer32()
-                    KarikaText(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        text = "Unesite novu lozinku",
-                        color = KarikaColors.Gray2,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                    YSpacer8()
-                    KarikaPasswordTextField(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        value = newPass,
-                        placeholder = "Nova lozinku",
-                        imeAction = ImeAction.Done,
-                    )
-                }
-                YSpacer32()
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    thickness = 1.dp,
-                    color = KarikaColors.Divider
-                )
-                Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    SecondaryButton(
-                        modifier = Modifier
-                            .weight(1f),
-                        title = "Zatvori",
-                        textSize = 16.sp
-                    ) {
-                        keyboard?.hide()
-                        showState.negate()
-                    }
-                    PrimaryButtonFilled(
-                        modifier = Modifier
-                            .weight(1f),
-                        title = "Potvrdi",
-                        enabled = newPass.value.isNotEmpty() && pass.value.isNotEmpty()
-                    ) {
-                        keyboard?.hide()
-                        showState.negate()
-                        component.changePass(pass.value, newPass.value)
-                    }
-                }
-            }
-        }
+        )
     }
 }
 

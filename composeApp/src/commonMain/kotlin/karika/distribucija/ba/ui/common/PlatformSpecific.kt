@@ -20,3 +20,5 @@ expect fun getEnvPrefix(): String
 expect fun isKiosk(): Boolean
 
 expect fun appVersion(): String
+
+expect fun openPhoneCall(phoneNumber: String, error: (String) -> Unit = {})

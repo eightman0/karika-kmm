@@ -70,7 +70,7 @@ class VendorDetailsComponent(
                                 it.plus(result.data)
                             }
                         }
-                        hasNextPage = result.data.isNotEmpty()
+                        hasNextPage = result.data.size == pageSize
                         currentPage++
                     }
 

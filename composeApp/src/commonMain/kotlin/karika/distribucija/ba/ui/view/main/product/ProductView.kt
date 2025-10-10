@@ -28,6 +28,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +53,7 @@ import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.main.home.DiscountView
 import karika.distribucija.ba.ui.view.main.home.NewView
+import karika.distribucija.ba.ui.view.main.home.NotAvailableOverlay
 import karika.distribucija.ba.ui.view.main.home.ProductItem
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_down
@@ -173,18 +175,25 @@ fun ProductImage(component: ProductComponent) {
             .border(width = 1.dp, color = KarikaColors.Gray5)
             .aspectRatio(1f),
     ) {
-        KarikaImage(
+        Box(
             modifier = Modifier
-                .onClick {
-                    component.showImagePreview(product.image())
-                }
-                .fillMaxSize(),
-            model = product.image()
-        )
-        Column {
-            DiscountView(product)
-            NewView(product)
+                .blur(radius = if (product.hasOnStock()) 0.dp else 5.dp)
+                .fillMaxSize()
+        ) {
+            KarikaImage(
+                modifier = Modifier
+                    .onClick {
+                        component.showImagePreview(product.image())
+                    }
+                    .fillMaxSize(),
+                model = product.image()
+            )
+            Column {
+                DiscountView(product)
+                NewView(product)
+            }
         }
+        NotAvailableOverlay(product)
     }
 }
 

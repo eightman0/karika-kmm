@@ -3,9 +3,11 @@ package karika.distribucija.ba.ui.common
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
 import android.provider.Settings
 import android.text.Html
+import android.util.Patterns
 import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.runtime.Composable
@@ -78,4 +80,19 @@ actual fun getEnvPrefix(): String {
 actual fun isKiosk() = BuildConfig.FLAVOR == "kiosk"
 actual fun appVersion(): String {
     return ""
+}
+
+actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
+    val context: Context = KoinPlatform.getKoin().get()
+    val intent = Intent(Intent.ACTION_DIAL).apply {
+        data = Uri.parse("tel:$phoneNumber")
+        flags = FLAG_ACTIVITY_NEW_TASK
+    }
+    try {
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+        }
+    } catch (ignored: Exception) {
+        error.invoke(ignored.message ?: "")
+    }
 }

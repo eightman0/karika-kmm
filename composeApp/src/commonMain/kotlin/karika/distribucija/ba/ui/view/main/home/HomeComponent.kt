@@ -29,8 +29,7 @@ class HomeComponent(
             productRepository.searchProductsByCategory(
                 categoryId = "${KarikaConfig.getKarikaProductsId()}",
                 currentPage = 1,
-                pageSize = 12,
-                sortBy = "created_at"
+                pageSize = 12
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> {

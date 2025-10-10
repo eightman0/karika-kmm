@@ -52,7 +52,7 @@ class SearchComponent(componentContext: ComponentContext, stateHolder: KarikaSta
                                 it.plus(result.data)
                             }
                         }
-                        hasNextPage = result.data.isNotEmpty()
+                        hasNextPage = result.data.size == pageSize
                         currentPage++
                     }
 

@@ -27,13 +27,13 @@ class LoaderHandler {
 
     fun hideLoader() {
         val elapsed = now() - startTime
-        if (elapsed > 500) {
+        if (elapsed > 700) {
             _loader.update { false }
             return
         }
 
         CoroutineScope(Dispatchers.IO).launch {
-            delay(500 - elapsed)
+            delay(700 - elapsed)
             _loader.update { false }
         }
     }
