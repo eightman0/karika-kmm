@@ -123,6 +123,9 @@ private fun BreadCrumbs(viewModel: ProductComponent) {
 
 @Composable
 fun VendorName(product: Product, component: CommonComponent) {
+    if (component.isGuest()) {
+        return
+    }
     Row(
         modifier = Modifier
             .onClick {
@@ -132,13 +135,6 @@ fun VendorName(product: Product, component: CommonComponent) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        //KarikaText(
-        //    modifier = Modifier,
-        //    color = KarikaColors.Gray6,
-        //    text = "Dobavljač:",
-        //    textSize = 14.sp,
-        //    fontWeight = FontWeight.W400
-        //)
         KarikaText(
             modifier = Modifier,
             color = KarikaColors.Blue,
@@ -381,6 +377,9 @@ fun ProductBonus(viewModel: ProductComponent) {
 
 @Composable
 fun ProductButtons(component: ProductComponent) {
+    if (component.isGuest()) {
+        return
+    }
     val product by component.product.collectAsState()
     val productQty by component.productQty.asState()
 

@@ -203,7 +203,7 @@ fun LoginView(component: LoginComponent) {
                 Icon(
                     modifier = Modifier
                         .onClick {
-                            component.preLoginBack()
+                            component.navigateLanding()
                         }
                         .padding(it)
                         .padding(16.dp),

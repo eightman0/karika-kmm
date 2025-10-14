@@ -23,9 +23,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.AppConfig
+import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.PrimaryButton
+import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_gift
@@ -45,13 +47,17 @@ fun ProfileView(component: ProfileComponent) {
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Header(component)
-            Actions(component)
+        if (!component.isGuest()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Header(component)
+                Actions(component)
+            }
+        } else {
+            LoginRequired(component)
         }
     }
 }
@@ -99,9 +105,12 @@ private fun Header(component: ProfileComponent) {
 
 @Composable
 private fun Actions(component: ProfileComponent) {
-    val notificationCount = component.stateHolder.customerNotificationHandler.notificationCount.asStateFlow()
-    val adminCount = component.stateHolder.customerNotificationHandler.messageUnreadCountAdmin.asStateFlow()
-    val userCount = component.stateHolder.customerNotificationHandler.messageUnreadCountUser.asStateFlow()
+    val notificationCount =
+        component.stateHolder.customerNotificationHandler.notificationCount.asStateFlow()
+    val adminCount =
+        component.stateHolder.customerNotificationHandler.messageUnreadCountAdmin.asStateFlow()
+    val userCount =
+        component.stateHolder.customerNotificationHandler.messageUnreadCountUser.asStateFlow()
 
     Column(
         modifier = Modifier
@@ -222,6 +231,30 @@ private fun Actions(component: ProfileComponent) {
             textSize = 16.sp,
         ) {
             component.logout()
+        }
+    }
+}
+
+@Composable
+fun LoginRequired(component: CommonComponent) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        KarikaText(
+            modifier = Modifier,
+            color = KarikaColors.Black,
+            fontWeight = FontWeight.W700,
+            textSize = 18.sp,
+            text = "Morate biti prijavljeni!",
+        )
+        PrimaryButtonFilled(
+            modifier = Modifier,
+            title = "Prijavi se"
+        ) {
+            component.appNavigate(AppConfig.PreLogin(true))
         }
     }
 }

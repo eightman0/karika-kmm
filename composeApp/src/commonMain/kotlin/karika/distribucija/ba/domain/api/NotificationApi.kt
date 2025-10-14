@@ -53,7 +53,7 @@ class NotificationRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
 
@@ -71,7 +71,7 @@ class NotificationRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
 
@@ -89,7 +89,7 @@ class NotificationRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
 }

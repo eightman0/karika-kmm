@@ -5,6 +5,7 @@ import karika.distribucija.ba.di.PersistenceManager
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.ui.common.KarikaType
+import karika.distribucija.ba.ui.common.getEnvJwt
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -51,11 +52,11 @@ open class SessionHandler : KoinComponent {
         val type = persistenceManager.get("user_type")
         val jwt = persistenceManager.get("JWT_TOKEN")
 
-        if (type.isEmpty() || jwt.isEmpty()) {
-            return AppConfig.PreLogin
+        if (type.isEmpty() || jwt.isEmpty() || jwt == getEnvJwt()) {
+            return AppConfig.PreLogin()
         }
 
-        HttpClientProvider.token = jwt
+        HttpClientProvider.token = jwt.ifEmpty { getEnvJwt() }
 
         return if (type == KarikaType.VENDOR.name)
             AppConfig.Dashboard else AppConfig.Main

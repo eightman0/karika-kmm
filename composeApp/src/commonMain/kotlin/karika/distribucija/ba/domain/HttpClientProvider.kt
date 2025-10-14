@@ -14,6 +14,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.content.TextContent
 import io.ktor.serialization.kotlinx.json.json
+import karika.distribucija.ba.ui.common.getEnvJwt
 import karika.distribucija.ba.ui.common.getEnvPrefix
 import kotlinx.serialization.json.Json
 
@@ -29,7 +30,7 @@ object HttpClientProvider {
         return "https://${getEnvPrefix()}karika.ba/api/V1/$query"
     }
 
-    var token: String? = null
+    var token: String? = getEnvJwt()
     fun imageUrl(name: String?): String {
         return if (name != null && name.contains("media")) {
             "$HOST/$name"

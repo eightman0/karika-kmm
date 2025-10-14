@@ -109,8 +109,10 @@ data class VendorOrder(
     @SerialName("products") var products: List<VendorProduct> = emptyList(),
     @SerialName("address") var address: ShopAddress? = null,
     @SerialName("shipping_details") var shippingDetails: ShippingDetails? = null,
-    @SerialName("has_changes") var hasChanges: String? = null
+    @SerialName("has_changes") var hasChanges: String? = null,
+    @SerialName("is_locked") var locked: Boolean? = null,
 ) {
+    fun locked() = locked ?: false
     fun totalAmount(): String {
         return karikaPriceFormat(orderTotal?.toDouble() ?: 0.00)
     }

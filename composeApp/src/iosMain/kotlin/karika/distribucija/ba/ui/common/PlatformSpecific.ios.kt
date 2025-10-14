@@ -227,3 +227,13 @@ actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
         }
     )
 }
+
+actual fun getEnvJwt(): String {
+    val currentEnv =
+        NSBundle.mainBundle.objectForInfoDictionaryKey("APP_ENV") as? String ?: "prod"
+    return when (currentEnv) {
+        "prod" -> "lbzgyy1qylr7unu707eblcphftb2fzha"
+        "demo" -> "demo."
+        else -> "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"
+    }
+}

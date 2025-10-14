@@ -148,7 +148,7 @@ fun ProductItem(
             maxLines = 3,
             fontWeight = FontWeight.W600
         )
-        if (!hideVendor) {
+        if (!hideVendor && !component.isGuest()) {
             VendorName(product, component)
         }
     }
@@ -254,7 +254,7 @@ private fun BonusView(product: Product) {
 
 @Composable
 private fun AddToCartButton(product: Product, component: CommonComponent) {
-    if (product.hasOnStock()) {
+    if (product.hasOnStock() && !component.isGuest()) {
         Box(
             modifier = Modifier
                 .fillMaxSize(),

@@ -3,6 +3,7 @@ package karika.distribucija.ba.ui.common
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.pop
+import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.api.CartRepository
@@ -68,11 +69,14 @@ open class CommonComponent(
     fun logout() {
         removePushHandle()
         stateHolder.sessionHandler.logout()
-        HttpClientProvider.token = null
+        HttpClientProvider.token = getEnvJwt()
         stateHolder.logout()
     }
 
     open fun showVendor(vendor: Vendor) {
+        if (isGuest()) {
+            return
+        }
         mainScope.launch {
             stateHolder.mainNavigation.bringToFront(MainConfig.VendorDetails(vendor))
         }
@@ -85,6 +89,9 @@ open class CommonComponent(
     }
 
     fun addToCart(product: Product, qty: Int = 1, showSnack: Boolean = true) {
+        if (isGuest()) {
+            return
+        }
         iOScope.launch {
             cartRepository.addToCart(
                 AddToCart(
@@ -115,6 +122,9 @@ open class CommonComponent(
     }
 
     fun addToCartWithPut(product: Product, qty: Int = 1, showSnack: Boolean = true) {
+        if (isGuest()) {
+            return
+        }
         iOScope.launch {
             cartRepository.addToCart(
                 AddToCart(
@@ -242,7 +252,11 @@ open class CommonComponent(
 
     fun appNavigate(config: AppConfig) {
         mainScope.launch {
-            stateHolder.appNavigation.bringToFront(config)
+            if (config is AppConfig.PreLogin) {
+                stateHolder.appNavigation.replaceAll(config)
+            } else {
+                stateHolder.appNavigation.bringToFront(config)
+            }
         }
     }
 
@@ -404,4 +418,6 @@ open class CommonComponent(
     fun getUnit(unit: String): String {
         return stateHolder.commonHandler.getUnit(unit)
     }
+
+    fun isGuest() = HttpClientProvider.token == getEnvJwt()
 }

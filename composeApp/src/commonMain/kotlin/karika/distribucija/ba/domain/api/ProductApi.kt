@@ -122,9 +122,9 @@ class ProductRepository internal constructor() {
                 return@flow
             }
 
-            emit(ResultState.Error(response?.bodyAsText() ?: ""))
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error(e.message ?: ""))
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
 
@@ -138,9 +138,9 @@ class ProductRepository internal constructor() {
                 return@flow
             }
 
-            emit(ResultState.Error(response?.bodyAsText() ?: ""))
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error(e.message ?: ""))
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
 
@@ -177,9 +177,9 @@ class ProductRepository internal constructor() {
                 return@flow
             }
 
-            emit(ResultState.Error(response?.bodyAsText() ?: ""))
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error(e.message ?: ""))
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
 }

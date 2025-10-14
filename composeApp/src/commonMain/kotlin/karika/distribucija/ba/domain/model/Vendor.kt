@@ -35,7 +35,7 @@ data class Vendor(
     @SerialName("b2b_vendor_pdv_broj") var b2bVendorPdvBroj: String? = null,
     @SerialName("b2b_vendor_id") var b2bVendorId: String? = null,
     @SerialName("b2b_vendor_phone") var b2bVendorPhone: String? = null,
-    @SerialName("b2b_vendor_entitet") var b2bVendorEntitet: Int? = null,
+    @SerialName("b2b_vendor_entitet") var b2bVendorEntitet: String? = null,
     @SerialName("b2b_target_customer_group") var b2bTargetCustomerGroup: String? = null,
     @SerialName("target_customer_region") var targetCustomerRegion: String? = null,
     @SerialName("promote_vendor_logo_from_date") var promoteVendorLogoFromDate: String? = null,

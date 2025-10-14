@@ -34,12 +34,13 @@ sealed class PreLoginChild {
 class PreLoginComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
+    showLogin: Boolean = true
 ) : CommonComponent(componentContext, stateHolder) {
     val stack: Value<ChildStack<*, PreLoginChild>> =
         childStack(
             source = stateHolder.preLoginNavigation,
             serializer = PreLoginConfig.serializer(),
-            initialConfiguration = if (isKiosk()) PreLoginConfig.Login(KarikaType.SHOP) else PreLoginConfig.Landing,
+            initialConfiguration = if (isKiosk() || showLogin) PreLoginConfig.Login(KarikaType.SHOP) else PreLoginConfig.Landing,
             handleBackButton = true,
             childFactory = ::child,
         )

@@ -36,6 +36,6 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
 
         imagePreview.value = ""
 
-        appNavigation.replaceAll(AppConfig.PreLogin)
+        appNavigation.replaceAll(AppConfig.PreLogin())
     }
 }

@@ -96,3 +96,11 @@ actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
         error.invoke(ignored.message ?: "")
     }
 }
+
+actual fun getEnvJwt(): String {
+    return when (BuildConfig.FLAVOR) {
+        "prod", "kiosk" -> "lbzgyy1qylr7unu707eblcphftb2fzha"
+        "demo" -> "demo."
+        else -> "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"
+    }
+}

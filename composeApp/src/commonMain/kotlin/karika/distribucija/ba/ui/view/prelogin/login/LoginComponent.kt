@@ -89,6 +89,10 @@ class LoginComponent(
         stateHolder.preLoginNavigation.bringToFront(PreLoginConfig.Registration(userType))
     }
 
+    fun navigateLanding() {
+        stateHolder.preLoginNavigation.replaceAll(PreLoginConfig.Landing)
+    }
+
     private fun navigatePostLogin() {
         mainScope.launch {
             stateHolder.appNavigation.replaceAll(

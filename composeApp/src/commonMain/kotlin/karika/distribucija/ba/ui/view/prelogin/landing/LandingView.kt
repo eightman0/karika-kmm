@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.components.CarouselLogos
 import karika.distribucija.ba.ui.components.IconTextItem
@@ -36,6 +37,7 @@ import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
+import karika.distribucija.ba.ui.components.onClick
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_checked_circle
 import org.jetbrains.compose.resources.vectorResource
@@ -177,8 +179,18 @@ fun LandingView(component: LandingComponent) {
                             component.navigateLogin(KarikaType.VENDOR)
                         }
                     }
-                    YSpacer16()
-                    //LandingBanner()
+                    KarikaText(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .onClick {
+                                component.appNavigate(AppConfig.Main)
+                            },
+                        text = "Nastavi kao gost",
+                        color = KarikaColors.Black,
+                        fontWeight = FontWeight.W700,
+                        textSize = 16.sp,
+                        textAlign = TextAlign.Center
+                    )
                     Box(
                         modifier = Modifier
                             .height(130.dp)

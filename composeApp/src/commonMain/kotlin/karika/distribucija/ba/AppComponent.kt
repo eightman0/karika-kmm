@@ -41,7 +41,7 @@ sealed class AppConfig {
     data object Main : AppConfig()
 
     @Serializable
-    data object PreLogin : AppConfig()
+    data class PreLogin(val showLogin: Boolean = false) : AppConfig()
 
     @Serializable
     data class ProductDetails(val product: Product) : AppConfig()
@@ -153,7 +153,7 @@ class AppComponent(
             )
 
             is AppConfig.PreLogin -> Child.PreLogin(
-                PreLoginComponent(componentContext, stateHolder)
+                PreLoginComponent(componentContext, stateHolder, appConfig.showLogin)
             )
 
             is AppConfig.ProductDetails -> Child.ProductDetails(

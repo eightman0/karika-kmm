@@ -23,6 +23,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -144,82 +146,111 @@ fun OrdersView(component: OrdersComponent) {
 
 @Composable
 private fun OrderItem(component: OrdersComponent, vendorOrder: VendorOrder) {
-    Row(
+    Box(
         modifier = Modifier
-            .onClick {
-                component.dashNavigate(DashConfig.OrderDetails(vendorOrder))
-            }
-            .background(color = KarikaColors.White)
-            .border(width = 1.dp, color = KarikaColors.Gray21, shape = RoundedCornerShape(4.dp))
-            .fillMaxSize(),
-        verticalAlignment = Alignment.CenterVertically
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .padding(16.dp)
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxWidth()
+                .blur(radius = if (vendorOrder.locked()) 5.dp else 0.dp)
+                .background(Color.White.copy(alpha = 0.3f)),
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier
+                    .onClick {
+                        if (!vendorOrder.locked()) {
+                            component.dashNavigate(DashConfig.OrderDetails(vendorOrder))
+                        }
+                    }
+                    .background(color = KarikaColors.White)
+                    .border(
+                        width = 1.dp,
+                        color = KarikaColors.Gray21,
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                KarikaText(
-                    modifier = Modifier,
-                    text = vendorOrder.b2bPravnoLice,
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W700
-                )
-                if (vendorOrder.hasChanges()) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        KarikaText(
+                            modifier = Modifier,
+                            text = vendorOrder.b2bPravnoLice,
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                        if (vendorOrder.hasChanges()) {
+                            Box(
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .background(color = KarikaColors.Red, shape = CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                KarikaText(
+                                    modifier = Modifier
+                                        .padding(0.dp),
+                                    text = "1",
+                                    textSize = 10.sp,
+                                    fontWeight = FontWeight.W400,
+                                    color = KarikaColors.White
+                                )
+                            }
+                        }
+                    }
                     Box(
                         modifier = Modifier
-                            .size(16.dp)
-                            .background(color = KarikaColors.Red, shape = CircleShape),
-                        contentAlignment = Alignment.Center
+                            .rounded(color = vendorOrder.statusColor(), shape = 6.dp)
                     ) {
                         KarikaText(
                             modifier = Modifier
-                                .padding(0.dp),
-                            text = "1",
-                            textSize = 10.sp,
-                            fontWeight = FontWeight.W400,
-                            color = KarikaColors.White
+                                .padding(8.dp),
+                            text = vendorOrder.status(),
+                            fontWeight = FontWeight.W700,
+                            color = vendorOrder.statusTextColor(),
+                            textSize = 12.sp
                         )
                     }
+                    KarikaText(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        text = vendorOrder.date(),
+                        color = KarikaColors.Gray2,
+                        textSize = 14.sp,
+                        fontWeight = FontWeight.W600
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    KarikaText(
+                        modifier = Modifier,
+                        text = vendorOrder.totalAmount() + " KM",
+                        color = KarikaColors.Gray2,
+                        textSize = 14.sp,
+                        fontWeight = FontWeight.W700
+                    )
                 }
             }
-            Box(
-                modifier = Modifier
-                    .rounded(color = vendorOrder.statusColor(), shape = 6.dp)
-            ) {
-                KarikaText(
-                    modifier = Modifier
-                        .padding(8.dp),
-                    text = vendorOrder.status(),
-                    fontWeight = FontWeight.W700,
-                    color = vendorOrder.statusTextColor(),
-                    textSize = 12.sp
-                )
-            }
-            KarikaText(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = vendorOrder.date(),
-                color = KarikaColors.Gray2,
-                textSize = 14.sp,
-                fontWeight = FontWeight.W600
-            )
         }
-        Column(
-            modifier = Modifier
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        if (vendorOrder.locked()) {
             KarikaText(
-                modifier = Modifier,
-                text = vendorOrder.totalAmount() + " KM",
-                color = KarikaColors.Gray2,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
+                text = "Za prikaz detalja narudžbe, molimo Vas da zaključite prethodne narudžbe tako što ćete ih označiti kao odobrene ili odbijene!",
+                color = KarikaColors.Primary,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
             )

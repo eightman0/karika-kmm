@@ -38,7 +38,7 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     val companyPdv =
         mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorPdvBroj ?: "")
     val companyEntity = mutableStateOf(
-        KarikaConstants.entries.find { it.id == stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorEntitet }?.name
+        KarikaConstants.entries.find { it.id.toString() == stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorEntitet }?.name
             ?: ""
     )
     val companyCanton =
