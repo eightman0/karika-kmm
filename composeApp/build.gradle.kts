@@ -136,7 +136,7 @@ android {
         create("kiosk") {
             applicationId = "karika.distribucija.ba.kiosk"
             dimension = "karika"
-            versionCode = 213
+            versionCode = 218
             versionName = "2.0"
         }
     }
