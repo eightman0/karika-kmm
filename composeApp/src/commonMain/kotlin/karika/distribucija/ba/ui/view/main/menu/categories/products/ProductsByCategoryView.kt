@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -263,21 +262,21 @@ private fun Filter(component: ProductByCategoryComponent) {
 @Composable
 private fun EmptyState(component: ProductByCategoryComponent) {
     val products by component.products.collectAsState()
-    if (products.isNotEmpty()) {
-        return
-    }
-    Box(
-        modifier = Modifier
-            .height(200.dp)
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Primary,
-            textSize = 16.sp,
-            fontWeight = FontWeight.W700,
-            text = "Nema rezultata."
-        )
+    val loader by component.stateHolder.loaderHandler.loader.collectAsState()
+    if (products.isEmpty() && !loader) {
+        Box(
+            modifier = Modifier
+                .height(200.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            KarikaText(
+                modifier = Modifier,
+                color = KarikaColors.Primary,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W700,
+                text = "Nema rezultata."
+            )
+        }
     }
 }

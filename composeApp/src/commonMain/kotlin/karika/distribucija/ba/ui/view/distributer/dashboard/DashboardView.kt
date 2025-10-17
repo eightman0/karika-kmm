@@ -217,7 +217,7 @@ fun DashboardView(component: DashboardComponent) {
                                 textColor = if (navState.value.active.instance is DashChild.CustomerMessages) KarikaColors.White else KarikaColors.Gray2,
                                 textSize = 16.sp,
                                 fontWeight = FontWeight.W600,
-                                text = "Poruke kupac",
+                                text = "Poruke kupaca",
                                 textAlign = TextAlign.Start
                             )
                         },

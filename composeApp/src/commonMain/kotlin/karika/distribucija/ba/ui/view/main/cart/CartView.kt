@@ -42,7 +42,6 @@ import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.main.product.ProductQtyAction
 import karika.distribucija.ba.ui.view.main.product.VendorName
-import karika.distribucija.ba.ui.view.main.profile.LoginRequired
 import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_check_circle_filled
@@ -60,9 +59,7 @@ fun CartView(component: CartComponent) {
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (component.isGuest()) {
-            LoginRequired(component)
-        } else if (items.value.isEmpty()) {
+        if (items.value.isEmpty()) {
             KarikaText(
                 modifier = Modifier
                     .padding(horizontal = 16.dp),

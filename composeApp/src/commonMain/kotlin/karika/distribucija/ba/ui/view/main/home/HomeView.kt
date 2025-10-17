@@ -254,7 +254,7 @@ private fun BonusView(product: Product) {
 
 @Composable
 private fun AddToCartButton(product: Product, component: CommonComponent) {
-    if (product.hasOnStock() && !component.isGuest()) {
+    if (product.hasOnStock()) {
         Box(
             modifier = Modifier
                 .fillMaxSize(),

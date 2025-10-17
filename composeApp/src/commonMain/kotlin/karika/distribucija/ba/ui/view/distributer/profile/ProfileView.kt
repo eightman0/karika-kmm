@@ -20,40 +20,32 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import karika.distribucija.ba.ui.components.HorizontalButtons
 import karika.distribucija.ba.ui.components.HorizontalSecondaryButtons
 import karika.distribucija.ba.ui.components.KarikaCheckboxSecondary
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
-import karika.distribucija.ba.ui.components.KarikaPasswordTextField
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
-import karika.distribucija.ba.ui.components.PrimaryButtonFilled
-import karika.distribucija.ba.ui.components.SecondaryButton
-import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer24
-import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.components.rounded
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
 import karika.distribucija.ba.ui.view.distributer.products.details.dashedBorder
 import karika.distribucija.ba.ui.view.main.profile.account.ChangePasswordSheet
@@ -86,6 +78,8 @@ fun ProfileView(component: ProfileComponent) {
         Images(component)
         ButtonsBox(component)
     }
+    DeleteAccountConfirmation(component)
+    DeleteAccountConfirmation(component)
 }
 
 @Composable
@@ -129,7 +123,7 @@ private fun CompanyInfo(component: ProfileComponent) {
             modifier = Modifier
                 .padding(top = 16.dp)
                 .fillMaxWidth(),
-            text = "Opste informacije",
+            text = "Opšte informacije",
             color = KarikaColors.Black,
             fontWeight = FontWeight.W600,
             textSize = 18.sp
@@ -328,6 +322,16 @@ private fun CompanyInfo(component: ProfileComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W600
         )
+        KarikaText(
+            modifier = Modifier
+                .onClick {
+                    component.deleteAccount.negate()
+                },
+            text = "Obriši nalog",
+            color = KarikaColors.Red,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W600
+        )
     }
     if (showState.value) {
         ChangePasswordSheet(
@@ -510,6 +514,60 @@ private fun Images(component: ProfileComponent) {
                     tint = KarikaColors.Red,
                     contentDescription = ""
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeleteAccountConfirmation(component: ProfileComponent) {
+    val state = component.deleteAccount.asState()
+
+    if (state.value) {
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .rounded(shape = 16.dp)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    KarikaText(
+                        modifier = Modifier,
+                        text = "Obriši nalog",
+                        color = KarikaColors.Gray2,
+                        textSize = 20.sp,
+                        fontWeight = FontWeight.W600
+                    )
+                    KarikaText(
+                        modifier = Modifier,
+                        text = "Jeste li sigurni da želite obrisati nalog?",
+                        color = KarikaColors.Gray2,
+                        textSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.W600
+                    )
+                    HorizontalButtons(
+                        modifier = Modifier,
+                        primaryTitle = "Obriši nalog",
+                        secondaryTitle = "Odustani"
+                    ) {
+                        if (it == "Odustani") {
+                            state.negate()
+                            return@HorizontalButtons
+                        }
+                        component.deleteAccount()
+                    }
+                }
             }
         }
     }

@@ -4,17 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import karika.distribucija.ba.ui.common.CommonComponent
 
 @Composable
@@ -63,19 +63,16 @@ fun LoadingView2(commonComponent: CommonComponent) {
 }
 
 @Composable
-fun LoadingView() {
-    Dialog(
-        onDismissRequest = { },
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
+fun LoadingView3(state: MutableState<Boolean>) {
+    if (state.value) {
         Box(
             modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .wrapContentSize(Alignment.Center)
         ) {
             CircularProgressIndicator(
                 modifier = Modifier,
-                color = KarikaColors.White
+                color = KarikaColors.Primary
             )
         }
     }

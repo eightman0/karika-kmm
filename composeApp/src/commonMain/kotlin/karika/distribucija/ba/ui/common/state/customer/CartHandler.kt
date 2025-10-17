@@ -58,7 +58,7 @@ class CartHandler {
         }
     }
 
-    fun placedOrder() {
+    fun createCart() {
         CoroutineScope(Dispatchers.IO).launch {
             CartRepository().createCart()
                 .collect { result ->

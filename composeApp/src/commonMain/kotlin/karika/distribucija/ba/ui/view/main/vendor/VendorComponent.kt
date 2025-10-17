@@ -30,7 +30,6 @@ class VendorComponent(
         if (reset) {
             hasNextPage = true
             currentPage = 1
-            _vendors.update { emptyList() }
         }
 
         if (!hasNextPage || loader.value) {
@@ -53,7 +52,13 @@ class VendorComponent(
 
                     is ResultState.Success -> {
                         hideLoader()
-                        _vendors.update { it + result.data }
+                        _vendors.update {
+                            if (reset) {
+                                result.data
+                            } else {
+                                it + result.data
+                            }
+                        }
                         hasNextPage = result.data.size == pageSize
                         currentPage++
                     }

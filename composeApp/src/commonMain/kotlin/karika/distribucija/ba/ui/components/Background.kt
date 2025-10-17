@@ -21,17 +21,16 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
-fun KarikaBox(content: @Composable () -> Unit) {
+fun KarikaBox(modifier: Modifier = Modifier.fillMaxSize(), content: @Composable () -> Unit) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(
                 Brush.linearGradient(
                     colors = listOf(KarikaColors.Background1, KarikaColors.Background2),
                     start = Offset(0f, 0f),
                     end = Offset(1000f, 1000f)
                 )
-            )
-            .fillMaxSize(),
+            ),
         contentAlignment = Alignment.Center
     ) {
         Image(

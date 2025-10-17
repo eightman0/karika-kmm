@@ -1,8 +1,10 @@
 package karika.distribucija.ba.ui.common.state.customer
 
+import androidx.compose.runtime.mutableStateOf
 import karika.distribucija.ba.domain.api.UserRepository
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.UserDetails
+import karika.distribucija.ba.ui.components.negate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO

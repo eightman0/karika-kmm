@@ -87,6 +87,7 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
     init {
         stateHolder.customerSpecificHandler.getUserDetails()
         stateHolder.cartHandler.reloadCart()
+        stateHolder.cartHandler.createCart()
         stateHolder.customerNotificationHandler.notificationReceived()
     }
 
@@ -175,6 +176,10 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
         }
 
     fun navigate(config: MainConfig) {
+        if (isGuest() && (config is MainConfig.Cart || config is MainConfig.Profile)) {
+            stateHolder.commonHandler.showLoginRequired("")
+            return
+        }
         stateHolder.mainNavigation.bringToFront(config)
     }
 }

@@ -237,7 +237,7 @@ private fun OrderItem(component: OrdersComponent, vendorOrder: VendorOrder) {
                 ) {
                     KarikaText(
                         modifier = Modifier,
-                        text = vendorOrder.totalAmount() + " KM",
+                        text = "",
                         color = KarikaColors.Gray2,
                         textSize = 14.sp,
                         fontWeight = FontWeight.W700
@@ -245,15 +245,39 @@ private fun OrderItem(component: OrdersComponent, vendorOrder: VendorOrder) {
                 }
             }
         }
-        if (vendorOrder.locked()) {
-            KarikaText(
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                text = "Za prikaz detalja narudžbe, molimo Vas da zaključite prethodne narudžbe tako što ćete ih označiti kao odobrene ili odbijene!",
-                color = KarikaColors.Primary,
-                textSize = 14.sp,
-                fontWeight = FontWeight.W700
-            )
+                    .padding(16.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (vendorOrder.locked()) {
+                    KarikaText(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp),
+                        text = "Za prikaz detalja narudžbe, molimo Vas da zaključite prethodne narudžbe tako što ćete ih označiti kao odobrene ili odbijene!",
+                        color = KarikaColors.Primary,
+                        textSize = 14.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                KarikaText(
+                    modifier = Modifier,
+                    text = vendorOrder.totalAmount() + " KM",
+                    color = KarikaColors.Gray2,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }
         }
     }
 }

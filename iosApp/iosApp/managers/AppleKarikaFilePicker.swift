@@ -11,6 +11,10 @@ import FirebaseMessaging
 import FirebaseInstallations
 
 class AppleKarikaHandler : KarikaHandler {
+    func takePhoto(callback: @escaping (String, KotlinByteArray) -> Void) {
+        
+    }
+    
     func downloadFile(fileName: String, fileType: String, fileUrl: String) {
         
     }

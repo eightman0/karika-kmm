@@ -101,7 +101,7 @@ android {
         applicationId = "karika.distribucija.ba"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 217
+        versionCode = 218
 
         versionName = "2.1"
     }
@@ -136,7 +136,13 @@ android {
         create("kiosk") {
             applicationId = "karika.distribucija.ba.kiosk"
             dimension = "karika"
-            versionCode = 218
+            versionCode = 220
+            versionName = "2.0"
+        }
+        create("kioskTest") {
+            applicationId = "karika.distribucija.ba.kiosk"
+            dimension = "karika"
+            versionCode = 220
             versionName = "2.0"
         }
     }
@@ -149,6 +155,14 @@ android {
     }
     lint {
         disable.add("NullSafeMutableLiveData")
+    }
+    sourceSets {
+        getByName("kioskTest") {
+            setRoot("src/kiosk")
+        }
+        getByName("kiosk") {
+            setRoot("src/kiosk")
+        }
     }
 }
 

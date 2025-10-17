@@ -49,6 +49,7 @@ import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.bgWhite
+import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.main.home.DiscountView
@@ -87,11 +88,11 @@ fun ProductView(component: ProductComponent) {
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
+                        .hideKeyboard()
                         .fillMaxSize()
                         .padding(it),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // BreadCrumbs(component)
                     VendorName(product, component)
                     ProductName(component)
                     ProductImage(component)
@@ -106,19 +107,6 @@ fun ProductView(component: ProductComponent) {
             }
         }
     }
-}
-
-@Composable
-private fun BreadCrumbs(viewModel: ProductComponent) {
-    val product by viewModel.product.collectAsState()
-    KarikaText(
-        modifier = Modifier
-            .fillMaxWidth(),
-        text = product.breadCrumbs(),
-        color = KarikaColors.Black,
-        textSize = 14.sp,
-        fontWeight = FontWeight.W400
-    )
 }
 
 @Composable
@@ -377,9 +365,6 @@ fun ProductBonus(viewModel: ProductComponent) {
 
 @Composable
 fun ProductButtons(component: ProductComponent) {
-    if (component.isGuest()) {
-        return
-    }
     val product by component.product.collectAsState()
     val productQty by component.productQty.asState()
 
@@ -413,7 +398,7 @@ private fun VendorProducts(viewModel: ProductComponent) {
         KarikaText(
             modifier = Modifier,
             color = KarikaColors.Black,
-            text = "Proizvodi istog dobavljaca:",
+            text = "Proizvodi istog dobavljača:",
             textSize = 20.sp,
             fontWeight = FontWeight.W700
         )

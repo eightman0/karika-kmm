@@ -6,6 +6,8 @@ import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.common.getEnvJwt
+import karika.distribucija.ba.ui.common.isKiosk
+import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -46,6 +48,14 @@ open class SessionHandler : KoinComponent {
         persistenceManager.save("JWT_TOKEN", "")
     }
 
+    fun delete() {
+        val type = persistenceManager.get("user_type")
+        persistenceManager.save("JWT_TOKEN", "")
+        persistenceManager.save("user_type", "")
+        persistenceManager.save("user_username".plus(type), "")
+        persistenceManager.save("user_password".plus(type), "")
+    }
+
     fun hasJWT() = persistenceManager.get("JWT_TOKEN").isNotEmpty()
 
     fun mainConfig(): AppConfig {
@@ -53,7 +63,9 @@ open class SessionHandler : KoinComponent {
         val jwt = persistenceManager.get("JWT_TOKEN")
 
         if (type.isEmpty() || jwt.isEmpty() || jwt == getEnvJwt()) {
-            return AppConfig.PreLogin()
+            return AppConfig.PreLogin(
+                if (isKiosk()) PreLoginConfig.Login(KarikaType.SHOP) else PreLoginConfig.Landing
+            )
         }
 
         HttpClientProvider.token = jwt.ifEmpty { getEnvJwt() }

@@ -27,13 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.components.KarikaAmountField
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.KarikaTextField2
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.RadioGroup
 import karika.distribucija.ba.ui.components.SearchBoxBorder
@@ -43,7 +42,6 @@ import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
-import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -63,6 +61,7 @@ fun ProductsFilterSheet(
     val vendors by component.vendors.collectAsState()
     val selectedVendor = component.selectedVendor.asState()
     val checkedElements = component.selectedRegion.asState()
+    val config by component.stateHolder.commonHandler.config.collectAsState()
 
     if (showState.value) {
         ModalBottomSheet(
@@ -120,23 +119,19 @@ fun ProductsFilterSheet(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        KarikaTextField2(
+                        KarikaAmountField(
                             modifier = Modifier
                                 .weight(1f),
                             value = startPrice,
                             placeholder = "OD",
-                            allowedChars = KarikaConstants.numbers,
-                            imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number
+                            imeAction = ImeAction.Next
                         )
-                        KarikaTextField2(
+                        KarikaAmountField(
                             modifier = Modifier
                                 .weight(1f),
                             value = endPrice,
                             placeholder = "DO",
-                            allowedChars = KarikaConstants.numbers,
-                            imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number
+                            imeAction = ImeAction.Next
                         )
                     }
                     HorizontalDivider(
@@ -242,7 +237,7 @@ fun ProductsFilterSheet(
                         textSize = 16.sp,
                         fontWeight = FontWeight.W700
                     )
-                    component.stateHolder.commonHandler.config.value.customerRegionList.forEach {
+                    config.customerRegionList.forEach {
                         Row(
                             modifier = Modifier
                                 .clickable(

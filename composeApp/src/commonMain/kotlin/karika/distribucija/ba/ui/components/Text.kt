@@ -433,6 +433,103 @@ fun KarikaTextField2(
 }
 
 @Composable
+fun KarikaAmountField(
+    modifier: Modifier = Modifier,
+    value: MutableState<String> = mutableStateOf(""),
+    placeholder: String = "",
+    placeholderColor: Color = KarikaColors.Placeholder,
+    placeholderSize: TextUnit = 14.sp,
+    textColor: Color = KarikaColors.Black,
+    textSize: TextUnit = 14.sp,
+    fontWeight: FontWeight = FontWeight.Normal,
+    fontStyle: FontStyle = FontStyle.Normal,
+    maxLines: Int = Int.MAX_VALUE,
+    enabled: Boolean = true,
+    imeAction: ImeAction = ImeAction.Done,
+    doneAction: (() -> Unit)? = null,
+    trailingIcons: @Composable (() -> Unit)? = null,
+    error: MutableState<String> = mutableStateOf("")
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val regex = remember { Regex("^(0|[1-9]\\d*)([,]\\d{0,2})?$") }
+
+    TextField(
+        modifier = modifier
+            .border(
+                width = 1.dp,
+                color = if (error.value.isNotEmpty()) KarikaColors.Error else KarikaColors.Border,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .background(
+                color = KarikaColors.White,
+                shape = RoundedCornerShape(4.dp)
+            ),
+        placeholder = {
+            KarikaText(
+                text = placeholder,
+                color = placeholderColor,
+                textSize = placeholderSize,
+                fontWeight = FontWeight.W400
+            )
+        },
+        enabled = enabled,
+        value = value.value,
+        onValueChange = {
+            val newValue = it.replace('.', ',')
+
+            if (newValue == "0") {
+                value.value = newValue
+                return@TextField
+            }
+
+            if (newValue.startsWith("0") && !newValue.startsWith("0,")) {
+                return@TextField
+            }
+
+            if (newValue.isEmpty() || regex.matches(newValue)) {
+                value.value = newValue
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            imeAction = imeAction,
+            keyboardType = KeyboardType.Decimal,
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                if (doneAction != null) {
+                    if (value.value.isEmpty()) {
+                        keyboardController?.hide()
+                    }
+                    doneAction.invoke()
+                } else {
+                    keyboardController?.hide()
+                }
+            }
+        ),
+        maxLines = maxLines,
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = textColor,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent
+        ),
+        textStyle = LocalTextStyle.current.copy(
+            fontWeight = fontWeight,
+            fontStyle = fontStyle,
+            fontSize = textSize,
+            fontFamily = KarikaFonts()
+        ),
+        trailingIcon = {
+            trailingIcons?.invoke()
+        },
+      //  visualTransformation = AmountVisualTransformation()
+    )
+}
+
+@Composable
 fun KarikaTextField3(
     modifier: Modifier = Modifier,
     value: String,

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -21,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaLazyColumn
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.TopBarSearch
@@ -41,7 +41,7 @@ fun SearchView(component: SearchComponent) {
         },
         component = component
     ) {
-        LazyColumn(
+        KarikaLazyColumn(
             state = state,
             modifier = Modifier
                 .hideKeyboard()
@@ -131,21 +131,21 @@ fun SearchView(component: SearchComponent) {
 private fun EmptyState(component: SearchComponent) {
     val vendors by component.vendors.collectAsState()
     val products by component.products.collectAsState()
-    if (vendors.isNotEmpty() && products.isNotEmpty()) {
-        return
-    }
-    Box(
-        modifier = Modifier
-            .height(200.dp)
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Primary,
-            textSize = 16.sp,
-            fontWeight = FontWeight.W700,
-            text = "Nema rezultata."
-        )
+    val loader by component.stateHolder.loaderHandler.loader.collectAsState()
+    if (vendors.isEmpty() && products.isNotEmpty() && !loader) {
+        Box(
+            modifier = Modifier
+                .height(200.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            KarikaText(
+                modifier = Modifier,
+                color = KarikaColors.Primary,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W700,
+                text = "Nema rezultata."
+            )
+        }
     }
 }

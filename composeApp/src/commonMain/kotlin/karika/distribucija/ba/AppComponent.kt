@@ -32,6 +32,7 @@ import karika.distribucija.ba.ui.view.main.profile.order.details.OrderDetailsCom
 import karika.distribucija.ba.ui.view.main.profile.points.PointsComponent
 import karika.distribucija.ba.ui.view.main.vendor.details.VendorDetailsComponent
 import karika.distribucija.ba.ui.view.prelogin.PreLoginComponent
+import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -41,7 +42,7 @@ sealed class AppConfig {
     data object Main : AppConfig()
 
     @Serializable
-    data class PreLogin(val showLogin: Boolean = false) : AppConfig()
+    data class PreLogin(val config: PreLoginConfig = PreLoginConfig.Landing) : AppConfig()
 
     @Serializable
     data class ProductDetails(val product: Product) : AppConfig()
@@ -153,7 +154,7 @@ class AppComponent(
             )
 
             is AppConfig.PreLogin -> Child.PreLogin(
-                PreLoginComponent(componentContext, stateHolder, appConfig.showLogin)
+                PreLoginComponent(componentContext, stateHolder, appConfig.config)
             )
 
             is AppConfig.ProductDetails -> Child.ProductDetails(

@@ -27,8 +27,6 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
         cartHandler = CartHandler()
         sessionHandler = SessionHandler()
         messageHandler = MessageHandler()
-        loaderHandler = LoaderHandler()
-        commonHandler = CommonHandler()
         customerSpecificHandler = CustomerSpecificHandler()
         vendorSpecificHandler = VendorSpecificHandler()
         vendorNotificationHandler = VendorNotificationHandler()
@@ -36,6 +34,6 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
 
         imagePreview.value = ""
 
-        appNavigation.replaceAll(AppConfig.PreLogin())
+        appNavigation.replaceAll(sessionHandler.mainConfig())
     }
 }

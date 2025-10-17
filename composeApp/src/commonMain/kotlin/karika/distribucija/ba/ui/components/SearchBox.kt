@@ -64,7 +64,7 @@ fun SearchBox(
         placeholder = {
             KarikaText(
                 modifier = Modifier,
-                text = "Pretraži proizvode...",
+                text = "Pretraži..",
                 color = KarikaColors.Gray1,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
@@ -74,6 +74,7 @@ fun SearchBox(
         onValueChange = {
             searchText.value = it
             onValueChange.invoke(it)
+            focusRequester.freeFocus()
             if (it.isEmpty()) {
                 onClose.invoke("")
             }
@@ -98,11 +99,24 @@ fun SearchBox(
             unfocusedContainerColor = Color.Transparent
         ),
         trailingIcon = {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_search),
-                null,
-                tint = KarikaColors.Secondary
-            )
+            if (searchText.value.isEmpty()) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_search),
+                    null,
+                    tint = KarikaColors.Secondary
+                )
+            } else {
+                Icon(
+                    modifier = Modifier
+                        .onClick {
+                            searchText.value = ""
+                            onClose(searchText.value)
+                        },
+                    imageVector = vectorResource(Res.drawable.ic_tertiary),
+                    contentDescription = null,
+                    tint = KarikaColors.Secondary
+                )
+            }
         },
         textStyle = LocalTextStyle.current.copy(
             color = KarikaColors.Secondary,
@@ -131,7 +145,7 @@ fun SearchBoxBorder(
     onValueChange: (String) -> Unit,
     onClose: (String) -> Unit = {},
     onSearchExecute: (String) -> Unit,
-    placeholder: String = "Pretraži proizvode..",
+    placeholder: String = "Pretraži..",
     focusRequester: FocusRequester = FocusRequester(),
     borderShape: Dp = 12.dp,
     preselected: String = ""

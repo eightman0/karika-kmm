@@ -2,6 +2,7 @@ package karika.distribucija.ba.domain.api
 
 import androidx.compose.foundation.content.MediaType
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.headers
@@ -17,6 +18,7 @@ import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.HttpClientProvider.urlV1
 import karika.distribucija.ba.domain.model.Blog
 import karika.distribucija.ba.domain.model.ChangePasswordRequest
+import karika.distribucija.ba.domain.model.ChangePasswordResponse
 import karika.distribucija.ba.domain.model.Config
 import karika.distribucija.ba.domain.model.ForgotPasswordRequest
 import karika.distribucija.ba.domain.model.ResultState
@@ -24,6 +26,8 @@ import karika.distribucija.ba.domain.model.UpdateCustomerRequest
 import karika.distribucija.ba.domain.model.UserDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 internal class UserApi {
     suspend fun get(): Result<HttpResponse> = runCatching {
@@ -78,6 +82,11 @@ internal class UserApi {
             header(HttpHeaders.Accept, "application/json")
             setBody(ChangePasswordRequest(old, new, new))
         }
+    }
+    suspend fun deleteAccount(): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.get(
+            url("mobile/customer/me/delete")
+        )
     }
 }
 
@@ -201,7 +210,37 @@ class UserRepository internal constructor() {
                 .change(old, new)
                 .getOrNull()
             if (response != null && response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(""))
+                val body = response.body<ChangePasswordResponse>()
+                if (body.message == "The old password is incorrect.") {
+                    emit(ResultState.Success("Stara lozinka je pogrešna!"))
+                    return@flow
+                }
+
+                if (body.status == "true") {
+                    emit(ResultState.Success("Lozinka uspješno promijenjena!"))
+                    return@flow
+                }
+                emit(
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
+                )
+
+            } else {
+                emit(
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
+                )
+            }
+        } catch (e: Exception) {
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        }
+    }
+    fun deleteAccount(): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = UserApi()
+                .deleteAccount()
+                .getOrNull()
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body()))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")

@@ -87,7 +87,7 @@ fun FilterSheet(component: VendorComponent) {
                     KarikaText(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
-                        text = "Regije",
+                        text = "REGIJE",
                         color = KarikaColors.Gray2,
                         textSize = 16.sp,
                         fontWeight = FontWeight.W700,

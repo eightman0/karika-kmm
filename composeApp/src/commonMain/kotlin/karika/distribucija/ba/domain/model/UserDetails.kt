@@ -90,3 +90,9 @@ data class ChangePasswordRequest(
     val password: String,
     val password_confirmation: String,
 )
+
+@Serializable
+data class ChangePasswordResponse(
+    val status: String? = null,
+    val message: String? = null
+)

@@ -1,15 +1,21 @@
 package karika.distribucija.ba
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.WindowManager
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import com.google.android.play.core.install.InstallState
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.InstallStatus
 import karika.distribucija.ba.provision.KarikaKiosk
+import java.io.ByteArrayOutputStream
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 
 class MainActivityKiosk : KarikaActivity(), InstallStateUpdatedListener {
@@ -19,12 +25,38 @@ class MainActivityKiosk : KarikaActivity(), InstallStateUpdatedListener {
     private val idleRunnable = Runnable {
         showScreensaver()
     }
+    private var takePhotoCallback: ((String, ByteArray) -> Unit)? = null
+
+    @OptIn(ExperimentalUuidApi::class)
+    private val takePictureLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+            if (bitmap != null) {
+                takePhotoCallback?.invoke(
+                    Uuid.random().toString() + ".png",
+                    bitmapToByteArray(bitmap)
+                )
+            }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         kiosk = KarikaKiosk(this)
         appUpdateManager.registerListener(this)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    override fun pickFile(mediaTypes: Array<String>, callback: (String, ByteArray) -> Unit) {
+        takePhoto(callback)
+    }
+
+    override fun takePhoto(callback: (String, ByteArray) -> Unit) {
+        fun takePicture() {
+            takePhotoCallback = callback
+            takePictureLauncher.launch()
+        }
+
+        takePicture()
     }
 
     override fun onStateUpdate(p0: InstallState) {
@@ -86,4 +118,14 @@ class MainActivityKiosk : KarikaActivity(), InstallStateUpdatedListener {
     private fun removeCallbacks() {
         handler.removeCallbacks(idleRunnable)
     }
+}
+
+fun bitmapToByteArray(
+    bitmap: Bitmap,
+    format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
+    quality: Int = 100
+): ByteArray {
+    val stream = ByteArrayOutputStream()
+    bitmap.compress(format, quality, stream)
+    return stream.toByteArray()
 }

@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import coil3.compose.setSingletonImageLoaderFactory
 import com.arkivanov.decompose.extensions.compose.stack.Children
+import karika.distribucija.ba.ui.components.GuestUserInfoDialog
 import karika.distribucija.ba.ui.components.ImagePreview
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
@@ -81,6 +82,7 @@ fun App(component: AppComponent) {
             ImagePreview(component)
             LoadingView1(component)
             ScreenSaver(component)
+            GuestUserInfoDialog(component)
         }
 
         MandatoryUpdate(component)

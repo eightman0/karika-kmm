@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
-import android.provider.Settings
 import android.text.Html
-import android.util.Patterns
 import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.runtime.Composable
@@ -77,7 +75,7 @@ actual fun getEnvPrefix(): String {
     }
 }
 
-actual fun isKiosk() = BuildConfig.FLAVOR == "kiosk"
+actual fun isKiosk() = BuildConfig.FLAVOR.startsWith("kiosk")
 actual fun appVersion(): String {
     return ""
 }

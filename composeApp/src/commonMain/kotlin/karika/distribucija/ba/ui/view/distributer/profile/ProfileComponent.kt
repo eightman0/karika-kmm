@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
     CommonComponent(componentContext, stateHolder) {
 
+    val deleteAccount = mutableStateOf(false)
     val customerRegions = mutableStateOf(
         stateHolder.vendorSpecificHandler.vendorDetails.value.targetCustomerRegion
             ?.replace("|", "")
@@ -53,8 +54,11 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     val minOrderAmount =
         mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.minOrderAmount ?: "")
     val bankAccountNumber =
-        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.bankAccountNumber ?: "")
-    val contactName = mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.name ?: "")
+        mutableStateOf(
+            stateHolder.vendorSpecificHandler.vendorDetails.value.bankAccountNumber ?: ""
+        )
+    val contactName =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.name ?: "")
 
     val companyLogo =
         mutableStateOf(
@@ -83,7 +87,7 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
                             hideLoader()
-                            showMessage("Lozinka uspješno promijenjena!")
+                            showMessage(result.data)
                         }
 
                         is ResultState.Error -> {
@@ -147,6 +151,28 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
             }
 
             companyBanner.value = Triple("NEW", name, data)
+        }
+    }
+
+    fun deleteAccount() {
+        iOScope.launch {
+            userRepository.deleteAccount()
+                .collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            hideLoader()
+                            mainScope.launch {
+                                deleteUser()
+                            }
+                        }
+
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showMessage(result.message)
+                        }
+                    }
+                }
         }
     }
 }

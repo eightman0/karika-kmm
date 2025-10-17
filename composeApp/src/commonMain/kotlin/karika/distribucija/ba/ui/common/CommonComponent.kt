@@ -73,8 +73,16 @@ open class CommonComponent(
         stateHolder.logout()
     }
 
+    fun deleteUser() {
+        removePushHandle()
+        stateHolder.sessionHandler.delete()
+        HttpClientProvider.token = getEnvJwt()
+        stateHolder.logout()
+    }
+
     open fun showVendor(vendor: Vendor) {
         if (isGuest()) {
+            stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za pristup dobavljačima")
             return
         }
         mainScope.launch {
@@ -90,6 +98,7 @@ open class CommonComponent(
 
     fun addToCart(product: Product, qty: Int = 1, showSnack: Boolean = true) {
         if (isGuest()) {
+            stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
             return
         }
         iOScope.launch {
@@ -123,6 +132,7 @@ open class CommonComponent(
 
     fun addToCartWithPut(product: Product, qty: Int = 1, showSnack: Boolean = true) {
         if (isGuest()) {
+            stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
             return
         }
         iOScope.launch {
@@ -155,6 +165,10 @@ open class CommonComponent(
     }
 
     fun updateCart(product: Product, qty: Int = 1, successCallback: () -> Unit = {}) {
+        if (isGuest()) {
+            stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
+            return
+        }
         if (product.itemId == null) {
             addToCart(product, qty)
             return
@@ -236,6 +250,10 @@ open class CommonComponent(
     }
 
     fun sendMessageToVendor(product: Product) {
+        if (isGuest()) {
+            stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
+            return
+        }
         navigateToMessagesOverview(
             Conversation(
                 vendorId = product.vendorId,
@@ -267,7 +285,7 @@ open class CommonComponent(
     }
 
     fun placedOrder(id: String) {
-        stateHolder.cartHandler.placedOrder()
+        stateHolder.cartHandler.createCart()
         mainScope.launch {
             stateHolder.mainNavigation.bringToFront(MainConfig.CartSuccess(id))
         }

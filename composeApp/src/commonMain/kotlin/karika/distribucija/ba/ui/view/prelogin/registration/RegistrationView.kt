@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.ui.components.KarikaBox
 import karika.distribucija.ba.ui.components.KarikaCheckbox
 import karika.distribucija.ba.ui.components.KarikaCheckboxSecondary
@@ -43,6 +44,7 @@ import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import karika.distribucija.ba.util.KarikaConstants
 
 
@@ -65,7 +67,9 @@ fun RegistrationView(component: RegistrationComponent) {
             contentWindowInsets = WindowInsets.systemBars,
             topBar = {
                 TopBarWithBack(component.title, color = component.getColor()) {
-                    component.preLoginBack()
+                    component.stateHolder.preLoginNavigation.replaceAll(
+                        PreLoginConfig.Login(component.userType)
+                    )
                 }
             },
             component = component

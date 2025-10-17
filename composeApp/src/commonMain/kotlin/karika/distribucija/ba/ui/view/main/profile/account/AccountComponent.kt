@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
     CommonComponent(componentContext, stateHolder) {
 
+    val deleteAccount = mutableStateOf(false)
     val changePassSheet = mutableStateOf(false)
     val editAddress = mutableStateOf("")
     val editContact = mutableStateOf(false)
@@ -183,7 +184,29 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
                             hideLoader()
-                            showMessage("Lozinka uspješno promijenjena!")
+                            showMessage(result.data)
+                        }
+
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showMessage(result.message)
+                        }
+                    }
+                }
+        }
+    }
+
+    fun deleteAccount() {
+        iOScope.launch {
+            userRepository.deleteAccount()
+                .collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            hideLoader()
+                            mainScope.launch {
+                                deleteUser()
+                            }
                         }
 
                         is ResultState.Error -> {

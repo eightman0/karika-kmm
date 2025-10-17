@@ -43,7 +43,6 @@ import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_menu
 import karikav2.composeapp.generated.resources.ic_notifications
 import karikav2.composeapp.generated.resources.ic_outlet
-import kotlinx.coroutines.flow.asStateFlow
 import org.jetbrains.compose.resources.vectorResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -199,7 +198,9 @@ fun TopBarSearch(component: SearchComponent) {
                     value.value = it
                 },
                 onSearchExecute = {
-                    component.search(true)
+                    if (value.value.length > 2) {
+                        component.search(true)
+                    }
                 },
                 onClose = {
                     component.search(true)

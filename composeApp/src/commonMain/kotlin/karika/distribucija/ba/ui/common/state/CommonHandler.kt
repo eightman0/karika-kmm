@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.common.state
 
+import androidx.compose.runtime.mutableStateOf
 import karika.distribucija.ba.domain.api.CategoryRepository
 import karika.distribucija.ba.domain.api.UserRepository
 import karika.distribucija.ba.domain.model.Category
@@ -19,6 +20,12 @@ class CommonHandler {
 
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
     val categories = _categories.asStateFlow()
+
+    val showLoginRequired = mutableStateOf<String?>(null)
+
+    fun showLoginRequired(message: String) {
+        showLoginRequired.value = message
+    }
 
     private fun getConfig() {
         CoroutineScope(Dispatchers.IO).launch {

@@ -30,7 +30,7 @@ class LoginComponent(
         mutableStateOf(stateHolder.sessionHandler.getUserPassword(userType).isNotEmpty())
     private val repository = LoginRepository()
 
-    fun login() {
+    fun login(callback: () -> Unit = {}) {
         showLoader()
         iOScope.launch {
             repository.login(LoginDto(email.value, pass.value, userType))
@@ -50,6 +50,7 @@ class LoginComponent(
                             )
                             savePushHandle()
                             navigatePostLogin()
+                            callback()
                         }
 
                         is ResultState.Error -> {

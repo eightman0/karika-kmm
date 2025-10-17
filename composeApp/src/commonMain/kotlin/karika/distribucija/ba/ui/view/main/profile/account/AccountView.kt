@@ -3,6 +3,7 @@ package karika.distribucija.ba.ui.view.main.profile.account
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -31,6 +32,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.HorizontalButtons
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
@@ -40,6 +44,7 @@ import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.components.rounded
 import karika.distribucija.ba.util.KarikaConstants
 
 @Composable
@@ -91,6 +96,7 @@ fun AccountView(component: AccountComponent) {
                 }
             )
         }
+        DeleteAccountConfirmation(component)
     }
 }
 
@@ -231,6 +237,25 @@ private fun ContactInfo(component: AccountComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W600
         )
+        if (!isKiosk()) {
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                thickness = 1.dp,
+                color = KarikaColors.Gray11
+            )
+            KarikaText(
+                modifier = Modifier
+                    .onClick {
+                        component.deleteAccount.negate()
+                    }
+                    .padding(16.dp),
+                text = "Obriši nalog",
+                color = KarikaColors.Red,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W600
+            )
+        }
     }
 }
 
@@ -810,6 +835,60 @@ private fun UpdateContactInfo(component: AccountComponent) {
             }
 
             component.updateContact()
+        }
+    }
+}
+
+@Composable
+private fun DeleteAccountConfirmation(component: AccountComponent) {
+    val state = component.deleteAccount.asState()
+
+    if (state.value) {
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .rounded(shape = 16.dp)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    KarikaText(
+                        modifier = Modifier,
+                        text = "Obriši nalog",
+                        color = KarikaColors.Gray2,
+                        textSize = 20.sp,
+                        fontWeight = FontWeight.W600
+                    )
+                    KarikaText(
+                        modifier = Modifier,
+                        text = "Jeste li sigurni da želite obrisati nalog?",
+                        color = KarikaColors.Gray2,
+                        textSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.W600
+                    )
+                    HorizontalButtons(
+                        modifier = Modifier,
+                        primaryTitle = "Obriši nalog",
+                        secondaryTitle = "Odustani"
+                    ) {
+                        if (it == "Odustani") {
+                            state.negate()
+                            return@HorizontalButtons
+                        }
+                        component.deleteAccount()
+                    }
+                }
+            }
         }
     }
 }

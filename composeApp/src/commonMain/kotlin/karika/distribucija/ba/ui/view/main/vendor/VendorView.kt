@@ -35,6 +35,7 @@ import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
+import karika.distribucija.ba.ui.components.KarikaLazyColumn
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.asState
@@ -81,7 +82,7 @@ private fun Vendors(component: VendorComponent) {
         fontWeight = FontWeight.W700
     )
     Box(modifier = Modifier) {
-        LazyColumn(
+        KarikaLazyColumn(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             state = state
         ) {
@@ -120,6 +121,9 @@ private fun Vendors(component: VendorComponent) {
         if (!state.canScrollForward) {
             component.loadNextPage()
         }
+    }
+    LaunchedEffect(Unit) {
+        component.loadNextPage(reset = true)
     }
 }
 
@@ -180,7 +184,9 @@ private fun Filter(component: VendorComponent) {
                 component.loadNextPage(true)
             },
             onSearchExecute = {
-                component.loadNextPage(true)
+                if (searchText.value.length > 2) {
+                    component.loadNextPage(true)
+                }
             },
             placeholder = "Pretraži dobavljače.."
         )
@@ -259,20 +265,20 @@ private fun Filter(component: VendorComponent) {
 @Composable
 private fun EmptyState(component: VendorComponent) {
     val vendors by component.vendors.collectAsState()
-    if (vendors.isNotEmpty()) {
-        return
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Primary,
-            textSize = 16.sp,
-            fontWeight = FontWeight.W700,
-            text = "Nema rezultata."
-        )
+    val loader by component.stateHolder.loaderHandler.loader.collectAsState()
+    if (vendors.isEmpty() && !loader) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            KarikaText(
+                modifier = Modifier,
+                color = KarikaColors.Primary,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W700,
+                text = "Nema rezultata."
+            )
+        }
     }
 }

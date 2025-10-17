@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -32,6 +31,7 @@ import karika.distribucija.ba.ui.common.openPhoneCall
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
+import karika.distribucija.ba.ui.components.KarikaLazyColumn
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.PrimaryButton
@@ -85,7 +85,7 @@ private fun VendorProducts(modifier: Modifier, component: VendorDetailsComponent
     val searchText = component.searchText.asState()
 
     Box(contentAlignment = Alignment.Center) {
-        LazyColumn(
+        KarikaLazyColumn(
             modifier = modifier
                 .hideKeyboard(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -109,7 +109,9 @@ private fun VendorProducts(modifier: Modifier, component: VendorDetailsComponent
                         component.loadNextPage(true)
                     },
                     onSearchExecute = {
-                        component.loadNextPage(true)
+                        if (searchText.value.length > 2) {
+                            component.loadNextPage(true)
+                        }
                     }
                 )
                 YSpacer16()
@@ -181,29 +183,29 @@ private fun VendorInfo(component: VendorDetailsComponent) {
         textSize = 20.sp,
         fontWeight = FontWeight.W600
     )
-    IconTextItem(
-        modifier = Modifier,
-        icon = vectorResource(Res.drawable.ic_email),
-        iconColor = KarikaColors.Gray2,
-        textColor = KarikaColors.Gray2,
-        textSize = 14.sp,
-        fontWeight = FontWeight.W400,
-        text = vendor.email,
-        iconPosition = FabPosition.Start
-    )
-    IconTextItem(
-        modifier = Modifier
-            .onClick {
-                openPhoneCall(vendor.b2bVendorPhone ?: return@onClick)
-            },
-        icon = vectorResource(Res.drawable.ic_phone),
-        iconColor = KarikaColors.Gray2,
-        textColor = KarikaColors.Gray2,
-        textSize = 14.sp,
-        fontWeight = FontWeight.W400,
-        text = vendor.b2bVendorPhone,
-        iconPosition = FabPosition.Start
-    )
+    //IconTextItem(
+    //    modifier = Modifier,
+    //    icon = vectorResource(Res.drawable.ic_email),
+    //    iconColor = KarikaColors.Gray2,
+    //    textColor = KarikaColors.Gray2,
+    //    textSize = 14.sp,
+    //    fontWeight = FontWeight.W400,
+    //    text = vendor.email,
+    //    iconPosition = FabPosition.Start
+    //)
+    //IconTextItem(
+    //    modifier = Modifier
+    //        .onClick {
+    //            openPhoneCall(vendor.b2bVendorPhone ?: return@onClick)
+    //        },
+    //    icon = vectorResource(Res.drawable.ic_phone),
+    //    iconColor = KarikaColors.Gray2,
+    //    textColor = KarikaColors.Gray2,
+    //    textSize = 14.sp,
+    //    fontWeight = FontWeight.W400,
+    //    text = vendor.b2bVendorPhone,
+    //    iconPosition = FabPosition.Start
+    //)
     IconTextItem(
         modifier = Modifier,
         icon = vectorResource(Res.drawable.ic_location),
@@ -242,7 +244,7 @@ private fun VendorImage(component: VendorDetailsComponent) {
             title = "Pošalji poruku dobavljaču",
         ) {
             component.sendMessageToVendor(
-                Product(vendorId = vendor.b2bVendorId, vendorName = vendor.publicName)
+                Product(vendorId = vendor.entityId.toString(), vendorName = vendor.publicName)
             )
         }
     }
@@ -264,21 +266,21 @@ private fun BreadCrumbs(component: VendorDetailsComponent) {
 @Composable
 private fun EmptyState(component: VendorDetailsComponent) {
     val vendors by component.products.collectAsState()
-    if (vendors.isNotEmpty()) {
-        return
-    }
-    Box(
-        modifier = Modifier
-            .height(200.dp)
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Primary,
-            textSize = 16.sp,
-            fontWeight = FontWeight.W700,
-            text = "Nema rezultata."
-        )
+    val loader by component.stateHolder.loaderHandler.loader.collectAsState()
+    if (vendors.isEmpty() && !loader) {
+        Box(
+            modifier = Modifier
+                .height(200.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            KarikaText(
+                modifier = Modifier,
+                color = KarikaColors.Primary,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W700,
+                text = "Nema rezultata."
+            )
+        }
     }
 }
