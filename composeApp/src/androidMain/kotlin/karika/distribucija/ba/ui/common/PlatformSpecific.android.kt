@@ -102,3 +102,7 @@ actual fun getEnvJwt(): String {
         else -> "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"
     }
 }
+
+actual fun appVersionName(): String {
+   return "v${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+}

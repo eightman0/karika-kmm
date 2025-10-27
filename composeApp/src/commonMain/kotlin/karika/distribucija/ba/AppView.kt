@@ -1,16 +1,29 @@
 package karika.distribucija.ba
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.setSingletonImageLoaderFactory
 import com.arkivanov.decompose.extensions.compose.stack.Children
+import karika.distribucija.ba.ui.common.getEnvPrefix
 import karika.distribucija.ba.ui.components.GuestUserInfoDialog
 import karika.distribucija.ba.ui.components.ImagePreview
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
+import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.MandatoryUpdateModal
 import karika.distribucija.ba.ui.components.ScreenSaver
@@ -82,9 +95,15 @@ fun App(component: AppComponent) {
             ImagePreview(component)
             LoadingView1(component)
             ScreenSaver(component)
-            GuestUserInfoDialog(component)
+            getEnvPrefix()
+                .replace(".", "")
+                .takeIf { it.isNotEmpty() }
+                ?.let {
+                    WaterMarkBox(it)
+                }
         }
 
+        GuestUserInfoDialog(component)
         MandatoryUpdate(component)
     }
 }
@@ -99,5 +118,46 @@ private fun MandatoryUpdate(component: AppComponent) {
 
     LaunchedEffect(Unit) {
         component.checkForUpdate()
+    }
+}
+
+@Composable
+fun WaterMarkBox(watermarkText: String) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.TopEnd
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 300.dp, height = 40.dp)
+                    .graphicsLayer {
+                        rotationZ = 45f
+                    }
+                    .offset(x = 80.dp, y = (-10).dp)
+                    .background(
+                        color = when (getEnvPrefix()) {
+                            "demo." -> KarikaColors.Yellow
+                            "test." -> KarikaColors.Green3
+                            else -> KarikaColors.Black
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = watermarkText,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W700,
+                    color = when (getEnvPrefix()) {
+                        "demo." -> KarikaColors.Gray2
+                        else -> KarikaColors.White
+                    },
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }

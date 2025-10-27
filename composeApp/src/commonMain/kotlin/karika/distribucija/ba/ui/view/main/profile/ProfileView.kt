@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.AppConfig
+import karika.distribucija.ba.ui.common.appVersionName
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.PrimaryButton
@@ -208,7 +209,14 @@ private fun Actions(component: ProfileComponent) {
                 component.appNavigate(AppConfig.Notifications)
             }
         }
-
+        YSpacer16()
+        KarikaText(
+            modifier = Modifier,
+            color = KarikaColors.Black,
+            fontWeight = FontWeight.W600,
+            textSize = 14.sp,
+            text = appVersionName()
+        )
         YSpacer16()
     }
     Box(

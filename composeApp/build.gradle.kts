@@ -101,7 +101,7 @@ android {
         applicationId = "karika.distribucija.ba"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 219
+        versionCode = 220
 
         versionName = "2.2"
     }
@@ -122,11 +122,11 @@ android {
     flavorDimensions += "karika"
     productFlavors {
         create("demo") {
-            applicationId = "karika.distribucija.ba"
+            applicationId = "karika.distribucija.ba.demo"
             dimension = "karika"
         }
         create("uat") {
-            applicationId = "karika.distribucija.ba"
+            applicationId = "karika.distribucija.ba.uat"
             dimension = "karika"
         }
         create("prod") {

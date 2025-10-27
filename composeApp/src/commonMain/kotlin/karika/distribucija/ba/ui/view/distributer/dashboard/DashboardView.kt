@@ -1,7 +1,7 @@
 package karika.distribucija.ba.ui.view.distributer.dashboard
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +24,6 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
@@ -33,11 +32,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import karika.distribucija.ba.ui.common.appVersionName
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.TopBarDashboard
+import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.distributer.board.BoardView
 import karika.distribucija.ba.ui.view.distributer.messages.admin.AdminMessagesView
@@ -51,7 +52,6 @@ import karika.distribucija.ba.ui.view.distributer.products.details.ProductDetail
 import karika.distribucija.ba.ui.view.distributer.profile.ProfileView
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_analytics
-import karikav2.composeapp.generated.resources.ic_inventory
 import karikav2.composeapp.generated.resources.ic_logout
 import karikav2.composeapp.generated.resources.ic_messages
 import karikav2.composeapp.generated.resources.ic_navigation_profile
@@ -175,33 +175,33 @@ fun DashboardView(component: DashboardComponent) {
                             }
                         }
                     )
-                   /* NavigationDrawerItem(
-                        modifier = Modifier,
-                        colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = KarikaColors.White,
-                            selectedContainerColor = KarikaColors.Blue
-                        ),
-                        shape = RectangleShape,
-                        label = {
-                            IconTextItem(
-                                modifier = Modifier,
-                                icon = vectorResource(Res.drawable.ic_inventory),
-                                iconColor = if (navState.value.active.instance is DashChild.Products) KarikaColors.White else KarikaColors.Gray2,
-                                textColor = if (navState.value.active.instance is DashChild.Products) KarikaColors.White else KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W600,
-                                text = "Upravljanje artiklima",
-                                textAlign = TextAlign.Start
-                            )
-                        },
-                        selected = navState.value.active.instance is DashChild.Products,
-                        onClick = {
-                            component.dashNavigate(DashConfig.Products, true)
-                            scope.launch {
-                                drawerState.close()
-                            }
-                        }
-                    )*/
+                    /* NavigationDrawerItem(
+                         modifier = Modifier,
+                         colors = NavigationDrawerItemDefaults.colors(
+                             unselectedContainerColor = KarikaColors.White,
+                             selectedContainerColor = KarikaColors.Blue
+                         ),
+                         shape = RectangleShape,
+                         label = {
+                             IconTextItem(
+                                 modifier = Modifier,
+                                 icon = vectorResource(Res.drawable.ic_inventory),
+                                 iconColor = if (navState.value.active.instance is DashChild.Products) KarikaColors.White else KarikaColors.Gray2,
+                                 textColor = if (navState.value.active.instance is DashChild.Products) KarikaColors.White else KarikaColors.Gray2,
+                                 textSize = 16.sp,
+                                 fontWeight = FontWeight.W600,
+                                 text = "Upravljanje artiklima",
+                                 textAlign = TextAlign.Start
+                             )
+                         },
+                         selected = navState.value.active.instance is DashChild.Products,
+                         onClick = {
+                             component.dashNavigate(DashConfig.Products, true)
+                             scope.launch {
+                                 drawerState.close()
+                             }
+                         }
+                     )*/
                     NavigationDrawerItem(
                         modifier = Modifier,
                         colors = NavigationDrawerItemDefaults.colors(
@@ -284,11 +284,21 @@ fun DashboardView(component: DashboardComponent) {
                         }
                     )
                     HorizontalDivider()
-                    Box(
+                    Column(
                         modifier = Modifier
                             .weight(1f),
-                        contentAlignment = Alignment.BottomStart
+                        verticalArrangement = Arrangement.Bottom
                     ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            color = KarikaColors.Black,
+                            fontWeight = FontWeight.W600,
+                            textSize = 14.sp,
+                            text = appVersionName(),
+                            textAlign = TextAlign.Center
+                        )
+                        YSpacer16()
                         NavigationDrawerItem(
                             modifier = Modifier,
                             colors = NavigationDrawerItemDefaults.colors(

@@ -233,7 +233,15 @@ actual fun getEnvJwt(): String {
         NSBundle.mainBundle.objectForInfoDictionaryKey("APP_ENV") as? String ?: "prod"
     return when (currentEnv) {
         "prod" -> "lbzgyy1qylr7unu707eblcphftb2fzha"
-        "demo" -> "demo."
+        "demo" -> "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"
         else -> "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"
     }
+}
+
+actual fun appVersionName(): String {
+    return "v${NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String ?: "0.0"}(${
+        NSBundle.mainBundle.infoDictionary?.get(
+            "CFBundleVersion"
+        ) as? String ?: "1"
+    })"
 }

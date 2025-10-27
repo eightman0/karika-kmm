@@ -23,4 +23,6 @@ expect fun isKiosk(): Boolean
 
 expect fun appVersion(): String
 
+expect fun appVersionName(): String
+
 expect fun openPhoneCall(phoneNumber: String, error: (String) -> Unit = {})
