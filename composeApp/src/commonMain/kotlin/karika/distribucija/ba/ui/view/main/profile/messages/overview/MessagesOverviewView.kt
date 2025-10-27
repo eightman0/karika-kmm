@@ -77,7 +77,7 @@ fun MessagesOverviewView(component: MessagesOverviewComponent) {
         containerColor = KarikaColors.White,
         contentWindowInsets = WindowInsets.systemBars,
         topBar = {
-            TopBarWithBack(conversation.receiverName ?: "Nova poruka") {
+            TopBarWithBack(conversation.senderName()) {
                 component.appBack()
             }
         },
@@ -271,7 +271,7 @@ private fun EnterComment(component: MessagesOverviewComponent) {
     val enableButton = remember(comment, conversation, subject) {
         derivedStateOf {
             comment.value.isNotEmpty() &&
-                    (conversation.value.vendorId != null || conversation.value.receiverId == "0") &&
+                    (conversation.value.vendorId != null || conversation.value.receiverId == "0" || conversation.value.senderId == "0") &&
                     subject.value.isNotEmpty()
 
         }

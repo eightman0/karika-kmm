@@ -45,7 +45,9 @@ data class Conversation(
         }
     }
 
-    fun receiverId() = if (receiverId == "0") receiverId?.toIntOrNull() else vendorId?.toIntOrNull()
+    fun receiverId() = if (receiverId == "0" || senderId == "0") 0 else vendorId?.toIntOrNull()
+
+    fun admin() = receiverId == "0" || senderId == "0"
 }
 
 @Serializable

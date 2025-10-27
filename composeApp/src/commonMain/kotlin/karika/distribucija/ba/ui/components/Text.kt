@@ -451,7 +451,7 @@ fun KarikaAmountField(
     error: MutableState<String> = mutableStateOf("")
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val regex = remember { Regex("^(0|[1-9]\\d*)([,]\\d{0,2})?$") }
+    val regex = remember { Regex("^(0|[1-9]\\d*)([.]\\d{0,2})?$") }
 
     TextField(
         modifier = modifier
@@ -475,14 +475,14 @@ fun KarikaAmountField(
         enabled = enabled,
         value = value.value,
         onValueChange = {
-            val newValue = it.replace('.', ',')
+            val newValue = it.replace(',', '.')
 
             if (newValue == "0") {
                 value.value = newValue
                 return@TextField
             }
 
-            if (newValue.startsWith("0") && !newValue.startsWith("0,")) {
+            if (newValue.startsWith("0") && !newValue.startsWith("0.")) {
                 return@TextField
             }
 

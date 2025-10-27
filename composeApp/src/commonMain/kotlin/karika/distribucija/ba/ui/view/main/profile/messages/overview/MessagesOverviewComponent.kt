@@ -42,7 +42,7 @@ class MessagesOverviewComponent(
         iOScope.launch {
             messagesRepository.get(
                 threadId = threadId,
-                admin = conversationState.value.receiverId == "0"
+                admin = conversationState.value.admin()
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
@@ -76,7 +76,7 @@ class MessagesOverviewComponent(
         iOScope.launch {
             messagesRepository.send(
                 SendMessageRequest(
-                    sendToAdmin = conversationState.value.receiverId == "0",
+                    sendToAdmin = conversationState.value.admin(),
                     message = newMessage.value,
                     subject = subject.value,
                     receiverId = conversationState.value.receiverId(),
