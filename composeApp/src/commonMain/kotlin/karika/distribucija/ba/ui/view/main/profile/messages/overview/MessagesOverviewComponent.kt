@@ -30,8 +30,18 @@ class MessagesOverviewComponent(
     val vendors = _vendors.asStateFlow()
 
     init {
-        getMessages()
-        vendors("", true)
+        if (conversation.createdAt == null) {
+            vendors("", true)
+        }
+
+        iOScope.launch {
+            stateHolder.messageHandler.adminMessagesReloadState.collect {
+                getMessages()
+            }
+            stateHolder.messageHandler.vendorMessagesReloadState.collect {
+                getMessages()
+            }
+        }
     }
 
     private fun getMessages(threadId: String? = conversationState.value.id) {
@@ -59,16 +69,6 @@ class MessagesOverviewComponent(
                     }
                 }
             }
-
-            messagesRepository.markAsRead(conversationState.value.id)
-                .collect {
-                    if (conversationState.value.admin) {
-                        stateHolder.messageHandler.reloadAdminMessages()
-                    } else {
-                        stateHolder.messageHandler.reloadVendorMessages()
-                    }
-                }
-            stateHolder.customerNotificationHandler.notificationReceived()
         }
     }
 
@@ -142,4 +142,12 @@ class MessagesOverviewComponent(
             sendMessage(data)
         }
     }
+
+    fun getVendorName(): String? {
+        return when {
+            conversationState.value.sender == "customer" -> conversationState.value.senderName
+            else -> conversationState.value.receiverName
+        }
+    }
+
 }

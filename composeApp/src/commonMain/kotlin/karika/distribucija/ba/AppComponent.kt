@@ -128,8 +128,7 @@ class AppComponent(
 
     init {
         refreshHandler = {
-            stateHolder.customerNotificationHandler.notificationReceived()
-            stateHolder.vendorNotificationHandler.notificationReceived()
+            stateHolder.notificationReceived()
         }
         screensaverHandler = { showScreenSaver.value = true }
         stateHolder.commonHandler.init()

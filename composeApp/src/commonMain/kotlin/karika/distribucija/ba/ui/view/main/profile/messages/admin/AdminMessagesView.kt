@@ -114,7 +114,7 @@ private fun MessageItem(item: Conversation, component: AdminMessagesComponent) {
                 color = KarikaColors.Gray2,
                 fontWeight = if (item.isRead()) FontWeight.W400 else FontWeight.W700,
                 textSize = 12.sp,
-                text = item.createdAt
+                text = item.date()
             )
         }
         KarikaText(

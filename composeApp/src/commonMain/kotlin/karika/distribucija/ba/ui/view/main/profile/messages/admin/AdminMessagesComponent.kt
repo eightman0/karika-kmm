@@ -19,6 +19,10 @@ open class AdminMessagesComponent(
     val messages = _messages.asStateFlow()
 
     init {
+        init()
+    }
+
+    open fun init() {
         iOScope.launch {
             stateHolder.messageHandler.adminMessagesReloadState.collect {
                 loadNextPage()
@@ -44,5 +48,23 @@ open class AdminMessagesComponent(
                     }
                 }
         }
+    }
+
+    override fun navigateToMessagesOverview(item: Conversation) {
+        super.navigateToMessagesOverview(item)
+        if (item.isRead()) {
+            return
+        }
+        iOScope.launch {
+            messagesRepository.markAsRead(item.id)
+                .collect {
+                    if (item.admin) {
+                        stateHolder.messageHandler.reloadAdminMessages()
+                    } else {
+                        stateHolder.messageHandler.reloadVendorMessages()
+                    }
+                }
+        }
+        stateHolder.customerNotificationHandler.notificationReceived()
     }
 }

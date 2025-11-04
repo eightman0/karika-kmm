@@ -38,6 +38,10 @@ data class Conversation(
     fun receiverId() = if (receiverId == "0" || senderId == "0") 0 else vendorId?.toIntOrNull()
 
     fun admin() = receiverId == "0" || senderId == "0"
+
+    fun date(): String? {
+        return updatedAt?.split(" ")?.getOrNull(0) ?: updatedAt
+    }
 }
 
 @Serializable
@@ -67,6 +71,32 @@ data class Message(
         if (senderId == id.toString()) return true
 
         return false
+    }
+
+    fun date(): String? {
+        return createdAt
+    }
+
+    fun message(): String {
+        return emoticonsToEmoji(message ?: "")
+    }
+
+    fun emoticonsToEmoji(input: String): String {
+        val map = mapOf(
+            ":-)" to "🙂",
+            ":)" to "😊",
+            ":-(" to "☹️",
+            ":(" to "☹️",
+            ":D" to "😄",
+            ";)" to "😉",
+            ":P" to "😛",
+            ":-P" to "😛"
+        )
+        var out = input
+        map.forEach { (k, v) ->
+            out = out.replace(k, v)
+        }
+        return out
     }
 }
 

@@ -328,7 +328,7 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                 modifier = Modifier
                     .padding(start = 32.dp)
                     .background(
-                        color = KarikaColors.MineMessage,
+                        color = KarikaColors.Primary,
                         shape = RoundedCornerShape(
                             topStart = 8.dp,
                             topEnd = 8.dp,
@@ -358,15 +358,15 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                         HtmlTextWithStyles(
                             modifier = Modifier
                                 .padding(16.dp),
-                            html = message.message ?: "",
+                            html = message.message(),
                             textColor = KarikaColors.White,
-                            background = KarikaColors.MineMessage
+                            background = KarikaColors.Primary
                         )
                     } else {
                         KarikaText(
                             modifier = Modifier
                                 .padding(16.dp),
-                            text = message.message,
+                            text = message.message(),
                             color = KarikaColors.White,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W400
@@ -376,7 +376,7 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                 KarikaText(
                     modifier = Modifier
                         .padding(horizontal = 16.dp),
-                    text = message.createdAt,
+                    text = message.date(),
                     color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400
@@ -394,15 +394,23 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                 modifier = Modifier
                     .padding(end = 32.dp)
                     .background(
-                        color = KarikaColors.NotMineMessage,
+                        color = KarikaColors.Blue,
                         shape = RoundedCornerShape(
-                            topStart = 8.dp,
+                            bottomEnd = 8.dp,
                             topEnd = 8.dp,
                             bottomStart = 8.dp
                         )
                     ),
                 horizontalAlignment = Alignment.Start
             ) {
+                KarikaText(
+                    modifier = Modifier
+                        .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                    text = component.getVendorName(),
+                    color = KarikaColors.White,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W700
+                )
                 message.images
                     ?.takeIf { image -> image.isNotEmpty() }
                     ?.let {
@@ -424,16 +432,16 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                         HtmlTextWithStyles(
                             modifier = Modifier
                                 .padding(16.dp),
-                            html = message.message ?: "",
-                            textColor = KarikaColors.Gray2,
-                            background = KarikaColors.NotMineMessage
+                            html = message.message(),
+                            textColor = KarikaColors.White,
+                            background = KarikaColors.Blue
                         )
                     } else {
                         KarikaText(
                             modifier = Modifier
                                 .padding(16.dp),
-                            text = message.message,
-                            color = KarikaColors.Gray2,
+                            text = message.message(),
+                            color = KarikaColors.White,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W400
                         )
@@ -443,8 +451,8 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                 KarikaText(
                     modifier = Modifier
                         .padding(horizontal = 16.dp),
-                    text = message.createdAt,
-                    color = KarikaColors.Gray2,
+                    text = message.date(),
+                    color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400
                 )

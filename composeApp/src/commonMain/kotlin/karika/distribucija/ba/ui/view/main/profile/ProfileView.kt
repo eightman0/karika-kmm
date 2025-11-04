@@ -101,11 +101,17 @@ private fun Header(component: ProfileComponent) {
 @Composable
 private fun Actions(component: ProfileComponent) {
     val notificationCount =
-        component.stateHolder.customerNotificationHandler.notificationCount.asStateFlow()
+        component.stateHolder.customerNotificationHandler.notificationCount
+            .asStateFlow()
+            .collectAsState()
     val adminCount =
-        component.stateHolder.customerNotificationHandler.messageUnreadCountAdmin.asStateFlow()
+        component.stateHolder.customerNotificationHandler.messageUnreadCountAdmin.
+        asStateFlow()
+            .collectAsState()
     val userCount =
-        component.stateHolder.customerNotificationHandler.messageUnreadCountUser.asStateFlow()
+        component.stateHolder.customerNotificationHandler.messageUnreadCountUser
+            .asStateFlow()
+            .collectAsState()
 
     Column(
         modifier = Modifier

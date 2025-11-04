@@ -36,4 +36,11 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
 
         appNavigation.replaceAll(sessionHandler.mainConfig())
     }
+
+    fun notificationReceived() {
+        vendorNotificationHandler.notificationReceived()
+        customerNotificationHandler.notificationReceived()
+        messageHandler.reloadAdminMessages()
+        messageHandler.reloadVendorMessages()
+    }
 }
