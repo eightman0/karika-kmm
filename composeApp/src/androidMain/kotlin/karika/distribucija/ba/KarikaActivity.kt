@@ -17,7 +17,11 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Density
 import androidx.core.content.ContextCompat
 import com.arkivanov.decompose.defaultComponentContext
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -35,6 +39,7 @@ import karika.distribucija.ba.util.PushHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import karika.distribucija.ba.ui.components.KarikaFonts
 
 open class KarikaActivity : ComponentActivity(), KarikaHandler {
     private val requestPermissionLauncher = registerForActivityResult(
@@ -83,7 +88,15 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
                     filePicker = this
                 )
             }
-            App(appComponent)
+
+            // Force fontScale = 1 for the whole app composable tree and provide default app font family
+            CompositionLocalProvider(
+                LocalDensity provides Density(LocalDensity.current.density, 1f),
+                androidx.compose.material3.LocalTextStyle provides TextStyle(fontFamily = KarikaFonts())
+            ) {
+                App(appComponent)
+            }
+
             PushHandler.handleNewPushIfExists(intent.extras?.getString("route") ?: "", appComponent)
             checkUpdate()
         }
