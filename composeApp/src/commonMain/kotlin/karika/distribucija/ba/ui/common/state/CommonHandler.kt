@@ -9,7 +9,9 @@ import karika.distribucija.ba.domain.model.ResultState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -20,6 +22,9 @@ class CommonHandler {
 
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
     val categories = _categories.asStateFlow()
+
+    private val _deepLinkToken = MutableSharedFlow<Pair<String, String>>()
+    val deepLinkToken = _deepLinkToken.asSharedFlow()
 
     val showLoginRequired = mutableStateOf<String?>(null)
 
@@ -64,5 +69,11 @@ class CommonHandler {
     fun init() {
         fetchCategories()
         getConfig()
+    }
+
+    fun handleDeepLink(emailToken: String, token: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            _deepLinkToken.emit(Pair(emailToken, token))
+        }
     }
 }

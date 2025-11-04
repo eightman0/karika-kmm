@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Karika.ba - test</string>
+    <string name="deeplink_host">test.karika.ba</string>
 </resources>

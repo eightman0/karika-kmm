@@ -106,6 +106,21 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
             }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent.let {
+            val uri = it.data
+            if (uri != null && uri.path == "/oauth") {
+                val emailToken = uri.getQueryParameter("email")
+                val token = uri.getQueryParameter("token")
+                if (token != null && emailToken != null) {
+                    appComponent.handleDeepLink(emailToken, token)
+                }
+            }
+        }
+    }
+
     private fun askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(

@@ -231,6 +231,10 @@ class AppComponent(
                 }
             }
     }
+
+    fun handleDeepLink(emailToken: String, token: String) {
+        stateHolder.commonHandler.handleDeepLink(emailToken, token)
+    }
 }
 
 private fun String?.toDoubleOrZero() = this?.toDoubleOrNull() ?: 0.0

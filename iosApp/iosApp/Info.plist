@@ -13,5 +13,20 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>karika</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>ba.karika.Karika</string>
+		</dict>
+	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:${APP_LINKS}</string>
+	</array>
 </dict>
 </plist>

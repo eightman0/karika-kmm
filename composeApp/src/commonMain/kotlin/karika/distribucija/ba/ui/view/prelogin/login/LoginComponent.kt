@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.replaceAll
+import com.arkivanov.essenty.lifecycle.Lifecycle
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.api.LoginRepository
 import karika.distribucija.ba.domain.model.LoginDto
@@ -30,10 +31,37 @@ class LoginComponent(
         mutableStateOf(stateHolder.sessionHandler.getUserPassword(userType).isNotEmpty())
     private val repository = LoginRepository()
 
-    fun login(callback: () -> Unit = {}) {
+    init {
+        val state = iOScope.launch {
+            stateHolder.commonHandler.deepLinkToken.collect {
+                login(it.first, it.second)
+            }
+        }
+
+        lifecycle.subscribe(callbacks = object : Lifecycle.Callbacks {
+            override fun onResume() {
+                super.onResume()
+                state.start()
+            }
+
+            override fun onDestroy() {
+                super.onDestroy()
+                state.cancel()
+            }
+        })
+    }
+
+
+    fun login(emailToken: String = "", token: String = "", callback: () -> Unit = {}) {
         showLoader()
         iOScope.launch {
-            repository.login(LoginDto(email.value, pass.value, userType))
+            repository.login(
+                LoginDto(
+                    emailToken.ifEmpty { email.value },
+                    token.ifEmpty { pass.value },
+                    userType
+                )
+            )
                 .collect { result ->
                     when (result) {
                         is ResultState.Loading -> {
