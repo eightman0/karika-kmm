@@ -19,7 +19,7 @@ class VendorComponent(
 ) : CommonComponent(componentContext, stateHolder) {
     private val repository = VendorRepository()
 
-    private val _vendors = MutableStateFlow<List<Vendor>>(emptyList())
+    private val _vendors = MutableStateFlow<Set<Vendor>>(emptySet())
     val vendors = _vendors.asStateFlow()
     var sort = mutableStateOf("A - Z")
     val searchText = mutableStateOf("")
@@ -54,7 +54,7 @@ class VendorComponent(
                         hideLoader()
                         _vendors.update {
                             if (reset) {
-                                result.data
+                                result.data.toSet()
                             } else {
                                 it + result.data
                             }

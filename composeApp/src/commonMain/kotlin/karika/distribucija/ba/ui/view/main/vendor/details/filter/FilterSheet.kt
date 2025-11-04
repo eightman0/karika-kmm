@@ -93,6 +93,45 @@ fun FilterSheet(component: VendorComponent) {
                         fontWeight = FontWeight.W700,
                         textAlign = TextAlign.Center
                     )
+                    Row(
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = null, indication = null
+                            ) {
+                                if (checkedElements.value.size == component.stateHolder.commonHandler.config.value.customerRegionList.size) {
+                                    checkedElements.value = listOf()
+                                } else {
+                                    checkedElements.value = component.stateHolder.commonHandler.config.value.customerRegionList
+                                }
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(0.dp)
+                    ) {
+                        Checkbox(
+                            modifier = Modifier
+                                .height(24.dp)
+                                .padding(vertical = 0.dp),
+                            checked = checkedElements.value.size == component.stateHolder.commonHandler.config.value.customerRegionList.size,
+                            onCheckedChange = { _ ->
+                                if (checkedElements.value.size == component.stateHolder.commonHandler.config.value.customerRegionList.size) {
+                                    checkedElements.value = listOf()
+                                } else {
+                                    checkedElements.value = component.stateHolder.commonHandler.config.value.customerRegionList
+                                }
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = KarikaColors.Primary,
+                                uncheckedColor = KarikaColors.Gray7
+                            ),
+                            enabled = true
+                        )
+                        KarikaText(
+                            text = "Svi regioni",
+                            color = KarikaColors.Gray2,
+                            textSize = 16.sp,
+                            fontWeight = FontWeight.W400,
+                        )
+                    }
                     component.stateHolder.commonHandler.config.value.customerRegionList.forEach {
                         Row(
                             modifier = Modifier

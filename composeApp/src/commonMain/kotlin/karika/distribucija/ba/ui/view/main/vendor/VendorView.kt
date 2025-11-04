@@ -176,6 +176,7 @@ private fun Filter(component: VendorComponent) {
             modifier = Modifier
                 .height(50.dp)
                 .weight(1f),
+            preselected = searchText.value,
             onValueChange = {
                 searchText.value = it
             },
