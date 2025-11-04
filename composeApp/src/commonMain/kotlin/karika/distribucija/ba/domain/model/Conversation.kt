@@ -30,17 +30,7 @@ data class Conversation(
             sender == "customer" -> receiverName ?: "-"
             sender == "vendor" -> senderName ?: "-"
             senderId == "0" -> senderName ?: ""
-            receiverId == "0" -> receiverName ?: ""
-            else -> "-"
-        }
-    }
-
-    fun senderNameVendorApp(): String {
-        return when {
-            sender == "customer" -> senderName ?: "-"
-            sender == "vendor" -> receiverName ?: "-"
-            senderId == "0" -> senderName ?: ""
-            receiverId == "0" -> receiverName ?: ""
+            receiverId == "0" || receiverId.isNullOrBlank() -> receiverName ?: ""
             else -> "-"
         }
     }
