@@ -22,7 +22,23 @@ class CustomerMessagesComponent(componentContext: ComponentContext, stateHolder:
     private val _messages = MutableStateFlow<List<Conversation>>(emptyList())
     val messages = _messages.asStateFlow()
 
+    init {
+        init()
+    }
+
+    fun init() {
+        iOScope.launch {
+            stateHolder.messageHandler.vendorMessagesReloadState.collect {
+                loadNextPage()
+            }
+        }
+    }
+
     override fun loadNextPage(reset: Boolean) {
+        if (loader.value) {
+            return
+        }
+
         iOScope.launch {
             MessagesRepository()
                 .messages(false)
@@ -45,5 +61,20 @@ class CustomerMessagesComponent(componentContext: ComponentContext, stateHolder:
 
     override fun navigateToMessagesOverview(item: Conversation) {
         dashNavigate(DashConfig.MessageOverview(item))
+
+        if (item.isRead()) {
+            return
+        }
+        iOScope.launch {
+            messagesRepository.markAsRead(item.id)
+                .collect {
+                    if (item.admin) {
+                        stateHolder.messageHandler.reloadAdminMessages()
+                    } else {
+                        stateHolder.messageHandler.reloadVendorMessages()
+                    }
+                }
+        }
+        stateHolder.customerNotificationHandler.notificationReceived()
     }
 }

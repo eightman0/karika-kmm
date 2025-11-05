@@ -358,7 +358,7 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                         HtmlTextWithStyles(
                             modifier = Modifier
                                 .padding(16.dp),
-                            html = message.message ?: "",
+                            html = message.message(),
                             textColor = KarikaColors.White,
                             background = KarikaColors.MineMessage
                         )
@@ -366,7 +366,7 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                         KarikaText(
                             modifier = Modifier
                                 .padding(16.dp),
-                            text = message.message,
+                            text = message.message(),
                             color = KarikaColors.White,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W400
@@ -432,7 +432,7 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                         HtmlTextWithStyles(
                             modifier = Modifier
                                 .padding(16.dp),
-                            html = message.message ?: "",
+                            html = message.message(),
                             textColor = KarikaColors.White,
                             background = KarikaColors.NotMineMessage
                         )
@@ -440,7 +440,7 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                         KarikaText(
                             modifier = Modifier
                                 .padding(16.dp),
-                            text = message.message,
+                            text = message.message(),
                             color = KarikaColors.White,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W400

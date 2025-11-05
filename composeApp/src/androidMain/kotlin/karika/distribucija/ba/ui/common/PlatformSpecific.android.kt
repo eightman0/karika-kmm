@@ -98,7 +98,7 @@ actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
 actual fun getEnvJwt(): String {
     return when (BuildConfig.FLAVOR) {
         "prod", "kiosk" -> "lbzgyy1qylr7unu707eblcphftb2fzha"
-        "demo" -> "demo."
+        "demo" -> "hgy5au3paxuijsiv52nyt9w47fcxprbz"
         else -> "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"
     }
 }

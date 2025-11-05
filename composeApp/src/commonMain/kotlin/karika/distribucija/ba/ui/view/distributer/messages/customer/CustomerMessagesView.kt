@@ -50,29 +50,6 @@ fun CustomerMessagesView(component: CustomerMessagesComponent) {
                 fontWeight = FontWeight.W700
             )
             YSpacer16()
-            /*   Row(
-                   verticalAlignment = Alignment.CenterVertically,
-                   horizontalArrangement = Arrangement.spacedBy(16.dp)
-               ) {
-                   SearchBoxBorder(
-                       modifier = Modifier
-                           .height(50.dp)
-                           .weight(1f),
-                       borderShape = 100.dp,
-                       onValueChange = {
-                           component.searchText.value = it
-                       },
-                       onClose = {
-                           component.searchText.value = ""
-                           component.loadNextPage(true)
-                       },
-                       onSearchExecute = {
-                           component.loadNextPage(true)
-                       },
-                       placeholder = "Pretraži poruke...",
-                       preselected = component.searchText.value
-                   )
-               }*/
         }
         items(items = messages.value) {
             MessageItem(it, component)
