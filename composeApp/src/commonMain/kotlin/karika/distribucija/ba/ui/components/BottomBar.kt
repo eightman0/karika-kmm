@@ -58,32 +58,34 @@ fun BottomBar(
                                 imageVector = if (isSelected) selectedIcon else unselectedIcon,
                                 contentDescription = text,
                             )
-                           if (cart.count { it.value.isNotEmpty() } > 0) {
-                               if (selectedIcon == vectorResource(Res.drawable.ic_navigation_cart)) {
-                                   Box(
-                                       modifier = Modifier
-                                           .fillMaxSize(),
-                                       contentAlignment = Alignment.TopEnd
-                                   ) {
-                                       Box(
-                                           modifier = Modifier
-                                               .background(
-                                                   color = KarikaColors.Red,
-                                                   shape = CircleShape
-                                               )
-                                               .size(16.dp),
-                                           contentAlignment = Alignment.Center
-                                       ) {
-                                           KarikaText(
-                                               text = "${cart.count { it.value.isNotEmpty() }}",
-                                               color = KarikaColors.White,
-                                               fontWeight = FontWeight.W700,
-                                               textSize = 12.sp
-                                           )
-                                       }
-                                   }
-                               }
-                           }
+                            // show badge only when there are any items in cart (sum of sizes of value collections)
+                            val totalCartItems = cart.values.sumOf { it.size }
+                            if (totalCartItems > 0) {
+                                if (selectedIcon == vectorResource(Res.drawable.ic_navigation_cart)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize(),
+                                        contentAlignment = Alignment.TopEnd
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    color = KarikaColors.Red,
+                                                    shape = CircleShape
+                                                )
+                                                .size(16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            KarikaText(
+                                                text = "${totalCartItems}",
+                                                color = KarikaColors.White,
+                                                fontWeight = FontWeight.W700,
+                                                textSize = 12.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     },
                     label = {
