@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
     CommonComponent(componentContext, stateHolder) {
 
-    private val _orders = MutableStateFlow<List<VendorOrder>>(emptyList())
+    private val _orders = MutableStateFlow<Set<VendorOrder>>(emptySet())
     val orders = _orders.asStateFlow()
     var filterPriceFrom = mutableStateOf("")
     var filterPriceTo = mutableStateOf("")
@@ -49,7 +49,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
                         hideLoader()
                         _orders.update {
                             if (reset) {
-                                result.data
+                                result.data.toSet()
                             } else {
                                 it.plus(result.data)
                             }

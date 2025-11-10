@@ -125,7 +125,7 @@ fun OrdersView(component: OrdersComponent) {
                 }
             }
         }
-        items(items = items) {
+        items(items = items.toList()) {
             OrderItem(component, it)
         }
     }
@@ -160,9 +160,7 @@ private fun OrderItem(component: OrdersComponent, vendorOrder: VendorOrder) {
             Row(
                 modifier = Modifier
                     .onClick {
-                        if (!vendorOrder.locked()) {
-                            component.dashNavigate(DashConfig.OrderDetails(vendorOrder))
-                        }
+                        component.dashNavigate(DashConfig.OrderDetails(vendorOrder))
                     }
                     .background(color = KarikaColors.White)
                     .border(

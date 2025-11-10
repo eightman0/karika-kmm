@@ -41,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
@@ -171,6 +172,7 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                         containerColor = KarikaColors.Blue,
                         disabledContentColor = KarikaColors.Secondary
                     ),
+                    enabled = !order.locked(),
                     contentPadding = PaddingValues(horizontal = 12.dp)
                 ) {
                     Row(
@@ -400,7 +402,8 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 KarikaText(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .blur(radius = if (order.locked()) 5.dp else 0.dp),
                     text = order.totalAmountWithPdv(),
                     color = KarikaColors.Gray2,
                     textSize = 16.sp,
@@ -420,7 +423,8 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 KarikaText(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .blur(radius = if (order.locked()) 5.dp else 0.dp),
                     text = order.totalCommission(),
                     color = KarikaColors.Gray2,
                     textSize = 16.sp,
@@ -441,7 +445,8 @@ private fun OrderInfo(component: OrderDetailsComponent) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             KarikaText(
-                modifier = Modifier,
+                modifier = Modifier
+                    .blur(radius = if (order.locked()) 5.dp else 0.dp),
                 text = order.b2bPravnoLice,
                 color = KarikaColors.Gray2,
                 textSize = 16.sp,
@@ -466,7 +471,8 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 KarikaText(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .blur(radius = if (order.locked()) 5.dp else 0.dp),
                     text = order.pdvNumber ?: "-",
                     color = KarikaColors.Gray2,
                     textSize = 16.sp,
@@ -486,7 +492,8 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 KarikaText(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .blur(radius = if (order.locked()) 5.dp else 0.dp),
                     text = order.idNumber ?: "-",
                     color = KarikaColors.Gray2,
                     textSize = 16.sp,
@@ -512,7 +519,8 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 KarikaText(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .blur(radius = if (order.locked()) 5.dp else 0.dp),
                     text = order.billingName ?: "-",
                     color = KarikaColors.Gray2,
                     textSize = 16.sp,
@@ -532,7 +540,8 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 KarikaText(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .blur(radius = if (order.locked()) 5.dp else 0.dp),
                     text = order.email(),
                     color = KarikaColors.Gray2,
                     textSize = 16.sp,
@@ -592,10 +601,10 @@ private fun OrderInfo(component: OrderDetailsComponent) {
 
 @Composable
 private fun OrderShipping(component: OrderDetailsComponent) {
-    val order = component.order.collectAsState()
+    val order by component.order.collectAsState()
     val expand = mutableStateOf(false).asState()
 
-    if (order.value.shouldShowShipping()) {
+    if (order.shouldShowShipping()) {
         Column(
             modifier = Modifier
                 .hideKeyboard(true)
@@ -892,7 +901,8 @@ private fun OrderShipping(component: OrderDetailsComponent) {
                         .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                         .height(48.dp)
                         .fillMaxWidth(),
-                    title = "Izračunaj cijenu"
+                    title = "Izračunaj cijenu",
+                    enabled = !order.locked()
                 ) {
                     component.calculateShipping()
                 }
@@ -905,53 +915,74 @@ private fun OrderShipping(component: OrderDetailsComponent) {
 private fun OrderTax(component: OrderDetailsComponent) {
     val order by component.order.collectAsState()
 
-    Column(
+    Box(
         modifier = Modifier
-            .hideKeyboard(true)
-            .fillMaxWidth()
-            .background(color = KarikaColors.White)
-            .border(width = 1.dp, color = KarikaColors.Gray21, shape = RoundedCornerShape(4.dp)),
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            KarikaText(
-                modifier = Modifier
-                    .weight(1f),
-                text = "Specifikacija narudžbe",
-                fontWeight = FontWeight.W700,
-                color = KarikaColors.Gray2,
-                textSize = 16.sp
-            )
-        }
-        Row(
-            modifier = Modifier
-                .horizontalScroll(rememberScrollState())
+                .hideKeyboard(true)
                 .fillMaxWidth()
+                .blur(radius = if (order.locked()) 5.dp else 0.dp)
+                .background(color = KarikaColors.White)
+                .border(
+                    width = 1.dp,
+                    color = KarikaColors.Gray21,
+                    shape = RoundedCornerShape(4.dp)
+                )
         ) {
-            Column {
-                TableHeaderRow()
-                order.products.forEach {
-                    TableRow(
-                        component = component,
-                        item = it,
-                        name = it.name ?: "",
-                        originalRabat = it.originalRabat(),
-                        rabat = it.rabat(),
-                        priceVpc = it.priceVpc(),
-                        originalQty = it.originalQty(),
-                        qty = it.qty(),
-                        totalVpc = it.totalVpc(),
-                        totalWithPdv = it.totalWithPdv(),
-                        percent = it.commissionPercent(),
-                        tax = it.commission()
-                    )
+            Row(
+                modifier = Modifier
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .weight(1f),
+                    text = "Specifikacija narudžbe",
+                    fontWeight = FontWeight.W700,
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .fillMaxWidth()
+            ) {
+                Column {
+                    TableHeaderRow()
+                    order.products.forEach {
+                        TableRow(
+                            component = component,
+                            item = it,
+                            name = it.name ?: "",
+                            originalRabat = it.originalRabat(),
+                            rabat = it.rabat(),
+                            priceVpc = it.priceVpc(),
+                            originalQty = it.originalQty(),
+                            qty = it.qty(),
+                            totalVpc = it.totalVpc(),
+                            totalWithPdv = it.totalWithPdv(),
+                            percent = it.commissionPercent(),
+                            tax = it.commission()
+                        )
+                    }
                 }
             }
+            YSpacer16()
         }
-        YSpacer16()
+        if (order.locked()) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
+                text = "Za prikaz detalja narudžbe, molimo Vas da zaključite prethodne narudžbe tako što ćete ih označiti kao odobrene ili odbijene!",
+                color = KarikaColors.Primary,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W700
+            )
+        }
     }
 }
 
@@ -1107,6 +1138,7 @@ private fun TableRow(
     percent: String,
     tax: String
 ) {
+    val order by component.order.collectAsState()
     val height = remember { mutableStateOf(0) }
     val edit = component.editOrderItem.asState()
 
@@ -1294,7 +1326,7 @@ private fun TableRow(
             modifier = Modifier
                 .height(with(LocalDensity.current) { height.value.toDp() })
                 .width(100.dp)
-                .onClick {
+                .onClick(!order.locked()) {
                     edit.value = item
                 }
                 .border(width = 0.5.dp, color = KarikaColors.Border),
@@ -1339,6 +1371,7 @@ private fun Comments(component: OrderDetailsComponent) {
 
 @Composable
 private fun EnterComment(component: OrderDetailsComponent) {
+    val order by component.order.collectAsState()
     val comment = component.newComment.asState()
     val keyboardController = LocalSoftwareKeyboardController.current
     Row(
@@ -1371,7 +1404,7 @@ private fun EnterComment(component: OrderDetailsComponent) {
             modifier = Modifier
                 .height(50.dp),
             title = "Pošalji",
-            enabled = comment.value.isNotEmpty()
+            enabled = comment.value.isNotEmpty() && !order.locked()
         ) {
             keyboardController?.hide()
             component.sendComment()

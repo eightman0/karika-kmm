@@ -23,10 +23,11 @@ import karika.distribucija.ba.ui.common.CommonComponent
 @Composable
 fun <T> MutableState<T>.asState() = remember { this }
 
-fun Modifier.onClick(callback: () -> Unit): Modifier {
+fun Modifier.onClick(enabled: Boolean = true,callback: () -> Unit): Modifier {
     return this.clickable(
         interactionSource = null,
-        indication = null
+        indication = null,
+        enabled = enabled
     ) {
         callback.invoke()
     }

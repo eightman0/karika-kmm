@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
@@ -93,6 +94,7 @@ fun BottomBar(
                             text = text,
                             color = if (isSelected) KarikaColors.Primary else KarikaColors.Secondary,
                             fontWeight = FontWeight.W600,
+                            maxLines = 1,
                             textSize = 12.sp
                         )
                     },
