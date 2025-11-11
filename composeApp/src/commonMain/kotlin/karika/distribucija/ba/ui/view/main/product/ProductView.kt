@@ -52,6 +52,7 @@ import karika.distribucija.ba.ui.components.bgWhite
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.components.toGrid
 import karika.distribucija.ba.ui.view.main.home.DiscountView
 import karika.distribucija.ba.ui.view.main.home.NewView
 import karika.distribucija.ba.ui.view.main.home.NotAvailableOverlay
@@ -402,7 +403,7 @@ private fun VendorProducts(viewModel: ProductComponent) {
             textSize = 20.sp,
             fontWeight = FontWeight.W700
         )
-        products.chunked(2)
+        products.toGrid()
             .filter { it.size == 2 }
             .forEach {
                 Column(
@@ -434,7 +435,8 @@ fun ProductQtyAction(
     product: Product,
     qty: MutableState<Int>,
     component: CommonComponent,
-    disableUpdate: Boolean = true
+    disableUpdate: Boolean = true,
+    autoUpdate: Boolean = false
 ) {
     Row {
         Box(
@@ -483,6 +485,9 @@ fun ProductQtyAction(
                         return@KarikaTextField3
                     }
                     qty.value = it.toIntOrNull() ?: qty.value
+                    if (autoUpdate) {
+                        component.updateCart(product, qty.value)
+                    }
                 }
             )
         }

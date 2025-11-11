@@ -41,6 +41,7 @@ import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.bgWhite
+import karika.distribucija.ba.ui.components.gridColumnCount
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.main.home.ProductItem
@@ -83,7 +84,7 @@ private fun VendorProducts(modifier: Modifier, component: VendorDetailsComponent
     val products = component.products.collectAsState()
     val state = rememberLazyListState()
     val searchText = component.searchText.asState()
-
+    val gridColumnCount = gridColumnCount()
     Box(contentAlignment = Alignment.Center) {
         KarikaLazyColumn(
             modifier = modifier
@@ -116,7 +117,7 @@ private fun VendorProducts(modifier: Modifier, component: VendorDetailsComponent
                 )
                 YSpacer16()
             }
-            items(items = products.value.chunked(2)) { item ->
+            items(items = products.value.chunked(gridColumnCount)) { item ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),

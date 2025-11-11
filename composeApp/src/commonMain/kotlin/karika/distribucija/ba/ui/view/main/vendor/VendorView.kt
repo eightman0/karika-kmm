@@ -39,6 +39,7 @@ import karika.distribucija.ba.ui.components.KarikaLazyColumn
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.components.gridColumnCount
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
@@ -73,6 +74,7 @@ fun VendorView(viewModel: VendorComponent) {
 private fun Vendors(component: VendorComponent) {
     val vendors by component.vendors.collectAsState()
     val state = rememberLazyListState()
+    val gridColumnCount = gridColumnCount()
 
     KarikaText(
         modifier = Modifier,
@@ -90,7 +92,7 @@ private fun Vendors(component: VendorComponent) {
                 Filter(component)
             }
             items(
-                items = vendors.chunked(2)
+                items = vendors.chunked(gridColumnCount)
             ) {
                 Row(
                     modifier = Modifier

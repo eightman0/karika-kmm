@@ -3,7 +3,6 @@ package karika.distribucija.ba.domain.api
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
@@ -13,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 internal class VendorApi {
+    @Suppress("UNUSED_PARAMETER")
     suspend fun vendors(
         searchText: String = "",
         pageSize: Int = 10000,
@@ -21,24 +21,45 @@ internal class VendorApi {
         filterValue: String = "",
         sortType: String = "ASC"
     ): Result<HttpResponse> = runCatching {
-        val url =
-            when {
-                filterValue.isNotEmpty() ->
-                    url("mobile/vendors?" +
-                            (filterValue.takeIf { it.isNotEmpty() }?.let {
-                                "searchCriteria[filterGroups][0][filters][0][field]=region_uid" +
-                                        "&searchCriteria[filterGroups][0][filters][0][value]=$it" +
-                                        "&searchCriteria[filterGroups][0][filters][0][conditionType]=in"
-                            } ?: "") +
-
-                            "&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
-
-                searchText.isNotEmpty() ->
-                    url("mobile/vendors?searchCriteria[filterGroups][0][filters][0][field]=public_name&searchCriteria[filterGroups][0][filters][0][value]=$searchText&searchCriteria[filterGroups][0][filters][0][conditionType]=like&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
-
-                else ->
-                    url("mobile/vendors?searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
+        val url = when {
+            filterValue.isNotEmpty() && searchText.isNotEmpty() -> {
+                val groups = mutableListOf<String>()
+                var idx = 0
+                val firstField = filterBy.ifEmpty { "region_uid" }
+                groups.add(
+                    "searchCriteria[filterGroups][${idx}][filters][0][field]=$firstField" +
+                            "&searchCriteria[filterGroups][${idx}][filters][0][value]=$filterValue" +
+                            "&searchCriteria[filterGroups][${idx}][filters][0][conditionType]=in"
+                )
+                idx++
+                groups.add(
+                    "searchCriteria[filterGroups][${idx}][filters][0][field]=public_name" +
+                            "&searchCriteria[filterGroups][${idx}][filters][0][value]=$searchText" +
+                            "&searchCriteria[filterGroups][${idx}][filters][0][conditionType]=like"
+                )
+                url(
+                    "mobile/vendors?" +
+                            groups.joinToString(separator = "&") +
+                            "&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage"
+                )
             }
+
+            filterValue.isNotEmpty() ->
+                url("mobile/vendors?" +
+                        (filterValue.takeIf { it.isNotEmpty() }?.let {
+                            val field = filterBy.ifEmpty { "region_uid" }
+                            "searchCriteria[filterGroups][0][filters][0][field]=$field" +
+                                    "&searchCriteria[filterGroups][0][filters][0][value]=$it" +
+                                    "&searchCriteria[filterGroups][0][filters][0][conditionType]=in"
+                        } ?: "") +
+                        "&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
+
+            searchText.isNotEmpty() ->
+                url("mobile/vendors?searchCriteria[filterGroups][0][filters][0][field]=public_name&searchCriteria[filterGroups][0][filters][0][value]=$searchText&searchCriteria[filterGroups][0][filters][0][conditionType]=like&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
+
+            else ->
+                url("mobile/vendors?searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
+        }
 
         return@runCatching HttpClientProvider.client.get(url)
     }
@@ -70,7 +91,7 @@ class VendorRepository internal constructor() {
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }

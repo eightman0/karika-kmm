@@ -320,7 +320,13 @@ private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
         ) {
             ProductName(item.first)
             ProductBonus(item.first)
-            ProductQtyAction(item.first, mutableStateOf(item.second), component, false)
+            ProductQtyAction(
+                product = item.first,
+                qty = mutableStateOf(item.second),
+                component = component,
+                disableUpdate = false,
+                autoUpdate = true
+            )
         }
         Column(
             modifier = Modifier,

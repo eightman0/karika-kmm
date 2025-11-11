@@ -15,6 +15,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import karika.distribucija.ba.ui.common.CommonComponent
@@ -23,7 +24,7 @@ import karika.distribucija.ba.ui.common.CommonComponent
 @Composable
 fun <T> MutableState<T>.asState() = remember { this }
 
-fun Modifier.onClick(enabled: Boolean = true,callback: () -> Unit): Modifier {
+fun Modifier.onClick(enabled: Boolean = true, callback: () -> Unit): Modifier {
     return this.clickable(
         interactionSource = null,
         indication = null,
@@ -103,4 +104,20 @@ fun Modifier.rounded(
             color = color,
             shape = RoundedCornerShape(shape)
         )
+}
+
+@Composable
+fun gridColumnCount(): Int {
+    val screenWidth = LocalWindowInfo.current.containerSize.width
+    val screenHeight = LocalWindowInfo.current.containerSize.height
+    val isLandscape = screenWidth > screenHeight
+    val isTablet = screenWidth >= 600
+
+    return if (isTablet && isLandscape) 4 else 2
+}
+
+@Composable
+fun <T> Iterable<T>.toGrid(): List<List<T>> {
+    val size = gridColumnCount()
+    return windowed(size, size, partialWindows = true)
 }

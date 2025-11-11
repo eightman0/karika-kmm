@@ -37,6 +37,7 @@ import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.components.gridColumnCount
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
@@ -72,6 +73,7 @@ fun ProductByCategoryView(component: ProductByCategoryComponent) {
 private fun Products(component: ProductByCategoryComponent) {
     val products by component.products.collectAsState()
     val state = rememberLazyListState()
+    val gridColumnCount = gridColumnCount()
 
     LazyColumn(
         state = state,
@@ -83,7 +85,7 @@ private fun Products(component: ProductByCategoryComponent) {
         item {
             Filter(component)
         }
-        items(items = products.chunked(2)) { item ->
+        items(items = products.chunked(gridColumnCount)) { item ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),

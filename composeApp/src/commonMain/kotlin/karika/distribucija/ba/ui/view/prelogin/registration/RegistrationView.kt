@@ -44,6 +44,7 @@ import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.components.gridColumnCount
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import karika.distribucija.ba.util.KarikaConstants
 
@@ -118,6 +119,7 @@ fun RegistrationView(component: RegistrationComponent) {
 private fun CompanyInfo(component: RegistrationComponent) {
     val customerGroups = component.customerGroups.asState()
     val customerRegions = component.customerRegions.asState()
+    val gridColumnCount = gridColumnCount()
 
     KarikaText(
         modifier = Modifier
@@ -191,7 +193,7 @@ private fun CompanyInfo(component: RegistrationComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.commonHandler.config.value.customerGroupList.chunked(2).forEach {
+        component.stateHolder.commonHandler.config.value.customerGroupList.chunked(gridColumnCount).forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -236,7 +238,7 @@ private fun CompanyInfo(component: RegistrationComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(2).forEach {
+        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(gridColumnCount).forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),

@@ -38,6 +38,7 @@ import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.components.toGrid
 import karika.distribucija.ba.ui.view.main.MainConfig
 import karika.distribucija.ba.ui.view.main.product.VendorName
 import karika.distribucija.ba.util.KarikaConfig
@@ -192,7 +193,7 @@ private fun KarikaProducts(component: HomeComponent) {
             )
         }
         YSpacer8()
-        newArrivals.chunked(2).forEach {
+        newArrivals.toGrid().forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),

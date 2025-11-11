@@ -490,7 +490,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = "${MARKETING_VERSION}";
-				PRODUCT_BUNDLE_IDENTIFIER = ba.karika.Karika;
+				PRODUCT_BUNDLE_IDENTIFIER = "ba.karika.Karika-Test";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

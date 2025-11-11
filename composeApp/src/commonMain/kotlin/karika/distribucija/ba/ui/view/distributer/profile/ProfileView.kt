@@ -42,6 +42,7 @@ import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.YSpacer24
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.components.gridColumnCount
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
@@ -113,6 +114,8 @@ private fun CompanyInfo(component: ProfileComponent) {
     val companyCanton = component.companyCanton.asState()
     val companyMunicipality = component.companyMunicipality.asState()
     val showState = component.changePassSheet.asState()
+    val gridColumnCount = gridColumnCount()
+
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp),
@@ -197,7 +200,7 @@ private fun CompanyInfo(component: ProfileComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.commonHandler.config.value.customerGroupList.chunked(2).forEach {
+        component.stateHolder.commonHandler.config.value.customerGroupList.chunked(gridColumnCount).forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -228,7 +231,7 @@ private fun CompanyInfo(component: ProfileComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(2).forEach {
+        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(gridColumnCount).forEach {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),

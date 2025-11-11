@@ -24,6 +24,7 @@ import karika.distribucija.ba.ui.components.KarikaLazyColumn
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.TopBarSearch
+import karika.distribucija.ba.ui.components.gridColumnCount
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.view.main.home.ProductItem
 import karika.distribucija.ba.ui.view.main.vendor.VendorItem
@@ -33,6 +34,7 @@ fun SearchView(component: SearchComponent) {
     val products by component.products.collectAsState()
     val vendors by component.vendors.collectAsState()
     val state = rememberLazyListState()
+    val gridColumnCount = gridColumnCount()
     KarikaScaffold(
         containerColor = KarikaColors.White,
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -60,7 +62,7 @@ fun SearchView(component: SearchComponent) {
                     )
                 }
             }
-            items(items = vendors.chunked(2)) { item ->
+            items(items = vendors.chunked(gridColumnCount)) { item ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -94,7 +96,7 @@ fun SearchView(component: SearchComponent) {
                     )
                 }
             }
-            items(items = products.chunked(2)) { item ->
+            items(items = products.chunked(gridColumnCount)) { item ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
