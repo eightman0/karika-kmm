@@ -82,12 +82,13 @@ fun KarikaText(
     fontStyle: FontStyle = FontStyle.Normal,
     decoration: TextDecoration = TextDecoration.None
 ) {
-    if (text.isNullOrEmpty()) {
+    val safeText = text.orEmpty()
+    if (safeText.isEmpty()) {
         return
     }
     Text(
         modifier = modifier,
-        text = text ?: "",
+        text = safeText,
         fontSize = textSize,
         color = color,
         textAlign = textAlign,
@@ -96,7 +97,7 @@ fun KarikaText(
         lineHeight = lineHeight,
         fontStyle = fontStyle,
         fontWeight = fontWeight,
-        fontFamily = KarikaFonts(),
+        fontFamily = karikaFonts(),
         style = LocalTextStyle.current.copy(
             textDecoration = decoration
         )
@@ -131,7 +132,7 @@ fun KarikaText(
         style = LocalTextStyle.current.copy(
             textDecoration = decoration
         ),
-        fontFamily = KarikaFonts()
+        fontFamily = karikaFonts()
     )
 }
 
@@ -322,7 +323,7 @@ fun KarikaTextField1(
                 fontWeight = fontWeight,
                 fontStyle = fontStyle,
                 fontSize = textSize,
-                fontFamily = KarikaFonts()
+                fontFamily = karikaFonts()
             ),
             trailingIcon = {
                 trailingIcons?.invoke()
@@ -424,7 +425,7 @@ fun KarikaTextField2(
             fontWeight = fontWeight,
             fontStyle = fontStyle,
             fontSize = textSize,
-            fontFamily = KarikaFonts()
+            fontFamily = karikaFonts()
         ),
         trailingIcon = {
             trailingIcons?.invoke()
@@ -520,12 +521,11 @@ fun KarikaAmountField(
             fontWeight = fontWeight,
             fontStyle = fontStyle,
             fontSize = textSize,
-            fontFamily = KarikaFonts()
+            fontFamily = karikaFonts()
         ),
         trailingIcon = {
             trailingIcons?.invoke()
-        },
-      //  visualTransformation = AmountVisualTransformation()
+        }
     )
 }
 
@@ -661,7 +661,7 @@ fun KarikaPasswordTextField(
                 fontWeight = fontWeight,
                 fontStyle = fontStyle,
                 fontSize = textSize,
-                fontFamily = KarikaFonts()
+                fontFamily = karikaFonts()
             ),
             trailingIcon = {
                 Icon(
@@ -812,10 +812,10 @@ fun EndIconTextItem(
 }
 
 @Composable
-fun KarikaFonts() = FontFamily(
+fun karikaFonts() = FontFamily(
     Font(Res.font.gotham_book, FontWeight.Normal),
     Font(Res.font.gotham_bold, FontWeight.Bold),
     Font(Res.font.gotham_thin, FontWeight.Thin),
     Font(Res.font.gotham_light, FontWeight.Light),
-    Font(Res.font.gotham_medium, FontWeight.Medium),
+    Font(Res.font.gotham_medium, FontWeight.Medium)
 )
