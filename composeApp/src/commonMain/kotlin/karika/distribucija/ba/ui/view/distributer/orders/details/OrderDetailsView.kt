@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.domain.model.VendorProduct
+import karika.distribucija.ba.ui.common.HtmlTextWithStyles
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
@@ -1433,14 +1434,24 @@ fun CommentItem(comment: Comment, component: OrderDetailsComponent) {
                     ),
                 horizontalAlignment = Alignment.End
             ) {
-                KarikaText(
-                    modifier = Modifier
-                        .padding(16.dp),
-                    text = comment.message,
-                    color = KarikaColors.White,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W400
-                )
+                if (comment.message?.contains("<") == true) {
+                    HtmlTextWithStyles(
+                        modifier = Modifier
+                            .padding(16.dp),
+                        html = comment.message(),
+                        textColor = KarikaColors.White,
+                        background = KarikaColors.MineMessage
+                    )
+                } else {
+                    KarikaText(
+                        modifier = Modifier
+                            .padding(16.dp),
+                        text = comment.message,
+                        color = KarikaColors.White,
+                        textSize = 14.sp,
+                        fontWeight = FontWeight.W400
+                    )
+                }
                 comment.files?.forEach {
                     if (it.type?.startsWith("image") == true) {
                         KarikaImage(
@@ -1507,14 +1518,24 @@ fun CommentItem(comment: Comment, component: OrderDetailsComponent) {
                     ),
                 horizontalAlignment = Alignment.Start
             ) {
-                KarikaText(
-                    modifier = Modifier
-                        .padding(16.dp),
-                    text = comment.message,
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W400
-                )
+                if (comment.message?.contains("<") == true) {
+                    HtmlTextWithStyles(
+                        modifier = Modifier
+                            .padding(16.dp),
+                        html = comment.message(),
+                        textColor = KarikaColors.Gray2,
+                        background = KarikaColors.NotMineMessage
+                    )
+                } else {
+                    KarikaText(
+                        modifier = Modifier
+                            .padding(16.dp),
+                        text = comment.message,
+                        color = KarikaColors.White,
+                        textSize = 14.sp,
+                        fontWeight = FontWeight.W400
+                    )
+                }
                 comment.files?.forEach {
                     if (it.type?.startsWith("image") == true) {
                         KarikaImage(
@@ -1532,7 +1553,7 @@ fun CommentItem(comment: Comment, component: OrderDetailsComponent) {
                             modifier = Modifier
                                 .padding(16.dp)
                                 .clickable {
-                                    //component.downloadReceipt(it)
+                                    component.downloadReceipt(it)
                                 },
                             verticalAlignment = Alignment.CenterVertically
                         ) {

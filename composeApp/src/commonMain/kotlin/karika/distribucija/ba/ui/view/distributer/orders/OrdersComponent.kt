@@ -40,6 +40,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
 
         iOScope.launch {
             DashRepository().getOrders(
+                pageSize = pageSize,
                 currentPage = currentPage,
                 queryParams = queryParams
             ).collect { result ->

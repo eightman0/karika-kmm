@@ -223,7 +223,9 @@ class OrderDetailsComponent(
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
                         hideLoader()
-                        openPdf(result.data)
+                       mainScope.launch {
+                           openPdf(result.data)
+                       }
                     }
 
                     is ResultState.Error -> {

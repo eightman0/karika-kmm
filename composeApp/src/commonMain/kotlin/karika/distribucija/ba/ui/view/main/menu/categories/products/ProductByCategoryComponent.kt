@@ -126,8 +126,8 @@ private fun String.sortBy(): String {
 
 private fun String.sortType(): String {
     return when (this) {
-        "Najnoviji" -> "ASC"
-        "Najstariji" -> "DESC"
+        "Najnoviji" -> "DESC"
+        "Najstariji" -> "ASC"
         "Najjeftiniji" -> "ASC"
         "Najskuplji" -> "DESC"
         "Minimalna količina" -> "ASC"

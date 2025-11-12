@@ -28,13 +28,18 @@ import platform.CoreGraphics.CGSizeMake
 import platform.Foundation.NSAttributedString
 import platform.Foundation.NSBundle
 import platform.Foundation.NSData
+import platform.Foundation.NSMakeRange
+import platform.Foundation.NSMutableAttributedString
 import platform.Foundation.NSString
 import platform.Foundation.NSURL
 import platform.Foundation.NSUTF8StringEncoding
+import platform.Foundation.addAttribute
 import platform.Foundation.create
 import platform.Foundation.dataUsingEncoding
+import platform.Foundation.length
 import platform.UIKit.NSCharacterEncodingDocumentAttribute
 import platform.UIKit.NSDocumentTypeDocumentAttribute
+import platform.UIKit.NSForegroundColorAttributeName
 import platform.UIKit.NSHTMLTextDocumentType
 import platform.UIKit.NSStringDrawingUsesLineFragmentOrigin
 import platform.UIKit.UIApplication
@@ -98,7 +103,21 @@ actual fun HtmlTextWithStyles(
                             )
                         } ?: NSAttributedString()
 
-                        textView.attributedText = attributedString
+                        val mutableAttrString = NSMutableAttributedString.create(attributedString)
+                        val range = NSMakeRange(0u, attributedString.length)
+
+                        mutableAttrString.addAttribute(
+                            NSForegroundColorAttributeName,
+                            UIColor(
+                                red = textColor.red.toDouble(),
+                                green = textColor.green.toDouble(),
+                                blue = textColor.blue.toDouble(),
+                                alpha = textColor.alpha.toDouble()
+                            ),
+                            range = range
+                        )
+
+                        textView.attributedText = mutableAttrString
                         textView.font = UIFont.systemFontOfSize(fontSize = 16.0)
 
                         val maxWidth = UIScreen.mainScreen.bounds.useContents { size.width } - 32
@@ -129,14 +148,6 @@ actual fun HtmlTextWithStyles(
                     blue = background.blue.toDouble(),
                     alpha = background.alpha.toDouble()
                 )
-                textView.setTextColor(
-                    UIColor(
-                        red = textColor.red.toDouble(),
-                        green = textColor.green.toDouble(),
-                        blue = textColor.blue.toDouble(),
-                        alpha = textColor.alpha.toDouble()
-                    )
-                )
             },
             onReset = { textView ->
                 textView.backgroundColor = UIColor(
@@ -145,14 +156,6 @@ actual fun HtmlTextWithStyles(
                     blue = background.blue.toDouble(),
                     alpha = background.alpha.toDouble()
                 )
-                textView.setTextColor(
-                    UIColor(
-                        red = textColor.red.toDouble(),
-                        green = textColor.green.toDouble(),
-                        blue = textColor.blue.toDouble(),
-                        alpha = textColor.alpha.toDouble()
-                    )
-                )
             },
             onRelease = { textView ->
                 textView.backgroundColor = UIColor(
@@ -160,14 +163,6 @@ actual fun HtmlTextWithStyles(
                     green = background.green.toDouble(),
                     blue = background.blue.toDouble(),
                     alpha = background.alpha.toDouble()
-                )
-                textView.setTextColor(
-                    UIColor(
-                        red = textColor.red.toDouble(),
-                        green = textColor.green.toDouble(),
-                        blue = textColor.blue.toDouble(),
-                        alpha = textColor.alpha.toDouble()
-                    )
                 )
             }
         )
@@ -195,7 +190,7 @@ object HtmlEntityDecoder {
 }
 
 actual fun openPdf(url: String) {
-    val nsUrl = NSURL.URLWithString(url) ?: return
+    val nsUrl = NSURL.URLWithString(url.replace("\\", "")) ?: return
     val app = UIApplication.sharedApplication
     app.openURL(url = nsUrl, completionHandler = {}, options = mapOf<Any?, String>())
 }
