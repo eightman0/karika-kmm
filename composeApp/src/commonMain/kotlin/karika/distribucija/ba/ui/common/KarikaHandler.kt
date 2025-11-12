@@ -6,6 +6,8 @@ interface KarikaHandler {
         callback: (String, ByteArray) -> Unit
     )
 
+    fun pickPhoto(callback: (String, ByteArray) -> Unit)
+
     fun takePhoto(callback: (String, ByteArray) -> Unit) {}
 
     fun downloadFile(

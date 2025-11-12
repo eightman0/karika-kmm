@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -163,6 +164,40 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
             )
         }
 
+        val launcher = activityResultRegistry.register(
+            "filePicker",
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data: Intent? = result.data
+                val uri: Uri? = data?.data
+                if (uri != null) {
+                    var fileName: String? = null
+                    contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        if (cursor.moveToFirst() && nameIndex >= 0) {
+                            fileName = cursor.getString(nameIndex)
+                        }
+                    }
+                    if (fileName == null) {
+                        fileName = uri.lastPathSegment ?: "unknown"
+                    }
+
+                    val bytes = contentResolver.openInputStream(uri)?.use { input ->
+                        input.readBytes()
+                    }
+
+                    if (bytes != null) {
+                        callback(fileName ?: "file", bytes)
+                    }
+                }
+            }
+        }
+        launcher.launch(intent)
+    }
+
+    override fun pickPhoto(callback: (String, ByteArray) -> Unit) {
+        val intent = Intent(MediaStore.ACTION_PICK_IMAGES)
         val launcher = activityResultRegistry.register(
             "filePicker",
             ActivityResultContracts.StartActivityForResult()

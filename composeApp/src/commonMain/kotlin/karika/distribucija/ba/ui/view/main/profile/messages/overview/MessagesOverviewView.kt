@@ -62,6 +62,7 @@ import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_attachment
+import karikav2.composeapp.generated.resources.ic_photo
 import karikav2.composeapp.generated.resources.ic_tertiary
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -296,9 +297,9 @@ private fun EnterComment(component: MessagesOverviewComponent) {
                 Icon(
                     modifier = Modifier
                         .onClick {
-                            component.pickFile()
+                            component.pickPhoto()
                         },
-                    imageVector = vectorResource(Res.drawable.ic_attachment),
+                    imageVector = vectorResource(Res.drawable.ic_photo),
                     tint = KarikaColors.Gray2,
                     contentDescription = ""
                 )

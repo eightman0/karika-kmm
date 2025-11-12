@@ -48,6 +48,7 @@ data class CartItem(
     @SerialName("item_id") val itemId: Int? = null,
     @SerialName("sku") val sku: String,
     @SerialName("qty") val qty: Int,
+    @SerialName("min_qty") val minQty: Int? = 0,
     @SerialName("name") val name: String? = null,
     @SerialName("price") val price: Double? = null,
     @SerialName("product_type") val productType: String? = null,

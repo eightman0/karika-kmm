@@ -80,6 +80,7 @@ fun PrimaryButtonFilled(
     icon: DrawableResource? = null,
     textSize: TextUnit = 14.sp,
     iconPosition: FabPosition = FabPosition.Start,
+    paddingValues: PaddingValues = ButtonDefaults.ContentPadding,
     onClick: () -> Unit
 ) {
     Button(
@@ -90,7 +91,8 @@ fun PrimaryButtonFilled(
             containerColor = KarikaColors.Primary,
             disabledContentColor = KarikaColors.Secondary
         ),
-        enabled = enabled
+        enabled = enabled,
+        contentPadding = paddingValues
     ) {
         IconTextItem(
             modifier = Modifier,

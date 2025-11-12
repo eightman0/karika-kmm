@@ -137,8 +137,8 @@ class MessagesOverviewComponent(
         _vendors.update { emptyList() }
     }
 
-    fun pickFile() {
-        stateHolder.handler.pickFile { name, data ->
+    fun pickPhoto() {
+        stateHolder.handler.pickPhoto { name, data ->
             sendMessage(data)
         }
     }

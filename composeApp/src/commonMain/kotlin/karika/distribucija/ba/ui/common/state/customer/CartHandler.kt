@@ -45,6 +45,7 @@ class CartHandler {
                                             itemId = it.itemId,
                                             price = it.price,
                                             minQtyUnit = it.extensionAttributes?.productUnit,
+                                            minQty = it.minQty.toString(),
                                             image = it.extensionAttributes?.imageUrl,
                                             specialPrice = it.extensionAttributes?.specialPrice?.toDoubleOrNull()
                                         ),
