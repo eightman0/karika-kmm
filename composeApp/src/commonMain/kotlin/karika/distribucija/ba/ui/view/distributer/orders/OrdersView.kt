@@ -83,11 +83,11 @@ fun OrdersView(component: OrdersComponent) {
                     },
                     onClose = {
                         component.searchText.value = ""
-                        component.addSearchQuery()
+                        component.filter()
                         component.loadNextPage(true)
                     },
                     onSearchExecute = {
-                        component.addSearchQuery()
+                        component.filter()
                         component.loadNextPage(true)
                     },
                     placeholder = "Pretraži narudžbe..."

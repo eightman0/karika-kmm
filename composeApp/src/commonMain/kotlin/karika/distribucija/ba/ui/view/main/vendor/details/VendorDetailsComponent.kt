@@ -17,6 +17,7 @@ class VendorDetailsComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
     vendor: Vendor,
+    val fromMain: Boolean = true
 ) : CommonComponent(componentContext, stateHolder) {
 
     private val _vendor = MutableStateFlow(vendor)

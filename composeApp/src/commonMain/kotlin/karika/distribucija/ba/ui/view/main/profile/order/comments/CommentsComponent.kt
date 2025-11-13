@@ -63,6 +63,7 @@ class CommentsComponent(
                     is ResultState.Success -> {
                         getComments()
                         newComment.value = ""
+                        stateHolder.customerSpecificHandler.refreshOrders()
                     }
 
                     is ResultState.Error -> {
@@ -89,6 +90,7 @@ class CommentsComponent(
                         is ResultState.Success -> {
                             getComments()
                             newComment.value = ""
+                            stateHolder.customerSpecificHandler.refreshOrders()
                         }
 
                         is ResultState.Error -> {

@@ -13,8 +13,8 @@ import karika.distribucija.ba.domain.model.VendorDeliveryServiceData
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.common.openPdf
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.util.karikaPriceFormat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -66,6 +66,20 @@ class OrderDetailsComponent(
                         is ResultState.Success -> {
                             hideLoader()
                             _order.update { result.data }
+
+                            contactName.value = result.data.shippingDetails?.name ?: ""
+                            contactEmail.value = result.data.shippingDetails?.email ?: ""
+                            contactPhone.value = result.data.shippingDetails?.telephone ?: ""
+                            contactCity.value = result.data.shippingDetails?.city ?: ""
+                            contactAddress.value = result.data.shippingDetails?.street ?: ""
+                            contactPostal.value = result.data.shippingDetails?.postcode ?: ""
+                            packageWidth.value = result.data.shippingDetails?.width ?: ""
+                            packageHeight.value = result.data.shippingDetails?.height ?: ""
+                            packageDepth.value = result.data.shippingDetails?.depth ?: ""
+                            packageWeight.value = result.data.shippingDetails?.weight ?: ""
+                            deliveryNotes.value = result.data.shippingDetails?.note ?: ""
+
+                            calculateShipping(true)
                         }
 
                         is ResultState.Error -> {
@@ -145,22 +159,24 @@ class OrderDetailsComponent(
     }
 
     fun approve(message: String, type: String, withDelivery: Boolean) {
-        iOScope.launch {
-            repository.changeOrderStatus(
-                type = "approve",
-                orderId = order.value.orderId ?: "",
-                message = message,
-                withDelivery = withDelivery
-            ).collect { result ->
-                when (result) {
-                    is ResultState.Loading -> showLoader()
-                    is ResultState.Success -> {
-                        getOrder()
-                    }
+        saveShippingOrderDetails(if (type.startsWith("A2B")) "A2B" else "EURO_EXPRESS") {
+            iOScope.launch {
+                repository.changeOrderStatus(
+                    type = "approve",
+                    orderId = order.value.orderId ?: "",
+                    message = message,
+                    withDelivery = withDelivery
+                ).collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            getOrder()
+                        }
 
-                    is ResultState.Error -> {
-                        hideLoader()
-                        showMessage(result.message)
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showMessage(result.message)
+                        }
                     }
                 }
             }
@@ -217,15 +233,16 @@ class OrderDetailsComponent(
         iOScope.launch {
             repository.createInvoice(
                 orderId = order.value.orderId ?: "",
-                bankAccountNumber = stateHolder.vendorSpecificHandler.vendorDetails.value.bankAccountNumber ?: ""
+                bankAccountNumber = stateHolder.vendorSpecificHandler.vendorDetails.value.bankAccountNumber
+                    ?: ""
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
                         hideLoader()
-                       mainScope.launch {
-                           openPdf(result.data)
-                       }
+                        mainScope.launch {
+                            openPdf(result.data)
+                        }
                     }
 
                     is ResultState.Error -> {
@@ -258,45 +275,55 @@ class OrderDetailsComponent(
         // }
     }
 
-    fun calculateShipping() {
-        if (contactName.value.isEmpty()) {
-            showMessage("Kontakt osoba je obavezno polje!")
-            return
+    fun calculateShipping(ignoreValidations: Boolean = false) {
+        if (!ignoreValidations) {
+            if (contactName.value.isEmpty()) {
+                showMessage("Kontakt osoba je obavezno polje!")
+                return
+            }
+            if (contactEmail.value.isEmpty()) {
+                showMessage("Email je obavezno polje!")
+                return
+            }
+            if (contactPhone.value.isEmpty()) {
+                showMessage("Telefon je obavezno polje!")
+                return
+            }
+            if (contactCity.value.isEmpty()) {
+                showMessage("Grad je obavezno polje!")
+                return
+            }
+            if (contactAddress.value.isEmpty()) {
+                showMessage("Adresa je obavezno polje!")
+                return
+            }
+            if (contactPostal.value.isEmpty()) {
+                showMessage("Poštanski Broj je obavezno polje!")
+                return
+            }
+            if (packageWidth.value.isEmpty()) {
+                showMessage("Širina je obavezno polje!")
+                return
+            }
+            if (packageHeight.value.isEmpty()) {
+                showMessage("Visina je obavezno polje!")
+                return
+            }
+            if (packageDepth.value.isEmpty()) {
+                showMessage("Dubina je obavezno polje!")
+                return
+            }
+            if (packageWeight.value.isEmpty()) {
+                showMessage("Težina je obavezno polje!")
+                return
+            }
         }
-        if (contactEmail.value.isEmpty()) {
-            showMessage("Email je obavezno polje!")
-            return
-        }
-        if (contactPhone.value.isEmpty()) {
-            showMessage("Telefon je obavezno polje!")
-            return
-        }
-        if (contactCity.value.isEmpty()) {
-            showMessage("Grad je obavezno polje!")
-            return
-        }
-        if (contactAddress.value.isEmpty()) {
-            showMessage("Adresa je obavezno polje!")
-            return
-        }
-        if (contactPostal.value.isEmpty()) {
-            showMessage("Poštanski Broj je obavezno polje!")
-            return
-        }
-        if (packageWidth.value.isEmpty()) {
-            showMessage("Širina je obavezno polje!")
-            return
-        }
-        if (packageHeight.value.isEmpty()) {
-            showMessage("Visina je obavezno polje!")
-            return
-        }
-        if (packageDepth.value.isEmpty()) {
-            showMessage("Dubina je obavezno polje!")
-            return
-        }
-        if (packageWeight.value.isEmpty()) {
-            showMessage("Težina je obavezno polje!")
+
+        if (packageWidth.value.isEmpty() ||
+            packageHeight.value.isEmpty() ||
+            packageDepth.value.isEmpty() ||
+            packageWeight.value.isEmpty()
+        ) {
             return
         }
 
@@ -316,7 +343,9 @@ class OrderDetailsComponent(
                 weight = packageWeight.value.toDoubleOrNull() ?: 0.0
             )
         )
+    }
 
+    fun saveShippingOrderDetails(companyCode: String, onSuccess: () -> Unit) {
         iOScope.launch {
             repository.updateDelivery(
                 VendorDeliveryServiceData(
@@ -331,13 +360,15 @@ class OrderDetailsComponent(
                     packageWidth.value,
                     packageHeight.value,
                     packageDepth.value,
-                    deliveryNotes.value
+                    deliveryNotes.value,
+                    companyCode
                 )
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
                         getOrder()
+                        onSuccess()
                     }
 
                     is ResultState.Error -> {

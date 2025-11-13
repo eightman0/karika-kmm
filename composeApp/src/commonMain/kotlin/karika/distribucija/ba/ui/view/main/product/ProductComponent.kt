@@ -44,6 +44,9 @@ class ProductComponent(
                     is ResultState.Success -> {
                         hideLoader()
                         _products.update { result.data }
+                        _product.update {
+                            result.data.find { it.sku == product.value.sku } ?: product.value
+                        }
                     }
 
                     is ResultState.Error -> {

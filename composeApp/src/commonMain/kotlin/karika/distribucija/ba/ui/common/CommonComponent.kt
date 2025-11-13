@@ -135,7 +135,42 @@ open class CommonComponent(
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
             return
         }
+
+        val cartItem = stateHolder.cartHandler.cart.value
+            .values.flatMap { it }
+            .find { it.first.sku == product.sku }
+
         iOScope.launch {
+            if (cartItem != null) {
+                cartRepository.updateCart(
+                    AddToCart(
+                        CartItem(
+                            sku = product.sku ?: return@launch,
+                            qty = cartItem.second + qty,
+                            quoteId = stateHolder.cartHandler.cartId,
+                            itemId = cartItem.first.itemId
+                        )
+                    )
+                ).collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            hideLoader()
+                            if (showSnack) {
+                                showMessage("Proizvod dodan u korpu!")
+                            }
+                            reloadCart()
+                        }
+
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showMessage(result.message ?: "")
+                        }
+                    }
+                }
+                return@launch
+            }
+
             cartRepository.addToCart(
                 AddToCart(
                     CartItem(

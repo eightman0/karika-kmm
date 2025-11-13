@@ -1,14 +1,18 @@
 package karika.distribucija.ba.ui.view.main.profile.order
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.stack.bringToFront
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.api.OrdersRepository
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.view.main.MainConfig
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,6 +25,20 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
     val orders = _orders.asStateFlow()
     var status = ""
     var sortDirection = "DESC"
+    private val _shouldScrollToTop = MutableStateFlow(false)
+    val shouldScrollToTop: StateFlow<Boolean> = _shouldScrollToTop
+
+    init {
+        iOScope.launch {
+            stateHolder.customerSpecificHandler.refreshOrders.collect {
+                loadNextPage(true)
+            }
+        }
+    }
+
+    fun scrollHandled() {
+        _shouldScrollToTop.value = false
+    }
 
     override fun loadNextPage(reset: Boolean) {
         if (reset) {
@@ -53,6 +71,9 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
                         }
                         hasNextPage = result.data.size == pageSize
                         currentPage++
+                        if (reset) {
+                            _shouldScrollToTop.value = true
+                        }
                     }
 
                     is ResultState.Error -> {
@@ -104,6 +125,16 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
                     }
                 }
             }
+        }
+    }
+
+    override fun showVendor(vendor: Vendor) {
+        if (isGuest()) {
+            stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za pristup dobavljačima")
+            return
+        }
+        mainScope.launch {
+            stateHolder.appNavigation.bringToFront(AppConfig.VendorDetails(vendor, false))
         }
     }
 }

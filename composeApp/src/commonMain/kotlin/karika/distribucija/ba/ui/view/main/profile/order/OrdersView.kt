@@ -137,6 +137,8 @@ private fun FilterView(component: OrdersComponent) {
 private fun Orders(component: OrdersComponent) {
     val state = rememberLazyListState()
     val items by component.orders.collectAsState()
+    val shouldScrollToTop by component.shouldScrollToTop.collectAsState()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth(),
@@ -152,6 +154,13 @@ private fun Orders(component: OrdersComponent) {
     LaunchedEffect(state.canScrollForward) {
         if (!state.canScrollForward) {
             component.loadNextPage()
+        }
+    }
+
+    LaunchedEffect(shouldScrollToTop) {
+        if (component.shouldScrollToTop.value) {
+            state.scrollToItem(0)
+            component.scrollHandled()
         }
     }
 }

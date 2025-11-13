@@ -14,9 +14,9 @@ import kotlin.math.roundToInt
 
 @Serializable
 data class OrdersResponse(
-    @SerialName("total_due") var total: Double,
-    @SerialName("entity_id") var orderId: String,
-    @SerialName("created_at") var createdAt: String,
+    @SerialName("total_due") var total: Double = 0.0,
+    @SerialName("entity_id") var orderId: String = "",
+    @SerialName("created_at") var createdAt: String? = null,
     @SerialName("mp_reward_earn") var bonus: Double? = null,
     @SerialName("increment_id") var incrementId: String? = null,
     @SerialName("vendor_orders") var orders: ArrayList<Order> = arrayListOf(),
@@ -44,7 +44,7 @@ data class OrdersResponse(
         return karikaPriceFormat(bonus ?: 0.00) + " KM"
     }
 
-    fun date() = createdAt.toDateString()
+    fun date() = createdAt?.toDateString() ?: ""
 }
 
 @Serializable
@@ -127,7 +127,7 @@ data class OrderProduct(
     }
 
     fun originalQty(): String {
-        return  "${(originalQty ?: 0.0).roundToInt()} ${qtyUnit()}"
+        return "${(originalQty ?: 0.0).roundToInt()} ${qtyUnit()}"
     }
 
     fun qtyChanged() = qty != originalQty

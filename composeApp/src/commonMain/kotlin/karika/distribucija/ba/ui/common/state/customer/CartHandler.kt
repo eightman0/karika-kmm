@@ -45,9 +45,10 @@ class CartHandler {
                                             itemId = it.itemId,
                                             price = it.price,
                                             minQtyUnit = it.extensionAttributes?.productUnit,
-                                            minQty = it.minQty.toString(),
+                                            minQty = it.extensionAttributes?.minQty.toString(),
                                             image = it.extensionAttributes?.imageUrl,
-                                            specialPrice = it.extensionAttributes?.specialPrice?.toDoubleOrNull()
+                                            specialPrice = it.extensionAttributes?.specialPrice?.toDoubleOrNull(),
+                                            rewardPoints = it.extensionAttributes?.rewardPoints ?: 0.0,
                                         ),
                                         it.qty
                                     )

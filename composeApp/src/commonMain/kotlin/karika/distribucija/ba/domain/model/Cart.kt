@@ -48,7 +48,6 @@ data class CartItem(
     @SerialName("item_id") val itemId: Int? = null,
     @SerialName("sku") val sku: String,
     @SerialName("qty") val qty: Int,
-    @SerialName("min_qty") val minQty: Int? = 0,
     @SerialName("name") val name: String? = null,
     @SerialName("price") val price: Double? = null,
     @SerialName("product_type") val productType: String? = null,
@@ -72,6 +71,10 @@ data class ExtAttributes(
     val specialPrice: String? = null,
     @SerialName("vendors")
     val vendors: List<Vendor>? = null,
+    @SerialName("reward_points")
+    val rewardPoints: Double? = null,
+    @SerialName("min_qty")
+    val minQty: Int? = null,
 )
 
 @Serializable

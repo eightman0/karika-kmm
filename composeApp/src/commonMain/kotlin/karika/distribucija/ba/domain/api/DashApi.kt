@@ -284,6 +284,7 @@ internal class DashApi {
                             append("package[height]", data.height)
                             append("package[depth]", data.depth)
                             append("note", data.note)
+                            append("company_code", data.companyCode)
                         }.withLog(),
                         "WebAppBoundary"
                     )
@@ -717,7 +718,7 @@ class DashRepository internal constructor() {
         }
     }
 
-    fun updateDelivery(data: VendorDeliveryServiceData): Flow<ResultState<Vendor>> = flow {
+    fun updateDelivery(data: VendorDeliveryServiceData): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
             val response = DashApi().updateDelivery(data).getOrNull()

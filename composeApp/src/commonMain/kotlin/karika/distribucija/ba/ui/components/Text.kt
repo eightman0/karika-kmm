@@ -346,6 +346,7 @@ fun KarikaTextField2(
     placeholderColor: Color = KarikaColors.Placeholder,
     placeholderSize: TextUnit = 14.sp,
     textColor: Color = KarikaColors.Black,
+    disabledTextColor: Color = KarikaColors.Gray22,
     textSize: TextUnit = 14.sp,
     fontWeight: FontWeight = FontWeight.Normal,
     fontStyle: FontStyle = FontStyle.Normal,
@@ -414,6 +415,7 @@ fun KarikaTextField2(
         maxLines = maxLines,
         colors = TextFieldDefaults.colors(
             focusedTextColor = textColor,
+            disabledTextColor = disabledTextColor,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,

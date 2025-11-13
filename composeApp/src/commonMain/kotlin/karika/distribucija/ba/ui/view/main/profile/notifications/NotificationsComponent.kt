@@ -44,25 +44,25 @@ class NotificationsComponent(componentContext: ComponentContext, stateHolder: Ka
     }
 
     fun markAsRead(item: Notification) {
-        if (item.isRead == "0") {
-            iOScope.launch {
-                notificationRepository.put(item.id)
-                    .collect { result ->
-                        when (result) {
-                            is ResultState.Loading -> showLoader()
-                            is ResultState.Success -> {
-                                hideLoader()
-                                get()
-                            }
+       //if (item.isRead == "0") {
+       //    iOScope.launch {
+       //        notificationRepository.put(item.id)
+       //            .collect { result ->
+       //                when (result) {
+       //                    is ResultState.Loading -> showLoader()
+       //                    is ResultState.Success -> {
+       //                        hideLoader()
+       //                        get()
+       //                    }
 
-                            is ResultState.Error -> {
-                                hideLoader()
-                            }
-                        }
-                    }
-                stateHolder.customerNotificationHandler.notificationReceived()
-            }
-        }
+       //                    is ResultState.Error -> {
+       //                        hideLoader()
+       //                    }
+       //                }
+       //            }
+       //        stateHolder.customerNotificationHandler.notificationReceived()
+       //    }
+       //}
         PushHandler.handleNewPushIfExists(item.route, this)
     }
 }

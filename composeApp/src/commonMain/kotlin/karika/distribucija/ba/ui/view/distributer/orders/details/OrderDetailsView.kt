@@ -76,6 +76,7 @@ import karika.distribucija.ba.ui.view.distributer.orders.details.component.Appro
 import karika.distribucija.ba.ui.view.distributer.orders.details.component.AttachBillModal
 import karika.distribucija.ba.ui.view.distributer.orders.details.component.EditOrderSheet
 import karika.distribucija.ba.ui.view.distributer.orders.details.component.RejectOrderModal
+import karika.distribucija.ba.util.KarikaConstants
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_arrow_down
@@ -535,6 +536,12 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                     fontWeight = FontWeight.W400
                 )
             }
+        }
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Column(
                 modifier = Modifier
                     .weight(1f),
@@ -605,308 +612,307 @@ private fun OrderShipping(component: OrderDetailsComponent) {
     val order by component.order.collectAsState()
     val expand = mutableStateOf(false).asState()
 
-    if (order.shouldShowShipping()) {
-        Column(
+    Column(
+        modifier = Modifier
+            .hideKeyboard(true)
+            .fillMaxWidth()
+            .background(color = KarikaColors.Yellow1)
+            .border(
+                width = 1.dp,
+                color = KarikaColors.Yellow,
+                shape = RoundedCornerShape(4.dp)
+            ),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
             modifier = Modifier
-                .hideKeyboard(true)
+                .onClick {
+                    expand.negate()
+                }
+                .padding(16.dp)
                 .fillMaxWidth()
-                .background(color = KarikaColors.White)
-                .border(
-                    width = 1.dp,
-                    color = KarikaColors.Gray21,
-                    shape = RoundedCornerShape(4.dp)
-                ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
+            KarikaText(
                 modifier = Modifier
-                    .onClick {
-                        expand.negate()
-                    }
-                    .padding(16.dp)
-                    .fillMaxWidth()
+                    .weight(1f),
+                text = "Usluga dostave",
+                color = KarikaColors.Yellow2,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W700
+            )
+            Icon(
+                imageVector = vectorResource(
+                    if (!expand.value) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up
+                ),
+                contentDescription = "",
+                tint = KarikaColors.Yellow2
+            )
+        }
+        if (expand.value) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
+                text = "Adresa za utovar",
+                color = KarikaColors.Gray2,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W700
+            )
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                KarikaText(
+                KarikaTextField1(
                     modifier = Modifier
-                        .weight(1f),
-                    text = "Usluga dostave",
-                    color = KarikaColors.Gray2,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W700
-                )
-                Icon(
-                    imageVector = vectorResource(
-                        if (!expand.value) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up
-                    ),
-                    contentDescription = "",
-                    tint = KarikaColors.Gray2
-                )
-            }
-            if (expand.value) {
-                KarikaText(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    text = "Adresa za utovar",
-                    color = KarikaColors.Gray2,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W700
-                )
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    KarikaTextField1(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = "Kontakt osoba*",
-                        value = component.contactName.asState(),
-                        placeholder = "Kontakt osoba",
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    )
-                    KarikaTextField1(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = "Email adresa*",
-                        value = component.contactEmail.asState(),
-                        placeholder = "Email adresa",
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Next
-                    )
-                    KarikaTextField1(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = "Telefon*",
-                        value = component.contactPhone.asState(),
-                        placeholder = "Telefon",
-                        keyboardType = KeyboardType.Phone,
-                        imeAction = ImeAction.Next
-                    )
-                    KarikaTextField1(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = "Grad*",
-                        value = component.contactCity.asState(),
-                        placeholder = "Grad",
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    )
-                    KarikaTextField1(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = "Adresa*",
-                        value = component.contactAddress.asState(),
-                        placeholder = "Adresa",
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    )
-                    KarikaTextField1(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = "Poštanski broj*",
-                        value = component.contactPostal.asState(),
-                        placeholder = "Poštanski broj",
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    )
-                }
-
-
-                KarikaText(
-                    modifier = Modifier
-                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-                    text = "Kalkulator dostave",
-                    color = KarikaColors.Gray2,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W700
-                )
-                KarikaText(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    text = "Unesite dimenzije paketa i izračunajte cijene za brzu dostavu, ukoliko odobrite paket u tom koraku ćete moći izabrati da li i koju opciju dostave želite",
-                    color = KarikaColors.Gray2,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W400
-                )
-
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    KarikaTextField1(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = "Ukupna širina*",
-                        value = component.packageWidth.asState(),
-                        placeholder = "Ukupna širina",
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next,
-                        trailingIcons = {
-                            KarikaText(
-                                modifier = Modifier,
-                                text = "cm",
-                                color = KarikaColors.Gray4,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W400
-                            )
-                        }
-                    )
-                    KarikaTextField1(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = "Ukupna visina*",
-                        value = component.packageHeight.asState(),
-                        placeholder = "Ukupna visina",
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Next,
-                        trailingIcons = {
-                            KarikaText(
-                                modifier = Modifier,
-                                text = "cm",
-                                color = KarikaColors.Gray4,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W400
-                            )
-                        }
-                    )
-                    KarikaTextField1(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = "Ukupna dubina*",
-                        value = component.packageDepth.asState(),
-                        placeholder = "Ukupna dubina",
-                        keyboardType = KeyboardType.Phone,
-                        imeAction = ImeAction.Next,
-                        trailingIcons = {
-                            KarikaText(
-                                modifier = Modifier,
-                                text = "cm",
-                                color = KarikaColors.Gray4,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W400
-                            )
-                        }
-                    )
-                    KarikaTextField1(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = "Ukupna težina*",
-                        value = component.packageWeight.asState(),
-                        placeholder = "Ukupna težina",
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next,
-                        trailingIcons = {
-                            KarikaText(
-                                modifier = Modifier,
-                                text = "cm",
-                                color = KarikaColors.Gray4,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W400
-                            )
-                        }
-                    )
-                }
-
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = KarikaColors.Divider
-                )
-
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Image(
-                        modifier = Modifier
-                            .width(93.dp),
-                        contentScale = ContentScale.FillWidth,
-                        painter = painterResource(Res.drawable.img_ab_post),
-                        contentDescription = ""
-                    )
-                    KarikaText(
-                        modifier = Modifier,
-                        text = "A2B Express",
-                        color = KarikaColors.Gray2,
-                        textSize = 16.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                }
-                KarikaText(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    text = "Cijena dostave sa PDV: ${component.a2b.asState().value}",
-                    color = KarikaColors.Gray2,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W600
-                )
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = KarikaColors.Divider
-                )
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Image(
-                        modifier = Modifier
-                            .width(93.dp),
-                        contentScale = ContentScale.FillWidth,
-                        painter = painterResource(Res.drawable.img_express_post),
-                        contentDescription = ""
-                    )
-                    KarikaText(
-                        modifier = Modifier,
-                        text = "EuroExpress",
-                        color = KarikaColors.Gray2,
-                        textSize = 16.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                }
-                KarikaText(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    text = "Cijena dostave sa PDV: ${component.express.asState().value}",
-                    color = KarikaColors.Gray2,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W600
-                )
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = KarikaColors.Divider
-                )
-
-                KarikaText(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    text = "Napomena za dostavu",
-                    color = KarikaColors.Gray4,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W400
-                )
-                KarikaTextField2(
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                        .heightIn(min = 66.dp)
                         .fillMaxWidth(),
-                    value = component.deliveryNotes.asState(),
-                    placeholder = "Napiši svoju napomenu za dostavu ovdje...",
+                    title = "Kontakt osoba*",
+                    value = component.contactName.asState(),
+                    placeholder = "Kontakt osoba",
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next
                 )
-
-                PrimaryButtonFilled(
+                KarikaTextField1(
                     modifier = Modifier
-                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                        .height(48.dp)
                         .fillMaxWidth(),
-                    title = "Izračunaj cijenu",
-                    enabled = !order.locked()
-                ) {
-                    component.calculateShipping()
-                }
+                    title = "Email adresa*",
+                    value = component.contactEmail.asState(),
+                    placeholder = "Email adresa",
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                )
+                KarikaTextField1(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    title = "Telefon*",
+                    value = component.contactPhone.asState(),
+                    placeholder = "Telefon",
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = ImeAction.Next
+                )
+                KarikaTextField1(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    title = "Grad*",
+                    value = component.contactCity.asState(),
+                    placeholder = "Grad",
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                )
+                KarikaTextField1(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    title = "Adresa*",
+                    value = component.contactAddress.asState(),
+                    placeholder = "Adresa",
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                )
+                KarikaTextField1(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    title = "Poštanski broj*",
+                    value = component.contactPostal.asState(),
+                    placeholder = "Poštanski broj",
+                    keyboardType = KeyboardType.Number,
+                    allowedChars = KarikaConstants.numbers,
+                    imeAction = ImeAction.Next
+                )
+            }
+
+
+            KarikaText(
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                text = "Kalkulator dostave",
+                color = KarikaColors.Gray2,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W700
+            )
+            KarikaText(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
+                text = "Unesite dimenzije paketa i izračunajte cijene za brzu dostavu, ukoliko odobrite paket u tom koraku ćete moći izabrati da li i koju opciju dostave želite",
+                color = KarikaColors.Gray2,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W400
+            )
+
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                KarikaTextField1(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    title = "Ukupna širina*",
+                    value = component.packageWidth.asState(),
+                    placeholder = "Ukupna širina",
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next,
+                    trailingIcons = {
+                        KarikaText(
+                            modifier = Modifier,
+                            text = "cm",
+                            color = KarikaColors.Gray4,
+                            textSize = 16.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                )
+                KarikaTextField1(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    title = "Ukupna visina*",
+                    value = component.packageHeight.asState(),
+                    placeholder = "Ukupna visina",
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next,
+                    trailingIcons = {
+                        KarikaText(
+                            modifier = Modifier,
+                            text = "cm",
+                            color = KarikaColors.Gray4,
+                            textSize = 16.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                )
+                KarikaTextField1(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    title = "Ukupna dubina*",
+                    value = component.packageDepth.asState(),
+                    placeholder = "Ukupna dubina",
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next,
+                    trailingIcons = {
+                        KarikaText(
+                            modifier = Modifier,
+                            text = "cm",
+                            color = KarikaColors.Gray4,
+                            textSize = 16.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                )
+                KarikaTextField1(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    title = "Ukupna težina*",
+                    value = component.packageWeight.asState(),
+                    placeholder = "Ukupna težina",
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next,
+                    trailingIcons = {
+                        KarikaText(
+                            modifier = Modifier,
+                            text = "kg",
+                            color = KarikaColors.Gray4,
+                            textSize = 16.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                )
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = KarikaColors.Divider
+            )
+
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Image(
+                    modifier = Modifier
+                        .width(93.dp),
+                    contentScale = ContentScale.FillWidth,
+                    painter = painterResource(Res.drawable.img_ab_post),
+                    contentDescription = ""
+                )
+                KarikaText(
+                    modifier = Modifier,
+                    text = "A2B Express",
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W600
+                )
+            }
+            KarikaText(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
+                text = "Cijena dostave sa PDV: ${component.a2b.asState().value}",
+                color = KarikaColors.Gray2,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W600
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = KarikaColors.Divider
+            )
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Image(
+                    modifier = Modifier
+                        .width(93.dp),
+                    contentScale = ContentScale.FillWidth,
+                    painter = painterResource(Res.drawable.img_express_post),
+                    contentDescription = ""
+                )
+                KarikaText(
+                    modifier = Modifier,
+                    text = "EuroExpress",
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W600
+                )
+            }
+            KarikaText(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
+                text = "Cijena dostave sa PDV: ${component.express.asState().value}",
+                color = KarikaColors.Gray2,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W600
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = KarikaColors.Divider
+            )
+
+            KarikaText(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
+                text = "Napomena za dostavu",
+                color = KarikaColors.Gray4,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W400
+            )
+            KarikaTextField2(
+                modifier = Modifier.padding(horizontal = 16.dp)
+                    .heightIn(min = 66.dp)
+                    .fillMaxWidth(),
+                value = component.deliveryNotes.asState(),
+                placeholder = "Napiši svoju napomenu za dostavu ovdje...",
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next
+            )
+
+            PrimaryButtonFilled(
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    .height(48.dp)
+                    .fillMaxWidth(),
+                title = "Izračunaj cijenu",
+                enabled = !order.locked() && order.shouldShowShipping()
+            ) {
+                component.calculateShipping()
             }
         }
     }
@@ -1531,7 +1537,7 @@ fun CommentItem(comment: Comment, component: OrderDetailsComponent) {
                         modifier = Modifier
                             .padding(16.dp),
                         text = comment.message,
-                        color = KarikaColors.White,
+                        color = KarikaColors.Gray2,
                         textSize = 14.sp,
                         fontWeight = FontWeight.W400
                     )

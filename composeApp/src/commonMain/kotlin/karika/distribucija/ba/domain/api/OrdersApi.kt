@@ -7,7 +7,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
@@ -30,6 +29,14 @@ internal class OrdersApi {
     ): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
             url("mobile/orders?pageSize=$pageSize&currentPage=$currentPage&status=$filterValue&sortBy=$sortBy&sortDirection=$sortDirection")
+        )
+    }
+
+    suspend fun order(
+        orderId: String,
+    ): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.get(
+            url("mobile/order?orderId=$orderId")
         )
     }
 
@@ -116,6 +123,25 @@ class OrdersRepository internal constructor() {
                     sortBy,
                     sortDirection
                 ).getOrNull()
+
+            if (response != null && response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body()))
+                return@flow
+            }
+
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: Exception) {
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        }
+    }
+
+    fun order(
+        orderId: String = "",
+    ): Flow<ResultState<OrdersResponse>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = OrdersApi()
+                .order(orderId).getOrNull()
 
             if (response != null && response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))

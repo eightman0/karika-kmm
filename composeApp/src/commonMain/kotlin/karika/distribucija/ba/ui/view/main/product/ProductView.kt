@@ -21,11 +21,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -49,6 +52,7 @@ import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.bgWhite
+import karika.distribucija.ba.ui.components.gridColumnCount
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
@@ -62,6 +66,7 @@ import karikav2.composeapp.generated.resources.ic_arrow_down
 import karikav2.composeapp.generated.resources.ic_arrow_up
 import karikav2.composeapp.generated.resources.ic_gift
 import karikav2.composeapp.generated.resources.ic_navigation_cart
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -94,6 +99,10 @@ fun ProductView(component: ProductComponent) {
                         .padding(it),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    if (product.createdAt == null) {
+                        return@KarikaScaffold
+                    }
+
                     VendorName(product, component)
                     ProductName(component)
                     ProductImage(component)
@@ -151,34 +160,52 @@ fun ProductName(viewModel: ProductComponent) {
 @Composable
 fun ProductImage(component: ProductComponent) {
     val product by component.product.collectAsState()
-    Box(
-        modifier = Modifier
-            .onClick {
-                component.navigateToProduct(product)
-            }
-            .fillMaxWidth()
-            .border(width = 1.dp, color = KarikaColors.Gray5)
-            .aspectRatio(1f),
-    ) {
+    val grid = gridColumnCount()
+
+    Row {
+        if (grid == 4) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f),
+            )
+        }
         Box(
             modifier = Modifier
-                .blur(radius = if (product.hasOnStock()) 0.dp else 5.dp)
-                .fillMaxSize()
+                .onClick {
+                    component.navigateToProduct(product)
+                }
+                .weight(1f)
+                .border(width = 1.dp, color = KarikaColors.Gray5)
+                .aspectRatio(1f),
         ) {
-            KarikaImage(
+            Box(
                 modifier = Modifier
-                    .onClick {
-                        component.showImagePreview(product.image())
-                    }
-                    .fillMaxSize(),
-                model = product.image()
-            )
-            Column {
-                DiscountView(product)
-                NewView(product)
+                    .blur(radius = if (product.hasOnStock()) 0.dp else 5.dp)
+                    .fillMaxSize()
+            ) {
+                KarikaImage(
+                    modifier = Modifier
+                        .onClick {
+                            component.showImagePreview(product.image())
+                        }
+                        .fillMaxSize(),
+                    model = product.image()
+                )
+                Column {
+                    DiscountView(product)
+                    NewView(product)
+                }
             }
+            NotAvailableOverlay(product)
         }
-        NotAvailableOverlay(product)
+        if (grid == 4) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f),
+            )
+        }
     }
 }
 
@@ -404,7 +431,6 @@ private fun VendorProducts(viewModel: ProductComponent) {
             fontWeight = FontWeight.W700
         )
         products.toGrid()
-            .filter { it.size == 2 }
             .forEach {
                 Column(
                     modifier = Modifier
@@ -424,6 +450,12 @@ private fun VendorProducts(viewModel: ProductComponent) {
                                 ProductItem(it, viewModel)
                             }
                         }
+                        repeat(gridColumnCount() - it.size) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                            )
+                        }
                     }
                 }
             }
@@ -438,6 +470,18 @@ fun ProductQtyAction(
     disableUpdate: Boolean = true,
     autoUpdate: Boolean = false
 ) {
+    var pendingQty by remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(pendingQty) {
+        pendingQty?.let { newQty ->
+            delay(500)
+            if (!disableUpdate) {
+                component.updateCart(product, newQty)
+            }
+            pendingQty = null
+        }
+    }
+
     Row {
         Box(
             modifier = Modifier
@@ -446,9 +490,7 @@ fun ProductQtyAction(
                         return@onClick
                     }
                     qty.value -= 1
-                    if (!disableUpdate) {
-                        component.updateCart(product, qty.value)
-                    }
+                    pendingQty = qty.value
                 }
                 .size(40.dp)
                 .border(
@@ -495,9 +537,7 @@ fun ProductQtyAction(
             modifier = Modifier
                 .onClick {
                     qty.value += 1
-                    if (!disableUpdate) {
-                        component.updateCart(product, qty.value)
-                    }
+                    pendingQty = qty.value
                 }
                 .size(40.dp)
                 .border(

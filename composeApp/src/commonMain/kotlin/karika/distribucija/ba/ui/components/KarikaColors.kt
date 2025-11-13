@@ -46,6 +46,7 @@ object KarikaColors {
     val Gray20 = Color(0xFFF5F5F5)
     val Gray21 = Color(0xFFEAEAEA)
     val Gray22 = Color(0xFF716F6F)
+    val Gray23 = Color(0xFFd1d5dc)
 
     val Red = Color(0xFFE00000)
     val Red1 = Color(0xFFFFD4E7)
@@ -81,4 +82,6 @@ object KarikaColors {
     val NotMineMessage = Color(0xFFF1F4F9)
 
     val Yellow = Color(0xFFFFC107)
+    val Yellow1 = Color(0xFFFAF0CD)
+    val Yellow2 = Color(0xFFa65f00)
 }

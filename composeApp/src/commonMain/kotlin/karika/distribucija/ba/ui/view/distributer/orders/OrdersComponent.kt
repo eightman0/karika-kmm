@@ -75,85 +75,76 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
             "&searchCriteria[sortOrders][0][field]=created_at&searchCriteria[sortOrders][0][direction]=DESC"
         )
 
-        if (dateFrom.value.isNotEmpty() && dateTo.value.isNotEmpty()) {
-            val query =
-                "&searchCriteria[filterGroups][0][filters][0][field]=created_at" +
-                        "&searchCriteria[filterGroups][0][filters][0][conditionType]=from" +
-                        "&searchCriteria[filterGroups][0][filters][0][value]=${dateFrom.value}" +
-                        "&searchCriteria[filterGroups][0][filters][1][field]=created_at" +
-                        "&searchCriteria[filterGroups][0][filters][1][conditionType]=to" +
-                        "&searchCriteria[filterGroups][0][filters][1][value]=${dateTo.value}"
-            params.add(query)
-        } else if (dateFrom.value.isNotEmpty()) {
-            val query =
-                "&searchCriteria[filterGroups][0][filters][0][field]=created_at" +
-                        "&searchCriteria[filterGroups][0][filters][0][conditionType]=from" +
-                        "&searchCriteria[filterGroups][0][filters][0][value]=${dateFrom.value}" +
-                        "&searchCriteria[filterGroups][0][filters][1][field]=created_at"
-            params.add(query)
-        } else if (dateTo.value.isNotEmpty()) {
-            val query =
-                "&searchCriteria[filterGroups][0][filters][0][field]=created_at" +
-                        "&searchCriteria[filterGroups][0][filters][0][conditionType]=to" +
-                        "&searchCriteria[filterGroups][0][filters][0][value]=${dateTo.value}" +
-                        "&searchCriteria[filterGroups][0][filters][1][field]=created_at"
-            params.add(query)
+        var filterIndex = 0 // Brojač za filtere
+
+        // Datum FROM
+        if (dateFrom.value.isNotEmpty()) {
+            params.add(
+                "&searchCriteria[filterGroups][0][filters][$filterIndex][field]=created_at" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][conditionType]=from" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][value]=${dateFrom.value} 00:00:00"
+            )
+            filterIndex++
         }
 
+        // Datum TO
+        if (dateTo.value.isNotEmpty()) {
+            params.add(
+                "&searchCriteria[filterGroups][0][filters][$filterIndex][field]=created_at" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][conditionType]=to" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][value]=${dateTo.value} 23:59:59"
+            )
+            filterIndex++
+        }
+
+        // Order number
         if (orderNumber.value.isNotEmpty()) {
             params.add(
-                "&searchCriteria[filterGroups][0][filters][0][field]=order_id" +
-                        "&searchCriteria[filterGroups][0][filters][0][value]=${orderNumber.value}" +
-                        "&searchCriteria[filterGroups][0][filters][0][conditionType]=like"
+                "&searchCriteria[filterGroups][0][filters][$filterIndex][field]=order_id" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][value]=${orderNumber.value}" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][conditionType]=like"
             )
+            filterIndex++
         }
 
-        if (filterPriceFrom.value.isNotEmpty() && filterPriceTo.value.isNotEmpty()) {
-            val query =
-                "&searchCriteria[filterGroups][1][filters][0][field]=order_total" +
-                        "&searchCriteria[filterGroups][1][filters][0][conditionType]=from" +
-                        "&searchCriteria[filterGroups][1][filters][0][value]=${filterPriceFrom.value}" +
-                        "&searchCriteria[filterGroups][1][filters][1][field]=order_total" +
-                        "&searchCriteria[filterGroups][1][filters][1][conditionType]=to" +
-                        "&searchCriteria[filterGroups][1][filters][1][value]=${filterPriceTo.value}"
+        // Price FROM
+        if (filterPriceFrom.value.isNotEmpty()) {
             params.add(
-                query
+                "&searchCriteria[filterGroups][0][filters][$filterIndex][field]=order_total" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][conditionType]=from" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][value]=${filterPriceFrom.value}"
             )
-        } else if (filterPriceFrom.value.isNotEmpty()) {
-            val query =
-                "&searchCriteria[filterGroups][1][filters][0][field]=order_total" +
-                        "&searchCriteria[filterGroups][1][filters][0][conditionType]=from" +
-                        "&searchCriteria[filterGroups][1][filters][0][value]=${filterPriceFrom.value}" +
-                        "&searchCriteria[filterGroups][1][filters][1][field]=order_total"
-            params.add(
-                query
-            )
-        } else if (filterPriceTo.value.isNotEmpty()) {
-            val query =
-                "&searchCriteria[filterGroups][1][filters][0][field]=order_total" +
-                        "&searchCriteria[filterGroups][1][filters][0][conditionType]=to" +
-                        "&searchCriteria[filterGroups][1][filters][0][value]=${filterPriceTo.value}" +
-                        "&searchCriteria[filterGroups][1][filters][1][field]=order_total"
-            params.add(
-                query
-            )
+            filterIndex++
         }
 
+        // Price TO
+        if (filterPriceTo.value.isNotEmpty()) {
+            params.add(
+                "&searchCriteria[filterGroups][0][filters][$filterIndex][field]=order_total" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][conditionType]=to" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][value]=${filterPriceTo.value}"
+            )
+            filterIndex++
+        }
+
+        // Payer name
         if (payerName.value.isNotEmpty()) {
             params.add(
-                "&searchCriteria[filterGroups][0][filters][0][field]=billing_name" +
-                        "&searchCriteria[filterGroups][0][filters][0][value]=${payerName.value}" +
-                        "&searchCriteria[filterGroups][0][filters][0][conditionType]=like"
+                "&searchCriteria[filterGroups][0][filters][$filterIndex][field]=billing_name" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][value]=${payerName.value}" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][conditionType]=like"
             )
+            filterIndex++
         }
 
-        //if (value.person.isNotEmpty()) {
-        //    params.add(
-        //        "&searchCriteria[filterGroups][0][filters][0][field]=b2b_pravno_lice" +
-        //                "&searchCriteria[filterGroups][0][filters][0][value]=${value.person}" +
-        //                "&searchCriteria[filterGroups][0][filters][0][conditionType]=like"
-        //    )
-        //}
+        // B2B pravno lice (search)
+        if (searchText.value.isNotEmpty()) {
+            params.add(
+                "&searchCriteria[filterGroups][0][filters][$filterIndex][field]=b2b_pravno_lice" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][value]=${searchText.value}" +
+                        "&searchCriteria[filterGroups][0][filters][$filterIndex][conditionType]=like"
+            )
+        }
 
         queryParams = params
         loadNextPage(true)
@@ -175,14 +166,5 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
         orderNumber.value = ""
 
         filter()
-    }
-
-    fun addSearchQuery() {
-        queryParams = listOf(
-            "&searchCriteria[sortOrders][0][field]=created_at&searchCriteria[sortOrders][0][direction]=DESC",
-            "&searchCriteria[filterGroups][0][filters][0][field]=b2b_pravno_lice" +
-                    "&searchCriteria[filterGroups][0][filters][0][value]=${searchText.value}" +
-                    "&searchCriteria[filterGroups][0][filters][0][conditionType]=like"
-        )
     }
 }

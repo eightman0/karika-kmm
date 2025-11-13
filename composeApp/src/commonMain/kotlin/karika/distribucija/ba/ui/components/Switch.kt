@@ -53,11 +53,11 @@ fun KarikaSwitch(
                 },
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = KarikaColors.Blue,
-                    uncheckedTrackColor = KarikaColors.Error,
+                    uncheckedTrackColor = KarikaColors.Gray23,
                     checkedThumbColor = KarikaColors.White,
                     uncheckedThumbColor = KarikaColors.White,
                     checkedBorderColor = KarikaColors.Blue,
-                    uncheckedBorderColor = KarikaColors.Error
+                    uncheckedBorderColor = KarikaColors.Gray23
                 ),
                 modifier = Modifier
                     .width(40.dp)

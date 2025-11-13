@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Product
-import karika.distribucija.ba.ui.common.openPhoneCall
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
@@ -46,9 +45,7 @@ import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.main.home.ProductItem
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_email
 import karikav2.composeapp.generated.resources.ic_location
-import karikav2.composeapp.generated.resources.ic_phone
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -62,7 +59,11 @@ fun VendorDetailsView(component: VendorDetailsComponent) {
             component = component,
             topBar = {
                 TopBarWithBack(vendor.name()) {
-                    component.mainBack()
+                    if (component.fromMain) {
+                        component.mainBack()
+                    } else {
+                        component.appBack()
+                    }
                 }
             }
         ) {

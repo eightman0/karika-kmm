@@ -24,6 +24,7 @@ fun LoadingView1(commonComponent: CommonComponent) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .onClick {}
                 .wrapContentSize(Alignment.Center)
         ) {
             Box(

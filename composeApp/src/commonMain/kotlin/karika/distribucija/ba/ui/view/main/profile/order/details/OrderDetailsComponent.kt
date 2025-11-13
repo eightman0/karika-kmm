@@ -8,6 +8,7 @@ import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class OrderDetailsComponent(
@@ -18,6 +19,18 @@ class OrderDetailsComponent(
 
     private val _order = MutableStateFlow(ordersResponse)
     val order = _order.asStateFlow()
+
+    init {
+        if (ordersResponse.createdAt == null) {
+            loadOrder()
+        }
+
+        iOScope.launch {
+            stateHolder.customerSpecificHandler.refreshOrders.collect {
+                loadOrder()
+            }
+        }
+    }
 
     override fun loadNextPage(reset: Boolean) {
 
@@ -46,6 +59,27 @@ class OrderDetailsComponent(
                         showMessage("Predračun je uspješno poslan!")
                         pageSize *= currentPage
                         loadNextPage(true)
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message)
+                    }
+                }
+            }
+        }
+    }
+
+    fun loadOrder() {
+        iOScope.launch {
+            orderRepository.order(
+                orderId = order.value.incrementId ?: ""
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> showLoader()
+                    is ResultState.Success -> {
+                        hideLoader()
+                        _order.update { result.data }
                     }
 
                     is ResultState.Error -> {

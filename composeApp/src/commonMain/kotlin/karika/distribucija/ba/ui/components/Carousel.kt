@@ -43,7 +43,8 @@ fun CarouselBanners(component: CommonComponent) {
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            val cardWidth = maxWidth * (1f - 0.2f) - 16.dp
+            val divideBy = if (gridColumnCount() == 4) 2 else 1
+            val cardWidth = (maxWidth * (1f - 0.2f) - 16.dp) / divideBy
 
             LazyRow(
                 modifier = Modifier

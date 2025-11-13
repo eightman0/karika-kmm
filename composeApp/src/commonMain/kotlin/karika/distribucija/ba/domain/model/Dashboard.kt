@@ -421,7 +421,8 @@ data class VendorDeliveryServiceData(
     @SerialName("width") var width: String = "",
     @SerialName("height") var height: String = "",
     @SerialName("depth") var depth: String = "",
-    @SerialName("note") var note: String = ""
+    @SerialName("note") var note: String = "",
+    @SerialName("company_code") var companyCode: String = ""
 )
 
 @Serializable

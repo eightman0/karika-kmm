@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.components.KarikaAmountField
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaDatePicker
 import karika.distribucija.ba.ui.components.KarikaText
@@ -120,11 +121,15 @@ fun OrderFilterSheet(
                     ) {
                         KarikaTextField2(
                             modifier = Modifier
+                                .onClick {
+                                    showDateDialogFrom.negate()
+                                }
                                 .weight(1f),
                             value = dateFrom,
                             placeholder = "OD",
                             imeAction = ImeAction.Next,
                             enabled = false,
+                            disabledTextColor = KarikaColors.Gray2,
                             keyboardType = KeyboardType.Number,
                             trailingIcons = {
                                 Icon(
@@ -140,9 +145,13 @@ fun OrderFilterSheet(
                         )
                         KarikaTextField2(
                             modifier = Modifier
+                                .onClick {
+                                    showDateDialogTo.negate()
+                                }
                                 .weight(1f),
                             value = dateTo,
                             placeholder = "DO",
+                            disabledTextColor = KarikaColors.Gray2,
                             imeAction = ImeAction.Next,
                             keyboardType = KeyboardType.Number,
                             enabled = false,
@@ -180,14 +189,12 @@ fun OrderFilterSheet(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        KarikaTextField2(
+                        KarikaAmountField(
                             modifier = Modifier
                                 .weight(1f),
                             value = startPrice,
                             placeholder = "OD",
-                            allowedChars = KarikaConstants.numbers,
                             imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number,
                             trailingIcons = {
                                 KarikaText(
                                     modifier = Modifier,
@@ -198,14 +205,12 @@ fun OrderFilterSheet(
                                 )
                             }
                         )
-                        KarikaTextField2(
+                        KarikaAmountField(
                             modifier = Modifier
                                 .weight(1f),
                             value = endPrice,
                             placeholder = "DO",
-                            allowedChars = KarikaConstants.numbers,
                             imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number,
                             trailingIcons = {
                                 KarikaText(
                                     modifier = Modifier,

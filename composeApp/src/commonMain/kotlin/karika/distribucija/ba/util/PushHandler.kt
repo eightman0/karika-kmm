@@ -1,7 +1,9 @@
 package karika.distribucija.ba.util
 
+import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Order
+import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
@@ -172,8 +174,11 @@ object PushHandler {
         matchResult?.let {
             val (orderId, status) = it.destructured
             CoroutineScope(Dispatchers.Main).launch {
-                //delay(300)
-
+                component.appNavigate(
+                    AppConfig.OrderDetails(
+                        OrdersResponse(incrementId = orderId)
+                    )
+                )
             }
         }
     }

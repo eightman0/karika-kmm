@@ -41,7 +41,7 @@ class LoginRepository internal constructor() {
                                 "Ovaj ${loginDto.username} račun je napravljen samo za dobavljača, prijavite se kao dobavljač"
                             else "Ovaj ${loginDto.username} račun je napravljen samo za kupca, prijavite se kao kupac"
                         } else {
-                            "Prijava na račun je bila pogrešna ili je vaš račun privremeno onemogućen. Molimo pričekajte i pokušajte ponovo kasnije."
+                            "Prijava na račun je bila pogrešna ili je Vaš račun privremeno onemogućen. Molimo pričekajte i pokušajte ponovo kasnije."
                         }
                     )
                 )
