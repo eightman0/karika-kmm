@@ -30,6 +30,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -50,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -183,29 +186,136 @@ fun KarikaTextField(
             maxLines = maxLines,
             minLines = minLines,
             decorationBox =
-            @Composable { innerTextField ->
-                // places leading icon, text field with label and placeholder, trailing icon
+                @Composable { innerTextField ->
+                    // places leading icon, text field with label and placeholder, trailing icon
+                    TextFieldDefaults.DecorationBox(
+                        contentPadding = contentPadding,
+                        value = value,
+                        visualTransformation = visualTransformation,
+                        innerTextField = innerTextField,
+                        placeholder = placeholder,
+                        label = label,
+                        leadingIcon = leadingIcon,
+                        trailingIcon = trailingIcon,
+                        prefix = prefix,
+                        suffix = suffix,
+                        supportingText = supportingText,
+                        shape = shape,
+                        singleLine = singleLine,
+                        enabled = enabled,
+                        isError = isError,
+                        interactionSource = interactionSource,
+                        colors = colors,
+                    )
+                }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun KarikaIntTextField(
+    value: Int?,
+    onValueChange: (Int?) -> Unit,
+    modifier: Modifier = Modifier,
+    minValue: Int = 1
+) {
+    val imeVisible = rememberImeVisible()
+    var textFieldValue by remember(value) {
+        mutableStateOf(
+            TextFieldValue(
+                text = value?.toString() ?: "",
+                selection = TextRange((value?.toString() ?: "").length)
+            )
+        )
+    }
+
+    CompositionLocalProvider {
+        BasicTextField(
+            value = textFieldValue,
+            modifier = modifier,
+            onValueChange = { newValue ->
+                val newText = newValue.text
+
+                // Filtriraj input - dozvoli samo cifre
+                val filtered = newText.filter { it.isDigit() }
+
+                // Provjeri da li počinje sa nulom
+                val withoutLeadingZero = if (filtered.startsWith("0") && filtered.length > 1) {
+                    filtered.trimStart('0')
+                } else if (filtered == "0") {
+                    ""
+                } else {
+                    filtered
+                }
+
+                val parsedValue = withoutLeadingZero.toIntOrNull()
+                val finalValue = when {
+                    withoutLeadingZero.isEmpty() -> null
+                    parsedValue != null && parsedValue < minValue -> minValue
+                    else -> parsedValue
+                }
+
+                val finalText = finalValue?.toString() ?: withoutLeadingZero
+                textFieldValue = TextFieldValue(
+                    text = finalText,
+                    selection = TextRange(finalText.length)
+                )
+
+                if (finalValue != null) {
+                    onValueChange(finalValue)
+                }
+            },
+            enabled = true,
+            readOnly = false,
+            textStyle = LocalTextStyle.current.copy(
+                color = KarikaColors.Gray2,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.W600,
+                textAlign = TextAlign.Center,
+                lineHeight = 24.sp,
+                fontFamily = karikaFonts()
+            ),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            singleLine = true,
+            maxLines = 1,
+            minLines = 1,
+            decorationBox = @Composable { innerTextField ->
                 TextFieldDefaults.DecorationBox(
-                    contentPadding = contentPadding,
-                    value = value,
-                    visualTransformation = visualTransformation,
+                    contentPadding = PaddingValues(8.dp),
+                    value = textFieldValue.text,
+                    visualTransformation = VisualTransformation.None,
                     innerTextField = innerTextField,
-                    placeholder = placeholder,
-                    label = label,
-                    leadingIcon = leadingIcon,
-                    trailingIcon = trailingIcon,
-                    prefix = prefix,
-                    suffix = suffix,
-                    supportingText = supportingText,
-                    shape = shape,
-                    singleLine = singleLine,
-                    enabled = enabled,
-                    isError = isError,
-                    interactionSource = interactionSource,
-                    colors = colors,
+                    singleLine = true,
+                    enabled = true,
+                    isError = false,
+                    interactionSource = remember { MutableInteractionSource() },
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
+                    )
                 )
             }
         )
+    }
+
+    LaunchedEffect(imeVisible) {
+        if (!imeVisible) {
+            if (textFieldValue.text.isEmpty()) {
+                textFieldValue = TextFieldValue(
+                    text = minValue.toString(),
+                    selection = TextRange(minValue.toString().length)
+                )
+                onValueChange(minValue)
+            }
+        }
     }
 }
 

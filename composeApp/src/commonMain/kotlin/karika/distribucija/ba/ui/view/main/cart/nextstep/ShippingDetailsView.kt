@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +35,7 @@ import karika.distribucija.ba.ui.components.KarikaRadioButton
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
+import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.util.KarikaConstants
@@ -231,7 +233,8 @@ private fun AddressBox(component: ShippingDetailsComponent) {
             if (newAddress.value) {
                 Column(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     KarikaTextField1(
                         modifier = Modifier
@@ -259,6 +262,7 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         placeholder = "Naziv pravnog lica",
                         allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
                         keyboardType = KeyboardType.Text,
+                        enabled = false,
                         imeAction = ImeAction.Next
                     )
                     KarikaTextField1(
@@ -299,6 +303,7 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         keyboardType = KeyboardType.Phone,
                         imeAction = ImeAction.Done
                     )
+                    YSpacer16()
                 }
             }
         }

@@ -20,7 +20,7 @@ class ShippingDetailsComponent(
     stateHolder: KarikaStateHolder,
 ) : CommonComponent(componentContext, stateHolder) {
     private val repository = CartRepository()
-    private val _addresses = MutableStateFlow(stateHolder.customerSpecificHandler.userDetails.value.shippingAddresses())
+    private val _addresses = MutableStateFlow(stateHolder.customerSpecificHandler.userDetails.value.addresses)
     val addresses = _addresses.asStateFlow()
 
     val selectedAddress =
@@ -29,7 +29,7 @@ class ShippingDetailsComponent(
 
     val firstname = mutableStateOf("")
     val lastname = mutableStateOf("")
-    val companyName = mutableStateOf("")
+    val companyName = mutableStateOf(stateHolder.customerSpecificHandler.userDetails.value.companyName())
     val address = mutableStateOf("")
     val city = mutableStateOf("")
     val postal = mutableStateOf("")
@@ -37,11 +37,10 @@ class ShippingDetailsComponent(
 
     fun handleShippingAddress() {
         if (newAddress.value) {
-            val id = Random(10).nextInt()
             _addresses.update {
                 it.plus(
                     Address(
-                        id = id,
+                        id = -100,
                         firstname = firstname.value,
                         lastname = lastname.value,
                         postcode = postal.value,
@@ -49,11 +48,11 @@ class ShippingDetailsComponent(
                         street = listOf(address.value),
                         telephone = telephone.value,
                         customerId = _addresses.value.firstOrNull()?.customerId,
-                        countryId = _addresses.value.firstOrNull()?.countryId
+                        countryId = _addresses.value.firstOrNull()?.countryId,
                     )
                 )
             }
-            selectedAddress.value = id.toString()
+            selectedAddress.value = "-100"
             newAddress.value = false
         } else {
             iOScope.launch {
@@ -64,13 +63,15 @@ class ShippingDetailsComponent(
                                 .copy(
                                     id = null,
                                     defaultShipping = null,
-                                    defaultBilling = null
+                                    defaultBilling = null,
+                                    save = if (selectedAddress.value == "-100") 1 else 0
                                 ),
                             billingAddress = addresses.value.first { it.id?.toString() == selectedAddress.value }
                                 .copy(
                                     id = null,
                                     defaultShipping = null,
-                                    defaultBilling = null
+                                    defaultBilling = null,
+                                    save = 0
                                 ),
                             shippingCode = "freeshipping",
                             shippingMethodCode = "freeshipping"

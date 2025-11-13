@@ -74,24 +74,24 @@ data class Order(
 
     fun statusColor(): Color {
         return when (status) {
-            "rejected" -> KarikaColors.Pending
-            "approved" -> KarikaColors.Approved
-            "cancelled" -> KarikaColors.Pending
-            "bill-sent" -> KarikaColors.Approved
-            "estimate-sent" -> KarikaColors.Approved
-            "pending" -> KarikaColors.Pending
+            "rejected" -> KarikaColors.Red.copy(alpha = 0.1f)
+            "approved" -> KarikaColors.Green3.copy(alpha = 0.1f)
+            "cancelled" -> KarikaColors.Gray2.copy(alpha = 0.1f)
+            "bill-sent" -> KarikaColors.Orange.copy(alpha = 0.1f)
+            "estimate-sent" -> KarikaColors.Orange.copy(alpha = 0.1f)
+            "pending" -> KarikaColors.Blue.copy(alpha = 0.1f)
             else -> KarikaColors.Pending
         }
     }
 
     fun statusTextColor(): Color {
         return when (status) {
-            "rejected" -> KarikaColors.Orange
+            "rejected" -> KarikaColors.Red
             "approved" -> KarikaColors.Green3
-            "cancelled" -> KarikaColors.Orange
-            "bill-sent" -> KarikaColors.Green3
-            "estimate-sent" -> KarikaColors.Green3
-            "pending" -> KarikaColors.Orange
+            "cancelled" -> KarikaColors.Gray2
+            "bill-sent" -> KarikaColors.Orange
+            "estimate-sent" -> KarikaColors.Orange
+            "pending" -> KarikaColors.Blue
             else -> KarikaColors.Orange
         }
     }

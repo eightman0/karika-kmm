@@ -319,7 +319,7 @@ private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
                 .weight(1f)
         ) {
             ProductName(item.first)
-            ProductBonus(item.first)
+            ProductBonus(item.first, item.second)
             ProductQtyAction(
                 product = item.first,
                 qty = mutableStateOf(item.second),
@@ -387,7 +387,7 @@ fun ProductName(product: Product) {
 }
 
 @Composable
-fun ProductBonus(product: Product) {
+fun ProductBonus(product: Product, qty: Int) {
     Row(
         modifier = Modifier
             .height(40.dp)
@@ -404,7 +404,7 @@ fun ProductBonus(product: Product) {
         KarikaText(
             modifier = Modifier,
             color = KarikaColors.Black,
-            text = product.bonusString(),
+            text = product.bonusString(qty),
             textSize = 14.sp,
             fontWeight = FontWeight.W400
         )

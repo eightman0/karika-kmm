@@ -127,6 +127,14 @@ data class Product(
         } KM"
     }
 
+    fun bonusString(qty: Int): String {
+        return "${
+            karikaPriceFormat(
+                (rewardPoints ?: extensionAttributes?.rewardsPoints?.rewardPoints ?: 0.00) * qty
+            )
+        } KM"
+    }
+
     fun hasBonus() = bonusString() != "0,00 KM"
 
     fun image(): String {

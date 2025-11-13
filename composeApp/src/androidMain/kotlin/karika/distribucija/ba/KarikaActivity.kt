@@ -4,7 +4,9 @@ import android.Manifest
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -74,6 +76,19 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
         askNotificationPermission()
         appUpdateManager = AppUpdateManagerFactory.create(this)
         super.onCreate(savedInstanceState)
+
+        val screenSize =
+            resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK
+        requestedOrientation = when {
+            screenSize < Configuration.SCREENLAYOUT_SIZE_LARGE -> {
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            }
+
+            else -> {
+                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
+        }
+
         setContent {
             val systemUiController = rememberSystemUiController()
             SideEffect {

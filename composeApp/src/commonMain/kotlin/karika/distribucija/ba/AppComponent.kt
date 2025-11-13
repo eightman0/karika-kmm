@@ -5,6 +5,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.backhandler.BackCallback
 import karika.distribucija.ba.domain.api.MandatoryUpdateRepository
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Order
@@ -17,6 +18,7 @@ import karika.distribucija.ba.ui.common.KarikaHandler
 import karika.distribucija.ba.ui.common.appVersion
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardComponent
+import karika.distribucija.ba.ui.view.main.MainChild
 import karika.distribucija.ba.ui.view.main.MainComponent
 import karika.distribucija.ba.ui.view.main.menu.blog.BlogsComponent
 import karika.distribucija.ba.ui.view.main.menu.blog.overview.BlogOverviewComponent
@@ -126,12 +128,13 @@ class AppComponent(
         var screensaverHandler: () -> Unit = {}
     }
 
-    init {
-        refreshHandler = {
-            stateHolder.notificationReceived()
+    private val backCallback = BackCallback {
+        if (stateHolder.imagePreview.value.isNotEmpty()) {
+            stateHolder.imagePreview.value = ""
+            return@BackCallback
         }
-        screensaverHandler = { showScreenSaver.value = true }
-        stateHolder.commonHandler.init()
+
+        appBack()
     }
 
     val stack: Value<ChildStack<*, Child>> =
@@ -142,6 +145,15 @@ class AppComponent(
             handleBackButton = true,
             childFactory = ::child,
         )
+
+    init {
+        refreshHandler = {
+            stateHolder.notificationReceived()
+        }
+        screensaverHandler = { showScreenSaver.value = true }
+        stateHolder.commonHandler.init()
+        backHandler.register(backCallback)
+    }
 
     private fun child(appConfig: AppConfig, componentContext: ComponentContext): Child =
         when (appConfig) {

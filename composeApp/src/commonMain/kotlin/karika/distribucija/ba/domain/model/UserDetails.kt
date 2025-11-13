@@ -58,6 +58,7 @@ data class Address(
     @SerialName("email") var email: String? = null,
     @SerialName("default_shipping") var defaultShipping: String? = null,
     @SerialName("default_billing") var defaultBilling: String? = null,
+    @SerialName("save_in_address_book") var save: Int? = null,
 ) {
     fun address(): String {
         return "${street.firstOrNull()}, ${city}, ${postcode}, Bosna I Hercegovina, ${telephone}"

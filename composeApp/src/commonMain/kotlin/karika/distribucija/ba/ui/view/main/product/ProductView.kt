@@ -44,9 +44,9 @@ import karika.distribucija.ba.ui.common.HtmlTextWithStyles
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
+import karika.distribucija.ba.ui.components.KarikaIntTextField
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.KarikaTextField3
 import karika.distribucija.ba.ui.components.PrimaryButton
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.TopBarWithBack
@@ -518,17 +518,15 @@ fun ProductQtyAction(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            KarikaTextField3(
+            KarikaIntTextField(
                 modifier = Modifier
                     .fillMaxSize(),
-                value = qty.value.toString(),
+                value = qty.value,
+                minValue = product.minQty(),
                 onValueChange = {
-                    if ((it.toIntOrNull() ?: 0) < product.minQty()) {
-                        return@KarikaTextField3
-                    }
-                    qty.value = it.toIntOrNull() ?: qty.value
+                    qty.value = it ?: qty.value
                     if (autoUpdate) {
-                        component.updateCart(product, qty.value)
+                        pendingQty = qty.value
                     }
                 }
             )
