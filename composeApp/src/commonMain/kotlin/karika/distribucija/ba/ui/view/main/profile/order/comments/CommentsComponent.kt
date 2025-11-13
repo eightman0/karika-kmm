@@ -27,6 +27,12 @@ class CommentsComponent(
 
     init {
         getComments()
+
+        iOScope.launch {
+            stateHolder.customerSpecificHandler.refreshOrders.collect {
+                getComments()
+            }
+        }
     }
 
     private fun getComments() {

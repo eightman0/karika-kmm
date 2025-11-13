@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrderProduct
 import karika.distribucija.ba.domain.model.OrdersResponse
+import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
@@ -166,7 +167,15 @@ fun VendorOrder(order: OrdersResponse, component: OrderDetailsComponent) {
                     fontWeight = FontWeight.W600
                 )
                 KarikaText(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .onClick {
+                            component.showVendor(
+                                Vendor(
+                                    entityId = it.vendorId ?: 0,
+                                    publicName = it.vendorName
+                                )
+                            )
+                        },
                     color = KarikaColors.Blue,
                     text = it.vendorName,
                     textSize = 14.sp,

@@ -1440,7 +1440,7 @@ fun CommentItem(comment: Comment, component: OrderDetailsComponent) {
                     ),
                 horizontalAlignment = Alignment.End
             ) {
-                if (comment.message?.contains("<") == true) {
+                if (comment.message().contains("<")) {
                     HtmlTextWithStyles(
                         modifier = Modifier
                             .padding(16.dp),
@@ -1452,7 +1452,7 @@ fun CommentItem(comment: Comment, component: OrderDetailsComponent) {
                     KarikaText(
                         modifier = Modifier
                             .padding(16.dp),
-                        text = comment.message,
+                        text = comment.message(),
                         color = KarikaColors.White,
                         textSize = 14.sp,
                         fontWeight = FontWeight.W400
@@ -1524,7 +1524,7 @@ fun CommentItem(comment: Comment, component: OrderDetailsComponent) {
                     ),
                 horizontalAlignment = Alignment.Start
             ) {
-                if (comment.message?.contains("<") == true) {
+                if (comment.message().contains("<")) {
                     HtmlTextWithStyles(
                         modifier = Modifier
                             .padding(16.dp),
@@ -1536,7 +1536,7 @@ fun CommentItem(comment: Comment, component: OrderDetailsComponent) {
                     KarikaText(
                         modifier = Modifier
                             .padding(16.dp),
-                        text = comment.message,
+                        text = comment.message(),
                         color = KarikaColors.Gray2,
                         textSize = 14.sp,
                         fontWeight = FontWeight.W400

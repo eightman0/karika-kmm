@@ -48,7 +48,8 @@ class CartHandler {
                                             minQty = it.extensionAttributes?.minQty.toString(),
                                             image = it.extensionAttributes?.imageUrl,
                                             specialPrice = it.extensionAttributes?.specialPrice?.toDoubleOrNull(),
-                                            rewardPoints = it.extensionAttributes?.rewardPoints ?: 0.0,
+                                            rewardPoints = it.extensionAttributes?.rewardPoints
+                                                ?: 0.0,
                                         ),
                                         it.qty
                                     )
@@ -60,11 +61,12 @@ class CartHandler {
         }
     }
 
-    fun createCart() {
+    fun createCart(callback: () -> Unit = {}) {
         CoroutineScope(Dispatchers.IO).launch {
             CartRepository().createCart()
                 .collect { result ->
                     if (result is ResultState.Success) {
+                        callback()
                         reloadCart()
                     }
                 }

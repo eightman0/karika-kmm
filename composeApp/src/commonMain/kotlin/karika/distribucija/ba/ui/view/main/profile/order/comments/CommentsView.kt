@@ -157,19 +157,19 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                     ),
                 horizontalAlignment = Alignment.End
             ) {
-                if (comment.message?.contains("<") == true) {
+                if (comment.message().contains("<")) {
                     HtmlTextWithStyles(
                         modifier = Modifier
                             .padding(16.dp),
                         html = comment.message(),
                         textColor = KarikaColors.Gray2,
-                        background = KarikaColors.Primary
+                        background = KarikaColors.MineMessage
                     )
                 } else {
                     KarikaText(
                         modifier = Modifier
                             .padding(16.dp),
-                        text = comment.message,
+                        text = comment.message(),
                         color = KarikaColors.White,
                         textSize = 14.sp,
                         fontWeight = FontWeight.W400
@@ -241,19 +241,19 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                     ),
                 horizontalAlignment = Alignment.Start
             ) {
-                if (comment.message?.contains("<") == true) {
+                if (comment.message().contains("<")) {
                     HtmlTextWithStyles(
                         modifier = Modifier
                             .padding(16.dp),
                         html = comment.message(),
                         textColor = KarikaColors.Gray2,
-                        background = KarikaColors.Primary
+                        background = KarikaColors.NotMineMessage
                     )
                 } else {
                     KarikaText(
                         modifier = Modifier
                             .padding(16.dp),
-                        text = comment.message,
+                        text = comment.message(),
                         color = KarikaColors.Gray2,
                         textSize = 14.sp,
                         fontWeight = FontWeight.W400

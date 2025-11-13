@@ -170,6 +170,7 @@ class OrderDetailsComponent(
                     when (result) {
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
+                            showMessage("Narudžba je uspješno odobrena.")
                             getOrder()
                         }
 

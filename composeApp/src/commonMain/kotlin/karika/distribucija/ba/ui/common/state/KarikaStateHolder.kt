@@ -42,5 +42,6 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
         customerNotificationHandler.notificationReceived()
         messageHandler.reloadAdminMessages()
         messageHandler.reloadVendorMessages()
+        customerSpecificHandler.refreshOrders()
     }
 }

@@ -21,7 +21,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
     CommonComponent(componentContext, stateHolder) {
     private val repository = OrdersRepository()
 
-    private val _orders = MutableStateFlow<Set<OrdersResponse>>(emptySet())
+    private val _orders = MutableStateFlow<List<OrdersResponse>>(emptyList())
     val orders = _orders.asStateFlow()
     var status = ""
     var sortDirection = "DESC"
@@ -64,9 +64,9 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
                         hideLoader()
                         _orders.update {
                             if (reset) {
-                                result.data.toSet()
+                                result.data
                             } else {
-                                it.plus(result.data.toSet())
+                                it.plus(result.data).toList()
                             }
                         }
                         hasNextPage = result.data.size == pageSize

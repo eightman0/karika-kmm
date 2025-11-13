@@ -58,7 +58,6 @@ import karikav2.composeapp.generated.resources.ic_arrow_down
 import karikav2.composeapp.generated.resources.ic_arrow_up
 import karikav2.composeapp.generated.resources.ic_gift
 import org.jetbrains.compose.resources.vectorResource
-import kotlin.random.Random
 
 @Composable
 fun OrdersView(component: OrdersComponent) {
@@ -145,7 +144,7 @@ private fun Orders(component: OrdersComponent) {
         state = state,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(items = items.toList(), key = { it.orderId.toIntOrNull() ?: Random(10).nextInt() }) {
+        items(items = items, key = { it.orderId }) {
             OrderItem(it, component)
         }
         item { EmptyState(component) }

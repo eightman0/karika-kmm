@@ -123,7 +123,9 @@ open class CommonComponent(
 
                     is ResultState.Error -> {
                         hideLoader()
-                        showMessage(result.message ?: "")
+                        if (showSnack) {
+                            showMessage(result.message ?: "")
+                        }
                     }
                 }
             }
@@ -164,7 +166,9 @@ open class CommonComponent(
 
                         is ResultState.Error -> {
                             hideLoader()
-                            showMessage(result.message ?: "")
+                            if (showSnack) {
+                                showMessage(result.message ?: "")
+                            }
                         }
                     }
                 }
@@ -373,18 +377,20 @@ open class CommonComponent(
             appBack()
         }
     ) {
-        iOScope.launch {
-            showLoader()
-            order.orders.flatMap { it.products }.forEach {
-                addToCart(
-                    product = Product(sku = it.sku),
-                    it.qty?.toInt() ?: 1,
-                    false
-                )
+        stateHolder.cartHandler.createCart {
+            iOScope.launch {
+                showLoader()
+                order.orders.flatMap { it.products }.forEach {
+                    addToCart(
+                        product = Product(sku = it.sku),
+                        it.qty?.toInt() ?: 1,
+                        false
+                    )
+                }
+                hideLoader()
+                callback()
+                navigateToCart()
             }
-            hideLoader()
-            callback()
-            navigateToCart()
         }
     }
 

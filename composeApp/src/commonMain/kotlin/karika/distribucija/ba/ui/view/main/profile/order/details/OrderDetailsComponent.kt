@@ -1,9 +1,12 @@
 package karika.distribucija.ba.ui.view.main.profile.order.details
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.stack.bringToFront
+import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,6 +91,16 @@ class OrderDetailsComponent(
                     }
                 }
             }
+        }
+    }
+
+    override fun showVendor(vendor: Vendor) {
+        if (isGuest()) {
+            stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za pristup dobavljačima")
+            return
+        }
+        mainScope.launch {
+            stateHolder.appNavigation.bringToFront(AppConfig.VendorDetails(vendor, false))
         }
     }
 }

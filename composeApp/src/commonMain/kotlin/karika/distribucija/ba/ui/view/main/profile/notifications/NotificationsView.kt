@@ -119,7 +119,7 @@ private fun NotificationItem(item: Notification, component: NotificationsCompone
                 fontWeight = FontWeight.W700,
                 textSize = 14.sp,
                 text = item.title,
-                maxLines = 1
+                maxLines = 2
             )
             YSpacer8()
             KarikaText(

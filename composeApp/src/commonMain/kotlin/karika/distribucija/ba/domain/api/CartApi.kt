@@ -128,7 +128,7 @@ class CartRepository internal constructor() {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
-                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
+                    ResultState.Error(response?.bodyAsText())
                 )
             }
         } catch (e: Exception) {
