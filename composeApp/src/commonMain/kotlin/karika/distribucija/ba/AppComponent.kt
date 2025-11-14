@@ -18,10 +18,10 @@ import karika.distribucija.ba.ui.common.KarikaHandler
 import karika.distribucija.ba.ui.common.appVersion
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardComponent
-import karika.distribucija.ba.ui.view.main.MainChild
 import karika.distribucija.ba.ui.view.main.MainComponent
 import karika.distribucija.ba.ui.view.main.menu.blog.BlogsComponent
 import karika.distribucija.ba.ui.view.main.menu.blog.overview.BlogOverviewComponent
+import karika.distribucija.ba.ui.view.main.menu.faq.FaqComponent
 import karika.distribucija.ba.ui.view.main.product.ProductComponent
 import karika.distribucija.ba.ui.view.main.profile.account.AccountComponent
 import karika.distribucija.ba.ui.view.main.profile.messages.admin.AdminMessagesComponent
@@ -89,6 +89,9 @@ sealed class AppConfig {
 
     @Serializable
     data object Dashboard : AppConfig()
+
+    @Serializable
+    data object Faq : AppConfig()
 }
 
 sealed class Child {
@@ -111,6 +114,7 @@ sealed class Child {
 
     class Points(val component: PointsComponent) : Child()
     class Notifications(val component: NotificationsComponent) : Child()
+    class Faq(val component: FaqComponent) : Child()
 
     //vendor_side
     class Dashboard(val component: DashboardComponent) : Child()
@@ -173,7 +177,12 @@ class AppComponent(
             )
 
             is AppConfig.VendorDetails -> Child.VendorDetails(
-                VendorDetailsComponent(componentContext, stateHolder, appConfig.vendor, appConfig.fromMain)
+                VendorDetailsComponent(
+                    componentContext,
+                    stateHolder,
+                    appConfig.vendor,
+                    appConfig.fromMain
+                )
             )
 
             is AppConfig.Account -> Child.Account(
@@ -222,6 +231,10 @@ class AppComponent(
 
             is AppConfig.Dashboard -> Child.Dashboard(
                 DashboardComponent(componentContext, stateHolder)
+            )
+
+            is AppConfig.Faq -> Child.Faq(
+                FaqComponent(componentContext, stateHolder)
             )
         }
 

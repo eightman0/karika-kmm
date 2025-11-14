@@ -1,5 +1,6 @@
 package karika.distribucija.ba.domain.model
 
+import karika.distribucija.ba.domain.HttpClientProvider.blogImage
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -14,5 +15,5 @@ data class Blog(
     @SerialName("url_key") var urlKey: String? = null,
     @SerialName("published_at") var date: String? = null,
 ) {
-    fun image() = imageUrl(image)
+    fun image() = blogImage(image)
 }

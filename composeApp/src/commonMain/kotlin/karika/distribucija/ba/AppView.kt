@@ -32,6 +32,7 @@ import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardView
 import karika.distribucija.ba.ui.view.main.MainView
 import karika.distribucija.ba.ui.view.main.menu.blog.BlogsView
 import karika.distribucija.ba.ui.view.main.menu.blog.overview.BlogOverviewView
+import karika.distribucija.ba.ui.view.main.menu.faq.FaqView
 import karika.distribucija.ba.ui.view.main.product.ProductView
 import karika.distribucija.ba.ui.view.main.profile.account.AccountView
 import karika.distribucija.ba.ui.view.main.profile.messages.admin.AdminMessagesView
@@ -87,6 +88,7 @@ fun App(component: AppComponent) {
                     is Child.Points -> PointsView(child.component)
                     is Child.Notifications -> NotificationsView(child.component)
 
+                    is Child.Faq -> FaqView(child.component)
 
                     //vendor_side
                     is Child.Dashboard -> DashboardView(child.component)

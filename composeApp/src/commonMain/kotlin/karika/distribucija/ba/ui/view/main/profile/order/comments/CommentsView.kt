@@ -157,24 +157,12 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                     ),
                 horizontalAlignment = Alignment.End
             ) {
-                if (comment.message().contains("<")) {
-                    HtmlTextWithStyles(
-                        modifier = Modifier
-                            .padding(16.dp),
-                        html = comment.message(),
-                        textColor = KarikaColors.Gray2,
-                        background = KarikaColors.MineMessage
-                    )
-                } else {
-                    KarikaText(
-                        modifier = Modifier
-                            .padding(16.dp),
-                        text = comment.message(),
-                        color = KarikaColors.White,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W400
-                    )
-                }
+                HtmlTextWithStyles(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    html = comment.message(),
+                    textColor = KarikaColors.White
+                )
                 comment.files?.forEach {
                     if (it.type?.startsWith("image") == true) {
                         KarikaImage(
@@ -241,24 +229,12 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                     ),
                 horizontalAlignment = Alignment.Start
             ) {
-                if (comment.message().contains("<")) {
-                    HtmlTextWithStyles(
-                        modifier = Modifier
-                            .padding(16.dp),
-                        html = comment.message(),
-                        textColor = KarikaColors.Gray2,
-                        background = KarikaColors.NotMineMessage
-                    )
-                } else {
-                    KarikaText(
-                        modifier = Modifier
-                            .padding(16.dp),
-                        text = comment.message(),
-                        color = KarikaColors.Gray2,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W400
-                    )
-                }
+                HtmlTextWithStyles(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    html = comment.message(),
+                    textColor = KarikaColors.Gray2
+                )
                 comment.files?.forEach {
                     if (it.type?.startsWith("image") == true) {
                         KarikaImage(

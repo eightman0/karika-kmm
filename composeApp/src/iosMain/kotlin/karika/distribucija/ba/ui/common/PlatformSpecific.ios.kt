@@ -52,7 +52,7 @@ import platform.UIKit.create
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 @Composable
-actual fun HtmlTextWithStyles(
+actual fun HtmlTextWithStyles1(
     modifier: Modifier,
     html: String,
     background: Color,
@@ -239,4 +239,16 @@ actual fun appVersionName(): String {
             "CFBundleVersion"
         ) as? String ?: "1"
     })"
+}
+
+actual fun openEmail(emailAddress: String, error: (String) -> Unit) {
+    UIApplication.sharedApplication.openURL(
+        url = NSURL(string = "mailto:$emailAddress"),
+        options = mapOf<Any?, String>(),
+        completionHandler = {
+            if (!it) {
+                error.invoke(it.toString())
+            }
+        }
+    )
 }

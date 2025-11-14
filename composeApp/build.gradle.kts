@@ -85,6 +85,8 @@ kotlin {
             api(libs.decompose.extensions.compose.experimental)
             api(libs.essenty.lifecycle)
             api(libs.essenty.backhandler)
+
+            implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc04")
         }
 
         iosMain.dependencies {

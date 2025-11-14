@@ -4,10 +4,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -49,7 +51,6 @@ fun BlogsView(component: BlogsComponent) {
         ) {
             items(items = blogs) { item ->
                 BlogItem(item, component)
-                YSpacer16()
             }
         }
     }
@@ -57,47 +58,52 @@ fun BlogsView(component: BlogsComponent) {
 
 @Composable
 private fun BlogItem(blog: Blog, component: BlogsComponent) {
-    Column(
+    Row(
         modifier = Modifier
             .onClick {
                 component.navigateToBlog(blog)
             }
+            .border(width = 1.dp, color = KarikaColors.Gray5)
             .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1.5f)
-                .border(width = 1.dp, color = KarikaColors.Gray5)
+                .size(120.dp)
         ) {
             KarikaImage(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxSize(),
                 model = blog.image()
             )
         }
-
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray18,
-            text = blog.date,
-            textSize = 12.sp,
-            fontWeight = FontWeight.W300
-        )
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray2,
-            text = blog.title,
-            textSize = 16.sp,
-            fontWeight = FontWeight.W500
-        )
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray2,
-            text = blog.desc,
-            textSize = 16.sp,
-            fontWeight = FontWeight.W400
-        )
+        Column(
+            modifier = Modifier
+                .padding(vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            KarikaText(
+                modifier = Modifier,
+                color = KarikaColors.Gray18,
+                text = blog.date?.split(" ")?.first(),
+                textSize = 14.sp,
+                fontWeight = FontWeight.W400
+            )
+            KarikaText(
+                modifier = Modifier,
+                color = KarikaColors.Gray2,
+                text = blog.title,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W500
+            )
+            KarikaText(
+                modifier = Modifier,
+                color = KarikaColors.Gray2,
+                text = blog.desc,
+                textSize = 14.sp,
+                maxLines = 2,
+                fontWeight = FontWeight.W400
+            )
+        }
     }
 }

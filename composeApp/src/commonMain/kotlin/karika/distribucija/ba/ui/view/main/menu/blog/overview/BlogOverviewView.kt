@@ -62,6 +62,20 @@ private fun BlogItem(blog: Blog, component: BlogOverviewComponent) {
             .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        KarikaText(
+            modifier = Modifier,
+            color = KarikaColors.Gray18,
+            text = blog.date?.split(" ")?.first(),
+            textSize = 14.sp,
+            fontWeight = FontWeight.W300
+        )
+        KarikaText(
+            modifier = Modifier,
+            color = KarikaColors.Gray2,
+            text = blog.title,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W500
+        )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -74,27 +88,11 @@ private fun BlogItem(blog: Blog, component: BlogOverviewComponent) {
                 model = blog.image()
             )
         }
-
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray18,
-            text = blog.date,
-            textSize = 12.sp,
-            fontWeight = FontWeight.W300
-        )
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray2,
-            text = blog.title,
-            textSize = 16.sp,
-            fontWeight = FontWeight.W500
-        )
         HtmlTextWithStyles(
             modifier = Modifier
                 .fillMaxWidth(),
             html = blog.content ?: "",
-            textColor = KarikaColors.Gray2,
-            background = KarikaColors.White
+            textColor = KarikaColors.Gray2
         )
     }
 }

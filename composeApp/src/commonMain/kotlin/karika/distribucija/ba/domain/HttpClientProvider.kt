@@ -47,6 +47,14 @@ object HttpClientProvider {
         return "$HOST/media/$name"
     }
 
+    fun blogImage(name: String?): String? {
+        if (name.isNullOrEmpty()) {
+            return null
+        }
+
+        return "https://${getEnvPrefix()}karika.ba/media/mageplaza/blog/post/$name"
+    }
+
     fun chatImage(name: String): String {
         return "$HOST/media/csmessaging/chat_images/$name"
     }

@@ -61,7 +61,6 @@ import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_attachment
 import karikav2.composeapp.generated.resources.ic_photo
 import karikav2.composeapp.generated.resources.ic_tertiary
 import kotlinx.coroutines.launch
@@ -355,24 +354,12 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                         }
                     }
                 if (!message.message.isNullOrEmpty()) {
-                    if (message.message?.contains("<") == true) {
-                        HtmlTextWithStyles(
-                            modifier = Modifier
-                                .padding(16.dp),
-                            html = message.message(),
-                            textColor = KarikaColors.White,
-                            background = KarikaColors.Primary
-                        )
-                    } else {
-                        KarikaText(
-                            modifier = Modifier
-                                .padding(16.dp),
-                            text = message.message(),
-                            color = KarikaColors.White,
-                            textSize = 14.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                    }
+                    HtmlTextWithStyles(
+                        modifier = Modifier
+                            .padding(16.dp),
+                        html = message.message(),
+                        textColor = KarikaColors.White
+                    )
                 }
                 KarikaText(
                     modifier = Modifier
@@ -429,25 +416,12 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                         }
                     }
                 if (!message.message.isNullOrEmpty()) {
-                    if (message.message?.contains("<") == true) {
-                        HtmlTextWithStyles(
-                            modifier = Modifier
-                                .padding(16.dp),
-                            html = message.message(),
-                            textColor = KarikaColors.White,
-                            background = KarikaColors.Blue
-                        )
-                    } else {
-                        KarikaText(
-                            modifier = Modifier
-                                .padding(16.dp),
-                            text = message.message(),
-                            color = KarikaColors.White,
-                            textSize = 14.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                    }
-
+                    HtmlTextWithStyles(
+                        modifier = Modifier
+                            .padding(16.dp),
+                        html = message.message(),
+                        textColor = KarikaColors.White
+                    )
                 }
                 KarikaText(
                     modifier = Modifier

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
-import android.text.Html
 import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.runtime.Composable
@@ -19,7 +18,7 @@ import karika.distribucija.ba.BuildConfig
 import org.koin.mp.KoinPlatform
 
 @Composable
-actual fun HtmlTextWithStyles(
+actual fun HtmlTextWithStyles1(
     modifier: Modifier,
     html: String,
     background: Color,
@@ -92,4 +91,19 @@ actual fun getEnvJwt(): String {
 
 actual fun appVersionName(): String {
     return "v${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+}
+
+actual fun openEmail(emailAddress: String, error: (String) -> Unit) {
+    val context: Context = KoinPlatform.getKoin().get()
+    val intent = Intent(Intent.ACTION_SENDTO).apply {
+        data = "mailto:$emailAddress".toUri()
+        flags = FLAG_ACTIVITY_NEW_TASK
+    }
+    try {
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+        }
+    } catch (ignored: Exception) {
+        error.invoke(ignored.message ?: "")
+    }
 }

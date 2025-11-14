@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,7 +54,11 @@ fun TextArrowItem(text: String, onClick: () -> Unit = {}) {
 }
 
 @Composable
-fun TextItem(text: String, onClick: () -> Unit = {}) {
+fun TextItem(
+    text: String,
+    color: Color = KarikaColors.Gray3,
+    onClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .clickable { onClick() }
@@ -65,6 +71,32 @@ fun TextItem(text: String, onClick: () -> Unit = {}) {
             modifier = Modifier
                 .padding(start = 16.dp)
                 .fillMaxWidth(),
+            color = color,
+            text = text,
+            fontWeight = FontWeight.W700,
+            textSize = 14.sp
+        )
+    }
+}
+
+@Composable
+fun TextIconItem(text: String, icon: ImageVector, onClick: () -> Unit = {}) {
+    Row(
+        modifier = Modifier
+            .clickable { onClick() }
+            .height(40.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = "",
+            tint = KarikaColors.Gray3
+        )
+        KarikaText(
+            modifier = Modifier
+                .padding(start = 16.dp),
             color = KarikaColors.Gray3,
             text = text,
             fontWeight = FontWeight.W700,

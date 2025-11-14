@@ -197,7 +197,7 @@ data class Comment(
     @SerialName("files") var files: List<File>? = emptyList(),
 ) {
     fun isMine() = isMine ?: false
-    fun message() = message?.replace("<br>", "\n") ?: ""
+    fun message() = message ?: ""
     fun createdAt() = createdAt ?: ""
 }
 
