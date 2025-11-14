@@ -176,7 +176,7 @@ data class Product(
 
     fun vpc(qty: Int): Double {
         val price = if (specialPrice() > 0) specialPrice() else price()
-        return price * (qty * minQty()).toDouble()
+        return price * (qty).toDouble()
     }
 
     fun vpcString(qty: Int): String {
@@ -185,7 +185,7 @@ data class Product(
 
     fun pdv(qty: Int): Double {
         val price = if (specialPrice() > 0) specialPrice() else price()
-        return (price * 17 * qty * minQty()) / 100
+        return (price * 17 * qty) / 100
     }
 
     fun pdvString(qty: Int): String {

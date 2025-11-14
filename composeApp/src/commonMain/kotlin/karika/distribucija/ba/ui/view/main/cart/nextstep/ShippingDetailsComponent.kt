@@ -82,6 +82,7 @@ class ShippingDetailsComponent(
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
                             placeOrder()
+                            stateHolder.customerSpecificHandler.getUserDetails()
                         }
 
                         is ResultState.Error -> {

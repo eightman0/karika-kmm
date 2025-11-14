@@ -264,7 +264,7 @@ private fun AddToCartButton(product: Product, component: CommonComponent) {
             Box(
                 modifier = Modifier
                     .onClick {
-                        component.addToCart(product)
+                        component.addToCart(product, product.minQty())
                     }
                     .padding(8.dp)
                     .size(40.dp)

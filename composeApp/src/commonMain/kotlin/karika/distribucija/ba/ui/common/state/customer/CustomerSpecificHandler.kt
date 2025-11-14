@@ -22,8 +22,8 @@ class CustomerSpecificHandler {
         CoroutineScope(Dispatchers.IO).launch {
             UserRepository().get()
                 .collect { result ->
-                    callback.invoke()
                     if (result is ResultState.Success) {
+                        callback.invoke()
                         _userDetails.update { result.data }
                     }
                 }

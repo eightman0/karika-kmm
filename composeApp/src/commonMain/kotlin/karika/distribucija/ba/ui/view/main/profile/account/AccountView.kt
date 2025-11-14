@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
@@ -23,6 +25,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,12 +37,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import karika.distribucija.ba.domain.model.Address
 import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.HorizontalButtons
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
+import karika.distribucija.ba.ui.components.PrimaryButton
+import karika.distribucija.ba.ui.components.SecondaryButton
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.negate
@@ -75,7 +81,7 @@ fun AccountView(component: AccountComponent) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (editAddress.isNotEmpty()) {
+            if (editAddress != null) {
                 UpdateAddress(component)
             } else if (editContact) {
                 UpdateContactInfo(component)
@@ -83,6 +89,7 @@ fun AccountView(component: AccountComponent) {
                 ContactInfo(component)
                 BillingAddress(component)
                 ShippingAddress(component)
+                AllShippingAddress(component)
             }
         }
         if (showState.value) {
@@ -125,7 +132,7 @@ private fun ContactInfo(component: AccountComponent) {
             )
             KarikaText(
                 modifier = Modifier
-                    .onClick { component.edit("Kontakt informacije") }
+                    .onClick { component.edit(null, "Kontakt informacije") }
                     .padding(16.dp),
                 text = "Uredi",
                 color = KarikaColors.Primary,
@@ -284,7 +291,13 @@ private fun BillingAddress(component: AccountComponent) {
             )
             KarikaText(
                 modifier = Modifier
-                    .onClick { component.edit("Informacije za naplatu", false) }
+                    .onClick {
+                        component.edit(
+                            profile.billingAddress(),
+                            "Informacije za naplatu",
+                            false
+                        )
+                    }
                     .padding(16.dp),
                 text = "Uredi",
                 color = KarikaColors.Primary,
@@ -470,7 +483,7 @@ private fun ShippingAddress(component: AccountComponent) {
             )
             KarikaText(
                 modifier = Modifier
-                    .onClick { component.edit("Adresa za dostavu") }
+                    .onClick { component.edit(profile.shippingAddress(), "Adresa za dostavu") }
                     .padding(16.dp),
                 text = "Uredi",
                 color = KarikaColors.Primary,
@@ -662,6 +675,278 @@ private fun ShippingAddress(component: AccountComponent) {
 }
 
 @Composable
+private fun AllShippingAddress(component: AccountComponent) {
+    val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
+    val deleteAddressConfirmation = mutableStateOf<Address?>(null).asState()
+    if (profile.addresses.none { it.defaultShipping == null && it.defaultBilling == null }) {
+        return
+    }
+
+    Column(
+        modifier = Modifier
+            .border(width = 1.dp, shape = RoundedCornerShape(4.dp), color = KarikaColors.Gray11)
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .background(color = KarikaColors.Gray12)
+                .fillMaxWidth()
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(1f),
+                text = "Spisak svih unesenih adresa za dostavu",
+                color = KarikaColors.Gray2,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W700
+            )
+        }
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            thickness = 1.dp,
+            color = KarikaColors.Gray11
+        )
+        profile.addresses
+            .filter { it.defaultShipping == null && it.defaultBilling == null }
+            .forEach { shippingAddress ->
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .border(
+                            width = 1.dp,
+                            shape = RoundedCornerShape(4.dp),
+                            color = KarikaColors.Gray11
+                        )
+                        .fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .weight(0.5f),
+                            text = "Ime",
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                        KarikaText(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(16.dp),
+                            text = shippingAddress.firstname,
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = KarikaColors.Gray11
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .weight(0.5f),
+                            text = "Prezime",
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                        KarikaText(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(16.dp),
+                            text = shippingAddress.lastname,
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = KarikaColors.Gray11
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .weight(0.5f),
+                            text = "Broj telefona",
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                        KarikaText(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(16.dp),
+                            text = shippingAddress.telephone,
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = KarikaColors.Gray11
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .weight(0.5f),
+                            text = "Adresa i broj ulice",
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                        KarikaText(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(16.dp),
+                            text = shippingAddress.street.firstOrNull(),
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = KarikaColors.Gray11
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .weight(0.5f),
+                            text = "Grad",
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                        KarikaText(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(16.dp),
+                            text = shippingAddress.city,
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = KarikaColors.Gray11
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .weight(0.5f),
+                            text = "Poštanski broj",
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                        KarikaText(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(16.dp),
+                            text = shippingAddress.postcode,
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = KarikaColors.Gray11
+                    )
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        SecondaryButton(
+                            modifier = Modifier
+                                .height(40.dp),
+                            title = "Obriši",
+                            color = KarikaColors.Primary,
+                        ) {
+                            deleteAddressConfirmation.value = shippingAddress
+                        }
+                        PrimaryButton(
+                            modifier = Modifier
+                                .height(40.dp),
+                            title = "Uredi",
+                            color = KarikaColors.Primary
+                        ) {
+                            component.edit(shippingAddress, "Adresa za dostavu")
+                        }
+                    }
+                }
+            }
+    }
+
+    if (deleteAddressConfirmation.value != null) {
+        ConfirmationModal(
+            title = "Obriši adresu za dostavu",
+            message = "Jeste li sigurni da želite obrisati ovu adresu za dostavu?",
+            primaryButtonText = "Obriši",
+            secondaryButtonText = "Odustani",
+            onPrimaryClick = {
+                component.deleteShippingAddress(deleteAddressConfirmation.value)
+                deleteAddressConfirmation.value = null
+            },
+            onSecondaryClick = {
+                deleteAddressConfirmation.value = null
+            }
+        )
+    }
+}
+
+@Composable
 private fun UpdateAddress(component: AccountComponent) {
     var editAddress by component.editAddress.asState()
     val editableFields by component.editableFields.asState()
@@ -673,14 +958,14 @@ private fun UpdateAddress(component: AccountComponent) {
         KarikaText(
             modifier = Modifier
                 .fillMaxWidth(),
-            text = editAddress,
+            text = editAddress?.second,
             color = KarikaColors.Black,
             textSize = 16.sp,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.W600
         )
 
-        if (editAddress == "Adresa za dostavu") {
+        if (editAddress?.second == "Adresa za dostavu") {
             KarikaTextField1(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -761,7 +1046,7 @@ private fun UpdateAddress(component: AccountComponent) {
             secondaryTitle = "Odustani"
         ) {
             if (it == "Odustani") {
-                editAddress = ""
+                editAddress = null
                 return@HorizontalButtons
             }
 
@@ -887,6 +1172,64 @@ private fun DeleteAccountConfirmation(component: AccountComponent) {
                         }
                         component.deleteAccount()
                     }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ConfirmationModal(
+    title: String,
+    message: String,
+    primaryButtonText: String,
+    secondaryButtonText: String,
+    onPrimaryClick: () -> Unit,
+    onSecondaryClick: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(16.dp)
+                .rounded(shape = 16.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                KarikaText(
+                    modifier = Modifier,
+                    text = title,
+                    color = KarikaColors.Gray2,
+                    textSize = 20.sp,
+                    fontWeight = FontWeight.W600
+                )
+                KarikaText(
+                    modifier = Modifier,
+                    text = message,
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.W600
+                )
+                HorizontalButtons(
+                    modifier = Modifier,
+                    primaryTitle = primaryButtonText,
+                    secondaryTitle = secondaryButtonText
+                ) {
+                    if (it == secondaryButtonText) {
+                        onSecondaryClick()
+                        return@HorizontalButtons
+                    }
+                    onPrimaryClick()
                 }
             }
         }

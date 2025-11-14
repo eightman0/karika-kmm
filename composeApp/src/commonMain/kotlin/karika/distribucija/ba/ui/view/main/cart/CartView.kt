@@ -166,7 +166,13 @@ private fun CartItem(
             .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        VendorName(Product(vendorName = item.key.name(), vendorId = item.key.entityId.toString()), component)
+        VendorName(
+            Product(
+                vendorName = item.key.name(),
+                vendorId = item.key.entityId.toString()
+            ),
+            component = component
+        )
         MinOrderAmount(item)
         item.value.forEach {
             ProductItem(it, component)
