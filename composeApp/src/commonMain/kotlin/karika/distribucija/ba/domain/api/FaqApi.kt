@@ -6,6 +6,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
+import karika.distribucija.ba.domain.HttpClientProvider.urlV1
 import karika.distribucija.ba.domain.model.Faq
 import karika.distribucija.ba.domain.model.ResultState
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.flow
 internal class FaqApi {
     suspend fun faq(): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
-            url("mobile/faq")
+            urlV1("static/faq")
         )
     }
 

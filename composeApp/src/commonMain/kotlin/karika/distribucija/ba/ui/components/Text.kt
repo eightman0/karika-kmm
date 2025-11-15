@@ -236,11 +236,7 @@ fun KarikaIntTextField(
             modifier = modifier,
             onValueChange = { newValue ->
                 val newText = newValue.text
-
-                // Filtriraj input - dozvoli samo cifre
                 val filtered = newText.filter { it.isDigit() }
-
-                // Provjeri da li počinje sa nulom
                 val withoutLeadingZero = if (filtered.startsWith("0") && filtered.length > 1) {
                     filtered.trimStart('0')
                 } else if (filtered == "0") {
@@ -250,20 +246,16 @@ fun KarikaIntTextField(
                 }
 
                 val parsedValue = withoutLeadingZero.toIntOrNull()
-                val finalValue = when {
-                    withoutLeadingZero.isEmpty() -> null
-                    parsedValue != null && parsedValue < minValue -> minValue
-                    else -> parsedValue
-                }
 
-                val finalText = finalValue?.toString() ?: withoutLeadingZero
+                // Dozvoljavamo unos bilo kojeg broja tokom kucanja
                 textFieldValue = TextFieldValue(
-                    text = finalText,
-                    selection = TextRange(finalText.length)
+                    text = withoutLeadingZero,
+                    selection = TextRange(withoutLeadingZero.length)
                 )
 
-                if (finalValue != null) {
-                    onValueChange(finalValue)
+                // Obavijestimo parent o promjeni
+                if (minValue <= (parsedValue ?: return@BasicTextField)) {
+                    onValueChange(parsedValue)
                 }
             },
             enabled = true,
@@ -308,13 +300,17 @@ fun KarikaIntTextField(
 
     LaunchedEffect(imeVisible) {
         if (!imeVisible) {
-            if (textFieldValue.text.isEmpty()) {
-                textFieldValue = TextFieldValue(
-                    text = minValue.toString(),
-                    selection = TextRange(minValue.toString().length)
-                )
-                onValueChange(minValue)
+            val currentValue = textFieldValue.text.toIntOrNull()
+            val finalValue = when {
+                currentValue == null || currentValue < minValue -> minValue
+                else -> currentValue
             }
+
+            textFieldValue = TextFieldValue(
+                text = finalValue.toString(),
+                selection = TextRange(finalValue.toString().length)
+            )
+            onValueChange(finalValue)
         }
     }
 }

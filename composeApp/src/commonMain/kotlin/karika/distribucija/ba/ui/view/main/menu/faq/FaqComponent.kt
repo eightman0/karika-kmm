@@ -17,7 +17,6 @@ class FaqComponent(componentContext: ComponentContext, stateHolder: KarikaStateH
     private val _faq = MutableStateFlow<List<Faq>>(emptyList())
     val faq = _faq.asStateFlow()
 
-
     init {
         get()
     }
@@ -30,7 +29,9 @@ class FaqComponent(componentContext: ComponentContext, stateHolder: KarikaStateH
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
                             hideLoader()
-                            _faq.update { result.data }
+                            _faq.update {
+                                result.data
+                            }
                         }
 
                         is ResultState.Error -> {

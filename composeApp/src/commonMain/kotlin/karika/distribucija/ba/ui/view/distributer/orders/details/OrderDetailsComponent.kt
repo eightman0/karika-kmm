@@ -159,25 +159,34 @@ class OrderDetailsComponent(
     }
 
     fun approve(message: String, type: String, withDelivery: Boolean) {
-        saveShippingOrderDetails(if (type.startsWith("A2B")) "A2B" else "EURO_EXPRESS") {
-            iOScope.launch {
-                repository.changeOrderStatus(
-                    type = "approve",
-                    orderId = order.value.orderId ?: "",
-                    message = message,
-                    withDelivery = withDelivery
-                ).collect { result ->
-                    when (result) {
-                        is ResultState.Loading -> showLoader()
-                        is ResultState.Success -> {
-                            showMessage("Narudžba je uspješno odobrena.")
-                            getOrder()
-                        }
+        if (withDelivery) {
+            saveShippingOrderDetails(if (type.startsWith("A2B")) "A2B" else "EURO_EXPRESS") {
+                approve(message = message, withDelivery = withDelivery)
+            }
+        } else {
+            approve(message = message, withDelivery = withDelivery)
+        }
 
-                        is ResultState.Error -> {
-                            hideLoader()
-                            showMessage(result.message)
-                        }
+    }
+
+    fun approve(message: String, withDelivery: Boolean) {
+        iOScope.launch {
+            repository.changeOrderStatus(
+                type = "approve",
+                orderId = order.value.orderId ?: "",
+                message = message,
+                withDelivery = withDelivery
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> showLoader()
+                    is ResultState.Success -> {
+                        showMessage("Narudžba je uspješno odobrena.")
+                        getOrder()
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message)
                     }
                 }
             }

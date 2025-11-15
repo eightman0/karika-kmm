@@ -24,6 +24,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -68,6 +69,7 @@ fun FaqView(component: FaqComponent) {
                 KarikaText(
                     modifier = Modifier,
                     color = KarikaColors.White,
+                    textAlign = TextAlign.Center,
                     atext = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
@@ -144,8 +146,7 @@ private fun FaqItem(faq: Faq, component: FaqComponent) {
     Column(
         modifier = Modifier
             .border(width = 1.dp, color = KarikaColors.Primary, shape = RoundedCornerShape(4.dp))
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -159,30 +160,81 @@ private fun FaqItem(faq: Faq, component: FaqComponent) {
             KarikaText(
                 modifier = Modifier
                     .padding(start = 8.dp)
-                    .padding(8.dp)
+                    .padding(16.dp)
                     .weight(1f),
                 color = KarikaColors.White,
-                text = faq.question,
+                text = faq.section,
                 textSize = 14.sp,
-                fontWeight = FontWeight.W500
+                fontWeight = FontWeight.W600
             )
             Icon(
                 modifier = Modifier
-                    .padding(end = 8.dp),
+                    .padding(end = 16.dp),
                 imageVector = vectorResource(if (!expanded.value) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up),
                 contentDescription = "",
                 tint = KarikaColors.White
             )
         }
+
         if (expanded.value) {
-            HtmlTextWithStyles(
-                modifier = Modifier
-                    .padding(bottom = 16.dp, start = 16.dp, end = 16.dp),
-                textColor = KarikaColors.Gray2,
-                html = faq.answer ?: "",
-                // textSize = 14.sp,
-                // fontWeight = FontWeight.W400
-            )
+            Column(
+                modifier = Modifier.padding(vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                faq.items?.forEach {
+                    val expanded1 = mutableStateOf(false).asState()
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .border(
+                                width = 1.dp,
+                                color = KarikaColors.Gray20,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .onClick {
+                                    expanded1.negate()
+                                }
+                                .background(
+                                    color = KarikaColors.Gray5,
+                                    shape = RoundedCornerShape(4.dp)
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            KarikaText(
+                                modifier = Modifier
+                                    .padding(start = 8.dp)
+                                    .padding(8.dp)
+                                    .weight(1f),
+                                color = KarikaColors.Primary,
+                                text = it.question,
+                                textSize = 14.sp,
+                                fontWeight = FontWeight.W600
+                            )
+                            Icon(
+                                modifier = Modifier
+                                    .padding(end = 8.dp),
+                                imageVector = vectorResource(if (!expanded1.value) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up),
+                                contentDescription = "",
+                                tint = KarikaColors.Primary
+                            )
+                        }
+                        if (expanded1.value) {
+                            HtmlTextWithStyles(
+                                modifier = Modifier
+                                    .padding(bottom = 16.dp, start = 16.dp, end = 16.dp),
+                                textColor = KarikaColors.Gray2,
+                                html = it.answer ?: ""
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
