@@ -2,31 +2,27 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Potreban pristup fotografijama za odabir slika</string>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>Potreban pristup za spremanje fotografija</string>
 	<key>APP_ENV</key>
 	<string>${APP_ENV}</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>ba.karika.Karika</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>karika</string>
+			</array>
+		</dict>
+	</array>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 		<string>fetch</string>
-	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>karika</string>
-			</array>
-			<key>CFBundleURLName</key>
-			<string>ba.karika.Karika</string>
-		</dict>
 	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>

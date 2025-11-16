@@ -182,7 +182,7 @@
 		41E3D7AB2EAF81B2004AAB3E /* Demo */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = B9DA98002DC14AA900A4DA20 /* Configuration */;
-			baseConfigurationReferenceRelativePath = Uat.xcconfig;
+			baseConfigurationReferenceRelativePath = Demo.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APP_ENV = demo;
@@ -244,7 +244,7 @@
 		41E3D7AC2EAF81B2004AAB3E /* Demo */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = B9DA98002DC14AA900A4DA20 /* Configuration */;
-			baseConfigurationReferenceRelativePath = Uat.xcconfig;
+			baseConfigurationReferenceRelativePath = Demo.xcconfig;
 			buildSettings = {
 				APP_ENV = demo;
 				APP_LINKS = demo.karika.ba;
@@ -266,6 +266,8 @@
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Karika.ba - Demo";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Potreban pristup za spremanje fotografija";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Potreban pristup fotografijama za odabir slika";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -440,6 +442,8 @@
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Karika.ba;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Potreban pristup za spremanje fotografija";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Potreban pristup fotografijama za odabir slika";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -484,6 +488,8 @@
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Karika.ba - Test";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Potreban pristup za spremanje fotografija";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Potreban pristup fotografijama za odabir slika";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
