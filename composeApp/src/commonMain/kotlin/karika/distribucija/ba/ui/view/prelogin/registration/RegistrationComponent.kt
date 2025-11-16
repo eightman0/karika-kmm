@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.RegistrationRepository
 import karika.distribucija.ba.domain.model.Addresses
+import karika.distribucija.ba.domain.model.ConfirmRegistration
 import karika.distribucija.ba.domain.model.CustomAttributes
 import karika.distribucija.ba.domain.model.Customer
 import karika.distribucija.ba.domain.model.KarikaUnit
@@ -11,14 +12,16 @@ import karika.distribucija.ba.domain.model.RegisterDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorRegisterRequest
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.common.KarikaType
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.view.main.profile.account.isPassComplex
 import karika.distribucija.ba.util.KarikaConstants
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 
 class RegistrationComponent(
     componentContext: ComponentContext,
@@ -56,8 +59,8 @@ class RegistrationComponent(
     val canton = mutableStateOf<List<String>>(emptyList())
     val city = mutableStateOf<List<String>>(emptyList())
     val municipality = mutableStateOf<List<String>>(emptyList())
-    val customerRegions = mutableStateOf<List<KarikaUnit>>(emptyList())
-    val customerGroups = mutableStateOf<List<KarikaUnit>>(emptyList())
+    val customerRegions = mutableStateOf(stateHolder.commonHandler.config.value.customerRegionList)
+    val customerGroups = mutableStateOf(stateHolder.commonHandler.config.value.customerGroupList)
 
     fun register() {
         if (companyName.value.isEmpty()) {
@@ -245,6 +248,14 @@ class RegistrationComponent(
                             "Dobrodošli na Karika.ba\n" +
                                     "Nakon provjere informacija za registraciju, vaš nalog će biti odobren."
                         )
+                        repository.confirmRegister(
+                            ConfirmRegistration(
+                                publicName = companyName.value.trim(),
+                                email = email.value,
+                                password = password.value,
+                                userType = "customer"
+                            )
+                        ).collect()
                         preLoginBack()
                     }
 
@@ -289,6 +300,14 @@ class RegistrationComponent(
                         showMessage(
                             "Registracija je uspješna, dobrodošli na Karika.ba. Nakon provjere validnosti unesenih podataka Vaš nalog će biti odobren."
                         )
+                        repository.confirmRegister(
+                            ConfirmRegistration(
+                                publicName = companyName.value,
+                                email = email.value,
+                                password = password.value,
+                                userType = "vendor"
+                            )
+                        ).collect()
                         preLoginBack()
                     }
 

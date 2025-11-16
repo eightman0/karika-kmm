@@ -19,10 +19,6 @@ class NotificationsComponent(componentContext: ComponentContext, stateHolder: Ka
     private val _notifications = MutableStateFlow<List<Notification>>(emptyList())
     val notifications = _notifications.asStateFlow()
 
-    init {
-        get()
-    }
-
     fun get() {
         iOScope.launch {
             dashRepository.notifications()

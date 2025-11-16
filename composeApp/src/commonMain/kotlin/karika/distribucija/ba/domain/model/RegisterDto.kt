@@ -6,15 +6,15 @@ import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class RegisterDto(
-    val customer: Customer,
-    val password: String
+    val customer: Customer?,
+    val password: String?
 )
 
 @Serializable
 data class Customer(
-    val email: String,
-    val firstname: String,
-    val lastname: String,
+    val email: String?,
+    val firstname: String?,
+    val lastname: String?,
     val addresses: ArrayList<Addresses>,
     val customAttributes: List<CustomAttributes> = arrayListOf()
 )
@@ -55,4 +55,14 @@ data class VendorRegisterRequest(
     val firstname: String,
     val lastname: String,
     val phone: String
+)
+
+@Serializable
+data class ConfirmRegistration(
+    @SerialName("public_name")
+    val publicName: String,
+    val email: String,
+    val password: String,
+    @SerialName("user_type")
+    val userType: String
 )

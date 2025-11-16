@@ -146,7 +146,7 @@ data class OrderProduct(
         return karikaPriceFormat(
             Product().apply {
                 price = total
-            }.vpc(qty?.toInt() ?: 1)
+            }.vpc(1)
         ) + " KM"
     }
 

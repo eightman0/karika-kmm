@@ -54,7 +54,13 @@ class OrderDetailsComponent(
     init {
         getOrder()
         getComments()
-        //listenPackageChanges()
+
+        iOScope.launch {
+            stateHolder.vendorNotificationHandler.notificationCount
+                .collect {
+                    getOrder()
+                }
+        }
     }
 
     private fun getOrder() {

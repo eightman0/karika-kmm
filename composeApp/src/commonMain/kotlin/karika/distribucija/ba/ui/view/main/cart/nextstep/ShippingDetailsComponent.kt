@@ -13,14 +13,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 class ShippingDetailsComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
 ) : CommonComponent(componentContext, stateHolder) {
     private val repository = CartRepository()
-    private val _addresses = MutableStateFlow(stateHolder.customerSpecificHandler.userDetails.value.addresses)
+    private val _addresses = MutableStateFlow(
+        stateHolder.customerSpecificHandler.userDetails.value.addresses
+            .filter { it.defaultBilling == null || it.defaultBilling == "false" }
+    )
     val addresses = _addresses.asStateFlow()
 
     val selectedAddress =
@@ -29,7 +31,8 @@ class ShippingDetailsComponent(
 
     val firstname = mutableStateOf("")
     val lastname = mutableStateOf("")
-    val companyName = mutableStateOf(stateHolder.customerSpecificHandler.userDetails.value.companyName())
+    val companyName =
+        mutableStateOf(stateHolder.customerSpecificHandler.userDetails.value.companyName())
     val address = mutableStateOf("")
     val city = mutableStateOf("")
     val postal = mutableStateOf("")

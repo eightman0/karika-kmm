@@ -1,5 +1,6 @@
 package karika.distribucija.ba.domain.api
 
+import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.post
@@ -9,6 +10,8 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
+import karika.distribucija.ba.domain.HttpClientProvider.urlV1
+import karika.distribucija.ba.domain.model.ConfirmRegistration
 import karika.distribucija.ba.domain.model.RegisterDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorRegisterRequest
@@ -23,6 +26,7 @@ internal class RegistrationApi {
             setBody(registerDto)
         }
     }
+
     suspend fun registerVendor(data: VendorRegisterRequest): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.post(
             url("mobile/vendor/register")
@@ -50,10 +54,18 @@ internal class RegistrationApi {
             )
         }
     }
+
+    suspend fun confirmRegistration(data: ConfirmRegistration): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.post(
+            urlV1("auth/register")
+        ) {
+            setBody(data)
+        }
+    }
 }
 
 class RegistrationRepository internal constructor() {
-    fun register(registerDto: RegisterDto): Flow<ResultState<String>> = flow {
+    fun register(registerDto: RegisterDto): Flow<ResultState<RegisterDto>> = flow {
         emit(ResultState.Loading)
         try {
             val response = RegistrationApi()
@@ -61,7 +73,7 @@ class RegistrationRepository internal constructor() {
                 .getOrNull()
 
             if (response != null && response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.bodyAsText()))
+                emit(ResultState.Success(response.body()))
                 return@flow
             }
 
@@ -88,4 +100,17 @@ class RegistrationRepository internal constructor() {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
+
+    fun confirmRegister(confirmRegistration: ConfirmRegistration): Flow<ResultState<String>> =
+        flow {
+            emit(ResultState.Loading)
+            try {
+                RegistrationApi()
+                    .confirmRegistration(confirmRegistration)
+                    .getOrNull()
+                emit(ResultState.Success("Došlo je do greške. Pokušajte ponovo!"))
+            } catch (e: Exception) {
+                emit(ResultState.Success("Došlo je do greške. Pokušajte ponovo!"))
+            }
+        }
 }

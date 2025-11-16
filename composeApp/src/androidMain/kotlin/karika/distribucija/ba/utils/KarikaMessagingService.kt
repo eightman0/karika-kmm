@@ -16,6 +16,7 @@ import karika.distribucija.ba.AppComponent
 import karika.distribucija.ba.KarikaActivity
 import karika.distribucija.ba.R
 import kotlin.random.Random
+import androidx.core.net.toUri
 
 class KarikaMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
@@ -50,19 +51,16 @@ class KarikaMessagingService : FirebaseMessagingService() {
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setContentTitle(notification.title)
             .setContentText(notification.body)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_notification)
             .setColor(applicationContext.getColor(R.color.karika))
             .setAutoCancel(true)
-            .setSound(Uri.parse("android.resource://${applicationContext.packageName}/raw/android_ta_da"))
+            .setSound("android.resource://${applicationContext.packageName}/raw/android_ta_da".toUri())
             .setContentIntent(pendingIntent)
 
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            manager.createNotificationChannel(
-                NotificationChannel(channelId, "KarikaChannel", IMPORTANCE_DEFAULT)
-            )
-        }
+        manager.createNotificationChannel(
+            NotificationChannel(channelId, "KarikaChannel", IMPORTANCE_DEFAULT)
+        )
         manager.notify(nextInt, notificationBuilder.build())
     }
 }

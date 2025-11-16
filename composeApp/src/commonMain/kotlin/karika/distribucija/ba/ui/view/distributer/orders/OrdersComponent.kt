@@ -28,6 +28,15 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
     private var queryParams =
         listOf("&searchCriteria[sortOrders][0][field]=created_at&searchCriteria[sortOrders][0][direction]=DESC")
 
+    init {
+        iOScope.launch {
+            stateHolder.vendorNotificationHandler.notificationCount
+                .collect {
+                    loadNextPage(true)
+                }
+        }
+    }
+
     override fun loadNextPage(reset: Boolean) {
         if (reset) {
             hasNextPage = true

@@ -193,42 +193,44 @@ private fun CompanyInfo(component: RegistrationComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.commonHandler.config.value.customerGroupList.chunked(gridColumnCount).forEach {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                it.forEach { it1 ->
-                    if (component.userType.isShop()) {
-                        KarikaCheckbox(
-                            modifier = Modifier.weight(1f),
-                            title = it1.label(),
-                            value = customerGroups.value.contains(it1)
-                        ) {
-                            if (customerGroups.value.contains(it1)) {
-                                customerGroups.value -= it1
-                            } else {
-                                customerGroups.value += it1
+        component.stateHolder.commonHandler.config.value.customerGroupList
+            .chunked(gridColumnCount)
+            .forEach {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    it.forEach { it1 ->
+                        if (component.userType.isShop()) {
+                            KarikaCheckbox(
+                                modifier = Modifier.weight(1f),
+                                title = it1.label(),
+                                value = customerGroups.value.contains(it1)
+                            ) {
+                                if (customerGroups.value.contains(it1)) {
+                                    customerGroups.value -= it1
+                                } else {
+                                    customerGroups.value += it1
+                                }
                             }
-                        }
-                    } else {
-                        KarikaCheckboxSecondary(
-                            modifier = Modifier.weight(1f),
-                            title = it1.label(),
-                            value = customerGroups.value.contains(it1)
-                        ) {
-                            if (customerGroups.value.contains(it1)) {
-                                customerGroups.value -= it1
-                            } else {
-                                customerGroups.value += it1
+                        } else {
+                            KarikaCheckboxSecondary(
+                                modifier = Modifier.weight(1f),
+                                title = it1.label(),
+                                value = customerGroups.value.contains(it1)
+                            ) {
+                                if (customerGroups.value.contains(it1)) {
+                                    customerGroups.value -= it1
+                                } else {
+                                    customerGroups.value += it1
+                                }
                             }
                         }
                     }
                 }
             }
-        }
         YSpacer8()
         KarikaText(
             modifier = Modifier
@@ -238,42 +240,43 @@ private fun CompanyInfo(component: RegistrationComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(gridColumnCount).forEach {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                it.forEach { it1 ->
-                    if (component.userType.isShop()) {
-                        KarikaCheckbox(
-                            modifier = Modifier.weight(1f),
-                            title = it1.label(),
-                            value = customerRegions.value.contains(it1)
-                        ) {
-                            if (customerRegions.value.contains(it1)) {
-                                customerRegions.value -= it1
-                            } else {
-                                customerRegions.value += it1
+        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(gridColumnCount)
+            .forEach {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    it.forEach { it1 ->
+                        if (component.userType.isShop()) {
+                            KarikaCheckbox(
+                                modifier = Modifier.weight(1f),
+                                title = it1.label(),
+                                value = customerRegions.value.contains(it1)
+                            ) {
+                                if (customerRegions.value.contains(it1)) {
+                                    customerRegions.value -= it1
+                                } else {
+                                    customerRegions.value += it1
+                                }
                             }
-                        }
-                    } else {
-                        KarikaCheckboxSecondary(
-                            modifier = Modifier.weight(1f),
-                            title = it1.label(),
-                            value = customerRegions.value.contains(it1)
-                        ) {
-                            if (customerRegions.value.contains(it1)) {
-                                customerRegions.value -= it1
-                            } else {
-                                customerRegions.value += it1
+                        } else {
+                            KarikaCheckboxSecondary(
+                                modifier = Modifier.weight(1f),
+                                title = it1.label(),
+                                value = customerRegions.value.contains(it1)
+                            ) {
+                                if (customerRegions.value.contains(it1)) {
+                                    customerRegions.value -= it1
+                                } else {
+                                    customerRegions.value += it1
+                                }
                             }
                         }
                     }
                 }
             }
-        }
     }
 }
 
