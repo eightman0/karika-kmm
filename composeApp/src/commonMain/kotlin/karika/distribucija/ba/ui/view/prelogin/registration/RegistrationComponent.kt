@@ -7,7 +7,6 @@ import karika.distribucija.ba.domain.model.Addresses
 import karika.distribucija.ba.domain.model.ConfirmRegistration
 import karika.distribucija.ba.domain.model.CustomAttributes
 import karika.distribucija.ba.domain.model.Customer
-import karika.distribucija.ba.domain.model.KarikaUnit
 import karika.distribucija.ba.domain.model.RegisterDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorRegisterRequest
@@ -21,7 +20,6 @@ import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonPrimitive
 
 class RegistrationComponent(
     componentContext: ComponentContext,
@@ -272,13 +270,14 @@ class RegistrationComponent(
         iOScope.launch {
             repository.registerVendor(
                 VendorRegisterRequest(
-                    customerGroups.value.joinToString(separator = ",") { it.unit() }
+                    customerGroups.value.joinToString(separator = ",") { "|${it.unit()}|" }
                         .trimIndent(),
-                    customerRegions.value.joinToString(separator = ",") { it.unit() }
+                    customerRegions.value.joinToString(separator = ",") { "|${it.unit()}|" }
                         .trimIndent(),
-                    companyEntity.value.trim(),
+                    KarikaConstants.entries.findLast { it.name == companyEntity.value }?.id?.toString()
+                        ?: "",
                     companyCanton.value.trim(),
-                    companyMunicipality.value.trim(),
+                    companyMunicipality.value.trim().ifEmpty { companyCity.value.trim() },
                     companyName.value.trim(),
                     companyPdv.value.trim(),
                     companyId.value.trim(),

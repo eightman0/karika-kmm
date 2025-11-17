@@ -76,7 +76,7 @@ fun SearchView(component: SearchComponent) {
                             VendorItem(it, component)
                         }
                     }
-                    if (item.size == 1) {
+                    repeat(gridColumnCount - item.size) {
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -110,7 +110,7 @@ fun SearchView(component: SearchComponent) {
                             ProductItem(it, component)
                         }
                     }
-                    if (item.size == 1) {
+                    repeat(gridColumnCount - item.size) {
                         Box(
                             modifier = Modifier
                                 .weight(1f)

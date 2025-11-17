@@ -99,7 +99,7 @@ private fun Products(component: ProductByCategoryComponent) {
                         ProductItem(it, component)
                     }
                 }
-                if (item.size == 1) {
+                repeat(gridColumnCount - item.size) {
                     Box(
                         modifier = Modifier
                             .weight(1f)

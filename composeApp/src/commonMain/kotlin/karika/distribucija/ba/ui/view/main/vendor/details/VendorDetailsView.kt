@@ -132,7 +132,7 @@ private fun VendorProducts(modifier: Modifier, component: VendorDetailsComponent
                             ProductItem(it, component, true)
                         }
                     }
-                    if (item.size == 1) {
+                    repeat(gridColumnCount - item.size) {
                         Box(
                             modifier = Modifier
                                 .weight(1f)
