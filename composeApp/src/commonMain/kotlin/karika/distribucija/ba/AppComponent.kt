@@ -6,6 +6,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackCallback
+import com.arkivanov.essenty.lifecycle.Lifecycle
 import karika.distribucija.ba.domain.api.MandatoryUpdateRepository
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Order
@@ -16,6 +17,7 @@ import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaHandler
 import karika.distribucija.ba.ui.common.appVersion
+import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardComponent
 import karika.distribucija.ba.ui.view.main.MainComponent
@@ -157,6 +159,11 @@ class AppComponent(
         screensaverHandler = { showScreenSaver.value = true }
         stateHolder.commonHandler.init()
         backHandler.register(backCallback)
+        lifecycle.subscribe(object : Lifecycle.Callbacks {
+            override fun onResume() {
+                checkForUpdate()
+            }
+        })
     }
 
     private fun child(appConfig: AppConfig, componentContext: ComponentContext): Child =
@@ -239,26 +246,22 @@ class AppComponent(
         }
 
     fun checkForUpdate() {
-        appVersion()
-            .takeIf { it.isNotEmpty() }
-            ?.let { current ->
-                iOScope.launch {
-                    MandatoryUpdateRepository()
-                        .get()
-                        .collect { result ->
-                            if (result is ResultState.Success) {
-                                if (current.toDoubleOrZero() < result.data.iOS()) {
-                                    showMandatoryUpdate.value = true
-                                }
-                            }
-                        }
+        if (isKiosk()) {
+            return
+        }
+
+        iOScope.launch {
+            MandatoryUpdateRepository()
+                .get()
+                .collect { result ->
+                    if (result is ResultState.Success) {
+                        showMandatoryUpdate.value = appVersion() < result.data.version()
+                    }
                 }
-            }
+        }
     }
 
     fun handleDeepLink(emailToken: String, token: String) {
         stateHolder.commonHandler.handleDeepLink(emailToken, token)
     }
 }
-
-private fun String?.toDoubleOrZero() = this?.toDoubleOrNull() ?: 0.0

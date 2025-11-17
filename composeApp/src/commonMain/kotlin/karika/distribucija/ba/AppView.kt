@@ -117,10 +117,6 @@ private fun MandatoryUpdate(component: AppComponent) {
     if (update) {
         MandatoryUpdateModal()
     }
-
-    LaunchedEffect(Unit) {
-        component.checkForUpdate()
-    }
 }
 
 @Composable

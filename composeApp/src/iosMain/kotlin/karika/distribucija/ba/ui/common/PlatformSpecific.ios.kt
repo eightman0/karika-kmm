@@ -207,8 +207,11 @@ actual fun getEnvPrefix(): String {
 
 actual fun isKiosk() = false
 
-actual fun appVersion(): String {
-    return NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String ?: "0.0"
+actual fun appVersion(): Int {
+    return (NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String
+        ?: "0.0")
+        .replace(".", "")
+        .toIntOrNull() ?: 0
 }
 
 actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
@@ -251,4 +254,12 @@ actual fun openEmail(emailAddress: String, error: (String) -> Unit) {
             }
         }
     )
+}
+
+actual fun isAndroid(): Boolean {
+    return false
+}
+
+actual fun appUrl(): String {
+    return "https://apps.apple.com/app/id/6692625868"
 }

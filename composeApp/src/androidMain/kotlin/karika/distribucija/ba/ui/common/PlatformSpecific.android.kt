@@ -62,14 +62,14 @@ actual fun getEnvPrefix(): String {
 }
 
 actual fun isKiosk() = BuildConfig.FLAVOR.startsWith("kiosk")
-actual fun appVersion(): String {
-    return ""
+actual fun appVersion(): Int {
+    return BuildConfig.VERSION_NAME.replace(".", "").toIntOrNull() ?: 0
 }
 
 actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
     val context: Context = KoinPlatform.getKoin().get()
     val intent = Intent(Intent.ACTION_DIAL).apply {
-        data = Uri.parse("tel:$phoneNumber")
+        data = "tel:$phoneNumber".toUri()
         flags = FLAG_ACTIVITY_NEW_TASK
     }
     try {
@@ -106,4 +106,12 @@ actual fun openEmail(emailAddress: String, error: (String) -> Unit) {
     } catch (ignored: Exception) {
         error.invoke(ignored.message ?: "")
     }
+}
+
+actual fun isAndroid(): Boolean {
+    return !isKiosk()
+}
+
+actual fun appUrl(): String {
+    return "https://${getEnvPrefix()}karika.ba/internal/builds/app"
 }

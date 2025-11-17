@@ -48,9 +48,13 @@ expect fun getEnvJwt(): String
 
 expect fun isKiosk(): Boolean
 
-expect fun appVersion(): String
+expect fun appVersion(): Int
 
 expect fun appVersionName(): String
+
+expect fun isAndroid(): Boolean
+
+expect fun appUrl(): String
 
 expect fun openPhoneCall(phoneNumber: String, error: (String) -> Unit = {})
 expect fun openEmail(emailAddress: String, error: (String) -> Unit = {})

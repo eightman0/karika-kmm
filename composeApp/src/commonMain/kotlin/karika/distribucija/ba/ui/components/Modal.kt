@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import karika.distribucija.ba.ui.common.appUrl
 import karika.distribucija.ba.ui.common.openPdf
 
 @Composable
@@ -55,7 +56,7 @@ fun MandatoryUpdateModal() {
                         .fillMaxWidth(),
                     title = "Instaliraj novu verziju",
                 ) {
-                    openPdf("https://apps.apple.com/app/id/6692625868")
+                    openPdf(appUrl())
                 }
             }
         }
