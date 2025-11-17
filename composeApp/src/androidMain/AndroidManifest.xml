@@ -30,9 +30,10 @@
 
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="https"
-                      android:host="@string/deeplink_host"
-                      android:pathPrefix="/oauth" />
+                <data
+                    android:host="@string/deeplink_host"
+                    android:pathPrefix="/oauth"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
 
@@ -61,13 +62,4 @@
             android:name="firebase_analytics_collection_enabled"
             android:value="true" />
     </application>
-
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.DIAL" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.SENDTO" />
-        </intent>
-    </queries>
 </manifest>

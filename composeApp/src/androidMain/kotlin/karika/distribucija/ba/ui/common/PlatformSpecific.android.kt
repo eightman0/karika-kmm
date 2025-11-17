@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
+import android.util.Patterns
 import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.runtime.Composable
@@ -75,6 +76,8 @@ actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
     try {
         if (intent.resolveActivity(context.packageManager) != null) {
             context.startActivity(intent)
+        } else {
+            error.invoke("No phone app found")
         }
     } catch (ignored: Exception) {
         error.invoke(ignored.message ?: "")
@@ -94,17 +97,24 @@ actual fun appVersionName(): String {
 }
 
 actual fun openEmail(emailAddress: String, error: (String) -> Unit) {
-    val context: Context = KoinPlatform.getKoin().get()
-    val intent = Intent(Intent.ACTION_SENDTO).apply {
-        data = "mailto:$emailAddress".toUri()
-        flags = FLAG_ACTIVITY_NEW_TASK
+    if (!Patterns.EMAIL_ADDRESS.matcher(emailAddress).matches()) {
+        error.invoke("Email is not valid!")
+        return
     }
+
+    val context: Context = KoinPlatform.getKoin().get()
+
+    val intent = Intent(Intent.ACTION_SENDTO).apply {
+        data = Uri.parse("mailto:$emailAddress") // ← Dodaj email direktno u URI!
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    }
+
     try {
-        if (intent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(intent)
-        }
-    } catch (ignored: Exception) {
-        error.invoke(ignored.message ?: "")
+        context.startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        error.invoke("No email app installed!")
+    } catch (e: Exception) {
+        error.invoke(e.message ?: "Failed to open email app")
     }
 }
 
