@@ -257,9 +257,9 @@ class RegistrationComponent(
                         preLoginBack()
                     }
 
-                    else -> {
+                   is  ResultState.Error -> {
                         hideLoader()
-                        showMessage("Email adresa već postoji u sistemu, molimo pokušajte sa drugom adresom.")
+                        showMessage(result.message)
                     }
                 }
             }
@@ -310,9 +310,9 @@ class RegistrationComponent(
                         preLoginBack()
                     }
 
-                    else -> {
+                    is ResultState.Error -> {
                         hideLoader()
-                        showMessage("Email adresa već postoji u sistemu, molimo pokušajte sa drugom adresom.")
+                        showMessage(result.message)
                     }
                 }
             }

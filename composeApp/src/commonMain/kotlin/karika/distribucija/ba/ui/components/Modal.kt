@@ -18,7 +18,7 @@ import karika.distribucija.ba.ui.common.appUrl
 import karika.distribucija.ba.ui.common.openPdf
 
 @Composable
-fun MandatoryUpdateModal() {
+fun MandatoryUpdateModal(url: String = appUrl()) {
     Dialog(
         onDismissRequest = {},
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -56,7 +56,7 @@ fun MandatoryUpdateModal() {
                         .fillMaxWidth(),
                     title = "Instaliraj novu verziju",
                 ) {
-                    openPdf(appUrl())
+                    openPdf(url)
                 }
             }
         }

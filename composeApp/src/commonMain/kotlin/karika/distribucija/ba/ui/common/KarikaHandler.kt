@@ -2,7 +2,7 @@ package karika.distribucija.ba.ui.common
 
 interface KarikaHandler {
     fun pickFile(
-        mediaTypes: Array<String> = arrayOf("image/png", "image/jpeg"),
+        mediaTypes: Array<String> = arrayOf("application/pdf"),
         callback: (String, ByteArray) -> Unit
     )
 

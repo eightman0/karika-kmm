@@ -8,8 +8,8 @@ import karika.distribucija.ba.domain.model.File
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.common.openPdf
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -82,7 +82,7 @@ class CommentsComponent(
     }
 
     fun pickFile() {
-        stateHolder.handler.pickFile(arrayOf("application/pdf")) { name, data ->
+        stateHolder.handler.pickFile { name, data ->
             iOScope.launch {
                 orderRepository.sendBill(
                     orderId = order.orderId ?: return@launch,

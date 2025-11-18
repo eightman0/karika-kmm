@@ -127,7 +127,7 @@ class AppComponent(
     filePicker: KarikaHandler
 ) : CommonComponent(componentContext, KarikaStateHolder(filePicker)) {
     val showScreenSaver = mutableStateOf(false)
-    val showMandatoryUpdate = mutableStateOf(false)
+    val showMandatoryUpdate = mutableStateOf("")
 
     companion object {
         var refreshHandler: () -> Unit = {}
@@ -255,7 +255,11 @@ class AppComponent(
                 .get()
                 .collect { result ->
                     if (result is ResultState.Success) {
-                        showMandatoryUpdate.value = appVersion() < result.data.version()
+                        if (appVersion() < result.data.version()) {
+                            showMandatoryUpdate.value = result.data.updateUrl()
+                        } else {
+                            showMandatoryUpdate.value = ""
+                        }
                     }
                 }
         }

@@ -59,6 +59,7 @@ import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.view.main.profile.messages.overview.AttachmentModal
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_attachment
@@ -276,6 +277,8 @@ private fun EnterComment(component: MessagesOverviewComponent) {
 
         }
     }
+    val pickAttachment = component.showAttachmentSheet.asState()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -296,7 +299,7 @@ private fun EnterComment(component: MessagesOverviewComponent) {
                 Icon(
                     modifier = Modifier
                         .onClick {
-                            component.pickFile()
+                            pickAttachment.negate()
                         },
                     imageVector = vectorResource(Res.drawable.ic_attachment),
                     tint = KarikaColors.Gray2,
@@ -314,6 +317,12 @@ private fun EnterComment(component: MessagesOverviewComponent) {
             component.sendMessage()
         }
     }
+
+    AttachmentModal(
+        showAttachmentModal = pickAttachment,
+        onPickFile = component::pickFile,
+        onPickPhoto = component::pickPhoto
+    )
 }
 
 @Composable

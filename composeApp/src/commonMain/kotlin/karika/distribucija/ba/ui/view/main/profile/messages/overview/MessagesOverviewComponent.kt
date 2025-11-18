@@ -28,6 +28,7 @@ class MessagesOverviewComponent(
 
     private val _vendors = MutableStateFlow<List<Vendor>>(emptyList())
     val vendors = _vendors.asStateFlow()
+    var showAttachmentSheet = mutableStateOf(false)
 
     init {
         if (conversation.createdAt == null) {
@@ -139,6 +140,12 @@ class MessagesOverviewComponent(
 
     fun pickPhoto() {
         stateHolder.handler.pickPhoto { name, data ->
+            sendMessage(data)
+        }
+    }
+
+    fun pickFile() {
+        stateHolder.handler.pickFile { name, data ->
             sendMessage(data)
         }
     }

@@ -114,8 +114,8 @@ fun App(component: AppComponent) {
 private fun MandatoryUpdate(component: AppComponent) {
     val update by component.showMandatoryUpdate.asState()
 
-    if (update) {
-        MandatoryUpdateModal()
+    if (update.isNotEmpty()) {
+        MandatoryUpdateModal(update)
     }
 }
 

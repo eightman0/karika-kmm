@@ -144,10 +144,10 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     }
 
     fun pickImage(value: Int) {
-        stateHolder.handler.pickFile { name, data ->
+        stateHolder.handler.pickPhoto { name, data ->
             if (value == 1) {
                 companyLogo.value = Triple("NEW", name, data)
-                return@pickFile
+                return@pickPhoto
             }
 
             companyBanner.value = Triple("NEW", name, data)

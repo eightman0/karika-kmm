@@ -66,3 +66,8 @@ data class ConfirmRegistration(
     @SerialName("user_type")
     val userType: String
 )
+
+@Serializable
+data class ErrorResponse(
+    val message: String
+)

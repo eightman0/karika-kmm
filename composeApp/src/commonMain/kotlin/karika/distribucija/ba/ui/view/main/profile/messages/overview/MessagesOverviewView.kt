@@ -1,11 +1,13 @@
 package karika.distribucija.ba.ui.view.main.profile.messages.overview
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,10 +25,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -61,6 +65,7 @@ import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_attachment
 import karikav2.composeapp.generated.resources.ic_photo
 import karikav2.composeapp.generated.resources.ic_tertiary
 import kotlinx.coroutines.launch
@@ -276,6 +281,7 @@ private fun EnterComment(component: MessagesOverviewComponent) {
 
         }
     }
+    val pickAttachment = component.showAttachmentSheet.asState()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -296,9 +302,9 @@ private fun EnterComment(component: MessagesOverviewComponent) {
                 Icon(
                     modifier = Modifier
                         .onClick {
-                            component.pickPhoto()
+                            pickAttachment.negate()
                         },
-                    imageVector = vectorResource(Res.drawable.ic_photo),
+                    imageVector = vectorResource(Res.drawable.ic_attachment),
                     tint = KarikaColors.Gray2,
                     contentDescription = ""
                 )
@@ -314,6 +320,12 @@ private fun EnterComment(component: MessagesOverviewComponent) {
             component.sendMessage()
         }
     }
+
+    AttachmentModal(
+        showAttachmentModal = pickAttachment,
+        onPickFile = component::pickFile,
+        onPickPhoto = component::pickPhoto
+    )
 }
 
 @Composable
@@ -432,6 +444,114 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                     fontWeight = FontWeight.W400
                 )
                 YSpacer16()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AttachmentModal(
+    showAttachmentModal: MutableState<Boolean>,
+    onPickFile: () -> Unit = { },
+    onPickPhoto: () -> Unit = { }
+) {
+
+    if (showAttachmentModal.value) {
+        ModalBottomSheet(
+            onDismissRequest = { showAttachmentModal.value = false },
+            containerColor = KarikaColors.White,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = "Izaberi",
+                    fontWeight = FontWeight.Bold,
+                    textSize = 20.sp,
+                    color = KarikaColors.Gray2,
+                    textAlign = TextAlign.Center
+                )
+
+                YSpacer16()
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .onClick {
+                                onPickPhoto()
+                                showAttachmentModal.value = false
+                            }
+                            .border(
+                                width = 1.dp,
+                                color = KarikaColors.Gray3,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .aspectRatio(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(
+                                modifier = Modifier,
+                                imageVector = vectorResource(Res.drawable.ic_photo),
+                                tint = KarikaColors.Gray2,
+                                contentDescription = ""
+                            )
+                            KarikaText(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                text = "Sliku iz galerije",
+                                fontWeight = FontWeight.Bold,
+                                textSize = 14.sp,
+                                color = KarikaColors.Gray2,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .onClick {
+                                onPickFile()
+                                showAttachmentModal.value = false
+                            }
+                            .border(
+                                width = 1.dp,
+                                color = KarikaColors.Gray3,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .aspectRatio(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(
+                                modifier = Modifier,
+                                imageVector = vectorResource(Res.drawable.ic_attachment),
+                                tint = KarikaColors.Gray2,
+                                contentDescription = ""
+                            )
+                            KarikaText(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                text = "Fajl sa uređaja",
+                                fontWeight = FontWeight.Bold,
+                                textSize = 14.sp,
+                                color = KarikaColors.Gray2,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
             }
         }
     }

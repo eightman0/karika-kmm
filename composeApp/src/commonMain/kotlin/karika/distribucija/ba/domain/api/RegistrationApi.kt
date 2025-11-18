@@ -12,6 +12,7 @@ import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.HttpClientProvider.urlV1
 import karika.distribucija.ba.domain.model.ConfirmRegistration
+import karika.distribucija.ba.domain.model.ErrorResponse
 import karika.distribucija.ba.domain.model.RegisterDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorRegisterRequest
@@ -77,7 +78,12 @@ class RegistrationRepository internal constructor() {
                 return@flow
             }
 
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(
+                ResultState.Error(
+                    response?.body<ErrorResponse>()?.message
+                        ?: "Došlo je do greške. Pokušajte ponovo!"
+                )
+            )
         } catch (e: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
@@ -95,7 +101,12 @@ class RegistrationRepository internal constructor() {
                 return@flow
             }
 
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(
+                ResultState.Error(
+                    response?.body<ErrorResponse>()?.message
+                        ?: "Došlo je do greške. Pokušajte ponovo!"
+                )
+            )
         } catch (e: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
