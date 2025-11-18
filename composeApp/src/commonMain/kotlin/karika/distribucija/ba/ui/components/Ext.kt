@@ -117,6 +117,12 @@ fun gridColumnCount(): Int {
 }
 
 @Composable
+fun isTablet(): Boolean {
+    val screenWidth = LocalWindowInfo.current.containerSize.width
+    return screenWidth >= 600
+}
+
+@Composable
 fun <T> Iterable<T>.toGrid(): List<List<T>> {
     val size = gridColumnCount()
     return windowed(size, size, partialWindows = true)

@@ -333,21 +333,23 @@ fun TopBarDashboard(
                         contentDescription = "",
                         tint = KarikaColors.Gray2
                     )
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .offset(16.dp, (-8).dp)
-                            .background(color = KarikaColors.Red, shape = CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        KarikaText(
+                    if (badge > 0) {
+                        Box(
                             modifier = Modifier
-                                .padding(0.dp),
-                            text = "$badge",
-                            textSize = 10.sp,
-                            fontWeight = FontWeight.W400,
-                            color = KarikaColors.White
-                        )
+                                .size(16.dp)
+                                .offset(16.dp, (-8).dp)
+                                .background(color = KarikaColors.Red, shape = CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            KarikaText(
+                                modifier = Modifier
+                                    .padding(0.dp),
+                                text = "$badge",
+                                textSize = 10.sp,
+                                fontWeight = FontWeight.W400,
+                                color = KarikaColors.White
+                            )
+                        }
                     }
                 }
             },

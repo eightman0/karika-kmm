@@ -138,6 +138,7 @@ data class OrderProduct(
         return karikaPriceFormat(
             Product().apply {
                 price = this@OrderProduct.price
+                specialPrice = this@OrderProduct.discountedPrice
             }.vpc(1)
         ) + " KM"
     }

@@ -399,7 +399,7 @@ fun ProductButtons(component: ProductComponent) {
     if (product.hasOnStock()) {
         PrimaryButtonFilled(
             modifier = Modifier
-                .height(56.dp)
+                .height(48.dp)
                 .fillMaxWidth(),
             title = "Dodaj u Korpu",
             icon = Res.drawable.ic_navigation_cart,
@@ -524,6 +524,10 @@ fun ProductQtyAction(
                 value = qty.value,
                 minValue = product.minQty(),
                 onValueChange = {
+                    if (it == qty.value) {
+                        return@KarikaIntTextField
+                    }
+
                     qty.value = it ?: qty.value
                     if (autoUpdate) {
                         pendingQty = qty.value

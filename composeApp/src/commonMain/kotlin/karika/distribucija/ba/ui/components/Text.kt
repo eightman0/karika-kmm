@@ -423,7 +423,8 @@ fun KarikaTextField1(
                 disabledIndicatorColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent
+                unfocusedContainerColor = Color.Transparent,
+                disabledTextColor = KarikaColors.Gray21
             ),
             textStyle = LocalTextStyle.current.copy(
                 fontWeight = fontWeight,

@@ -9,9 +9,10 @@ import coil3.request.CachePolicy
 import coil3.request.crossfade
 import okio.FileSystem
 import kotlin.math.ceil
+import kotlin.math.round
 
 fun karikaPriceFormat(value: Double): String {
-    val scaled = ceil(value * 100) / 100
+    val scaled = round(value * 100) / 100
     val parts = scaled.toString().split('.')
 
     val integerPart = parts[0]

@@ -118,4 +118,13 @@ class ShippingDetailsComponent(
         }
     }
 
+    fun validateNewAddress(): Boolean {
+        return firstname.value.isNotEmpty() &&
+                lastname.value.isNotEmpty() &&
+                address.value.isNotEmpty() &&
+                city.value.isNotEmpty() &&
+                postal.value.isNotEmpty() &&
+                telephone.value.isNotEmpty()
+    }
+
 }

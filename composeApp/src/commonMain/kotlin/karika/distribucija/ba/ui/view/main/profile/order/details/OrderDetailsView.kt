@@ -47,6 +47,7 @@ import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
+import karika.distribucija.ba.ui.components.isTablet
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rounded
 import karika.distribucija.ba.ui.view.main.profile.order.components.AttachBillModal
@@ -109,17 +110,6 @@ private fun OrderCommon(component: OrderDetailsComponent) {
         YSpacer16()
         PriceBox(order)
         YSpacer16()
-        //HorizontalButtons(
-        //    modifier = Modifier,
-        //    primaryTitle = "Naruči ponovo",
-        //    secondaryTitle = "Isprintaj"
-        //) {
-        //    if (it == "Naruči ponovo") {
-        //        component.orderAgain(order)
-        //    } else {
-
-        //    }
-        //}
         PrimaryButtonFilled(
             title = "Naruči ponovo",
         ) {
@@ -267,7 +257,7 @@ fun VendorOrder(order: OrdersResponse, component: OrderDetailsComponent) {
                 //)
             }
             YSpacer8()
-            if (isKiosk()) {
+            if (isTablet()) {
                 Column {
                     TableHeaderRow2()
                     it.products.forEach { vp ->

@@ -2,6 +2,7 @@ package karika.distribucija.ba.ui.view.main.vendor
 
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.Lifecycle
 import karika.distribucija.ba.domain.api.VendorRepository
 import karika.distribucija.ba.domain.model.KarikaUnit
 import karika.distribucija.ba.domain.model.ResultState
@@ -26,6 +27,14 @@ class VendorComponent(
     val showFilter = mutableStateOf(false)
     val selectedRegion = mutableStateOf<List<KarikaUnit>>(listOf())
 
+    init {
+        lifecycle.subscribe(object : Lifecycle.Callbacks {
+            override fun onResume() {
+                super.onResume()
+                loadNextPage(true)
+            }
+        })
+    }
     override fun loadNextPage(reset: Boolean) {
         if (reset) {
             hasNextPage = true

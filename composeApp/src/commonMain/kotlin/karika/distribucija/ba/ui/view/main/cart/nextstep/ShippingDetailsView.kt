@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -356,11 +355,13 @@ private fun PinnedFooter(component: ShippingDetailsComponent) {
             .fillMaxWidth(),
         title = if (newAddress.value) "Spasi i nastavi dalje" else "Pošalji zahtjev dobavljaču",
         fontWeight = FontWeight.W700,
-        textSize = 18.sp
+        textSize = 18.sp,
+        enabled = if (newAddress.value) component.validateNewAddress() else true
     ) {
         component.handleShippingAddress()
     }
 }
+
 
 private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.totalVPC(): String {
     return karikaPriceFormat(

@@ -124,9 +124,6 @@ private fun Vendors(component: VendorComponent) {
             component.loadNextPage()
         }
     }
-    LaunchedEffect(Unit) {
-        component.loadNextPage(reset = true)
-    }
 }
 
 @Composable
