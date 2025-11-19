@@ -37,11 +37,13 @@ import karika.distribucija.ba.ui.components.PrimaryButton
 import karika.distribucija.ba.ui.components.RoundedItem
 import karika.distribucija.ba.ui.components.SearchBoxBorder
 import karika.distribucija.ba.ui.components.TopBarWithBack
+import karika.distribucija.ba.ui.components.XSpacer16
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.bgWhite
 import karika.distribucija.ba.ui.components.gridColumnCount
 import karika.distribucija.ba.ui.components.hideKeyboard
+import karika.distribucija.ba.ui.components.isTabletLandscape
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.main.home.ProductItem
 import karikav2.composeapp.generated.resources.Res
@@ -96,7 +98,9 @@ private fun VendorProducts(modifier: Modifier, component: VendorDetailsComponent
             item {
                 VendorImage(component)
                 YSpacer16()
-                VendorInfo(component)
+                if (!isTabletLandscape()) {
+                    VendorInfo(component)
+                }
                 YSpacer16()
                 VendorCategories(component)
                 YSpacer16()
@@ -228,7 +232,9 @@ private fun VendorImage(component: VendorDetailsComponent) {
         Box(
             modifier = Modifier
                 .onClick {}
-                .size(100.dp)
+                .size(
+                    if (isTabletLandscape()) 140.dp else 100.dp
+                )
                 .border(width = 1.dp, color = KarikaColors.Gray5)
         ) {
             KarikaImage(
@@ -240,14 +246,26 @@ private fun VendorImage(component: VendorDetailsComponent) {
                 model = vendor.image()
             )
         }
-        PrimaryButton(
-            modifier = Modifier
-                .height(48.dp),
-            title = "Pošalji poruku dobavljaču",
-        ) {
-            component.sendMessageToVendor(
-                Product(vendorId = vendor.entityId.toString(), vendorName = vendor.publicName)
-            )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (isTabletLandscape()) {
+                KarikaText(
+                    modifier = Modifier,
+                    text = vendor.name(),
+                    color = KarikaColors.Black,
+                    textSize = 20.sp,
+                    fontWeight = FontWeight.W600
+                )
+            }
+            XSpacer16()
+            PrimaryButton(
+                modifier = Modifier
+                    .height(48.dp),
+                title = "Pošalji poruku dobavljaču",
+            ) {
+                component.sendMessageToVendor(
+                    Product(vendorId = vendor.entityId.toString(), vendorName = vendor.publicName)
+                )
+            }
         }
     }
 }

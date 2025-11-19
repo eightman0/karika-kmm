@@ -124,6 +124,18 @@ fun isTablet(): Boolean {
 }
 
 @Composable
+fun isTabletLandscape(): Boolean {
+    val containerSize = LocalWindowInfo.current.containerSize
+    val screenWidth = containerSize.width
+    val screenHeight = containerSize.height
+
+    val isTablet = screenWidth >= 600.dp.toPx()
+    val isLandscape = screenWidth > screenHeight
+
+    return isTablet && isLandscape
+}
+
+@Composable
 fun Dp.toPx() = with(LocalDensity.current) { this@toPx.toPx() }
 
 @Composable

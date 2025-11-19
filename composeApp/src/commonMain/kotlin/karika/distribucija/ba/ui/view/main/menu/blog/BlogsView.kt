@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,13 +27,13 @@ import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.TopBarWithBack
-import karika.distribucija.ba.ui.components.YSpacer16
+import karika.distribucija.ba.ui.components.isTabletLandscape
 import karika.distribucija.ba.ui.components.onClick
 
 @Composable
 fun BlogsView(component: BlogsComponent) {
     val blogs by component.blogs.collectAsState()
-
+    val columns = if (isTabletLandscape()) 2 else 1
     KarikaScaffold(
         containerColor = KarikaColors.White,
         contentWindowInsets = WindowInsets.systemBars,
@@ -49,8 +50,17 @@ fun BlogsView(component: BlogsComponent) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(items = blogs) { item ->
-                BlogItem(item, component)
+            items(items = blogs.chunked(columns)) { items ->
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    items.forEach { item ->
+                        Box(modifier = Modifier.weight(1f)) {
+                            BlogItem(blog = item, component = component)
+                        }
+                    }
+                    if (items.size < columns) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
     }

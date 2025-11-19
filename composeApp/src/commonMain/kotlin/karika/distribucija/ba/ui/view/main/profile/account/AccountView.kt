@@ -48,6 +48,7 @@ import karika.distribucija.ba.ui.components.PrimaryButton
 import karika.distribucija.ba.ui.components.SecondaryButton
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.asState
+import karika.distribucija.ba.ui.components.isTabletLandscape
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rounded
@@ -86,10 +87,21 @@ fun AccountView(component: AccountComponent) {
             } else if (editContact) {
                 UpdateContactInfo(component)
             } else {
-                ContactInfo(component)
-                BillingAddress(component)
-                ShippingAddress(component)
-                AllShippingAddress(component)
+                if (isTabletLandscape()) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        ContactInfo(modifier = Modifier.weight(1f), component = component)
+                        BillingAddress(modifier = Modifier.weight(1f), component = component)
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        ShippingAddress(modifier = Modifier.weight(1f), component = component)
+                        AllShippingAddress(modifier = Modifier.weight(1f), component = component)
+                    }
+                } else {
+                    ContactInfo(component = component)
+                    BillingAddress(component = component)
+                    ShippingAddress(component = component)
+                    AllShippingAddress(component = component)
+                }
             }
         }
         if (showState.value) {
@@ -108,13 +120,15 @@ fun AccountView(component: AccountComponent) {
 }
 
 @Composable
-private fun ContactInfo(component: AccountComponent) {
+private fun ContactInfo(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    component: AccountComponent
+) {
     val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .border(width = 1.dp, shape = RoundedCornerShape(4.dp), color = KarikaColors.Gray11)
-            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -267,13 +281,15 @@ private fun ContactInfo(component: AccountComponent) {
 }
 
 @Composable
-private fun BillingAddress(component: AccountComponent) {
+private fun BillingAddress(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    component: AccountComponent
+) {
     val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .border(width = 1.dp, shape = RoundedCornerShape(4.dp), color = KarikaColors.Gray11)
-            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -459,13 +475,15 @@ private fun BillingAddress(component: AccountComponent) {
 }
 
 @Composable
-private fun ShippingAddress(component: AccountComponent) {
+private fun ShippingAddress(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    component: AccountComponent
+) {
     val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .border(width = 1.dp, shape = RoundedCornerShape(4.dp), color = KarikaColors.Gray11)
-            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -675,7 +693,10 @@ private fun ShippingAddress(component: AccountComponent) {
 }
 
 @Composable
-private fun AllShippingAddress(component: AccountComponent) {
+private fun AllShippingAddress(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    component: AccountComponent
+) {
     val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
     val deleteAddressConfirmation = mutableStateOf<Address?>(null).asState()
     if (profile.addresses.none { it.defaultShipping == null && it.defaultBilling == null }) {
@@ -683,9 +704,8 @@ private fun AllShippingAddress(component: AccountComponent) {
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .border(width = 1.dp, shape = RoundedCornerShape(4.dp), color = KarikaColors.Gray11)
-            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier

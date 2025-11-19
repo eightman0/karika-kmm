@@ -3,23 +3,33 @@ package karika.distribucija.ba.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
@@ -46,6 +56,82 @@ fun BottomBar(
             containerColor = KarikaColors.White
         ) {
             NavigationButtons(component) { isSelected, selectedIcon, unselectedIcon, text, onClick ->
+                NavigationBarItem(
+                    selected = isSelected,
+                    onClick = onClick,
+                    icon = {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (isSelected) selectedIcon else unselectedIcon,
+                                contentDescription = text,
+                            )
+                            // show badge only when there are any items in cart (sum of sizes of value collections)
+                            val totalCartItems = cart.values.sumOf { it.size }
+                            if (totalCartItems > 0) {
+                                if (selectedIcon == vectorResource(Res.drawable.ic_navigation_cart)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize(),
+                                        contentAlignment = Alignment.TopEnd
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    color = KarikaColors.Red,
+                                                    shape = CircleShape
+                                                )
+                                                .size(16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            KarikaText(
+                                                text = "${totalCartItems}",
+                                                color = KarikaColors.White,
+                                                fontWeight = FontWeight.W700,
+                                                textSize = 12.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    label = {
+                        KarikaText(
+                            text = text,
+                            color = if (isSelected) KarikaColors.Primary else KarikaColors.Secondary,
+                            fontWeight = FontWeight.W600,
+                            maxLines = 1,
+                            textSize = 12.sp
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors().copy(
+                        selectedIndicatorColor = KarikaColors.White,
+                        unselectedIconColor = KarikaColors.Secondary,
+                        selectedIconColor = KarikaColors.Primary,
+                        unselectedTextColor = KarikaColors.Secondary,
+                        selectedTextColor = KarikaColors.Primary
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SideBar(
+    component: MainComponent
+) {
+    val cart by component.stateHolder.cartHandler.cart.collectAsState()
+    SideBar(
+        modifier = Modifier,
+        containerColor = KarikaColors.White
+    ) {
+        NavigationButtons(component) { isSelected, selectedIcon, unselectedIcon, text, onClick ->
+            Row {
                 NavigationBarItem(
                     selected = isSelected,
                     onClick = onClick,
@@ -165,5 +251,30 @@ private fun <T> T.NavigationButtons(
         "Profil"
     ) {
         component.navigate(MainConfig.Profile)
+    }
+}
+
+@Composable
+fun SideBar(
+    modifier: Modifier = Modifier,
+    containerColor: Color = NavigationBarDefaults.containerColor,
+    contentColor: Color = MaterialTheme.colorScheme.contentColorFor(containerColor),
+    tonalElevation: Dp = NavigationBarDefaults.Elevation,
+    windowInsets: WindowInsets = NavigationBarDefaults.windowInsets,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        color = containerColor,
+        contentColor = contentColor,
+        tonalElevation = tonalElevation,
+        modifier = modifier
+    ) {
+        Column(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .windowInsetsPadding(windowInsets)
+                    .selectableGroup(),
+            content = content
+        )
     }
 }

@@ -54,6 +54,7 @@ import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.bgWhite
 import karika.distribucija.ba.ui.components.gridColumnCount
 import karika.distribucija.ba.ui.components.hideKeyboard
+import karika.distribucija.ba.ui.components.isTabletLandscape
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.toGrid
@@ -103,15 +104,38 @@ fun ProductView(component: ProductComponent) {
                         return@KarikaScaffold
                     }
 
-                    VendorName(product, component)
-                    ProductName(component)
-                    ProductImage(component)
-                    ProductPrice(component)
-                    ProductDescription(component)
-                    ProductAvailability(component)
-                    ProductMinQty(component)
-                    ProductBonus(component)
-                    ProductButtons(component)
+                    if (isTabletLandscape()) {
+                        Row(
+                            modifier = Modifier,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            ProductImageTablet(Modifier.weight(1f), component)
+                            Column(
+                                modifier = Modifier
+                                    .weight(2f),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                VendorName(product, component)
+                                ProductName(component)
+                                ProductAvailability(component)
+                                ProductMinQty(component)
+                                ProductPriceTablet(component)
+                                ProductBonus(component)
+                            }
+                        }
+                        ProductDescription(component)
+                    } else {
+                        VendorName(product, component)
+                        ProductName(component)
+                        ProductImage(component)
+                        ProductPrice(component)
+                        ProductDescription(component)
+                        ProductAvailability(component)
+                        ProductMinQty(component)
+                        ProductBonus(component)
+                        ProductButtons(component)
+                    }
+
                     VendorProducts(component)
                 }
             }
@@ -210,6 +234,39 @@ fun ProductImage(component: ProductComponent) {
 }
 
 @Composable
+fun ProductImageTablet(modifier: Modifier, component: ProductComponent) {
+    val product by component.product.collectAsState()
+    Box(
+        modifier = modifier
+            .onClick {
+                component.navigateToProduct(product)
+            }
+            .border(width = 1.dp, color = KarikaColors.Gray5)
+            .aspectRatio(1f),
+    ) {
+        Box(
+            modifier = Modifier
+                .blur(radius = if (product.hasOnStock()) 0.dp else 5.dp)
+                .fillMaxSize()
+        ) {
+            KarikaImage(
+                modifier = Modifier
+                    .onClick {
+                        component.showImagePreview(product.image())
+                    }
+                    .fillMaxSize(),
+                model = product.image()
+            )
+            Column {
+                DiscountView(product)
+                NewView(product)
+            }
+        }
+        NotAvailableOverlay(product)
+    }
+}
+
+@Composable
 fun ProductPrice(component: ProductComponent) {
     val product by component.product.collectAsState()
     val productQty = component.productQty.asState()
@@ -255,6 +312,73 @@ fun ProductPrice(component: ProductComponent) {
             }
         }
         ProductQtyAction(product, productQty, component)
+    }
+}
+
+@Composable
+fun ProductPriceTablet(component: ProductComponent) {
+    val product by component.product.collectAsState()
+    val productQty = component.productQty.asState()
+
+    Column(
+        modifier = Modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        if (product.hasSpecialPrice()) {
+            KarikaText(
+                color = KarikaColors.Gray2,
+                text = product.specialPriceString(),
+                textSize = 22.sp,
+                fontWeight = FontWeight.W600
+            )
+            KarikaText(
+                modifier = Modifier.drawBehind {
+                    drawLine(
+                        color = KarikaColors.Gray1,
+                        strokeWidth = 1.dp.toPx(),
+                        start = Offset(0f, size.height / 2),
+                        end = Offset(size.width, size.height / 2)
+                    )
+                },
+                color = KarikaColors.Gray6,
+                text = product.priceString(),
+                textSize = 18.sp,
+                fontWeight = FontWeight.W500
+            )
+        } else {
+            KarikaText(
+                color = KarikaColors.Gray2,
+                text = product.priceString(),
+                textSize = 22.sp,
+                fontWeight = FontWeight.W600
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ProductQtyAction(product, productQty, component)
+            if (product.hasOnStock()) {
+                PrimaryButtonFilled(
+                    modifier = Modifier
+                        .height(48.dp),
+                    title = "Dodaj u Korpu",
+                    icon = Res.drawable.ic_navigation_cart,
+                    enabled = product.hasOnStock()
+                ) {
+                    component.addToCartWithPut(product, productQty.value)
+                }
+            }
+
+        }
+
+        PrimaryButton(
+            modifier = Modifier
+                .height(48.dp),
+            title = "Pošalji poruku dobavljaču",
+        ) {
+            component.sendMessageToVendor(product)
+        }
     }
 }
 
