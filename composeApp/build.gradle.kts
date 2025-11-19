@@ -142,14 +142,14 @@ android {
         create("kiosk") {
             applicationId = "karika.distribucija.ba.kiosk"
             dimension = "karika"
-            versionCode = 220
-            versionName = "2.0"
+            versionCode = 222
+            versionName = "2.4"
         }
         create("kioskTest") {
             applicationId = "karika.distribucija.ba.kiosk"
             dimension = "karika"
-            versionCode = 220
-            versionName = "2.0"
+            versionCode = 222
+            versionName = "2.4"
         }
     }
     compileOptions {

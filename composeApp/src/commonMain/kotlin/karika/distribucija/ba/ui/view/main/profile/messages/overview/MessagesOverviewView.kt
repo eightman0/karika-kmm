@@ -53,6 +53,7 @@ import karika.distribucija.ba.domain.HttpClientProvider.chatImage
 import karika.distribucija.ba.domain.model.FileData
 import karika.distribucija.ba.domain.model.Message
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
+import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
@@ -68,6 +69,7 @@ import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_attachment
+import karikav2.composeapp.generated.resources.ic_camera
 import karikav2.composeapp.generated.resources.ic_pdf
 import karikav2.composeapp.generated.resources.ic_photo
 import karikav2.composeapp.generated.resources.ic_tertiary
@@ -302,15 +304,27 @@ private fun EnterComment(component: MessagesOverviewComponent) {
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Done,
             trailingIcons = {
-                Icon(
-                    modifier = Modifier
-                        .onClick {
-                            pickAttachment.negate()
-                        },
-                    imageVector = vectorResource(Res.drawable.ic_attachment),
-                    tint = KarikaColors.Gray2,
-                    contentDescription = ""
-                )
+                if (isKiosk()) {
+                    Icon(
+                        modifier = Modifier
+                            .onClick {
+                                component.pickPhoto()
+                            },
+                        imageVector = vectorResource(Res.drawable.ic_camera),
+                        tint = KarikaColors.Gray2,
+                        contentDescription = ""
+                    )
+                } else {
+                    Icon(
+                        modifier = Modifier
+                            .onClick {
+                                pickAttachment.negate()
+                            },
+                        imageVector = vectorResource(Res.drawable.ic_attachment),
+                        tint = KarikaColors.Gray2,
+                        contentDescription = ""
+                    )
+                }
             }
         )
         PrimaryButtonFilled(
