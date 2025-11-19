@@ -619,7 +619,8 @@ private fun TableHeaderRow1() {
                 color = KarikaColors.Gray15,
                 fontWeight = FontWeight.W600,
                 textSize = 10.sp,
-                text = "ARTIKAL"
+                text = "ARTIKAL",
+                maxLines = 1
             )
         }
         Box(
@@ -633,7 +634,8 @@ private fun TableHeaderRow1() {
                 color = KarikaColors.Gray15,
                 fontWeight = FontWeight.W600,
                 textSize = 10.sp,
-                text = "RABAT %"
+                text = "RABAT %",
+                maxLines = 1
             )
         }
         Box(
@@ -647,7 +649,8 @@ private fun TableHeaderRow1() {
                 color = KarikaColors.Gray15,
                 fontWeight = FontWeight.W600,
                 textSize = 10.sp,
-                text = "VPC"
+                text = "VPC",
+                maxLines = 1
             )
         }
         Box(
@@ -661,7 +664,8 @@ private fun TableHeaderRow1() {
                 color = KarikaColors.Gray15,
                 fontWeight = FontWeight.W600,
                 textSize = 10.sp,
-                text = "KOLIČINA"
+                text = "KOLIČINA",
+                maxLines = 1
             )
         }
         Box(
@@ -675,7 +679,8 @@ private fun TableHeaderRow1() {
                 color = KarikaColors.Gray15,
                 fontWeight = FontWeight.W600,
                 textSize = 10.sp,
-                text = "UKUPNO"
+                text = "UKUPNO",
+                maxLines = 1
             )
         }
     }

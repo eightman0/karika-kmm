@@ -1,10 +1,12 @@
 package karika.distribucija.ba.ui.view.distributer.messages.details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -63,6 +65,7 @@ import karika.distribucija.ba.ui.view.main.profile.messages.overview.AttachmentM
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_attachment
+import karikav2.composeapp.generated.resources.ic_pdf
 import karikav2.composeapp.generated.resources.ic_tertiary
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -350,16 +353,40 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                     ?.takeIf { image -> image.isNotEmpty() }
                     ?.let {
                         Json.decodeFromString<FileData>(it).filename?.firstOrNull()?.let { image ->
-                            KarikaImage(
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .width(150.dp)
-                                    .onClick {
-                                        component.showImagePreview(chatImage(image))
-                                    },
-                                model = chatImage(image),
-                                contentScale = ContentScale.Inside
-                            )
+                            if (image.endsWith("pdf")) {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .clickable {
+                                            component.downloadReceipt(image)
+                                        },
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = vectorResource(Res.drawable.ic_pdf),
+                                        tint = KarikaColors.White,
+                                        contentDescription = null
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    KarikaText(
+                                        text = image,
+                                        fontWeight = FontWeight.Bold,
+                                        textSize = 12.sp,
+                                        color = KarikaColors.White
+                                    )
+                                }
+                            } else {
+                                KarikaImage(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .width(150.dp)
+                                        .onClick {
+                                            component.showImagePreview(chatImage(image))
+                                        },
+                                    model = chatImage(image),
+                                    contentScale = ContentScale.Inside
+                                )
+                            }
                         }
                     }
                 if (!message.message.isNullOrEmpty()) {
@@ -412,16 +439,40 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                     ?.takeIf { image -> image.isNotEmpty() }
                     ?.let {
                         Json.decodeFromString<FileData>(it).filename?.firstOrNull()?.let { image ->
-                            KarikaImage(
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .width(150.dp)
-                                    .onClick {
-                                        component.showImagePreview(chatImage(image))
-                                    },
-                                model = chatImage(image),
-                                contentScale = ContentScale.Inside
-                            )
+                            if (image.endsWith("pdf")) {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .clickable {
+                                            component.downloadReceipt(image)
+                                        },
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = vectorResource(Res.drawable.ic_pdf),
+                                        tint = KarikaColors.White,
+                                        contentDescription = null
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    KarikaText(
+                                        text = image,
+                                        fontWeight = FontWeight.Bold,
+                                        textSize = 12.sp,
+                                        color = KarikaColors.White
+                                    )
+                                }
+                            } else {
+                                KarikaImage(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .width(150.dp)
+                                        .onClick {
+                                            component.showImagePreview(chatImage(image))
+                                        },
+                                    model = chatImage(image),
+                                    contentScale = ContentScale.Inside
+                                )
+                            }
                         }
                     }
                 if (!message.message.isNullOrEmpty()) {

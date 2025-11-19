@@ -2,12 +2,14 @@ package karika.distribucija.ba.ui.view.distributer.messages.details
 
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
+import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Message
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.SendMessageRequest
 import karika.distribucija.ba.domain.model.Shop
 import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.openPdf
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -73,7 +75,7 @@ class MessagesOverviewComponent(
         }
     }
 
-    fun sendMessage(attachment: ByteArray? = null) {
+    fun sendMessage(attachment: ByteArray? = null, filename: String? = "") {
         iOScope.launch {
             messagesRepository.send(
                 SendMessageRequest(
@@ -82,7 +84,7 @@ class MessagesOverviewComponent(
                     subject = subject.value,
                     receiverId = conversationState.value.customerId?.toIntOrNull() ?: 0,
                     threadId = conversationState.value.id?.toIntOrNull(),
-                    image = attachment
+                    file = Pair(attachment, filename)
                 )
             ).collect { result ->
                 when (result) {
@@ -140,13 +142,17 @@ class MessagesOverviewComponent(
 
     fun pickFile() {
         stateHolder.handler.pickFile { name, data ->
-            sendMessage(data)
+            sendMessage(data, name)
         }
     }
 
     fun pickPhoto() {
         stateHolder.handler.pickPhoto { name, data ->
-            sendMessage(data)
+            sendMessage(data, name)
         }
+    }
+
+    fun downloadReceipt(it: String) {
+        openPdf(imageUrl("/$it"))
     }
 }

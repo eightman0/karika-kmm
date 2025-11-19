@@ -74,11 +74,7 @@ actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
         flags = FLAG_ACTIVITY_NEW_TASK
     }
     try {
-        if (intent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(intent)
-        } else {
-            error.invoke("No phone app found")
-        }
+        context.startActivity(intent)
     } catch (ignored: Exception) {
         error.invoke(ignored.message ?: "")
     }

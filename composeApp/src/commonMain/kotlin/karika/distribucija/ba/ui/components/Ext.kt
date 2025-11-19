@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -119,8 +120,11 @@ fun gridColumnCount(): Int {
 @Composable
 fun isTablet(): Boolean {
     val screenWidth = LocalWindowInfo.current.containerSize.width
-    return screenWidth >= 600
+    return screenWidth >= 600.dp.toPx()
 }
+
+@Composable
+fun Dp.toPx() = with(LocalDensity.current) { this@toPx.toPx() }
 
 @Composable
 fun <T> Iterable<T>.toGrid(): List<List<T>> {

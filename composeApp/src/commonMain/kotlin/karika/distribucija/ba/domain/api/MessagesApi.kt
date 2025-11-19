@@ -7,7 +7,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -117,12 +116,15 @@ internal class MessagesApi {
                         message.threadId?.let {
                             append("thread_id", it)
                         }
-                        message.image?.let {
-                            append("files[]", it, Headers.build {
-                                append(HttpHeaders.ContentType, "image/png")
+                        message.file?.let {
+                            append("files[]", it.first ?: return@let, Headers.build {
+                                append(
+                                    HttpHeaders.ContentType,
+                                    if (it.second?.endsWith(".pdf") == true) "application/pdf" else "image/png"
+                                )
                                 append(
                                     HttpHeaders.ContentDisposition,
-                                    "filename=\"${Clock.System.now().toEpochMilliseconds()}.png\""
+                                    "filename=\"${it.second}\""
                                 )
                             })
                         }
