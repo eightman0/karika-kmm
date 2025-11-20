@@ -101,7 +101,7 @@ actual fun openEmail(emailAddress: String, error: (String) -> Unit) {
     val context: Context = KoinPlatform.getKoin().get()
 
     val intent = Intent(Intent.ACTION_SENDTO).apply {
-        data = Uri.parse("mailto:$emailAddress") // ← Dodaj email direktno u URI!
+        data = "mailto:$emailAddress".toUri()
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
     }
 

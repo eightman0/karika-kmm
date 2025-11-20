@@ -38,7 +38,6 @@ import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.util.KarikaConstants
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_calendar
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -46,6 +45,8 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.vectorResource
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -319,6 +320,7 @@ fun OrderFilterSheet(
     }
 }
 
+@OptIn(ExperimentalTime::class)
 fun Long.toDate(): String {
     val localDate = Instant.fromEpochMilliseconds(this)
         .toLocalDateTime(TimeZone.UTC)
@@ -333,6 +335,7 @@ fun Long.toDate(): String {
     return localDate.format(dateFormat)
 }
 
+@OptIn(ExperimentalTime::class)
 fun Long.toDate1(): String {
     val localDate = Instant.fromEpochMilliseconds(this)
         .toLocalDateTime(TimeZone.UTC)
@@ -348,6 +351,7 @@ fun Long.toDate1(): String {
     return localDate.format(dateFormat)
 }
 
+@OptIn(ExperimentalTime::class)
 fun String.toDate1(): String {
     val isoString = replace(" ", "T")
     val localDateTime = LocalDateTime.parse(isoString)

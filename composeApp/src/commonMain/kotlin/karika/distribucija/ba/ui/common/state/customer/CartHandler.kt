@@ -40,6 +40,7 @@ class CartHandler {
                                 entry.value.map {
                                     Pair(
                                         Product(
+                                            id = it.productId.toIntOrNull(),
                                             name = it.name,
                                             sku = it.sku,
                                             itemId = it.itemId,

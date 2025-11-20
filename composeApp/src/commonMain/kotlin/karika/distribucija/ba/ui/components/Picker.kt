@@ -118,11 +118,13 @@ fun KarikaPicker(
                         )
                     },
                 )
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(),
-                    thickness = 1.dp,
-                    color = KarikaColors.Divider
-                )
+                if (index < values.value.size - 1) {
+                    HorizontalDivider(
+                        modifier = Modifier.fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = KarikaColors.Divider
+                    )
+                }
             }
         }
     }

@@ -86,7 +86,7 @@ kotlin {
             api(libs.essenty.lifecycle)
             api(libs.essenty.backhandler)
 
-            implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc04")
+            implementation(libs.richeditor.compose)
         }
 
         iosMain.dependencies {
@@ -142,14 +142,10 @@ android {
         create("kiosk") {
             applicationId = "karika.distribucija.ba.kiosk"
             dimension = "karika"
-            versionCode = 222
-            versionName = "2.4"
         }
         create("kioskTest") {
             applicationId = "karika.distribucija.ba.kiosk"
             dimension = "karika"
-            versionCode = 222
-            versionName = "2.4"
         }
     }
     compileOptions {

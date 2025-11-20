@@ -2,7 +2,6 @@ package karika.distribucija.ba.domain.model
 
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.util.karikaPriceFormat
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
@@ -12,6 +11,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.roundToInt
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 @Serializable
 data class ProductResponse(
@@ -142,11 +143,12 @@ data class Product(
             return imageUrl(image)
         }
 
-        return imageUrl(customAttributes
-            .find { c -> c.attributeCode == "image" }
-            ?.value
-            ?.jsonPrimitive
-            ?.content)
+        return imageUrl(
+            customAttributes
+                .find { c -> c.attributeCode == "image" }
+                ?.value
+                ?.jsonPrimitive
+                ?.content)
     }
 
     fun isInStockLabel(): String {
@@ -168,11 +170,6 @@ data class Product(
             .find { f -> f.attributeCode == "b2b_min_qty" }
             ?.value?.jsonPrimitive?.content?.trim()?.toIntOrNull() ?: minQty?.toIntOrNull() ?: 1
     }
-
-    fun breadCrumbs(): String {
-        return "Piće > Alkoholna pića > Alkoholna žestoka pića"
-    }
-
 
     fun vpc(qty: Int): Double {
         val price = if (specialPrice() > 0) specialPrice() else price()
@@ -196,6 +193,7 @@ data class Product(
         return karikaPriceFormat(vpc(qty) + pdv(qty))
     }
 
+    @OptIn(ExperimentalTime::class)
     fun isNew(): Boolean {
         val newsFromDate = newsFromDate ?: (customAttributes
             .find { f -> f.attributeCode == "news_from_date" }

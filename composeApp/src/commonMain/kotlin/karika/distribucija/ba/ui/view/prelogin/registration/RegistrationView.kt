@@ -522,16 +522,11 @@ private fun CompanyAddress(viewModel: RegistrationComponent) {
 
     LaunchedEffect(entity.value) {
         when (entity.value) {
-            "Izaberite entitet" -> {
-                viewModel.canton.value = emptyList()
-                viewModel.city.value = emptyList()
-                viewModel.municipality.value = emptyList()
-            }
-
             "Federacija" -> {
                 viewModel.canton.value = KarikaConstants.cantons("Federacija")
                 viewModel.city.value = emptyList()
                 viewModel.municipality.value = emptyList()
+                viewModel.companyMunicipality.value = ""
             }
 
             "Republika Srpska" -> {
@@ -539,6 +534,8 @@ private fun CompanyAddress(viewModel: RegistrationComponent) {
                 viewModel.municipality.value = KarikaConstants.cantons("Republika Srpska")
                 viewModel.canton.value = emptyList()
                 viewModel.city.value = emptyList()
+                viewModel.companyCanton.value = ""
+                viewModel.companyCity.value = ""
             }
 
             "Distrikt Brčko" -> {
@@ -546,19 +543,13 @@ private fun CompanyAddress(viewModel: RegistrationComponent) {
                 viewModel.municipality.value = KarikaConstants.cantons("Distrikt Brčko")
                 viewModel.canton.value = emptyList()
                 viewModel.city.value = emptyList()
+                viewModel.companyCanton.value = ""
+                viewModel.companyCity.value = ""
             }
         }
     }
     LaunchedEffect(canton.value) {
-        when (entity.value) {
-            "Izaberite Kanton" -> {
-                viewModel.city.value = emptyList()
-            }
-
-            else -> {
-                city.value = ""
-                viewModel.city.value = KarikaConstants.cities(canton.value)
-            }
-        }
+        viewModel.companyCity.value = ""
+        viewModel.city.value = KarikaConstants.cities(canton.value)
     }
 }

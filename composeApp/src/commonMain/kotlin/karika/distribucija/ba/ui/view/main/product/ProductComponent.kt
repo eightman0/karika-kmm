@@ -44,13 +44,30 @@ class ProductComponent(
                     is ResultState.Success -> {
                         hideLoader()
                         _products.update { result.data }
-                        _product.update {
-                            result.data.find { it.sku == product.value.sku } ?: product.value
-                        }
                     }
 
                     is ResultState.Error -> {
                         hideLoader()
+                    }
+                }
+            }
+        }
+
+        iOScope.launch {
+            repository.productById(product.value.id.toString()).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> {
+
+                    }
+
+                    is ResultState.Success -> {
+                        _product.update {
+                            result.data.items.find { it.sku == product.value.sku } ?: product.value
+                        }
+                    }
+
+                    is ResultState.Error -> {
+
                     }
                 }
             }

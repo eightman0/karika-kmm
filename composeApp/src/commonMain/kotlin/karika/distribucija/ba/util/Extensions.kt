@@ -8,7 +8,6 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.CachePolicy
 import coil3.request.crossfade
 import okio.FileSystem
-import kotlin.math.ceil
 import kotlin.math.round
 
 fun karikaPriceFormat(value: Double): String {

@@ -308,7 +308,7 @@ private fun EnterComment(component: MessagesOverviewComponent) {
                     Icon(
                         modifier = Modifier
                             .onClick {
-                                component.pickPhoto()
+                                component.pickFile()
                             },
                         imageVector = vectorResource(Res.drawable.ic_camera),
                         tint = KarikaColors.Gray2,

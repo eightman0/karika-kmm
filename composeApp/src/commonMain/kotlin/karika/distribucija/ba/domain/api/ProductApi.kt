@@ -3,7 +3,6 @@ package karika.distribucija.ba.domain.api
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
@@ -16,17 +15,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 internal class ProductApi {
-    suspend fun karikaProducts(
-        pageSize: Int = 30,
-        currentPage: Int,
-        searchText: String = "",
-        from: String = "",
-        to: String = "",
-        onlyWithImage: Boolean = false,
-    ): Result<HttpResponse> = runCatching {
+    suspend fun productById(id: String): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
             url(
-                "products?searchCriteria[filterGroups][0][filters][0][field]=is_karika_suggestion&searchCriteria[filterGroups][0][filters][0][value]=1&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage"
+                "products?searchCriteria[filter_groups][0][filters][0][field]=entity_id&searchCriteria[filter_groups][0][filters][0][value]=$id&searchCriteria[filter_groups][0][filters][0][conditionType]=in"
             )
         )
     }
@@ -96,25 +88,11 @@ internal class ProductApi {
 }
 
 class ProductRepository internal constructor() {
-    fun karikaProducts(
-        pageSize: Int = 30,
-        currentPage: Int,
-        searchText: String = "",
-        from: String = "",
-        to: String = "",
-        onlyWithImage: Boolean = false,
-    ): Flow<ResultState<ProductResponse>> = flow {
+    fun productById(id: String): Flow<ResultState<ProductResponse>> = flow {
         emit(ResultState.Loading)
         try {
             val response = ProductApi()
-                .karikaProducts(
-                    pageSize,
-                    currentPage,
-                    searchText,
-                    from,
-                    to,
-                    onlyWithImage
-                )
+                .productById(id)
                 .getOrNull()
 
             if (response != null && response.status == HttpStatusCode.OK) {
