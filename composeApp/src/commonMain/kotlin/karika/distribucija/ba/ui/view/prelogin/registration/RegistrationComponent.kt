@@ -185,6 +185,20 @@ class RegistrationComponent(
                                 lastname = contactLastname.value.trim(),
                                 city = companyCity.value.trim(),
                                 defaultBilling = true,
+                                defaultShipping = false
+                            ),
+                            Addresses(
+                                countryId = "BA",
+                                street = arrayListOf(
+                                    contactAddress.value.trim(),
+                                    contactAddress.value.trim()
+                                ),
+                                telephone = contactPhone.value.trim(),
+                                postcode = contactPostal.value.trim(),
+                                firstname = contactFirstname.value.trim(),
+                                lastname = contactLastname.value.trim(),
+                                city = companyCity.value.trim(),
+                                defaultBilling = false,
                                 defaultShipping = true
                             )
                         ),
