@@ -66,22 +66,29 @@ fun CarouselBanners(component: CommonComponent) {
 }
 
 @Composable
-fun CarouselBannersAuto(component: CommonComponent) {
+fun CarouselBannersAuto(component: CommonComponent, onClick: (PromotedVendor) -> Unit) {
     val promotedVendors by component.promotedVendors.collectAsState()
     val pagerState = rememberPagerState { promotedVendors.size }
 
     if (promotedVendors.isNotEmpty()) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .aspectRatio(7f / 5f)
-            ) {
-                CarouselBannerItemAuto(
-                    modifier = Modifier,
-                    promotedVendor = promotedVendors[it]
-                )
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(7f / 5f)
+                ) {
+                    CarouselBannerItemAuto(
+                        modifier = Modifier,
+                        promotedVendor = promotedVendors[it],
+                        onClick = { onClick(promotedVendors[it]) }
+                    )
+                }
             }
         }
 

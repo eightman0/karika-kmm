@@ -57,41 +57,43 @@ fun ScreenSaver(component: AppComponent) {
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable {
-                            show.negate()
-                            component.appNavigate(AppConfig.Notifications)
-                        }
-                        .background(
-                            color = KarikaColors.Yellow
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    KarikaText(
-                        text = "${notificationCount.value}",
-                        textSize = 14.sp,
-                        color = KarikaColors.Black,
-                        fontWeight = FontWeight.Normal,
+                if (notificationCount.value > 0) {
+                    Box(
                         modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                show.negate()
+                                component.appNavigate(AppConfig.Notifications)
+                            }
+                            .background(
+                                color = KarikaColors.Yellow
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        KarikaText(
+                            text = "${notificationCount.value}",
+                            textSize = 14.sp,
+                            color = KarikaColors.Black,
+                            fontWeight = FontWeight.Normal,
+                            modifier = Modifier
+                                .padding(8.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    KarikaText(
+                        text = "notifikacije",
+                        textSize = 16.sp,
+                        color = KarikaColors.Yellow,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .onClick {
+                                show.negate()
+                                component.appNavigate(AppConfig.Notifications)
+                            }
                             .padding(8.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                KarikaText(
-                    text = "notifikacije",
-                    textSize = 16.sp,
-                    color = KarikaColors.Yellow,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .onClick {
-                            show.negate()
-                            component.appNavigate(AppConfig.Notifications)
-                        }
-                        .padding(8.dp)
-                )
                 Spacer(modifier = Modifier.weight(1f))
                 Box(
                     modifier = Modifier
@@ -120,7 +122,10 @@ fun ScreenSaver(component: AppComponent) {
                 contentAlignment = Alignment.Center
             ) {
                 if (promotedBanners.value.isNotEmpty()) {
-                    CarouselBannersAuto(component)
+                    CarouselBannersAuto(component) {
+                        show.negate()
+                        component.showVendor(it.toVendor())
+                    }
                 } else {
                     Image(
                         painter = painterResource(Res.drawable.ic_primary_logo),
