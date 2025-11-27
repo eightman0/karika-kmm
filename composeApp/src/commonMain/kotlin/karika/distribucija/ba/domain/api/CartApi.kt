@@ -14,6 +14,7 @@ import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.model.AddToCart
 import karika.distribucija.ba.domain.model.Cart
 import karika.distribucija.ba.domain.model.CartItem
+import karika.distribucija.ba.domain.model.ErrorResponse
 import karika.distribucija.ba.domain.model.PaymentMethod
 import karika.distribucija.ba.domain.model.PlaceOrder
 import karika.distribucija.ba.domain.model.ResultState
@@ -145,8 +146,13 @@ class CartRepository internal constructor() {
             if (response != null && response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
+                val error = response?.body<ErrorResponse>()
                 emit(
-                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
+                    ResultState.Error(
+                        if ("The requested qty is not available" == error?.message)
+                            "Tražena količina nije dostupna."
+                        else "Došlo je do greške. Pokušajte ponovo!"
+                    )
                 )
             }
         } catch (e: Exception) {

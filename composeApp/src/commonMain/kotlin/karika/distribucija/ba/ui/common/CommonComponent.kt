@@ -138,7 +138,7 @@ open class CommonComponent(
             return
         }
 
-        val cartItem = stateHolder.cartHandler.cart.value
+        val cartItem = stateHolder.cartHandler.cart.value.items
             .values.flatMap { it }
             .find { it.first.sku == product.sku }
 
@@ -168,6 +168,7 @@ open class CommonComponent(
                             hideLoader()
                             if (showSnack) {
                                 showMessage(result.message ?: "")
+                                reloadCart()
                             }
                         }
                     }
@@ -203,7 +204,7 @@ open class CommonComponent(
         }
     }
 
-    fun updateCart(product: Product, qty: Int = 1, successCallback: () -> Unit = {}) {
+    fun updateCart(product: Product, qty: Int = 1, errorCallback: () -> Unit = {}) {
         if (isGuest()) {
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
             return
@@ -227,7 +228,6 @@ open class CommonComponent(
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
-                        successCallback.invoke()
                         hideLoader()
                         reloadCart()
                     }
@@ -235,6 +235,8 @@ open class CommonComponent(
                     is ResultState.Error -> {
                         hideLoader()
                         showMessage(result.message ?: "")
+                        reloadCart()
+                        errorCallback.invoke()
                     }
                 }
             }

@@ -70,7 +70,7 @@ fun BottomBar(
                                 contentDescription = text,
                             )
                             // show badge only when there are any items in cart (sum of sizes of value collections)
-                            val totalCartItems = cart.values.sumOf { it.size }
+                            val totalCartItems = cart.items.values.sumOf { it.size }
                             if (totalCartItems > 0) {
                                 if (selectedIcon == vectorResource(Res.drawable.ic_navigation_cart)) {
                                     Box(
@@ -146,7 +146,7 @@ fun SideBar(
                                 contentDescription = text,
                             )
                             // show badge only when there are any items in cart (sum of sizes of value collections)
-                            val totalCartItems = cart.values.sumOf { it.size }
+                            val totalCartItems = cart.items.values.sumOf { it.size }
                             if (totalCartItems > 0) {
                                 if (selectedIcon == vectorResource(Res.drawable.ic_navigation_cart)) {
                                     Box(

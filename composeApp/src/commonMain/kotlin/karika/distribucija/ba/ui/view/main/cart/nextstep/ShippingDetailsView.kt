@@ -85,7 +85,7 @@ private fun Cart(modifier: Modifier, component: ShippingDetailsComponent) {
             fontWeight = FontWeight.W700,
             textSize = 20.sp
         )
-        cart.value.entries.forEach {
+        cart.value.items.entries.forEach {
             VendorItem(it)
         }
     }

@@ -13,6 +13,11 @@ import kotlinx.coroutines.launch
 
 object PushHandler {
     fun handleNewPushIfExists(route: String, component: CommonComponent) {
+        if (component.stateHolder.sessionHandler.mainConfig() == AppConfig.Dashboard) {
+            handleNewPushIfExistsVendor(route, component)
+            return
+        }
+
         when {
             route.startsWith("route/orderComments") -> {
                 handleOrderCommentPush(route, component)
@@ -176,7 +181,7 @@ object PushHandler {
             CoroutineScope(Dispatchers.Main).launch {
                 component.appNavigate(
                     AppConfig.OrderDetails(
-                        OrdersResponse(incrementId = orderId)
+                        OrdersResponse(orderId = orderId)
                     )
                 )
             }

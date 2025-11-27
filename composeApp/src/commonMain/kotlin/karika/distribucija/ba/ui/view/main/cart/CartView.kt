@@ -59,7 +59,7 @@ fun CartView(component: CartComponent) {
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (items.value.isEmpty()) {
+        if (items.value.items.isEmpty()) {
             KarikaText(
                 modifier = Modifier
                     .padding(horizontal = 16.dp),
@@ -89,10 +89,10 @@ fun CartView(component: CartComponent) {
                         .padding(horizontal = 16.dp)
                         .weight(1f)
                 ) {
-                    itemsIndexed(items.value.entries.toList()) { index, it ->
+                    itemsIndexed(items.value.items.entries.toList()) { index, it ->
                         CartItem(it, component)
                         YSpacer16()
-                        if (index != items.value.entries.toList().lastIndex) {
+                        if (index != items.value.items.entries.toList().lastIndex) {
                             HorizontalDivider(
                                 modifier = Modifier.fillMaxWidth(),
                                 color = KarikaColors.Gray5,
@@ -133,7 +133,7 @@ private fun PinnedFooter(component: CartComponent) {
         KarikaText(
             modifier = Modifier,
             color = KarikaColors.Gray2,
-            text = cart.calculateTotal(),
+            text = cart.items.calculateTotal(),
             textSize = 20.sp,
             fontWeight = FontWeight.W700
         )
@@ -148,7 +148,7 @@ private fun PinnedFooter(component: CartComponent) {
         textSize = 18.sp,
         enabled = true
     ) {
-        if (cart.orderValid()) {
+        if (cart.items.orderValid()) {
             component.shippingDetails()
         } else {
             component.showMessage("Nije zadovoljna minimalna količina po dobavljaču!")
