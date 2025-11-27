@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karika.ba - Kiosk Uputstvo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+          rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        karika: {
+                            light: '#ff7eb6', // Svjetlija varijanta nove boje
+                            DEFAULT: '#FF2B86', // NOVA BOJA
+                            dark: '#cc1f6a', // Tamnija varijanta
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media print {
+            body {
+                background-color: white;
+                -webkit-print-color-adjust: exact;
+            }
+            .no-print {
+                display: none;
+            }
+            .shadow-2xl {
+                box-shadow: none;
+            }
+            .page-break {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 py-8 min-h-screen flex flex-col items-center justify-center">
+
+<!-- Flyer Container (A4 Proportions approx) -->
+<div class="bg-white w-full max-w-[210mm] min-h-[297mm] p-8 md:p-12 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+
+    <!-- Background Decor -->
+    <div class="absolute top-0 right-0 w-64 h-64 bg-karika opacity-5 rounded-bl-full pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 w-48 h-48 bg-karika opacity-5 rounded-tr-full pointer-events-none"></div>
+
+    <!-- Header -->
+    <header class="text-center mb-10 z-10">
+        <h1 class="text-5xl font-bold text-karika mb-2 tracking-tight">Karika.ba</h1>
+        <p class="text-xl text-gray-600 font-medium tracking-wide">KIOSK MODE INSTALACIJA</p>
+        <div class="h-1 w-24 bg-karika mx-auto mt-4 rounded-full"></div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-grow z-10">
+
+        <!-- QR Section -->
+        <div class="bg-gray-50 border-2 border-karika border-dashed rounded-3xl p-8 mb-10 text-center mx-auto max-w-lg shadow-sm">
+            <p class="text-gray-500 text-sm font-semibold mb-4 uppercase tracking-wider">Skeniraj za
+                konfiguraciju</p>
+
+            <!-- QR Code Container -->
+            <div class="bg-white p-4 inline-block rounded-xl shadow-md mb-4 border border-gray-100">
+                <!-- Generisan QR kod za www.karika.ba u zadanoj boji -->
+                <img src="https://test.karika.ba/app-builds/qr-code-json.png"
+                     alt="QR Code za Karika.ba"
+                     class="w-48 h-48 object-contain">
+            </div>
+
+            <p class="text-gray-800 font-bold text-lg">Ovaj kod se koristi u Koraku 1</p>
+        </div>
+
+        <!-- Steps Section -->
+        <div class="grid grid-cols-1 gap-6">
+
+            <!-- Step 1 -->
+            <div class="flex items-start bg-white p-4 rounded-xl border-l-4 border-karika page-break">
+                <div class="bg-karika-light/10 text-karika p-3 rounded-full mr-4 flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                    <span class="font-bold text-xl">1</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-1">Pokretanje i QR skeniranje</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Nakon prvog paljenja tableta, kliknite prstom <strong>6 puta</strong> bilo
+                        gdje na ekranu. Otvorit će se kamera. Skenirajte QR kod iznad, unesite Wi-Fi
+                        podatke i pratite korake instalacije do početnog ekrana.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-start bg-white p-4 rounded-xl border-l-4 border-gray-300 page-break">
+                <div class="bg-gray-100 text-gray-600 p-3 rounded-full mr-4 flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                    <span class="font-bold text-xl">2</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-1">Play Trgovina Postavke</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Kada se tablet upali, otvorite <strong>Play trgovinu</strong> aplikaciju
+                        i prijavite se sa Google računom.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-start bg-white p-4 rounded-xl border-l-4 border-gray-300 page-break">
+                <div class="bg-gray-100 text-gray-600 p-3 rounded-full mr-4 flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                    <span class="font-bold text-xl">3</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-1">Isključivanje Play Zaštite</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Unutar Play trgovine idite na postavke profila, pronađite <strong>Play
+                        zaštita</strong> i idite na postavke i isključite:
+                    <ul style="list-style-type:disc;margin-left:20px;margin-top:8px;">
+                        <li>Skeniranje aplikacija pomoću Play zaštite</li>
+                        <li>Bolje otkrivanje štetnih aplikacija.</li>
+                    </ul>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flex items-start bg-white p-4 rounded-xl border-l-4 border-karika page-break">
+                <div class="bg-karika-light/10 text-karika p-3 rounded-full mr-4 flex-shrink-0 w-12 h-12 flex items-center justify-center">
+                    <i class="fas fa-power-off text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-1">Restart i Završetak</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Restartujte tablet. Nakon ponovnog paljenja, aplikacija će se automatski
+                        pokrenuti u <strong>Kiosk modu</strong>. Tablet je spreman za rad.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
