@@ -19,16 +19,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.router.stack.replaceAll
+import karika.distribucija.ba.ui.common.getEnvPrefix
+import karika.distribucija.ba.ui.common.openPdf
 import karika.distribucija.ba.ui.components.KarikaBox
 import karika.distribucija.ba.ui.components.KarikaCheckbox
 import karika.distribucija.ba.ui.components.KarikaCheckboxSecondary
@@ -389,15 +394,25 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
                 ) {
                     append("Slažem se sa")
                 }
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.W400,
-                        color = KarikaColors.Gray4,
-                        fontSize = 14.sp,
-                        textDecoration = TextDecoration.Underline
+                withLink(
+                    LinkAnnotation.Clickable(
+                        tag = "",
+                        styles = TextLinkStyles(),
+                        linkInteractionListener = {
+                            openPdf("https://${getEnvPrefix()}karika.ba/cms/politika-privatnosti")
+                        }
                     )
                 ) {
-                    append(" uslovima korištenja ")
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.W400,
+                            color = KarikaColors.Gray4,
+                            fontSize = 14.sp,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    ) {
+                        append(" uslovima korištenja ")
+                    }
                 }
                 withStyle(
                     style = SpanStyle(
@@ -443,15 +458,25 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
                 ) {
                     append("Slažem se sa")
                 }
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.W400,
-                        color = KarikaColors.Gray4,
-                        fontSize = 14.sp,
-                        textDecoration = TextDecoration.Underline
+                withLink(
+                    LinkAnnotation.Clickable(
+                        tag = "",
+                        styles = TextLinkStyles(),
+                        linkInteractionListener = {
+                            openPdf("https://${getEnvPrefix()}karika.ba/cms/politika-privatnosti")
+                        }
                     )
                 ) {
-                    append(" uslovima korištenja ")
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.W400,
+                            color = KarikaColors.Gray4,
+                            fontSize = 14.sp,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    ) {
+                        append(" uslovima korištenja ")
+                    }
                 }
                 withStyle(
                     style = SpanStyle(
