@@ -72,7 +72,7 @@ fun OrderPlaced(component: CartSuccessComponent) {
                         fontSize = 18.sp
                     )
                 ) {
-                    append("Broj vaše narudžbe je: ")
+                    append("Broj Vaše narudžbe je: ")
                 }
                 withStyle(
                     style = SpanStyle(

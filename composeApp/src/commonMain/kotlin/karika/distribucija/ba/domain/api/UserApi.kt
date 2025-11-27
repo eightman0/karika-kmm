@@ -190,12 +190,12 @@ class UserRepository internal constructor() {
             if (response != null && response.status == HttpStatusCode.OK) {
                 emit(
                     ResultState.Success(
-                        "Ako postoji nalog povezan sa '$email', dobićete e-poruku sa vezom za resetovanje vaše lozinke."
+                        "Ako postoji nalog povezan sa '$email', dobićete e-poruku sa vezom za resetovanje Vaše lozinke."
                     )
                 )
             } else {
                 emit(
-                    ResultState.Error("Ako postoji nalog povezan sa '$email', dobićete e-poruku sa vezom za resetovanje vaše lozinke.")
+                    ResultState.Error("Ako postoji nalog povezan sa '$email', dobićete e-poruku sa vezom za resetovanje Vaše lozinke.")
                 )
             }
         } catch (e: Exception) {

@@ -64,7 +64,7 @@ object HttpClientProvider {
     }
 
     fun orderPdf(name: String?): String {
-        return "$HOST/media/order_pdf/$name"
+        return "$HOST/media/order_pdf/PR-$name"
     }
 
     val client: HttpClient by lazy {

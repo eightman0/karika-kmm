@@ -174,7 +174,7 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                         containerColor = KarikaColors.Blue,
                         disabledContentColor = KarikaColors.Secondary
                     ),
-                    enabled = !order.locked(),
+                    enabled = !order.locked() && !order.isApproved() && !order.isRejected(),
                     contentPadding = PaddingValues(horizontal = 12.dp)
                 ) {
                     Row(
@@ -239,36 +239,38 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                                 }
                             )
                         }
-                        DropdownMenuItem(
-                            onClick = {
-                                dropdownState.negate()
-                                component.createInvoice()
-                            },
-                            text = {
-                                IconTextItem(
-                                    modifier = Modifier,
-                                    icon = vectorResource(Res.drawable.ic_send_receipt),
-                                    iconColor = KarikaColors.Gray2,
-                                    textColor = KarikaColors.Gray2,
-                                    text = "Generiši predračun"
-                                )
-                            }
-                        )
-                        DropdownMenuItem(
-                            onClick = {
-                                dropdownState.negate()
-                                component.getBill()
-                            },
-                            text = {
-                                IconTextItem(
-                                    modifier = Modifier,
-                                    icon = vectorResource(Res.drawable.ic_print),
-                                    iconColor = KarikaColors.Gray2,
-                                    textColor = KarikaColors.Gray2,
-                                    text = "Printaj narudžbu"
-                                )
-                            }
-                        )
+                        if (!order.isApproved()) {
+                            DropdownMenuItem(
+                                onClick = {
+                                    dropdownState.negate()
+                                    component.createInvoice()
+                                },
+                                text = {
+                                    IconTextItem(
+                                        modifier = Modifier,
+                                        icon = vectorResource(Res.drawable.ic_send_receipt),
+                                        iconColor = KarikaColors.Gray2,
+                                        textColor = KarikaColors.Gray2,
+                                        text = "Generiši predračun"
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                onClick = {
+                                    dropdownState.negate()
+                                    component.getBill()
+                                },
+                                text = {
+                                    IconTextItem(
+                                        modifier = Modifier,
+                                        icon = vectorResource(Res.drawable.ic_print),
+                                        iconColor = KarikaColors.Gray2,
+                                        textColor = KarikaColors.Gray2,
+                                        text = "Printaj narudžbu"
+                                    )
+                                }
+                            )
+                        }
                         if (order.isPending()) {
                             DropdownMenuItem(
                                 onClick = {

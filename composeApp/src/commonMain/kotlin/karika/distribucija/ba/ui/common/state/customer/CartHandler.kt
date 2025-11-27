@@ -81,8 +81,3 @@ class CartHandler {
         }
     }
 }
-
-data class CartData(
-    val items: Map<Vendor, List<Pair<Product, Int>>>,
-    val lastUpdated: Long = 0
-)

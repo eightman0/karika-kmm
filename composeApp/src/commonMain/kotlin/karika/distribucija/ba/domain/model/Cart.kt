@@ -86,3 +86,8 @@ data class CartVendor(
         return minOrderAmount?.toDoubleOrNull() ?: 0.0
     }
 }
+
+data class CartData(
+    val items: Map<Vendor, List<Pair<Product, Int>>>,
+    val lastUpdated: Long = 0
+)
