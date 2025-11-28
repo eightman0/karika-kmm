@@ -298,14 +298,14 @@ fun ProductPrice(component: ProductComponent) {
                         )
                     },
                     color = KarikaColors.Gray6,
-                    text = product.priceString(),
+                    text = product.originalPriceString(),
                     textSize = 18.sp,
                     fontWeight = FontWeight.W500
                 )
             } else {
                 KarikaText(
                     color = KarikaColors.Gray2,
-                    text = product.priceString(),
+                    text = product.originalPriceString(),
                     textSize = 22.sp,
                     fontWeight = FontWeight.W600
                 )
@@ -341,14 +341,14 @@ fun ProductPriceTablet(component: ProductComponent) {
                     )
                 },
                 color = KarikaColors.Gray6,
-                text = product.priceString(),
+                text = product.originalPriceString(),
                 textSize = 18.sp,
                 fontWeight = FontWeight.W500
             )
         } else {
             KarikaText(
                 color = KarikaColors.Gray2,
-                text = product.priceString(),
+                text = product.originalPriceString(),
                 textSize = 22.sp,
                 fontWeight = FontWeight.W600
             )

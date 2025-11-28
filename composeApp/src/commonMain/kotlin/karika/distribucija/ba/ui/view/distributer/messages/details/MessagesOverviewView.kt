@@ -141,6 +141,7 @@ private fun Subject(component: MessagesOverviewComponent) {
             title = "Naslov",
             value = subject,
             placeholder = "Unesite naslov",
+            disabledTextColor = KarikaColors.Gray2,
             imeAction = ImeAction.Next,
             enabled = conversation.value.subject == null
         )

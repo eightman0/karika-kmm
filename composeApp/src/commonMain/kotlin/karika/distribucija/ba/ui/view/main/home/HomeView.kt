@@ -137,7 +137,7 @@ fun ProductItem(
         KarikaText(
             modifier = Modifier,
             color = KarikaColors.Gray2,
-            text = if (product.hasSpecialPrice()) product.specialPriceString() else product.priceString(),
+            text = product.currentPriceString(),
             textSize = 18.sp,
             fontWeight = FontWeight.W700
         )

@@ -994,7 +994,8 @@ private fun UpdateAddress(component: AccountComponent) {
                 placeholder = "Ime",
                 allowedChars = KarikaConstants.lettersSpace,
                 imeAction = ImeAction.Next,
-                enabled = editableFields
+                enabled = editableFields,
+                disabledTextColor = KarikaColors.Gray2
             )
             KarikaTextField1(
                 modifier = Modifier
@@ -1004,7 +1005,8 @@ private fun UpdateAddress(component: AccountComponent) {
                 placeholder = "Prezime",
                 allowedChars = KarikaConstants.lettersSpace,
                 imeAction = ImeAction.Next,
-                enabled = editableFields
+                enabled = editableFields,
+                disabledTextColor = KarikaColors.Gray2
             )
         } else {
             KarikaTextField1(
@@ -1015,7 +1017,8 @@ private fun UpdateAddress(component: AccountComponent) {
                 placeholder = "Naziv pravnog lica",
                 allowedChars = KarikaConstants.lettersSpace,
                 imeAction = ImeAction.Next,
-                enabled = editableFields
+                enabled = editableFields,
+                disabledTextColor = KarikaColors.Gray2
             )
         }
         KarikaTextField1(
@@ -1026,7 +1029,8 @@ private fun UpdateAddress(component: AccountComponent) {
             placeholder = "Grad",
             allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
             imeAction = ImeAction.Next,
-            enabled = editableFields
+            enabled = editableFields,
+            disabledTextColor = KarikaColors.Gray2
         )
         KarikaTextField1(
             modifier = Modifier
@@ -1036,7 +1040,8 @@ private fun UpdateAddress(component: AccountComponent) {
             placeholder = "Adresa i broj ulice",
             allowedChars = KarikaConstants.numbersAndLettersSpace,
             imeAction = ImeAction.Next,
-            enabled = editableFields
+            enabled = editableFields,
+            disabledTextColor = KarikaColors.Gray2
         )
         KarikaTextField1(
             modifier = Modifier
@@ -1047,7 +1052,8 @@ private fun UpdateAddress(component: AccountComponent) {
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Next,
-            enabled = editableFields
+            enabled = editableFields,
+            disabledTextColor = KarikaColors.Gray2
         )
         KarikaTextField1(
             modifier = Modifier

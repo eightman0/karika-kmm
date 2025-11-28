@@ -323,6 +323,7 @@ fun KarikaTextField1(
     placeholder: String = "",
     placeholderColor: Color = KarikaColors.Placeholder,
     placeholderSize: TextUnit = 14.sp,
+    disabledTextColor: Color = KarikaColors.Gray21,
     textColor: Color = KarikaColors.Black,
     textSize: TextUnit = 14.sp,
     fontWeight: FontWeight = FontWeight.Normal,
@@ -424,7 +425,7 @@ fun KarikaTextField1(
                 focusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
-                disabledTextColor = KarikaColors.Gray21
+                disabledTextColor = disabledTextColor
             ),
             textStyle = LocalTextStyle.current.copy(
                 fontWeight = fontWeight,

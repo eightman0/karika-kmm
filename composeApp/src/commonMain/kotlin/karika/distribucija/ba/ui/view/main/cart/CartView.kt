@@ -420,7 +420,7 @@ fun ProductBonus(product: Product, qty: Int) {
 private fun Map<Vendor, List<Pair<Product, Int>>>.calculateTotal(): String {
     val total = values
         .flatten()
-        .sumOf { (product, quantity) -> product.price() * quantity }
+        .sumOf { (product, quantity) -> product.currentPrice() * quantity }
 
     return karikaPriceFormat(total * 1.17) + " KM"
 }
@@ -428,7 +428,7 @@ private fun Map<Vendor, List<Pair<Product, Int>>>.calculateTotal(): String {
 private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.minAmountRestValue(): String {
     return "${
         ((key.minOrderAmount()
-            ?.toDoubleOrNull() ?: 0.0) - (value.sumOf { it.first.price() * it.second } * 1.17)).coerceAtLeast(
+            ?.toDoubleOrNull() ?: 0.0) - (value.sumOf { it.first.currentPrice() * it.second } * 1.17)).coerceAtLeast(
             0.0
         )
     }"
@@ -438,7 +438,7 @@ private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.minAmountRest(): String 
     return karikaPriceFormat(
         ((key.minOrderAmount()
             ?.toDoubleOrNull()
-            ?: 0.0) - (value.sumOf { it.first.price() * it.second } * 1.17)).coerceAtLeast(
+            ?: 0.0) - (value.sumOf { it.first.currentPrice() * it.second } * 1.17)).coerceAtLeast(
             0.0
         )
     )
@@ -446,7 +446,7 @@ private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.minAmountRest(): String 
 
 private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.progress(): Pair<Float, Float> {
     val min = key.minOrderAmount()?.toDoubleOrNull() ?: 0.0
-    val current = (value.sumOf { it.first.price() * it.second } * 1.17).coerceAtLeast(0.0)
+    val current = (value.sumOf { it.first.currentPrice() * it.second } * 1.17).coerceAtLeast(0.0)
     if (current == 0.0) {
         return Pair(1f, 0f)
     }

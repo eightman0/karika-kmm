@@ -312,7 +312,8 @@ private fun PriceBox(component: ProductDetailsComponent) {
                         tint = KarikaColors.Gray2
                     )
                 },
-                enabled = false
+                enabled = false,
+                disabledTextColor = KarikaColors.Gray2,
             )
         }
         BoxWithConstraints(modifier = Modifier.weight(1f)) {
@@ -335,7 +336,8 @@ private fun PriceBox(component: ProductDetailsComponent) {
                         tint = KarikaColors.Gray2
                     )
                 },
-                enabled = false
+                enabled = false,
+                disabledTextColor = KarikaColors.Gray2,
             )
         }
     }
@@ -391,7 +393,8 @@ private fun NameBox(component: ProductDetailsComponent) {
         placeholder = "SKU",
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Next,
-        enabled = false
+        enabled = false,
+        disabledTextColor = KarikaColors.Gray2,
     )
 }
 
@@ -438,7 +441,8 @@ private fun MinQtyBox(component: ProductDetailsComponent) {
                         tint = KarikaColors.Gray2
                     )
                 },
-                enabled = false
+                enabled = false,
+                disabledTextColor = KarikaColors.Gray2
             )
             if (dropdownState.value) {
                 DropdownMenu(

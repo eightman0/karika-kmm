@@ -24,7 +24,7 @@ class VendorDetailsComponent(
     val vendor = _vendor.asStateFlow()
     private val _vendorCategories = MutableStateFlow<List<Category>>(emptyList())
     val vendorCategories = _vendorCategories.asStateFlow()
-    private val _products = MutableStateFlow<List<Product>>(emptyList())
+    private val _products = MutableStateFlow<Set<Product>>(emptySet())
     val products = _products.asStateFlow()
     val searchText = mutableStateOf("")
     val selectedCategories = mutableStateOf<List<Category>>(emptyList())
@@ -66,7 +66,7 @@ class VendorDetailsComponent(
                         hideLoader()
                         _products.update {
                             if (reset) {
-                                result.data
+                                result.data.toSet()
                             } else {
                                 it.plus(result.data)
                             }

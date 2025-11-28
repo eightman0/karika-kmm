@@ -55,6 +55,8 @@ class CartHandler {
                                                 minQty = it.extensionAttributes?.minQty.toString(),
                                                 image = it.extensionAttributes?.imageUrl,
                                                 specialPrice = it.extensionAttributes?.specialPrice?.toDoubleOrNull(),
+                                                specialPriceFrom = it.extensionAttributes?.specialPriceFrom,
+                                                specialPriceTo = it.extensionAttributes?.specialPriceTo,
                                                 rewardPoints = it.extensionAttributes?.rewardPoints
                                                     ?: 0.0,
                                             ),

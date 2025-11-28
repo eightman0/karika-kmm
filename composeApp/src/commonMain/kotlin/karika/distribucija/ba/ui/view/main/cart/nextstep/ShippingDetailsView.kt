@@ -262,7 +262,8 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
                         keyboardType = KeyboardType.Text,
                         enabled = false,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Next,
+                        disabledTextColor = KarikaColors.Gray2
                     )
                     KarikaTextField1(
                         modifier = Modifier

@@ -46,7 +46,7 @@ class AdminMessagesComponent(componentContext: ComponentContext, stateHolder: Ka
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
                             hideLoader()
-                            _messages.update { result.data }
+                            _messages.update { result.data.map { it.copy(admin = true) } }
                         }
 
                         is ResultState.Error -> {

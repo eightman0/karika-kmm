@@ -158,7 +158,7 @@ fun TopBar(component: MainComponent) {
                         },
                         onSearchExecute = {
 
-                        },
+                        }
                     )
                 },
                 actions = {

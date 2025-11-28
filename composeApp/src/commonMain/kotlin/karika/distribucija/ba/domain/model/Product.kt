@@ -28,6 +28,8 @@ data class Product(
     @SerialName("name") var name: String? = null,
     @SerialName("b2b_min_qty") var minQty: String? = null,
     @SerialName("special_price") var specialPrice: Double? = null,
+    @SerialName("special_from_date") val specialPriceFrom: String? = null,
+    @SerialName("special_to_date") val specialPriceTo: String? = null,
     @SerialName("price") var price: Double? = null,
     @SerialName("status") var status: Int? = null,
     @SerialName("image") val image: String? = null,
@@ -96,10 +98,46 @@ data class Product(
         companyLogo = "media/" + extensionAttributes?.vendorData?.vendorLogo
     )
 
+    @OptIn(ExperimentalTime::class)
     fun specialPrice(): Double {
-        return customAttributes
+        val special = customAttributes
             .find { f -> f.attributeCode == "special_price" }
             ?.value?.jsonPrimitive?.content?.toDouble() ?: specialPrice ?: 0.0
+
+        if (specialPriceFrom != null && specialPriceTo != null) {
+            try {
+                val formatter = LocalDateTime.Format {
+                    year()
+                    char('-')
+                    monthNumber()
+                    char('-')
+                    day()
+                    char(' ')
+                    hour()
+                    char(':')
+                    minute()
+                    char(':')
+                    second()
+                }
+
+                val from = LocalDateTime.parse(specialPriceFrom, formatter)
+                    .toInstant(TimeZone.currentSystemDefault())
+                val to = LocalDateTime.parse(specialPriceTo, formatter)
+                    .toInstant(TimeZone.currentSystemDefault())
+
+                val now = Clock.System.now()
+
+                return if (now in from..to) {
+                    special
+                } else {
+                    0.0
+                }
+            } catch (e: Exception) {
+                return special
+            }
+        } else {
+            return special
+        }
     }
 
     fun hasSpecialPrice() = specialPriceString() != "0,00 KM"
@@ -112,7 +150,15 @@ data class Product(
         return price ?: 0.0
     }
 
-    fun priceString(): String {
+    fun currentPrice(): Double {
+        return if (specialPrice() > 0) specialPrice() else price()
+    }
+
+    fun currentPriceString(): String {
+        return karikaPriceFormat(currentPrice()) + " KM"
+    }
+
+    fun originalPriceString(): String {
         return karikaPriceFormat(price()) + " KM"
     }
 
@@ -213,7 +259,7 @@ data class Product(
                 char('-')
                 monthNumber()
                 char('-')
-                dayOfMonth()
+                day()
                 char(' ')
                 hour()
                 char(':')

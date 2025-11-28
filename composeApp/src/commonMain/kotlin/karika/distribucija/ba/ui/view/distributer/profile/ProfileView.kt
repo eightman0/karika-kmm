@@ -140,7 +140,8 @@ private fun CompanyInfo(component: ProfileComponent) {
             allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Next,
-            enabled = false
+            enabled = false,
+            disabledTextColor = KarikaColors.Gray2,
         )
         KarikaTextField1(
             modifier = Modifier
@@ -151,7 +152,8 @@ private fun CompanyInfo(component: ProfileComponent) {
             allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Next,
-            enabled = false
+            enabled = false,
+            disabledTextColor = KarikaColors.Gray2,
         )
         if (companyCity.value.isNotEmpty()) {
             KarikaTextField1(
@@ -163,7 +165,8 @@ private fun CompanyInfo(component: ProfileComponent) {
                 allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next,
-                enabled = false
+                enabled = false,
+                disabledTextColor = KarikaColors.Gray2,
             )
         }
         if (companyCanton.value.isNotEmpty()) {
@@ -176,7 +179,8 @@ private fun CompanyInfo(component: ProfileComponent) {
                 allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next,
-                enabled = false
+                enabled = false,
+                disabledTextColor = KarikaColors.Gray2,
             )
         }
         if (companyMunicipality.value.isNotEmpty()) {
@@ -189,7 +193,8 @@ private fun CompanyInfo(component: ProfileComponent) {
                 allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next,
-                enabled = false
+                enabled = false,
+                disabledTextColor = KarikaColors.Gray2,
             )
         }
         KarikaText(
@@ -262,7 +267,8 @@ private fun CompanyInfo(component: ProfileComponent) {
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Next,
-            enabled = false
+            enabled = false,
+            disabledTextColor = KarikaColors.Gray2,
         )
         KarikaTextField1(
             modifier = Modifier
@@ -273,7 +279,8 @@ private fun CompanyInfo(component: ProfileComponent) {
             keyboardType = KeyboardType.Number,
             allowedChars = KarikaConstants.numbers,
             imeAction = ImeAction.Next,
-            enabled = false
+            enabled = false,
+            disabledTextColor = KarikaColors.Gray2,
         )
         KarikaTextField1(
             modifier = Modifier

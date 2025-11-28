@@ -55,7 +55,7 @@ class MessagesOverviewComponent(
         iOScope.launch {
             messagesRepository.get(
                 threadId = threadId,
-                admin = conversationState.value.receiverId == "0"
+                admin = conversationState.value.admin
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()

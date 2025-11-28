@@ -75,6 +75,10 @@ data class ExtAttributes(
     val rewardPoints: Double? = null,
     @SerialName("min_qty")
     val minQty: Int? = null,
+    @SerialName("special_price_from")
+    val specialPriceFrom: String? = null,
+    @SerialName("special_price_to")
+    val specialPriceTo: String? = null,
 )
 
 @Serializable

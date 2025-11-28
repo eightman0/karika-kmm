@@ -134,7 +134,7 @@ private fun EmptyState(component: SearchComponent) {
     val vendors by component.vendors.collectAsState()
     val products by component.products.collectAsState()
     val loader by component.stateHolder.loaderHandler.loader.collectAsState()
-    if (vendors.isEmpty() && products.isNotEmpty() && !loader) {
+    if (vendors.isEmpty() && products.isEmpty() && !loader) {
         Box(
             modifier = Modifier
                 .height(200.dp)
