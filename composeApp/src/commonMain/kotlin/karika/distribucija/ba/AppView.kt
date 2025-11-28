@@ -138,6 +138,7 @@ fun WaterMarkBox(watermarkText: String) {
                         color = when (getEnvPrefix()) {
                             "demo." -> KarikaColors.Yellow
                             "test." -> KarikaColors.Green3
+                            "stage." -> KarikaColors.Blue2
                             else -> KarikaColors.Black
                         }
                     ),

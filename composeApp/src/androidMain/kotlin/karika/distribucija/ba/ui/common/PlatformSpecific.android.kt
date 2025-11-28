@@ -58,6 +58,7 @@ actual fun getEnvPrefix(): String {
     return when (flavour) {
         "prod", "kiosk" -> ""
         "demo" -> "demo."
+        "stage" -> "stage."
         else -> "test."
     }
 }
@@ -83,7 +84,7 @@ actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
 actual fun getEnvJwt(): String {
     return when (BuildConfig.FLAVOR) {
         "prod", "kiosk" -> "lbzgyy1qylr7unu707eblcphftb2fzha"
-        "demo" -> "hgy5au3paxuijsiv52nyt9w47fcxprbz"
+        "demo","stage" -> "hgy5au3paxuijsiv52nyt9w47fcxprbz"
         else -> "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"
     }
 }

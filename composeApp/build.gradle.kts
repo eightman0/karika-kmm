@@ -135,6 +135,10 @@ android {
             applicationId = "karika.distribucija.ba.uat"
             dimension = "karika"
         }
+        create("stage") {
+            applicationId = "karika.distribucija.ba.stage"
+            dimension = "karika"
+        }
         create("prod") {
             applicationId = "karika.distribucija.ba"
             dimension = "karika"

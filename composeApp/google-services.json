@@ -94,6 +94,35 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:854446114305:android:b741c0555701e39441a200",
+        "android_client_info": {
+          "package_name": "karika.distribucija.ba.stage"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhXruU2GPjiEDLP9XInSWTnrTptpgy8jQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "854446114305-8r2ana8q021c95sps0ipffhpkof6bjpk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:854446114305:android:68957dd2aa7957aa41a200",
         "android_client_info": {
           "package_name": "karika.distribucija.ba.uat"

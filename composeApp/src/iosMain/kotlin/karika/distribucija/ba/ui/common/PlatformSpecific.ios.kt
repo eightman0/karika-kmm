@@ -201,6 +201,7 @@ actual fun getEnvPrefix(): String {
     return when (currentEnv) {
         "prod" -> ""
         "demo" -> "demo."
+        "stage" -> "stage."
         else -> "test."
     }
 }
@@ -231,7 +232,7 @@ actual fun getEnvJwt(): String {
         NSBundle.mainBundle.objectForInfoDictionaryKey("APP_ENV") as? String ?: "prod"
     return when (currentEnv) {
         "prod" -> "lbzgyy1qylr7unu707eblcphftb2fzha"
-        "demo" -> "hgy5au3paxuijsiv52nyt9w47fcxprbz"
+        "demo", "stage" -> "hgy5au3paxuijsiv52nyt9w47fcxprbz"
         else -> "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"
     }
 }

@@ -1,6 +1,7 @@
 package karika.distribucija.ba.ui.common.state.customer
 
 import karika.distribucija.ba.domain.api.CartRepository
+import karika.distribucija.ba.domain.model.CartData
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
