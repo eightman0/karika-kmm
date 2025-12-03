@@ -566,6 +566,54 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                 )
             }
         }
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .blur(radius = if (order.locked()) 5.dp else 0.dp),
+                    text = order.telephone(),
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W700
+                )
+                KarikaText(
+                    modifier = Modifier,
+                    text = "KONTAKT TELEFON",
+                    color = KarikaColors.Gray13,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W400
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .blur(radius = if (order.locked()) 5.dp else 0.dp),
+                    text = order.address(),
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W700
+                )
+                KarikaText(
+                    modifier = Modifier,
+                    text = "ADRESA ZA ISPORUKU",
+                    color = KarikaColors.Gray13,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W400
+                )
+            }
+        }
         YSpacer16()
     }
 

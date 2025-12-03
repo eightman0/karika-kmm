@@ -217,6 +217,8 @@ data class VendorOrder(
     }
 
     fun email() = address?.email ?: "-"
+    fun telephone() = address?.telephone ?: "-"
+    fun address() = "${(address?.street) ?: "-"}, ${(address?.city) ?: "-"}"
 }
 
 @Serializable
