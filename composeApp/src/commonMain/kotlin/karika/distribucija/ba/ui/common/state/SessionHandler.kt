@@ -58,6 +58,7 @@ open class SessionHandler : KoinComponent {
 
     fun hasJWT() = persistenceManager.get("JWT_TOKEN").isNotEmpty()
 
+    fun userType() = KarikaType.valueOf(persistenceManager.get("user_type")).toUserType()
     fun mainConfig(): AppConfig {
         val type = persistenceManager.get("user_type")
         val jwt = persistenceManager.get("JWT_TOKEN")

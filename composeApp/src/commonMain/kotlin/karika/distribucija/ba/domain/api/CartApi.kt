@@ -96,7 +96,7 @@ class CartRepository internal constructor() {
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
@@ -114,7 +114,7 @@ class CartRepository internal constructor() {
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
@@ -132,7 +132,7 @@ class CartRepository internal constructor() {
                     ResultState.Error(response?.bodyAsText())
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
@@ -155,7 +155,7 @@ class CartRepository internal constructor() {
                     )
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
@@ -173,7 +173,7 @@ class CartRepository internal constructor() {
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
@@ -191,7 +191,7 @@ class CartRepository internal constructor() {
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }
@@ -209,7 +209,7 @@ class CartRepository internal constructor() {
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         }
     }

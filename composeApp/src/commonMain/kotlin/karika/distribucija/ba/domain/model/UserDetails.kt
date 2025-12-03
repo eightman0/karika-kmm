@@ -26,6 +26,9 @@ data class UserDetails(
     fun companyName() =
         customAttributes.find { it.attributeCode == "b2b_pravno_lice" }?.value ?: "-"
 
+    fun companyNameNullable() =
+        customAttributes.find { it.attributeCode == "b2b_pravno_lice" }?.value
+
     fun address(): String {
         val address = addresses.firstOrNull() ?: return ""
         return "${address.street.firstOrNull()}, ${address.city}, ${address.postcode}, Bosna I Hercegovina, ${address.telephone}"

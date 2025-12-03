@@ -6,6 +6,7 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.HttpClientProvider
+import karika.distribucija.ba.domain.api.AnalyticsRepository
 import karika.distribucija.ba.domain.api.CartRepository
 import karika.distribucija.ba.domain.api.MessagesRepository
 import karika.distribucija.ba.domain.api.NotificationRepository
@@ -16,11 +17,15 @@ import karika.distribucija.ba.domain.api.VendorRepository
 import karika.distribucija.ba.domain.model.AddToCart
 import karika.distribucija.ba.domain.model.CartItem
 import karika.distribucija.ba.domain.model.Conversation
+import karika.distribucija.ba.domain.model.EventType
+import karika.distribucija.ba.domain.model.KarikaTracking
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.PromotedVendor
+import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.TrackingPayload
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
@@ -31,14 +36,19 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 open class CommonComponent(
     componentContext: ComponentContext,
     val stateHolder: KarikaStateHolder,
 ) : KoinComponent, ComponentContext by componentContext {
+    @OptIn(ExperimentalUuidApi::class)
+    private val sessionId = Uuid.random().toString()
     open val title: String = ""
     val snackbarHostState = stateHolder.hostState
     val mainScope = CoroutineScope(Dispatchers.Main)
@@ -50,6 +60,7 @@ open class CommonComponent(
     val vendorRepository = VendorRepository()
     val productRepository = ProductRepository()
     private val notificationRepository = NotificationRepository()
+    private val analyticsRepository = AnalyticsRepository()
 
     private val _promotedVendors = MutableStateFlow<List<PromotedVendor>>(emptyList())
     val promotedVendors = _promotedVendors.asStateFlow()
@@ -409,6 +420,13 @@ open class CommonComponent(
                     .collect()
             }
         }
+
+        logEvent(
+            eventType = EventType.USER_LOGIN,
+            refType = RefType.USER_LOGIN,
+            product = Product(name = "FCM Token", sku = "", id = 0),
+            qty = 0
+        )
     }
 
     private fun removePushHandle() {
@@ -419,6 +437,13 @@ open class CommonComponent(
                     .collect()
             }
         }
+
+        logEvent(
+            eventType = EventType.LOGOUT,
+            refType = RefType.LOGOUT,
+            product = Product(name = "FCM Token", sku = "", id = 0),
+            qty = 0
+        )
     }
 
     fun showImagePreview(imageUrl: String) {
@@ -481,4 +506,39 @@ open class CommonComponent(
     }
 
     fun isGuest() = HttpClientProvider.token == getEnvJwt()
+
+    fun logEvent(
+        eventType: EventType,
+        refType: RefType,
+        product: Product,
+        qty: Int = 1
+    ) {
+        /*
+        iOScope.launch {
+            analyticsRepository.post(
+                KarikaTracking(
+                    sessionId = sessionId,
+                    userType = stateHolder.sessionHandler.userType(),
+                    eventType = eventType,
+                    payload = when (eventType) {
+                        EventType.USER_LOGIN, EventType.LOGOUT -> null
+                        else -> TrackingPayload(
+                            ref = refType,
+                            product = product.name,
+                            sku = product.sku,
+                            qty = qty
+                        )
+                    },
+                    url = when (eventType) {
+                        EventType.USER_LOGIN -> "karika-mobile://login"
+                        EventType.LOGOUT -> "karika-mobile://logout"
+                        else -> "karika-mobile://product/${product.id}"
+                    },
+                    userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
+                    userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
+                )
+            ).firstOrNull()
+        }
+         */
+    }
 }

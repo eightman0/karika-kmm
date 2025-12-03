@@ -399,7 +399,7 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
                         tag = "",
                         styles = TextLinkStyles(),
                         linkInteractionListener = {
-                            openPdf("https://${getEnvPrefix()}karika.ba/cms/politika-privatnosti")
+                            openPdf("https://${getEnvPrefix()}karika.ba/cms/odredbe-i-uvjeti")
                         }
                     )
                 ) {
@@ -423,15 +423,25 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
                 ) {
                     append("i")
                 }
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.W400,
-                        color = KarikaColors.Gray4,
-                        fontSize = 14.sp,
-                        textDecoration = TextDecoration.Underline
+                withLink(
+                    LinkAnnotation.Clickable(
+                        tag = "",
+                        styles = TextLinkStyles(),
+                        linkInteractionListener = {
+                            openPdf("https://${getEnvPrefix()}karika.ba/cms/politika-privatnosti")
+                        }
                     )
                 ) {
-                    append(" politikom privatnosti")
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.W400,
+                            color = KarikaColors.Gray4,
+                            fontSize = 14.sp,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    ) {
+                        append(" politikom privatnosti")
+                    }
                 }
                 withStyle(
                     style = SpanStyle(
@@ -463,7 +473,7 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
                         tag = "",
                         styles = TextLinkStyles(),
                         linkInteractionListener = {
-                            openPdf("https://${getEnvPrefix()}karika.ba/cms/politika-privatnosti")
+                            openPdf("https://${getEnvPrefix()}karika.ba/cms/odredbe-i-uvjeti")
                         }
                     )
                 ) {
@@ -487,15 +497,25 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
                 ) {
                     append("i")
                 }
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.W400,
-                        color = KarikaColors.Gray4,
-                        fontSize = 14.sp,
-                        textDecoration = TextDecoration.Underline
+                withLink(
+                    LinkAnnotation.Clickable(
+                        tag = "",
+                        styles = TextLinkStyles(),
+                        linkInteractionListener = {
+                            openPdf("https://${getEnvPrefix()}karika.ba/cms/politika-privatnosti")
+                        }
                     )
                 ) {
-                    append(" politikom privatnosti")
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.W400,
+                            color = KarikaColors.Gray4,
+                            fontSize = 14.sp,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    ) {
+                        append(" politikom privatnosti")
+                    }
                 }
                 withStyle(
                     style = SpanStyle(
