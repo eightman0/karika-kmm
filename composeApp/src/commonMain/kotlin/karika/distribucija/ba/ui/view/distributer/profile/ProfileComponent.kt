@@ -4,7 +4,9 @@ import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.HttpClientProvider.profileImage
 import karika.distribucija.ba.domain.api.DashRepository
+import karika.distribucija.ba.domain.model.EventType
 import karika.distribucija.ba.domain.model.KarikaUnit
+import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
@@ -88,6 +90,11 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                         is ResultState.Success -> {
                             hideLoader()
                             showMessage(result.data)
+
+                            logEvent(
+                                eventType = EventType.CUSTOMER_PASSWORD_CHANGE,
+                                refType = RefType.USER_LOGIN
+                            )
                         }
 
                         is ResultState.Error -> {

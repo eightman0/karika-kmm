@@ -8,10 +8,10 @@ data class KarikaTracking(
     @SerialName("session_id")
     val sessionId: String,
     @SerialName("user_type")
-    val userType: UserType,
-    val platform: String = "mobile",
+    val userType: String,
+    val platform: String,
     @SerialName("event_type")
-    val eventType: EventType,
+    val eventType: String,
     val payload: TrackingPayload?,
     val url: String?,
 
@@ -23,10 +23,30 @@ data class KarikaTracking(
 
 @Serializable
 data class TrackingPayload(
-    val ref: RefType,
+    val ref: String,
     val product: String? = null,
     val sku: String? = null,
-    val qty: Int? = null
+    val qty: Int? = null,
+
+    val query: String? = null,
+    val results: String? = null,
+
+    val filters: Filters? = null,
+
+    val sort: String? = null,
+    val categoryIds: String? = null,
+)
+
+@Serializable
+data class Filters(
+    @SerialName("price_min")
+    val priceMin: String? = null,
+    @SerialName("price_max")
+    val priceMax: String? = null,
+    @SerialName("regions")
+    val regions: String? = null,
+    @SerialName("vendors")
+    val vendors: String? = null
 )
 
 enum class UserType(val value: String) {
@@ -53,4 +73,5 @@ enum class RefType(val value: String) {
     SEARCH_BAR("search_bar"),
     USER_LOGIN("user_login"),
     LOGOUT("user_logout"),
+    PRODUCT("product_page"),
 }

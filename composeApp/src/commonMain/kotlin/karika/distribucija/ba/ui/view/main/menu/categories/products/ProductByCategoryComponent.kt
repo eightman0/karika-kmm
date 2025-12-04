@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.ProductRepository
 import karika.distribucija.ba.domain.model.Category
+import karika.distribucija.ba.domain.model.Filters
 import karika.distribucija.ba.domain.model.KarikaUnit
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
@@ -79,6 +80,16 @@ class ProductByCategoryComponent(
                         showMessage(result.message)
                     }
                 }
+                logProductFilterEvent(
+                    filters = Filters(
+                        priceMin = filterPriceFrom.value,
+                        priceMax = filterPriceTo.value,
+                        regions = selectedRegion.value.joinToString(separator = ",") { it.unit() },
+                        vendors = "${if (selectedVendor.value.second == 0) null else selectedVendor.value.second}"
+                    ),
+                    sort = sortBy.value.sortType(),
+                    categoryIds = category.value.getAllCategoryIds()
+                )
             }
         }
     }

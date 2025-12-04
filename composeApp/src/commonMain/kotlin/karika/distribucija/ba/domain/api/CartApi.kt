@@ -128,9 +128,8 @@ class CartRepository internal constructor() {
             if (response != null && response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
-                emit(
-                    ResultState.Error(response?.bodyAsText())
-                )
+                val errorBody = response?.body<ErrorResponse>()
+                emit(ResultState.Error(errorBody?.message))
             }
         } catch (_: Exception) {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))

@@ -3,7 +3,9 @@ package karika.distribucija.ba.ui.view.main.product
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.ProductRepository
+import karika.distribucija.ba.domain.model.EventType
 import karika.distribucija.ba.domain.model.Product
+import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
@@ -64,6 +66,11 @@ class ProductComponent(
                         _product.update {
                             result.data.items.find { it.sku == product.value.sku } ?: product.value
                         }
+                        logEvent(
+                            eventType = EventType.PAGE_OPEN,
+                            refType = RefType.PRODUCT,
+                            product = product.value,
+                        )
                     }
 
                     is ResultState.Error -> {

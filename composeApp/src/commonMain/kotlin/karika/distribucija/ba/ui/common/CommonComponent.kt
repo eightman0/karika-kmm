@@ -18,6 +18,7 @@ import karika.distribucija.ba.domain.model.AddToCart
 import karika.distribucija.ba.domain.model.CartItem
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.EventType
+import karika.distribucija.ba.domain.model.Filters
 import karika.distribucija.ba.domain.model.KarikaTracking
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
@@ -36,7 +37,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -112,6 +112,12 @@ open class CommonComponent(
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
             return
         }
+        logEvent(
+            eventType = EventType.ADD_TO_CART,
+            refType = RefType.CART_PANEL,
+            product = product,
+            qty = qty
+        )
         iOScope.launch {
             cartRepository.addToCart(
                 AddToCart(
@@ -134,6 +140,13 @@ open class CommonComponent(
 
                     is ResultState.Error -> {
                         hideLoader()
+                        if (result.message == "Current customer does not have an active cart.") {
+                            stateHolder.cartHandler.createCart {
+                                addToCart(product, qty, showSnack)
+                            }
+                            return@collect
+                        }
+
                         if (showSnack) {
                             showMessage(result.message ?: "")
                         }
@@ -177,6 +190,14 @@ open class CommonComponent(
 
                         is ResultState.Error -> {
                             hideLoader()
+
+                            if (result.message == "Current customer does not have an active cart.") {
+                                stateHolder.cartHandler.createCart {
+                                    addToCart(product, qty, showSnack)
+                                }
+                                return@collect
+                            }
+
                             if (showSnack) {
                                 showMessage(result.message ?: "")
                                 reloadCart()
@@ -255,6 +276,11 @@ open class CommonComponent(
     }
 
     fun removeFromCart(product: Product) {
+        logEvent(
+            eventType = EventType.REMOVE_FROM_CART,
+            refType = RefType.CART_PANEL,
+            product = product
+        )
         iOScope.launch {
             cartRepository.removeFromCart(product.itemId?.toString() ?: return@launch)
                 .collect { result ->
@@ -510,35 +536,88 @@ open class CommonComponent(
     fun logEvent(
         eventType: EventType,
         refType: RefType,
-        product: Product,
-        qty: Int = 1
+        product: Product? = null,
+        qty: Int? = null
     ) {
-        /*
-        iOScope.launch {
-            analyticsRepository.post(
-                KarikaTracking(
-                    sessionId = sessionId,
-                    userType = stateHolder.sessionHandler.userType(),
-                    eventType = eventType,
-                    payload = when (eventType) {
-                        EventType.USER_LOGIN, EventType.LOGOUT -> null
-                        else -> TrackingPayload(
-                            ref = refType,
-                            product = product.name,
-                            sku = product.sku,
-                            qty = qty
-                        )
-                    },
-                    url = when (eventType) {
-                        EventType.USER_LOGIN -> "karika-mobile://login"
-                        EventType.LOGOUT -> "karika-mobile://logout"
-                        else -> "karika-mobile://product/${product.id}"
-                    },
-                    userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
-                    userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
-                )
-            ).firstOrNull()
-        }
-         */
+        //iOScope.launch {
+        //    analyticsRepository.post(
+        //        KarikaTracking(
+        //            platform = "mobile",
+        //            sessionId = sessionId,
+        //            userType = stateHolder.sessionHandler.userType().value,
+        //            eventType = eventType.value,
+        //            payload = TrackingPayload(
+        //                ref = refType.value,
+        //                product = product?.name,
+        //                sku = product?.sku,
+        //                qty = qty
+        //            ),
+        //            url = when (eventType) {
+        //                EventType.USER_LOGIN -> "karika-mobile://login"
+        //                EventType.LOGOUT -> "karika-mobile://logout"
+        //                else -> "karika-mobile://product/${product?.id}"
+        //            },
+        //            userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
+        //            userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
+        //        )
+        //    ).collect()
+        //}
+    }
+
+    fun logSearchEvent(
+        eventType: EventType,
+        refType: RefType,
+        query: String,
+        results: String
+    ) {
+        //iOScope.launch {
+        //    analyticsRepository.post(
+        //        KarikaTracking(
+        //            platform = "mobile",
+        //            sessionId = sessionId,
+        //            userType = stateHolder.sessionHandler.userType().value,
+        //            eventType = eventType.value,
+        //            payload = when (eventType) {
+        //                EventType.USER_LOGIN, EventType.LOGOUT -> null
+        //                else -> TrackingPayload(
+        //                    ref = refType.value,
+        //                    query = query,
+        //                    results = results
+        //                )
+        //            },
+        //            url = when (eventType) {
+        //                else -> "karika-mobile://search?query=${query}"
+        //            },
+        //            userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
+        //            userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
+        //        )
+        //    ).collect()
+        //}
+    }
+
+    fun logProductFilterEvent(
+        filters: Filters,
+        sort: String,
+        categoryIds: String
+    ) {
+       // iOScope.launch {
+       //     analyticsRepository.post(
+       //         KarikaTracking(
+       //             platform = "mobile",
+       //             sessionId = sessionId,
+       //             userType = stateHolder.sessionHandler.userType().value,
+       //             eventType = EventType.PRODUCT_FILTER.value,
+       //             payload = TrackingPayload(
+       //                 ref = RefType.VENDOR_PRODUCTS_PAGE.value,
+       //                 filters = filters,
+       //                 sort = sort,
+       //                 categoryIds = categoryIds
+       //             ),
+       //             url = "karika-mobile://products?query=${Json.encodeToString(filters)}?sort=$sort",
+       //             userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
+       //             userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
+       //         )
+       //     ).collect()
+       // }
     }
 }

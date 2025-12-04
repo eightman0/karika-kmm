@@ -2,7 +2,9 @@ package karika.distribucija.ba.ui.view.main.search
 
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
+import karika.distribucija.ba.domain.model.EventType
 import karika.distribucija.ba.domain.model.Product
+import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 class SearchComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
     CommonComponent(componentContext, stateHolder) {
@@ -54,11 +57,25 @@ class SearchComponent(componentContext: ComponentContext, stateHolder: KarikaSta
                         }
                         hasNextPage = result.data.size == pageSize
                         currentPage++
+
+                        logSearchEvent(
+                            eventType = EventType.SEARCH_TERM,
+                            refType = RefType.SEARCH_BAR,
+                            query = searchText.value,
+                            results = Json.encodeToString(result.data)
+                        )
                     }
 
                     is ResultState.Error -> {
                         hideLoader()
                         showMessage(result.message)
+
+                        logSearchEvent(
+                            eventType = EventType.SEARCH_TERM,
+                            refType = RefType.SEARCH_BAR,
+                            query = searchText.value,
+                            results = "null"
+                        )
                     }
                 }
             }

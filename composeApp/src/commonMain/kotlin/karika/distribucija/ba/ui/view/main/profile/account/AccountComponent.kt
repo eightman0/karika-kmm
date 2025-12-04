@@ -3,6 +3,8 @@ package karika.distribucija.ba.ui.view.main.profile.account
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.model.Address
+import karika.distribucija.ba.domain.model.EventType
+import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.UpdateCustomerRequest
 import karika.distribucija.ba.ui.common.CommonComponent
@@ -190,6 +192,10 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                             showMessage(result.message)
                         }
                     }
+                    logEvent(
+                        eventType = EventType.CUSTOMER_PASSWORD_CHANGE,
+                        refType = RefType.USER_LOGIN
+                    )
                 }
         }
     }
