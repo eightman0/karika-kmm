@@ -559,7 +559,7 @@ private fun CompanyAddress(viewModel: RegistrationComponent) {
         value = city
     )
     KarikaPicker(
-        title = "Opčina*",
+        title = "Općina*",
         placeholder = "Općina",
         values = viewModel.municipality.asState(),
         value = municipality

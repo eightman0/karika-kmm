@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		41992F9A2EE1C5B0007DFBB6 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 41992F992EE1C5B0007DFBB6 /* FirebaseCrashlytics */; };
 		41F3A1AD2E79A0B80023588F /* FirebaseInstallations in Frameworks */ = {isa = PBXBuildFile; productRef = 41F3A1AC2E79A0B80023588F /* FirebaseInstallations */; };
 		41F3A1AF2E79A0B80023588F /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 41F3A1AE2E79A0B80023588F /* FirebaseMessaging */; };
 /* End PBXBuildFile section */
@@ -46,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41992F9A2EE1C5B0007DFBB6 /* FirebaseCrashlytics in Frameworks */,
 				41F3A1AF2E79A0B80023588F /* FirebaseMessaging in Frameworks */,
 				41F3A1AD2E79A0B80023588F /* FirebaseInstallations in Frameworks */,
 			);
@@ -81,7 +83,9 @@
 				B9DA97F42DC1497100A4DA20 /* Compile Kotlin Framework */,
 				B9DA97AD2DC1472C00A4DA20 /* Sources */,
 				B9DA97AE2DC1472C00A4DA20 /* Frameworks */,
+				41992FC02EE1CD91007DFBB6 /* Crashlytics-Script */,
 				B9DA97AF2DC1472C00A4DA20 /* Resources */,
+				41992F9B2EE1C610007DFBB6 /* Crashlytics */,
 			);
 			buildRules = (
 			);
@@ -94,6 +98,7 @@
 			packageProductDependencies = (
 				41F3A1AC2E79A0B80023588F /* FirebaseInstallations */,
 				41F3A1AE2E79A0B80023588F /* FirebaseMessaging */,
+				41992F992EE1C5B0007DFBB6 /* FirebaseCrashlytics */,
 			);
 			productName = iosApp;
 			productReference = B9DA97B12DC1472C00A4DA20 /* Karika.ba.app */;
@@ -147,6 +152,47 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		41992F9B2EE1C610007DFBB6 /* Crashlytics */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			name = Crashlytics;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+		41992FC02EE1CD91007DFBB6 /* Crashlytics-Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Crashlytics-Script";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\nENVIRONMENT=\"\"\n\nif [[ \"${CONFIGURATION}\" == *\"Uat\"* ]]; then\n    ENVIRONMENT=\"Uat\"\nelif [[ \"${CONFIGURATION}\" == *\"Stage\"* ]]; then\n    ENVIRONMENT=\"Stage\"\nelif [[ \"${CONFIGURATION}\" == *\"Demo\"* ]]; then\n    ENVIRONMENT=\"Demo\"\nelse\n    ENVIRONMENT=\"Prod\"\nfi\n\nPLIST_SOURCE=\"${PROJECT_DIR}/${TARGET_NAME}/GoogleService-Info-${ENVIRONMENT}.plist\"\nPLIST_DESTINATION=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n\nif [ ! -f \"${PLIST_SOURCE}\" ]; then\n    exit 1\nfi\n\ncp \"${PLIST_SOURCE}\" \"${PLIST_DESTINATION}\"\n\n";
+		};
 		B9DA97F42DC1497100A4DA20 /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -278,7 +324,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.4.5;
+				MARKETING_VERSION = 2.4.6;
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "ba.karika.Karika-Demo";
 				PRODUCT_NAME = "Karika.ba - Demo";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -387,7 +434,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.4.5;
+				MARKETING_VERSION = 2.4.6;
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "ba.karika.Karika-Stage";
 				PRODUCT_NAME = "Karika.ba - Stage";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -563,7 +611,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.4.5;
+				MARKETING_VERSION = 2.4.6;
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = ba.karika.Karika;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -609,7 +658,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.4.5;
+				MARKETING_VERSION = 2.4.6;
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "ba.karika.Karika-Test";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -657,6 +707,12 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		41992F992EE1C5B0007DFBB6 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 41F3A1AB2E79A0B80023588F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+
 		41F3A1AC2E79A0B80023588F /* FirebaseInstallations */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 41F3A1AB2E79A0B80023588F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
