@@ -151,7 +151,7 @@ private fun PinnedFooter(component: CartComponent) {
         if (cart.items.orderValid()) {
             component.shippingDetails()
         } else {
-            component.showMessage("Nije zadovoljena minimalna količina po dobavljaču!")
+            component.showMessage("Nije zadovoljena minimalna vrijednost narudžbe za dobavljača!")
         }
     }
 }

@@ -22,8 +22,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import karika.distribucija.ba.ui.common.CommonComponent
 import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_cancel_circle
 import karikav2.composeapp.generated.resources.ic_checked_circle
+import karikav2.composeapp.generated.resources.ic_warning
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.vectorResource
 
 
@@ -63,16 +66,21 @@ fun KarikaScaffold(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp),
                             action = null,
-                            containerColor = KarikaColors.Blue,
+                            containerColor = component.snackbarHostState.currentSnackbarData?.visuals?.actionLabel?.toContainerColor()
+                                ?: KarikaColors.Blue,
                             contentColor = KarikaColors.Blue,
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(8.dp),
                         ) {
                             IconTextItem(
                                 modifier = Modifier
+                                    .padding(bottom = 8.dp)
                                     .onClick {
                                         component.snackbarHostState.currentSnackbarData?.dismiss()
                                     },
-                                icon = vectorResource(Res.drawable.ic_checked_circle),
+                                icon = vectorResource(
+                                    component.snackbarHostState.currentSnackbarData?.visuals?.actionLabel?.toContainerIcon()
+                                        ?: Res.drawable.ic_checked_circle
+                                ),
                                 iconColor = KarikaColors.White,
                                 textColor = KarikaColors.White,
                                 text = data.visuals.message
@@ -116,4 +124,22 @@ fun KarikaScaffold(
 fun rememberImeVisible(): Boolean {
     val density = LocalDensity.current
     return WindowInsets.ime.getBottom(density) > 0
+}
+
+private fun String.toContainerColor(): Color {
+    return when (this) {
+        "ERROR" -> KarikaColors.Error
+        "SUCCESS" -> KarikaColors.Blue
+        "WARNING" -> KarikaColors.Yellow
+        else -> KarikaColors.Blue
+    }
+}
+
+private fun String?.toContainerIcon(): DrawableResource {
+    return when (this) {
+        "ERROR" -> Res.drawable.ic_cancel_circle
+        "SUCCESS" -> Res.drawable.ic_checked_circle
+        "WARNING" -> Res.drawable.ic_warning
+        else -> Res.drawable.ic_checked_circle
+    }
 }

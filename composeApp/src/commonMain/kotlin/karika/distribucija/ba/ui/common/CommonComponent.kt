@@ -72,7 +72,28 @@ open class CommonComponent(
         mainScope.launch {
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(
-                message = message ?: return@launch
+                message = message ?: return@launch,
+                actionLabel = "SUCCESS"
+            )
+        }
+    }
+
+    fun showErrorMessage(message: String?) {
+        mainScope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            snackbarHostState.showSnackbar(
+                message = message ?: return@launch,
+                actionLabel = "ERROR"
+            )
+        }
+    }
+
+    fun showWarningMessage(message: String?) {
+        mainScope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            snackbarHostState.showSnackbar(
+                message = message ?: return@launch,
+                actionLabel = "WARNING"
             )
         }
     }
