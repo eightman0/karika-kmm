@@ -37,7 +37,6 @@ class RegistrationComponent(
     val companyEntity = mutableStateOf("")
     val companyCanton = mutableStateOf("")
     val companyCity = mutableStateOf("")
-    val companyMunicipality = mutableStateOf("")
     val companySize = mutableStateOf("")
     val companyType = mutableStateOf("")
     val companyEmployees = mutableStateOf("")
@@ -56,7 +55,6 @@ class RegistrationComponent(
     val entities = mutableStateOf(KarikaConstants.entries.map { it.name })
     val canton = mutableStateOf<List<String>>(emptyList())
     val city = mutableStateOf<List<String>>(emptyList())
-    val municipality = mutableStateOf<List<String>>(emptyList())
     val customerRegions = mutableStateOf(stateHolder.commonHandler.config.value.customerRegionList)
     val customerGroups = mutableStateOf(stateHolder.commonHandler.config.value.customerGroupList)
 
@@ -80,18 +78,6 @@ class RegistrationComponent(
                 }
                 if (companyCity.value.isEmpty()) {
                     showMessage("Grad je obavezno polje!")
-                    return
-                }
-            }
-            if (companyEntity.value == "Republika Srpska") {
-                if (companyMunicipality.value.isEmpty()) {
-                    showMessage("Općina je obavezno polje!")
-                    return
-                }
-            }
-            if (companyEntity.value == "Distrikt Brčko") {
-                if (companyMunicipality.value.isEmpty()) {
-                    showMessage("Opština je obavezno polje!")
                     return
                 }
             }
@@ -212,10 +198,6 @@ class RegistrationComponent(
                                 JsonPrimitive(companyCanton.value.trim())
                             ),
                             CustomAttributes(
-                                "b2b_opcina",
-                                JsonPrimitive(companyMunicipality.value.trim())
-                            ),
-                            CustomAttributes(
                                 "b2b_grad",
                                 JsonPrimitive(companyCity.value.trim())
                             ),
@@ -271,7 +253,7 @@ class RegistrationComponent(
                         preLoginBack()
                     }
 
-                   is  ResultState.Error -> {
+                    is ResultState.Error -> {
                         hideLoader()
                         showMessage(result.message)
                     }
@@ -291,7 +273,7 @@ class RegistrationComponent(
                     KarikaConstants.entries.findLast { it.name == companyEntity.value }?.id?.toString()
                         ?: "",
                     companyCanton.value.trim(),
-                    companyMunicipality.value.trim().ifEmpty { companyCity.value.trim() },
+                    "",
                     companyName.value.trim(),
                     companyPdv.value.trim(),
                     companyId.value.trim(),

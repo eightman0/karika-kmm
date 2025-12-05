@@ -74,20 +74,10 @@ object KarikaConstants {
     val lettersSpace = capitalLetters + nonCapitalLetters + " "
 
     val entries: List<Entity> = mutableListOf(
-      // Entity(
-      //     name = "Izaberite entitet",
-      //     id = -1,
-      //     cantons = mutableListOf()
-      // ),
         Entity(
             name = "Federacija",
             id = 1,
             cantons = mutableListOf(
-              //  Canton(
-              //      name = "Izaberite Kanton",
-              //      id = -1,
-              //      cities = mutableListOf()
-              //  ),
                 Canton(
                     name = "Kanton Sarajevo",
                     id = 1,
@@ -298,19 +288,14 @@ object KarikaConstants {
             name = "Distrikt Brčko",
             id = 3,
             cantons = mutableListOf(
-               // Canton("Izaberite opštinu", -1, emptyList()),
                 Canton("Brčko Grad", 0, emptyList()),
             )
         ),
     )
 
-    fun cantons(entityId: String, withoutPlaceholder: Boolean = false): List<String> {
-        if (entityId == "Izaberite entitet") {
-            return emptyList()
-        }
-        return entries.find { it.name == entityId }
+    fun cantons(name: String): List<String> {
+        return entries.find { it.name == name }
             ?.cantons
-            ?.filter { if (withoutPlaceholder) it.id != -1 else true }
             ?.map { it.name }
             ?: emptyList()
     }

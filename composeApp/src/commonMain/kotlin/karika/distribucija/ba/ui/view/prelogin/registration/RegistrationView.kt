@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -538,63 +537,40 @@ private fun CompanyAddress(viewModel: RegistrationComponent) {
     val entity = viewModel.companyEntity.asState()
     val canton = viewModel.companyCanton.asState()
     val city = viewModel.companyCity.asState()
-    val municipality = viewModel.companyMunicipality.asState()
 
     KarikaPicker(
         title = "Entitet*",
         placeholder = "Entitet",
         values = viewModel.entities.asState(),
         value = entity
-    )
+    ) {
+        when (entity.value) {
+            "Federacija" -> {
+                viewModel.canton.value = KarikaConstants.cantons("Federacija")
+                viewModel.city.value = emptyList()
+            }
+
+            else -> {
+                viewModel.canton.value = emptyList()
+                viewModel.city.value = KarikaConstants.cantons(entity.value)
+                viewModel.companyCanton.value = ""
+                viewModel.companyCity.value = ""
+            }
+        }
+    }
     KarikaPicker(
         title = "Kanton*",
         placeholder = "Kanton",
         values = viewModel.canton.asState(),
         value = canton
-    )
+    ) {
+        viewModel.companyCity.value = ""
+        viewModel.city.value = KarikaConstants.cities(canton.value)
+    }
     KarikaPicker(
         title = "Grad*",
         placeholder = "Grad",
         values = viewModel.city.asState(),
         value = city
     )
-    KarikaPicker(
-        title = "Općina*",
-        placeholder = "Općina",
-        values = viewModel.municipality.asState(),
-        value = municipality
-    )
-
-    LaunchedEffect(entity.value) {
-        when (entity.value) {
-            "Federacija" -> {
-                viewModel.canton.value = KarikaConstants.cantons("Federacija")
-                viewModel.city.value = emptyList()
-                viewModel.municipality.value = emptyList()
-                viewModel.companyMunicipality.value = ""
-            }
-
-            "Republika Srpska" -> {
-                municipality.value = ""
-                viewModel.municipality.value = KarikaConstants.cantons("Republika Srpska")
-                viewModel.canton.value = emptyList()
-                viewModel.city.value = emptyList()
-                viewModel.companyCanton.value = ""
-                viewModel.companyCity.value = ""
-            }
-
-            "Distrikt Brčko" -> {
-                municipality.value = ""
-                viewModel.municipality.value = KarikaConstants.cantons("Distrikt Brčko")
-                viewModel.canton.value = emptyList()
-                viewModel.city.value = emptyList()
-                viewModel.companyCanton.value = ""
-                viewModel.companyCity.value = ""
-            }
-        }
-    }
-    LaunchedEffect(canton.value) {
-        viewModel.companyCity.value = ""
-        viewModel.city.value = KarikaConstants.cities(canton.value)
-    }
 }

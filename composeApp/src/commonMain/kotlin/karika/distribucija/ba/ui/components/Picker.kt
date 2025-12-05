@@ -37,7 +37,8 @@ fun KarikaPicker(
     title: String = "",
     placeholder: String = "",
     values: MutableState<List<String>>,
-    value: MutableState<String>
+    value: MutableState<String>,
+    onChange: (String) -> Unit = {}
 ) {
     if (values.value.isEmpty()) {
         return
@@ -107,6 +108,7 @@ fun KarikaPicker(
                     onClick = {
                         value.value = it
                         expanded.negate()
+                        onChange(it)
                     },
                     text = {
                         KarikaText(
