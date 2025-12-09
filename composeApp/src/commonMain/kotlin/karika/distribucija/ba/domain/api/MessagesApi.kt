@@ -22,7 +22,6 @@ import karika.distribucija.ba.domain.model.Shop
 import karika.distribucija.ba.domain.model.Vendor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.datetime.Clock
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
@@ -143,16 +142,16 @@ class MessagesRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = MessagesApi()
-                .messages(admin).getOrNull()
+                .messages(admin).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -163,16 +162,16 @@ class MessagesRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = MessagesApi()
-                .get(threadId, admin).getOrNull()
+                .get(threadId, admin).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -187,16 +186,16 @@ class MessagesRepository internal constructor() {
         try {
             val response = MessagesApi()
                 .vendors(searchText, pageSize, currentPage, filterBy, filterValue)
-                .getOrNull()
+                .getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -211,16 +210,16 @@ class MessagesRepository internal constructor() {
         try {
             val response = MessagesApi()
                 .shops(searchText, pageSize, currentPage, filterBy, filterValue)
-                .getOrNull()
+                .getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -230,16 +229,16 @@ class MessagesRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = MessagesApi()
-                .send(message).getOrNull()
+                .send(message).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -247,16 +246,16 @@ class MessagesRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = MessagesApi()
-                .getMessageUnread().getOrNull()
+                .getMessageUnread().getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -264,16 +263,16 @@ class MessagesRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = MessagesApi()
-                .markAsRead(id).getOrNull()
+                .markAsRead(id).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(""))
                 return@flow
             }
 
             emit(ResultState.Error(""))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 }

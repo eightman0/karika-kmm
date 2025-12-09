@@ -88,16 +88,16 @@ class CartRepository internal constructor() {
         try {
             val response = CartApi()
                 .setAddress(address)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(true))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
-        } catch (_: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -106,16 +106,16 @@ class CartRepository internal constructor() {
         try {
             val response = CartApi()
                 .placeOrder()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.bodyAsText()))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
-        } catch (_: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -124,15 +124,15 @@ class CartRepository internal constructor() {
         try {
             val response = CartApi()
                 .addToCart(item)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
-                val errorBody = response?.body<ErrorResponse>()
-                emit(ResultState.Error(errorBody?.message))
+                val errorBody = response.body<ErrorResponse>()
+                emit(ResultState.Error(errorBody.message))
             }
-        } catch (_: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -141,21 +141,21 @@ class CartRepository internal constructor() {
         try {
             val response = CartApi()
                 .updateCart(item)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
-                val error = response?.body<ErrorResponse>()
+                val error = response.body<ErrorResponse>()
                 emit(
                     ResultState.Error(
-                        if ("The requested qty is not available" == error?.message)
+                        if ("The requested qty is not available" == error.message)
                             "Tražena količina nije dostupna."
                         else "Došlo je do greške. Pokušajte ponovo!"
                     )
                 )
             }
-        } catch (_: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -164,16 +164,16 @@ class CartRepository internal constructor() {
         try {
             val response = CartApi()
                 .removeFromCart(itemId)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
-        } catch (_: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -182,16 +182,16 @@ class CartRepository internal constructor() {
         try {
             val response = CartApi()
                 .createCart()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
-        } catch (_: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -200,16 +200,16 @@ class CartRepository internal constructor() {
         try {
             val response = CartApi()
                 .getCart()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
-        } catch (_: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
         }
     }
 }

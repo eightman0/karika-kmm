@@ -122,16 +122,16 @@ class OrdersRepository internal constructor() {
                     filterValue,
                     sortBy,
                     sortDirection
-                ).getOrNull()
+                ).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -141,16 +141,16 @@ class OrdersRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = OrdersApi()
-                .order(orderId).getOrNull()
+                .order(orderId).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -164,16 +164,16 @@ class OrdersRepository internal constructor() {
                 .comments(
                     orderId,
                     vendorId
-                ).getOrNull()
+                ).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -189,16 +189,16 @@ class OrdersRepository internal constructor() {
                     orderId,
                     vendorId,
                     comment
-                ).getOrNull()
+                ).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(""))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -218,16 +218,16 @@ class OrdersRepository internal constructor() {
                     comment,
                     attachment,
                     filename
-                ).getOrNull()
+                ).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(""))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -243,16 +243,16 @@ class OrdersRepository internal constructor() {
                     orderId,
                     vendorId,
                     reason
-                ).getOrNull()
+                ).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(true))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 }

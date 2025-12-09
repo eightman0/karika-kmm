@@ -27,8 +27,8 @@ class AnalyticsRepository internal constructor() {
         try {
             val response = AnalyticsApi()
                 .post(tracking)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(Unit))
             } else {
                 emit(
@@ -36,7 +36,7 @@ class AnalyticsRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 }

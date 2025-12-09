@@ -1,16 +1,12 @@
 package karika.distribucija.ba.domain.api
 
-import androidx.compose.foundation.content.MediaType
 import io.ktor.client.call.body
-import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
@@ -26,8 +22,6 @@ import karika.distribucija.ba.domain.model.UpdateCustomerRequest
 import karika.distribucija.ba.domain.model.UserDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 internal class UserApi {
     suspend fun get(): Result<HttpResponse> = runCatching {
@@ -96,8 +90,8 @@ class UserRepository internal constructor() {
         try {
             val response = UserApi()
                 .get()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
@@ -105,7 +99,7 @@ class UserRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -114,8 +108,8 @@ class UserRepository internal constructor() {
         try {
             val response = UserApi()
                 .put(userDetails)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(""))
             } else {
                 emit(
@@ -123,7 +117,7 @@ class UserRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -132,8 +126,8 @@ class UserRepository internal constructor() {
         try {
             val response = UserApi()
                 .blogs()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
@@ -141,7 +135,7 @@ class UserRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -150,8 +144,8 @@ class UserRepository internal constructor() {
         try {
             val response = UserApi()
                 .blog(id)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
@@ -159,7 +153,7 @@ class UserRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -168,8 +162,8 @@ class UserRepository internal constructor() {
         try {
             val response = UserApi()
                 .config()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
@@ -177,7 +171,7 @@ class UserRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -186,8 +180,8 @@ class UserRepository internal constructor() {
         try {
             val response = UserApi()
                 .forgotPass(email)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(
                     ResultState.Success(
                         "Ako postoji nalog povezan sa '$email', dobićete e-poruku sa vezom za resetovanje Vaše lozinke."
@@ -199,7 +193,7 @@ class UserRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -208,8 +202,8 @@ class UserRepository internal constructor() {
         try {
             val response = UserApi()
                 .change(old, new)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 val body = response.body<ChangePasswordResponse>()
                 if (body.message == "The old password is incorrect.") {
                     emit(ResultState.Success("Stara lozinka je pogrešna!"))
@@ -230,7 +224,7 @@ class UserRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
     fun deleteAccount(): Flow<ResultState<String>> = flow {
@@ -238,8 +232,8 @@ class UserRepository internal constructor() {
         try {
             val response = UserApi()
                 .deleteAccount()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
@@ -247,7 +241,7 @@ class UserRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 }

@@ -36,8 +36,8 @@ class PointsRepository internal constructor() {
         try {
             val response = PointsApi()
                 .get()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
@@ -45,7 +45,7 @@ class PointsRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -57,8 +57,8 @@ class PointsRepository internal constructor() {
         try {
             val response = PointsApi()
                 .trx(pageSize, currentPage)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
@@ -66,7 +66,7 @@ class PointsRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 }

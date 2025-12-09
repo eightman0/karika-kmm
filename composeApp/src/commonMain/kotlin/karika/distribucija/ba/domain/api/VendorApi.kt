@@ -83,16 +83,16 @@ class VendorRepository internal constructor() {
                 filterBy,
                 filterValue,
                 sortType
-            ).getOrNull()
+            ).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-        } catch (_: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
         }
     }
 }

@@ -71,24 +71,21 @@ class RegistrationRepository internal constructor() {
         try {
             val response = RegistrationApi()
                 .register(registerDto)
-                .getOrNull()
+                .getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
-            emit(
-                ResultState.Error(
-                    when (response?.body<ErrorResponse>()?.message) {
-                        "A customer with the same email address already exists in an associated website." -> "Ovaj email je već u upotrebi."
-                        "E-mail adresa nije u ispravnom formatu." -> "E-mail adresa nije u ispravnom formatu."
-                        else -> "Došlo je do greške. Pokušajte ponovo!"
-                    }
-                )
-            )
+            val errorMsg = when (response.body<ErrorResponse>().message) {
+                "A customer with the same email address already exists in an associated website." -> "Ovaj email je već u upotrebi."
+                "E-mail adresa nije u ispravnom formatu." -> "E-mail adresa nije u ispravnom formatu."
+                else -> "Došlo je do greške. Pokušajte ponovo!"
+            }
+            emit(ResultState.Error(errorMsg))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -97,21 +94,20 @@ class RegistrationRepository internal constructor() {
         try {
             val response = RegistrationApi()
                 .registerVendor(registerDto)
-                .getOrNull()
+                .getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.bodyAsText()))
                 return@flow
             }
 
             emit(
                 ResultState.Error(
-                    response?.body<ErrorResponse>()?.message
-                        ?: "Došlo je do greške. Pokušajte ponovo!"
+                    response.body<ErrorResponse>().message
                 )
             )
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -121,10 +117,10 @@ class RegistrationRepository internal constructor() {
             try {
                 RegistrationApi()
                     .confirmRegistration(confirmRegistration)
-                    .getOrNull()
-                emit(ResultState.Success("Došlo je do greške. Pokušajte ponovo!"))
+                    .getOrNoInternet()
+                emit(ResultState.Success("Uspješno registrovano"))
             } catch (e: Exception) {
-                emit(ResultState.Success("Došlo je do greške. Pokušajte ponovo!"))
+                emit(ResultState.Error(e.message))
             }
         }
 }

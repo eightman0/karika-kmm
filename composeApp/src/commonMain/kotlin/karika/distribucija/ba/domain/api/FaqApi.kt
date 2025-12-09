@@ -5,7 +5,6 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
-import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.HttpClientProvider.urlV1
 import karika.distribucija.ba.domain.model.Faq
 import karika.distribucija.ba.domain.model.ResultState
@@ -27,8 +26,8 @@ class FaqRepository internal constructor() {
         try {
             val response = FaqApi()
                 .faq()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
@@ -36,7 +35,7 @@ class FaqRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 }

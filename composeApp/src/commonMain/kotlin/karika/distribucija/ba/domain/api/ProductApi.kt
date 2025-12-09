@@ -7,7 +7,6 @@ import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.model.Product
-import karika.distribucija.ba.domain.model.ProductResponse
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.util.addConditionally
@@ -91,32 +90,32 @@ class ProductRepository internal constructor() {
         try {
             val response = ProductApi()
                 .productById(id)
-                .getOrNull()
+                .getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
     fun promotedVendors(): Flow<ResultState<List<PromotedVendor>>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = ProductApi().promotedVendors().getOrNull()
+            val response = ProductApi().promotedVendors().getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -146,16 +145,16 @@ class ProductRepository internal constructor() {
                     searchText,
                     sortBy,
                     sortType
-                ).getOrNull()
+                ).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 }

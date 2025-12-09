@@ -25,8 +25,8 @@ class CategoryRepository internal constructor() {
         try {
             val response = CategoryApi()
                 .get()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
@@ -34,7 +34,7 @@ class CategoryRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 }

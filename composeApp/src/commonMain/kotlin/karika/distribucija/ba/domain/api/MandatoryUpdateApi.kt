@@ -2,12 +2,10 @@ package karika.distribucija.ba.domain.api
 
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
-import karika.distribucija.ba.domain.HttpClientProvider.urlV1
 import karika.distribucija.ba.domain.model.MandatoryUpdate
 import karika.distribucija.ba.domain.model.ResultState
 import kotlinx.coroutines.flow.Flow
@@ -27,8 +25,8 @@ class MandatoryUpdateRepository internal constructor() {
         try {
             val response = MandatoryUpdateApi()
                 .get()
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
@@ -36,7 +34,7 @@ class MandatoryUpdateRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 }

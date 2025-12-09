@@ -163,7 +163,7 @@ internal class DashApi {
         name: String? = null,
         minOrderAmount: String? = null,
         bankAccountNumber: String? = null,
-        reason: String? = null,
+        _reason: String? = null,
         logo: Pair<String?, ByteArray>?,
         banner: Pair<String?, ByteArray>?
     ): Result<HttpResponse> = runCatching {
@@ -210,7 +210,7 @@ internal class DashApi {
                             )
                         }
                         logo?.let {
-                            if (it.second != null) {
+                            if (it.second.isNotEmpty()) {
                                 append("vendor[company_logo]", it.second, Headers.build {
                                     append(
                                         HttpHeaders.ContentType,
@@ -234,7 +234,7 @@ internal class DashApi {
                             // }
                         }
                         banner?.let {
-                            if (it.second != null) {
+                            if (it.second.isNotEmpty()) {
                                 append("vendor[company_banner]", it.second, Headers.build {
                                     append(
                                         HttpHeaders.ContentType,
@@ -518,16 +518,16 @@ class DashRepository internal constructor() {
     ): Flow<ResultState<DashboardData>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().get().getOrNull()
+            val response = DashApi().get().getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -538,48 +538,48 @@ class DashRepository internal constructor() {
     ): Flow<ResultState<List<VendorOrder>>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().getOrders(pageSize, currentPage, queryParams).getOrNull()
+            val response = DashApi().getOrders(pageSize, currentPage, queryParams).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
     fun getOrder(id: String): Flow<ResultState<VendorOrder>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().getOrder(id).getOrNull()
+            val response = DashApi().getOrder(id).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
     fun getOrderComments(id: String): Flow<ResultState<List<Comment>>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().getOrderComments(id).getOrNull()
+            val response = DashApi().getOrderComments(id).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -591,16 +591,16 @@ class DashRepository internal constructor() {
     ): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().sendComment(orderId, comment, attachment, filename).getOrNull()
+            val response = DashApi().sendComment(orderId, comment, attachment, filename).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(""))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -616,16 +616,16 @@ class DashRepository internal constructor() {
         try {
             val response = DashApi().changeOrderStatus(
                 type, orderId, message, withDelivery, attachment, filename
-            ).getOrNull()
+            ).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(""))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -635,16 +635,16 @@ class DashRepository internal constructor() {
     ): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().createInvoice(orderId, bankAccountNumber).getOrNull()
+            val response = DashApi().createInvoice(orderId, bankAccountNumber).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.bodyAsText().replace("\"", "")))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -653,16 +653,16 @@ class DashRepository internal constructor() {
     ): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().getPdf(orderId).getOrNull()
+            val response = DashApi().getPdf(orderId).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.bodyAsText().replace("\"", "")))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -675,7 +675,7 @@ class DashRepository internal constructor() {
         bankAccountNumber: String? = null,
         logo: Pair<String?, ByteArray>? = null,
         banner: Pair<String?, ByteArray>? = null,
-        reason: String? = null
+        _reason: String? = null
     ): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
@@ -686,51 +686,51 @@ class DashRepository internal constructor() {
                 name,
                 minOrderAmount,
                 bankAccountNumber,
-                reason,
+                _reason,
                 logo,
                 banner
-            ).getOrNull()
+            ).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
     fun getProfile(): Flow<ResultState<Vendor>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().getProfile().getOrNull()
+            val response = DashApi().getProfile().getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
     fun updateDelivery(data: VendorDeliveryServiceData): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().updateDelivery(data).getOrNull()
+            val response = DashApi().updateDelivery(data).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -741,32 +741,32 @@ class DashRepository internal constructor() {
     ): Flow<ResultState<List<VendorProduct>>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().getProducts(pageSize, currentPage, queryParams).getOrNull()
+            val response = DashApi().getProducts(pageSize, currentPage, queryParams).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
     fun getProduct(id: String): Flow<ResultState<VendorProduct>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().getProduct(id).getOrNull()
+            val response = DashApi().getProduct(id).getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -779,16 +779,16 @@ class DashRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = DashApi().saveProduct(product, newImages, removeImages, primaryImage)
-                .getOrNull()
+                .getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.bodyAsText().replace("\"", "")))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -799,16 +799,16 @@ class DashRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = DashApi().saveProductImage(attachment, filename)
-                .getOrNull()
+                .getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.bodyAsText()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -818,16 +818,16 @@ class DashRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = DashApi().productData(name)
-                .getOrNull()
+                .getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -835,16 +835,16 @@ class DashRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = DashApi().notifications()
-                .getOrNull()
+                .getOrNoInternet()
 
-            if (response != null && response.status == HttpStatusCode.OK) {
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
     }
 
@@ -856,16 +856,16 @@ class DashRepository internal constructor() {
             emit(ResultState.Loading)
             try {
                 val response = DashApi().updateOrder(orderId, items)
-                    .getOrNull()
+                    .getOrNoInternet()
 
-                if (response != null && response.status == HttpStatusCode.OK) {
+                if (response.status == HttpStatusCode.OK) {
                     emit(ResultState.Success(""))
                     return@flow
                 }
 
                 emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
             } catch (e: Exception) {
-                emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+                emit(ResultState.Error(e.message))
             }
         }
 
@@ -876,16 +876,16 @@ class DashRepository internal constructor() {
             emit(ResultState.Loading)
             try {
                 val response = DashApi().markAsRead(id)
-                    .getOrNull()
+                    .getOrNoInternet()
 
-                if (response != null && response.status == HttpStatusCode.OK) {
+                if (response.status == HttpStatusCode.OK) {
                     emit(ResultState.Success(""))
                     return@flow
                 }
 
                 emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
             } catch (e: Exception) {
-                emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+                emit(ResultState.Error(e.message))
             }
         }
 
@@ -896,16 +896,16 @@ class DashRepository internal constructor() {
             emit(ResultState.Loading)
             try {
                 val response = DashApi().getBytesFromImage(url)
-                    .getOrNull()
+                    .getOrNoInternet()
 
-                if (response != null && response.status == HttpStatusCode.OK) {
+                if (response.status == HttpStatusCode.OK) {
                     emit(ResultState.Success(response.bodyAsBytes()))
                     return@flow
                 }
 
                 emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
             } catch (e: Exception) {
-                emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+                emit(ResultState.Error(e.message))
             }
         }
 
