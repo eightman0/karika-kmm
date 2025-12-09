@@ -24,9 +24,9 @@ class OrderDetailsComponent(
     val order = _order.asStateFlow()
 
     init {
-        if (ordersResponse.createdAt == null) {
+      //  if (ordersResponse.createdAt == null) {
             loadOrder()
-        }
+   //     }
 
         iOScope.launch {
             stateHolder.customerSpecificHandler.refreshOrders.collect {

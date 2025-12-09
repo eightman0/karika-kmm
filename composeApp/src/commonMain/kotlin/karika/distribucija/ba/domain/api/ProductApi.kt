@@ -17,9 +17,7 @@ import kotlinx.coroutines.flow.flow
 internal class ProductApi {
     suspend fun productById(id: String): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
-            url(
-                "products?searchCriteria[filter_groups][0][filters][0][field]=entity_id&searchCriteria[filter_groups][0][filters][0][value]=$id&searchCriteria[filter_groups][0][filters][0][conditionType]=in"
-            )
+            url("mobile/product/search?searchCriteria[filterGroups][0][filters][0][conditionType]=eq&searchCriteria[filterGroups][0][filters][0][field]=entity_id&searchCriteria[filterGroups][0][filters][0][value]=$id")
         )
     }
 
@@ -88,7 +86,7 @@ internal class ProductApi {
 }
 
 class ProductRepository internal constructor() {
-    fun productById(id: String): Flow<ResultState<ProductResponse>> = flow {
+    fun productById(id: String): Flow<ResultState<List<Product>>> = flow {
         emit(ResultState.Loading)
         try {
             val response = ProductApi()

@@ -352,9 +352,37 @@ fun Long.toDate1(): String {
 }
 
 @OptIn(ExperimentalTime::class)
+fun Long.toDateTime(): String {
+    val localDate = Instant.fromEpochMilliseconds(this)
+        .toLocalDateTime(TimeZone.UTC)
+
+    val dateFormat = LocalDateTime.Format {
+        dayOfMonth()
+        char('.')
+        monthNumber()
+        char('.')
+        year()
+        char('.')
+        char(' ')
+        hour()
+        char(':')
+        minute()
+    }
+    return localDate.format(dateFormat)
+}
+
+@OptIn(ExperimentalTime::class)
 fun String.toDate1(): String {
     val isoString = replace(" ", "T")
     val localDateTime = LocalDateTime.parse(isoString)
     val instant = localDateTime.toInstant(TimeZone.UTC)
     return instant.toEpochMilliseconds().toDate1()
+}
+
+@OptIn(ExperimentalTime::class)
+fun String.toDateTime(): String {
+    val isoString = replace(" ", "T")
+    val localDateTime = LocalDateTime.parse(isoString)
+    val instant = localDateTime.toInstant(TimeZone.UTC)
+    return instant.toEpochMilliseconds().toDateTime()
 }

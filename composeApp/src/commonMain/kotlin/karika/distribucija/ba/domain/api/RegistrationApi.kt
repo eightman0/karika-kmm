@@ -80,8 +80,11 @@ class RegistrationRepository internal constructor() {
 
             emit(
                 ResultState.Error(
-                    response?.body<ErrorResponse>()?.message
-                        ?: "Došlo je do greške. Pokušajte ponovo!"
+                    when (response?.body<ErrorResponse>()?.message) {
+                        "A customer with the same email address already exists in an associated website." -> "Ovaj email je već u upotrebi."
+                        "E-mail adresa nije u ispravnom formatu." -> "E-mail adresa nije u ispravnom formatu."
+                        else -> "Došlo je do greške. Pokušajte ponovo!"
+                    }
                 )
             )
         } catch (e: Exception) {

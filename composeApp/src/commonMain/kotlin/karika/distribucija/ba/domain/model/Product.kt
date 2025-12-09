@@ -22,6 +22,7 @@ data class ProductResponse(
 
 @Serializable
 data class Product(
+    @SerialName("entity_id") var entityId: String? = null,
     @SerialName("id") var id: Int? = null,
     @SerialName("created_at") var createdAt: String? = null,
     @SerialName("sku") var sku: String? = null,

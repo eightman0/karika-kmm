@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.VendorOrder
@@ -205,6 +207,15 @@ private fun OrderItem(component: OrdersComponent, vendorOrder: VendorOrder) {
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.weight(1f))
+                        KarikaText(
+                            modifier = Modifier,
+                            text = "#${vendorOrder.orderId}",
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700,
+                            textAlign = TextAlign.End
+                        )
                     }
                     Box(
                         modifier = Modifier
@@ -226,19 +237,6 @@ private fun OrderItem(component: OrdersComponent, vendorOrder: VendorOrder) {
                         color = KarikaColors.Gray2,
                         textSize = 14.sp,
                         fontWeight = FontWeight.W600
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    KarikaText(
-                        modifier = Modifier,
-                        text = "",
-                        color = KarikaColors.Gray2,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W700
                     )
                 }
             }

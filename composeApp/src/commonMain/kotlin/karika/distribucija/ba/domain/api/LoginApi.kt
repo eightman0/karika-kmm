@@ -28,14 +28,17 @@ class LoginRepository internal constructor() {
         try {
             val response = LoginApi()
                 .login(loginDto)
-                .getOrNull()
-            if (response != null && response.status == HttpStatusCode.OK) {
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.bodyAsText().replace("\"", "")))
             } else {
                 emit(
                     ResultState.Error(
-                        if (response?.bodyAsText()
-                                ?.contains("You're not allowed to login here") == true
+                        if (response.bodyAsText().contains("Failure(java.net.UnknownHostException:")
+                        ) {
+                            "Nema internet konekcije, provjerite Vašu vezu i pokušajte ponovo."
+                        } else if (response.bodyAsText()
+                                .contains("You're not allowed to login here")
                         ) {
                             if (loginDto.userType.isShop())
                                 "Ovaj ${loginDto.username} račun je napravljen samo za dobavljača, prijavite se kao dobavljač"
@@ -47,7 +50,16 @@ class LoginRepository internal constructor() {
                 )
             }
         } catch (e: Exception) {
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            emit(ResultState.Error(e.message))
         }
+    }
+}
+
+fun Result<HttpResponse>.getOrNoInternet(): HttpResponse {
+    return this.getOrElse {
+        if (it.message?.contains("Unable to resolve host") == true) {
+            throw Exception("Nema internet konekcije, provjerite Vašu vezu i pokušajte ponovo.")
+        }
+        throw Exception("Došlo je do greške. Pokušajte ponovo!")
     }
 }

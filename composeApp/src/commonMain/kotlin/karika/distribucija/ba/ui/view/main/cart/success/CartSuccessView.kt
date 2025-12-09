@@ -89,7 +89,7 @@ fun OrderPlaced(component: CartSuccessComponent) {
         KarikaText(
             modifier = Modifier,
             color = KarikaColors.Black,
-            text = "Poslat ćemo vam e-poštom potvrdu narudžbe s detaljima i informacijama o praćenju.",
+            text = "Poslat ćemo Vam e-poštom potvrdu narudžbe s detaljima i informacijama o praćenju.",
             fontWeight = FontWeight.W400,
             textSize = 14.sp,
             textAlign = TextAlign.Center

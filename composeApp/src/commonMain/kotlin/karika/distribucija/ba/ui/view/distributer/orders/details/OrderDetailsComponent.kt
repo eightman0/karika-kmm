@@ -4,7 +4,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
-import karika.distribucija.ba.domain.HttpClientProvider.orderPdf
 import karika.distribucija.ba.domain.api.DashRepository
 import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.domain.model.File
@@ -271,24 +270,24 @@ class OrderDetailsComponent(
     }
 
     fun getBill() {
-        openPdf(url = orderPdf("${order.value.orderId}.pdf"))
-        // iOScope.launch {
-        //     repository.getPdf(
-        //         orderId = order.value.orderId ?: "",
-        //     ).collect { result ->
-        //         when (result) {
-        //             is ResultState.Loading -> showLoader()
-        //             is ResultState.Success -> {
-        //
-        //             }
-//
-        //             is ResultState.Error -> {
-        //                 hideLoader()
-        //                 showMessage(result.message)
-        //             }
-        //         }
-        //     }
-        // }
+        iOScope.launch {
+            repository.getPdf(
+                orderId = order.value.orderId ?: "",
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> showLoader()
+                    is ResultState.Success -> {
+                        hideLoader()
+                        openPdf(result.data)
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message)
+                    }
+                }
+            }
+        }
     }
 
     fun calculateShipping(ignoreValidations: Boolean = false) {

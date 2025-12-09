@@ -15,6 +15,7 @@ import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.isEmailFormat
+import karika.distribucija.ba.ui.components.isPhoneFormat
 import karika.distribucija.ba.ui.view.main.profile.account.isPassComplex
 import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.flow.collect
@@ -113,6 +114,10 @@ class RegistrationComponent(
         }
         if (contactPhone.value.isEmpty()) {
             showMessage("Broj telefona je obavezno polje!")
+            return
+        }
+        if (!contactPhone.value.isPhoneFormat()) {
+            showMessage("Broj telefona nije u odgovarajućem formatu!")
             return
         }
         if (email.value.isEmpty()) {

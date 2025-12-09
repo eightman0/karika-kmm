@@ -145,7 +145,7 @@ internal class DashApi {
     suspend fun getPdf(
         orderId: String
     ): Result<HttpResponse> = runCatching {
-        return@runCatching HttpClientProvider.client.post(
+        return@runCatching HttpClientProvider.client.get(
             url("mobile/vendor/order/pdf?orderId=$orderId")
         )
     }
@@ -656,7 +656,7 @@ class DashRepository internal constructor() {
             val response = DashApi().getPdf(orderId).getOrNull()
 
             if (response != null && response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.bodyAsText()))
+                emit(ResultState.Success(response.bodyAsText().replace("\"", "")))
                 return@flow
             }
 

@@ -49,6 +49,11 @@ fun String.isEmailFormat(): Boolean {
     return emailRegex.matches(this)
 }
 
+fun String.isPhoneFormat(): Boolean {
+    val emailRegex = Regex("""^(?:\+387|00387|387|0)(60|61|62|63|64|65|66|67|68|69)\d{6,7}$""")
+    return emailRegex.matches(this)
+}
+
 @Composable
 fun Modifier.hideKeyboard(onlyClick: Boolean = false): Modifier {
     val keyboard = LocalSoftwareKeyboardController.current

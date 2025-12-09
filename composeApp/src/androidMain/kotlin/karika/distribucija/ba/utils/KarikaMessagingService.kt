@@ -26,6 +26,7 @@ class KarikaMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         remoteMessage.notification?.let { notification ->
+            println("TEST_TEST_PUSH: ${remoteMessage.data}")
             sendNotification(notification, remoteMessage.data)
         }
     }

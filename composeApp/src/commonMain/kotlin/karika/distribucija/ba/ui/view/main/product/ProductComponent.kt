@@ -56,7 +56,7 @@ class ProductComponent(
         }
 
         iOScope.launch {
-            repository.productById(product.value.id.toString()).collect { result ->
+            repository.productById(product.value.entityId ?: "").collect { result ->
                 when (result) {
                     is ResultState.Loading -> {
 
@@ -64,7 +64,7 @@ class ProductComponent(
 
                     is ResultState.Success -> {
                         _product.update {
-                            result.data.items.find { it.sku == product.value.sku } ?: product.value
+                            result.data.firstOrNull() ?: return@collect
                         }
                         logEvent(
                             eventType = EventType.PAGE_OPEN,

@@ -339,8 +339,9 @@ private fun ContactInfo(component: RegistrationComponent) {
         title = "Broj telefona*",
         value = component.contactPhone.asState(),
         placeholder = "Broj telefona",
-        allowedChars = KarikaConstants.numbers,
+        allowedChars = KarikaConstants.numbers.plus("+"),
         keyboardType = KeyboardType.Phone,
+        maxLength = 14,
         imeAction = ImeAction.Next
     )
 }

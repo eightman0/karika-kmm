@@ -174,7 +174,7 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                         containerColor = KarikaColors.Blue,
                         disabledContentColor = KarikaColors.Secondary
                     ),
-                    enabled = !order.locked() && !order.isApproved() && !order.isRejected(),
+                    enabled = !order.locked() && !order.isApproved() && !order.isRejected() && !order.isCancelled(),
                     contentPadding = PaddingValues(horizontal = 12.dp)
                 ) {
                     Row(
@@ -207,7 +207,7 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                             dropdownState.negate()
                         }
                     ) {
-                        if (!order.isApproved() && !order.isRejected()) {
+                        if (!order.isApproved() && !order.isRejected() && !order.isCancelled()) {
                             DropdownMenuItem(
                                 onClick = {
                                     dropdownState.negate()
@@ -1383,7 +1383,7 @@ private fun TableRow(
             modifier = Modifier
                 .height(with(LocalDensity.current) { height.value.toDp() })
                 .width(100.dp)
-                .onClick(!order.locked()) {
+                .onClick(!order.locked() && !order.isCancelled() && !order.isRejected() && !order.isApproved()) {
                     edit.value = item
                 }
                 .border(width = 0.5.dp, color = KarikaColors.Border),
@@ -1461,7 +1461,7 @@ private fun EnterComment(component: OrderDetailsComponent) {
             modifier = Modifier
                 .height(50.dp),
             title = "Pošalji",
-            enabled = comment.value.isNotEmpty() && !order.locked()
+            enabled = comment.value.isNotEmpty() && !order.locked() && !order.isCancelled() && !order.isRejected()
         ) {
             keyboardController?.hide()
             component.sendComment()

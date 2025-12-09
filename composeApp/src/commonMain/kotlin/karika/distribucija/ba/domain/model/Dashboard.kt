@@ -5,6 +5,7 @@ import coil3.Uri
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.view.distributer.orders.toDate1
+import karika.distribucija.ba.ui.view.distributer.orders.toDateTime
 import karika.distribucija.ba.util.karikaPriceFormat
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -121,7 +122,7 @@ data class VendorOrder(
         return karikaPriceFormat((orderTotal?.toDouble() ?: 0.00) * 1.17)
     }
 
-    fun date() = createdAt?.toDate1() ?: "-"
+    fun date() = createdAt?.toDateTime() ?: "-"
 
     fun shouldShowShipping(): Boolean {
         return when (this.realOrderStatus) {
@@ -152,6 +153,18 @@ data class VendorOrder(
             "rejected" -> true
             "approved" -> false
             "cancelled" -> false
+            "bill-sent" -> false
+            "estimate-sent" -> false
+            "pending" -> false
+            else -> false
+        }
+    }
+
+    fun isCancelled(): Boolean {
+        return when (this.realOrderStatus) {
+            "rejected" -> false
+            "approved" -> false
+            "cancelled" -> true
             "bill-sent" -> false
             "estimate-sent" -> false
             "pending" -> false

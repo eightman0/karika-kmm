@@ -181,7 +181,7 @@ object PushHandler {
             CoroutineScope(Dispatchers.Main).launch {
                 component.appNavigate(
                     AppConfig.OrderDetails(
-                        OrdersResponse(orderId = orderId)
+                        OrdersResponse(orderId = orderId, incrementId = orderId)
                     )
                 )
             }

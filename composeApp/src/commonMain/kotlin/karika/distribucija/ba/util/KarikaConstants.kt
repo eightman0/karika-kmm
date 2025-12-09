@@ -82,7 +82,6 @@ object KarikaConstants {
                     name = "Kanton Sarajevo",
                     id = 1,
                     cities = mutableListOf(
-                        City("Izaberite opštinu", -1),
                         City("Hadžići", 0),
                         City("Ilijaš", 0),
                         City("Centar", 0),
@@ -98,7 +97,6 @@ object KarikaConstants {
                     name = "Tuzlanski Kanton",
                     id = 2,
                     cities = mutableListOf(
-                       // City("Izaberite opštinu", -1),
                         City("Banovići", 0),
                         City("Gračanica", 0),
                         City("Gradačac", 0),
@@ -118,7 +116,6 @@ object KarikaConstants {
                     name = "Unsko-Sanski Kanton",
                     id = 3,
                     cities = mutableListOf(
-                      //  City("Izaberite opštinu", -1),
                         City("Bihać", 0),
                         City("Bosanska Krupa", 0),
                         City("Bosanski Petrovac", 0),
@@ -133,7 +130,6 @@ object KarikaConstants {
                     name = "Zeničko-Dobojski Kanton",
                     id = 4,
                     cities = mutableListOf(
-                    //    City("Izaberite opštinu", -1),
                         City("Breza", 0),
                         City("Kakanj", 0),
                         City("Maglaj", 0),
@@ -152,7 +148,6 @@ object KarikaConstants {
                     name = "Hercegovačko-Neretvanski Kanton",
                     id = 5,
                     cities = mutableListOf(
-                     //   City("Izaberite opštinu", -1),
                         City("Čapljina", 0),
                         City("Čitluk", 0),
                         City("Grad Mostar", 0),
@@ -168,7 +163,6 @@ object KarikaConstants {
                     name = "Bosansko-Podrinjski Kanton",
                     id = 6,
                     cities = mutableListOf(
-                     //   City("Izaberite opštinu", -1),
                         City("Goražde", 0),
                         City("Foča - Ustikolina", 0),
                         City("Pale - Prača", 0)
@@ -178,7 +172,6 @@ object KarikaConstants {
                     name = "Srednjebosanski Kanton",
                     id = 7,
                     cities = mutableListOf(
-                     //   City("Izaberite opštinu", -1),
                         City("Bugojno", 0),
                         City("Busovača", 0),
                         City("Donji Vakuf", 0),
@@ -197,7 +190,6 @@ object KarikaConstants {
                     name = "Livanjski Kanton",
                     id = 8,
                     cities = mutableListOf(
-                      //  City("Izaberite opštinu", -1),
                         City("Livno", 0),
                         City("Tomislavgrad", 0),
                         City("Kupres", 0),
@@ -210,7 +202,6 @@ object KarikaConstants {
                     name = "Posavski Kanton",
                     id = 9,
                     cities = mutableListOf(
-                        //City("Izaberite opštinu", -1),
                         City("Orašje", 0),
                         City("Odžak", 0),
                         City("Domaljevac-Šamac", 0)
@@ -220,7 +211,6 @@ object KarikaConstants {
                     name = "Zapadno-Hercegovački Kanton",
                     id = 10,
                     cities = mutableListOf(
-                       // City("Izaberite opštinu", -1),
                         City("Široki Brijeg", 0),
                         City("Grude", 0),
                         City("Ljubuški", 0),
@@ -233,7 +223,6 @@ object KarikaConstants {
             name = "Republika Srpska",
             id = 2,
             cantons = mutableListOf(
-               // Canton("Izaberite Općinu RS", -1, listOf()),
                 Canton("Banja Luka", 0, listOf()),
                 Canton("Čelinac", 0, listOf()),
                 Canton("Gradiška", 0, listOf()),
