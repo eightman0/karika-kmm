@@ -58,6 +58,7 @@ class OrderDetailsComponent(
             stateHolder.vendorNotificationHandler.notificationCount
                 .collect {
                     getOrder()
+                    getComments()
                 }
         }
     }

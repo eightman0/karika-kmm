@@ -104,7 +104,7 @@ fun EditOrderSheet(
                     .fillMaxWidth(),
                 value = discount,
                 placeholder = "rabat",
-                imeAction = ImeAction.Unspecified,
+                imeAction = ImeAction.Done,
                 enabled = true,
                 keyboardType = KeyboardType.Number,
                 leadingZero = false,
