@@ -598,7 +598,7 @@ fun ProductQtyAction(
 
     LaunchedEffect(pendingQty) {
         pendingQty?.let { newQty ->
-            delay(500)
+            delay(600)
             if (!disableUpdate) {
                 component.updateCart(product, newQty)
             }
@@ -613,7 +613,7 @@ fun ProductQtyAction(
                     if (qty.value == product.minQty()) {
                         return@onClick
                     }
-                    qty.value -= 1
+                    qty.value -= product.minQty()
                     pendingQty = qty.value
                 }
                 .size(40.dp)
@@ -635,7 +635,7 @@ fun ProductQtyAction(
         Box(
             modifier = Modifier
                 .height(40.dp)
-                .width(80.dp)
+                .width(60.dp)
                 .border(
                     width = 1.dp,
                     color = KarikaColors.Border
@@ -652,7 +652,25 @@ fun ProductQtyAction(
                         return@KarikaIntTextField
                     }
 
-                    qty.value = it ?: qty.value
+                    val entered = it ?: qty.value
+                    val min = product.minQty()
+
+                    val adjusted = if (entered <= min) {
+                        min
+                    } else {
+                        val remainder = entered % min
+                        if (remainder == 0) {
+                            entered
+                        } else {
+                            entered + (min - remainder)
+                        }
+                    }
+
+                    if (adjusted != entered) {
+                        //component.showMessage("kolicina mora biti djeljiva sa minimalnom kolicinom!")
+                    }
+
+                    qty.value = adjusted
                     if (autoUpdate) {
                         pendingQty = qty.value
                     }
@@ -662,7 +680,7 @@ fun ProductQtyAction(
         Box(
             modifier = Modifier
                 .onClick {
-                    qty.value += 1
+                    qty.value += product.minQty()
                     pendingQty = qty.value
                 }
                 .size(40.dp)

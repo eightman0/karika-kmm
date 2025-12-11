@@ -150,6 +150,8 @@ class CartRepository internal constructor() {
                     ResultState.Error(
                         if ("The requested qty is not available" == error.message)
                             "Tražena količina nije dostupna."
+                        else if (error.message.startsWith("Current customer does not have an active cart."))
+                            "Current customer does not have an active cart."
                         else "Došlo je do greške. Pokušajte ponovo!"
                     )
                 )
@@ -205,7 +207,7 @@ class CartRepository internal constructor() {
                 emit(ResultState.Success(response.body()))
             } else {
                 emit(
-                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
+                    ResultState.Error(response.body<ErrorResponse>().message)
                 )
             }
         } catch (e: Exception) {

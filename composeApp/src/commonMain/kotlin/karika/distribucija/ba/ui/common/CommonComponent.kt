@@ -214,7 +214,7 @@ open class CommonComponent(
 
                             if (result.message == "Current customer does not have an active cart.") {
                                 stateHolder.cartHandler.createCart {
-                                    addToCart(product, qty, showSnack)
+                                    addToCartWithPut(product, qty, showSnack)
                                 }
                                 return@collect
                             }
@@ -250,6 +250,13 @@ open class CommonComponent(
 
                     is ResultState.Error -> {
                         hideLoader()
+                        if (result.message == "Current customer does not have an active cart.") {
+                            stateHolder.cartHandler.createCart {
+                                addToCartWithPut(product, qty, showSnack)
+                            }
+                            return@collect
+                        }
+
                         showMessage(result.message ?: "")
                     }
                 }
@@ -287,9 +294,17 @@ open class CommonComponent(
 
                     is ResultState.Error -> {
                         hideLoader()
-                        showMessage(result.message ?: "")
-                        reloadCart()
-                        errorCallback.invoke()
+                        if (result.message == "Current customer does not have an active cart.") {
+                            stateHolder.cartHandler.createCart {
+                                showMessage("Postojeca korpa je završena na drugom uredjaju!")
+                                reloadCart()
+                                errorCallback.invoke()
+                            }
+                        } else {
+                            showMessage(result.message ?: "")
+                            reloadCart()
+                            errorCallback.invoke()
+                        }
                     }
                 }
             }

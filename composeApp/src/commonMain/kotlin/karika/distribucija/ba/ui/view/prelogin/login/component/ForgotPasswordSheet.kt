@@ -30,6 +30,7 @@ import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
+import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.view.prelogin.login.LoginComponent
 
@@ -126,7 +127,8 @@ fun ForgotPasswordSheet(
                     PrimaryButtonFilled(
                         modifier = Modifier
                             .weight(1f),
-                        title = "Potvrdi"
+                        title = "Potvrdi",
+                        enabled = email.value.isEmailFormat()
                     ) {
                         keyboard?.hide()
                         showState.negate()

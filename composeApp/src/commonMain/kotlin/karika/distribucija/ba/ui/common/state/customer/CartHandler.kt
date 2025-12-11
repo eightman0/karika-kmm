@@ -68,6 +68,16 @@ class CartHandler {
                                 lastUpdated = Clock.System.now().toEpochMilliseconds()
                             )
                         }
+                    } else if (result is ResultState.Error) {
+                        if (result.message?.startsWith("No such entity with %fieldName") == true) {
+                            _cart.update {
+                                CartData(items = emptyMap())
+                            }
+                            createCart {
+                                reloadCart()
+                            }
+                        }
+
                     }
                 }
         }

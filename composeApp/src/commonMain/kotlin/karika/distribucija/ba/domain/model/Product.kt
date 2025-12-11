@@ -202,7 +202,7 @@ data class Product(
         if (stockData == null) {
             stockData = extensionAttributes?.stockData
         }
-        return if (stockData?.isInStock == "1") "Na zalihama" else "Nije na zalihama"
+        return if (stockData?.isInStock == "1") "Na zalihama" else "Nema na zalihama"
     }
 
     fun hasOnStock(): Boolean {

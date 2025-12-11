@@ -300,14 +300,14 @@ private fun MinOrderAmount(item: Map.Entry<Vendor, List<Pair<Product, Int>>>) {
 private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
     Row(
         modifier = Modifier
-            .height(120.dp)
+            .height(144.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(120.dp)
+                .size(144.dp)
                 .onClick {
                     component.navigateToProduct(item.first)
                 }
@@ -326,6 +326,27 @@ private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
         ) {
             ProductName(item.first)
             ProductBonus(item.first, item.second)
+            Row(
+                modifier = Modifier
+                    .padding(bottom = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                KarikaText(
+                    modifier = Modifier,
+                    color = KarikaColors.Gray6,
+                    text = "Min. kol.:",
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W400
+                )
+                KarikaText(
+                    modifier = Modifier,
+                    color = KarikaColors.Black,
+                    text = "${item.first.minQty()} ${component.getUnit(item.first.minQtyUnit())}",
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }
             ProductQtyAction(
                 product = item.first,
                 qty = mutableStateOf(item.second),

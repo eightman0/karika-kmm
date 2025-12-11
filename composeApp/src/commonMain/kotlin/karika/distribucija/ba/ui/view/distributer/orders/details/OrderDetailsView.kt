@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.model.Comment
+import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
 import karika.distribucija.ba.ui.components.IconTextItem
@@ -1009,7 +1010,7 @@ private fun OrderTax(component: OrderDetailsComponent) {
                     .fillMaxWidth()
             ) {
                 Column {
-                    TableHeaderRow()
+                    TableHeaderRow(order)
                     order.products.forEach {
                         TableRow(
                             component = component,
@@ -1044,7 +1045,7 @@ private fun OrderTax(component: OrderDetailsComponent) {
 }
 
 @Composable
-private fun TableHeaderRow() {
+private fun TableHeaderRow(order: VendorOrder) {
     Row(
         modifier = Modifier
             .padding(horizontal = 16.dp)
@@ -1163,19 +1164,21 @@ private fun TableHeaderRow() {
                 text = "PROVIZIJA"
             )
         }
-        Box(
-            modifier = Modifier
-                .width(100.dp)
-                .border(width = 0.5.dp, color = KarikaColors.Border)
-        ) {
-            KarikaText(
+        if (!order.locked() && !order.isCancelled() && !order.isRejected() && !order.isApproved()) {
+            Box(
                 modifier = Modifier
-                    .padding(8.dp),
-                color = KarikaColors.Gray15,
-                fontWeight = FontWeight.W600,
-                textSize = 10.sp,
-                text = "IZMIJENI"
-            )
+                    .width(100.dp)
+                    .border(width = 0.5.dp, color = KarikaColors.Border)
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .padding(8.dp),
+                    color = KarikaColors.Gray15,
+                    fontWeight = FontWeight.W600,
+                    textSize = 10.sp,
+                    text = "IZMIJENI"
+                )
+            }
         }
     }
 }
@@ -1379,24 +1382,26 @@ private fun TableRow(
                 text = tax
             )
         }
-        Box(
-            modifier = Modifier
-                .height(with(LocalDensity.current) { height.value.toDp() })
-                .width(100.dp)
-                .onClick(!order.locked() && !order.isCancelled() && !order.isRejected() && !order.isApproved()) {
-                    edit.value = item
-                }
-                .border(width = 0.5.dp, color = KarikaColors.Border),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            KarikaText(
+        if (!order.locked() && !order.isCancelled() && !order.isRejected() && !order.isApproved()) {
+            Box(
                 modifier = Modifier
-                    .padding(8.dp),
-                color = KarikaColors.Blue,
-                fontWeight = FontWeight.W600,
-                textSize = 12.sp,
-                text = "Izmijeni"
-            )
+                    .height(with(LocalDensity.current) { height.value.toDp() })
+                    .width(100.dp)
+                    .onClick(!order.locked() && !order.isCancelled() && !order.isRejected() && !order.isApproved()) {
+                        edit.value = item
+                    }
+                    .border(width = 0.5.dp, color = KarikaColors.Border),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .padding(8.dp),
+                    color = if (!order.locked() && !order.isCancelled() && !order.isRejected() && !order.isApproved()) KarikaColors.Blue else KarikaColors.Secondary,
+                    fontWeight = FontWeight.W600,
+                    textSize = 12.sp,
+                    text = "Izmijeni"
+                )
+            }
         }
     }
     if (edit.value != null) {

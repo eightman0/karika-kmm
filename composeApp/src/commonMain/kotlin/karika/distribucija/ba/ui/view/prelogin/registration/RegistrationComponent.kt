@@ -77,10 +77,11 @@ class RegistrationComponent(
                     showMessage("Kanton je obavezno polje!")
                     return
                 }
-                if (companyCity.value.isEmpty()) {
-                    showMessage("Grad je obavezno polje!")
-                    return
-                }
+            }
+
+            if (companyCity.value.isEmpty()) {
+                showMessage("Grad je obavezno polje!")
+                return
             }
         }
 

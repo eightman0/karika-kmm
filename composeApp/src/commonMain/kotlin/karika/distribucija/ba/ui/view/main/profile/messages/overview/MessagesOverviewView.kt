@@ -179,7 +179,7 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                     .fillMaxWidth(),
                 title = "Dobavljač",
                 value = searchText,
-                placeholder = "Prtražite dobavljača",
+                placeholder = "Pretražite dobavljača",
                 imeAction = ImeAction.Search,
                 maxLines = 1,
                 onValueChange = {

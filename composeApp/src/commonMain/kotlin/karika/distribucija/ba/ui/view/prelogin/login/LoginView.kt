@@ -132,20 +132,18 @@ fun LoginView(component: LoginComponent) {
                             title = "Zapamti me",
                             checked = component.rememberMe.asState()
                         )
-                        if (!isKiosk()) {
-                            Spacer(modifier = Modifier.weight(1f))
-                            KarikaText(
-                                modifier = Modifier
-                                    .onClick {
-                                        component.forgotPassword()
-                                    },
-                                text = "Zaboravili ste šifru?",
-                                color = KarikaColors.Gray4,
-                                fontWeight = FontWeight.W400,
-                                textSize = 14.sp,
-                                decoration = TextDecoration.Underline
-                            )
-                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        KarikaText(
+                            modifier = Modifier
+                                .onClick {
+                                    component.forgotPassword()
+                                },
+                            text = "Zaboravili ste šifru?",
+                            color = KarikaColors.Gray4,
+                            fontWeight = FontWeight.W400,
+                            textSize = 14.sp,
+                            decoration = TextDecoration.Underline
+                        )
                     }
                     YSpacer16()
                     if (component.isShop()) {
