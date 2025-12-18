@@ -38,6 +38,7 @@ class ProductByCategoryComponent(
     var filterPriceTo = mutableStateOf("")
     var selectedVendor = mutableStateOf(Pair("", 0))
     val selectedRegion = mutableStateOf<List<KarikaUnit>>(listOf())
+    val isInStock = mutableStateOf("")
 
     override fun loadNextPage(reset: Boolean) {
         if (reset) {
@@ -58,7 +59,8 @@ class ProductByCategoryComponent(
                 from = filterPriceFrom.value,
                 to = filterPriceTo.value,
                 sortType = sortBy.value.sortType(),
-                sortBy = sortBy.value.sortBy()
+                sortBy = sortBy.value.sortBy(),
+                isInStock = isInStock.value
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()

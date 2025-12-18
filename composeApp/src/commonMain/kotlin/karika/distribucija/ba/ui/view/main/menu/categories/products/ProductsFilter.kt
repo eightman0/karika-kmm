@@ -62,6 +62,7 @@ fun ProductsFilterSheet(
     val selectedVendor = component.selectedVendor.asState()
     val checkedElements = component.selectedRegion.asState()
     val config by component.stateHolder.commonHandler.config.collectAsState()
+    val isInStock = component.isInStock.asState()
 
     if (showState.value) {
         ModalBottomSheet(
@@ -132,6 +133,45 @@ fun ProductsFilterSheet(
                             value = endPrice,
                             placeholder = "DO",
                             imeAction = ImeAction.Next
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = KarikaColors.Divider
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .padding(vertical = 16.dp)
+                            .clickable(
+                                interactionSource = null, indication = null
+                            ) {
+                                isInStock.value = if (isInStock.value == "1") "0" else "1"
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(0.dp)
+                    ) {
+                        Checkbox(
+                            modifier = Modifier
+                                .height(24.dp)
+                                .padding(vertical = 0.dp),
+                            checked = isInStock.value == "1",
+                            onCheckedChange = { state ->
+                               isInStock.value = if (state) "1" else "0"
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = KarikaColors.Primary,
+                                uncheckedColor = KarikaColors.Gray7
+                            ),
+                            enabled = true
+                        )
+                        KarikaText(
+                            text = "Prikaži rasprodate",
+                            color = KarikaColors.Gray2,
+                            textSize = 16.sp,
+                            fontWeight = FontWeight.W400,
                         )
                     }
                     HorizontalDivider(

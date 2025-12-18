@@ -37,6 +37,7 @@ internal class ProductApi {
         searchText: String = "",
         sortBy: String = "price",
         sortType: String = "ASC",
+        isInStock: String = ""
     ): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
             url(
@@ -78,6 +79,10 @@ internal class ProductApi {
                             .addConditionally(
                                 sortType.isNotEmpty(),
                                 "&sortDirection=$sortType"
+                            )
+                            .addConditionally(
+                                isInStock.isNotEmpty(),
+                                "&isInStock=$isInStock"
                             )
             )
         )
@@ -130,6 +135,7 @@ class ProductRepository internal constructor() {
         searchText: String = "",
         sortBy: String = "",
         sortType: String = "",
+        isInStock: String = "",
     ): Flow<ResultState<List<Product>>> = flow {
         emit(ResultState.Loading)
         try {
@@ -144,7 +150,8 @@ class ProductRepository internal constructor() {
                     currentPage,
                     searchText,
                     sortBy,
-                    sortType
+                    sortType,
+                    isInStock
                 ).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {

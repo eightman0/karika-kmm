@@ -127,6 +127,7 @@ private fun Filter(component: ProductByCategoryComponent) {
     val sort = component.sortBy.asState()
     val selectedVendor = component.selectedVendor.asState()
     val selectedRegions = component.selectedRegion.asState()
+    val isInStock = component.isInStock.asState()
 
     SearchBoxBorder(
         modifier = Modifier
@@ -193,7 +194,7 @@ private fun Filter(component: ProductByCategoryComponent) {
     }
 
     if (filter.value.first.isNotBlank()
-        || selectedRegions.value.isNotEmpty() || selectedVendor.value.second != 0
+        || selectedRegions.value.isNotEmpty() || selectedVendor.value.second != 0 || isInStock.value == "1"
     ) {
         YSpacer16()
         FlowRow(
@@ -248,6 +249,29 @@ private fun Filter(component: ProductByCategoryComponent) {
                         iconColor = KarikaColors.Black1,
                         iconSize = 16.dp,
                         text = it.label(),
+                        textColor = KarikaColors.Gray2,
+                        textSize = 16.sp,
+                        fontWeight = FontWeight.W700,
+                        iconPosition = FabPosition.End
+                    )
+                }
+            }
+            if (isInStock.value == "1") {
+                Box(
+                    modifier = Modifier
+                        .rounded(color = KarikaColors.Gray19)
+                ) {
+                    IconTextItem(
+                        modifier = Modifier
+                            .onClick {
+                                isInStock.value = "0"
+                                component.loadNextPage(true)
+                            }
+                            .padding(4.dp),
+                        icon = vectorResource(Res.drawable.ic_tertiary),
+                        iconColor = KarikaColors.Black1,
+                        iconSize = 16.dp,
+                        text = "Prikaži rasprodate",
                         textColor = KarikaColors.Gray2,
                         textSize = 16.sp,
                         fontWeight = FontWeight.W700,

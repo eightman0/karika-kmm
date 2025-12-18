@@ -158,12 +158,23 @@ private fun VendorProducts(modifier: Modifier, component: VendorDetailsComponent
 @Composable
 private fun VendorCategories(component: VendorDetailsComponent) {
     val categories by component.vendorCategories.collectAsState()
+    val isInStock = component.isInStock.asState()
 
     LazyRow(
         modifier = Modifier
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        item {
+            RoundedItem("Prikaži rasprodate", isInStock.value == "1") {
+                if (isInStock.value == "1") {
+                    isInStock.value = ""
+                } else {
+                    isInStock.value = "1"
+                }
+                component.loadNextPage(true)
+            }
+        }
         items(items = categories) {
             RoundedItem(it.name, component.selectedCategories.value.contains(it)) {
                 if (component.selectedCategories.value.contains(it)) {

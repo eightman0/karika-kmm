@@ -28,6 +28,7 @@ class VendorDetailsComponent(
     val products = _products.asStateFlow()
     val searchText = mutableStateOf("")
     val selectedCategories = mutableStateOf<List<Category>>(emptyList())
+    val isInStock = mutableStateOf("")
 
     init {
         getVendor()
@@ -56,6 +57,7 @@ class VendorDetailsComponent(
                 vendorId = vendor.value.entityId,
                 categoryId = selectedCategories.value.joinToString(",") { it.id.toString() }.ifEmpty { null },
                 searchText = searchText.value,
+                isInStock = isInStock.value
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> {
