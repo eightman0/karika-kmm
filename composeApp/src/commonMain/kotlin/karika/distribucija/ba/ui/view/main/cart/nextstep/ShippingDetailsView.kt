@@ -291,6 +291,7 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         placeholder = "Poštanski broj",
                         allowedChars = KarikaConstants.numbers,
                         keyboardType = KeyboardType.Number,
+                        maxLength = 5,
                         imeAction = ImeAction.Next
                     )
                     KarikaTextField1(

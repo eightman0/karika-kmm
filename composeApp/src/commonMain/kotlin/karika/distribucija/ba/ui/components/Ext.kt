@@ -54,6 +54,11 @@ fun String.isPhoneFormat(): Boolean {
     return phoneRegex.matches(this)
 }
 
+fun String.isPostalCodeValid(): Boolean {
+    val postalRegex = Regex("^\\d{5}$")
+    return postalRegex.matches(this)
+}
+
 @Composable
 fun Modifier.hideKeyboard(onlyClick: Boolean = false): Modifier {
     val keyboard = LocalSoftwareKeyboardController.current

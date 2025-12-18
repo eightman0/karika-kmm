@@ -16,6 +16,7 @@ import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.components.isPhoneFormat
+import karika.distribucija.ba.ui.components.isPostalCodeValid
 import karika.distribucija.ba.ui.view.main.profile.account.isPassComplex
 import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.flow.collect
@@ -110,6 +111,10 @@ class RegistrationComponent(
             }
             if (contactPostal.value.isEmpty()) {
                 showMessage("Poštanski broj je obavezno polje!")
+                return
+            }
+            if (!contactPostal.value.isPostalCodeValid()) {
+                showMessage("Poštanski broj nije u odgovarajućem formatu!")
                 return
             }
         }

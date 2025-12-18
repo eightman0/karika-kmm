@@ -9,6 +9,7 @@ import karika.distribucija.ba.domain.model.SetShippingAddressRequest
 import karika.distribucija.ba.domain.model.ShippingAddress
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.components.isPostalCodeValid
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -124,6 +125,7 @@ class ShippingDetailsComponent(
                 address.value.isNotEmpty() &&
                 city.value.isNotEmpty() &&
                 postal.value.isNotEmpty() &&
+                postal.value.isPostalCodeValid() &&
                 telephone.value.isNotEmpty()
     }
 

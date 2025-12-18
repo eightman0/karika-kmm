@@ -14,6 +14,7 @@ import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.openPdf
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.components.isPostalCodeValid
 import karika.distribucija.ba.util.karikaPriceFormat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -315,6 +316,10 @@ class OrderDetailsComponent(
             }
             if (contactPostal.value.isEmpty()) {
                 showMessage("Poštanski Broj je obavezno polje!")
+                return
+            }
+            if (!contactPostal.value.isPostalCodeValid()) {
+                showMessage("Poštanski broj nije u odgovarajućem formatu!")
                 return
             }
             if (packageWidth.value.isEmpty()) {
