@@ -45,7 +45,7 @@ data class VendorRegisterRequest(
     val customersRegion: String,
     val entity: String,
     val canton: String,
-    val municipality: String,
+    val city: String,
     val companyName: String,
     val pdvNumber: String,
     val idNumber: String,

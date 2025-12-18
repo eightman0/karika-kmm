@@ -279,7 +279,7 @@ class RegistrationComponent(
                     KarikaConstants.entries.findLast { it.name == companyEntity.value }?.id?.toString()
                         ?: "",
                     companyCanton.value.trim(),
-                    "",
+                    companyCity.value,
                     companyName.value.trim(),
                     companyPdv.value.trim(),
                     companyId.value.trim(),

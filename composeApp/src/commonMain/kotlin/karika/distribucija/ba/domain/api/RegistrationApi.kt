@@ -38,7 +38,7 @@ internal class RegistrationApi {
                         append("vendor[b2b_vendor_pravno_lice]", data.companyName)
                         append("vendor[b2b_vendor_entitet]", data.entity)
                         append("vendor[b2b_vendor_kanton]", data.canton)
-                        append("vendor[b2b_vendor_grad]", data.municipality)
+                        append("vendor[b2b_vendor_grad]", data.city)
                         append("vendor[b2b_vendor_pdv_broj]", data.pdvNumber)
                         append("vendor[b2b_vendor_id]", data.idNumber)
                         append("vendor[b2b_target_customer_group]", data.customerGroup)
