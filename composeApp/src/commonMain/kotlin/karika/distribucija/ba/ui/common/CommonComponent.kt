@@ -371,7 +371,8 @@ open class CommonComponent(
         navigateToMessagesOverview(
             Conversation(
                 vendorId = product.vendorId,
-                receiverName = product.vendorName
+                receiverName = product.vendorName,
+                subject = product.name()
             )
         )
     }
