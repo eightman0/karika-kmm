@@ -28,7 +28,7 @@ class CommentsComponent(
     init {
         getComments()
 
-        iOScope.launch {
+        scope.launch {
             stateHolder.customerSpecificHandler.refreshOrders.collect {
                 getComments()
             }
@@ -36,7 +36,7 @@ class CommentsComponent(
     }
 
     private fun getComments() {
-        iOScope.launch {
+        scope.launch {
             orderRepository.comments(
                 orderId = order.orderId,
                 order.vendorId?.toString()
@@ -58,7 +58,7 @@ class CommentsComponent(
     }
 
     fun sendComment() {
-        iOScope.launch {
+        scope.launch {
             orderRepository.sendComment(
                 orderId = order.orderId,
                 vendorId = order.vendorId.toString(),
@@ -83,7 +83,7 @@ class CommentsComponent(
 
     fun pickFile() {
         stateHolder.handler.pickFile { name, data ->
-            iOScope.launch {
+            scope.launch {
                 orderRepository.sendBill(
                     orderId = order.orderId ?: return@launch,
                     vendorId = order.vendorId.toString(),

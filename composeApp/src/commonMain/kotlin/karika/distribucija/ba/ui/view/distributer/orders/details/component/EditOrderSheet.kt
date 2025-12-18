@@ -53,7 +53,7 @@ fun EditOrderSheet(
         modifier = Modifier
             .padding(top = 100.dp),
         onDismissRequest = {
-           component.mainScope.launch {
+           component.scope.launch {
                product.value = null
            }
         },

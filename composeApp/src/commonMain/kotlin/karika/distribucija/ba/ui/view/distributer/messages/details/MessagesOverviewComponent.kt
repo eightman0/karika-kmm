@@ -37,7 +37,7 @@ class MessagesOverviewComponent(
         if (conversation.createdAt == null) {
             vendors("", true)
         }
-        iOScope.launch {
+        scope.launch {
             stateHolder.messageHandler.adminMessagesReloadState.collect {
                 getMessages()
             }
@@ -52,7 +52,7 @@ class MessagesOverviewComponent(
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             messagesRepository.get(
                 threadId = threadId,
                 admin = conversationState.value.admin
@@ -76,7 +76,7 @@ class MessagesOverviewComponent(
     }
 
     fun sendMessage(attachment: ByteArray? = null, filename: String? = "") {
-        iOScope.launch {
+        scope.launch {
             messagesRepository.send(
                 SendMessageRequest(
                     sendToAdmin = conversationState.value.receiverId == "0",
@@ -116,7 +116,7 @@ class MessagesOverviewComponent(
         if (!loadImmediately && searchText.length < 3) {
             return
         }
-        iOScope.launch {
+        scope.launch {
             messagesRepository.shops(
                 searchText
             ).collect { result ->

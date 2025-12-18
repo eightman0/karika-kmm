@@ -12,7 +12,7 @@ class VendorMessagesComponent(componentContext: ComponentContext, stateHolder: K
     AdminMessagesComponent(componentContext, stateHolder) {
 
     override fun init() {
-        iOScope.launch {
+        scope.launch {
             stateHolder.messageHandler.vendorMessagesReloadState.collect {
                 loadNextPage()
             }
@@ -20,7 +20,7 @@ class VendorMessagesComponent(componentContext: ComponentContext, stateHolder: K
     }
 
     override fun loadNextPage(reset: Boolean) {
-        iOScope.launch {
+        scope.launch {
             messagesRepository.messages(admin = false)
                 .collect { result ->
                     when (result) {
@@ -44,7 +44,7 @@ class VendorMessagesComponent(componentContext: ComponentContext, stateHolder: K
         if (item.isRead()) {
             return
         }
-        iOScope.launch {
+        scope.launch {
             messagesRepository.markAsRead(item.id)
                 .collect {
                     if (item.admin) {

@@ -250,7 +250,7 @@ class AppComponent(
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             MandatoryUpdateRepository()
                 .get()
                 .collect { result ->

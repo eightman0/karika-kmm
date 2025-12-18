@@ -27,7 +27,7 @@ class CustomerMessagesComponent(componentContext: ComponentContext, stateHolder:
     }
 
     fun init() {
-        iOScope.launch {
+        scope.launch {
             stateHolder.messageHandler.vendorMessagesReloadState.collect {
                 loadNextPage()
             }
@@ -39,7 +39,7 @@ class CustomerMessagesComponent(componentContext: ComponentContext, stateHolder:
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             MessagesRepository()
                 .messages(false)
                 .collect { result ->
@@ -65,7 +65,7 @@ class CustomerMessagesComponent(componentContext: ComponentContext, stateHolder:
         if (item.isRead()) {
             return
         }
-        iOScope.launch {
+        scope.launch {
             messagesRepository.markAsRead(item.id)
                 .collect {
                     if (item.admin) {

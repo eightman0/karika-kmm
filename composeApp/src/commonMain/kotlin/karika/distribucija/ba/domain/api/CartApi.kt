@@ -19,8 +19,10 @@ import karika.distribucija.ba.domain.model.PaymentMethod
 import karika.distribucija.ba.domain.model.PlaceOrder
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.SetShippingAddressRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 internal class CartApi {
     suspend fun setAddress(address: SetShippingAddressRequest): Result<HttpResponse> = runCatching {
@@ -96,10 +98,12 @@ class CartRepository internal constructor() {
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun placeOrder(): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
@@ -114,10 +118,12 @@ class CartRepository internal constructor() {
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun addToCart(item: AddToCart): Flow<ResultState<CartItem>> = flow {
         emit(ResultState.Loading)
@@ -126,15 +132,17 @@ class CartRepository internal constructor() {
                 .addToCart(item)
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<CartItem>() ))
             } else {
                 val errorBody = response.body<ErrorResponse>()
                 emit(ResultState.Error(errorBody.message))
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun updateCart(item: AddToCart): Flow<ResultState<CartItem>> = flow {
         emit(ResultState.Loading)
@@ -143,7 +151,7 @@ class CartRepository internal constructor() {
                 .updateCart(item)
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<CartItem>() ))
             } else {
                 val error = response.body<ErrorResponse>()
                 emit(
@@ -156,10 +164,12 @@ class CartRepository internal constructor() {
                     )
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun removeFromCart(itemId: String): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
@@ -168,16 +178,18 @@ class CartRepository internal constructor() {
                 .removeFromCart(itemId)
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<String>() ))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun createCart(): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
@@ -186,16 +198,18 @@ class CartRepository internal constructor() {
                 .createCart()
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<String>() ))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun getCart(): Flow<ResultState<Cart>> = flow {
         emit(ResultState.Loading)
@@ -204,14 +218,16 @@ class CartRepository internal constructor() {
                 .getCart()
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<Cart>() ))
             } else {
                 emit(
                     ResultState.Error(response.body<ErrorResponse>().message)
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 }

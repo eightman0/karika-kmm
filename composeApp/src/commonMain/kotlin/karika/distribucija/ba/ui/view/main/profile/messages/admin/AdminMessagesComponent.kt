@@ -23,7 +23,7 @@ open class AdminMessagesComponent(
     }
 
     open fun init() {
-        iOScope.launch {
+        scope.launch {
             stateHolder.messageHandler.adminMessagesReloadState.collect {
                 loadNextPage()
             }
@@ -31,7 +31,7 @@ open class AdminMessagesComponent(
     }
 
     override fun loadNextPage(reset: Boolean) {
-        iOScope.launch {
+        scope.launch {
             messagesRepository.messages()
                 .collect { result ->
                     when (result) {
@@ -55,7 +55,7 @@ open class AdminMessagesComponent(
         if (item.isRead()) {
             return
         }
-        iOScope.launch {
+        scope.launch {
             messagesRepository.markAsRead(item.id)
                 .collect {
                     if (item.admin) {

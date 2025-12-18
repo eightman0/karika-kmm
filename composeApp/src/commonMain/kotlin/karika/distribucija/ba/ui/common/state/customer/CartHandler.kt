@@ -22,7 +22,7 @@ class CartHandler {
 
     @OptIn(ExperimentalTime::class)
     fun reloadCart() {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             CartRepository().getCart()
                 .collect { result ->
                     if (result is ResultState.Success) {
@@ -84,7 +84,7 @@ class CartHandler {
     }
 
     fun createCart(callback: () -> Unit = {}) {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             CartRepository().createCart()
                 .collect { result ->
                     if (result is ResultState.Success) {

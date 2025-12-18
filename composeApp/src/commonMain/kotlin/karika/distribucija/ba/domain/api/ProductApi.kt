@@ -10,8 +10,11 @@ import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.util.addConditionally
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlin.coroutines.cancellation.CancellationException
 
 internal class ProductApi {
     suspend fun productById(id: String): Result<HttpResponse> = runCatching {
@@ -98,15 +101,17 @@ class ProductRepository internal constructor() {
                 .getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<Product>>() ))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun promotedVendors(): Flow<ResultState<List<PromotedVendor>>> = flow {
         emit(ResultState.Loading)
@@ -114,15 +119,17 @@ class ProductRepository internal constructor() {
             val response = ProductApi().promotedVendors().getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<PromotedVendor>>() ))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun searchProductsByCategory(
         categoryId: String? = null,
@@ -155,13 +162,15 @@ class ProductRepository internal constructor() {
                 ).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<Product>>() ))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 }

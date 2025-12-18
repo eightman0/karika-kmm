@@ -23,7 +23,7 @@ class BlogsComponent(componentContext: ComponentContext, stateHolder: KarikaStat
     }
 
     fun get() {
-        iOScope.launch {
+        scope.launch {
             userRepository.blogs()
                 .collect { result ->
                     when (result) {

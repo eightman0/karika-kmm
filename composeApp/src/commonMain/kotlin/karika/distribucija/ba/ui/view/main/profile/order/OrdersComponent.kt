@@ -10,7 +10,6 @@ import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
-import karika.distribucija.ba.ui.view.main.MainConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +28,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
     val shouldScrollToTop: StateFlow<Boolean> = _shouldScrollToTop
 
     init {
-        iOScope.launch {
+        scope.launch {
             stateHolder.customerSpecificHandler.refreshOrders.collect {
                 loadNextPage(true)
             }
@@ -50,7 +49,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             repository.orders(
                 currentPage = currentPage,
                 pageSize = pageSize,
@@ -102,7 +101,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
     }
 
     fun attachBill(order: Order?, message: String, file: Pair<String, ByteArray>) {
-        iOScope.launch {
+        scope.launch {
             orderRepository.sendBill(
                 orderId = order?.orderId ?: return@launch,
                 vendorId = order.vendorId.toString(),
@@ -133,7 +132,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za pristup dobavljačima")
             return
         }
-        mainScope.launch {
+        scope.launch {
             stateHolder.appNavigation.bringToFront(AppConfig.VendorDetails(vendor, false))
         }
     }

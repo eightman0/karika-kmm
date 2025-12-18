@@ -19,21 +19,18 @@ import karika.distribucija.ba.domain.model.CartItem
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.EventType
 import karika.distribucija.ba.domain.model.Filters
-import karika.distribucija.ba.domain.model.KarikaTracking
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.TrackingPayload
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
 import karika.distribucija.ba.ui.view.main.MainConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
@@ -51,8 +48,7 @@ open class CommonComponent(
     private val sessionId = Uuid.random().toString()
     open val title: String = ""
     val snackbarHostState = stateHolder.hostState
-    val mainScope = CoroutineScope(Dispatchers.Main)
-    val iOScope = CoroutineScope(Dispatchers.IO)
+    val scope = CoroutineScope(Dispatchers.Main)
     private val cartRepository = CartRepository()
     val userRepository = UserRepository()
     val orderRepository = OrdersRepository()
@@ -69,7 +65,7 @@ open class CommonComponent(
     val loader = stateHolder.loaderHandler.loader
 
     fun showMessage(message: String?) {
-        mainScope.launch {
+        scope.launch {
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(
                 message = message ?: return@launch,
@@ -79,7 +75,7 @@ open class CommonComponent(
     }
 
     fun showErrorMessage(message: String?) {
-        mainScope.launch {
+        scope.launch {
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(
                 message = message ?: return@launch,
@@ -89,7 +85,7 @@ open class CommonComponent(
     }
 
     fun showWarningMessage(message: String?) {
-        mainScope.launch {
+        scope.launch {
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(
                 message = message ?: return@launch,
@@ -117,13 +113,13 @@ open class CommonComponent(
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za pristup dobavljačima")
             return
         }
-        mainScope.launch {
+        scope.launch {
             stateHolder.mainNavigation.bringToFront(MainConfig.VendorDetails(vendor))
         }
     }
 
     fun navigateToProduct(product: Product) {
-        mainScope.launch {
+        scope.launch {
             stateHolder.mainNavigation.bringToFront(MainConfig.ProductDetails(product))
         }
     }
@@ -139,7 +135,7 @@ open class CommonComponent(
             product = product,
             qty = qty
         )
-        iOScope.launch {
+        scope.launch {
             cartRepository.addToCart(
                 AddToCart(
                     CartItem(
@@ -187,7 +183,7 @@ open class CommonComponent(
             .values.flatMap { it }
             .find { it.first.sku == product.sku }
 
-        iOScope.launch {
+        scope.launch {
             if (cartItem != null) {
                 cartRepository.updateCart(
                     AddToCart(
@@ -274,7 +270,7 @@ open class CommonComponent(
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             cartRepository.updateCart(
                 AddToCart(
                     CartItem(
@@ -317,7 +313,7 @@ open class CommonComponent(
             refType = RefType.CART_PANEL,
             product = product
         )
-        iOScope.launch {
+        scope.launch {
             cartRepository.removeFromCart(product.itemId?.toString() ?: return@launch)
                 .collect { result ->
                     when (result) {
@@ -346,19 +342,19 @@ open class CommonComponent(
     }
 
     fun preLoginBack() {
-        mainScope.launch {
+        scope.launch {
             stateHolder.preLoginNavigation.pop()
         }
     }
 
     fun appBack() {
-        mainScope.launch {
+        scope.launch {
             stateHolder.appNavigation.pop()
         }
     }
 
     fun mainBack() {
-        mainScope.launch {
+        scope.launch {
             stateHolder.mainNavigation.pop()
         }
     }
@@ -378,13 +374,13 @@ open class CommonComponent(
     }
 
     fun showHome() {
-        mainScope.launch {
+        scope.launch {
             stateHolder.mainNavigation.bringToFront(MainConfig.Home)
         }
     }
 
     fun appNavigate(config: AppConfig) {
-        mainScope.launch {
+        scope.launch {
             if (config is AppConfig.PreLogin) {
                 stateHolder.appNavigation.replaceAll(config)
             } else {
@@ -394,14 +390,14 @@ open class CommonComponent(
     }
 
     fun mainNavigate(config: MainConfig) {
-        mainScope.launch {
+        scope.launch {
             stateHolder.mainNavigation.bringToFront(config)
         }
     }
 
     fun placedOrder(id: String) {
         stateHolder.cartHandler.createCart()
-        mainScope.launch {
+        scope.launch {
             stateHolder.mainNavigation.bringToFront(MainConfig.CartSuccess(id))
         }
     }
@@ -421,7 +417,7 @@ open class CommonComponent(
         com: String,
         callback: () -> Unit = {}
     ) {
-        iOScope.launch {
+        scope.launch {
             orderRepository.cancel(
                 orderId = orderId,
                 vendorId = vendorId,
@@ -454,7 +450,7 @@ open class CommonComponent(
         }
     ) {
         stateHolder.cartHandler.createCart {
-            iOScope.launch {
+            scope.launch {
                 showLoader()
                 order.orders.flatMap { it.products }.forEach {
                     addToCart(
@@ -477,7 +473,7 @@ open class CommonComponent(
     fun savePushHandle() {
         stateHolder.handler.getPushHandle { fId, token ->
             println("TEST_TEST: FCM_TOKEN: $token")
-            iOScope.launch {
+            scope.launch {
                 notificationRepository
                     .savePushHandle(token, fId)
                     .collect()
@@ -494,7 +490,7 @@ open class CommonComponent(
 
     private fun removePushHandle() {
         stateHolder.handler.getPushHandle { fId, _ ->
-            iOScope.launch {
+            scope.launch {
                 notificationRepository
                     .savePushHandle(null, fId)
                     .collect()
@@ -534,7 +530,7 @@ open class CommonComponent(
     }
 
     open fun loadBanners() {
-        iOScope.launch {
+        scope.launch {
             productRepository.promotedVendors().collect { result ->
                 when (result) {
                     is ResultState.Loading -> {
@@ -637,24 +633,24 @@ open class CommonComponent(
         sort: String,
         categoryIds: String
     ) {
-       // iOScope.launch {
-       //     analyticsRepository.post(
-       //         KarikaTracking(
-       //             platform = "mobile",
-       //             sessionId = sessionId,
-       //             userType = stateHolder.sessionHandler.userType().value,
-       //             eventType = EventType.PRODUCT_FILTER.value,
-       //             payload = TrackingPayload(
-       //                 ref = RefType.VENDOR_PRODUCTS_PAGE.value,
-       //                 filters = filters,
-       //                 sort = sort,
-       //                 categoryIds = categoryIds
-       //             ),
-       //             url = "karika-mobile://products?query=${Json.encodeToString(filters)}?sort=$sort",
-       //             userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
-       //             userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
-       //         )
-       //     ).collect()
-       // }
+        // iOScope.launch {
+        //     analyticsRepository.post(
+        //         KarikaTracking(
+        //             platform = "mobile",
+        //             sessionId = sessionId,
+        //             userType = stateHolder.sessionHandler.userType().value,
+        //             eventType = EventType.PRODUCT_FILTER.value,
+        //             payload = TrackingPayload(
+        //                 ref = RefType.VENDOR_PRODUCTS_PAGE.value,
+        //                 filters = filters,
+        //                 sort = sort,
+        //                 categoryIds = categoryIds
+        //             ),
+        //             url = "karika-mobile://products?query=${Json.encodeToString(filters)}?sort=$sort",
+        //             userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
+        //             userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
+        //         )
+        //     ).collect()
+        // }
     }
 }

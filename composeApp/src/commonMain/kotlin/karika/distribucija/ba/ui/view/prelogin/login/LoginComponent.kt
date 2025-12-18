@@ -32,7 +32,7 @@ class LoginComponent(
     private val repository = LoginRepository()
 
     init {
-        val state = iOScope.launch {
+        val state = scope.launch {
             stateHolder.commonHandler.deepLinkToken.collect {
                 login(it.first, it.second)
             }
@@ -54,7 +54,7 @@ class LoginComponent(
 
     fun login(emailToken: String = "", token: String = "", callback: () -> Unit = {}) {
         showLoader()
-        iOScope.launch {
+        scope.launch {
             repository.login(
                 LoginDto(
                     emailToken.ifEmpty { email.value },
@@ -91,7 +91,7 @@ class LoginComponent(
     }
 
     fun forgotPassword(email: String) {
-        iOScope.launch {
+        scope.launch {
             userRepository.forgotPass(email)
                 .collect { result ->
                     when (result) {
@@ -123,7 +123,7 @@ class LoginComponent(
     }
 
     private fun navigatePostLogin() {
-        mainScope.launch {
+        scope.launch {
             stateHolder.appNavigation.replaceAll(
                 if (userType.isShop()) AppConfig.Main else AppConfig.Dashboard
             )

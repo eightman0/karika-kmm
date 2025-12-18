@@ -115,7 +115,7 @@ fun MessagesOverviewView(component: MessagesOverviewComponent) {
     }
 
     LaunchedEffect(comments.value) {
-        component.mainScope.launch {
+        component.scope.launch {
             state.scrollToItem(comments.value.size)
         }
     }

@@ -155,7 +155,7 @@ class AppleKarikaHandler : KarikaHandler {
                         }
                         
                         // Dohvati filename (ili generiši default)
-                        let filename = result.itemProvider.suggestedName ?? "image_\(Date().timeIntervalSince1970).jpg"
+                        let filename = "image_\(Date().timeIntervalSince1970).jpg"
                         
                         // Pretvori u KotlinByteArray
                         var bytes = [UInt8](repeating: 0, count: data.count)
@@ -167,7 +167,7 @@ class AppleKarikaHandler : KarikaHandler {
                         
                         // Pozovi callback na main thread-u
                         DispatchQueue.main.async {
-                            self.callback(filename, kArray)
+                           self.callback(filename, kArray)
                         }
                     }
                 }

@@ -18,7 +18,7 @@ class BoardComponent(componentContext: ComponentContext, stateHolder: KarikaStat
     val dash = _dash.asStateFlow()
 
     fun dash() {
-        iOScope.launch {
+        scope.launch {
             DashRepository()
                 .get()
                 .collect { result ->

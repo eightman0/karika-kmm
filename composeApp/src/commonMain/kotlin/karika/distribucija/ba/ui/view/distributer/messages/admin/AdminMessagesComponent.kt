@@ -26,7 +26,7 @@ class AdminMessagesComponent(componentContext: ComponentContext, stateHolder: Ka
     }
 
     fun init() {
-        iOScope.launch {
+        scope.launch {
             stateHolder.messageHandler.adminMessagesReloadState.collect {
                 loadNextPage()
             }
@@ -38,7 +38,7 @@ class AdminMessagesComponent(componentContext: ComponentContext, stateHolder: Ka
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             MessagesRepository()
                 .messages(true)
                 .collect { result ->
@@ -64,7 +64,7 @@ class AdminMessagesComponent(componentContext: ComponentContext, stateHolder: Ka
         if (item.isRead()) {
             return
         }
-        iOScope.launch {
+        scope.launch {
             messagesRepository.markAsRead(item.id)
                 .collect {
                     if (item.admin) {

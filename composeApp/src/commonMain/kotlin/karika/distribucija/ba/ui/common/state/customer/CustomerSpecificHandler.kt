@@ -19,7 +19,7 @@ class CustomerSpecificHandler {
     val userDetails = _userDetails.asStateFlow()
 
     fun getUserDetails(callback: () -> Unit = {}) {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             UserRepository().get()
                 .collect { result ->
                     if (result is ResultState.Success) {

@@ -13,7 +13,7 @@ class CartComponent(
 ) : CommonComponent(componentContext, stateHolder) {
 
     fun shippingDetails() {
-        mainScope.launch {
+        scope.launch {
             stateHolder.mainNavigation.bringToFront(MainConfig.CartShippingDetails)
         }
     }

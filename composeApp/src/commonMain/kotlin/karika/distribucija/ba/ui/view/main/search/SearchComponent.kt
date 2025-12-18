@@ -11,7 +11,6 @@ import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -38,7 +37,7 @@ class SearchComponent(componentContext: ComponentContext, stateHolder: KarikaSta
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             productRepository.searchProductsByCategory(
                 searchText = searchText.value,
                 pageSize = pageSize,
@@ -82,7 +81,7 @@ class SearchComponent(componentContext: ComponentContext, stateHolder: KarikaSta
         }
 
         if (searchText.value.isNotEmpty()) {
-            CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(Dispatchers.Main).launch {
                 vendorRepository.vendors(
                     searchText = searchText.value,
                     currentPage = currentPage,

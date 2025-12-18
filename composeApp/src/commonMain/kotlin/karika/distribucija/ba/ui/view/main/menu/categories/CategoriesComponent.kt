@@ -27,7 +27,7 @@ class CategoriesComponent(componentContext: ComponentContext, stateHolder: Karik
     }
 
     fun get() {
-        iOScope.launch {
+        scope.launch {
             categoryRepository.get()
                 .collect { result ->
                     when (result) {

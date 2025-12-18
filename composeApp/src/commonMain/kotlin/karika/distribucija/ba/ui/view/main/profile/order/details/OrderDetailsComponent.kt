@@ -28,7 +28,7 @@ class OrderDetailsComponent(
             loadOrder()
    //     }
 
-        iOScope.launch {
+        scope.launch {
             stateHolder.customerSpecificHandler.refreshOrders.collect {
                 loadOrder()
             }
@@ -47,7 +47,7 @@ class OrderDetailsComponent(
     }
 
     fun attachBill(order: Order?, message: String, file: Pair<String, ByteArray>) {
-        iOScope.launch {
+        scope.launch {
             orderRepository.sendBill(
                 orderId = order?.orderId ?: return@launch,
                 vendorId = order.vendorId.toString(),
@@ -74,7 +74,7 @@ class OrderDetailsComponent(
     }
 
     fun loadOrder() {
-        iOScope.launch {
+        scope.launch {
             orderRepository.order(
                 orderId = order.value.incrementId ?: ""
             ).collect { result ->
@@ -99,7 +99,7 @@ class OrderDetailsComponent(
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za pristup dobavljačima")
             return
         }
-        mainScope.launch {
+        scope.launch {
             stateHolder.appNavigation.bringToFront(AppConfig.VendorDetails(vendor, false))
         }
     }

@@ -24,7 +24,7 @@ class NotificationsComponent(componentContext: ComponentContext, stateHolder: Ka
     }
 
     fun get() {
-        iOScope.launch {
+        scope.launch {
             notificationRepository.get()
                 .collect { result ->
                     when (result) {
@@ -45,7 +45,7 @@ class NotificationsComponent(componentContext: ComponentContext, stateHolder: Ka
 
     fun markAsRead(item: Notification) {
         if (item.isRead == "0") {
-            iOScope.launch {
+            scope.launch {
                 notificationRepository.put(item.id)
                     .collect { result ->
                         when (result) {

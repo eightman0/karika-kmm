@@ -20,8 +20,10 @@ import karika.distribucija.ba.domain.model.ForgotPasswordRequest
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.UpdateCustomerRequest
 import karika.distribucija.ba.domain.model.UserDetails
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 internal class UserApi {
     suspend fun get(): Result<HttpResponse> = runCatching {
@@ -77,6 +79,7 @@ internal class UserApi {
             setBody(ChangePasswordRequest(old, new, new))
         }
     }
+
     suspend fun deleteAccount(): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(
             url("mobile/customer/me/delete")
@@ -92,16 +95,18 @@ class UserRepository internal constructor() {
                 .get()
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<UserDetails>()))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun put(userDetails: UpdateCustomerRequest): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
@@ -116,10 +121,12 @@ class UserRepository internal constructor() {
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun blogs(): Flow<ResultState<List<Blog>>> = flow {
         emit(ResultState.Loading)
@@ -128,16 +135,18 @@ class UserRepository internal constructor() {
                 .blogs()
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<Blog>>() ))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun blog(id: String): Flow<ResultState<Blog>> = flow {
         emit(ResultState.Loading)
@@ -146,16 +155,18 @@ class UserRepository internal constructor() {
                 .blog(id)
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<Blog>() ))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun config(): Flow<ResultState<Config>> = flow {
         emit(ResultState.Loading)
@@ -164,16 +175,18 @@ class UserRepository internal constructor() {
                 .config()
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<Config>() ))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun forgotPass(email: String): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
@@ -192,10 +205,12 @@ class UserRepository internal constructor() {
                     ResultState.Error("Ako postoji nalog povezan sa '$email', dobićete e-poruku sa vezom za resetovanje Vaše lozinke.")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun changePass(old: String, new: String): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
@@ -223,10 +238,13 @@ class UserRepository internal constructor() {
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
+
     fun deleteAccount(): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
@@ -234,14 +252,16 @@ class UserRepository internal constructor() {
                 .deleteAccount()
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<String>() ))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 }

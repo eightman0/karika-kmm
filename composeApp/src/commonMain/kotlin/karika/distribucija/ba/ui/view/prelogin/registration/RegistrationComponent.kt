@@ -162,7 +162,7 @@ class RegistrationComponent(
     }
 
     private fun registerShop() {
-        iOScope.launch {
+        scope.launch {
             repository.register(
                 RegisterDto(
                     customer = Customer(
@@ -274,7 +274,7 @@ class RegistrationComponent(
     }
 
     private fun registerVendor() {
-        iOScope.launch {
+        scope.launch {
             repository.registerVendor(
                 VendorRegisterRequest(
                     customerGroups.value.joinToString(separator = ",") { "|${it.unit()}|" }

@@ -25,7 +25,7 @@ class HomeComponent(
     }
 
     override fun loadNextPage(reset: Boolean) {
-        iOScope.launch {
+        scope.launch {
             productRepository.searchProductsByCategory(
                 categoryId = "${KarikaConfig.getKarikaProductsId()}",
                 currentPage = 1,

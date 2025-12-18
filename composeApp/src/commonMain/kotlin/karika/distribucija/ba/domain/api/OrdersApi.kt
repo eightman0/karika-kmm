@@ -16,8 +16,10 @@ import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.ResultState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 internal class OrdersApi {
     suspend fun orders(
@@ -125,15 +127,17 @@ class OrdersRepository internal constructor() {
                 ).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<OrdersResponse>>() ))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun order(
         orderId: String = "",
@@ -144,15 +148,17 @@ class OrdersRepository internal constructor() {
                 .order(orderId).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<OrdersResponse>() ))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun comments(
         orderId: String?,
@@ -167,15 +173,17 @@ class OrdersRepository internal constructor() {
                 ).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<Comment>>() ))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun sendComment(
         orderId: String?,
@@ -197,10 +205,12 @@ class OrdersRepository internal constructor() {
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun sendBill(
         orderId: String,
@@ -226,10 +236,12 @@ class OrdersRepository internal constructor() {
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun cancel(
         orderId: String?,
@@ -251,8 +263,10 @@ class OrdersRepository internal constructor() {
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 }

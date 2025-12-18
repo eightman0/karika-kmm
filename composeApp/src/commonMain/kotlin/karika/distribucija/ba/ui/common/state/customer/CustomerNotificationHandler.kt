@@ -5,7 +5,6 @@ import karika.distribucija.ba.domain.api.NotificationRepository
 import karika.distribucija.ba.domain.model.ResultState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -15,7 +14,7 @@ class CustomerNotificationHandler {
     val notificationCount = MutableStateFlow(0)
 
     fun notificationReceived() {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             MessagesRepository()
                 .messageUnreadCount()
                 .collect {

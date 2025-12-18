@@ -29,7 +29,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
         listOf("&searchCriteria[sortOrders][0][field]=created_at&searchCriteria[sortOrders][0][direction]=DESC")
 
     init {
-        iOScope.launch {
+        scope.launch {
             stateHolder.vendorNotificationHandler.notificationCount
                 .collect {
                     loadNextPage(true)
@@ -47,7 +47,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             DashRepository().getOrders(
                 pageSize = pageSize,
                 currentPage = currentPage,

@@ -17,7 +17,7 @@ class VendorSpecificHandler {
     val vendorDetails = _vendorDetails.asStateFlow()
 
     fun getVendorDetails(callback: () -> Unit = {}) {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             dashRepository.getProfile()
                 .collect { result ->
                     callback.invoke()

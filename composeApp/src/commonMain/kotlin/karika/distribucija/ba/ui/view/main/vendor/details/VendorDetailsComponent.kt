@@ -50,7 +50,7 @@ class VendorDetailsComponent(
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             productRepository.searchProductsByCategory(
                 currentPage = currentPage,
                 pageSize = pageSize,
@@ -86,7 +86,7 @@ class VendorDetailsComponent(
     }
 
     private fun getVendor() {
-        iOScope.launch {
+        scope.launch {
             vendorRepository.vendors(
                 currentPage = currentPage,
                 pageSize = 1,

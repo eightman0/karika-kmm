@@ -20,8 +20,10 @@ import karika.distribucija.ba.domain.model.SendMessageRequest
 import karika.distribucija.ba.domain.model.SendMessageResponse
 import karika.distribucija.ba.domain.model.Shop
 import karika.distribucija.ba.domain.model.Vendor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
@@ -145,15 +147,17 @@ class MessagesRepository internal constructor() {
                 .messages(admin).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<Conversation>>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun get(
         threadId: String?,
@@ -165,15 +169,17 @@ class MessagesRepository internal constructor() {
                 .get(threadId, admin).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<Conversation>>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun vendors(
         searchText: String = "",
@@ -189,15 +195,17 @@ class MessagesRepository internal constructor() {
                 .getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<Vendor>>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun shops(
         searchText: String = "",
@@ -213,15 +221,17 @@ class MessagesRepository internal constructor() {
                 .getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<Shop>>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun send(
         message: SendMessageRequest
@@ -232,15 +242,17 @@ class MessagesRepository internal constructor() {
                 .send(message).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<SendMessageResponse>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun messageUnreadCount(): Flow<ResultState<MessagesCount>> = flow {
         emit(ResultState.Loading)
@@ -249,15 +261,17 @@ class MessagesRepository internal constructor() {
                 .getMessageUnread().getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<MessagesCount>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun markAsRead(id: String?): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
@@ -274,15 +288,15 @@ class MessagesRepository internal constructor() {
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 }
 
 fun List<PartData>.withLog(): List<PartData> {
     also {
         val json = buildJsonObject {
-            it.filterIsInstance<PartData.FormItem>()
-                .map { it1 -> it1 }.forEach { it2 ->
-                    put(it2.name ?: "", it2.value)
+            this@withLog.filterIsInstance<PartData.FormItem>()
+                .forEach { formItem ->
+                    put(formItem.name ?: "", formItem.value)
                 }
         }
         println("RequestBody: $json")

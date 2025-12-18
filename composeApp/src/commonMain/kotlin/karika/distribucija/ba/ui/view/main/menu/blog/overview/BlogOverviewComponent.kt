@@ -24,7 +24,7 @@ class BlogOverviewComponent(
     }
 
     fun get() {
-        iOScope.launch {
+        scope.launch {
             userRepository.blog(blog.value.urlKey ?: "")
                 .collect { result ->
                     when (result) {

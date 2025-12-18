@@ -33,7 +33,7 @@ class ProductComponent(
     }
 
     private fun loadProducts() {
-        iOScope.launch {
+        scope.launch {
             repository.searchProductsByCategory(
                 currentPage = 1,
                 vendorId = product.value.vendorId().toIntOrNull()
@@ -55,7 +55,7 @@ class ProductComponent(
             }
         }
 
-        iOScope.launch {
+        scope.launch {
             repository.productById(product.value.entityId ?: "").collect { result ->
                 when (result) {
                     is ResultState.Loading -> {

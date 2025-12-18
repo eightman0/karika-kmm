@@ -59,7 +59,7 @@ class ShippingDetailsComponent(
             selectedAddress.value = "-100"
             newAddress.value = false
         } else {
-            iOScope.launch {
+            scope.launch {
                 repository.setAddress(
                     SetShippingAddressRequest(
                         addressInformation = ShippingAddress(
@@ -100,7 +100,7 @@ class ShippingDetailsComponent(
     }
 
     private fun placeOrder() {
-        iOScope.launch {
+        scope.launch {
             repository.placeOrder()
                 .collect {
                     when (it) {

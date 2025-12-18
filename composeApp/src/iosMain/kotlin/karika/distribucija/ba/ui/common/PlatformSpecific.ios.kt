@@ -89,7 +89,7 @@ actual fun HtmlTextWithStyles1(
                     .dataUsingEncoding(encoding = NSUTF8StringEncoding)
                 if (data != null) {
                     coroutineScope.launch {
-                        val attributedString = withContext(Dispatchers.IO) {
+                        val attributedString = withContext(Dispatchers.Main) {
                             val options: Map<Any?, *> = mapOf(
                                 String to NSHTMLTextDocumentType,
                                 NSDocumentTypeDocumentAttribute to NSHTMLTextDocumentType,

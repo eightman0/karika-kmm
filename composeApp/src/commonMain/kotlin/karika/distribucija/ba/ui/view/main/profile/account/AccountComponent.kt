@@ -28,7 +28,7 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     val telephone = mutableStateOf("")
 
     fun updateAddress() {
-        iOScope.launch {
+        scope.launch {
             userRepository.put(
                 UpdateCustomerRequest(
                     customer = stateHolder.customerSpecificHandler.userDetails.value
@@ -71,7 +71,7 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     }
 
     fun updateContact() {
-        iOScope.launch {
+        scope.launch {
             userRepository.put(
                 UpdateCustomerRequest(
                     customer = stateHolder.customerSpecificHandler.userDetails.value
@@ -104,7 +104,7 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     }
 
     fun deleteShippingAddress(address: Address?) {
-        iOScope.launch {
+        scope.launch {
             userRepository.put(
                 UpdateCustomerRequest(
                     customer = stateHolder.customerSpecificHandler.userDetails.value
@@ -177,7 +177,7 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     }
 
     fun changePass(oldPass: String, newPass: String) {
-        iOScope.launch {
+        scope.launch {
             userRepository.changePass(oldPass, newPass)
                 .collect { result ->
                     when (result) {
@@ -201,14 +201,14 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     }
 
     fun deleteAccount() {
-        iOScope.launch {
+        scope.launch {
             userRepository.deleteAccount()
                 .collect { result ->
                     when (result) {
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
                             hideLoader()
-                            mainScope.launch {
+                            scope.launch {
                                 deleteUser()
                             }
                         }

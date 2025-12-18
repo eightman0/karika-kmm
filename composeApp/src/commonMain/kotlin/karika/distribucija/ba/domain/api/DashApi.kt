@@ -28,6 +28,8 @@ import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.domain.model.VendorProduct
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -163,7 +165,6 @@ internal class DashApi {
         name: String? = null,
         minOrderAmount: String? = null,
         bankAccountNumber: String? = null,
-        _reason: String? = null,
         logo: Pair<String?, ByteArray>?,
         banner: Pair<String?, ByteArray>?
     ): Result<HttpResponse> = runCatching {
@@ -222,16 +223,6 @@ internal class DashApi {
                                     )
                                 })
                             }
-                            // if (it.delete) {
-                            //     append(
-                            //         "vendor[company_logo][delete]",
-                            //         "1"
-                            //     )
-                            //     append(
-                            //         "vendor[company_logo][value]",
-                            //         "1"
-                            //     )
-                            // }
                         }
                         banner?.let {
                             if (it.second.isNotEmpty()) {
@@ -246,16 +237,6 @@ internal class DashApi {
                                     )
                                 })
                             }
-                            //if (it.delete) {
-                            //    append(
-                            //        "vendor[company_banner][delete]",
-                            //        "1"
-                            //    )
-                            //    append(
-                            //        "vendor[company_banner][value]",
-                            //        "1"
-                            //    )
-                            //}
                         }
                     }.withLog(),
                     boundary = "WebAppBoundary"
@@ -521,15 +502,17 @@ class DashRepository internal constructor() {
             val response = DashApi().get().getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<DashboardData>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun getOrders(
         pageSize: Int = 10,
@@ -541,15 +524,17 @@ class DashRepository internal constructor() {
             val response = DashApi().getOrders(pageSize, currentPage, queryParams).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<VendorOrder>>() ))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun getOrder(id: String): Flow<ResultState<VendorOrder>> = flow {
         emit(ResultState.Loading)
@@ -557,15 +542,17 @@ class DashRepository internal constructor() {
             val response = DashApi().getOrder(id).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<VendorOrder>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun getOrderComments(id: String): Flow<ResultState<List<Comment>>> = flow {
         emit(ResultState.Loading)
@@ -573,15 +560,17 @@ class DashRepository internal constructor() {
             val response = DashApi().getOrderComments(id).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<Comment>>() ))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun sendComment(
         orderId: String,
@@ -599,10 +588,12 @@ class DashRepository internal constructor() {
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun changeOrderStatus(
         type: String,
@@ -624,10 +615,12 @@ class DashRepository internal constructor() {
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun createInvoice(
         orderId: String,
@@ -643,10 +636,12 @@ class DashRepository internal constructor() {
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun getPdf(
         orderId: String
@@ -661,10 +656,12 @@ class DashRepository internal constructor() {
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun updateProfile(
         phone: String? = null,
@@ -675,7 +672,6 @@ class DashRepository internal constructor() {
         bankAccountNumber: String? = null,
         logo: Pair<String?, ByteArray>? = null,
         banner: Pair<String?, ByteArray>? = null,
-        _reason: String? = null
     ): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
@@ -686,21 +682,22 @@ class DashRepository internal constructor() {
                 name,
                 minOrderAmount,
                 bankAccountNumber,
-                _reason,
                 logo,
                 banner
             ).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<String>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun getProfile(): Flow<ResultState<Vendor>> = flow {
         emit(ResultState.Loading)
@@ -708,15 +705,17 @@ class DashRepository internal constructor() {
             val response = DashApi().getProfile().getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<Vendor>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun updateDelivery(data: VendorDeliveryServiceData): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
@@ -724,15 +723,17 @@ class DashRepository internal constructor() {
             val response = DashApi().updateDelivery(data).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<String>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun getProducts(
         pageSize: Int = 10,
@@ -744,15 +745,17 @@ class DashRepository internal constructor() {
             val response = DashApi().getProducts(pageSize, currentPage, queryParams).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<VendorProduct>>() ))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun getProduct(id: String): Flow<ResultState<VendorProduct>> = flow {
         emit(ResultState.Loading)
@@ -760,15 +763,17 @@ class DashRepository internal constructor() {
             val response = DashApi().getProduct(id).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<VendorProduct>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun saveProduct(
         product: VendorProduct,
@@ -787,10 +792,12 @@ class DashRepository internal constructor() {
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun saveProductImage(
         attachment: ByteArray? = null,
@@ -807,10 +814,12 @@ class DashRepository internal constructor() {
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun productData(
         name: String
@@ -821,15 +830,17 @@ class DashRepository internal constructor() {
                 .getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<AIResponse>()))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun notifications(): Flow<ResultState<List<Notification>>> = flow {
         emit(ResultState.Loading)
@@ -838,15 +849,17 @@ class DashRepository internal constructor() {
                 .getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<List<Notification>>() ))
                 return@flow
             }
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun updateOrder(
         orderId: String,
@@ -864,10 +877,12 @@ class DashRepository internal constructor() {
                 }
 
                 emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 emit(ResultState.Error(e.message))
             }
-        }
+        }.flowOn(Dispatchers.Default)
 
     fun markAsRead(
         id: String,
@@ -884,10 +899,12 @@ class DashRepository internal constructor() {
                 }
 
                 emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 emit(ResultState.Error(e.message))
             }
-        }
+        }.flowOn(Dispatchers.Default)
 
     fun getBytesFromImage(
         url: String,
@@ -904,9 +921,11 @@ class DashRepository internal constructor() {
                 }
 
                 emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 emit(ResultState.Error(e.message))
             }
-        }
+        }.flowOn(Dispatchers.Default)
 
 }

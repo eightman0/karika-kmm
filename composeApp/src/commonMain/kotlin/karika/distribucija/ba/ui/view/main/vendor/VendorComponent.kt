@@ -45,7 +45,7 @@ class VendorComponent(
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             repository.vendors(
                 currentPage = currentPage,
                 pageSize = pageSize,

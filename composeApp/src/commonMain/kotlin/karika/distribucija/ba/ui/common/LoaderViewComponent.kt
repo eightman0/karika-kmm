@@ -30,7 +30,7 @@ open class LoaderViewComponent {
             return
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             delay(500 - elapsed)
             _loader.update { false }
         }

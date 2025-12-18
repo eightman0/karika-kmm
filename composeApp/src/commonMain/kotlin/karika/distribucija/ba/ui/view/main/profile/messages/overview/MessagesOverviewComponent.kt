@@ -4,7 +4,6 @@ import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.model.Conversation
-import karika.distribucija.ba.domain.model.File
 import karika.distribucija.ba.domain.model.Message
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.SendMessageRequest
@@ -38,7 +37,7 @@ class MessagesOverviewComponent(
             vendors("", true)
         }
 
-        iOScope.launch {
+        scope.launch {
             stateHolder.messageHandler.adminMessagesReloadState.collect {
                 getMessages()
             }
@@ -53,7 +52,7 @@ class MessagesOverviewComponent(
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             messagesRepository.get(
                 threadId = threadId,
                 admin = conversationState.value.admin()
@@ -77,7 +76,7 @@ class MessagesOverviewComponent(
     }
 
     fun sendMessage(attachment: ByteArray? = null, filename: String? = null) {
-        iOScope.launch {
+        scope.launch {
             messagesRepository.send(
                 SendMessageRequest(
                     sendToAdmin = conversationState.value.admin(),
@@ -117,7 +116,7 @@ class MessagesOverviewComponent(
         if (!loadImmediately && searchText.length < 3) {
             return
         }
-        iOScope.launch {
+        scope.launch {
             messagesRepository.vendors(
                 searchText
             ).collect { result ->

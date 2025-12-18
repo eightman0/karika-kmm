@@ -20,7 +20,7 @@ class NotificationsComponent(componentContext: ComponentContext, stateHolder: Ka
     val notifications = _notifications.asStateFlow()
 
     fun get() {
-        iOScope.launch {
+        scope.launch {
             dashRepository.notifications()
                 .collect { result ->
                     when (result) {
@@ -40,7 +40,7 @@ class NotificationsComponent(componentContext: ComponentContext, stateHolder: Ka
     }
 
     fun markAsRead(item: Notification) {
-        iOScope.launch {
+        scope.launch {
             dashRepository.markAsRead(item.id)
                 .collect { result ->
                     when (result) {

@@ -54,7 +54,7 @@ class ProductDetailsComponent(
     }
 
     private fun getProduct() {
-        iOScope.launch {
+        scope.launch {
             repository.getProduct(product.value.productId ?: return@launch)
                 .collect { result ->
                     when (result) {
@@ -118,7 +118,7 @@ class ProductDetailsComponent(
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             val newImages = mutableListOf<String>()
             async {
                 product.value.media?.filter { it.data != null }?.forEach {
@@ -192,7 +192,7 @@ class ProductDetailsComponent(
     }
 
     fun fillWithAi() {
-        iOScope.launch {
+        scope.launch {
             repository.productData(name = name.value)
                 .collect { result ->
                     when (result) {
@@ -225,7 +225,7 @@ class ProductDetailsComponent(
         showAISheet.negate()
         aiImagesSelected.value
             .forEach {
-                iOScope.launch {
+                scope.launch {
                     repository.getBytesFromImage(it)
                         .collect { result ->
                             if (result is ResultState.Success) {

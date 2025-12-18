@@ -25,7 +25,7 @@ class PointsComponent(componentContext: ComponentContext, stateHolder: KarikaSta
     }
 
     private fun get() {
-        iOScope.launch {
+        scope.launch {
             repository.get()
                 .collect { result ->
                     when (result) {
@@ -48,7 +48,7 @@ class PointsComponent(componentContext: ComponentContext, stateHolder: KarikaSta
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             repository.trx(currentPage = currentPage).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()

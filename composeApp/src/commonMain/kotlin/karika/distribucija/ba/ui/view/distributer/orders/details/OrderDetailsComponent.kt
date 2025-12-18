@@ -55,7 +55,7 @@ class OrderDetailsComponent(
         getOrder()
         getComments()
 
-        iOScope.launch {
+        scope.launch {
             stateHolder.vendorNotificationHandler.notificationCount
                 .collect {
                     getOrder()
@@ -65,7 +65,7 @@ class OrderDetailsComponent(
     }
 
     private fun getOrder() {
-        iOScope.launch {
+        scope.launch {
             repository.getOrder(order.value.orderId ?: "")
                 .collect { result ->
                     when (result) {
@@ -99,7 +99,7 @@ class OrderDetailsComponent(
     }
 
     private fun getComments() {
-        iOScope.launch {
+        scope.launch {
             repository.getOrderComments(order.value.orderId ?: "").collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
@@ -118,7 +118,7 @@ class OrderDetailsComponent(
     }
 
     fun sendComment() {
-        iOScope.launch {
+        scope.launch {
             repository.sendComment(
                 orderId = order.value.orderId ?: "",
                 comment = newComment.value
@@ -141,7 +141,7 @@ class OrderDetailsComponent(
 
     fun pickFile() {
         stateHolder.handler.pickFile { name, data ->
-            iOScope.launch {
+            scope.launch {
                 repository.sendComment(
                     orderId = order.value.orderId ?: return@launch,
                     comment = newComment.value,
@@ -177,7 +177,7 @@ class OrderDetailsComponent(
     }
 
     fun approve(message: String, withDelivery: Boolean) {
-        iOScope.launch {
+        scope.launch {
             repository.changeOrderStatus(
                 type = "approve",
                 orderId = order.value.orderId ?: "",
@@ -201,7 +201,7 @@ class OrderDetailsComponent(
     }
 
     fun reject(message: String) {
-        iOScope.launch {
+        scope.launch {
             repository.changeOrderStatus(
                 type = "reject",
                 orderId = order.value.orderId ?: "",
@@ -223,7 +223,7 @@ class OrderDetailsComponent(
     }
 
     fun estimate(message: String, file: ByteArray?, filename: String) {
-        iOScope.launch {
+        scope.launch {
             repository.changeOrderStatus(
                 type = "estimate",
                 orderId = order.value.orderId ?: "",
@@ -247,7 +247,7 @@ class OrderDetailsComponent(
     }
 
     fun createInvoice() {
-        iOScope.launch {
+        scope.launch {
             repository.createInvoice(
                 orderId = order.value.orderId ?: "",
                 bankAccountNumber = stateHolder.vendorSpecificHandler.vendorDetails.value.bankAccountNumber
@@ -257,7 +257,7 @@ class OrderDetailsComponent(
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
                         hideLoader()
-                        mainScope.launch {
+                        scope.launch {
                             openPdf(result.data)
                         }
                     }
@@ -272,7 +272,7 @@ class OrderDetailsComponent(
     }
 
     fun getBill() {
-        iOScope.launch {
+        scope.launch {
             repository.getPdf(
                 orderId = order.value.orderId ?: "",
             ).collect { result ->
@@ -367,7 +367,7 @@ class OrderDetailsComponent(
     }
 
     fun saveShippingOrderDetails(companyCode: String, onSuccess: () -> Unit) {
-        iOScope.launch {
+        scope.launch {
             repository.updateDelivery(
                 VendorDeliveryServiceData(
                     order.value.orderId ?: "",
@@ -402,7 +402,7 @@ class OrderDetailsComponent(
     }
 
     private fun listenPackageChanges() {
-        iOScope.launch {
+        scope.launch {
             snapshotFlow { packageWidth.value }
                 .collect {
                     a2b.value = karikaPriceFormat(
@@ -492,7 +492,7 @@ class OrderDetailsComponent(
     }
 
     fun editOrderProduct(discount: String, discountAll: Boolean, newQty: String) {
-        iOScope.launch {
+        scope.launch {
             repository.updateOrder(
                 orderId = order.value.orderId ?: "",
                 mutableListOf(

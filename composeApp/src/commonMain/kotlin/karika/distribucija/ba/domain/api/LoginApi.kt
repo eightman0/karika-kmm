@@ -9,8 +9,10 @@ import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.ResultState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 internal class LoginApi {
     suspend fun login(loginDto: LoginDto): Result<HttpResponse> = runCatching {
@@ -49,10 +51,12 @@ class LoginRepository internal constructor() {
                     )
                 )
             }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 }
 
 fun Result<HttpResponse>.getOrNoInternet(): HttpResponse {

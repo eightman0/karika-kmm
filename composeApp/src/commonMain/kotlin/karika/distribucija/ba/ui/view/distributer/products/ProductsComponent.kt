@@ -29,7 +29,7 @@ class ProductsComponent(componentContext: ComponentContext, stateHolder: KarikaS
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             DashRepository().getProducts(
                 pageSize = pageSize,
                 currentPage = currentPage,

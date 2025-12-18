@@ -16,8 +16,10 @@ import karika.distribucija.ba.domain.model.ErrorResponse
 import karika.distribucija.ba.domain.model.RegisterDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorRegisterRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 internal class RegistrationApi {
     suspend fun register(registerDto: RegisterDto): Result<HttpResponse> = runCatching {
@@ -74,7 +76,7 @@ class RegistrationRepository internal constructor() {
                 .getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body()))
+                emit(ResultState.Success(response.body<RegisterDto>() ))
                 return@flow
             }
 
@@ -84,10 +86,12 @@ class RegistrationRepository internal constructor() {
                 else -> "Došlo je do greške. Pokušajte ponovo!"
             }
             emit(ResultState.Error(errorMsg))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun registerVendor(registerDto: VendorRegisterRequest): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
@@ -106,10 +110,12 @@ class RegistrationRepository internal constructor() {
                     response.body<ErrorResponse>().message
                 )
             )
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     fun confirmRegister(confirmRegistration: ConfirmRegistration): Flow<ResultState<String>> =
         flow {
@@ -119,8 +125,10 @@ class RegistrationRepository internal constructor() {
                     .confirmRegistration(confirmRegistration)
                     .getOrNoInternet()
                 emit(ResultState.Success("Uspješno registrovano"))
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 emit(ResultState.Error(e.message))
             }
-        }
+        }.flowOn(Dispatchers.Default)
 }

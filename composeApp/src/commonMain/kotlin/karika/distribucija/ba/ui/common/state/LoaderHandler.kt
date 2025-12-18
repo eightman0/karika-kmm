@@ -32,7 +32,7 @@ class LoaderHandler {
             return
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             delay(700 - elapsed)
             _loader.update { false }
         }

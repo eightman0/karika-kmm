@@ -33,7 +33,7 @@ class CommonHandler {
     }
 
     private fun getConfig() {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             UserRepository().config()
                 .collect { result ->
                     if (result is ResultState.Success) {
@@ -44,7 +44,7 @@ class CommonHandler {
     }
 
     private fun fetchCategories() {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             CategoryRepository().get()
                 .collect { result ->
                     if (result is ResultState.Success) {
@@ -72,7 +72,7 @@ class CommonHandler {
     }
 
     fun handleDeepLink(emailToken: String, token: String) {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             _deepLinkToken.emit(Pair(emailToken, token))
         }
     }

@@ -82,7 +82,7 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     val changePassSheet = mutableStateOf(false)
 
     fun changePass(oldPass: String, newPass: String) {
-        iOScope.launch {
+        scope.launch {
             userRepository.changePass(oldPass, newPass)
                 .collect { result ->
                     when (result) {
@@ -112,7 +112,7 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             DashRepository()
                 .updateProfile(
                     phone = companyPhone.value,
@@ -162,14 +162,14 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     }
 
     fun deleteAccount() {
-        iOScope.launch {
+        scope.launch {
             userRepository.deleteAccount()
                 .collect { result ->
                     when (result) {
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
                             hideLoader()
-                            mainScope.launch {
+                            scope.launch {
                                 deleteUser()
                             }
                         }

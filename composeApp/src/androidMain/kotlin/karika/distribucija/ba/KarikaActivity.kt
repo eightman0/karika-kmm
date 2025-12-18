@@ -259,7 +259,7 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
     }
 
     override fun getPushHandle(callback: (String, String) -> Unit) {
-        runBlocking(Dispatchers.IO) {
+        runBlocking(Dispatchers.Main) {
             val fId = FirebaseInstallations.getInstance().id.await()
             val token = FirebaseMessaging.getInstance().token.await()
             callback(fId, token)

@@ -22,7 +22,7 @@ class FaqComponent(componentContext: ComponentContext, stateHolder: KarikaStateH
     }
 
     fun get() {
-        iOScope.launch {
+        scope.launch {
             FaqRepository().faq()
                 .collect { result ->
                     when (result) {

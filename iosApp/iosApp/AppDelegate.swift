@@ -42,6 +42,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
         application.registerForRemoteNotifications()
         
         KoinInit_iosKt.doInitKoinIos(manager: ApplePersistenceManager())
+        
         return true
     }
     

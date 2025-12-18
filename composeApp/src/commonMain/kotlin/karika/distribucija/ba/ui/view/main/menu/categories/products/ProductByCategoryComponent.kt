@@ -49,7 +49,7 @@ class ProductByCategoryComponent(
             return
         }
 
-        iOScope.launch {
+        scope.launch {
             repository.searchProductsByCategory(
                 vendorId = if (selectedVendor.value.second == 0) null else selectedVendor.value.second,
                 searchText = searchText.value,
@@ -100,7 +100,7 @@ class ProductByCategoryComponent(
         if (searchText.length < 3) {
             return
         }
-        iOScope.launch {
+        scope.launch {
             messagesRepository.vendors(
                 searchText
             ).collect { result ->

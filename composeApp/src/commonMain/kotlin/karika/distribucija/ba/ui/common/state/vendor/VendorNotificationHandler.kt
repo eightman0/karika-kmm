@@ -15,7 +15,7 @@ class VendorNotificationHandler {
     val notificationCount = MutableStateFlow(0)
 
     fun notificationReceived() {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             MessagesRepository()
                 .messageUnreadCount()
                 .collect {
