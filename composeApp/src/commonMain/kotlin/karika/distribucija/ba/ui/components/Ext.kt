@@ -50,8 +50,8 @@ fun String.isEmailFormat(): Boolean {
 }
 
 fun String.isPhoneFormat(): Boolean {
-    val emailRegex = Regex("""^(?:\+387|00387|387|0)(60|61|62|63|64|65|66|67|68|69)\d{6,7}$""")
-    return emailRegex.matches(this)
+    val phoneRegex = Regex("^(?:\\+387|00387|387|0)(?:6\\d{7}|[2-9]\\d{6,7})$")
+    return phoneRegex.matches(this)
 }
 
 @Composable
