@@ -505,7 +505,7 @@ open class CommonComponent(
         )
     }
 
-    fun showImagePreview(imageUrl: String) {
+    fun showImagePreview(imageUrl: Any?) {
         stateHolder.imagePreview.value = imageUrl
     }
 

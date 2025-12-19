@@ -101,8 +101,8 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
         )
 
     private val backCallback = BackCallback {
-        if (stateHolder.imagePreview.value.isNotEmpty()) {
-            stateHolder.imagePreview.value = ""
+        if (stateHolder.imagePreview.value != null) {
+            stateHolder.imagePreview.value = null
             return@BackCallback
         }
         when (stack.value.active.instance) {

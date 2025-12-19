@@ -118,14 +118,14 @@ internal class MessagesApi {
                             append("thread_id", it)
                         }
                         message.file?.let {
-                            append("files[]", it.first ?: return@let, Headers.build {
+                            append("files[]", it.second ?: return@let, Headers.build {
                                 append(
                                     HttpHeaders.ContentType,
-                                    if (it.second?.endsWith(".pdf") == true) "application/pdf" else "image/png"
+                                    if (it.first?.endsWith(".pdf") == true) "application/pdf" else "image/png"
                                 )
                                 append(
                                     HttpHeaders.ContentDisposition,
-                                    "filename=\"${it.second}\""
+                                    "filename=\"${it.first}\""
                                 )
                             })
                         }

@@ -1,6 +1,7 @@
 package karika.distribucija.ba.ui.view.distributer.messages.details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,13 +50,14 @@ import karika.distribucija.ba.domain.HttpClientProvider.chatImage
 import karika.distribucija.ba.domain.model.FileData
 import karika.distribucija.ba.domain.model.Message
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
+import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
-import karika.distribucija.ba.ui.components.KarikaTextField2
-import karika.distribucija.ba.ui.components.SecondaryButtonFilled
+import karika.distribucija.ba.ui.components.KarikaTextFieldWithoutBorder
+import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
@@ -65,6 +67,7 @@ import karika.distribucija.ba.ui.view.main.profile.messages.overview.AttachmentM
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_attachment
+import karikav2.composeapp.generated.resources.ic_camera
 import karikav2.composeapp.generated.resources.ic_pdf
 import karikav2.composeapp.generated.resources.ic_tertiary
 import kotlinx.coroutines.launch
@@ -273,55 +276,154 @@ private fun EnterComment(component: MessagesOverviewComponent) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val conversation = component.conversationState.asState()
     val subject = component.subject.asState()
+    val attachment = component.attachment.asState()
+
     val enableButton = remember(comment, conversation, subject) {
         derivedStateOf {
-            comment.value.isNotEmpty() &&
-                    (conversation.value.customerId != null || conversation.value.receiverId == "0") &&
+            (comment.value.isNotEmpty() || attachment.value != null) &&
+                    (conversation.value.vendorId != null || conversation.value.receiverId == "0" || conversation.value.senderId == "0") &&
                     subject.value.isNotEmpty()
 
         }
     }
     val pickAttachment = component.showAttachmentSheet.asState()
 
-    Row(
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .imePadding()
+            .padding(16.dp)
             .navigationBarsPadding()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+            .fillMaxWidth()
     ) {
-        KarikaTextField2(
+        Row(
             modifier = Modifier
-                .weight(1f),
-            value = comment,
-            placeholder = "Napiši komentar",
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Done,
-            trailingIcons = {
-                Icon(
-                    modifier = Modifier
-                        .onClick {
-                            pickAttachment.negate()
-                        },
-                    imageVector = vectorResource(Res.drawable.ic_attachment),
-                    tint = KarikaColors.Gray2,
-                    contentDescription = ""
+                .fillMaxWidth()
+                .imePadding()
+                .border(
+                    width = 1.dp,
+                    color = KarikaColors.Border,
+                    shape = RoundedCornerShape(4.dp)
                 )
-            }
-        )
-        SecondaryButtonFilled(
-            modifier = Modifier
-                .height(50.dp),
-            title = "Pošalji",
-            enabled = enableButton.value
+                .background(
+                    color = KarikaColors.White,
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .padding(16.dp),
+            // verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            keyboardController?.hide()
-            component.sendMessage()
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                KarikaTextFieldWithoutBorder(
+                    modifier = Modifier,
+                    value = comment,
+                    placeholder = "Napiši komentar",
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done,
+                    trailingIcons = {
+                        if (isKiosk()) {
+                            Icon(
+                                modifier = Modifier
+                                    .onClick {
+                                        component.pickFile()
+                                    },
+                                imageVector = vectorResource(Res.drawable.ic_camera),
+                                tint = KarikaColors.Gray2,
+                                contentDescription = ""
+                            )
+                        } else {
+                            Icon(
+                                modifier = Modifier
+                                    .onClick {
+                                        pickAttachment.negate()
+                                    },
+                                imageVector = vectorResource(Res.drawable.ic_attachment),
+                                tint = KarikaColors.Gray2,
+                                contentDescription = ""
+                            )
+                        }
+                    }
+                )
+                attachment.value?.second?.let {
+                    Box(
+                        modifier = Modifier
+                            .width(50.dp)
+                            .height(60.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (attachment.value?.first?.contains("pdf") == true) {
+                            Icon(
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .height(50.dp)
+                                    .border(
+                                        width = 1.dp,
+                                        color = KarikaColors.Border
+                                    ),
+                                imageVector = vectorResource(Res.drawable.ic_pdf),
+                                tint = KarikaColors.Gray2,
+                                contentDescription = null
+                            )
+                        } else {
+                            KarikaImage(
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .height(50.dp)
+                                    .border(
+                                        width = 1.dp,
+                                        color = KarikaColors.Border
+                                    )
+                                    .onClick {
+                                        component.showImagePreview(it)
+                                    },
+                                model = it,
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = KarikaColors.White,
+                                        shape = RoundedCornerShape(100)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = KarikaColors.Border,
+                                        shape = RoundedCornerShape(100)
+                                    )
+                            ) {
+                                Icon(
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .onClick {
+                                            component.attachment.value = null
+                                        },
+                                    tint = KarikaColors.Gray2,
+                                    imageVector = vectorResource(Res.drawable.ic_tertiary),
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            PrimaryButtonFilled(
+                modifier = Modifier
+                    .height(50.dp),
+                title = "Pošalji",
+                enabled = enableButton.value
+            ) {
+                keyboardController?.hide()
+                component.sendMessage()
+            }
         }
-    }
 
+    }
     AttachmentModal(
         showAttachmentModal = pickAttachment,
         onPickFile = component::pickFile,

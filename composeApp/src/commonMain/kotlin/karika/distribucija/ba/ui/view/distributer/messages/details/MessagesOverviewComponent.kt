@@ -31,6 +31,7 @@ class MessagesOverviewComponent(
     private val _shops = MutableStateFlow<List<Shop>>(emptyList())
     val shops = _shops.asStateFlow()
 
+    val attachment = mutableStateOf<Pair<String, ByteArray>?>(null)
     val showAttachmentSheet = mutableStateOf(false)
 
     init {
@@ -75,7 +76,7 @@ class MessagesOverviewComponent(
         }
     }
 
-    fun sendMessage(attachment: ByteArray? = null, filename: String? = "") {
+    fun sendMessage() {
         scope.launch {
             messagesRepository.send(
                 SendMessageRequest(
@@ -84,7 +85,7 @@ class MessagesOverviewComponent(
                     subject = subject.value,
                     receiverId = conversationState.value.customerId?.toIntOrNull() ?: 0,
                     threadId = conversationState.value.id?.toIntOrNull(),
-                    file = Pair(attachment, filename)
+                    file = attachment.value
                 )
             ).collect { result ->
                 when (result) {
@@ -101,6 +102,7 @@ class MessagesOverviewComponent(
                         }
                         getMessages(threadId = result.data.threadId)
                         newMessage.value = ""
+                        attachment.value = null
                     }
 
                     is ResultState.Error -> {
@@ -142,13 +144,13 @@ class MessagesOverviewComponent(
 
     fun pickFile() {
         stateHolder.handler.pickFile { name, data ->
-            sendMessage(data, name)
+            attachment.value = Pair(name, data)
         }
     }
 
     fun pickPhoto() {
         stateHolder.handler.pickPhoto { name, data ->
-            sendMessage(data, name)
+            attachment.value = Pair(name, data)
         }
     }
 

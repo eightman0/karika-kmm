@@ -40,7 +40,9 @@ import karika.distribucija.ba.ui.common.KarikaHandler
 import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.util.PushHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
@@ -259,10 +261,12 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
     }
 
     override fun getPushHandle(callback: (String, String) -> Unit) {
-        runBlocking(Dispatchers.Main) {
-            val fId = FirebaseInstallations.getInstance().id.await()
-            val token = FirebaseMessaging.getInstance().token.await()
-            callback(fId, token)
+        CoroutineScope(Dispatchers.Default).launch {
+            runBlocking(Dispatchers.Main) {
+                val fId = FirebaseInstallations.getInstance().id.await()
+                val token = FirebaseMessaging.getInstance().token.await()
+                callback(fId, token)
+            }
         }
     }
 

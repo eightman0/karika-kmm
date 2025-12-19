@@ -41,7 +41,7 @@ import org.jetbrains.compose.resources.vectorResource
 fun ImagePreview(component: CommonComponent) {
     val image by component.stateHolder.imagePreview.asState()
 
-    if (image.isNotEmpty()) {
+    if (image != null) {
         Box(
             modifier = Modifier
                 .hideKeyboard()
@@ -68,7 +68,7 @@ fun ImagePreview(component: CommonComponent) {
                     modifier = Modifier
                         .padding(16.dp)
                         .onClick {
-                            component.showImagePreview("")
+                            component.showImagePreview(null)
                         }
                         .background(color = KarikaColors.Primary, shape = CircleShape),
                     contentAlignment = Alignment.Center

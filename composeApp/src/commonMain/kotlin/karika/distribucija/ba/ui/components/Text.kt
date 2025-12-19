@@ -544,6 +544,98 @@ fun KarikaTextField2(
 }
 
 @Composable
+fun KarikaTextFieldWithoutBorder(
+    modifier: Modifier = Modifier,
+    value: MutableState<String> = mutableStateOf(""),
+    placeholder: String = "",
+    placeholderColor: Color = KarikaColors.Placeholder,
+    placeholderSize: TextUnit = 14.sp,
+    textColor: Color = KarikaColors.Black,
+    disabledTextColor: Color = KarikaColors.Gray22,
+    textSize: TextUnit = 14.sp,
+    fontWeight: FontWeight = FontWeight.Normal,
+    fontStyle: FontStyle = FontStyle.Normal,
+    maxLines: Int = Int.MAX_VALUE,
+    maxLength: Int = Int.MAX_VALUE,
+    onValueChange: (String) -> Unit = {},
+    enabled: Boolean = true,
+    imeAction: ImeAction = ImeAction.Done,
+    doneAction: (() -> Unit)? = null,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    trailingIcons: @Composable (() -> Unit)? = null,
+    allowedChars: List<String> = emptyList(),
+    error: MutableState<String> = mutableStateOf("")
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    TextField(
+        modifier = modifier
+            .background(
+                color = KarikaColors.White,
+                shape = RoundedCornerShape(4.dp)
+            ),
+        placeholder = {
+            KarikaText(
+                text = placeholder,
+                color = placeholderColor,
+                textSize = placeholderSize,
+                fontWeight = FontWeight.W400
+            )
+        },
+        enabled = enabled,
+        value = value.value,
+        onValueChange = {
+            if (it.startsWith(" ")) {
+                return@TextField
+            }
+            if (allowedChars.isNotEmpty() && it.any { f -> !allowedChars.contains(f.toString()) }) {
+                return@TextField
+            }
+            if (it.length > maxLength) {
+                return@TextField
+            }
+            value.value = it
+            onValueChange.invoke(it)
+        },
+        keyboardOptions = KeyboardOptions(
+            imeAction = imeAction,
+            keyboardType = keyboardType,
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                if (doneAction != null) {
+                    if (value.value.isEmpty()) {
+                        keyboardController?.hide()
+                    }
+                    doneAction.invoke()
+                } else {
+                    keyboardController?.hide()
+                }
+            }
+        ),
+        maxLines = maxLines,
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = textColor,
+            disabledTextColor = disabledTextColor,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent
+        ),
+        textStyle = LocalTextStyle.current.copy(
+            fontWeight = fontWeight,
+            fontStyle = fontStyle,
+            fontSize = textSize,
+            fontFamily = karikaFonts()
+        ),
+        trailingIcon = {
+            trailingIcons?.invoke()
+        }
+    )
+}
+
+@Composable
 fun KarikaTextField4(
     modifier: Modifier = Modifier,
     value: MutableState<String> = mutableStateOf(""),

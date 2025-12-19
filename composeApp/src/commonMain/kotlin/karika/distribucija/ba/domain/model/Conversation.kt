@@ -107,7 +107,7 @@ data class SendMessageRequest(
     @SerialName("subject") var subject: String?,
     @SerialName("receiver_id") var receiverId: Int?,
     @SerialName("thread_id") var threadId: Int?,
-    @Transient var file: Pair<ByteArray?, String?>? = null,
+    @Transient var file: Pair<String?, ByteArray?>? = null,
 )
 
 @Serializable

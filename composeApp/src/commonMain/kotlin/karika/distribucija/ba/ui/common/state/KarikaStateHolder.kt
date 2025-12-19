@@ -21,7 +21,7 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
     var vendorNotificationHandler = VendorNotificationHandler()
     var customerNotificationHandler = CustomerNotificationHandler()
 
-    val imagePreview = mutableStateOf("")
+    val imagePreview = mutableStateOf<Any?>(null)
 
     fun logout() {
         cartHandler = CartHandler()
@@ -32,7 +32,7 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
         vendorNotificationHandler = VendorNotificationHandler()
         customerNotificationHandler = CustomerNotificationHandler()
 
-        imagePreview.value = ""
+        imagePreview.value = null
 
         appNavigation.replaceAll(sessionHandler.mainConfig())
     }
