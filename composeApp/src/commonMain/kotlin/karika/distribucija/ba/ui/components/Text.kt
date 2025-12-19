@@ -215,7 +215,7 @@ fun KarikaTextField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KarikaIntTextField(
-    value: Int?,
+    value: MutableState<Int>,
     onValueChange: (Int?) -> Unit,
     modifier: Modifier = Modifier,
     minValue: Int = 1
@@ -224,8 +224,8 @@ fun KarikaIntTextField(
     var textFieldValue by remember(value) {
         mutableStateOf(
             TextFieldValue(
-                text = value?.toString() ?: "",
-                selection = TextRange((value?.toString() ?: "").length)
+                text = value.value.toString(),
+                selection = TextRange(value.value.toString().length)
             )
         )
     }
@@ -311,6 +311,16 @@ fun KarikaIntTextField(
                 selection = TextRange(finalValue.toString().length)
             )
             onValueChange(finalValue)
+        }
+    }
+
+    LaunchedEffect(value.value) {
+        val valueString = value.value.toString()
+        if (valueString != textFieldValue.text) {
+            textFieldValue = TextFieldValue(
+                text = valueString,
+                selection = TextRange(valueString.length)
+            )
         }
     }
 }

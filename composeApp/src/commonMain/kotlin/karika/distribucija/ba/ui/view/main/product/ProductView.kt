@@ -645,7 +645,7 @@ fun ProductQtyAction(
             KarikaIntTextField(
                 modifier = Modifier
                     .fillMaxSize(),
-                value = qty.value,
+                value = qty,
                 minValue = product.minQty(),
                 onValueChange = {
                     if (it == qty.value) {
@@ -666,9 +666,6 @@ fun ProductQtyAction(
                         }
                     }
 
-                    if (adjusted != entered) {
-                        //component.showMessage("kolicina mora biti djeljiva sa minimalnom kolicinom!")
-                    }
 
                     qty.value = adjusted
                     if (autoUpdate) {
