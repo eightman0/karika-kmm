@@ -103,9 +103,9 @@ android {
         applicationId = "karika.distribucija.ba"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 248
+        versionCode = 249
 
-        versionName = "2.4.8"
+        versionName = "2.4.9"
     }
     packaging {
         resources {

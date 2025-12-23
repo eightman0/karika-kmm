@@ -126,6 +126,12 @@ fun rememberImeVisible(): Boolean {
     return WindowInsets.ime.getBottom(density) > 0
 }
 
+@Composable
+fun rememberImeVisible1(): Boolean {
+    val density = LocalDensity.current
+    return WindowInsets.ime.getBottom(density) > 200
+}
+
 private fun String.toContainerColor(): Color {
     return when (this) {
         "ERROR" -> KarikaColors.Error

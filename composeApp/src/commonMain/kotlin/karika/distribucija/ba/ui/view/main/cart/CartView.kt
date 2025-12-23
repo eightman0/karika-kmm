@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +41,7 @@ import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.components.rememberImeVisible1
 import karika.distribucija.ba.ui.view.main.product.ProductQtyAction
 import karika.distribucija.ba.ui.view.main.product.VendorName
 import karika.distribucija.ba.util.karikaPriceFormat
@@ -52,6 +54,8 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun CartView(component: CartComponent) {
     val items = component.stateHolder.cartHandler.cart.collectAsState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val imeVisible = rememberImeVisible1()
 
     Box(
         modifier = Modifier
@@ -69,40 +73,63 @@ fun CartView(component: CartComponent) {
                 fontWeight = FontWeight.W500
             )
         } else {
-            Column(
-                modifier = Modifier
-                    .padding(vertical = 16.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                KarikaText(
+            Column {
+                Column(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    color = KarikaColors.Black,
-                    text = "Pregled korpe:",
-                    fontWeight = FontWeight.W700,
-                    textSize = 20.sp
-                )
-                LazyColumn(
-                    modifier = Modifier
-                        .hideKeyboard()
-                        .padding(horizontal = 16.dp)
+                        .padding(vertical = 16.dp)
                         .weight(1f)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    itemsIndexed(items.value.items.entries.toList()) { index, it ->
-                        CartItem(it, component)
-                        YSpacer16()
-                        if (index != items.value.items.entries.toList().lastIndex) {
-                            HorizontalDivider(
-                                modifier = Modifier.fillMaxWidth(),
-                                color = KarikaColors.Gray5,
-                                thickness = 1.dp
-                            )
-                            YSpacer32()
+                    KarikaText(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp),
+                        color = KarikaColors.Black,
+                        text = "Pregled korpe:",
+                        fontWeight = FontWeight.W700,
+                        textSize = 20.sp
+                    )
+                    LazyColumn(
+                        modifier = Modifier
+                            .hideKeyboard()
+                            .padding(horizontal = 16.dp)
+                            .weight(1f)
+                    ) {
+                        itemsIndexed(items.value.items.entries.toList()) { index, it ->
+                            CartItem(it, component)
+                            YSpacer16()
+                            if (index != items.value.items.entries.toList().lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = KarikaColors.Gray5,
+                                    thickness = 1.dp
+                                )
+                                YSpacer32()
+                            }
                         }
                     }
+                    PinnedFooter(component)
                 }
-                PinnedFooter(component)
+                if (imeVisible) {
+                    Box(
+                        modifier = Modifier
+                            .background(color = KarikaColors.Primary)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .padding(vertical = 8.dp, horizontal = 16.dp)
+                                .onClick {
+                                    keyboardController?.hide()
+                                },
+                            text = "Zatvori",
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W600,
+                            color = KarikaColors.White
+                        )
+                    }
+                }
             }
         }
     }
