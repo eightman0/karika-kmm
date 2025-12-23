@@ -18,4 +18,12 @@ class CartComponent(
         }
     }
 
+    fun clearCart() {
+        showLoader()
+        stateHolder.cartHandler.clearCart {
+            scope.launch {
+                hideLoader()
+            }
+        }
+    }
 }

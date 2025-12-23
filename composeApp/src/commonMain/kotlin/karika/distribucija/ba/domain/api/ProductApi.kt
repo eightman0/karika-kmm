@@ -84,8 +84,8 @@ internal class ProductApi {
                                 "&sortDirection=$sortType"
                             )
                             .addConditionally(
-                                isInStock.isNotEmpty(),
-                                "&isInStock=$isInStock"
+                                isInStock.isEmpty(),
+                                "&isInStock=1"
                             )
             )
         )

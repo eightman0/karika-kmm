@@ -27,14 +27,7 @@ class VendorComponent(
     val showFilter = mutableStateOf(false)
     val selectedRegion = mutableStateOf<List<KarikaUnit>>(listOf())
 
-    init {
-        lifecycle.subscribe(object : Lifecycle.Callbacks {
-            override fun onResume() {
-                super.onResume()
-                loadNextPage(true)
-            }
-        })
-    }
+
     override fun loadNextPage(reset: Boolean) {
         if (reset) {
             hasNextPage = true

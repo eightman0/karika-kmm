@@ -7,9 +7,11 @@ import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
@@ -92,6 +94,31 @@ class CartHandler {
                         reloadCart()
                     }
                 }
+        }
+    }
+
+    fun clearCart(callback: (String) -> Unit = {}) {
+        CoroutineScope(Dispatchers.Default).launch {
+            val items = cart.value.items.values.flatten()
+
+            if (items.isEmpty()) {
+                callback("Cart is already empty")
+                return@launch
+            }
+
+            try {
+                items.map { item ->
+                    async {
+                        CartRepository().removeFromCart("${item.first.itemId}")
+                            .collect()
+                    }
+                }.awaitAll()
+
+                reloadCart()
+                callback("")
+            } catch (e: Exception) {
+                callback("Došlo je do greške. Pokušajte ponovo!")
+            }
         }
     }
 }

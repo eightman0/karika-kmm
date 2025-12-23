@@ -449,19 +449,21 @@ open class CommonComponent(
             appBack()
         }
     ) {
-        stateHolder.cartHandler.createCart {
-            scope.launch {
-                showLoader()
-                order.orders.flatMap { it.products }.forEach {
-                    addToCart(
-                        product = Product(sku = it.sku),
-                        it.qty?.toInt() ?: 1,
-                        false
-                    )
+        showLoader()
+        stateHolder.cartHandler.clearCart {
+            stateHolder.cartHandler.createCart {
+                scope.launch {
+                    order.orders.flatMap { it.products }.forEach {
+                        addToCart(
+                            product = Product(sku = it.sku),
+                            it.qty?.toInt() ?: 1,
+                            false
+                        )
+                    }
+                    hideLoader()
+                    callback()
+                    navigateToCart()
                 }
-                hideLoader()
-                callback()
-                navigateToCart()
             }
         }
     }

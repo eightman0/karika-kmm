@@ -122,9 +122,9 @@ data class Product(
                 }
 
                 val from = LocalDateTime.parse(specialPriceFrom, formatter)
-                    .toInstant(TimeZone.currentSystemDefault())
+                    .toInstant(TimeZone.of("Europe/Sarajevo"))
                 val to = LocalDateTime.parse(specialPriceTo, formatter)
-                    .toInstant(TimeZone.currentSystemDefault())
+                    .toInstant(TimeZone.of("Europe/Sarajevo"))
 
                 val now = Clock.System.now()
 

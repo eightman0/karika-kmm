@@ -3,6 +3,7 @@ package karika.distribucija.ba.domain.model
 import androidx.compose.ui.graphics.Color
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.toDateString
+import karika.distribucija.ba.ui.view.distributer.orders.toDateTime
 import karika.distribucija.ba.util.karikaPriceFormat
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -44,7 +45,7 @@ data class OrdersResponse(
         return karikaPriceFormat(bonus ?: 0.00) + " KM"
     }
 
-    fun date() = createdAt?.toDateString() ?: ""
+    fun date() = createdAt?.toDateTime() ?: ""
 }
 
 @Serializable

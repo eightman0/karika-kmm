@@ -1244,7 +1244,7 @@ fun ConfirmationModal(
                     color = KarikaColors.Gray2,
                     textSize = 16.sp,
                     textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.W600
+                    fontWeight = FontWeight.W400
                 )
                 HorizontalButtons(
                     modifier = Modifier,

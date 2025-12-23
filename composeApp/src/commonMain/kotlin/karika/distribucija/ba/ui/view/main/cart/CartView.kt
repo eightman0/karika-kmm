@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
@@ -39,11 +41,14 @@ import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.YSpacer8
+import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
+import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rememberImeVisible1
 import karika.distribucija.ba.ui.view.main.product.ProductQtyAction
 import karika.distribucija.ba.ui.view.main.product.VendorName
+import karika.distribucija.ba.ui.view.main.profile.account.ConfirmationModal
 import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_check_circle_filled
@@ -56,6 +61,7 @@ fun CartView(component: CartComponent) {
     val items = component.stateHolder.cartHandler.cart.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
     val imeVisible = rememberImeVisible1()
+    val clearCartModal = mutableStateOf(false).asState()
 
     Box(
         modifier = Modifier
@@ -81,14 +87,35 @@ fun CartView(component: CartComponent) {
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    KarikaText(
+                    Row(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp),
-                        color = KarikaColors.Black,
-                        text = "Pregled korpe:",
-                        fontWeight = FontWeight.W700,
-                        textSize = 20.sp
-                    )
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        KarikaText(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 16.dp),
+                            color = KarikaColors.Black,
+                            text = "Pregled korpe:",
+                            fontWeight = FontWeight.W700,
+                            textSize = 20.sp
+                        )
+                        IconTextItem(
+                            modifier = Modifier
+                                .onClick {
+                                    clearCartModal.negate()
+                                },
+                            icon = vectorResource(Res.drawable.ic_delete),
+                            iconColor = KarikaColors.Red,
+                            textColor = KarikaColors.Red,
+                            text = "Isprazni korpu",
+                            fontWeight = FontWeight.W500,
+                            textSize = 14.sp,
+                            iconPosition = FabPosition.Start
+                        )
+                    }
                     LazyColumn(
                         modifier = Modifier
                             .hideKeyboard()
@@ -132,6 +159,22 @@ fun CartView(component: CartComponent) {
                 }
             }
         }
+    }
+
+    if (clearCartModal.value) {
+        ConfirmationModal(
+            title = "Da li želite da ispraznite korpu?",
+            message = "Ova akcija će ukloniti sve artikle iz korpe.",
+            primaryButtonText = "Da",
+            secondaryButtonText = "Ne",
+            onPrimaryClick = {
+                component.clearCart()
+                clearCartModal.negate()
+            },
+            onSecondaryClick = {
+                clearCartModal.negate()
+            }
+        )
     }
 }
 

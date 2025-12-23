@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -254,7 +255,8 @@ private fun VendorImage(component: VendorDetailsComponent) {
                         component.showImagePreview(vendor.image())
                     }
                     .fillMaxSize(),
-                model = vendor.image()
+                model = vendor.image(),
+                contentScale = ContentScale.Inside
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {

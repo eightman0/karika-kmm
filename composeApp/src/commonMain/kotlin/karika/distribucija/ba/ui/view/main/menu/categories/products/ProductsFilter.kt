@@ -148,7 +148,7 @@ fun ProductsFilterSheet(
                             .clickable(
                                 interactionSource = null, indication = null
                             ) {
-                                isInStock.value = if (isInStock.value == "1") "0" else "1"
+                                isInStock.value = if (isInStock.value == "1") "" else "1"
                             },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(0.dp)
@@ -159,7 +159,7 @@ fun ProductsFilterSheet(
                                 .padding(vertical = 0.dp),
                             checked = isInStock.value == "1",
                             onCheckedChange = { state ->
-                               isInStock.value = if (state) "1" else "0"
+                               isInStock.value = if (state) "1" else ""
                             },
                             colors = CheckboxDefaults.colors(
                                 checkedColor = KarikaColors.Primary,

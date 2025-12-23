@@ -204,7 +204,7 @@ class AppleKarikaHandler : KarikaHandler {
                     guard let data = image.jpegData(compressionQuality: 0.9) else { return }
                     
                     // Generiši filename
-                    let filename = "image_\(Date().timeIntervalSince1970).jpg"
+                    let filename = "image.jpg"
                     
                     // Pretvori u KotlinByteArray
                     var bytes = [UInt8](repeating: 0, count: data.count)

@@ -264,7 +264,7 @@ private fun Filter(component: ProductByCategoryComponent) {
                     IconTextItem(
                         modifier = Modifier
                             .onClick {
-                                isInStock.value = "0"
+                                isInStock.value = ""
                                 component.loadNextPage(true)
                             }
                             .padding(4.dp),
