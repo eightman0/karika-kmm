@@ -52,7 +52,7 @@ sealed class AppConfig {
     data class ProductDetails(val product: Product) : AppConfig()
 
     @Serializable
-    data class VendorDetails(val vendor: Vendor, val fromMain: Boolean = true) : AppConfig()
+    data class VendorDetails(val vendor: Vendor) : AppConfig()
 
     @Serializable
     data object Account : AppConfig()
@@ -180,7 +180,7 @@ class AppComponent(
             )
 
             is AppConfig.ProductDetails -> Child.ProductDetails(
-                ProductComponent(componentContext, stateHolder, appConfig.product)
+                ProductComponent(componentContext, stateHolder, appConfig.product, false)
             )
 
             is AppConfig.VendorDetails -> Child.VendorDetails(
@@ -188,7 +188,7 @@ class AppComponent(
                     componentContext,
                     stateHolder,
                     appConfig.vendor,
-                    appConfig.fromMain
+                    false
                 )
             )
 

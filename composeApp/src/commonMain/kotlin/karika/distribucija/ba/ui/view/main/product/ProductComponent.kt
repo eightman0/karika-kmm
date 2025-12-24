@@ -17,7 +17,8 @@ import kotlinx.coroutines.launch
 class ProductComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
-    product: Product
+    product: Product,
+    val fromMain: Boolean = true
 ) : CommonComponent(componentContext, stateHolder) {
 
     private val repository = ProductRepository()
@@ -78,6 +79,14 @@ class ProductComponent(
                     }
                 }
             }
+        }
+    }
+
+    fun back() {
+        if (fromMain) {
+            mainBack()
+        } else {
+            appBack()
         }
     }
 }

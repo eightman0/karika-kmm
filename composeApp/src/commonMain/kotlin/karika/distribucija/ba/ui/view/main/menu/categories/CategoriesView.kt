@@ -137,7 +137,8 @@ private fun Categories(component: CategoriesComponent) {
                 EndIconTextItem(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    icon = if (it.childrenData.isEmpty()) null else vectorResource(Res.drawable.ic_arrow_right),
+                    //icon = if (it.childrenData.isEmpty()) null else vectorResource(Res.drawable.ic_arrow_right),
+                    icon = if (category != null) null else vectorResource(Res.drawable.ic_arrow_right),
                     iconColor = KarikaColors.Gray3,
                     textColor = KarikaColors.Gray3,
                     textSize = 14.sp,

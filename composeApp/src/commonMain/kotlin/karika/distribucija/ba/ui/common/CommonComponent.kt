@@ -118,7 +118,7 @@ open class CommonComponent(
         }
     }
 
-    fun navigateToProduct(product: Product) {
+    open fun navigateToProduct(product: Product) {
         scope.launch {
             stateHolder.mainNavigation.bringToFront(MainConfig.ProductDetails(product))
         }

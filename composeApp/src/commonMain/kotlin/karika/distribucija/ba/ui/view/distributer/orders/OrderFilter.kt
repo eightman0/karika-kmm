@@ -383,6 +383,6 @@ fun String.toDate1(): String {
 fun String.toDateTime(): String {
     val isoString = replace(" ", "T")
     val localDateTime = LocalDateTime.parse(isoString)
-    val instant = localDateTime.toInstant(TimeZone.of("Europe/Sarajevo"))
+    val instant = localDateTime.toInstant(TimeZone.UTC).toLocalDateTime(TimeZone.of("Europe/Sarajevo")).toInstant(TimeZone.UTC)
     return instant.toEpochMilliseconds().toDateTime()
 }

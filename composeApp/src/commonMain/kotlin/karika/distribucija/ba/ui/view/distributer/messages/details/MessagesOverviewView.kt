@@ -247,7 +247,6 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                                 conversation.value = conversation.value.copy(
                                     customerId = it.id,
                                     receiverName = it.name,
-                                    senderName = it.name
                                 )
                             }
                             .background(color = KarikaColors.Gray12)
@@ -281,7 +280,7 @@ private fun EnterComment(component: MessagesOverviewComponent) {
     val enableButton = remember(comment, conversation, subject) {
         derivedStateOf {
             (comment.value.isNotEmpty() || attachment.value != null) &&
-                    (conversation.value.vendorId != null || conversation.value.receiverId == "0" || conversation.value.senderId == "0") &&
+                    (conversation.value.id != null || conversation.value.customerId != null || conversation.value.admin) &&
                     subject.value.isNotEmpty()
 
         }

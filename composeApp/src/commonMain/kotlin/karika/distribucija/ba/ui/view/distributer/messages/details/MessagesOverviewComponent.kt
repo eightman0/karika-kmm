@@ -2,6 +2,7 @@ package karika.distribucija.ba.ui.view.distributer.messages.details
 
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
+import karika.distribucija.ba.domain.HttpClientProvider.chatImage
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Message
@@ -65,6 +66,13 @@ class MessagesOverviewComponent(
                         _messages.update {
                             result.data.firstOrNull()?.messages?.firstOrNull() ?: emptyList()
                         }
+                        result.data.firstOrNull()?.messages?.firstOrNull()?.firstOrNull()?.let {
+                            conversationState.value = conversationState.value.copy(
+                                customerId = it.customerId,
+                                vendorId = it.vendorId,
+                                admin = it.senderId == "0" || it.receiverId == "0"
+                            )
+                        }
                     }
 
                     is ResultState.Error -> {
@@ -80,7 +88,7 @@ class MessagesOverviewComponent(
         scope.launch {
             messagesRepository.send(
                 SendMessageRequest(
-                    sendToAdmin = conversationState.value.receiverId == "0",
+                    sendToAdmin = conversationState.value.admin,
                     message = newMessage.value,
                     subject = subject.value,
                     receiverId = conversationState.value.customerId?.toIntOrNull() ?: 0,
@@ -155,6 +163,6 @@ class MessagesOverviewComponent(
     }
 
     fun downloadReceipt(it: String) {
-        openPdf(imageUrl("/$it"))
+        openPdf(chatImage("/$it"))
     }
 }

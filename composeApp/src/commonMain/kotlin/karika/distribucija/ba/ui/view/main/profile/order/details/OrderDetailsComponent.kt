@@ -100,7 +100,7 @@ class OrderDetailsComponent(
             return
         }
         scope.launch {
-            stateHolder.appNavigation.bringToFront(AppConfig.VendorDetails(vendor, false))
+            stateHolder.appNavigation.bringToFront(AppConfig.VendorDetails(vendor))
         }
     }
 }

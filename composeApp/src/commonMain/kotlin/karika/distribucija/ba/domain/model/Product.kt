@@ -6,12 +6,14 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.roundToInt
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 
 @Serializable
@@ -102,42 +104,31 @@ data class Product(
     @OptIn(ExperimentalTime::class)
     fun specialPrice(): Double {
         val special = customAttributes
-            .find { f -> f.attributeCode == "special_price" }
+            .find { it.attributeCode == "special_price" }
             ?.value?.jsonPrimitive?.content?.toDouble() ?: specialPrice ?: 0.0
 
-        if (specialPriceFrom != null && specialPriceTo != null) {
-            try {
-                val formatter = LocalDateTime.Format {
-                    year()
-                    char('-')
-                    monthNumber()
-                    char('-')
-                    day()
-                    char(' ')
-                    hour()
-                    char(':')
-                    minute()
-                    char(':')
-                    second()
-                }
-
-                val from = LocalDateTime.parse(specialPriceFrom, formatter)
-                    .toInstant(TimeZone.of("Europe/Sarajevo"))
-                val to = LocalDateTime.parse(specialPriceTo, formatter)
-                    .toInstant(TimeZone.of("Europe/Sarajevo"))
-
-                val now = Clock.System.now()
-
-                return if (now in from..to) {
-                    special
-                } else {
-                    0.0
-                }
-            } catch (e: Exception) {
-                return special
-            }
-        } else {
+        if (specialPriceFrom.isNullOrBlank() || specialPriceTo.isNullOrBlank()) {
             return special
+        }
+
+        return try {
+            val formatter = LocalDateTime.Format {
+                year(); char('-');
+                monthNumber(); char('-');
+                day(); char(' ');
+                hour(); char(':');
+                minute();char(':');
+                second()
+            }
+
+            val from = LocalDateTime.parse(specialPriceFrom, formatter).toInstant(TimeZone.UTC)
+            val to = LocalDateTime.parse(specialPriceTo, formatter).toInstant(TimeZone.UTC).plus(1.days)
+            val now = Clock.System.now()
+
+            if (now in from..to) special else 0.0
+
+        } catch (e: Exception) {
+            special
         }
     }
 

@@ -81,7 +81,7 @@ fun ProductView(component: ProductComponent) {
             component = component,
             topBar = {
                 TopBarWithBack(product.name()) {
-                    component.mainBack()
+                    component.back()
                 }
             }
         ) {

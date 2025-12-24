@@ -2,12 +2,15 @@ package karika.distribucija.ba.ui.view.main.vendor.details
 
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.stack.bringToFront
+import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.view.main.MainConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -55,7 +58,8 @@ class VendorDetailsComponent(
                 currentPage = currentPage,
                 pageSize = pageSize,
                 vendorId = vendor.value.entityId,
-                categoryId = selectedCategories.value.joinToString(",") { it.id.toString() }.ifEmpty { null },
+                categoryId = selectedCategories.value.joinToString(",") { it.id.toString() }
+                    .ifEmpty { null },
                 searchText = searchText.value,
                 isInStock = isInStock.value
             ).collect { result ->
@@ -109,6 +113,16 @@ class VendorDetailsComponent(
                         // showMessage(result.message ?: "")
                     }
                 }
+            }
+        }
+    }
+
+    override fun navigateToProduct(product: Product) {
+        scope.launch {
+            if (fromMain) {
+                stateHolder.mainNavigation.bringToFront(MainConfig.ProductDetails(product))
+            } else {
+                stateHolder.appNavigation.bringToFront(AppConfig.ProductDetails(product))
             }
         }
     }
