@@ -3,6 +3,9 @@ package karika.distribucija.ba.ui.view.distributer.orders.details
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import com.arkivanov.decompose.ComponentContext
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.api.DashRepository
 import karika.distribucija.ba.domain.model.Comment
@@ -16,10 +19,13 @@ import karika.distribucija.ba.ui.common.openPdf
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.components.isPostalCodeValid
 import karika.distribucija.ba.util.karikaPriceFormat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class OrderDetailsComponent(
     componentContext: ComponentContext,
@@ -224,22 +230,66 @@ class OrderDetailsComponent(
 
     fun estimate(message: String, file: ByteArray?, filename: String) {
         scope.launch {
-            repository.changeOrderStatus(
-                type = "estimate",
-                orderId = order.value.orderId ?: "",
-                message = message,
-                attachment = file,
-                filename = filename
-            ).collect { result ->
-                when (result) {
-                    is ResultState.Loading -> showLoader()
-                    is ResultState.Success -> {
-                        getOrder()
-                    }
+            if (file == null) {
+                repository.createInvoice(
+                    orderId = order.value.orderId ?: "",
+                    bankAccountNumber = stateHolder.vendorSpecificHandler.vendorDetails.value.bankAccountNumber
+                        ?: ""
+                ).collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            hideLoader()
 
-                    is ResultState.Error -> {
-                        hideLoader()
-                        showMessage(result.message)
+                            // Download the file from URL and convert to ByteArray, then call changeOrderStatus
+                            val attachment = withContext(Dispatchers.IO) {
+                                downloadFile(result.data)
+                            }
+                            repository.changeOrderStatus(
+                                type = "estimate",
+                                orderId = order.value.orderId ?: "",
+                                message = message,
+                                attachment = attachment,
+                                filename = filename
+                            ).collect { statusResult ->
+                                when (statusResult) {
+                                    is ResultState.Loading -> showLoader()
+                                    is ResultState.Success -> {
+                                        getOrder()
+                                        getComments()
+                                    }
+                                    is ResultState.Error -> {
+                                        hideLoader()
+                                        showMessage(statusResult.message)
+                                    }
+                                }
+                            }
+                        }
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showMessage(result.message)
+                        }
+                    }
+                }
+            } else {
+                // If file is not null, only call changeOrderStatus
+                repository.changeOrderStatus(
+                    type = "estimate",
+                    orderId = order.value.orderId ?: "",
+                    message = message,
+                    attachment = file,
+                    filename = filename
+                ).collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            getOrder()
+                            getComments()
+                        }
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showMessage(result.message)
+                        }
                     }
                 }
             }
@@ -537,5 +587,11 @@ class OrderDetailsComponent(
 
     fun downloadReceipt(it: File) {
         openPdf(imageUrl(it.url))
+    }
+
+    private suspend fun downloadFile(url: String): ByteArray {
+        return HttpClient().use { client ->
+            client.get(url).body()
+        }
     }
 }

@@ -35,11 +35,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.domain.model.Address
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrderProduct
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.Vendor
-import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
@@ -102,6 +102,8 @@ private fun OrderCommon(component: OrderDetailsComponent) {
             textSize = 14.sp,
             text = order.date()
         )
+        YSpacer16()
+        ShippingAddress(order.shippingAddress ?: return)
         YSpacer16()
         TableHeaderRow()
         order.orders.flatMap { it.products }.forEach {
@@ -436,6 +438,121 @@ fun PriceBox(order: OrdersResponse) {
             textSize = 16.sp,
             text = order.vpcPdvString()
         )
+    }
+}
+
+@Composable
+private fun ShippingAddress(address: Address) {
+    Column(
+        modifier = Modifier
+            .background(color = KarikaColors.Gray12)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                ) {
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray15,
+                        fontWeight = FontWeight.W600,
+                        textSize = 10.sp,
+                        text = "KONTAKT OSOBA"
+                    )
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray2,
+                        fontWeight = FontWeight.W600,
+                        textSize = 10.sp,
+                        text = address.firstname + " " + address.lastname
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                ) {
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray15,
+                        fontWeight = FontWeight.W600,
+                        textSize = 10.sp,
+                        text = "BROJ TELEFONA"
+                    )
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray2,
+                        fontWeight = FontWeight.W600,
+                        textSize = 10.sp,
+                        text = address.telephone
+                    )
+                }
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                ) {
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray15,
+                        fontWeight = FontWeight.W600,
+                        textSize = 10.sp,
+                        text = "GRAD"
+                    )
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray2,
+                        fontWeight = FontWeight.W600,
+                        textSize = 10.sp,
+                        text = address.city
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                ) {
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray15,
+                        fontWeight = FontWeight.W600,
+                        textSize = 10.sp,
+                        text = "ADRESA I BROJ ULICE"
+                    )
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray2,
+                        fontWeight = FontWeight.W600,
+                        textSize = 10.sp,
+                        text = address.street.joinToString(" ")
+                    )
+                }
+            }
+        }
     }
 }
 

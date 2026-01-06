@@ -133,6 +133,7 @@ private fun String.sortBy(): String {
         "Najskuplji" -> "price"
         "Minimalna količina" -> "b2b_min_qty"
         "Po datumu" -> "created_at"
+        "Sa popustom" -> "best_special_price"
         else -> ""
     }
 }

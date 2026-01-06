@@ -107,7 +107,7 @@ private fun MessageItem(item: Conversation, component: CustomerMessagesComponent
                 color = KarikaColors.Gray2,
                 fontWeight = if (item.isRead()) FontWeight.W400 else FontWeight.W700,
                 textSize = 16.sp,
-                text = item.senderName
+                text = item.customerName()
             )
             KarikaText(
                 modifier = Modifier,

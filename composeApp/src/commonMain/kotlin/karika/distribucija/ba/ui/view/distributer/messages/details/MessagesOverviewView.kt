@@ -532,7 +532,7 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                 KarikaText(
                     modifier = Modifier
                         .padding(start = 16.dp, top = 16.dp),
-                    text = component.conversationState.value.senderName,
+                    text = component.customerName(),
                     color = KarikaColors.White,
                     textSize = 16.sp,
                     fontWeight = FontWeight.W700

@@ -165,4 +165,8 @@ class MessagesOverviewComponent(
     fun downloadReceipt(it: String) {
         openPdf(chatImage("/$it"))
     }
+
+    fun customerName(): String {
+        return conversationState.value.customerName()
+    }
 }

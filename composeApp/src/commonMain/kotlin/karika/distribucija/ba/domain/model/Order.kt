@@ -21,6 +21,7 @@ data class OrdersResponse(
     @SerialName("mp_reward_earn") var bonus: Double? = null,
     @SerialName("increment_id") var incrementId: String? = null,
     @SerialName("vendor_orders") var orders: ArrayList<Order> = arrayListOf(),
+    @SerialName("shipping_address") var shippingAddress: Address? = null,
     @Transient var status: String? = null
 ) {
     fun vpcPdvString(): String {

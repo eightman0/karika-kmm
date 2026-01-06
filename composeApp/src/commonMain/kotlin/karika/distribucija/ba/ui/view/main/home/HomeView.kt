@@ -221,7 +221,7 @@ private fun KarikaProducts(component: HomeComponent) {
 
 
 @Composable
-private fun BonusView(product: Product) {
+fun BonusView(product: Product) {
     if (!product.hasBonus()) {
         return
     }

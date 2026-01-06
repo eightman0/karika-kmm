@@ -185,7 +185,8 @@ private fun Filter(component: ProductByCategoryComponent) {
                     "Najjeftiniji",
                     "Najskuplji",
                     "Min. Količina",
-                    "Po datumu"
+                    "Po datumu",
+                    "Sa popustom"
                 )
             ).asState()
         ) {

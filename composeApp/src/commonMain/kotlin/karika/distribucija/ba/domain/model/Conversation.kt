@@ -42,6 +42,10 @@ data class Conversation(
     fun date(): String? {
         return updatedAt?.split(" ")?.getOrNull(0) ?: updatedAt
     }
+
+    fun customerName(): String {
+        return if (sender == "customer") senderName ?: "-" else receiverName ?: "-"
+    }
 }
 
 @Serializable

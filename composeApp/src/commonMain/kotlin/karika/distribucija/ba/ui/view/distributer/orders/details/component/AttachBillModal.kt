@@ -29,9 +29,11 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.YSpacer16
+import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rounded
+import karika.distribucija.ba.ui.view.distributer.products.details.dashedBorder
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_attachment
 import karikav2.composeapp.generated.resources.ic_tertiary
@@ -91,6 +93,7 @@ fun AttachBillModal(
                 YSpacer16()
                 Column(
                     modifier = Modifier
+                        .dashedBorder(color = KarikaColors.Blue2, cornerRadius = 3.dp)
                         .onClick {
                             component.stateHolder.handler.pickFile(
                                 arrayOf(
@@ -106,6 +109,7 @@ fun AttachBillModal(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    YSpacer8()
                     Icon(
                         modifier = Modifier
                             .size(32.dp),
@@ -120,7 +124,16 @@ fun AttachBillModal(
                         textSize = 16.sp,
                         fontWeight = FontWeight.W600
                     )
+                    YSpacer8()
                 }
+                YSpacer8()
+                KarikaText(
+                    modifier = Modifier,
+                    text = "Dodajte Vaš predračun, ili ostavite prazno i predračun će biti automatski generisan.",
+                    color = KarikaColors.Gray6,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W300
+                )
                 if (attachedFile.value.first.isNotEmpty()) {
                     YSpacer16()
                     IconTextItem(
@@ -151,8 +164,7 @@ fun AttachBillModal(
                 HorizontalSecondaryButtons(
                     modifier = Modifier,
                     primaryTitle = "Pošalji predračun",
-                    secondaryTitle = "Odustani",
-                    primaryEnabled = attachedFile.value.first.isNotEmpty()
+                    secondaryTitle = "Odustani"
                 ) {
                     if (it == "Pošalji predračun") {
                         onSubmit(

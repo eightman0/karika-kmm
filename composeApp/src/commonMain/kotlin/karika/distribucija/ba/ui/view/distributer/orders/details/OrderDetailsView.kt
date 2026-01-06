@@ -175,7 +175,7 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                         containerColor = KarikaColors.Blue,
                         disabledContentColor = KarikaColors.Secondary
                     ),
-                    enabled = !order.locked() && !order.isApproved() && !order.isRejected() && !order.isCancelled(),
+                    enabled = !order.locked() && !order.isRejected() && !order.isCancelled(),
                     contentPadding = PaddingValues(horizontal = 12.dp)
                 ) {
                     Row(
@@ -256,22 +256,22 @@ private fun OrderInfo(component: OrderDetailsComponent) {
                                     )
                                 }
                             )
-                            DropdownMenuItem(
-                                onClick = {
-                                    dropdownState.negate()
-                                    component.getBill()
-                                },
-                                text = {
-                                    IconTextItem(
-                                        modifier = Modifier,
-                                        icon = vectorResource(Res.drawable.ic_print),
-                                        iconColor = KarikaColors.Gray2,
-                                        textColor = KarikaColors.Gray2,
-                                        text = "Printaj narudžbu"
-                                    )
-                                }
-                            )
                         }
+                        DropdownMenuItem(
+                            onClick = {
+                                dropdownState.negate()
+                                component.getBill()
+                            },
+                            text = {
+                                IconTextItem(
+                                    modifier = Modifier,
+                                    icon = vectorResource(Res.drawable.ic_print),
+                                    iconColor = KarikaColors.Gray2,
+                                    textColor = KarikaColors.Gray2,
+                                    text = "Printaj narudžbu"
+                                )
+                            }
+                        )
                         if (order.isPending()) {
                             DropdownMenuItem(
                                 onClick = {
