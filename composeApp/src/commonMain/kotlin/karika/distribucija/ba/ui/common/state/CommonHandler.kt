@@ -58,6 +58,10 @@ class CommonHandler {
         return config.value.unitOptions.find { it.unit == id }?.label ?: "kom"
     }
 
+    fun getUnitId(name: String): String {
+        return config.value.unitOptions.find { it.label == name }?.unit ?: "1"
+    }
+
     fun getPackageVolume(width: Double, height: Double, depth: Double, weight: Double): Double {
         val volume = maxOf((width * height * depth) / 5000, weight)
         val price =

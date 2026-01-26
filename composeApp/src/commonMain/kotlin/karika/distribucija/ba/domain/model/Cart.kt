@@ -69,6 +69,8 @@ data class ExtAttributes(
     val imageUrl: String? = null,
     @SerialName("special_price")
     val specialPrice: String? = null,
+    @SerialName("original_price")
+    val originalPrice: String? = null,
     @SerialName("vendors")
     val vendors: List<Vendor>? = null,
     @SerialName("reward_points")

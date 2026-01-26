@@ -1,6 +1,8 @@
 package karika.distribucija.ba.ui.view.main.profile.messages.vendor
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.doOnDestroy
+import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
@@ -12,10 +14,14 @@ class VendorMessagesComponent(componentContext: ComponentContext, stateHolder: K
     AdminMessagesComponent(componentContext, stateHolder) {
 
     override fun init() {
-        scope.launch {
+        val job = scope.launch {
             stateHolder.messageHandler.vendorMessagesReloadState.collect {
                 loadNextPage()
             }
+        }
+
+        lifecycle.doOnDestroy {
+            job.cancel()
         }
     }
 
@@ -40,20 +46,6 @@ class VendorMessagesComponent(componentContext: ComponentContext, stateHolder: K
     }
 
     override fun navigateToMessagesOverview(item: Conversation) {
-        super.navigateToMessagesOverview(item)
-        if (item.isRead()) {
-            return
-        }
-        scope.launch {
-            messagesRepository.markAsRead(item.id)
-                .collect {
-                    if (item.admin) {
-                        stateHolder.messageHandler.reloadAdminMessages()
-                    } else {
-                        stateHolder.messageHandler.reloadVendorMessages()
-                    }
-                }
-        }
-        stateHolder.customerNotificationHandler.notificationReceived()
+        appNavigate(AppConfig.MessagesOverview(item.copy(admin = false)))
     }
 }

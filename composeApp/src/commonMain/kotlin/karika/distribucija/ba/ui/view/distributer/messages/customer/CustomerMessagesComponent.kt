@@ -2,6 +2,7 @@ package karika.distribucija.ba.ui.view.distributer.messages.customer
 
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.doOnDestroy
 import karika.distribucija.ba.domain.api.MessagesRepository
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.ResultState
@@ -13,7 +14,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CustomerMessagesComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
+class CustomerMessagesComponent(
+    componentContext: ComponentContext,
+    stateHolder: KarikaStateHolder
+) :
     CommonComponent(componentContext, stateHolder) {
 
 
@@ -27,18 +31,18 @@ class CustomerMessagesComponent(componentContext: ComponentContext, stateHolder:
     }
 
     fun init() {
-        scope.launch {
+        val job = scope.launch {
             stateHolder.messageHandler.vendorMessagesReloadState.collect {
                 loadNextPage()
             }
         }
+
+        lifecycle.doOnDestroy {
+            job.cancel()
+        }
     }
 
     override fun loadNextPage(reset: Boolean) {
-        if (loader.value) {
-            return
-        }
-
         scope.launch {
             MessagesRepository()
                 .messages(false)
@@ -60,21 +64,6 @@ class CustomerMessagesComponent(componentContext: ComponentContext, stateHolder:
     }
 
     override fun navigateToMessagesOverview(item: Conversation) {
-        dashNavigate(DashConfig.MessageOverview(item))
-
-        if (item.isRead()) {
-            return
-        }
-        scope.launch {
-            messagesRepository.markAsRead(item.id)
-                .collect {
-                    if (item.admin) {
-                        stateHolder.messageHandler.reloadAdminMessages()
-                    } else {
-                        stateHolder.messageHandler.reloadVendorMessages()
-                    }
-                }
-        }
-        stateHolder.customerNotificationHandler.notificationReceived()
+        dashNavigate(DashConfig.MessageOverview(item.copy(admin = false)))
     }
 }

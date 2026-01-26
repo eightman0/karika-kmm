@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +82,10 @@ fun ProfileView(component: ProfileComponent) {
     }
     DeleteAccountConfirmation(component)
     DeleteAccountConfirmation(component)
+
+    LaunchedEffect(Unit) {
+        component.stateHolder.vendorSpecificHandler.getVendorDetails()
+    }
 }
 
 @Composable
@@ -97,7 +102,7 @@ private fun ButtonsBox(component: ProfileComponent) {
             secondaryTitle = "Nazad"
         ) {
             if (it == "Nazad") {
-                component.dashNavigate(DashConfig.ControlBoard)
+                component.dashNavigate(DashConfig.ControlBoard, true)
                 return@HorizontalSecondaryButtons
             }
 
@@ -205,28 +210,29 @@ private fun CompanyInfo(component: ProfileComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.commonHandler.config.value.customerGroupList.chunked(gridColumnCount).forEach {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                it.forEach { it1 ->
-                    KarikaCheckboxSecondary(
-                        modifier = Modifier.weight(1f),
-                        title = it1.label(),
-                        value = customerGroups.value.any { c -> c.unit == it1.unit() }
-                    ) {
-                        if (customerGroups.value.any { c -> c.unit == it1.unit() }) {
-                            customerGroups.value -= it1
-                        } else {
-                            customerGroups.value += it1
+        component.stateHolder.commonHandler.config.value.customerGroupList.chunked(gridColumnCount)
+            .forEach {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    it.forEach { it1 ->
+                        KarikaCheckboxSecondary(
+                            modifier = Modifier.weight(1f),
+                            title = it1.label(),
+                            value = customerGroups.value.any { c -> c.unit == it1.unit() }
+                        ) {
+                            if (customerGroups.value.any { c -> c.unit == it1.unit() }) {
+                                customerGroups.value -= it1
+                            } else {
+                                customerGroups.value += it1
+                            }
                         }
                     }
                 }
             }
-        }
         YSpacer8()
         KarikaText(
             modifier = Modifier
@@ -236,28 +242,29 @@ private fun CompanyInfo(component: ProfileComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(gridColumnCount).forEach {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                it.forEach { it1 ->
-                    KarikaCheckboxSecondary(
-                        modifier = Modifier.weight(1f),
-                        title = it1.label(),
-                        value = customerRegions.value.any { c -> c.unit == it1.unit() }
-                    ) {
-                        if (customerRegions.value.any { c -> c.unit == it1.unit() }) {
-                            customerRegions.value -= it1
-                        } else {
-                            customerRegions.value += it1
+        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(gridColumnCount)
+            .forEach {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    it.forEach { it1 ->
+                        KarikaCheckboxSecondary(
+                            modifier = Modifier.weight(1f),
+                            title = it1.label(),
+                            value = customerRegions.value.any { c -> c.unit == it1.unit() }
+                        ) {
+                            if (customerRegions.value.any { c -> c.unit == it1.unit() }) {
+                                customerRegions.value -= it1
+                            } else {
+                                customerRegions.value += it1
+                            }
                         }
                     }
                 }
             }
-        }
         KarikaTextField1(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -318,8 +325,8 @@ private fun CompanyInfo(component: ProfileComponent) {
             title = "Ime kontakta*",
             value = component.contactName.asState(),
             placeholder = "Ime kontakta",
-            allowedChars = KarikaConstants.numbers,
-            keyboardType = KeyboardType.Phone,
+            allowedChars = KarikaConstants.numbersAndLettersSpace,
+            keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Next
         )
         KarikaText(

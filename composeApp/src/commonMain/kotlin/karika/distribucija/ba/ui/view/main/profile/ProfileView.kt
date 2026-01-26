@@ -105,12 +105,8 @@ private fun Actions(component: ProfileComponent) {
             .asStateFlow()
             .collectAsState()
     val adminCount =
-        component.stateHolder.customerNotificationHandler.messageUnreadCountAdmin.
+        component.stateHolder.customerNotificationHandler.messageUnreadCount.
         asStateFlow()
-            .collectAsState()
-    val userCount =
-        component.stateHolder.customerNotificationHandler.messageUnreadCountUser
-            .asStateFlow()
             .collectAsState()
 
     Column(
@@ -165,7 +161,7 @@ private fun Actions(component: ProfileComponent) {
                 title = "Poruke admina",
                 icon = Res.drawable.ic_messages,
                 color = KarikaColors.Gray2,
-                badge = adminCount.value,
+                badge = adminCount.value.admin(),
                 contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.AdminMessages)
@@ -177,7 +173,7 @@ private fun Actions(component: ProfileComponent) {
                 title = "Poruke dobavljača",
                 icon = Res.drawable.ic_navigation_profile,
                 color = KarikaColors.Gray2,
-                badge = userCount.value,
+                badge = adminCount.value.user(),
                 contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.VendorMessages)

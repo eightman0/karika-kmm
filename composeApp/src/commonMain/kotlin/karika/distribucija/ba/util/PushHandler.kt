@@ -1,7 +1,6 @@
 package karika.distribucija.ba.util
 
 import karika.distribucija.ba.AppConfig
-import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.VendorOrder
@@ -91,16 +90,17 @@ object PushHandler {
         ) {
             CoroutineScope(Dispatchers.Main).launch {
                 //delay(300)
-                component.dashNavigate(
-                    DashConfig.MessageOverview(
-                        Conversation(
-                            id = params["threadId"],
-                            subject = params["subject"],
-                            receiverName = params["receiverName"],
-                            admin = params["admin"] == "1"
-                        )
-                    )
-                )
+
+                component.messagesRepository.get(
+                    threadId = params["threadId"] ?: return@launch,
+                    admin = params["admin"] == "1"
+                ).collect {
+                    if (it is karika.distribucija.ba.domain.model.ResultState.Success) {
+                        val conversation = it.data.firstOrNull() ?: return@collect
+
+                        component.dashNavigate(DashConfig.MessageOverview(conversation))
+                    }
+                }
             }
         }
     }
@@ -159,15 +159,15 @@ object PushHandler {
             params.containsKey("subject")
         ) {
             CoroutineScope(Dispatchers.Main).launch {
-                //delay(300)
-                component.navigateToMessagesOverview(
-                    Conversation(
-                        id = params["threadId"],
-                        subject = params["subject"],
-                        receiverName = params["receiverName"],
-                        admin = params["admin"] == "1"
-                    )
-                )
+                component.messagesRepository.get(
+                    threadId = params["threadId"] ?: return@launch,
+                    admin = params["admin"] == "1"
+                ).collect {
+                    if (it is karika.distribucija.ba.domain.model.ResultState.Success) {
+                        val conversation = it.data.firstOrNull() ?: return@collect
+                        component.navigateToMessagesOverview(conversation)
+                    }
+                }
             }
         }
     }

@@ -46,7 +46,7 @@ class ProductComponent(
 
                     is ResultState.Success -> {
                         hideLoader()
-                        _products.update { result.data }
+                        _products.update { result.data.filter { it.entityId != product.value.entityId } }
                     }
 
                     is ResultState.Error -> {

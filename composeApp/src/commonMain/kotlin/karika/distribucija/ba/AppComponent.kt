@@ -130,7 +130,7 @@ class AppComponent(
     val showMandatoryUpdate = mutableStateOf("")
 
     companion object {
-        var refreshHandler: () -> Unit = {}
+        var refreshHandler: (String?) -> Unit = {}
         var screensaverHandler: () -> Unit = {}
     }
 
@@ -154,7 +154,7 @@ class AppComponent(
 
     init {
         refreshHandler = {
-            stateHolder.notificationReceived()
+            stateHolder.notificationReceived(it)
         }
         screensaverHandler = { showScreenSaver.value = true }
         stateHolder.commonHandler.init()

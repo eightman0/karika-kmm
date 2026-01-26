@@ -116,9 +116,9 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
             DashRepository()
                 .updateProfile(
                     phone = companyPhone.value,
-                    groupCustomers = customerGroups.value.joinToString(separator = ",") { it.unit() }
+                    groupCustomers = customerGroups.value.joinToString(separator = ",") { "|${it.unit()}|" }
                         .trimIndent(),
-                    groupRegions = customerRegions.value.joinToString(separator = ",") { it.unit() }
+                    groupRegions = customerRegions.value.joinToString(separator = ",") { "|${it.unit()}|" }
                         .trimIndent(),
                     name = contactName.value,
                     minOrderAmount = minOrderAmount.value,

@@ -101,10 +101,6 @@ fun AdminMessagesView(component: AdminMessagesComponent) {
             )
         }
     }
-
-    LaunchedEffect(Unit) {
-        component.loadNextPage(true)
-    }
 }
 
 @Composable

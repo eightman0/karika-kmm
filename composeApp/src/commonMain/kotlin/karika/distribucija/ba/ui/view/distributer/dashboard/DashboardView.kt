@@ -39,6 +39,7 @@ import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.TopBarDashboard
 import karika.distribucija.ba.ui.components.YSpacer16
+import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.distributer.board.BoardView
 import karika.distribucija.ba.ui.view.distributer.messages.admin.AdminMessagesView
@@ -57,6 +58,7 @@ import karikav2.composeapp.generated.resources.ic_messages
 import karikav2.composeapp.generated.resources.ic_navigation_profile
 import karikav2.composeapp.generated.resources.ic_shopping_cart
 import karikav2.composeapp.generated.resources.ic_tertiary
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
 
@@ -66,6 +68,7 @@ fun DashboardView(component: DashboardComponent) {
     val scope = rememberCoroutineScope()
     val profile = component.stateHolder.vendorSpecificHandler.vendorDetails.collectAsState()
     val navState = component.stack.subscribeAsState()
+    val messageState = component.stateHolder.vendorNotificationHandler.messageUnreadCount.asState()
 
     BoxWithConstraints(
         modifier = Modifier
@@ -218,7 +221,8 @@ fun DashboardView(component: DashboardComponent) {
                                 textSize = 16.sp,
                                 fontWeight = FontWeight.W600,
                                 text = "Poruke kupaca",
-                                textAlign = TextAlign.Start
+                                textAlign = TextAlign.Start,
+                                badge = messageState.value.user()
                             )
                         },
                         selected = navState.value.active.instance is DashChild.CustomerMessages,
@@ -245,7 +249,8 @@ fun DashboardView(component: DashboardComponent) {
                                 textSize = 16.sp,
                                 fontWeight = FontWeight.W600,
                                 text = "Poruke admina",
-                                textAlign = TextAlign.Start
+                                textAlign = TextAlign.Start,
+                                badge = messageState.value.admin()
                             )
                         },
                         selected = navState.value.active.instance is DashChild.AdminMessages,

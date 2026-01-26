@@ -35,7 +35,7 @@ class KarikaMessagingService : FirebaseMessagingService() {
         notification: RemoteMessage.Notification,
         data: MutableMap<String, String>
     ) {
-        AppComponent.refreshHandler.invoke()
+        AppComponent.refreshHandler.invoke(data["route"])
         val nextInt = Random.nextInt()
         val intent = Intent(this, MainActivity::class.java).apply {
             addFlags(

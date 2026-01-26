@@ -5,6 +5,7 @@ import karika.distribucija.ba.domain.model.CartData
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
+import karika.distribucija.ba.ui.common.state.CommonHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-class CartHandler {
+class CartHandler(val commonHandler: CommonHandler) {
     private val _cart = MutableStateFlow(CartData(items = emptyMap()))
     val cart = _cart.asStateFlow()
     var cartId: String = ""
@@ -53,8 +54,8 @@ class CartHandler {
                                                 name = it.name,
                                                 sku = it.sku,
                                                 itemId = it.itemId,
-                                                price = it.price,
-                                                minQtyUnit = it.extensionAttributes?.productUnit,
+                                                price = it.extensionAttributes?.originalPrice?.toDoubleOrNull(),
+                                                minQtyUnit = commonHandler.getUnitId(it.extensionAttributes?.productUnit ?: "kom"),
                                                 minQty = it.extensionAttributes?.minQty.toString(),
                                                 image = it.extensionAttributes?.imageUrl,
                                                 specialPrice = it.extensionAttributes?.specialPrice?.toDoubleOrNull(),

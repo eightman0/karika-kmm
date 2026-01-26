@@ -55,21 +55,22 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        AppComponent.companion.refreshHandler()
+        let route = notification.request.content.userInfo["route"] as? String
+        AppComponent.companion.refreshHandler(route)
         completionHandler([.banner, .sound, .badge])
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-        AppComponent.companion.refreshHandler()
+        AppComponent.companion.refreshHandler("")
         completionHandler()
     }
     
     func application(_ application: UIApplication,
                      didReceiveRemoteNotification userInfo: [AnyHashable : Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        AppComponent.companion.refreshHandler()
+        AppComponent.companion.refreshHandler("")
         completionHandler(.newData)
     }
     

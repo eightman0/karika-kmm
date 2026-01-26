@@ -11,7 +11,6 @@ import karika.distribucija.ba.ui.common.state.vendor.VendorNotificationHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorSpecificHandler
 
 class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
-    var cartHandler = CartHandler()
     var sessionHandler = SessionHandler()
     var messageHandler = MessageHandler()
     var loaderHandler = LoaderHandler()
@@ -20,28 +19,38 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
     var vendorSpecificHandler = VendorSpecificHandler()
     var vendorNotificationHandler = VendorNotificationHandler()
     var customerNotificationHandler = CustomerNotificationHandler()
+    var cartHandler = CartHandler(commonHandler)
 
     val imagePreview = mutableStateOf<Any?>(null)
 
     fun logout() {
-        cartHandler = CartHandler()
         sessionHandler = SessionHandler()
         messageHandler = MessageHandler()
         customerSpecificHandler = CustomerSpecificHandler()
         vendorSpecificHandler = VendorSpecificHandler()
         vendorNotificationHandler = VendorNotificationHandler()
         customerNotificationHandler = CustomerNotificationHandler()
+        cartHandler = CartHandler(commonHandler)
 
         imagePreview.value = null
 
         appNavigation.replaceAll(sessionHandler.mainConfig())
     }
 
-    fun notificationReceived() {
-        vendorNotificationHandler.notificationReceived()
-        customerNotificationHandler.notificationReceived()
-        messageHandler.reloadAdminMessages()
-        messageHandler.reloadVendorMessages()
+    fun notificationReceived(route: String?) {
+        if (sessionHandler.mainConfig() == AppConfig.Main) {
+            customerNotificationHandler.notificationReceived()
+        } else {
+            vendorNotificationHandler.notificationReceived()
+        }
+
+        if (route?.contains("admin=1") == true) {
+            messageHandler.reloadAdminMessages()
+        } else {
+            messageHandler.reloadVendorMessages()
+        }
+        messageHandler.reloadThread()
+
         customerSpecificHandler.refreshOrders()
     }
 }

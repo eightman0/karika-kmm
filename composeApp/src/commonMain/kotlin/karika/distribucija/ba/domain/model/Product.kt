@@ -6,7 +6,6 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -61,29 +60,14 @@ data class Product(
         }
     }
 
-    override fun hashCode(): Int {
-        return id.hashCode()
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        other as Product
+        if (other !is Product) return false
+        return entityId == other.entityId && createdAt == other.createdAt
+    }
 
-        if (id != other.id) return false
-        if (createdAt != other.createdAt) return false
-        if (sku != other.sku) return false
-        if (name != other.name) return false
-        if (minQty != other.minQty) return false
-        if (rewardPoints != other.rewardPoints) return false
-        if (price != other.price) return false
-        if (status != other.status) return false
-        if (image != other.image) return false
-        if (mediaGalleryEntries != other.mediaGalleryEntries) return false
-        if (customAttributes != other.customAttributes) return false
-        if (extensionAttributes != other.extensionAttributes) return false
-        if (itemId != other.itemId) return false
-
-        return true
+    override fun hashCode(): Int {
+        return entityId.hashCode() and createdAt.hashCode()
     }
 
     fun minQtyUnit(): String {
@@ -117,12 +101,13 @@ data class Product(
                 monthNumber(); char('-');
                 day(); char(' ');
                 hour(); char(':');
-                minute();char(':');
+                minute(); char(':');
                 second()
             }
 
             val from = LocalDateTime.parse(specialPriceFrom, formatter).toInstant(TimeZone.UTC)
-            val to = LocalDateTime.parse(specialPriceTo, formatter).toInstant(TimeZone.UTC).plus(1.days)
+            val to =
+                LocalDateTime.parse(specialPriceTo, formatter).toInstant(TimeZone.UTC).plus(1.days)
             val now = Clock.System.now()
 
             if (now in from..to) special else 0.0

@@ -85,6 +85,7 @@ kotlin {
             api(libs.decompose.extensions.compose.experimental)
             api(libs.essenty.lifecycle)
             api(libs.essenty.backhandler)
+            api(libs.essenty.lifecycle.coroutines)
 
             implementation(libs.richeditor.compose)
         }
@@ -103,9 +104,9 @@ android {
         applicationId = "karika.distribucija.ba"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 252
+        versionCode = 254
 
-        versionName = "2.5.2"
+        versionName = "2.5.4"
     }
     packaging {
         resources {

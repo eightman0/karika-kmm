@@ -2,8 +2,8 @@ package karika.distribucija.ba.ui.view.main.profile.messages.overview
 
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.doOnDestroy
 import karika.distribucija.ba.domain.HttpClientProvider.chatImage
-import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Message
 import karika.distribucija.ba.domain.model.ResultState
@@ -39,17 +39,20 @@ class MessagesOverviewComponent(
             vendors("", true)
         }
 
-        scope.launch {
-            stateHolder.messageHandler.adminMessagesReloadState.collect {
+        val job = scope.launch {
+            stateHolder.messageHandler.threadReloadState.collect {
                 getMessages()
             }
-            stateHolder.messageHandler.vendorMessagesReloadState.collect {
-                getMessages()
-            }
+        }
+
+        lifecycle.doOnDestroy {
+            job.cancel()
         }
     }
 
     private fun getMessages(threadId: String? = conversationState.value.id) {
+        markAsReadMessage(threadId, conversationState.value.admin)
+
         if (threadId == null) {
             return
         }
@@ -57,7 +60,7 @@ class MessagesOverviewComponent(
         scope.launch {
             messagesRepository.get(
                 threadId = threadId,
-                admin = conversationState.value.admin()
+                admin = conversationState.value.admin
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
@@ -66,11 +69,16 @@ class MessagesOverviewComponent(
                         _messages.update {
                             result.data.firstOrNull()?.messages?.firstOrNull() ?: emptyList()
                         }
-                        result.data.firstOrNull()?.messages?.firstOrNull()?.firstOrNull()?.let {
+                        result.data.firstOrNull()?.let {
                             conversationState.value = conversationState.value.copy(
-                                customerId = it.customerId,
+                                id = it.id,
+                                subject = it.subject,
                                 vendorId = it.vendorId,
-                                admin = it.senderId == "0" || it.receiverId == "0"
+                                customerId = it.customerId,
+                                senderName = it.senderName,
+                                receiverName = it.receiverName,
+                                senderId = it.senderId,
+                                sender = it.sender
                             )
                         }
                     }
@@ -101,8 +109,6 @@ class MessagesOverviewComponent(
                     is ResultState.Success -> {
                         hideLoader()
                         if (conversationState.value.id == null) {
-                            stateHolder.messageHandler.reloadAdminMessages()
-                            stateHolder.messageHandler.reloadVendorMessages()
                             conversationState.value = conversationState.value.copy(
                                 id = result.data.threadId,
                                 subject = subject.value
@@ -164,7 +170,8 @@ class MessagesOverviewComponent(
 
     fun getVendorName(): String? {
         return when {
-            conversationState.value.sender == "customer" -> conversationState.value.senderName
+            conversationState.value.senderId == "0" -> conversationState.value.senderName
+            conversationState.value.sender == "vendor" -> conversationState.value.senderName
             else -> conversationState.value.receiverName
         }
     }

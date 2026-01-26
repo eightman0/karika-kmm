@@ -512,10 +512,10 @@ open class CommonComponent(
     }
 
     fun dashNavigate(config: DashConfig, replace: Boolean = false) {
-        //if (replace) {
-        //    stateHolder.dashNavigation.replaceAll(config)
-        //    return
-        //}
+        if (replace) {
+            stateHolder.dashNavigation.replaceAll(config)
+            return
+        }
         stateHolder.dashNavigation.bringToFront(config)
     }
 
@@ -654,5 +654,37 @@ open class CommonComponent(
         //         )
         //     ).collect()
         // }
+    }
+
+    fun markAsReadMessage(threadId: String?, admin: Boolean) {
+        scope.launch {
+            messagesRepository.markAsRead(threadId)
+                .collect {
+                    if (it is ResultState.Success) {
+                        if (admin) {
+                            stateHolder.messageHandler.reloadAdminMessages()
+                        } else {
+                            stateHolder.messageHandler.reloadVendorMessages()
+                        }
+                        stateHolder.customerNotificationHandler.reloadMessageCount()
+                    }
+                }
+        }
+    }
+
+    fun markAsReadMessageVendor(threadId: String?, admin: Boolean) {
+        scope.launch {
+            messagesRepository.markAsRead(threadId)
+                .collect {
+                    if (it is ResultState.Success) {
+                        if (admin) {
+                            stateHolder.messageHandler.reloadAdminMessages()
+                        } else {
+                            stateHolder.messageHandler.reloadVendorMessages()
+                        }
+                        stateHolder.vendorNotificationHandler.reloadMessageCount()
+                    }
+                }
+        }
     }
 }

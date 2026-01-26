@@ -8,6 +8,7 @@ import kotlin.time.ExperimentalTime
 class MessageHandler {
     val adminMessagesReloadState = MutableStateFlow(Clock.System.now().nanosecondsOfSecond)
     val vendorMessagesReloadState = MutableStateFlow(Clock.System.now().nanosecondsOfSecond)
+    val threadReloadState = MutableStateFlow(Clock.System.now().nanosecondsOfSecond)
 
     fun reloadAdminMessages() {
         adminMessagesReloadState.value = Clock.System.now().nanosecondsOfSecond
@@ -15,5 +16,9 @@ class MessageHandler {
 
     fun reloadVendorMessages() {
         vendorMessagesReloadState.value = Clock.System.now().nanosecondsOfSecond
+    }
+
+    fun reloadThread() {
+        threadReloadState.value = Clock.System.now().nanosecondsOfSecond
     }
 }

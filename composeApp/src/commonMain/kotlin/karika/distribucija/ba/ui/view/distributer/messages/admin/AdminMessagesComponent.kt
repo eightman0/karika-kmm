@@ -2,6 +2,7 @@ package karika.distribucija.ba.ui.view.distributer.messages.admin
 
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.doOnDestroy
 import karika.distribucija.ba.domain.api.MessagesRepository
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.ResultState
@@ -26,18 +27,18 @@ class AdminMessagesComponent(componentContext: ComponentContext, stateHolder: Ka
     }
 
     fun init() {
-        scope.launch {
+        val job = scope.launch {
             stateHolder.messageHandler.adminMessagesReloadState.collect {
                 loadNextPage()
             }
         }
+
+        lifecycle.doOnDestroy {
+            job.cancel()
+        }
     }
 
     override fun loadNextPage(reset: Boolean) {
-        if (loader.value) {
-            return
-        }
-
         scope.launch {
             MessagesRepository()
                 .messages(true)
@@ -59,21 +60,6 @@ class AdminMessagesComponent(componentContext: ComponentContext, stateHolder: Ka
     }
 
     override fun navigateToMessagesOverview(item: Conversation) {
-        dashNavigate(DashConfig.MessageOverview(item))
-
-        if (item.isRead()) {
-            return
-        }
-        scope.launch {
-            messagesRepository.markAsRead(item.id)
-                .collect {
-                    if (item.admin) {
-                        stateHolder.messageHandler.reloadAdminMessages()
-                    } else {
-                        stateHolder.messageHandler.reloadVendorMessages()
-                    }
-                }
-        }
-        stateHolder.customerNotificationHandler.notificationReceived()
+        dashNavigate(DashConfig.MessageOverview(item.copy(admin = true)))
     }
 }

@@ -262,7 +262,7 @@ object KarikaConstants {
                 Canton("Han Pijesak", 0, listOf()),
                 Canton("Foča", 0, listOf()),
                 Canton("Čajniče", 0, listOf()),
-                Canton("Kalincovik", 0, listOf()),
+                Canton("Kalinovik", 0, listOf()),
                 Canton("Trebinje", 0, listOf()),
                 Canton("Bileća", 0, listOf()),
                 Canton("Ljubinje", 0, listOf()),
