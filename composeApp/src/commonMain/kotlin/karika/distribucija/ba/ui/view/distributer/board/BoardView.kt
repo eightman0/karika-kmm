@@ -96,12 +96,12 @@ private fun Board(component: BoardComponent) {
     )
     Item(
         title = "Ukupno odobrenih narudžbi:",
-        value = dash.value.approvedOrdersCount ?: "0",
+        value = dash.value.ordersByStatus?.find { it.key == "approved" }?.value ?: "0",
         icon = Res.drawable.ic_order_approved_total
     )
     Item(
         title = "Ukupan broj narudžbi:",
-        value = dash.value.ordersPlacedTotal ?: "0",
+        value = dash.value.ordersByStatus?.sumOf { it.value.toIntOrNull() ?: 0 }?.toString() ?: "0",
         icon = Res.drawable.ic_order_total
     )
     Item(

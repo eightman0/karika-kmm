@@ -96,7 +96,9 @@ object PushHandler {
                     admin = params["admin"] == "1"
                 ).collect {
                     if (it is karika.distribucija.ba.domain.model.ResultState.Success) {
-                        val conversation = it.data.firstOrNull() ?: return@collect
+                        val conversation = (it.data.firstOrNull() ?: return@collect).copy(
+                            admin = params["admin"] == "1"
+                        )
 
                         component.dashNavigate(DashConfig.MessageOverview(conversation))
                     }
@@ -164,7 +166,9 @@ object PushHandler {
                     admin = params["admin"] == "1"
                 ).collect {
                     if (it is karika.distribucija.ba.domain.model.ResultState.Success) {
-                        val conversation = it.data.firstOrNull() ?: return@collect
+                        val conversation = (it.data.firstOrNull() ?: return@collect).copy(
+                            admin = params["admin"] == "1"
+                        )
                         component.navigateToMessagesOverview(conversation)
                     }
                 }

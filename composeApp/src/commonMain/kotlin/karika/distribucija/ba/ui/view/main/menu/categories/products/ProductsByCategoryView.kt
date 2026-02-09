@@ -96,7 +96,7 @@ private fun Products(component: ProductByCategoryComponent) {
                         modifier = Modifier
                             .weight(1f)
                     ) {
-                        ProductItem(it, component)
+                        ProductItem(it, component, showMinQty = true)
                     }
                 }
                 repeat(gridColumnCount - item.size) {

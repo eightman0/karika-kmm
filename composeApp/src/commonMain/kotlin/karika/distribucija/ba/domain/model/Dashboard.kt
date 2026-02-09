@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import coil3.Uri
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.view.distributer.orders.toDate1
 import karika.distribucija.ba.ui.view.distributer.orders.toDateTime
 import karika.distribucija.ba.util.karikaPriceFormat
 import kotlinx.serialization.SerialName
@@ -24,7 +23,9 @@ data class DashboardData(
     @SerialName("disapproved_products") var disapprovedProducts: String? = null,
     @SerialName("latest_products") var latestProducts: List<LatestProducts>? = listOf(),
     @SerialName("best_seller_products") var bestSellerProducts: List<BestSellerProducts>? = listOf(),
-    @SerialName("latest_orders") var latestOrders: List<LatestOrders>? = listOf()
+    @SerialName("latest_orders") var latestOrders: List<LatestOrders>? = listOf(),
+    @SerialName("ordersByCustomerType") var ordersByCustomerType: List<PairData>? = listOf(),
+    @SerialName("ordersByStatus") var ordersByStatus: List<PairData>? = listOf()
 ) {
     fun approved() = (approvedOrdersCount?.toFloatOrNull() ?: 0f) / total()
     fun pending() =
@@ -445,4 +446,10 @@ data class AIResponse(
     @SerialName("shortDescription") var shortDescription: String,
     @SerialName("description") var description: String,
     @SerialName("images") var images: List<String>,
+)
+
+@Serializable
+data class PairData(
+    var key: String,
+    var value: String
 )

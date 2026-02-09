@@ -98,7 +98,8 @@ fun HomeView(component: HomeComponent) {
 fun ProductItem(
     product: Product,
     component: CommonComponent,
-    hideVendor: Boolean = false
+    hideVendor: Boolean = false,
+    showMinQty: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -133,6 +134,15 @@ fun ProductItem(
             }
             AddToCartButton(product, component)
             NotAvailableOverlay(product)
+        }
+        if (showMinQty) {
+            KarikaText(
+                modifier = Modifier,
+                color = KarikaColors.Gray2,
+                text = "Min. kol: ${product.minQty()} ${component.getUnit(product.minQtyUnit())}",
+                textSize = 14.sp,
+                fontWeight = FontWeight.W500
+            )
         }
         KarikaText(
             modifier = Modifier,
