@@ -13,6 +13,7 @@ data class KarikaTracking(
     @SerialName("event_type")
     val eventType: String,
     val payload: TrackingPayload?,
+    val fullUrl: String?,
     val url: String?,
 
     @SerialName("user_name")

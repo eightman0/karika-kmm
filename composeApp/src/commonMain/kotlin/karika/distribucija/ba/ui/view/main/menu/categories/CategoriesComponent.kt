@@ -34,7 +34,17 @@ class CategoriesComponent(componentContext: ComponentContext, stateHolder: Karik
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
                             hideLoader()
-                            _categories.update { result.data.childrenData }
+                            _categories.update {
+                                result.data.childrenData.apply {
+                                    add(
+                                        0, Category(
+                                            id = result.data.id,
+                                            name = "SVI PROIZVODI",
+                                            childrenData = mutableListOf()
+                                        )
+                                    )
+                                }
+                            }
                         }
 
                         is ResultState.Error -> {

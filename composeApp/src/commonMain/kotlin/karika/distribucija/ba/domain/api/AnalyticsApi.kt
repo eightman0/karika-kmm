@@ -33,14 +33,14 @@ class AnalyticsRepository internal constructor() {
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(Unit))
             } else {
-                emit(
-                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
-                )
+                // Ignore errors and emit success anyway
+                emit(ResultState.Success(Unit))
             }
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
+            emit(ResultState.Success(Unit))
+        } catch (_: Exception) {
+            // Ignore all errors and emit success anyway
+            emit(ResultState.Success(Unit))
         }
     }.flowOn(Dispatchers.Default)
 }

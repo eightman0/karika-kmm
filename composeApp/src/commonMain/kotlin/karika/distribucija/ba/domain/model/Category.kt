@@ -16,7 +16,7 @@ data class Category(
     @SerialName("product_count")
     var productCount: Int = 0,
     @SerialName("children_data")
-    var childrenData: List<Category> = emptyList()
+    var childrenData: MutableList<Category> = mutableListOf()
 ) {
     private fun collectCategoryIds(category: Category): List<Category> {
         return if (category.childrenData.isNotEmpty()) {

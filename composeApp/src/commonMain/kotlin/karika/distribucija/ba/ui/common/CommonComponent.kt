@@ -19,12 +19,14 @@ import karika.distribucija.ba.domain.model.CartItem
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.EventType
 import karika.distribucija.ba.domain.model.Filters
+import karika.distribucija.ba.domain.model.KarikaTracking
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.TrackingPayload
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
@@ -36,6 +38,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -49,6 +52,7 @@ open class CommonComponent(
     open val title: String = ""
     val snackbarHostState = stateHolder.hostState
     val scope = CoroutineScope(Dispatchers.Main)
+    val iOScope = CoroutineScope(Dispatchers.Default)
     private val cartRepository = CartRepository()
     val userRepository = UserRepository()
     val orderRepository = OrdersRepository()
@@ -574,29 +578,34 @@ open class CommonComponent(
         product: Product? = null,
         qty: Int? = null
     ) {
-        //iOScope.launch {
-        //    analyticsRepository.post(
-        //        KarikaTracking(
-        //            platform = "mobile",
-        //            sessionId = sessionId,
-        //            userType = stateHolder.sessionHandler.userType().value,
-        //            eventType = eventType.value,
-        //            payload = TrackingPayload(
-        //                ref = refType.value,
-        //                product = product?.name,
-        //                sku = product?.sku,
-        //                qty = qty
-        //            ),
-        //            url = when (eventType) {
-        //                EventType.USER_LOGIN -> "karika-mobile://login"
-        //                EventType.LOGOUT -> "karika-mobile://logout"
-        //                else -> "karika-mobile://product/${product?.id}"
-        //            },
-        //            userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
-        //            userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
-        //        )
-        //    ).collect()
-        //}
+        iOScope.launch {
+            analyticsRepository.post(
+                KarikaTracking(
+                    platform = "mobile",
+                    sessionId = sessionId,
+                    userType = stateHolder.sessionHandler.userType().value,
+                    eventType = eventType.value,
+                    payload = TrackingPayload(
+                        ref = refType.value,
+                        product = product?.name,
+                        sku = product?.sku,
+                        qty = qty
+                    ),
+                    fullUrl = when (eventType) {
+                        EventType.USER_LOGIN -> "karika-mobile://login"
+                        EventType.LOGOUT -> "karika-mobile://logout"
+                        else -> "karika-mobile://product/${product?.id}"
+                    },
+                    url = when (eventType) {
+                        EventType.USER_LOGIN -> "karika-mobile://login"
+                        EventType.LOGOUT -> "karika-mobile://logout"
+                        else -> "karika-mobile://product/${product?.id}"
+                    },
+                    userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
+                    userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
+                )
+            ).collect()
+        }
     }
 
     fun logSearchEvent(
@@ -605,29 +614,32 @@ open class CommonComponent(
         query: String,
         results: String
     ) {
-        //iOScope.launch {
-        //    analyticsRepository.post(
-        //        KarikaTracking(
-        //            platform = "mobile",
-        //            sessionId = sessionId,
-        //            userType = stateHolder.sessionHandler.userType().value,
-        //            eventType = eventType.value,
-        //            payload = when (eventType) {
-        //                EventType.USER_LOGIN, EventType.LOGOUT -> null
-        //                else -> TrackingPayload(
-        //                    ref = refType.value,
-        //                    query = query,
-        //                    results = results
-        //                )
-        //            },
-        //            url = when (eventType) {
-        //                else -> "karika-mobile://search?query=${query}"
-        //            },
-        //            userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
-        //            userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
-        //        )
-        //    ).collect()
-        //}
+        iOScope.launch {
+            analyticsRepository.post(
+                KarikaTracking(
+                    platform = "mobile",
+                    sessionId = sessionId,
+                    userType = stateHolder.sessionHandler.userType().value,
+                    eventType = eventType.value,
+                    payload = when (eventType) {
+                        EventType.USER_LOGIN, EventType.LOGOUT -> null
+                        else -> TrackingPayload(
+                            ref = refType.value,
+                            query = query,
+                            results = results
+                        )
+                    },
+                    fullUrl = when (eventType) {
+                        else -> "karika-mobile://search?query=${query}"
+                    },
+                    url = when (eventType) {
+                        else -> "karika-mobile://search?query=${query}"
+                    },
+                    userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
+                    userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
+                )
+            ).collect()
+        }
     }
 
     fun logProductFilterEvent(
@@ -635,25 +647,26 @@ open class CommonComponent(
         sort: String,
         categoryIds: String
     ) {
-        // iOScope.launch {
-        //     analyticsRepository.post(
-        //         KarikaTracking(
-        //             platform = "mobile",
-        //             sessionId = sessionId,
-        //             userType = stateHolder.sessionHandler.userType().value,
-        //             eventType = EventType.PRODUCT_FILTER.value,
-        //             payload = TrackingPayload(
-        //                 ref = RefType.VENDOR_PRODUCTS_PAGE.value,
-        //                 filters = filters,
-        //                 sort = sort,
-        //                 categoryIds = categoryIds
-        //             ),
-        //             url = "karika-mobile://products?query=${Json.encodeToString(filters)}?sort=$sort",
-        //             userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
-        //             userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
-        //         )
-        //     ).collect()
-        // }
+        iOScope.launch {
+            analyticsRepository.post(
+                KarikaTracking(
+                    platform = "mobile",
+                    sessionId = sessionId,
+                    userType = stateHolder.sessionHandler.userType().value,
+                    eventType = EventType.PRODUCT_FILTER.value,
+                    payload = TrackingPayload(
+                        ref = RefType.VENDOR_PRODUCTS_PAGE.value,
+                        filters = filters,
+                        sort = sort,
+                        categoryIds = categoryIds
+                    ),
+                    fullUrl = "karika-mobile://products?query=${Json.encodeToString(filters)}?sort=$sort",
+                    url = "karika-mobile://products?query=${Json.encodeToString(filters)}?sort=$sort",
+                    userName = stateHolder.customerSpecificHandler.userDetails.value.companyNameNullable(),
+                    userEmail = stateHolder.customerSpecificHandler.userDetails.value.email
+                )
+            ).collect()
+        }
     }
 
     fun markAsReadMessage(threadId: String?, admin: Boolean) {
