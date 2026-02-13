@@ -16,6 +16,7 @@ import io.ktor.http.content.TextContent
 import io.ktor.serialization.kotlinx.json.json
 import karika.distribucija.ba.ui.common.getEnvJwt
 import karika.distribucija.ba.ui.common.getEnvPrefix
+import karika.distribucija.ba.ui.common.userAgent
 import kotlinx.serialization.json.Json
 
 object HttpClientProvider {
@@ -73,6 +74,7 @@ object HttpClientProvider {
                 header(HttpHeaders.Accept, ContentType.Application.Json)
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
                 header(HttpHeaders.AcceptCharset, "utf-8")
+                header(HttpHeaders.UserAgent, userAgent())
             }
 
             install(ContentNegotiation) {

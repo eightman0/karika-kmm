@@ -264,3 +264,7 @@ actual fun isAndroid(): Boolean {
 actual fun appUrl(): String {
     return "https://apps.apple.com/app/id/6692625868"
 }
+
+actual fun userAgent(): String {
+    return "os:iOS;version:${appVersionName()}"
+}

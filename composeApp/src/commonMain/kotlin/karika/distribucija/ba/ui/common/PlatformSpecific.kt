@@ -50,6 +50,8 @@ expect fun isKiosk(): Boolean
 
 expect fun appVersion(): Int
 
+expect fun userAgent(): String
+
 expect fun appVersionName(): String
 
 expect fun isAndroid(): Boolean

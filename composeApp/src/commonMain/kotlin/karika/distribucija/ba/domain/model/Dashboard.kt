@@ -12,27 +12,13 @@ import kotlinx.serialization.Transient
 
 @Serializable
 data class DashboardData(
-    @SerialName("pending_amount_total") var pendingAmountTotal: String? = null,
-    @SerialName("earned_amount_total") var earnedAmountTotal: String? = null,
-    @SerialName("orders_placed_total") var ordersPlacedTotal: String? = null,
-    @SerialName("products_sold_total") var productsSoldTotal: String? = null,
-    @SerialName("approved_orders_total") var approvedOrdersTotal: String? = null,
-    @SerialName("approved_orders_count") var approvedOrdersCount: String? = null,
-    @SerialName("pending_products") var pendingProducts: String? = null,
-    @SerialName("approved_products") var approvedProducts: String? = null,
-    @SerialName("disapproved_products") var disapprovedProducts: String? = null,
-    @SerialName("latest_products") var latestProducts: List<LatestProducts>? = listOf(),
-    @SerialName("best_seller_products") var bestSellerProducts: List<BestSellerProducts>? = listOf(),
-    @SerialName("latest_orders") var latestOrders: List<LatestOrders>? = listOf(),
+    @SerialName("approvedOrders_total") var approvedOrdersTotal: String? = null,
+    @SerialName("latestProducts") var latestProducts: List<LatestProducts>? = listOf(),
+    @SerialName("bestSellerProducts") var bestSellerProducts: List<BestSellerProducts>? = listOf(),
     @SerialName("ordersByCustomerType") var ordersByCustomerType: List<PairData>? = listOf(),
     @SerialName("ordersByStatus") var ordersByStatus: List<PairData>? = listOf()
 ) {
-    fun approved() = (approvedOrdersCount?.toFloatOrNull() ?: 0f) / total()
-    fun pending() =
-        ((ordersPlacedTotal?.toFloatOrNull() ?: 0f) - (approvedOrdersCount?.toFloatOrNull()
-            ?: 0f)) / total()
-
-    fun total() = ordersPlacedTotal?.toFloatOrNull() ?: 0f
+    fun total() = (ordersByStatus?.sumOf { it.value.toDoubleOrNull() ?: 0.0 } ?: 1.0).toFloat()
 
     fun approvedTotal() = karikaPriceFormat(approvedOrdersTotal?.toDoubleOrNull() ?: 0.0)
 }
@@ -48,10 +34,10 @@ data class LatestProducts(
 
 @Serializable
 data class BestSellerProducts(
-    @SerialName("product_id") var productId: String? = null,
-    @SerialName("product_name") var productName: String? = null,
-    @SerialName("product_price") var productPrice: String? = null,
-    @SerialName("ordered_quantity") var orderedQuantity: String? = null
+    @SerialName("productId") var productId: String? = null,
+    @SerialName("productName") var productName: String? = null,
+    @SerialName("productPrice") var productPrice: String? = null,
+    @SerialName("orderedQuantity") var orderedQuantity: String? = null
 ) {
     fun price() = karikaPriceFormat(productPrice?.toDoubleOrNull() ?: 0.0)
 }

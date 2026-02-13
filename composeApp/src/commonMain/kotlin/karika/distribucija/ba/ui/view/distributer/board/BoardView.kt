@@ -74,6 +74,7 @@ fun BoardView(component: BoardComponent) {
     ) {
         Board(component)
         Status(component)
+        StatusPerType(component)
         Products(component)
     }
 
@@ -158,6 +159,8 @@ private fun Item(
 @Composable
 private fun Status(component: BoardComponent) {
     val dash = component.dash.collectAsState()
+    var selectedIndex by remember { mutableStateOf<Int?>(null) }
+
     Column(
         modifier = Modifier
             .border(width = 1.dp, color = KarikaColors.Border, shape = RoundedCornerShape(4.dp))
@@ -168,16 +171,19 @@ private fun Status(component: BoardComponent) {
             modifier = Modifier
                 .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                 .fillMaxWidth(),
-            text = "Status narudžbi",
+            text = "Narudžbe po statusu",
             color = KarikaColors.Gray2,
             textSize = 16.sp,
             fontWeight = FontWeight.W700
         )
 
-        val data = listOf(
-            PieSlice(dash.value.approved(), Color(0xFF4CAF50), "Odobrene narudžbe"),
-            PieSlice(dash.value.pending(), Color(0xFFFFA726), "Narudžbe na čekanju"),
-        )
+        val data = dash.value.ordersByStatus?.map {
+            PieSlice(
+                it.value.toFloat() / dash.value.total(),
+                it.key.statusTextColor(),
+                "${it.key.statusName()} - ${it.value}"
+            )
+        } ?: emptyList()
 
         Row(
             modifier = Modifier
@@ -193,15 +199,138 @@ private fun Status(component: BoardComponent) {
                 startAngle = -90f,
                 holeRatio = 0.75f,
                 animate = true,
-                onSliceClick = { _, _ -> }
+                selectedIndex = selectedIndex,
+                selectedOffsetDp = 0.dp,
+                onSliceClick = { index, slice ->
+                    if (slice.value > 0f) {
+                        selectedIndex = if (selectedIndex == index) null else index
+                    }
+                }
             )
             XSpacer32()
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                data.forEachIndexed { i, s ->
+                data.forEachIndexed { index, s ->
+                    val isClickable = s.value > 0f
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
+                            .then(
+                                if (isClickable) {
+                                    Modifier.pointerInput(Unit) {
+                                        detectTapGestures {
+                                            selectedIndex =
+                                                if (selectedIndex == index) null else index
+                                        }
+                                    }
+                                } else {
+                                    Modifier
+                                }
+                            )
+                            .padding(end = 8.dp)
+                    ) {
+                        Box(
+                            Modifier
+                                .size(14.dp)
+                                .background(s.color, CircleShape)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        KarikaText(
+                            modifier = Modifier,
+                            text = s.label,
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusPerType(component: BoardComponent) {
+    val dash = component.dash.collectAsState()
+    var selectedIndex by remember { mutableStateOf<Int?>(null) }
+
+    Column(
+        modifier = Modifier
+            .border(width = 1.dp, color = KarikaColors.Border, shape = RoundedCornerShape(4.dp))
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        KarikaText(
+            modifier = Modifier
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                .fillMaxWidth(),
+            text = "Narudžbe po ciljanoj grupi kupaca",
+            color = KarikaColors.Gray2,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W700
+        )
+
+        val data = dash.value.ordersByCustomerType?.filter { (it.value.toIntOrNull() ?: 0) > 0 }
+            ?.mapIndexed { index, it ->
+                PieSlice(
+                    it.value.toFloat() / dash.value.total(),
+                    listOf(
+                        KarikaColors.Gray2,
+                        KarikaColors.Blue,
+                        KarikaColors.Green,
+                        KarikaColors.Red,
+                        KarikaColors.Yellow,
+                        KarikaColors.Orange,
+                        KarikaColors.MineMessage,
+                        KarikaColors.Blue2,
+                        KarikaColors.Green2
+                    )[index],
+                    "${it.key} - ${it.value}"
+                )
+            } ?: emptyList()
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            PieChart(
+                slices = data,
+                modifier = Modifier
+                    .padding(start = 8.dp, bottom = 8.dp)
+                    .size(132.dp),
+                startAngle = -90f,
+                holeRatio = 0.75f,
+                animate = true,
+                selectedIndex = selectedIndex,
+                selectedOffsetDp = 0.dp,
+                onSliceClick = { index, slice ->
+                    if (slice.value > 0f) {
+                        selectedIndex = if (selectedIndex == index) null else index
+                    }
+                }
+            )
+            XSpacer32()
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                data.forEachIndexed { index, s ->
+                    val isClickable = s.value > 0f
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .then(
+                                if (isClickable) {
+                                    Modifier.pointerInput(Unit) {
+                                        detectTapGestures {
+                                            selectedIndex =
+                                                if (selectedIndex == index) null else index
+                                        }
+                                    }
+                                } else {
+                                    Modifier
+                                }
+                            )
                             .padding(end = 8.dp)
                     ) {
                         Box(
@@ -306,7 +435,7 @@ private fun TableHeaderRow() {
                 color = KarikaColors.Gray15,
                 fontWeight = FontWeight.W600,
                 textSize = 10.sp,
-                text = "CIJENA"
+                text = "CIJENA (VPC)"
             )
         }
     }
@@ -428,80 +557,124 @@ fun PieChart(
 
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
 
-    Canvas(
-        modifier = modifier
-            .onSizeChanged { canvasSize = it }
-            .pointerInput(onSliceClick != null) {
-                if (onSliceClick == null) return@pointerInput
-                detectTapGestures { offset ->
-                    val w = canvasSize.width.toFloat()
-                    val h = canvasSize.height.toFloat()
-                    val center = Offset(w / 2f, h / 2f)
-                    val r = min(w, h) / 2f
+    Box(modifier = modifier) {
+        Canvas(
+            modifier = Modifier
+                .matchParentSize()
+                .onSizeChanged { canvasSize = it }
+                .pointerInput(onSliceClick != null) {
+                    if (onSliceClick == null) return@pointerInput
+                    detectTapGestures { offset ->
+                        val w = canvasSize.width.toFloat()
+                        val h = canvasSize.height.toFloat()
+                        val center = Offset(w / 2f, h / 2f)
+                        val r = min(w, h) / 2f
 
-                    val dist = (offset - center).getDistance()
-                    val inHole = holeRatio > 0f && dist < r * holeRatio
-                    val outside = dist > r
+                        val dist = (offset - center).getDistance()
+                        val inHole = holeRatio > 0f && dist < r * holeRatio
+                        val outside = dist > r
 
-                    if (!inHole && !outside) {
-                        val touchAngle = angleOfPoint(center, offset)
-                        var a = (touchAngle - startAngle + 360f) % 360f
+                        if (!inHole && !outside) {
+                            val touchAngle = angleOfPoint(center, offset)
+                            var a = (touchAngle - startAngle + 360f) % 360f
 
-                        segments.forEachIndexed { index, (sa, ea, slice) ->
-                            val sweep = (ea - sa + 360f) % 360f
-                            val rel = (a + 360f) % 360f
-                            if (rel >= 0f && rel <= sweep + 0.0001f) {
-                                onSliceClick(index, slice)
-                                return@detectTapGestures
+                            segments.forEachIndexed { index, (sa, ea, slice) ->
+                                val sweep = (ea - sa + 360f) % 360f
+                                val rel = (a + 360f) % 360f
+                                if (rel >= 0f && rel <= sweep + 0.0001f) {
+                                    onSliceClick(index, slice)
+                                    return@detectTapGestures
+                                }
+                                a = (a - sweep + 360f) % 360f
                             }
-                            a = (a - sweep + 360f) % 360f
                         }
                     }
                 }
-            }
-    ) {
-        if (segments.isEmpty()) return@Canvas
+        ) {
+            if (segments.isEmpty()) return@Canvas
 
-        val w = size.width
-        val h = size.height
-        val radius = min(w, h) / 2f
-        val center = Offset(w / 2f, h / 2f)
+            val w = size.width
+            val h = size.height
+            val radius = min(w, h) / 2f
+            val center = Offset(w / 2f, h / 2f)
 
-        val style = if (holeRatio > 0f) {
-            val ringWidth = radius * (1f - holeRatio)
-            Stroke(width = ringWidth)
-        } else if (strokeWidth > 0.dp) {
-            Stroke(width = with(density) { strokeWidth.toPx() })
-        } else {
-            Fill
-        }
-        segments.forEachIndexed { idx, (sa, ea, s) ->
-            val sweep = (ea - sa)
-            val visibleSweep = sweep * animProgress
+            segments.forEachIndexed { idx, (sa, ea, s) ->
+                val sweep = (ea - sa)
+                val visibleSweep = sweep * animProgress
 
-            val middleAngleRad = (sa + sweep / 2f) * (PI / 180f)
-            val offsetTranslate = if (selectedIndex == idx && visibleSweep > 0f) {
-                Offset(
-                    (cos(middleAngleRad) * selectedOffsetPx).toFloat(),
-                    (sin(middleAngleRad) * selectedOffsetPx).toFloat()
+                val isSelected = selectedIndex == idx
+                val baseRingWidth = radius * (1f - holeRatio)
+                val ringWidth = if (isSelected) baseRingWidth * 1.3f else baseRingWidth
+
+                val style = if (holeRatio > 0f) {
+                    Stroke(width = ringWidth)
+                } else if (strokeWidth > 0.dp) {
+                    Stroke(width = with(density) { strokeWidth.toPx() })
+                } else {
+                    Fill
+                }
+
+                val middleAngleRad = (sa + sweep / 2f) * (PI / 180f)
+                val offsetTranslate = if (isSelected && visibleSweep > 0f) {
+                    Offset(
+                        (cos(middleAngleRad) * selectedOffsetPx).toFloat(),
+                        (sin(middleAngleRad) * selectedOffsetPx).toFloat()
+                    )
+                } else Offset.Zero
+                val rect = Rect(
+                    left = center.x - radius + offsetTranslate.x,
+                    top = center.y - radius + offsetTranslate.y,
+                    right = center.x + radius + offsetTranslate.x,
+                    bottom = center.y + radius + offsetTranslate.y
                 )
-            } else Offset.Zero
-            val rect = Rect(
-                left = center.x - radius + offsetTranslate.x,
-                top = center.y - radius + offsetTranslate.y,
-                right = center.x + radius + offsetTranslate.x,
-                bottom = center.y + radius + offsetTranslate.y
-            )
 
-            drawArc(
-                color = s.color,
-                startAngle = sa,
-                sweepAngle = visibleSweep,
-                useCenter = style == Fill,
-                topLeft = rect.topLeft,
-                size = rect.size,
-                style = style
-            )
+                drawArc(
+                    color = s.color,
+                    startAngle = sa,
+                    sweepAngle = visibleSweep,
+                    useCenter = style == Fill,
+                    topLeft = rect.topLeft,
+                    size = rect.size,
+                    style = style
+                )
+            }
         }
+
+        // Display value in center for selected segment
+        if (selectedIndex != null && selectedIndex < slices.size) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    text = slices[selectedIndex].label.substringAfter(" - "),
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }
+        }
+    }
+}
+
+fun String.statusName() = when (this) {
+    "rejected" -> "Odbijena"
+    "approved" -> "Odobrena"
+    "cancelled" -> "Otkazana"
+    "bill-sent" -> "Uplaćena"
+    "estimate-sent" -> "Čekanje na uplatu"
+    "pending" -> "Na čekanju"
+    else -> "Nepoznato"
+}
+
+fun String.statusTextColor(): Color {
+    return when (this) {
+        "rejected" -> KarikaColors.Red
+        "approved" -> KarikaColors.Green3
+        "cancelled" -> KarikaColors.Gray2
+        "bill-sent" -> KarikaColors.Orange
+        "estimate-sent" -> KarikaColors.Orange
+        "pending" -> KarikaColors.Blue
+        else -> KarikaColors.Orange
     }
 }

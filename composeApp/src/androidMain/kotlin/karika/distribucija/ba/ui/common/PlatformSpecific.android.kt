@@ -122,3 +122,7 @@ actual fun isAndroid(): Boolean {
 actual fun appUrl(): String {
     return "https://${getEnvPrefix()}karika.ba/internal/builds/app"
 }
+
+actual fun userAgent(): String {
+    return "os:Android;version:${appVersionName()}"
+}
