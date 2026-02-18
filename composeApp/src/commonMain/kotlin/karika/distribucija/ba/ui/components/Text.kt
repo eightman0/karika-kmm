@@ -230,6 +230,15 @@ fun KarikaIntTextField(
         )
     }
 
+    // Calculate font size based on text length
+    val fontSize = remember(textFieldValue.text.length) {
+        when {
+            textFieldValue.text.length <= 3 -> 24.sp
+            textFieldValue.text.length <= 5 -> 18.sp
+            else -> 10.sp
+        }
+    }
+
     CompositionLocalProvider {
         BasicTextField(
             value = textFieldValue,
@@ -262,10 +271,10 @@ fun KarikaIntTextField(
             readOnly = false,
             textStyle = LocalTextStyle.current.copy(
                 color = KarikaColors.Gray2,
-                fontSize = 24.sp,
+                fontSize = fontSize,
                 fontWeight = FontWeight.W600,
                 textAlign = TextAlign.Center,
-                lineHeight = 24.sp,
+                lineHeight = fontSize,
                 fontFamily = karikaFonts()
             ),
             keyboardOptions = KeyboardOptions(

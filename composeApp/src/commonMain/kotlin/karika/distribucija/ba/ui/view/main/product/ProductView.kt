@@ -635,7 +635,7 @@ fun ProductQtyAction(
         Box(
             modifier = Modifier
                 .height(40.dp)
-                .width(60.dp)
+                .width(80.dp)
                 .border(
                     width = 1.dp,
                     color = KarikaColors.Border

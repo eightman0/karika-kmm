@@ -46,9 +46,7 @@ import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rememberImeVisible1
-import karika.distribucija.ba.ui.view.main.home.BonusView
 import karika.distribucija.ba.ui.view.main.home.DiscountView
-import karika.distribucija.ba.ui.view.main.home.NewView
 import karika.distribucija.ba.ui.view.main.product.ProductQtyAction
 import karika.distribucija.ba.ui.view.main.product.VendorName
 import karika.distribucija.ba.ui.view.main.profile.account.ConfirmationModal

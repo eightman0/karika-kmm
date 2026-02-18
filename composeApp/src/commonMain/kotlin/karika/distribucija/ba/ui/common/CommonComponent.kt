@@ -372,7 +372,7 @@ open class CommonComponent(
             Conversation(
                 vendorId = product.vendorId,
                 receiverName = product.vendorName,
-                subject = product.name()
+                subject = product.name
             )
         )
     }

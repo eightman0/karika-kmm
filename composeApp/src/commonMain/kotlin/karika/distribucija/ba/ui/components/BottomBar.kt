@@ -211,6 +211,43 @@ private fun <T> T.NavigationButtons(
     val stack by component.stack.subscribeAsState()
     val activeChild = stack.active.instance
 
+    if (component.isGuest()) {
+        content(
+            activeChild is MainChild.Home,
+            vectorResource(Res.drawable.ic_navigation_home),
+            vectorResource(Res.drawable.ic_navigation_home),
+            "Početna"
+        ) {
+            component.navigate(MainConfig.Home)
+        }
+        content(
+            activeChild is MainChild.Cart,
+            vectorResource(Res.drawable.ic_navigation_cart),
+            vectorResource(Res.drawable.ic_navigation_cart),
+            "Korpa"
+        ) {
+            component.reloadCart()
+            component.navigate(MainConfig.Cart)
+        }
+        content(
+            activeChild is MainChild.Menu,
+            vectorResource(Res.drawable.ic_navigation_menu),
+            vectorResource(Res.drawable.ic_navigation_menu),
+            "Meni"
+        ) {
+            component.navigate(MainConfig.Menu)
+        }
+        content(
+            activeChild is MainChild.Profile,
+            vectorResource(Res.drawable.ic_navigation_profile),
+            vectorResource(Res.drawable.ic_navigation_profile),
+            "Profil"
+        ) {
+            component.navigate(MainConfig.Profile)
+        }
+        return
+    }
+
     content(
         activeChild is MainChild.Home,
         vectorResource(Res.drawable.ic_navigation_home),

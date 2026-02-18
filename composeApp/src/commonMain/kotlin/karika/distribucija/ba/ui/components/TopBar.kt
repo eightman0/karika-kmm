@@ -41,8 +41,10 @@ import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_action
 import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_menu
+import karikav2.composeapp.generated.resources.ic_navigation_vendors
 import karikav2.composeapp.generated.resources.ic_notifications
 import karikav2.composeapp.generated.resources.ic_outlet
+import karikav2.composeapp.generated.resources.ic_products
 import org.jetbrains.compose.resources.vectorResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -234,6 +236,56 @@ fun TopBarSearch(component: SearchComponent) {
 
 @Composable
 fun ActionBar(component: MainComponent) {
+    if (component.isGuest()) {
+        Row(
+            modifier = Modifier
+                .height(40.dp)
+                .background(color = KarikaColors.Primary)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconTextItem(
+                modifier = Modifier
+                    .onClick {
+                        component.navigate(MainConfig.Vendor)
+                    }
+                    .weight(1f)
+                    .padding(start = 16.dp),
+                icon = vectorResource(Res.drawable.ic_navigation_vendors),
+                iconColor = KarikaColors.White,
+                textColor = KarikaColors.White,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W600,
+                text = "DOBAVLJAČI"
+            )
+            IconTextItem(
+                modifier = Modifier
+                    .onClick {
+                        component.mainNavigate(
+                            MainConfig.CategoryProducts(
+                                Category(
+                                    id = 10,
+                                    name = "SVI PROIZVODI"
+                                )
+                            )
+                        )
+                    }
+                    .weight(1f),
+                icon = vectorResource(Res.drawable.ic_products),
+                iconColor = KarikaColors.White,
+                textColor = KarikaColors.White,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W600,
+                text = "PROIZVODI"
+            )
+        }
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth(),
+            color = KarikaColors.White,
+            thickness = 1.dp
+        )
+    }
     Row(
         modifier = Modifier
             .height(40.dp)
