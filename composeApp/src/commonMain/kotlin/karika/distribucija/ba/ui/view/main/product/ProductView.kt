@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
@@ -635,7 +636,7 @@ fun ProductQtyAction(
         Box(
             modifier = Modifier
                 .height(40.dp)
-                .width(80.dp)
+                .width(IntrinsicSize.Min)
                 .border(
                     width = 1.dp,
                     color = KarikaColors.Border
@@ -643,8 +644,6 @@ fun ProductQtyAction(
             contentAlignment = Alignment.Center
         ) {
             KarikaIntTextField(
-                modifier = Modifier
-                    .fillMaxSize(),
                 value = qty,
                 minValue = product.minQty(),
                 onValueChange = {

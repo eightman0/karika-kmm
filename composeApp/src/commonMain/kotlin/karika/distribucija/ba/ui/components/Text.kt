@@ -8,12 +8,15 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -217,7 +220,6 @@ fun KarikaTextField(
 fun KarikaIntTextField(
     value: MutableState<Int>,
     onValueChange: (Int?) -> Unit,
-    modifier: Modifier = Modifier,
     minValue: Int = 1
 ) {
     val imeVisible = rememberImeVisible()
@@ -230,20 +232,18 @@ fun KarikaIntTextField(
         )
     }
 
-    // Calculate font size based on text length
-    val fontSize = remember(textFieldValue.text.length) {
-        when {
-            textFieldValue.text.length <= 3 -> 24.sp
-            textFieldValue.text.length <= 5 -> 18.sp
-            else -> 10.sp
-        }
-    }
-
     CompositionLocalProvider {
         BasicTextField(
             value = textFieldValue,
-            modifier = modifier,
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .defaultMinSize(minWidth = 80.dp),
+            onTextLayout = {},
             onValueChange = { newValue ->
+                if (newValue.text.length > 7) {
+                    return@BasicTextField
+                }
+
                 val newText = newValue.text
                 val filtered = newText.filter { it.isDigit() }
                 val withoutLeadingZero = if (filtered.startsWith("0") && filtered.length > 1) {
@@ -256,13 +256,11 @@ fun KarikaIntTextField(
 
                 val parsedValue = withoutLeadingZero.toIntOrNull()
 
-                // Dozvoljavamo unos bilo kojeg broja tokom kucanja
                 textFieldValue = TextFieldValue(
                     text = withoutLeadingZero,
                     selection = TextRange(withoutLeadingZero.length)
                 )
 
-                // Obavijestimo parent o promjeni
                 if (minValue <= (parsedValue ?: return@BasicTextField)) {
                     onValueChange(parsedValue)
                 }
@@ -271,39 +269,27 @@ fun KarikaIntTextField(
             readOnly = false,
             textStyle = LocalTextStyle.current.copy(
                 color = KarikaColors.Gray2,
-                fontSize = fontSize,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.W600,
                 textAlign = TextAlign.Center,
-                lineHeight = fontSize,
-                fontFamily = karikaFonts()
+                lineHeight = 24.sp,
+                fontFamily = karikaFonts(),
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done
             ),
-            singleLine = true,
+            decorationBox = { innerTextField ->
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                ) {
+                    innerTextField()
+                }
+            },
+            singleLine = false,
             maxLines = 1,
             minLines = 1,
-            decorationBox = @Composable { innerTextField ->
-                TextFieldDefaults.DecorationBox(
-                    contentPadding = PaddingValues(8.dp),
-                    value = textFieldValue.text,
-                    visualTransformation = VisualTransformation.None,
-                    innerTextField = innerTextField,
-                    singleLine = true,
-                    enabled = true,
-                    isError = false,
-                    interactionSource = remember { MutableInteractionSource() },
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent
-                    )
-                )
-            }
         )
     }
 

@@ -371,14 +371,14 @@ private fun MinOrderAmount(item: Map.Entry<Vendor, List<Pair<Product, Int>>>) {
 private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
     Row(
         modifier = Modifier
-            .height(144.dp)
+            .height(150.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(144.dp)
+                .size(150.dp)
                 .onClick {
                     component.navigateToProduct(item.first)
                 }
@@ -398,78 +398,83 @@ private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
             modifier = Modifier
                 .weight(1f)
         ) {
-            ProductName(item.first)
-            ProductBonus(item.first, item.second)
-            Row(
-                modifier = Modifier
-                    .padding(bottom = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KarikaText(
+            Row {
+                Column(modifier = Modifier.weight(1f)) {
+                    ProductName(item.first)
+                    ProductBonus(item.first, item.second)
+                    Row(
+                        modifier = Modifier
+                            .padding(bottom = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KarikaText(
+                            modifier = Modifier,
+                            color = KarikaColors.Gray6,
+                            text = "Min. kol.:",
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                        KarikaText(
+                            modifier = Modifier,
+                            color = KarikaColors.Black,
+                            text = "${item.first.minQty()} ${component.getUnit(item.first.minQtyUnit())}",
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
+                }
+                Column(
                     modifier = Modifier,
-                    color = KarikaColors.Gray6,
-                    text = "Min. kol.:",
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W400
-                )
-                KarikaText(
-                    modifier = Modifier,
-                    color = KarikaColors.Black,
-                    text = "${item.first.minQty()} ${component.getUnit(item.first.minQtyUnit())}",
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W700
-                )
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .onClick {
+                                component.removeFromCart(item.first)
+                            },
+                        imageVector = vectorResource(Res.drawable.ic_delete),
+                        tint = KarikaColors.Black1,
+                        contentDescription = ""
+                    )
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray2,
+                        text = "VPC:",
+                        textSize = 12.sp,
+                        fontWeight = FontWeight.W300
+                    )
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray2,
+                        text = item.first.vpcString(item.second),
+                        textSize = 12.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray2,
+                        text = "VPC+PDV:",
+                        textSize = 12.sp,
+                        fontWeight = FontWeight.W300
+                    )
+                    KarikaText(
+                        modifier = Modifier,
+                        color = KarikaColors.Gray2,
+                        text = item.first.vpcPdvString(item.second),
+                        textSize = 12.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                }
             }
+            YSpacer8()
             ProductQtyAction(
                 product = item.first,
                 qty = mutableStateOf(item.second),
                 component = component,
                 disableUpdate = false,
                 autoUpdate = true
-            )
-        }
-        Column(
-            modifier = Modifier,
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(
-                modifier = Modifier
-                    .onClick {
-                        component.removeFromCart(item.first)
-                    },
-                imageVector = vectorResource(Res.drawable.ic_delete),
-                tint = KarikaColors.Black1,
-                contentDescription = ""
-            )
-            KarikaText(
-                modifier = Modifier,
-                color = KarikaColors.Gray2,
-                text = "VPC:",
-                textSize = 12.sp,
-                fontWeight = FontWeight.W300
-            )
-            KarikaText(
-                modifier = Modifier,
-                color = KarikaColors.Gray2,
-                text = item.first.vpcString(item.second),
-                textSize = 12.sp,
-                fontWeight = FontWeight.W700
-            )
-            KarikaText(
-                modifier = Modifier,
-                color = KarikaColors.Gray2,
-                text = "VPC+PDV:",
-                textSize = 12.sp,
-                fontWeight = FontWeight.W300
-            )
-            KarikaText(
-                modifier = Modifier,
-                color = KarikaColors.Gray2,
-                text = item.first.vpcPdvString(item.second),
-                textSize = 12.sp,
-                fontWeight = FontWeight.W700
             )
         }
     }
