@@ -151,6 +151,59 @@ private fun CompanyInfo(component: ProfileComponent) {
         KarikaTextField1(
             modifier = Modifier
                 .fillMaxWidth(),
+            title = "O nama",
+            value = component.aboutUs.asState(),
+            placeholder = "O name",
+            allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next,
+            disabledTextColor = KarikaColors.Gray2,
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Ime kontakta*",
+            value = component.contactName.asState(),
+            placeholder = "Ime kontakta",
+            allowedChars = KarikaConstants.numbersAndLettersSpace,
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Email adresa*",
+            value = component.email.asState(),
+            placeholder = "Email adresa",
+            allowedChars = KarikaConstants.numbersAndLettersSpace,
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next,
+            enabled = false,
+            disabledTextColor = KarikaColors.Gray2,
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Broj telefona*",
+            value = component.companyPhone.asState(),
+            placeholder = "Broj telefona",
+            allowedChars = KarikaConstants.numbers,
+            keyboardType = KeyboardType.Phone,
+            imeAction = ImeAction.Next
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Viber broj telefona",
+            value = component.companyViberPhone.asState(),
+            placeholder = "Viber broj telefona",
+            allowedChars = KarikaConstants.numbers,
+            keyboardType = KeyboardType.Phone,
+            imeAction = ImeAction.Next
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
             title = "Entitet*",
             value = component.companyEntity.asState(),
             placeholder = "Entitet",
@@ -160,20 +213,6 @@ private fun CompanyInfo(component: ProfileComponent) {
             enabled = false,
             disabledTextColor = KarikaColors.Gray2,
         )
-        if (companyCity.value.isNotEmpty()) {
-            KarikaTextField1(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                title = "Grad*",
-                value = component.companyCity.asState(),
-                placeholder = "Grad",
-                allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next,
-                enabled = false,
-                disabledTextColor = KarikaColors.Gray2,
-            )
-        }
         if (companyCanton.value.isNotEmpty()) {
             KarikaTextField1(
                 modifier = Modifier
@@ -188,13 +227,13 @@ private fun CompanyInfo(component: ProfileComponent) {
                 disabledTextColor = KarikaColors.Gray2,
             )
         }
-        if (companyMunicipality.value.isNotEmpty()) {
+        if (companyCity.value.isNotEmpty()) {
             KarikaTextField1(
                 modifier = Modifier
                     .fillMaxWidth(),
-                title = "Opština*",
-                value = component.companyMunicipality.asState(),
-                placeholder = "Opština",
+                title = "Grad*",
+                value = component.companyCity.asState(),
+                placeholder = "Grad",
                 allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next,
@@ -202,6 +241,30 @@ private fun CompanyInfo(component: ProfileComponent) {
                 disabledTextColor = KarikaColors.Gray2,
             )
         }
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "ID broj*",
+            value = component.companyId.asState(),
+            placeholder = "ID broj",
+            keyboardType = KeyboardType.Number,
+            allowedChars = KarikaConstants.numbers,
+            imeAction = ImeAction.Next,
+            enabled = false,
+            disabledTextColor = KarikaColors.Gray2,
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "PDV broj",
+            value = component.companyPdv.asState(),
+            placeholder = "PDV broj",
+            allowedChars = KarikaConstants.numbers,
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Next,
+            enabled = false,
+            disabledTextColor = KarikaColors.Gray2,
+        )
         KarikaText(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -268,46 +331,21 @@ private fun CompanyInfo(component: ProfileComponent) {
         KarikaTextField1(
             modifier = Modifier
                 .fillMaxWidth(),
-            title = "PDV broj",
-            value = component.companyPdv.asState(),
-            placeholder = "PDV broj",
-            allowedChars = KarikaConstants.numbers,
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Next,
-            enabled = false,
-            disabledTextColor = KarikaColors.Gray2,
-        )
-        KarikaTextField1(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = "ID broj*",
-            value = component.companyId.asState(),
-            placeholder = "ID broj",
-            keyboardType = KeyboardType.Number,
-            allowedChars = KarikaConstants.numbers,
-            imeAction = ImeAction.Next,
-            enabled = false,
-            disabledTextColor = KarikaColors.Gray2,
-        )
-        KarikaTextField1(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = "Broj telefona*",
-            value = component.companyPhone.asState(),
-            placeholder = "Broj telefona",
-            allowedChars = KarikaConstants.numbers,
-            keyboardType = KeyboardType.Phone,
-            imeAction = ImeAction.Next
-        )
-        KarikaTextField1(
-            modifier = Modifier
-                .fillMaxWidth(),
             title = "Minimalna vrijednost narudžbe",
             value = component.minOrderAmount.asState(),
             placeholder = "Minimalna vrijednost narudžbe",
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Phone,
-            imeAction = ImeAction.Next
+            imeAction = ImeAction.Next,
+            trailingIcons = {
+                KarikaText(
+                    modifier = Modifier,
+                    text = "KM",
+                    color = KarikaColors.Gray4,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W400
+                )
+            }
         )
         KarikaTextField1(
             modifier = Modifier
@@ -317,16 +355,6 @@ private fun CompanyInfo(component: ProfileComponent) {
             placeholder = "Broj računa",
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Phone,
-            imeAction = ImeAction.Next
-        )
-        KarikaTextField1(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = "Ime kontakta*",
-            value = component.contactName.asState(),
-            placeholder = "Ime kontakta",
-            allowedChars = KarikaConstants.numbersAndLettersSpace,
-            keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Next
         )
         KarikaText(

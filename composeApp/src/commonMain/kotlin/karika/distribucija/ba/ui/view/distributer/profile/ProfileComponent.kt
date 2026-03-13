@@ -36,6 +36,8 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
 
     val companyName =
         mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.publicName ?: "")
+    val aboutUs =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.about ?: "")
     val companyId =
         mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorId ?: "")
     val companyPdv =
@@ -52,6 +54,11 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
         mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorOpicina ?: "")
     val companyPhone =
         mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorPhone ?: "")
+
+    val companyViberPhone =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.viberNumber ?: "")
+    val email =
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.email ?: "")
 
     val minOrderAmount =
         mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.minOrderAmount ?: "")
@@ -130,7 +137,9 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                     banner = if (companyBanner.value.first == "NEW") Pair(
                         companyBanner.value.second,
                         companyBanner.value.third as? ByteArray ?: return@launch
-                    ) else null
+                    ) else null,
+                    viberNumber = companyViberPhone.value,
+                    about = aboutUs.value
                 )
                 .collect { result ->
                     when (result) {

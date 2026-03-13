@@ -18,7 +18,6 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     val changePassSheet = mutableStateOf(false)
     val editAddress = mutableStateOf<Pair<Address?, String>?>(null)
     val editContact = mutableStateOf(false)
-    val editableFields = mutableStateOf(true)
     val firstname = mutableStateOf("")
     val lastname = mutableStateOf("")
     val address = mutableStateOf("")
@@ -26,6 +25,11 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     val email = mutableStateOf("")
     val postal = mutableStateOf("")
     val telephone = mutableStateOf("")
+
+    val objectSize = mutableStateOf("")
+    val objectType = mutableStateOf("")
+    val employeeCount = mutableStateOf("")
+    val viberPhoneNumber = mutableStateOf("")
 
     fun updateAddress() {
         scope.launch {
@@ -76,11 +80,16 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                 UpdateCustomerRequest(
                     customer = stateHolder.customerSpecificHandler.userDetails.value
                         .copy(
-                            firstname = firstname.value,
-                            lastname = lastname.value,
-                            email = email.value,
-                            addresses = stateHolder.customerSpecificHandler.userDetails.value.addresses
-                                .map { it.copy(telephone = telephone.value) }
+                            customAttributes = stateHolder.customerSpecificHandler.userDetails.value.customAttributes
+                                .map {
+                                    when (it.attributeCode) {
+                                        "b2b_velicina_objekta" -> it.copy(value = objectSize.value)
+                                        "b2b_tip_objekta" -> it.copy(value = objectType.value)
+                                        "b2b_broj_zaposlenih" -> it.copy(value = employeeCount.value)
+                                        "viber_messages_phone_number" -> it.copy(value = viberPhoneNumber.value)
+                                        else -> it
+                                    }
+                                }
                         )
                 )
             ).collect { result ->
@@ -132,13 +141,14 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     }
 
     fun edit(it: Address?, value: String, edit: Boolean = true) {
-        if (value == "Kontakt informacije") {
-            firstname.value = stateHolder.customerSpecificHandler.userDetails.value.firstname ?: ""
-            lastname.value = stateHolder.customerSpecificHandler.userDetails.value.lastname ?: ""
-            email.value = stateHolder.customerSpecificHandler.userDetails.value.email ?: ""
-            telephone.value =
-                stateHolder.customerSpecificHandler.userDetails.value.addresses.firstOrNull()?.telephone
-                    ?: ""
+        if (value == "Informacije profila") {
+            objectSize.value = stateHolder.customerSpecificHandler.userDetails.value.objectSize()
+            objectType.value = stateHolder.customerSpecificHandler.userDetails.value.objectType()
+            employeeCount.value =
+                stateHolder.customerSpecificHandler.userDetails.value.employeeCount()
+            viberPhoneNumber.value =
+                stateHolder.customerSpecificHandler.userDetails.value.viberPhoneNumber()
+
             editContact.value = true
             return
         }
@@ -151,7 +161,9 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
             postal.value = it?.postcode ?: ""
             telephone.value = it?.telephone ?: ""
         } else {
-            firstname.value = stateHolder.customerSpecificHandler.userDetails.value.companyName()
+            firstname.value =
+                stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.firstname
+                    ?: ""
             lastname.value =
                 stateHolder.customerSpecificHandler.userDetails.value.billingAddress()?.lastname
                     ?: ""
@@ -168,7 +180,6 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                     ?: ""
         }
 
-        editableFields.value = edit
         editAddress.value = Pair(it, value)
     }
 

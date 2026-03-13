@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -237,7 +238,22 @@ fun KarikaIntTextField(
             value = textFieldValue,
             modifier = Modifier
                 .width(IntrinsicSize.Min)
-                .defaultMinSize(minWidth = 80.dp),
+                .defaultMinSize(minWidth = 80.dp)
+                .onFocusChanged {
+                    if (!it.isFocused) {
+                        val currentValue = textFieldValue.text.toIntOrNull()
+                        val finalValue = when {
+                            currentValue == null || currentValue < minValue -> minValue
+                            else -> currentValue
+                        }
+
+                        textFieldValue = TextFieldValue(
+                            text = finalValue.toString(),
+                            selection = TextRange(finalValue.toString().length)
+                        )
+                        onValueChange(finalValue)
+                    }
+                },
             onTextLayout = {},
             onValueChange = { newValue ->
                 if (newValue.text.length > 7) {
@@ -253,15 +269,13 @@ fun KarikaIntTextField(
                 } else {
                     filtered
                 }
-
                 val parsedValue = withoutLeadingZero.toIntOrNull()
-
                 textFieldValue = TextFieldValue(
                     text = withoutLeadingZero,
                     selection = TextRange(withoutLeadingZero.length)
                 )
 
-                if (minValue <= (parsedValue ?: return@BasicTextField)) {
+                if ((parsedValue ?: return@BasicTextField) % minValue == 0) {
                     onValueChange(parsedValue)
                 }
             },

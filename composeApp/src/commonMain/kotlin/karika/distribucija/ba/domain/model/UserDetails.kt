@@ -26,8 +26,29 @@ data class UserDetails(
     fun companyName() =
         customAttributes.find { it.attributeCode == "b2b_pravno_lice" }?.value ?: "-"
 
+    fun pdv() =
+        customAttributes.find { it.attributeCode == "b2b_pdv" }?.value ?: "-"
+
+    fun idNumber() =
+        customAttributes.find { it.attributeCode == "b2b_id" }?.value ?: "-"
+
+    fun objectSize() =
+        customAttributes.find { it.attributeCode == "b2b_velicina_objekta" }?.value ?: "-"
+
+    fun employeeCount() =
+        customAttributes.find { it.attributeCode == "b2b_broj_zaposlenih" }?.value ?: "-"
+
+    fun objectType() =
+        customAttributes.find { it.attributeCode == "b2b_tip_objekta" }?.value ?: "-"
+
+    fun viberPhoneNumber() =
+        customAttributes.find { it.attributeCode == "viber_messages_phone_number" }?.value ?: "-"
+
     fun companyNameNullable() =
         customAttributes.find { it.attributeCode == "b2b_pravno_lice" }?.value
+
+    fun entity() =
+        customAttributes.find { it.attributeCode == "b2b_entitet" }?.value?.toIntOrNull() ?: 1
 
     fun address(): String {
         val address = addresses.firstOrNull() ?: return ""

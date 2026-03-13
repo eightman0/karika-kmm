@@ -289,6 +289,14 @@ object KarikaConstants {
             ?: emptyList()
     }
 
+    fun cities(): List<String> {
+        return mutableListOf<String>().apply {
+            addAll(entries[0].cantons.flatMap { it.cities }.map { it.name })
+            addAll(entries[1].cantons.map { it.name })
+            addAll(entries[2].cantons.map { it.name })
+        }.sorted()
+    }
+
     fun cities(canton: String): List<String> {
         return entries[0].cantons.find { it.name == canton }?.cities?.map { it.name } ?: emptyList()
     }

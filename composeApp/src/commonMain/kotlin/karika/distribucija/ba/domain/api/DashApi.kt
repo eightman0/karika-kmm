@@ -26,9 +26,9 @@ import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.domain.model.VendorDeliveryServiceData
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.domain.model.VendorProduct
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -166,7 +166,9 @@ internal class DashApi {
         minOrderAmount: String? = null,
         bankAccountNumber: String? = null,
         logo: Pair<String?, ByteArray>?,
-        banner: Pair<String?, ByteArray>?
+        banner: Pair<String?, ByteArray>?,
+        viberNumber: String? = null,
+        about: String? = null
     ): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.post(
             url("mobile/vendor/me")
@@ -177,6 +179,18 @@ internal class DashApi {
                         phone?.let {
                             append(
                                 "vendor[b2b_vendor_phone]",
+                                it
+                            )
+                        }
+                        viberNumber?.let {
+                            append(
+                                "vendor[viber_messages_phone_number]",
+                                it
+                            )
+                        }
+                        about?.let {
+                            append(
+                                "vendor[about]",
                                 it
                             )
                         }
@@ -330,7 +344,9 @@ internal class DashApi {
 
                         append("product[stock_data][manage_stock]", product.manageStock ?: "0")
                         if (product.manageStock == "1") {
-                            append("product[quantity_and_stock_status][qty]", product.qty?.ifEmpty { "99999" } ?: "99999")
+                            append(
+                                "product[quantity_and_stock_status][qty]",
+                                product.qty?.ifEmpty { "99999" } ?: "99999")
                         }
                         append(
                             "product[stock_data][use_config_manage_stock]",
@@ -524,7 +540,7 @@ class DashRepository internal constructor() {
             val response = DashApi().getOrders(pageSize, currentPage, queryParams).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<List<VendorOrder>>() ))
+                emit(ResultState.Success(response.body<List<VendorOrder>>()))
                 return@flow
             }
 
@@ -560,7 +576,7 @@ class DashRepository internal constructor() {
             val response = DashApi().getOrderComments(id).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<List<Comment>>() ))
+                emit(ResultState.Success(response.body<List<Comment>>()))
                 return@flow
             }
 
@@ -580,7 +596,8 @@ class DashRepository internal constructor() {
     ): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().sendComment(orderId, comment, attachment, filename).getOrNoInternet()
+            val response =
+                DashApi().sendComment(orderId, comment, attachment, filename).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(""))
@@ -672,6 +689,8 @@ class DashRepository internal constructor() {
         bankAccountNumber: String? = null,
         logo: Pair<String?, ByteArray>? = null,
         banner: Pair<String?, ByteArray>? = null,
+        viberNumber: String? = null,
+        about: String? = null
     ): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
@@ -683,7 +702,9 @@ class DashRepository internal constructor() {
                 minOrderAmount,
                 bankAccountNumber,
                 logo,
-                banner
+                banner,
+                viberNumber,
+                about
             ).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
@@ -742,10 +763,11 @@ class DashRepository internal constructor() {
     ): Flow<ResultState<List<VendorProduct>>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().getProducts(pageSize, currentPage, queryParams).getOrNoInternet()
+            val response =
+                DashApi().getProducts(pageSize, currentPage, queryParams).getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<List<VendorProduct>>() ))
+                emit(ResultState.Success(response.body<List<VendorProduct>>()))
                 return@flow
             }
 
@@ -849,7 +871,7 @@ class DashRepository internal constructor() {
                 .getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<List<Notification>>() ))
+                emit(ResultState.Success(response.body<List<Notification>>()))
                 return@flow
             }
 

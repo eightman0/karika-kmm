@@ -41,6 +41,7 @@ import karika.distribucija.ba.domain.model.Address
 import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.HorizontalButtons
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaPicker
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
@@ -139,14 +140,14 @@ private fun ContactInfo(
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(1f),
-                text = "Kontakt Informacije",
+                text = "Informacije profila",
                 color = KarikaColors.Gray2,
                 textSize = 16.sp,
                 fontWeight = FontWeight.W700
             )
             KarikaText(
                 modifier = Modifier
-                    .onClick { component.edit(null, "Kontakt informacije") }
+                    .onClick { component.edit(null, "Informacije profila") }
                     .padding(16.dp),
                 text = "Uredi",
                 color = KarikaColors.Primary,
@@ -162,13 +163,14 @@ private fun ContactInfo(
         )
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             KarikaText(
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(0.5f),
-                text = "Ime",
+                text = "Pravno lice",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
@@ -177,7 +179,7 @@ private fun ContactInfo(
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
-                text = profile.firstname,
+                text = profile.companyName(),
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
@@ -191,13 +193,14 @@ private fun ContactInfo(
         )
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             KarikaText(
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(0.5f),
-                text = "Prezime",
+                text = "ID broj",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
@@ -206,7 +209,7 @@ private fun ContactInfo(
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
-                text = profile.lastname,
+                text = profile.idNumber(),
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
@@ -220,7 +223,38 @@ private fun ContactInfo(
         )
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(0.5f),
+                text = "PDV broj",
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W400
+            )
+            KarikaText(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp),
+                text = profile.pdv(),
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W700
+            )
+        }
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            thickness = 1.dp,
+            color = KarikaColors.Gray11
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             KarikaText(
                 modifier = Modifier
@@ -236,6 +270,126 @@ private fun ContactInfo(
                     .weight(1f)
                     .padding(16.dp),
                 text = profile.email,
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W700
+            )
+        }
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            thickness = 1.dp,
+            color = KarikaColors.Gray11
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(0.5f),
+                text = "Veličina objekta",
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W400
+            )
+            KarikaText(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp),
+                text = profile.objectSize(),
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W700
+            )
+        }
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            thickness = 1.dp,
+            color = KarikaColors.Gray11
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(0.5f),
+                text = "Tip objekta",
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W400
+            )
+            KarikaText(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp),
+                text = profile.objectType(),
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W700
+            )
+        }
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            thickness = 1.dp,
+            color = KarikaColors.Gray11
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(0.5f),
+                text = "Broj zaposlenih",
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W400
+            )
+            KarikaText(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp),
+                text = profile.employeeCount(),
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W700
+            )
+        }
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            thickness = 1.dp,
+            color = KarikaColors.Gray11
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(0.5f),
+                text = "Viber broj",
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W400
+            )
+            KarikaText(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp),
+                text = profile.viberPhoneNumber(),
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
@@ -336,7 +490,7 @@ private fun BillingAddress(
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(0.5f),
-                text = "Naziv pravnog lica",
+                text = "Ime i prezime",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
@@ -345,37 +499,7 @@ private fun BillingAddress(
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
-                text = profile.companyName(),
-                color = KarikaColors.Gray2,
-                textSize = 14.sp,
-                fontWeight = FontWeight.W700
-            )
-        }
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth(),
-            thickness = 1.dp,
-            color = KarikaColors.Gray11
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            KarikaText(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .weight(0.5f),
-                text = "Adresa i broj ulice",
-                color = KarikaColors.Gray2,
-                textSize = 14.sp,
-                fontWeight = FontWeight.W400
-            )
-            KarikaText(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(16.dp),
-                text = profile.billingAddress()?.street?.firstOrNull(),
+                text = profile.firstname + " " + profile.lastname,
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
@@ -426,7 +550,7 @@ private fun BillingAddress(
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(0.5f),
-                text = "Grad",
+                text = "Adresa i broj ulice",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
@@ -435,7 +559,7 @@ private fun BillingAddress(
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
-                text = profile.billingAddress()?.city,
+                text = profile.billingAddress()?.street?.firstOrNull(),
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
@@ -456,7 +580,7 @@ private fun BillingAddress(
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(0.5f),
-                text = "Poštanski broj",
+                text = "Grad i poštanski broj",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
@@ -465,7 +589,37 @@ private fun BillingAddress(
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
-                text = profile.billingAddress()?.postcode,
+                text = profile.billingAddress()?.city + ", " + profile.billingAddress()?.postcode,
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W700
+            )
+        }
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            thickness = 1.dp,
+            color = KarikaColors.Gray11
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KarikaText(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(0.5f),
+                text = "Država",
+                color = KarikaColors.Gray2,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W400
+            )
+            KarikaText(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp),
+                text = "Bosna i Hercegovina",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
@@ -524,7 +678,7 @@ private fun ShippingAddress(
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(0.5f),
-                text = "Ime",
+                text = "Ime i prezime",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
@@ -533,37 +687,7 @@ private fun ShippingAddress(
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
-                text = profile.shippingAddress()?.firstname,
-                color = KarikaColors.Gray2,
-                textSize = 14.sp,
-                fontWeight = FontWeight.W700
-            )
-        }
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth(),
-            thickness = 1.dp,
-            color = KarikaColors.Gray11
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            KarikaText(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .weight(0.5f),
-                text = "Prezime",
-                color = KarikaColors.Gray2,
-                textSize = 14.sp,
-                fontWeight = FontWeight.W400
-            )
-            KarikaText(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(16.dp),
-                text = profile.shippingAddress()?.lastname,
+                text = profile.shippingAddress()?.firstname + " " + profile.shippingAddress()?.lastname,
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
@@ -644,7 +768,7 @@ private fun ShippingAddress(
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(0.5f),
-                text = "Grad",
+                text = "Grad i poštanski broj",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
@@ -653,7 +777,7 @@ private fun ShippingAddress(
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
-                text = profile.shippingAddress()?.city,
+                text = profile.shippingAddress()?.city + ", " + profile.shippingAddress()?.postcode,
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
@@ -674,7 +798,7 @@ private fun ShippingAddress(
                 modifier = Modifier
                     .padding(16.dp)
                     .weight(0.5f),
-                text = "Poštanski broj",
+                text = "Država",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
@@ -683,7 +807,7 @@ private fun ShippingAddress(
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
-                text = profile.shippingAddress()?.postcode,
+                text = "Bosna i Hercegovina",
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700
@@ -750,7 +874,7 @@ private fun AllShippingAddress(
                             modifier = Modifier
                                 .padding(16.dp)
                                 .weight(0.5f),
-                            text = "Ime",
+                            text = "Ime i prezime",
                             color = KarikaColors.Gray2,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W400
@@ -759,37 +883,7 @@ private fun AllShippingAddress(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(16.dp),
-                            text = shippingAddress.firstname,
-                            color = KarikaColors.Gray2,
-                            textSize = 14.sp,
-                            fontWeight = FontWeight.W700
-                        )
-                    }
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        thickness = 1.dp,
-                        color = KarikaColors.Gray11
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        KarikaText(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .weight(0.5f),
-                            text = "Prezime",
-                            color = KarikaColors.Gray2,
-                            textSize = 14.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                        KarikaText(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(16.dp),
-                            text = shippingAddress.lastname,
+                            text = shippingAddress.firstname + " " + shippingAddress.lastname,
                             color = KarikaColors.Gray2,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W700
@@ -870,7 +964,7 @@ private fun AllShippingAddress(
                             modifier = Modifier
                                 .padding(16.dp)
                                 .weight(0.5f),
-                            text = "Grad",
+                            text = "Grad i poštanski broj",
                             color = KarikaColors.Gray2,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W400
@@ -879,7 +973,7 @@ private fun AllShippingAddress(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(16.dp),
-                            text = shippingAddress.city,
+                            text = shippingAddress.city + ", " + shippingAddress.postcode,
                             color = KarikaColors.Gray2,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W700
@@ -900,7 +994,7 @@ private fun AllShippingAddress(
                             modifier = Modifier
                                 .padding(16.dp)
                                 .weight(0.5f),
-                            text = "Poštanski broj",
+                            text = "Država",
                             color = KarikaColors.Gray2,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W400
@@ -909,7 +1003,7 @@ private fun AllShippingAddress(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(16.dp),
-                            text = shippingAddress.postcode,
+                            text = "Bosna i Hercegovina",
                             color = KarikaColors.Gray2,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W700
@@ -969,7 +1063,7 @@ private fun AllShippingAddress(
 @Composable
 private fun UpdateAddress(component: AccountComponent) {
     var editAddress by component.editAddress.asState()
-    val editableFields by component.editableFields.asState()
+    val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
 
     Column(
         modifier = Modifier,
@@ -985,74 +1079,24 @@ private fun UpdateAddress(component: AccountComponent) {
             fontWeight = FontWeight.W600
         )
 
-        if (editAddress?.second == "Adresa za dostavu") {
-            KarikaTextField1(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                title = "Ime*",
-                value = component.firstname.asState(),
-                placeholder = "Ime",
-                allowedChars = KarikaConstants.lettersSpace,
-                imeAction = ImeAction.Next,
-                enabled = editableFields,
-                disabledTextColor = KarikaColors.Gray2
-            )
-            KarikaTextField1(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                title = "Prezime*",
-                value = component.lastname.asState(),
-                placeholder = "Prezime",
-                allowedChars = KarikaConstants.lettersSpace,
-                imeAction = ImeAction.Next,
-                enabled = editableFields,
-                disabledTextColor = KarikaColors.Gray2
-            )
-        } else {
-            KarikaTextField1(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                title = "Naziv pravnog lica*",
-                value = component.firstname.asState(),
-                placeholder = "Naziv pravnog lica",
-                allowedChars = KarikaConstants.lettersSpace,
-                imeAction = ImeAction.Next,
-                enabled = editableFields,
-                disabledTextColor = KarikaColors.Gray2
-            )
-        }
         KarikaTextField1(
             modifier = Modifier
                 .fillMaxWidth(),
-            title = "Grad*",
-            value = component.city.asState(),
-            placeholder = "Grad",
-            allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
+            title = "Ime*",
+            value = component.firstname.asState(),
+            placeholder = "Ime",
+            allowedChars = KarikaConstants.lettersSpace,
             imeAction = ImeAction.Next,
-            enabled = editableFields,
             disabledTextColor = KarikaColors.Gray2
         )
         KarikaTextField1(
             modifier = Modifier
                 .fillMaxWidth(),
-            title = "Adresa i broj ulice*",
-            value = component.address.asState(),
-            placeholder = "Adresa i broj ulice",
-            allowedChars = KarikaConstants.numbersAndLettersSpace,
+            title = "Prezime*",
+            value = component.lastname.asState(),
+            placeholder = "Prezime",
+            allowedChars = KarikaConstants.lettersSpace,
             imeAction = ImeAction.Next,
-            enabled = editableFields,
-            disabledTextColor = KarikaColors.Gray2
-        )
-        KarikaTextField1(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = "Poštanski broj*",
-            value = component.postal.asState(),
-            placeholder = "Poštanski broj",
-            allowedChars = KarikaConstants.numbers,
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Next,
-            enabled = editableFields,
             disabledTextColor = KarikaColors.Gray2
         )
         KarikaTextField1(
@@ -1064,6 +1108,43 @@ private fun UpdateAddress(component: AccountComponent) {
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Phone,
             imeAction = ImeAction.Done
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Adresa i broj ulice*",
+            value = component.address.asState(),
+            placeholder = "Adresa i broj ulice",
+            allowedChars = KarikaConstants.numbersAndLettersSpace,
+            imeAction = ImeAction.Next,
+            disabledTextColor = KarikaColors.Gray2
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Država*",
+            value = mutableStateOf("Bosna i Hercegovina").asState(),
+            placeholder = "Država",
+            imeAction = ImeAction.Next,
+            enabled = false,
+            disabledTextColor = KarikaColors.Gray6
+        )
+        KarikaPicker(
+            title = "Grad*",
+            placeholder = "Grad",
+            value = component.city.asState(),
+            values = mutableStateOf(KarikaConstants.cities()).asState()
+        )
+        KarikaTextField1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Poštanski broj*",
+            value = component.postal.asState(),
+            placeholder = "Poštanski broj",
+            allowedChars = KarikaConstants.numbers,
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Next,
+            disabledTextColor = KarikaColors.Gray2
         )
 
         HorizontalButtons(
@@ -1091,48 +1172,42 @@ private fun UpdateContactInfo(component: AccountComponent) {
         KarikaText(
             modifier = Modifier
                 .fillMaxWidth(),
-            text = "Kontakt informacije",
+            text = "Informacije profila",
             color = KarikaColors.Black,
             textSize = 16.sp,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.W600
         )
 
+        KarikaPicker(
+            title = "Veličina objekta*",
+            placeholder = "Veličina objekta*",
+            value = component.objectSize.asState(),
+            values = mutableStateOf(KarikaConstants.companySizes).asState()
+        )
+        KarikaPicker(
+            title = "Tip objekta*",
+            placeholder = "Tip objekta",
+            value = component.objectType.asState(),
+            values = mutableStateOf(KarikaConstants.companyTypes).asState()
+        )
         KarikaTextField1(
             modifier = Modifier
                 .fillMaxWidth(),
-            title = "Ime*",
-            value = component.firstname.asState(),
-            placeholder = "Ime",
-            allowedChars = KarikaConstants.lettersSpace,
+            title = "Broj zaposlenih*",
+            value = component.employeeCount.asState(),
+            placeholder = "Broj zaposlenih",
+            keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Next
         )
         KarikaTextField1(
             modifier = Modifier
                 .fillMaxWidth(),
-            title = "Prezime*",
-            value = component.lastname.asState(),
-            placeholder = "Prezime",
-            allowedChars = KarikaConstants.lettersSpace,
-            imeAction = ImeAction.Next
-        )
-        KarikaTextField1(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = "Email adresa*",
-            value = component.email.asState(),
-            placeholder = "Email adresa",
-            keyboardType = KeyboardType.Email,
-            imeAction = ImeAction.Next
-        )
-        KarikaTextField1(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = "Broj telefona*",
-            value = component.telephone.asState(),
+            title = "Viber broj telefona*",
+            value = component.viberPhoneNumber.asState(),
             placeholder = "Broj telefona",
             keyboardType = KeyboardType.Phone,
-            imeAction = ImeAction.Next
+            imeAction = ImeAction.Done
         )
 
         HorizontalButtons(

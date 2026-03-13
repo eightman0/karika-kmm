@@ -37,7 +37,8 @@ data class BestSellerProducts(
     @SerialName("productId") var productId: String? = null,
     @SerialName("productName") var productName: String? = null,
     @SerialName("productPrice") var productPrice: String? = null,
-    @SerialName("orderedQuantity") var orderedQuantity: String? = null
+    @SerialName("orderedQuantity") var orderedQuantity: String? = null,
+    @SerialName("minQtyUnit") var minQtyUnit: String? = null,
 ) {
     fun price() = karikaPriceFormat(productPrice?.toDoubleOrNull() ?: 0.0)
 }

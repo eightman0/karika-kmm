@@ -131,7 +131,7 @@ private fun String.sortBy(): String {
         "Najstariji" -> "created_at"
         "Najjeftiniji" -> "price"
         "Najskuplji" -> "price"
-        "Minimalna količina" -> "b2b_min_qty"
+        "Min. Količina" -> "b2b_min_qty"
         "Po datumu" -> "created_at"
         "Sa popustom" -> "best_special_price"
         else -> ""
@@ -144,7 +144,7 @@ private fun String.sortType(): String {
         "Najstariji" -> "ASC"
         "Najjeftiniji" -> "ASC"
         "Najskuplji" -> "DESC"
-        "Minimalna količina" -> "ASC"
+        "Min. Količina" -> "ASC"
         "Po datumu" -> "DESC"
         else -> ""
     }

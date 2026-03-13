@@ -23,6 +23,7 @@ data class Vendor(
     @SerialName("status") var status: String? = null,
     @SerialName("group") var group: String? = null,
     @SerialName("public_name") var publicName: String? = null,
+    @SerialName("about") var about: String? = null,
     @SerialName("name") var name: String? = null,
     @SerialName("email") var email: String? = null,
     @SerialName("company_logo") var companyLogo: String? = null,
@@ -45,6 +46,7 @@ data class Vendor(
     @SerialName("vendor_min_order_amount") var minOrderAmount: String? = null,
     @SerialName("min_order_amount") var minOrderAmount1: String? = null,
     @SerialName("category_ids") var categories: List<String>? = null,
+    @SerialName("viber_messages_phone_number") var viberNumber: String? = null,
 ) {
     fun name() = publicName ?: ""
     fun image() = imageUrl(companyLogo)

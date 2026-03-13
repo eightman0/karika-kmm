@@ -61,6 +61,7 @@ import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.min
+import kotlin.math.roundToLong
 import kotlin.math.sin
 
 @Composable
@@ -379,7 +380,7 @@ private fun Products(component: BoardComponent) {
         dash.value.bestSellerProducts?.forEach {
             TableRow(
                 name = (it.productName ?: ""),
-                qty = (it.orderedQuantity ?: "") + " kom",
+                qty = (it.orderedQuantity?.toDoubleOrNull()?.roundToLong()?.toString() ?: "") + " ${it.minQtyUnit}",
                 price = it.price() + " KM"
             )
         }
@@ -473,7 +474,7 @@ private fun TableRow(name: String, qty: String, price: String) {
                 .height(with(LocalDensity.current) { height.value.toDp() })
                 .weight(0.3f)
                 .border(width = 0.5.dp, color = KarikaColors.Border),
-            contentAlignment = Alignment.CenterStart
+            contentAlignment = Alignment.CenterEnd
         ) {
             KarikaText(
                 modifier = Modifier
@@ -489,7 +490,7 @@ private fun TableRow(name: String, qty: String, price: String) {
                 .height(with(LocalDensity.current) { height.value.toDp() })
                 .weight(0.3f)
                 .border(width = 0.5.dp, color = KarikaColors.Border),
-            contentAlignment = Alignment.CenterStart
+            contentAlignment = Alignment.CenterEnd
         ) {
             KarikaText(
                 modifier = Modifier
