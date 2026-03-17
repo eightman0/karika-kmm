@@ -674,7 +674,7 @@ fun String.statusTextColor(): Color {
         "approved" -> KarikaColors.Green3
         "cancelled" -> KarikaColors.Gray2
         "bill-sent" -> KarikaColors.Orange
-        "estimate-sent" -> KarikaColors.Orange
+        "estimate-sent" -> KarikaColors.MineMessage
         "pending" -> KarikaColors.Blue
         else -> KarikaColors.Orange
     }
