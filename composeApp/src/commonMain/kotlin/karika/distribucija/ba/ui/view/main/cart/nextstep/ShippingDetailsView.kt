@@ -355,7 +355,7 @@ private fun PinnedFooter(component: ShippingDetailsComponent) {
             .height(48.dp)
             .padding(horizontal = 16.dp)
             .fillMaxWidth(),
-        title = if (newAddress.value) "Spasi i nastavi dalje" else "Pošalji zahtjev dobavljaču",
+        title = if (newAddress.value) "Spasi i nastavi dalje" else "Pošalji narudžbu",
         fontWeight = FontWeight.W700,
         textSize = 18.sp,
         enabled = if (newAddress.value) component.validateNewAddress() else true
