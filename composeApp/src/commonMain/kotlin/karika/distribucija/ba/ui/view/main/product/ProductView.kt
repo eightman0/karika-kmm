@@ -272,47 +272,73 @@ fun ProductPrice(component: ProductComponent) {
     val product by component.product.collectAsState()
     val productQty = component.productQty.asState()
 
-    Row(
+    Column(
         modifier = Modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            if (product.hasSpecialPrice()) {
+        if (product.hasMpc()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 KarikaText(
+                    color = KarikaColors.Gray2,
+                    text = "Preporučena MPC:",
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W900
+                )
+                KarikaText(
+                    color = KarikaColors.Gray1,
+                    text = product.mpcString(),
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W500
+                )
+            }
+        }
+        if (product.hasSpecialPrice()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                KarikaText(
+                    modifier = Modifier
+                        .weight(1f),
                     color = KarikaColors.Gray2,
                     text = product.specialPriceString(),
                     textSize = 22.sp,
                     fontWeight = FontWeight.W600
                 )
+                ProductQtyAction(product, productQty, component)
+            }
+            KarikaText(
+                modifier = Modifier.drawBehind {
+                    drawLine(
+                        color = KarikaColors.Gray1,
+                        strokeWidth = 1.dp.toPx(),
+                        start = Offset(0f, size.height / 2),
+                        end = Offset(size.width, size.height / 2)
+                    )
+                },
+                color = KarikaColors.Gray6,
+                text = product.originalPriceString(),
+                textSize = 18.sp,
+                fontWeight = FontWeight.W500
+            )
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 KarikaText(
-                    modifier = Modifier.drawBehind {
-                        drawLine(
-                            color = KarikaColors.Gray1,
-                            strokeWidth = 1.dp.toPx(),
-                            start = Offset(0f, size.height / 2),
-                            end = Offset(size.width, size.height / 2)
-                        )
-                    },
-                    color = KarikaColors.Gray6,
-                    text = product.originalPriceString(),
-                    textSize = 18.sp,
-                    fontWeight = FontWeight.W500
-                )
-            } else {
-                KarikaText(
+                    modifier = Modifier
+                        .weight(1f),
                     color = KarikaColors.Gray2,
                     text = product.originalPriceString(),
                     textSize = 22.sp,
                     fontWeight = FontWeight.W600
                 )
+                ProductQtyAction(product, productQty, component)
             }
         }
-        ProductQtyAction(product, productQty, component)
     }
 }
 
@@ -325,6 +351,25 @@ fun ProductPriceTablet(component: ProductComponent) {
         modifier = Modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        if (product.hasMpc()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                KarikaText(
+                    color = KarikaColors.Gray2,
+                    text = "Preporučena MPC:",
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W900
+                )
+                KarikaText(
+                    color = KarikaColors.Gray1,
+                    text = product.mpcString(),
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W500
+                )
+            }
+        }
         if (product.hasSpecialPrice()) {
             KarikaText(
                 color = KarikaColors.Gray2,

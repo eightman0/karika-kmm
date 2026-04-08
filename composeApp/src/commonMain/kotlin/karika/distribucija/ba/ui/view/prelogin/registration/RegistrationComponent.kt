@@ -166,7 +166,7 @@ class RegistrationComponent(
             repository.register(
                 RegisterDto(
                     customer = Customer(
-                        email = email.value.trim(),
+                        email = email.value.trim().replace(" ", ""),
                         firstname = contactFirstname.value.trim(),
                         lastname = contactLastname.value.trim(),
                         addresses = arrayListOf(
@@ -288,7 +288,7 @@ class RegistrationComponent(
                     companyName.value.trim(),
                     companyPdv.value.trim(),
                     companyId.value.trim(),
-                    email.value.trim(),
+                    email.value.trim().replace(" ", ""),
                     password.value,
                     confirmPassword.value,
                     contactFirstname.value.trim(),

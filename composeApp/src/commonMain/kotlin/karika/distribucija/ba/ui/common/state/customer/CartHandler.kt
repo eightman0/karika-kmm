@@ -55,6 +55,7 @@ class CartHandler(val commonHandler: CommonHandler) {
                                                 sku = it.sku,
                                                 itemId = it.itemId,
                                                 price = it.extensionAttributes?.originalPrice?.toDoubleOrNull(),
+                                                mpc = it.extensionAttributes?.mpc?.toDoubleOrNull(),
                                                 minQtyUnit = commonHandler.getUnitId(it.extensionAttributes?.productUnit ?: "kom"),
                                                 minQty = it.extensionAttributes?.minQty.toString(),
                                                 image = it.extensionAttributes?.imageUrl,

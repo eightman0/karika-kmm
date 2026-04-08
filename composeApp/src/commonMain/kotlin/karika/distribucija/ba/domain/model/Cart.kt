@@ -71,6 +71,8 @@ data class ExtAttributes(
     val specialPrice: String? = null,
     @SerialName("original_price")
     val originalPrice: String? = null,
+    @SerialName("suggested_retail_price")
+    val mpc: String? = null,
     @SerialName("vendors")
     val vendors: List<Vendor>? = null,
     @SerialName("reward_points")

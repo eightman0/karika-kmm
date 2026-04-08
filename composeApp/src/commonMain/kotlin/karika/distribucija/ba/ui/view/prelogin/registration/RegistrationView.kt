@@ -364,6 +364,7 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
         value = viewModel.email.asState(),
         placeholder = "Email adresa",
         keyboardType = KeyboardType.Email,
+        allowedChars = KarikaConstants.numbersAndLetters.plus("@").plus(".").plus("_"),
         imeAction = ImeAction.Next
     )
     KarikaPasswordTextField(

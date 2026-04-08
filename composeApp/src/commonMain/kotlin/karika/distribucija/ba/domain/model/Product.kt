@@ -33,6 +33,7 @@ data class Product(
     @SerialName("special_from_date") val specialPriceFrom: String? = null,
     @SerialName("special_to_date") val specialPriceTo: String? = null,
     @SerialName("price") var price: Double? = null,
+    @SerialName("suggested_retail_price") var mpc: Double? = null,
     @SerialName("status") var status: Int? = null,
     @SerialName("image") val image: String? = null,
     @SerialName("media_gallery_entries") var mediaGalleryEntries: ArrayList<MediaGalleryEntries> = arrayListOf(),
@@ -127,6 +128,10 @@ data class Product(
         return price ?: 0.0
     }
 
+    fun mpc(): Double {
+        return mpc ?: 0.0
+    }
+
     fun currentPrice(): Double {
         return if (specialPrice() > 0) specialPrice() else price()
     }
@@ -138,6 +143,12 @@ data class Product(
     fun originalPriceString(): String {
         return karikaPriceFormat(price()) + " KM"
     }
+
+    fun mpcString(): String {
+        return karikaPriceFormat(mpc()) + " KM"
+    }
+
+    fun hasMpc() = mpc() > 0.0
 
     fun specialPriceString(): String {
         return karikaPriceFormat(specialPrice()) + " KM"
