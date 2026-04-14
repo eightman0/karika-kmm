@@ -28,6 +28,8 @@ class ProductByCategoryComponent(
     val category = _category.asStateFlow()
     private val _products = MutableStateFlow<List<Product>>(emptyList())
     val products = _products.asStateFlow()
+    private val _featuredProducts = MutableStateFlow<List<Product>>(emptyList())
+    val featuredProducts = _featuredProducts.asStateFlow()
     val searchText = mutableStateOf("")
     val filter = mutableStateOf(Pair("", 0))
     val sortBy = mutableStateOf("Najnoviji")
@@ -122,6 +124,22 @@ class ProductByCategoryComponent(
 
     fun clear() {
         _vendors.update { emptyList() }
+    }
+
+    fun loadFeatureProducts() {
+        scope.launch {
+            repository.loadFeaturedProducts(
+                categoryId = category.value.getAllCategoryIds()
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> {}
+                    is ResultState.Success -> {
+                        _featuredProducts.update { result.data }
+                    }
+                    is ResultState.Error -> {}
+                }
+            }
+        }
     }
 }
 

@@ -30,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -309,7 +310,7 @@ private fun FeaturedVendors(component: VendorComponent) {
                 ) {
                     KarikaText(
                         text = "Sponzorisano",
-                        color = KarikaColors.Primary,
+                        color = KarikaColors.Gray2,
                         textSize = 10.sp,
                         fontWeight = FontWeight.W700
                     )
@@ -320,7 +321,7 @@ private fun FeaturedVendors(component: VendorComponent) {
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                val cardWidth =if (featuredVendors.size == 1)  maxWidth else  maxWidth * 0.8f
+                val cardWidth = maxWidth * 0.8f
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -405,6 +406,11 @@ private fun FeaturedVendorItem(
                     Box(
                         modifier = Modifier
                             .size(56.dp)
+                            .border(
+                                color = KarikaColors.Gray5,
+                                shape = RoundedCornerShape(8.dp),
+                                width = 1.dp
+                            )
                             .background(
                                 color = KarikaColors.Primary.copy(alpha = 0.2f),
                                 shape = RoundedCornerShape(8.dp)
@@ -413,10 +419,9 @@ private fun FeaturedVendorItem(
                     ) {
                         KarikaImage(
                             modifier = Modifier
-                                .size(48.dp)
-                                .padding(4.dp),
-                            model = vendor.bannerImage(),
-                            contentScale = ContentScale.Inside
+                                .clip(RoundedCornerShape(8.dp)),
+                            model = vendor.logoImage(),
+                            contentScale = ContentScale.Crop
                         )
                     }
 
@@ -451,29 +456,28 @@ private fun FeaturedVendorItem(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     maxItemsInEachRow = 3
                 ) {
-                    vendor.categories(component.stateHolder.commonHandler.categories.value)
-                        .take(6).forEach { tag ->
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = KarikaColors.White,
-                                        shape = RoundedCornerShape(100)
-                                    )
-                                    .border(
-                                        width = 1.dp,
-                                        color = KarikaColors.Gray5,
-                                        shape = RoundedCornerShape(100)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                KarikaText(
-                                    text = tag.name,
-                                    color = KarikaColors.Black1,
-                                    textSize = 10.sp,
-                                    fontWeight = FontWeight.W400
+                    vendor.categories?.forEach { tag ->
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = KarikaColors.White,
+                                    shape = RoundedCornerShape(100)
                                 )
-                            }
+                                .border(
+                                    width = 1.dp,
+                                    color = KarikaColors.Gray5,
+                                    shape = RoundedCornerShape(100)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            KarikaText(
+                                text = tag.name,
+                                color = KarikaColors.Black1,
+                                textSize = 10.sp,
+                                fontWeight = FontWeight.W400
+                            )
                         }
+                    }
                 }
             }
         }

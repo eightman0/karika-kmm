@@ -29,6 +29,12 @@ internal class ProductApi {
         )
     }
 
+    suspend fun promotedProducts(categoryId: String): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.get(
+            url("mobile/product/promoted?categoryId=$categoryId")
+        )
+    }
+
     suspend fun search(
         categoryId: String? = null,
         regionId: String? = null,
@@ -125,6 +131,26 @@ class ProductRepository internal constructor() {
 
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun loadFeaturedProducts(categoryId: String): Flow<ResultState<List<Product>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = ProductApi()
+                .promotedProducts(categoryId)
+                .getOrNoInternet()
+
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<List<Product>>()))
+                return@flow
+            }
+
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
