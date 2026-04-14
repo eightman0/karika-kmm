@@ -13,6 +13,8 @@ data class PromotedVendor(
     @SerialName("shop_url") var shopUrl: String?,
     @SerialName("company_logo") var companyLogo: String?,
     @SerialName("company_banner") var companyBanner: String?,
+    @SerialName("des") var description: String?,
+    @SerialName("categories") var categories: List<String>?
 ) {
     fun name() = name ?: ""
     fun bannerImage() = imageUrl(companyBanner)
@@ -23,4 +25,11 @@ data class PromotedVendor(
         companyLogo = companyLogo,
         companyBanner = companyBanner
     )
+
+    fun categories(categories: List<Category>): List<Category> {
+        return categories.plus(categories.flatMap { it -> it.childrenData.flatMap { it -> it.childrenData.flatMap { it.childrenData } } })
+            .filter {
+                this.categories?.contains(it.id.toString()) ?: false
+            }
+    }
 }

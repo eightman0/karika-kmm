@@ -536,7 +536,7 @@ open class CommonComponent(
     }
 
     open fun loadBanners() {
-        scope.launch {
+        iOScope.launch {
             productRepository.promotedVendors().collect { result ->
                 when (result) {
                     is ResultState.Loading -> {
