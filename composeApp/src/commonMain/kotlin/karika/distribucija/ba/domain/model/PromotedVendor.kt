@@ -13,7 +13,7 @@ data class PromotedVendor(
     @SerialName("shop_url") var shopUrl: String?,
     @SerialName("company_logo") var companyLogo: String?,
     @SerialName("company_banner") var companyBanner: String?,
-    @SerialName("des") var description: String?,
+    @SerialName("about") var description: String?,
     @SerialName("top_categories") var categories: List<Category>?
 ) {
     fun name() = name ?: ""
