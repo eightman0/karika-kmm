@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
@@ -51,6 +52,7 @@ import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rounded
+import karika.distribucija.ba.ui.view.main.MainConfig
 import karika.distribucija.ba.ui.view.main.vendor.details.filter.FilterSheet
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_filter_alt
@@ -459,6 +461,16 @@ private fun FeaturedVendorItem(
                     vendor.categories?.forEach { tag ->
                         Box(
                             modifier = Modifier
+                                .onClick {
+                                    component.mainNavigate(
+                                        MainConfig.CategoryProducts(
+                                            Category(
+                                                id = tag.categoryId ?: 0,
+                                                name = tag.name
+                                            )
+                                        )
+                                    )
+                                }
                                 .background(
                                     color = KarikaColors.White,
                                     shape = RoundedCornerShape(100)

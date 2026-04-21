@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Category(
     var id: Int = 0,
+    @SerialName("category_id")
+    var categoryId: Int? = null,
     @SerialName("parent_id")
     var parentId: Int = 0,
     var name: String = "",
