@@ -7,17 +7,14 @@ import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
-import android.net.Uri
-import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import karika.distribucija.ba.AppComponent
-import karika.distribucija.ba.KarikaActivity
+import karika.distribucija.ba.MainActivity
 import karika.distribucija.ba.R
 import kotlin.random.Random
-import androidx.core.net.toUri
-import karika.distribucija.ba.MainActivity
 
 class KarikaMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
@@ -39,14 +36,15 @@ class KarikaMessagingService : FirebaseMessagingService() {
         val nextInt = Random.nextInt()
         val intent = Intent(this, MainActivity::class.java).apply {
             addFlags(
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or FLAG_ACTIVITY_CLEAR_TOP or
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                        Intent.FLAG_ACTIVITY_NEW_TASK
             )
             putExtra("route", data["route"])
         }
 
         val pendingIntent = PendingIntent.getActivity(
-            this, nextInt, intent, FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
+            this, nextInt, intent, FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         val channelId = "KarikaNotificationChannelId"

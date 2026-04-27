@@ -103,4 +103,16 @@ class OrderDetailsComponent(
             stateHolder.appNavigation.bringToFront(AppConfig.VendorDetails(vendor))
         }
     }
+
+    override fun cancelOrder(
+        orderId: String?,
+        vendorId: String?,
+        reason: String,
+        com: String,
+        callback: () -> Unit
+    ) {
+        super.cancelOrder(orderId, vendorId, reason, com) {
+            stateHolder.customerSpecificHandler.refreshOrders()
+        }
+    }
 }

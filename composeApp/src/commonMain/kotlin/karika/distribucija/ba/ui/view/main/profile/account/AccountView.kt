@@ -499,7 +499,7 @@ private fun BillingAddress(
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
-                text = profile.firstname + " " + profile.lastname,
+                text = profile.billingAddress()?.firstname + " " + profile.billingAddress()?.lastname,
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
                 fontWeight = FontWeight.W700

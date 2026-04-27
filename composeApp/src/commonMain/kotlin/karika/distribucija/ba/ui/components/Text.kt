@@ -3,7 +3,6 @@ package karika.distribucija.ba.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.common.textFieldImeOptions
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.gotham_bold
 import karikav2.composeapp.generated.resources.gotham_book
@@ -223,6 +224,8 @@ fun KarikaIntTextField(
     onValueChange: (Int?) -> Unit,
     minValue: Int = 1
 ) {
+    val focusManager = LocalFocusManager.current
+
     val imeVisible = rememberImeVisible()
     var textFieldValue by remember(value) {
         mutableStateOf(
@@ -291,7 +294,19 @@ fun KarikaIntTextField(
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Done,
+                platformImeOptions = textFieldImeOptions(
+                    onDone = {
+                        focusManager.clearFocus()
+                    },
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Next)
+                    },
+                    onPrevious = {
+                        focusManager.moveFocus(FocusDirection.Previous)
+                    },
+                    useAccessoryView = false
+                )
             ),
             decorationBox = { innerTextField ->
                 Box(
@@ -582,8 +597,7 @@ fun KarikaTextFieldWithoutBorder(
     doneAction: (() -> Unit)? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     trailingIcons: @Composable (() -> Unit)? = null,
-    allowedChars: List<String> = emptyList(),
-    error: MutableState<String> = mutableStateOf("")
+    allowedChars: List<String> = emptyList()
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     TextField(
@@ -859,53 +873,6 @@ fun KarikaAmountField(
         trailingIcon = {
             trailingIcons?.invoke()
         }
-    )
-}
-
-@Composable
-fun KarikaTextField3(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-) {
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
-    KarikaTextField(
-        modifier = modifier
-            .focusable()
-            .background(
-                color = KarikaColors.White,
-                shape = RoundedCornerShape(20.dp)
-            ),
-        value = value,
-        onValueChange = onValueChange,
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done,
-            keyboardType = KeyboardType.Number,
-        ),
-        maxLines = 1,
-        colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            focusedContainerColor = Color.Transparent,
-            disabledContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent
-        ),
-        textStyle = LocalTextStyle.current.copy(
-            color = KarikaColors.Gray2,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.W600,
-            textAlign = TextAlign.Center,
-            lineHeight = 24.sp
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                focusManager.clearFocus()
-                keyboardController?.hide()
-            }
-        ),
-        contentPadding = PaddingValues(top = 6.dp)
     )
 }
 

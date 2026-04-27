@@ -330,7 +330,7 @@ fun Long.toDate(): String {
         char('-')
         monthNumber()
         char('-')
-        dayOfMonth()
+        day()
     }
     return localDate.format(dateFormat)
 }
@@ -341,7 +341,7 @@ fun Long.toDate1(): String {
         .toLocalDateTime(TimeZone.UTC)
 
     val dateFormat = LocalDateTime.Format {
-        dayOfMonth()
+        day()
         char('.')
         monthNumber()
         char('.')
@@ -357,7 +357,7 @@ fun Long.toDateTime(): String {
         .toLocalDateTime(TimeZone.UTC)
 
     val dateFormat = LocalDateTime.Format {
-        dayOfMonth()
+        day()
         char('.')
         monthNumber()
         char('.')
@@ -383,6 +383,8 @@ fun String.toDate1(): String {
 fun String.toDateTime(): String {
     val isoString = replace(" ", "T")
     val localDateTime = LocalDateTime.parse(isoString)
-    val instant = localDateTime.toInstant(TimeZone.UTC).toLocalDateTime(TimeZone.of("Europe/Sarajevo")).toInstant(TimeZone.UTC)
+    val instant =
+        localDateTime.toInstant(TimeZone.UTC).toLocalDateTime(TimeZone.of("Europe/Sarajevo"))
+            .toInstant(TimeZone.UTC)
     return instant.toEpochMilliseconds().toDateTime()
 }

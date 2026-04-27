@@ -1450,6 +1450,7 @@ private fun EnterComment(component: OrderDetailsComponent) {
             placeholder = "Napiši komentar",
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Done,
+            enabled = !order.locked() && !order.isCancelled() && !order.isRejected(),
             trailingIcons = {
                 // Icon(
                 //     modifier = Modifier

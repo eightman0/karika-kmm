@@ -4,39 +4,11 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import android.net.Uri
 import android.util.Patterns
-import android.util.TypedValue
-import androidx.appcompat.widget.AppCompatTextView
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.text.input.PlatformImeOptions
 import androidx.core.net.toUri
-import androidx.core.text.parseAsHtml
 import karika.distribucija.ba.BuildConfig
 import org.koin.mp.KoinPlatform
-
-@Composable
-actual fun HtmlTextWithStyles1(
-    modifier: Modifier,
-    html: String,
-    background: Color,
-    textColor: Color,
-) {
-    AndroidView(
-        modifier = modifier,
-        factory = { ctx ->
-
-            AppCompatTextView(ctx).apply {
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                text = html.parseAsHtml()
-                setTextColor(textColor.toArgb())
-            }
-        }
-    )
-}
 
 actual fun openPdf(url: String) {
     val context: Context = KoinPlatform.getKoin().get()
@@ -84,7 +56,7 @@ actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
 actual fun getEnvJwt(): String {
     return when (BuildConfig.FLAVOR) {
         "prod", "kiosk" -> "lbzgyy1qylr7unu707eblcphftb2fzha"
-        "demo","stage" -> "hgy5au3paxuijsiv52nyt9w47fcxprbz"
+        "demo", "stage" -> "hgy5au3paxuijsiv52nyt9w47fcxprbz"
         else -> "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"
     }
 }
@@ -126,3 +98,10 @@ actual fun appUrl(): String {
 actual fun userAgent(): String {
     return "os:Android;version:${appVersionName()}"
 }
+
+actual fun textFieldImeOptions(
+    onDone: () -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    useAccessoryView: Boolean
+): PlatformImeOptions? = null

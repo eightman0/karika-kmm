@@ -9,10 +9,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -58,7 +59,6 @@ import karikav2.composeapp.generated.resources.ic_messages
 import karikav2.composeapp.generated.resources.ic_navigation_profile
 import karikav2.composeapp.generated.resources.ic_shopping_cart
 import karikav2.composeapp.generated.resources.ic_tertiary
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
 
@@ -76,8 +76,7 @@ fun DashboardView(component: DashboardComponent) {
             .fillMaxSize()
     ) {
         ModalNavigationDrawer(
-            modifier = Modifier
-                .systemBarsPadding(),
+            modifier = Modifier,
             drawerState = drawerState,
             drawerContent = {
                 ModalDrawerSheet(
@@ -331,8 +330,9 @@ fun DashboardView(component: DashboardComponent) {
             },
         ) {
             KarikaScaffold(
+                modifier = Modifier
+                    .windowInsetsPadding(WindowInsets.safeDrawing),
                 containerColor = KarikaColors.White,
-                contentWindowInsets = WindowInsets.systemBars,
                 topBar = {
                     TopBarDashboard(
                         component = component,

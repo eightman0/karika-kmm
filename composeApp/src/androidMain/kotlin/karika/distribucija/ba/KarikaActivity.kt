@@ -91,19 +91,19 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
             }
         }
 
+        if (!::appComponent.isInitialized) {
+            appComponent = AppComponent(
+                componentContext = defaultComponentContext(),
+                filePicker = this
+            )
+        }
+
         setContent {
             val systemUiController = rememberSystemUiController()
             SideEffect {
                 systemUiController.setStatusBarColor(
                     color = Color.Transparent,
                     darkIcons = true // true = dark icons, false = light icons
-                )
-            }
-
-            if (!::appComponent.isInitialized) {
-                appComponent = AppComponent(
-                    componentContext = defaultComponentContext(),
-                    filePicker = this
                 )
             }
 
@@ -114,10 +114,10 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
             ) {
                 App(appComponent)
             }
-
-            PushHandler.handleNewPushIfExists(intent.extras?.getString("route") ?: "", appComponent)
-            checkUpdate()
         }
+
+        handlePushRoute(intent)
+        checkUpdate()
     }
 
     override fun onResume() {
@@ -140,16 +140,24 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        intent.let {
-            val uri = it.data
-            if (uri != null && uri.path == "/oauth") {
-                val emailToken = uri.getQueryParameter("email")
-                val token = uri.getQueryParameter("token")
-                if (token != null && emailToken != null) {
-                    appComponent.handleDeepLink(emailToken, token)
-                }
+        val uri = intent.data
+        if (uri != null && uri.path == "/oauth") {
+            val emailToken = uri.getQueryParameter("email")
+            val token = uri.getQueryParameter("token")
+            if (token != null && emailToken != null) {
+                appComponent.handleDeepLink(emailToken, token)
             }
         }
+        handlePushRoute(intent)
+    }
+
+    private fun handlePushRoute(intent: Intent?) {
+        if (intent == null) return
+        if (!::appComponent.isInitialized) return
+        val route = intent.extras?.getString("route").orEmpty()
+        if (route.isEmpty()) return
+        PushHandler.handleNewPushIfExists(route, appComponent)
+        intent.removeExtra("route")
     }
 
     private fun askNotificationPermission() {

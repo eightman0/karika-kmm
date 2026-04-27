@@ -2,7 +2,6 @@ package karika.distribucija.ba.domain.model
 
 import androidx.compose.ui.graphics.Color
 import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.toDateString
 import karika.distribucija.ba.ui.view.distributer.orders.toDateTime
 import karika.distribucija.ba.util.karikaPriceFormat
 import kotlinx.serialization.SerialName

@@ -17,13 +17,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -45,7 +46,7 @@ import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
-import karika.distribucija.ba.ui.components.rememberImeVisible1
+import karika.distribucija.ba.ui.components.rememberImeVisible
 import karika.distribucija.ba.ui.view.main.home.DiscountView
 import karika.distribucija.ba.ui.view.main.product.ProductQtyAction
 import karika.distribucija.ba.ui.view.main.product.VendorName
@@ -60,10 +61,9 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun CartView(component: CartComponent) {
     val items = component.stateHolder.cartHandler.cart.collectAsState()
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val imeVisible = rememberImeVisible1()
     val clearCartModal = mutableStateOf(false).asState()
-
+    val imeVisible = rememberImeVisible()
+    val focusManager = LocalFocusManager.current
     Box(
         modifier = Modifier
             .background(color = KarikaColors.White)
@@ -141,21 +141,23 @@ fun CartView(component: CartComponent) {
                 if (imeVisible) {
                     Box(
                         modifier = Modifier
-                            .background(color = KarikaColors.Primary)
                             .fillMaxWidth(),
                         contentAlignment = Alignment.CenterEnd
                     ) {
-                        KarikaText(
-                            modifier = Modifier
-                                .padding(vertical = 8.dp, horizontal = 16.dp)
-                                .onClick {
-                                    keyboardController?.hide()
-                                },
-                            text = "Zatvori",
-                            textSize = 14.sp,
-                            fontWeight = FontWeight.W600,
-                            color = KarikaColors.White
-                        )
+
+                        TextButton(
+                            modifier = Modifier,
+                            onClick = {
+                                focusManager.clearFocus()
+                            }
+                        ) {
+                            KarikaText(
+                                text = "Zatvori",
+                                textSize = 14.sp,
+                                fontWeight = FontWeight.W600,
+                                color = KarikaColors.Blue
+                            )
+                        }
                     }
                 }
             }

@@ -34,6 +34,8 @@ class CartHandler(val commonHandler: CommonHandler) {
                             CartData(
                                 items = result.data.items.groupBy {
                                     Vendor(
+                                        id = it.extensionAttributes?.vendorId?.toIntOrNull()
+                                            ?: 0,
                                         entityId = it.extensionAttributes?.vendorId?.toIntOrNull()
                                             ?: 0,
                                         minOrderAmount = result.data.extensionAttributes?.vendors?.find { it1 ->
@@ -64,6 +66,7 @@ class CartHandler(val commonHandler: CommonHandler) {
                                                 specialPriceTo = it.extensionAttributes?.specialPriceTo,
                                                 rewardPoints = it.extensionAttributes?.rewardPoints
                                                     ?: 0.0,
+                                                vendorId = it.extensionAttributes?.vendorId
                                             ),
                                             it.qty
                                         )

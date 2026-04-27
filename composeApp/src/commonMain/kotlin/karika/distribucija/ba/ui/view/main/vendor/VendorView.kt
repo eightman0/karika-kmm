@@ -104,6 +104,9 @@ private fun Vendors(component: VendorComponent) {
             item {
                 FeaturedVendors(component)
             }
+            item {
+                EmptyState(component)
+            }
             items(
                 items = vendors.chunked(gridColumnCount)
             ) {
@@ -129,7 +132,6 @@ private fun Vendors(component: VendorComponent) {
                 }
             }
         }
-        EmptyState(component)
     }
 
     LaunchedEffect(state.canScrollForward) {

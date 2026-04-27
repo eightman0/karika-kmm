@@ -15,6 +15,11 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -123,13 +128,18 @@ fun KarikaScaffold(
 @Composable
 fun rememberImeVisible(): Boolean {
     val density = LocalDensity.current
-    return WindowInsets.ime.getBottom(density) > 0
-}
+    val imeInsets = WindowInsets.ime
 
-@Composable
-fun rememberImeVisible1(): Boolean {
-    val density = LocalDensity.current
-    return WindowInsets.ime.getBottom(density) > 200
+    var isVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(imeInsets, density) {
+        snapshotFlow { imeInsets.getBottom(density) }
+            .collect { bottomPixels ->
+                isVisible = bottomPixels > 0
+            }
+    }
+
+    return isVisible
 }
 
 private fun String.toContainerColor(): Color {

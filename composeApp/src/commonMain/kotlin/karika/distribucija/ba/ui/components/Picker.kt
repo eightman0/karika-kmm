@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +51,7 @@ fun KarikaPicker(
     ) {
         Column(
             modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -62,7 +63,6 @@ fun KarikaPicker(
             )
             Row(
                 modifier = Modifier
-                    .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
                     .border(
                         width = 1.dp,
                         color = KarikaColors.Border,
@@ -150,7 +150,7 @@ fun KarikaPickerSmall1(
     ) {
         Row(
             modifier = modifier
-                .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 .border(
                     width = 1.dp,
                     color = borderColor,
@@ -188,7 +188,7 @@ fun KarikaPickerSmall1(
                 expanded.negate()
             },
         ) {
-            values.value.forEachIndexed { index, it ->
+            values.value.forEachIndexed { _, it ->
                 DropdownMenuItem(
                     modifier = Modifier,
                     onClick = {
@@ -247,7 +247,7 @@ fun KarikaPickerSmall(
     ) {
         Row(
             modifier = modifier
-                .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 .border(
                     width = 1.dp,
                     color = borderColor,
@@ -285,7 +285,7 @@ fun KarikaPickerSmall(
                 expanded.negate()
             },
         ) {
-            values.value.forEachIndexed { index, it ->
+            values.value.forEachIndexed { _, it ->
                 DropdownMenuItem(
                     modifier = Modifier,
                     onClick = {

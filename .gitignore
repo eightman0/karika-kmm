@@ -16,3 +16,8 @@ captures
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
+/composeApp/prod/release/composeApp-prod-release.aab
+/composeApp/stage/release/composeApp-stage-release.apk
+/composeApp/stage/release/baselineProfiles/0/composeApp-stage-release.dm
+/composeApp/stage/release/baselineProfiles/1/composeApp-stage-release.dm
+/composeApp/stage/release/output-metadata.json

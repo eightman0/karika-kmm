@@ -5,20 +5,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PlatformImeOptions
 import androidx.compose.ui.unit.sp
+import com.mohamedrejeb.richeditor.annotation.ExperimentalRichTextApi
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material.RichText
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.karikaFonts
 
-@Composable
-expect fun HtmlTextWithStyles1(
-    modifier: Modifier = Modifier,
-    html: String,
-    background: Color = KarikaColors.White,
-    textColor: Color = KarikaColors.White
-)
-
+@OptIn(ExperimentalRichTextApi::class)
 @Composable
 fun HtmlTextWithStyles(
     modifier: Modifier = Modifier,
@@ -60,3 +55,9 @@ expect fun appUrl(): String
 
 expect fun openPhoneCall(phoneNumber: String, error: (String) -> Unit = {})
 expect fun openEmail(emailAddress: String, error: (String) -> Unit = {})
+expect fun textFieldImeOptions(
+    onDone: () -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+    useAccessoryView: Boolean = false
+): PlatformImeOptions?

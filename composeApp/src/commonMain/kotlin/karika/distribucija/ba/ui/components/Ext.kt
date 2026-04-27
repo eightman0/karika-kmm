@@ -83,6 +83,7 @@ fun Modifier.hideKeyboard(onlyClick: Boolean = false): Modifier {
             indication = null
         ) {
             keyboard?.hide()
+            focusManager.clearFocus()
         }
 }
 

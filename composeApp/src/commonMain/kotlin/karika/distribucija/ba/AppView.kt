@@ -2,12 +2,13 @@ package karika.distribucija.ba
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,23 +48,26 @@ import karika.distribucija.ba.ui.view.main.vendor.details.VendorDetailsView
 import karika.distribucija.ba.ui.view.prelogin.PreLoginView
 import karika.distribucija.ba.util.asyncImageLoader
 import karika.distribucija.ba.util.enableDiskCache
-import org.koin.compose.KoinContext
 
 @Composable
 fun App(component: AppComponent) {
-    KoinContext {
-        setSingletonImageLoaderFactory { context ->
-            if (true) context.asyncImageLoader() else
-                context.asyncImageLoader().enableDiskCache()
-        }
+    setSingletonImageLoaderFactory { context -> context.asyncImageLoader().enableDiskCache() }
 
-        KarikaScaffold(
-            modifier = Modifier
-                .fillMaxSize(),
-            containerColor = KarikaColors.Primary,
-            component = component,
-            disableSnackBar = false
-        ) {
+    KarikaScaffold(
+        modifier = Modifier
+            .fillMaxSize(),
+        containerColor = KarikaColors.White,
+        component = component,
+        disableSnackBar = false
+    ) {
+        Box {
+            Column {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                        .height(100.dp)
+                        .background(color = KarikaColors.Primary)
+                )
+            }
             Children(
                 stack = component.stack
             ) {
@@ -94,20 +98,21 @@ fun App(component: AppComponent) {
                     is Child.Dashboard -> DashboardView(child.component)
                 }
             }
-            ImagePreview(component)
-            LoadingView1(component)
-            ScreenSaver(component)
-            getEnvPrefix()
-                .replace(".", "")
-                .takeIf { it.isNotEmpty() }
-                ?.let {
-                    WaterMarkBox(it)
-                }
         }
 
-        GuestUserInfoDialog(component)
-        MandatoryUpdate(component)
+        ImagePreview(component)
+        LoadingView1(component)
+        ScreenSaver(component)
+        getEnvPrefix()
+            .replace(".", "")
+            .takeIf { it.isNotEmpty() }
+            ?.let {
+                WaterMarkBox(it)
+            }
     }
+
+    GuestUserInfoDialog(component)
+    MandatoryUpdate(component)
 }
 
 @Composable
