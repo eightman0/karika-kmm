@@ -62,7 +62,7 @@ open class CommonComponent(
     private val notificationRepository = NotificationRepository()
     private val analyticsRepository = AnalyticsRepository()
 
-    private val _promotedVendors = MutableStateFlow<List<PromotedVendor>>(emptyList())
+    val _promotedVendors = MutableStateFlow<List<PromotedVendor>>(emptyList())
     val promotedVendors = _promotedVendors.asStateFlow()
     private val _promotedLogos = MutableStateFlow<List<PromotedVendor>>(emptyList())
     val promotedLogos = _promotedLogos.asStateFlow()

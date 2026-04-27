@@ -139,7 +139,7 @@ private fun Vendors(component: VendorComponent) {
     }
 
     LaunchedEffect(Unit) {
-        component.loadBanners()
+        component.loadFeaturedVendors()
     }
 }
 

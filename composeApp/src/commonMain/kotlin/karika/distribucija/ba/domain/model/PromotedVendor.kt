@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 data class PromotedVendor(
     @SerialName("promote_vendor_logo") var promoteVendorLogo: Boolean = false,
     @SerialName("promote_vendor_banner") var promoteVendorBanner: Boolean = false,
+    @SerialName("promote_vendor_in_list") var promoteVendorInList: Boolean = false,
     @SerialName("entity_id") var entityId: String?,
     @SerialName("b2b_vendor_pravno_lice") var name: String?,
     @SerialName("shop_url") var shopUrl: String?,

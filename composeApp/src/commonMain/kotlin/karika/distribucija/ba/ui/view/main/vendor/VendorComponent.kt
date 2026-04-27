@@ -73,4 +73,28 @@ class VendorComponent(
             }
         }
     }
+
+    fun loadFeaturedVendors() {
+        iOScope.launch {
+            productRepository.promotedVendors().collect { result ->
+                when (result) {
+                    is ResultState.Loading -> {
+                        showLoader()
+                    }
+
+                    is ResultState.Success -> {
+                        hideLoader()
+                        _promotedVendors.update {
+                            result.data.filter { f -> f.promoteVendorInList }
+                        }
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message ?: "")
+                    }
+                }
+            }
+        }
+    }
 }
