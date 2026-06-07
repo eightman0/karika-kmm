@@ -11,6 +11,10 @@ import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.board.BoardComponent
+import karika.distribucija.ba.ui.view.distributer.customers.CustomerRule
+import karika.distribucija.ba.ui.view.distributer.customers.CustomersComponent
+import karika.distribucija.ba.ui.view.distributer.customers.RuleScope
+import karika.distribucija.ba.ui.view.distributer.customers.editor.CustomerRuleEditorComponent
 import karika.distribucija.ba.ui.view.distributer.messages.admin.AdminMessagesComponent
 import karika.distribucija.ba.ui.view.distributer.messages.customer.CustomerMessagesComponent
 import karika.distribucija.ba.ui.view.distributer.messages.details.MessagesOverviewComponent
@@ -84,6 +88,22 @@ class DashboardComponent(componentContext: ComponentContext, stateHolder: Karika
                 )
             )
 
+            is DashConfig.Customers -> DashChild.Customers(
+                CustomersComponent(
+                    componentContext,
+                    stateHolder
+                )
+            )
+
+            is DashConfig.CustomerRuleEditor -> DashChild.CustomerRuleEditor(
+                CustomerRuleEditorComponent(
+                    componentContext = componentContext,
+                    stateHolder = stateHolder,
+                    ruleScope = appConfig.scope,
+                    initialRule = appConfig.rule
+                )
+            )
+
             is DashConfig.CustomerMessages -> DashChild.CustomerMessages(
                 CustomerMessagesComponent(
                     componentContext,
@@ -140,6 +160,15 @@ sealed class DashConfig {
     data class ProductDetails(val product: VendorProduct) : DashConfig()
 
     @Serializable
+    data object Customers : DashConfig()
+
+    @Serializable
+    data class CustomerRuleEditor(
+        val scope: RuleScope,
+        val rule: CustomerRule? = null
+    ) : DashConfig()
+
+    @Serializable
     data object CustomerMessages : DashConfig()
 
     @Serializable
@@ -161,6 +190,8 @@ sealed class DashChild {
     data class OrderDetails(val component: OrderDetailsComponent) : DashChild()
     data class Products(val component: ProductsComponent) : DashChild()
     data class ProductDetails(val component: ProductDetailsComponent) : DashChild()
+    data class Customers(val component: CustomersComponent) : DashChild()
+    data class CustomerRuleEditor(val component: CustomerRuleEditorComponent) : DashChild()
     data class CustomerMessages(val component: CustomerMessagesComponent) : DashChild()
     data class AdminMessages(val component: AdminMessagesComponent) : DashChild()
     data class MessageDetails(val component: MessagesOverviewComponent) : DashChild()

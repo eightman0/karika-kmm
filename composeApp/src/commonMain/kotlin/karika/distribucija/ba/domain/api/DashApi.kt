@@ -1,10 +1,12 @@
 package karika.distribucija.ba.domain.api
 
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsBytes
@@ -18,6 +20,10 @@ import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.HttpClientProvider.urlV1
 import karika.distribucija.ba.domain.model.AIResponse
 import karika.distribucija.ba.domain.model.Comment
+import karika.distribucija.ba.domain.model.CustomerRuleRequest
+import karika.distribucija.ba.domain.model.SearchCriteria
+import karika.distribucija.ba.domain.model.DiscountRule
+import karika.distribucija.ba.domain.model.DiscountRuleSearchResults
 import karika.distribucija.ba.domain.model.DashboardData
 import karika.distribucija.ba.domain.model.MediaGallery
 import karika.distribucija.ba.domain.model.Notification
@@ -508,6 +514,50 @@ internal class DashApi {
     suspend fun getBytesFromImage(url: String): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.get(url)
     }
+
+    suspend fun getCustomerRules(
+        searchCriteria: SearchCriteria
+    ): Result<HttpResponse> = runCatching {
+        val queryParams = mutableListOf<String>()
+
+        searchCriteria.pageSize?.let { queryParams.add("searchCriteria[pageSize]=$it") }
+        searchCriteria.currentPage?.let { queryParams.add("searchCriteria[currentPage]=$it") }
+
+        searchCriteria.filterGroups.forEachIndexed { groupIndex, group ->
+            group.filters.forEachIndexed { filterIndex, filter ->
+                queryParams.add("searchCriteria[filterGroups][$groupIndex][filters][$filterIndex][field]=${filter.field}")
+                queryParams.add("searchCriteria[filterGroups][$groupIndex][filters][$filterIndex][value]=${filter.value}")
+                queryParams.add("searchCriteria[filterGroups][$groupIndex][filters][$filterIndex][conditionType]=${filter.conditionType}")
+            }
+        }
+
+        searchCriteria.sortOrders.forEachIndexed { index, sortOrder ->
+            queryParams.add("searchCriteria[sortOrders][$index][field]=${sortOrder.field}")
+            queryParams.add("searchCriteria[sortOrders][$index][direction]=${sortOrder.direction}")
+        }
+
+        val queryString = if (queryParams.isNotEmpty()) "?" + queryParams.joinToString("&") else ""
+        return@runCatching HttpClientProvider.client.get(url("vendor-customer-discount/rules$queryString"))
+    }
+
+    suspend fun createCustomerRule(data: CustomerRuleRequest): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.post(url("vendor-customer-discount/rules")) {
+            setBody(data)
+        }
+    }
+
+    suspend fun updateCustomerRule(
+        id: String,
+        data: CustomerRuleRequest
+    ): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.put(url("vendor-customer-discount/rules/$id")) {
+            setBody(data)
+        }
+    }
+
+    suspend fun deleteCustomerRule(id: String): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.delete(url("vendor-customer-discount/rules/$id"))
+    }
 }
 
 class DashRepository internal constructor() {
@@ -949,5 +999,82 @@ class DashRepository internal constructor() {
                 emit(ResultState.Error(e.message))
             }
         }.flowOn(Dispatchers.Default)
+
+    fun getCustomerRules(
+        searchCriteria: SearchCriteria = SearchCriteria(pageSize = 20, currentPage = 1)
+    ): Flow<ResultState<DiscountRuleSearchResults>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = DashApi().getCustomerRules(searchCriteria).getOrNoInternet()
+
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<DiscountRuleSearchResults>()))
+                return@flow
+            }
+
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun createCustomerRule(data: CustomerRuleRequest): Flow<ResultState<DiscountRule>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = DashApi().createCustomerRule(data).getOrNoInternet()
+
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<DiscountRule>()))
+                return@flow
+            }
+
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun updateCustomerRule(
+        id: String,
+        data: CustomerRuleRequest
+    ): Flow<ResultState<DiscountRule>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = DashApi().updateCustomerRule(id, data).getOrNoInternet()
+
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<DiscountRule>()))
+                return@flow
+            }
+
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun deleteCustomerRule(id: String): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = DashApi().deleteCustomerRule(id).getOrNoInternet()
+
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(""))
+                return@flow
+            }
+
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
 
 }

@@ -38,6 +38,7 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
     }
 
     fun notificationReceived(route: String?) {
+        println("Notification received: $route")
         if (sessionHandler.mainConfig() == AppConfig.Main) {
             customerNotificationHandler.notificationReceived()
         } else {

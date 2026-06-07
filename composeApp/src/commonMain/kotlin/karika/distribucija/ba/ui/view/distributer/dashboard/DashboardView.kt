@@ -43,6 +43,8 @@ import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.distributer.board.BoardView
+import karika.distribucija.ba.ui.view.distributer.customers.CustomersView
+import karika.distribucija.ba.ui.view.distributer.customers.editor.CustomerRuleEditorView
 import karika.distribucija.ba.ui.view.distributer.messages.admin.AdminMessagesView
 import karika.distribucija.ba.ui.view.distributer.messages.customer.CustomerMessagesView
 import karika.distribucija.ba.ui.view.distributer.messages.details.MessagesOverviewView
@@ -54,6 +56,7 @@ import karika.distribucija.ba.ui.view.distributer.products.details.ProductDetail
 import karika.distribucija.ba.ui.view.distributer.profile.ProfileView
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_analytics
+import karikav2.composeapp.generated.resources.ic_customers
 import karikav2.composeapp.generated.resources.ic_logout
 import karikav2.composeapp.generated.resources.ic_messages
 import karikav2.composeapp.generated.resources.ic_navigation_profile
@@ -172,6 +175,33 @@ fun DashboardView(component: DashboardComponent) {
                         selected = navState.value.active.instance is DashChild.Orders,
                         onClick = {
                             component.dashNavigate(DashConfig.Orders, true)
+                            scope.launch {
+                                drawerState.close()
+                            }
+                        }
+                    )
+                    NavigationDrawerItem(
+                        modifier = Modifier,
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = KarikaColors.White,
+                            selectedContainerColor = KarikaColors.Blue
+                        ),
+                        shape = RectangleShape,
+                        label = {
+                            IconTextItem(
+                                modifier = Modifier,
+                                icon = vectorResource(Res.drawable.ic_customers),
+                                iconColor = if (navState.value.active.instance is DashChild.Customers) KarikaColors.White else KarikaColors.Gray2,
+                                textColor = if (navState.value.active.instance is DashChild.Customers) KarikaColors.White else KarikaColors.Gray2,
+                                textSize = 16.sp,
+                                fontWeight = FontWeight.W600,
+                                text = "Upravljanje rabatima",
+                                textAlign = TextAlign.Start
+                            )
+                        },
+                        selected = navState.value.active.instance is DashChild.Customers,
+                        onClick = {
+                            component.dashNavigate(DashConfig.Customers, true)
                             scope.launch {
                                 drawerState.close()
                             }
@@ -358,6 +388,9 @@ fun DashboardView(component: DashboardComponent) {
 
                         is DashChild.Products -> ProductsView(child.component)
                         is DashChild.ProductDetails -> ProductDetailsView(child.component)
+
+                        is DashChild.Customers -> CustomersView(child.component)
+                        is DashChild.CustomerRuleEditor -> CustomerRuleEditorView(child.component)
 
                         is DashChild.CustomerMessages -> CustomerMessagesView(child.component)
                         is DashChild.AdminMessages -> AdminMessagesView(child.component)

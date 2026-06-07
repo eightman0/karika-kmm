@@ -40,6 +40,7 @@ import androidx.compose.ui.window.DialogProperties
 import karika.distribucija.ba.domain.model.Address
 import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.HorizontalButtons
+import karika.distribucija.ba.ui.components.HorizontalSecondaryButtons
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaPicker
 import karika.distribucija.ba.ui.components.KarikaScaffold
@@ -1286,6 +1287,7 @@ fun ConfirmationModal(
     message: String,
     primaryButtonText: String,
     secondaryButtonText: String,
+    type: Int = 0, // 0 primary, 1 secondary
     onPrimaryClick: () -> Unit,
     onSecondaryClick: () -> Unit
 ) {
@@ -1321,16 +1323,30 @@ fun ConfirmationModal(
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.W400
                 )
-                HorizontalButtons(
-                    modifier = Modifier,
-                    primaryTitle = primaryButtonText,
-                    secondaryTitle = secondaryButtonText
-                ) {
-                    if (it == secondaryButtonText) {
-                        onSecondaryClick()
-                        return@HorizontalButtons
+                if (type == 0) {
+                    HorizontalButtons(
+                        modifier = Modifier,
+                        primaryTitle = primaryButtonText,
+                        secondaryTitle = secondaryButtonText
+                    ) {
+                        if (it == secondaryButtonText) {
+                            onSecondaryClick()
+                            return@HorizontalButtons
+                        }
+                        onPrimaryClick()
                     }
-                    onPrimaryClick()
+                } else {
+                    HorizontalSecondaryButtons(
+                        modifier = Modifier,
+                        primaryTitle = primaryButtonText,
+                        secondaryTitle = secondaryButtonText
+                    ) {
+                        if (it == secondaryButtonText) {
+                            onSecondaryClick()
+                            return@HorizontalSecondaryButtons
+                        }
+                        onPrimaryClick()
+                    }
                 }
             }
         }

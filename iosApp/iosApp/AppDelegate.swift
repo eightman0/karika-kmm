@@ -63,14 +63,18 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-        AppComponent.companion.refreshHandler("")
+        let route = response.notification.request.content.userInfo["route"] as? String ?? ""
+        AppComponent.companion.refreshHandler(route)
+        PushHandler().handleNewPushIfExists(route: route, component: component)
         completionHandler()
     }
     
     func application(_ application: UIApplication,
                      didReceiveRemoteNotification userInfo: [AnyHashable : Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        AppComponent.companion.refreshHandler("")
+         let route = userInfo["route"] as? String ?? ""
+        AppComponent.companion.refreshHandler(route)
+        PushHandler().handleNewPushIfExists(route: route, component: component)
         completionHandler(.newData)
     }
     
