@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.DashRepository
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
@@ -25,6 +26,9 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
     var dateTo = mutableStateOf("")
     val showFilterState = mutableStateOf(false)
     val searchText = mutableStateOf("")
+    val showMinOrderModal = mutableStateOf(false)
+    val minOrderValueModal = mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.minOrderAmount ?: "0")
+    val minOrderValue = mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.minOrderAmount ?: "0")
     private var queryParams =
         listOf("&searchCriteria[sortOrders][0][field]=created_at&searchCriteria[sortOrders][0][direction]=DESC")
 
@@ -34,6 +38,31 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
                 .collect {
                     loadNextPage(true)
                 }
+        }
+    }
+
+    fun updateMinOrderAmount() {
+        scope.launch {
+            DashRepository().updateProfile(
+                minOrderAmount = minOrderValueModal.value
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> showLoader()
+                    is ResultState.Success -> {
+
+                        showMinOrderModal.value = false
+                        minOrderValue.value = minOrderValueModal.value
+                        stateHolder.vendorSpecificHandler.getVendorDetails {
+                            hideLoader()
+                        }
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message ?: "Greška prilikom spremanja")
+                    }
+                }
+            }
         }
     }
 
