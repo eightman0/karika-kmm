@@ -15,6 +15,7 @@ import karika.distribucija.ba.domain.model.AddToCart
 import karika.distribucija.ba.domain.model.Cart
 import karika.distribucija.ba.domain.model.CartItem
 import karika.distribucija.ba.domain.model.ErrorResponse
+import karika.distribucija.ba.domain.model.ExtAttributes
 import karika.distribucija.ba.domain.model.PaymentMethod
 import karika.distribucija.ba.domain.model.PlaceOrder
 import karika.distribucija.ba.domain.model.ResultState
@@ -33,13 +34,15 @@ internal class CartApi {
         }
     }
 
-    suspend fun placeOrder(): Result<HttpResponse> = runCatching {
+    suspend fun placeOrder(note: String): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.post(
             url("carts/mine/payment-information")
         ) {
             setBody(
                 PlaceOrder(
-                    paymentMethod = PaymentMethod("checkmo")
+                    paymentMethod = PaymentMethod("checkmo").apply {
+                        extensionAttributes = ExtAttributes(note = note)
+                    }
                 )
             )
         }
@@ -105,11 +108,11 @@ class CartRepository internal constructor() {
         }
     }.flowOn(Dispatchers.Default)
 
-    fun placeOrder(): Flow<ResultState<String>> = flow {
+    fun placeOrder(note: String): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
             val response = CartApi()
-                .placeOrder()
+                .placeOrder(note)
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.bodyAsText()))
@@ -132,7 +135,7 @@ class CartRepository internal constructor() {
                 .addToCart(item)
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<CartItem>() ))
+                emit(ResultState.Success(response.body<CartItem>()))
             } else {
                 val errorBody = response.body<ErrorResponse>()
                 emit(ResultState.Error(errorBody.message))
@@ -151,7 +154,7 @@ class CartRepository internal constructor() {
                 .updateCart(item)
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<CartItem>() ))
+                emit(ResultState.Success(response.body<CartItem>()))
             } else {
                 val error = response.body<ErrorResponse>()
                 emit(
@@ -178,7 +181,7 @@ class CartRepository internal constructor() {
                 .removeFromCart(itemId)
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<String>() ))
+                emit(ResultState.Success(response.body<String>()))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
@@ -198,7 +201,7 @@ class CartRepository internal constructor() {
                 .createCart()
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<String>() ))
+                emit(ResultState.Success(response.body<String>()))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
@@ -218,7 +221,7 @@ class CartRepository internal constructor() {
                 .getCart()
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<Cart>() ))
+                emit(ResultState.Success(response.body<Cart>()))
             } else {
                 emit(
                     ResultState.Error(response.body<ErrorResponse>().message)

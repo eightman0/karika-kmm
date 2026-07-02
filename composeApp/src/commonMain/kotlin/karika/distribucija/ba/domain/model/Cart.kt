@@ -35,7 +35,8 @@ data class PlaceOrder(
 
 @Serializable
 data class PaymentMethod(
-    val method: String
+    val method: String,
+    @SerialName("extension_attributes") var extensionAttributes: ExtAttributes? = null
 )
 
 @Serializable
@@ -83,6 +84,7 @@ data class ExtAttributes(
     val specialPriceFrom: String? = null,
     @SerialName("special_price_to")
     val specialPriceTo: String? = null,
+    val note: String? = null
 )
 
 @Serializable

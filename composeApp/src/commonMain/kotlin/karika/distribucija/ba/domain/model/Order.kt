@@ -145,10 +145,9 @@ data class OrderProduct(
     }
 
     fun total(): String {
+        val vpc = Product().apply { price = total }.vpc(1)
         return karikaPriceFormat(
-            Product().apply {
-                price = total
-            }.vpc(1)
+            vpc - vpc * (discountPercent?.div(100) ?: 0.0)
         ) + " KM"
     }
 

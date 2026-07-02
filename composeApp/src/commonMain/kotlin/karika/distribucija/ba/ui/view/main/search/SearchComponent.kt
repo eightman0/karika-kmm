@@ -26,23 +26,6 @@ class SearchComponent(componentContext: ComponentContext, stateHolder: KarikaSta
 
     private val _vendors = MutableStateFlow<List<Vendor>>(emptyList())
     val vendors = _vendors.asStateFlow()
-
-    private var currentVendorId: Int? = null
-
-    init {
-        loadProfile()
-    }
-
-    private fun loadProfile() {
-        scope.launch {
-            userRepository.get().collect { result ->
-                if (result is ResultState.Success) {
-                    currentVendorId = result.data.id
-                }
-            }
-        }
-    }
-
     fun search(reset: Boolean = false) {
         if (reset) {
             hasNextPage = true
@@ -56,7 +39,6 @@ class SearchComponent(componentContext: ComponentContext, stateHolder: KarikaSta
         scope.launch {
             productRepository.searchProductsByCategory(
                 searchText = searchText.value,
-                vendorId = currentVendorId,
                 pageSize = pageSize,
                 currentPage = currentPage
             ).collect { result ->
