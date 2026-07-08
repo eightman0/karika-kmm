@@ -32,10 +32,10 @@ import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardComponent
-import karika.distribucija.ba.ui.view.main.MainChild
-import karika.distribucija.ba.ui.view.main.MainComponent
-import karika.distribucija.ba.ui.view.main.MainConfig
-import karika.distribucija.ba.ui.view.main.search.SearchComponent
+import karika.distribucija.ba.ui.view.shop.MainChild
+import karika.distribucija.ba.ui.view.shop.MainComponent
+import karika.distribucija.ba.ui.view.shop.MainConfig
+import karika.distribucija.ba.ui.view.shop.search.SearchComponent
 import karika.distribucija.ba.util.KarikaConfig
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_action

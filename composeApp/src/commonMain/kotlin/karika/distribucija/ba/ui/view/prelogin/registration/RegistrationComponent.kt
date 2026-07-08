@@ -17,7 +17,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.components.isPhoneFormat
 import karika.distribucija.ba.ui.components.isPostalCodeValid
-import karika.distribucija.ba.ui.view.main.profile.account.isPassComplex
+import karika.distribucija.ba.ui.view.shop.profile.account.isPassComplex
 import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch

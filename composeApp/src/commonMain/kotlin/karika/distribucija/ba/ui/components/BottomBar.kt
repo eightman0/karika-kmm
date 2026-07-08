@@ -33,9 +33,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
-import karika.distribucija.ba.ui.view.main.MainChild
-import karika.distribucija.ba.ui.view.main.MainComponent
-import karika.distribucija.ba.ui.view.main.MainConfig
+import karika.distribucija.ba.ui.view.shop.MainChild
+import karika.distribucija.ba.ui.view.shop.MainComponent
+import karika.distribucija.ba.ui.view.shop.MainConfig
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_navigation_cart
 import karikav2.composeapp.generated.resources.ic_navigation_home
