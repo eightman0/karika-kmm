@@ -35,7 +35,7 @@ import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.onClick
-import karika.distribucija.ba.ui.view.main.profile.account.ConfirmationModal
+import karika.distribucija.ba.ui.view.shop.profile.account.ConfirmationModal
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_add_plus
 import karikav2.composeapp.generated.resources.ic_arrow_right

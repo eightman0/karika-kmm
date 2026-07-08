@@ -50,7 +50,7 @@ import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rounded
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
 import karika.distribucija.ba.ui.view.distributer.products.details.dashedBorder
-import karika.distribucija.ba.ui.view.main.profile.account.ChangePasswordSheet
+import karika.distribucija.ba.ui.view.shop.profile.account.ChangePasswordSheet
 import karika.distribucija.ba.util.KarikaConstants
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_delete

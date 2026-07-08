@@ -4,7 +4,7 @@ import androidx.compose.material3.SnackbarHostState
 import com.arkivanov.decompose.router.stack.StackNavigation
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
-import karika.distribucija.ba.ui.view.main.MainConfig
+import karika.distribucija.ba.ui.view.shop.MainConfig
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 
 

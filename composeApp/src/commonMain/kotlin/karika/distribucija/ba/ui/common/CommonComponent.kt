@@ -30,7 +30,7 @@ import karika.distribucija.ba.domain.model.TrackingPayload
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
-import karika.distribucija.ba.ui.view.main.MainConfig
+import karika.distribucija.ba.ui.view.shop.MainConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
