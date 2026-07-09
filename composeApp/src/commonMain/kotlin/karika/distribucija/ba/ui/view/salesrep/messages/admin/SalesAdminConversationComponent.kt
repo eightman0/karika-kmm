@@ -50,7 +50,6 @@ class SalesAdminConversationComponent(
     }
 
     fun sendMessage(text: String) {
-        if (text.isBlank() && attachment.value == null) return
         scope.launch {
             messagesRepository.send(
                 SendMessageRequest(
