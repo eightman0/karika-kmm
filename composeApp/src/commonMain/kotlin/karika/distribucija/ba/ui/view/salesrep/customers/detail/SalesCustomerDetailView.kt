@@ -21,12 +21,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,6 +58,73 @@ import org.jetbrains.compose.resources.vectorResource
 fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
     val customer = component.customer
     val discounts by component.discounts.collectAsState()
+
+    var confirmDeleteRule by remember { mutableStateOf<DiscountRule?>(null) }
+
+    // ── Confirmation dialog ────────────────────────────────────────────────────
+    confirmDeleteRule?.let { rule ->
+        AlertDialog(
+            onDismissRequest = { confirmDeleteRule = null },
+            containerColor = KarikaColors.White,
+            title = {
+                KarikaText(
+                    text = "Obriši popust",
+                    color = KarikaColors.Gray2,
+                    textSize = 17.sp,
+                    fontWeight = FontWeight.W700
+                )
+            },
+            text = {
+                KarikaText(
+                    text = "Sigurno želite obrisati ovaj popust? Ova radnja se ne može poništiti.",
+                    color = KarikaColors.Gray6,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W400
+                )
+            },
+            confirmButton = {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(KarikaColors.Error)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            component.deleteDiscount(rule)
+                            confirmDeleteRule = null
+                        }
+                        .padding(horizontal = 20.dp, vertical = 10.dp)
+                ) {
+                    KarikaText(
+                        text = "Obriši",
+                        color = KarikaColors.White,
+                        textSize = 14.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                }
+            },
+            dismissButton = {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(KarikaColors.Gray10)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { confirmDeleteRule = null }
+                        .padding(horizontal = 20.dp, vertical = 10.dp)
+                ) {
+                    KarikaText(
+                        text = "Odustani",
+                        color = KarikaColors.Gray2,
+                        textSize = 14.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                }
+            }
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(KarikaColors.Gray20)) {
         LazyColumn(
@@ -225,6 +295,7 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
                 DiscountCard(
                     rule = rule,
                     onEdit = { component.openEditDiscount(rule) },
+                    onDelete = { confirmDeleteRule = rule },
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                 )
             }
@@ -334,7 +405,7 @@ private fun ProfileInfoRow(
 // ── Discount card ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun DiscountCard(rule: DiscountRule, onEdit: () -> Unit = {}, modifier: Modifier = Modifier) {
+private fun DiscountCard(rule: DiscountRule, onEdit: () -> Unit = {}, onDelete: () -> Unit = {}, modifier: Modifier = Modifier) {
     val targetLabel = when {
         rule.productId != null  -> rule.productName ?: "Artikal #${rule.productId}"
         rule.categoryId != null -> rule.categoryName ?: "Kategorija #${rule.categoryId}"
@@ -477,7 +548,7 @@ private fun DiscountCard(rule: DiscountRule, onEdit: () -> Unit = {}, modifier: 
                     modifier = Modifier.clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
-                    ) {},
+                    ) { onDelete() },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(3.dp)
                 ) {

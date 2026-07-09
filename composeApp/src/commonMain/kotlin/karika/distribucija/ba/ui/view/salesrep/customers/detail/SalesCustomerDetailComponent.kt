@@ -53,5 +53,24 @@ class SalesCustomerDetailComponent(
         salesRepPush(SalesRepConfig.DiscountForm(customer = customer, existingRule = rule))
     }
 
+    fun deleteDiscount(rule: DiscountRule) {
+        val ruleId = rule.ruleId ?: return
+        scope.launch {
+            repository.deleteDiscount(ruleId).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> showLoader()
+                    is ResultState.Success -> {
+                        hideLoader()
+                        loadDiscounts()
+                    }
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showErrorMessage(result.message)
+                    }
+                }
+            }
+        }
+    }
+
     fun goBack() = salesRepBack()
 }

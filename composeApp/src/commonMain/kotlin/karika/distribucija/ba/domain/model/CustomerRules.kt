@@ -9,6 +9,33 @@ data class CustomerRuleRequest(
     val discountRule: DiscountRule
 )
 
+/** Slim request body for vendor-operations create/update endpoints */
+@Serializable
+data class DiscountRuleInput(
+    @SerialName("discount_type")
+    val discountType: String = "per_customer",
+    @SerialName("discount_percent")
+    val discountPercent: Float,
+    @SerialName("is_active")
+    val isActive: Int = 1,
+    @SerialName("product_id")
+    val productId: Long? = null,
+    @SerialName("category_id")
+    val categoryId: Long? = null,
+    @SerialName("min_qty")
+    val minQty: Float? = null,
+    @SerialName("starts_at")
+    val startsAt: String? = null,
+    @SerialName("ends_at")
+    val endsAt: String? = null
+)
+
+@Serializable
+data class DiscountRuleBody(
+    @SerialName("discountRule")
+    val discountRule: DiscountRuleInput
+)
+
 @Serializable
 data class DiscountRule(
     @SerialName("rule_id")

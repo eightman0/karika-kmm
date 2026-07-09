@@ -1,14 +1,18 @@
 package karika.distribucija.ba.domain.api
 
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
+import karika.distribucija.ba.domain.model.DiscountRule
+import karika.distribucija.ba.domain.model.DiscountRuleBody
 import karika.distribucija.ba.domain.model.DiscountRuleSearchResults
 import karika.distribucija.ba.domain.model.NewCustomerRequest
 import karika.distribucija.ba.domain.model.OnBehalfOrderSearchResults
@@ -28,7 +32,7 @@ internal class SalesApi {
         HttpClientProvider.client.get(url("vendor-operations/me"))
     }
 
-    /** GET /V1/vendor-operations/customers with optional server-side search + status filters */
+    /** GET /V1/vendor-operations/customers */
     suspend fun getCustomers(
         page: Int,
         pageSize: Int,
@@ -61,11 +65,30 @@ internal class SalesApi {
         HttpClientProvider.client.get(url("vendor-operations/customers/$customerId/discounts"))
     }
 
+    /** POST /V1/vendor-operations/customers/{customerId}/discounts */
+    suspend fun createCustomerDiscount(customerId: Long, data: DiscountRuleBody): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(url("vendor-operations/customers/$customerId/discounts")) {
+            setBody(data)
+        }
+    }
+
+    /** PUT /V1/vendor-operations/discounts/{ruleId} */
+    suspend fun updateDiscount(ruleId: Long, data: DiscountRuleBody): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.put(url("vendor-operations/discounts/$ruleId")) {
+            setBody(data)
+        }
+    }
+
     /** POST /V1/vendor-operations/customers */
     suspend fun createCustomer(data: NewCustomerRequest): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.post(url("vendor-operations/customers")) {
             setBody(data)
         }
+    }
+
+    /** DELETE /V1/vendor-operations/discounts/{ruleId} */
+    suspend fun deleteDiscount(ruleId: Long): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.delete(url("vendor-operations/discounts/$ruleId"))
     }
 
     /** GET /V1/vendor-operations/orders */
@@ -163,6 +186,54 @@ class SalesRepository internal constructor() {
             val response = SalesApi().createCustomer(data).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<OperationalCustomer>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun createCustomerDiscount(customerId: Long, data: DiscountRuleBody): Flow<ResultState<DiscountRule>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().createCustomerDiscount(customerId, data).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<DiscountRule>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun updateDiscount(ruleId: Long, data: DiscountRuleBody): Flow<ResultState<DiscountRule>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().updateDiscount(ruleId, data).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<DiscountRule>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun deleteDiscount(ruleId: Long): Flow<ResultState<Unit>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().deleteDiscount(ruleId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(Unit))
                 return@flow
             }
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))

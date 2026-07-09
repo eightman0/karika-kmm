@@ -1,12 +1,14 @@
 package karika.distribucija.ba.ui.view.salesrep.customers.detail
 
 import com.arkivanov.decompose.ComponentContext
-import karika.distribucija.ba.domain.api.DashRepository
-import karika.distribucija.ba.domain.model.CustomerRuleRequest
+import karika.distribucija.ba.domain.api.SalesRepository
+import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.DiscountRule
+import karika.distribucija.ba.domain.model.DiscountRuleBody
+import karika.distribucija.ba.domain.model.DiscountRuleInput
 import karika.distribucija.ba.domain.model.OperationalCustomer
+import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.Job
@@ -14,6 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class SalesDiscountFormComponent(
     componentContext: ComponentContext,
@@ -22,32 +25,39 @@ class SalesDiscountFormComponent(
     val existingRule: DiscountRule? = null
 ) : CommonComponent(componentContext, stateHolder) {
 
-    private val repository = DashRepository()
+    private val repository = SalesRepository()
+    private val vendorId = stateHolder.vendorSpecificHandler.vendorDetails.value.entityId
 
     val isEdit = existingRule != null
 
-    private val _productSearch = MutableStateFlow(
+    // ── Search state ───────────────────────────────────────────────────────────
+    private val _itemSearch = MutableStateFlow(
         existingRule?.productName ?: existingRule?.categoryName ?: ""
     )
-    val productSearch = _productSearch.asStateFlow()
+    val itemSearch = _itemSearch.asStateFlow()
 
-    private val _selectedProduct = MutableStateFlow<VendorProduct?>(null)
-    val selectedProduct = _selectedProduct.asStateFlow()
+    private val _selectedItem = MutableStateFlow<DiscountSearchItem?>(
+        when {
+            existingRule?.productId != null -> DiscountSearchItem.ProductItem(
+                Product(entityId = existingRule.productId.toString(), name = existingRule.productName)
+            )
+            existingRule?.categoryId != null -> DiscountSearchItem.CategoryItem(
+                category = Category(id = existingRule.categoryId.toInt(), name = existingRule.categoryName ?: ""),
+                fullPath = existingRule.categoryName ?: ""
+            )
+            else -> null
+        }
+    )
+    val selectedItem = _selectedItem.asStateFlow()
 
-    private val _searchResults = MutableStateFlow<List<VendorProduct>>(emptyList())
+    private val _searchResults = MutableStateFlow<List<DiscountSearchItem>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
 
-    private val _showDropdown = MutableStateFlow(false)
-    val showDropdown = _showDropdown.asStateFlow()
-
-    private val _minQty = MutableStateFlow(
-        existingRule?.minQty?.toInt()?.toString() ?: ""
-    )
+    // ── Other form fields ──────────────────────────────────────────────────────
+    private val _minQty = MutableStateFlow(existingRule?.minQty?.toInt()?.toString() ?: "")
     val minQty = _minQty.asStateFlow()
 
-    private val _discountPercent = MutableStateFlow(
-        existingRule?.discountPercent?.toInt()?.toString() ?: ""
-    )
+    private val _discountPercent = MutableStateFlow(existingRule?.discountPercent?.toInt()?.toString() ?: "")
     val discountPercent = _discountPercent.asStateFlow()
 
     private val _isSaving = MutableStateFlow(false)
@@ -55,30 +65,49 @@ class SalesDiscountFormComponent(
 
     private var searchJob: Job? = null
 
-    fun setProductSearch(query: String) {
-        _productSearch.value = query
-        _selectedProduct.value = null
+    // ── Search logic ───────────────────────────────────────────────────────────
+
+    fun setItemSearch(query: String) {
+        _itemSearch.value = query
+        _selectedItem.value = null
         searchJob?.cancel()
-        if (query.isBlank()) {
+
+        if (query.length < 2) {
             _searchResults.value = emptyList()
-            _showDropdown.value = false
             return
         }
+
+        // Local category search
+        val allCategories = stateHolder.commonHandler.categories.value
+        val matchedCategories = mutableListOf<DiscountSearchItem.CategoryItem>()
+
+        fun searchRecursive(categories: List<Category>, path: String, level: Int) {
+            if (level > 4) return
+            categories.forEach { cat ->
+                val currentPath = if (path.isEmpty()) cat.name else "$path > ${cat.name}"
+                if (cat.name.contains(query, ignoreCase = true)) {
+                    matchedCategories.add(DiscountSearchItem.CategoryItem(cat, currentPath))
+                }
+                searchRecursive(cat.childrenData, currentPath, level + 1)
+            }
+        }
+
+        searchRecursive(allCategories, "", 1)
+        _searchResults.value = matchedCategories
+
+        // Debounced product search
         searchJob = scope.launch {
-            delay(400)
-            repository.getProducts(
-                pageSize = 10,
-                currentPage = 1,
-                queryParams = listOf(
-                    "&searchCriteria[filter_groups][0][filters][0][field]=name",
-                    "&searchCriteria[filter_groups][0][filters][0][value]=%25${query}%25",
-                    "&searchCriteria[filter_groups][0][filters][0][condition_type]=like"
-                )
+            delay(350.milliseconds)
+            productRepository.searchProductsByCategory(
+                searchText = query,
+                vendorId = vendorId,
+                pageSize = 20,
+                currentPage = 1
             ).collect { result ->
                 when (result) {
                     is ResultState.Success -> {
-                        _searchResults.value = result.data
-                        _showDropdown.value = result.data.isNotEmpty()
+                        val productItems = result.data.map { DiscountSearchItem.ProductItem(it) }
+                        _searchResults.value = matchedCategories + productItems
                     }
                     else -> Unit
                 }
@@ -86,53 +115,52 @@ class SalesDiscountFormComponent(
         }
     }
 
-    fun selectProduct(product: VendorProduct) {
-        _selectedProduct.value = product
-        _productSearch.value = product.name ?: ""
+    fun selectItem(item: DiscountSearchItem) {
+        _selectedItem.value = item
+        _itemSearch.value = item.displayName
         _searchResults.value = emptyList()
-        _showDropdown.value = false
     }
 
-    fun clearProduct() {
-        _selectedProduct.value = null
-        _productSearch.value = ""
+    fun clearItem() {
+        _selectedItem.value = null
+        _itemSearch.value = ""
         _searchResults.value = emptyList()
-        _showDropdown.value = false
     }
 
-    fun setMinQty(value: String) {
-        _minQty.value = value.filter { it.isDigit() }
-    }
+    // ── Field setters ──────────────────────────────────────────────────────────
 
-    fun setDiscountPercent(value: String) {
-        _discountPercent.value = value.filter { it.isDigit() }
-    }
+    fun setMinQty(value: String) { _minQty.value = value.filter { it.isDigit() } }
+
+    fun setDiscountPercent(value: String) { _discountPercent.value = value.filter { it.isDigit() } }
+
+    // ── Save ───────────────────────────────────────────────────────────────────
 
     fun save() {
         val percent = _discountPercent.value.toFloatOrNull() ?: run {
             showErrorMessage("Unesite rabat %")
             return
         }
-        val product = _selectedProduct.value
-        val request = CustomerRuleRequest(
-            discountRule = DiscountRule(
-                ruleId = existingRule?.ruleId,
-                discountType = existingRule?.discountType ?: "percentage",
-                customerId = customer.customerId,
-                productId = product?.productId?.toLongOrNull(),
-                productName = product?.name,
-                categoryId = existingRule?.categoryId,
-                categoryName = existingRule?.categoryName,
-                minQty = _minQty.value.toFloatOrNull(),
+
+        val selected = _selectedItem.value
+        val productId = (selected as? DiscountSearchItem.ProductItem)?.product?.entityId?.toLongOrNull()
+        val categoryId = (selected as? DiscountSearchItem.CategoryItem)?.category?.id?.toLong()
+
+        val body = DiscountRuleBody(
+            discountRule = DiscountRuleInput(
+                discountType = "per_customer",
                 discountPercent = percent,
-                isActive = existingRule?.isActive ?: 1
+                isActive = existingRule?.isActive ?: 1,
+                productId = productId,
+                categoryId = categoryId,
+                minQty = _minQty.value.toFloatOrNull()
             )
         )
+
         scope.launch {
             val flow = if (isEdit && existingRule?.ruleId != null) {
-                repository.updateCustomerRule(existingRule.ruleId.toString(), request)
+                repository.updateDiscount(existingRule.ruleId, body)
             } else {
-                repository.createCustomerRule(request)
+                repository.createCustomerDiscount(customer.customerId, body)
             }
             flow.collect { result ->
                 when (result) {
@@ -151,4 +179,17 @@ class SalesDiscountFormComponent(
     }
 
     fun goBack() = salesRepBack()
+}
+
+// ── Search item sealed class ───────────────────────────────────────────────────
+
+sealed class DiscountSearchItem {
+    data class ProductItem(val product: Product) : DiscountSearchItem()
+    data class CategoryItem(val category: Category, val fullPath: String) : DiscountSearchItem()
+
+    val displayName: String
+        get() = when (this) {
+            is ProductItem -> product.name.orEmpty()
+            is CategoryItem -> fullPath
+        }
 }
