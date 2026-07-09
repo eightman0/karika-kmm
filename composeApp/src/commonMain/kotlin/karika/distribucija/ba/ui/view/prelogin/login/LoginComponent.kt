@@ -7,6 +7,7 @@ import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.api.LoginRepository
+import karika.distribucija.ba.domain.api.SalesRepository
 import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
@@ -19,7 +20,7 @@ import kotlinx.coroutines.launch
 class LoginComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
-    private val userType: KarikaType,
+    private var userType: KarikaType,
 ) : CommonComponent(componentContext, stateHolder) {
 
     val forgotPassSheet = mutableStateOf(false)
@@ -71,14 +72,30 @@ class LoginComponent(
                         is ResultState.Success -> {
                             hideLoader()
                             stateHolder.sessionHandler.setAccessToken(result.data)
-                            stateHolder.sessionHandler.saveJWT(
-                                result.data,
-                                LoginDto(email.value, pass.value, userType),
-                                rememberMe.value
-                            )
-                            savePushHandle()
-                            navigatePostLogin()
-                            callback()
+
+                            SalesRepository().getMe().collect { me ->
+                                when (me) {
+                                    is ResultState.Loading -> showLoader()
+                                    is ResultState.Success -> {
+                                        hideLoader()
+                                        userType =
+                                            if (me.data.role == "sales_employee") KarikaType.SALES_REP else KarikaType.VENDOR
+                                        stateHolder.sessionHandler.saveJWT(
+                                            result.data,
+                                            LoginDto(email.value, pass.value, userType),
+                                            rememberMe.value
+                                        )
+                                        savePushHandle()
+                                        navigatePostLogin()
+                                        callback()
+                                    }
+
+                                    is ResultState.Error -> {
+                                        hideLoader()
+                                        showMessage(me.message)
+                                    }
+                                }
+                            }
                         }
 
                         is ResultState.Error -> {
@@ -125,7 +142,11 @@ class LoginComponent(
     private fun navigatePostLogin() {
         scope.launch {
             stateHolder.appNavigation.replaceAll(
-                if (userType.isShop()) AppConfig.Main else AppConfig.Dashboard
+                when (userType) {
+                    KarikaType.SHOP -> AppConfig.Main
+                    KarikaType.VENDOR -> AppConfig.Dashboard
+                    KarikaType.SALES_REP -> AppConfig.SalesRep
+                }
             )
         }
     }

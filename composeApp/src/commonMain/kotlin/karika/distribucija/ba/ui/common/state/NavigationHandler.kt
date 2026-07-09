@@ -4,6 +4,7 @@ import androidx.compose.material3.SnackbarHostState
 import com.arkivanov.decompose.router.stack.StackNavigation
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
+import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig
 import karika.distribucija.ba.ui.view.shop.MainConfig
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 
@@ -13,6 +14,7 @@ open class NavigationHandler {
     val mainNavigation = StackNavigation<MainConfig>()
     val preLoginNavigation = StackNavigation<PreLoginConfig>()
     val dashNavigation = StackNavigation<DashConfig>()
+    val salesRepNavigation = StackNavigation<SalesRepConfig>()
 
     val hostState = SnackbarHostState()
 }

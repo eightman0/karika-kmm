@@ -30,6 +30,7 @@ import karika.distribucija.ba.ui.components.MandatoryUpdateModal
 import karika.distribucija.ba.ui.components.ScreenSaver
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardView
+import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesDashboardView
 import karika.distribucija.ba.ui.view.shop.MainView
 import karika.distribucija.ba.ui.view.shop.menu.blog.BlogsView
 import karika.distribucija.ba.ui.view.shop.menu.blog.overview.BlogOverviewView
@@ -113,6 +114,9 @@ fun App(component: AppComponent) {
 
                     //vendor_side
                     is Child.Dashboard -> DashboardView(child.component)
+
+                    // sales_rep_side
+                    is Child.SalesRep -> SalesDashboardView(child.component)
                 }
             }
         }

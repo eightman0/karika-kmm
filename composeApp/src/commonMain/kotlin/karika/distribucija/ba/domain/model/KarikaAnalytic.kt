@@ -52,7 +52,8 @@ data class Filters(
 
 enum class UserType(val value: String) {
     CUSTOMER("customer"),
-    VENDOR("vendor")
+    VENDOR("vendor"),
+    SALES_REP("sales_rep")
 }
 
 enum class EventType(val value: String) {

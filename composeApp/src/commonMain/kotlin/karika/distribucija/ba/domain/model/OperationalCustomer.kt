@@ -1,0 +1,36 @@
+package karika.distribucija.ba.domain.model
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class AssignedEmployeeSummary(
+    @SerialName("employee_id") val employeeId: Long,
+    @SerialName("display_name") val displayName: String? = null
+)
+
+@Serializable
+data class OperationalCustomer(
+    @SerialName("customer_id") val customerId: Long,
+    @SerialName("email") val email: String? = null,
+    @SerialName("firstname") val firstname: String? = null,
+    @SerialName("lastname") val lastname: String? = null,
+    /** B2B company name (b2b_pravno_lice) */
+    @SerialName("company") val company: String? = null,
+    @SerialName("partnership_id") val partnershipId: Long,
+    /** "pending" | "active" | "rejected" | "revoked" */
+    @SerialName("partnership_status") val partnershipStatus: String,
+    @SerialName("default_billing_address_id") val defaultBillingAddressId: Long? = null,
+    @SerialName("default_shipping_address_id") val defaultShippingAddressId: Long? = null,
+    @SerialName("assigned_employees") val assignedEmployees: List<AssignedEmployeeSummary> = emptyList()
+) {
+    val isActive: Boolean get() = partnershipStatus == "active"
+    val fullName: String get() = listOfNotNull(firstname, lastname).joinToString(" ").ifEmpty { "—" }
+    val displayId: String get() = "KUP-$customerId"
+}
+
+@Serializable
+data class OperationalCustomerSearchResults(
+    @SerialName("items") val items: List<OperationalCustomer> = emptyList(),
+    @SerialName("total_count") val totalCount: Long = 0
+)

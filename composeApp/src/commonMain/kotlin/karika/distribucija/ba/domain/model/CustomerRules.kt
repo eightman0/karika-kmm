@@ -46,7 +46,12 @@ data class DiscountRule(
     @SerialName("created_at")
     val createdAt: String? = null,
     @SerialName("updated_at")
-    val updatedAt: String? = null
+    val updatedAt: String? = null,
+    @SerialName("created_by_employee_id")
+    val createdByEmployeeId: Long? = null,
+    /** "approved" | "pending" | "rejected" */
+    @SerialName("approval_status")
+    val approvalStatus: String? = null
 )
 
 @Serializable
