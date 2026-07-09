@@ -71,7 +71,10 @@ open class SessionHandler : KoinComponent {
 
         HttpClientProvider.token = jwt.ifEmpty { getEnvJwt() }
 
-        return if (type == KarikaType.VENDOR.name)
-            AppConfig.Dashboard else AppConfig.Main
+        return when (type) {
+            KarikaType.VENDOR.name -> AppConfig.Dashboard
+            KarikaType.SALES_REP.name -> AppConfig.SalesRep
+            else -> AppConfig.Main
+        }
     }
 }

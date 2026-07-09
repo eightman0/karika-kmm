@@ -20,6 +20,7 @@ import karika.distribucija.ba.ui.common.appVersion
 import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardComponent
+import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesDashboardComponent
 import karika.distribucija.ba.ui.view.shop.MainComponent
 import karika.distribucija.ba.ui.view.shop.menu.blog.BlogsComponent
 import karika.distribucija.ba.ui.view.shop.menu.blog.overview.BlogOverviewComponent
@@ -94,6 +95,11 @@ sealed class AppConfig {
 
     @Serializable
     data object Faq : AppConfig()
+
+    // sales_rep_side
+
+    @Serializable
+    data object SalesRep : AppConfig()
 }
 
 sealed class Child {
@@ -120,6 +126,9 @@ sealed class Child {
 
     //vendor_side
     class Dashboard(val component: DashboardComponent) : Child()
+
+    // sales_rep_side
+    class SalesRep(val component: SalesDashboardComponent) : Child()
 }
 
 class AppComponent(
@@ -242,6 +251,10 @@ class AppComponent(
 
             is AppConfig.Faq -> Child.Faq(
                 FaqComponent(componentContext, stateHolder)
+            )
+
+            is AppConfig.SalesRep -> Child.SalesRep(
+                SalesDashboardComponent(componentContext, stateHolder)
             )
         }
 

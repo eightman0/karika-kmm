@@ -3,6 +3,7 @@ package karika.distribucija.ba.ui.common
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.pop
+import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.HttpClientProvider
@@ -30,6 +31,7 @@ import karika.distribucija.ba.domain.model.TrackingPayload
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
+import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig
 import karika.distribucija.ba.ui.view.shop.MainConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -525,6 +527,22 @@ open class CommonComponent(
 
     fun dashBack() {
         stateHolder.dashNavigation.pop()
+    }
+
+    fun salesRepNavigate(config: SalesRepConfig, replace: Boolean = false) {
+        if (replace) {
+            stateHolder.salesRepNavigation.replaceAll(config)
+            return
+        }
+        stateHolder.salesRepNavigation.bringToFront(config)
+    }
+
+    fun salesRepPush(config: SalesRepConfig) {
+        stateHolder.salesRepNavigation.push(config)
+    }
+
+    fun salesRepBack() {
+        stateHolder.salesRepNavigation.pop()
     }
 
     fun showLoader() {

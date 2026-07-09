@@ -1,0 +1,41 @@
+package karika.distribucija.ba.domain.model
+
+import karika.distribucija.ba.ui.view.distributer.orders.toDateTime
+import karika.distribucija.ba.util.karikaPriceFormat
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class OnBehalfOrder(
+    @SerialName("order_id") val orderId: Long = 0,
+    @SerialName("increment_id") val incrementId: String = "",
+    @SerialName("customer_id") val customerId: Long = 0,
+    @SerialName("customer_name") val customerName: String? = null,
+    @SerialName("employee_id") val employeeId: Long? = null,
+    @SerialName("grand_total") val grandTotal: Float = 0f,
+    @SerialName("status") val status: String = "",
+    @SerialName("created_at") val createdAt: String? = null
+) {
+    fun displayName(): String = customerName ?: "Kupac #$customerId"
+
+    fun statusLabel(): String = when (status) {
+        "rejected"       -> "Odbijeno"
+        "approved"       -> "Odobreno"
+        "cancelled"      -> "Otkazano"
+        "pending"        -> "Na čekanju"
+        "processing"     -> "U obradi"
+        "bill-sent"      -> "Uplaćeno"
+        "estimate-sent"  -> "Čekanje na uplatu"
+        else             -> status.replaceFirstChar { it.uppercase() }
+    }
+
+    fun totalString(): String = karikaPriceFormat(grandTotal.toDouble()) + " KM"
+
+    fun date(): String = createdAt?.toDateTime() ?: ""
+}
+
+@Serializable
+data class OnBehalfOrderSearchResults(
+    @SerialName("items") val items: List<OnBehalfOrder> = emptyList(),
+    @SerialName("total_count") val totalCount: Long = 0
+)
