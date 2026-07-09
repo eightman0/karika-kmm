@@ -12,8 +12,10 @@ import karika.distribucija.ba.ui.view.salesrep.customers.SalesNewCustomerCompone
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesCustomerDetailComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminConversationComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminMessagesComponent
+import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminNewMessageComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerConversationComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerMessagesComponent
+import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerNewMessageComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalMessagesComponent
 import karika.distribucija.ba.ui.view.salesrep.operations.SalesOperationsComponent
 import karika.distribucija.ba.ui.view.salesrep.orders.SalesOrdersComponent
@@ -86,6 +88,12 @@ class SalesDashboardComponent(
             is SalesRepConfig.CustomerConversation -> SalesChild.CustomerConversation(
                 SalesCustomerConversationComponent(componentContext, stateHolder, config.conversation)
             )
+            is SalesRepConfig.AdminNewMessage -> SalesChild.AdminNewMessage(
+                SalesAdminNewMessageComponent(componentContext, stateHolder)
+            )
+            is SalesRepConfig.CustomerNewMessage -> SalesChild.CustomerNewMessage(
+                SalesCustomerNewMessageComponent(componentContext, stateHolder)
+            )
         }
 }
 
@@ -103,6 +111,8 @@ sealed class SalesRepConfig {
     @Serializable data object NewCustomer : SalesRepConfig()
     @Serializable data class AdminConversation(val conversation: Conversation) : SalesRepConfig()
     @Serializable data class CustomerConversation(val conversation: Conversation) : SalesRepConfig()
+    @Serializable data object AdminNewMessage : SalesRepConfig()
+    @Serializable data object CustomerNewMessage : SalesRepConfig()
 }
 
 sealed class SalesChild {
@@ -118,4 +128,6 @@ sealed class SalesChild {
     data class NewCustomer(val component: SalesNewCustomerComponent) : SalesChild()
     data class AdminConversation(val component: SalesAdminConversationComponent) : SalesChild()
     data class CustomerConversation(val component: SalesCustomerConversationComponent) : SalesChild()
+    data class AdminNewMessage(val component: SalesAdminNewMessageComponent) : SalesChild()
+    data class CustomerNewMessage(val component: SalesCustomerNewMessageComponent) : SalesChild()
 }

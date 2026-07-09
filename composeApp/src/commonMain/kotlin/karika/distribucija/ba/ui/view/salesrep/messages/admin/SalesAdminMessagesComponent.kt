@@ -38,7 +38,7 @@ class SalesAdminMessagesComponent(
     }
 
     fun openNewMessage() {
-        // TODO: navigate to new message compose
+        salesRepPush(SalesRepConfig.AdminNewMessage)
     }
 
     fun goBack() = salesRepBack()

@@ -116,16 +116,41 @@ fun SalesCustomerMessagesView(component: SalesCustomerMessagesComponent) {
             ) {
                 if (filtered.isEmpty()) {
                     item {
-                        Box(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 48.dp),
-                            contentAlignment = Alignment.Center
+                                .padding(vertical = 64.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(CircleShape)
+                                    .background(KarikaColors.Gray10),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = vectorResource(Res.drawable.ic_messages),
+                                    contentDescription = null,
+                                    tint = KarikaColors.Gray6,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
                             KarikaText(
-                                text = "Nema poruka",
+                                text = when (filter) {
+                                    "sent"     -> "Nema poslanih poruka"
+                                    "received" -> "Nema primljenih poruka"
+                                    else       -> "Nema poruka"
+                                },
+                                color = KarikaColors.Gray2,
+                                textSize = 15.sp,
+                                fontWeight = FontWeight.W600
+                            )
+                            KarikaText(
+                                text = "Ovdje će se prikazati vaše poruke\nsa kupcima.",
                                 color = KarikaColors.Gray6,
-                                textSize = 14.sp,
+                                textSize = 13.sp,
                                 fontWeight = FontWeight.W400
                             )
                         }

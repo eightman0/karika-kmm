@@ -47,6 +47,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_location
@@ -417,6 +418,9 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                 modifier = Modifier
                     .size(24.dp)
                     .align(Alignment.Center)
+                    .onClick {
+                        component.printOrder()
+                    }
             )
         }
     }
@@ -574,14 +578,16 @@ private fun PriceCell(
 // ── Shared composables ────────────────────────────────────────────────────────
 
 private fun statusDotColor(status: String): Color = when (status) {
-    "approved"      -> KarikaColors.Green3
-    "rejected"      -> KarikaColors.Error
-    "cancelled"     -> KarikaColors.Gray6
+    "approved" -> KarikaColors.Green3
+    "rejected" -> KarikaColors.Error
+    "cancelled" -> KarikaColors.Gray6
     "pending",
-    "processing"    -> KarikaColors.Blue
+    "processing" -> KarikaColors.Blue
+
     "bill-sent",
     "estimate-sent" -> KarikaColors.Orange
-    else            -> KarikaColors.Gray6
+
+    else -> KarikaColors.Gray6
 }
 
 @Composable
