@@ -49,7 +49,6 @@ import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_location
 import karikav2.composeapp.generated.resources.ic_person
 import karikav2.composeapp.generated.resources.ic_phone
@@ -89,63 +88,6 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 96.dp)
         ) {
-            // ── Top bar ──────────────────────────────────────────────────────────
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(KarikaColors.White)
-                        .padding(horizontal = 8.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) { component.goBack() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_arrow_back),
-                            contentDescription = "Nazad",
-                            tint = KarikaColors.Blue,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Spacer(Modifier.width(4.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        KarikaText(
-                            text = "Narudžba #${order.incrementId}",
-                            color = KarikaColors.Gray2,
-                            textSize = 18.sp,
-                            fontWeight = FontWeight.W700,
-                            maxLines = 1,
-                            textOverflow = TextOverflow.Ellipsis
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(statusDotColor(order.status))
-                            )
-                            KarikaText(
-                                text = order.statusLabel(),
-                                color = statusDotColor(order.status),
-                                textSize = 12.sp,
-                                fontWeight = FontWeight.W600
-                            )
-                        }
-                    }
-                }
-            }
-
             // ── Informacije o narudžbi ───────────────────────────────────────────
             item {
                 Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {

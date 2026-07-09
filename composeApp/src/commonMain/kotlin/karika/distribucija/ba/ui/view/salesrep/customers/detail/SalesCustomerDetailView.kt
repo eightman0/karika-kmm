@@ -42,7 +42,6 @@ import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_add_plus
-import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_customers
 import karikav2.composeapp.generated.resources.ic_delete
 import karikav2.composeapp.generated.resources.ic_email
@@ -62,45 +61,6 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 96.dp)
         ) {
-            // ── Top bar ────────────────────────────────────────────────────────
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(KarikaColors.White)
-                        .padding(horizontal = 8.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) { component.goBack() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_arrow_back),
-                            contentDescription = "Nazad",
-                            tint = KarikaColors.Blue,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Spacer(Modifier.width(4.dp))
-                    KarikaText(
-                        text = customer.fullName,
-                        color = KarikaColors.Blue,
-                        textSize = 18.sp,
-                        fontWeight = FontWeight.W700,
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1,
-                        textOverflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
             // ── Profile card ───────────────────────────────────────────────────
             item {
                 Column(

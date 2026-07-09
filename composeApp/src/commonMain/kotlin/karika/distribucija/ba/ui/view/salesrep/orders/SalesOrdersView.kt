@@ -104,7 +104,6 @@ fun SalesOrdersView(component: SalesOrdersComponent) {
     val coroutineScope = rememberCoroutineScope()
 
     val orders by component.orders.collectAsState()
-    val totalCount by component.totalCount.collectAsState()
     val isLoadingMore by component.isLoadingMore.collectAsState()
     val searchText by component.searchQuery.collectAsState()
     val selectedStatus by component.statusFilter.collectAsState()
@@ -114,42 +113,10 @@ fun SalesOrdersView(component: SalesOrdersComponent) {
             .background(KarikaColors.Gray20)
             .fillMaxSize()
     ) {
-        // ── Header ─────────────────────────────────────────────────────────────
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    KarikaText(
-                        text = "Upravljanje narudžbama",
-                        color = KarikaColors.Gray2,
-                        textSize = 22.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                    KarikaText(
-                        text = "Pregledajte i upravljajte narudžbama kupaca.",
-                        color = KarikaColors.Gray6,
-                        textSize = 13.sp,
-                        fontWeight = FontWeight.W400
-                    )
-                }
-                if (totalCount > 0) {
-                    KarikaText(
-                        text = "$totalCount",
-                        color = KarikaColors.Gray7,
-                        textSize = 12.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                }
-            }
-        }
-
         // ── Search + Filteri bar ───────────────────────────────────────────────
         Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(16.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(KarikaColors.White)
                 .padding(8.dp),

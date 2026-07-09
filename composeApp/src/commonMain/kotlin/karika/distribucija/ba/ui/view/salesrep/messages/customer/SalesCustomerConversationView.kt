@@ -9,24 +9,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,7 +37,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Message
@@ -51,8 +45,6 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_attachment
-import karikav2.composeapp.generated.resources.ic_arrow_back
-import karikav2.composeapp.generated.resources.ic_notifications
 import karikav2.composeapp.generated.resources.ic_send_receipt
 import org.jetbrains.compose.resources.vectorResource
 
@@ -84,70 +76,6 @@ fun SalesCustomerConversationView(component: SalesCustomerConversationComponent)
             .fillMaxSize()
             .background(KarikaColors.Gray20)
     ) {
-        // ── Top bar ────────────────────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(KarikaColors.White)
-                .padding(horizontal = 8.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { component.goBack() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_arrow_back),
-                    contentDescription = "Nazad",
-                    tint = KarikaColors.Blue,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            Spacer(Modifier.width(4.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                KarikaText(
-                    text = component.conversation.customerName(),
-                    color = KarikaColors.Gray2,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W700,
-                    maxLines = 1,
-                    textOverflow = TextOverflow.Ellipsis
-                )
-                if (!component.conversation.subject.isNullOrBlank()) {
-                    KarikaText(
-                        text = component.conversation.subject ?: "",
-                        color = KarikaColors.Gray6,
-                        textSize = 12.sp,
-                        fontWeight = FontWeight.W400,
-                        maxLines = 1,
-                        textOverflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-            Spacer(Modifier.width(4.dp))
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_notifications),
-                    contentDescription = "Obavještenja",
-                    tint = KarikaColors.Blue,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
-
-        HorizontalDivider(color = KarikaColors.Gray9, thickness = 1.dp)
-
         // ── Messages ──────────────────────────────────────────────────────────
         LazyColumn(
             state = listState,

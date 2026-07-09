@@ -40,7 +40,6 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_add_plus
-import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_arrow_right
 import karikav2.composeapp.generated.resources.ic_messages
 import org.jetbrains.compose.resources.vectorResource
@@ -76,42 +75,7 @@ fun SalesCustomerMessagesView(component: SalesCustomerMessagesComponent) {
 
         Column(modifier = Modifier.fillMaxSize()) {
 
-            // ── Top bar ────────────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(KarikaColors.White)
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { component.goBack() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_arrow_back),
-                        contentDescription = "Nazad",
-                        tint = KarikaColors.Blue,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                Spacer(Modifier.width(4.dp))
-                KarikaText(
-                    text = "Poruke kupaca",
-                    color = KarikaColors.Blue,
-                    textSize = 18.sp,
-                    fontWeight = FontWeight.W700,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            // ── Filter chips ───────────────────────────────────────────────────
+                // ── Filter chips ───────────────────────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
