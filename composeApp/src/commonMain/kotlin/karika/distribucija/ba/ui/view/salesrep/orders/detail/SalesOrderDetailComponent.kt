@@ -7,6 +7,7 @@ import karika.distribucija.ba.domain.model.OnBehalfOrder
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.openPdf
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,6 +39,7 @@ class SalesOrderDetailComponent(
                         hideLoader()
                         _vendorOrder.value = result.data
                     }
+
                     is ResultState.Error -> {
                         hideLoader()
                         showErrorMessage(result.message)
@@ -70,6 +72,7 @@ class SalesOrderDetailComponent(
                         _isSendingComment.value = false
                         loadComments()
                     }
+
                     is ResultState.Error -> {
                         _isSendingComment.value = false
                         showErrorMessage(result.message)
@@ -80,4 +83,25 @@ class SalesOrderDetailComponent(
     }
 
     fun goBack() = salesRepBack()
+
+    fun printOrder() {
+        scope.launch {
+            repository.getPdf(
+                orderId = order.incrementId
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> showLoader()
+                    is ResultState.Success -> {
+                        hideLoader()
+                        openPdf(result.data)
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message)
+                    }
+                }
+            }
+        }
+    }
 }

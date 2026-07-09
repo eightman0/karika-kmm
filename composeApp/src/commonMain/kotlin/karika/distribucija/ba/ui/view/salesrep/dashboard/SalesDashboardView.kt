@@ -32,6 +32,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +58,8 @@ import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesCustomerDet
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesDiscountFormView
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminConversationView
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminMessagesView
+import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminNewMessageView
+import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerNewMessageView
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerConversationView
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerMessagesView
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalMessagesView
@@ -310,6 +314,23 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             title = child.component.conversation.subject ?: "Poruka",
                             onBack = { child.component.goBack() }
                         )
+                        is SalesChild.AdminNewMessage -> {
+                            val threadId by child.component.threadId.collectAsState()
+                            val subject by child.component.subject.collectAsState()
+                            SalesDetailTopBar(
+                                title = if (threadId != null && subject.isNotBlank()) subject else "Nova poruka",
+                                onBack = { child.component.goBack() }
+                            )
+                        }
+
+                        is SalesChild.CustomerNewMessage -> {
+                            val threadId by child.component.threadId.collectAsState()
+                            val subject by child.component.subject.collectAsState()
+                            SalesDetailTopBar(
+                                title = if (threadId != null && subject.isNotBlank()) subject else "Nova poruka",
+                                onBack = { child.component.goBack() }
+                            )
+                        }
 
                         is SalesChild.CustomerConversation -> SalesDetailTopBar(
                             title = child.component.conversation.customerName(),
@@ -333,6 +354,8 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         is SalesChild.NewCustomer -> SalesNewCustomerView(child.component)
                         is SalesChild.AdminConversation -> SalesAdminConversationView(child.component)
                         is SalesChild.CustomerConversation -> SalesCustomerConversationView(child.component)
+                        is SalesChild.AdminNewMessage -> SalesAdminNewMessageView(child.component)
+                        is SalesChild.CustomerNewMessage -> SalesCustomerNewMessageView(child.component)
                     }
                 }
             }
