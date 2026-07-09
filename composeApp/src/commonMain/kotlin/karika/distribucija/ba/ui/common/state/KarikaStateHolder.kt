@@ -9,6 +9,8 @@ import karika.distribucija.ba.ui.common.state.customer.CustomerNotificationHandl
 import karika.distribucija.ba.ui.common.state.customer.CustomerSpecificHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorNotificationHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorSpecificHandler
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
     var sessionHandler = SessionHandler()
@@ -22,6 +24,21 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
     var cartHandler = CartHandler(commonHandler)
 
     val imagePreview = mutableStateOf<Any?>(null)
+
+    private val _refreshDiscounts = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val refreshDiscounts = _refreshDiscounts.asSharedFlow()
+
+    fun refreshDiscounts() { _refreshDiscounts.tryEmit(Unit) }
+
+    private val _refreshCustomerMessages = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val refreshCustomerMessages = _refreshCustomerMessages.asSharedFlow()
+
+    fun refreshCustomerMessages() { _refreshCustomerMessages.tryEmit(Unit) }
+
+    private val _refreshAdminMessages = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val refreshAdminMessages = _refreshAdminMessages.asSharedFlow()
+
+    fun refreshAdminMessages() { _refreshAdminMessages.tryEmit(Unit) }
 
     fun logout() {
         sessionHandler = SessionHandler()

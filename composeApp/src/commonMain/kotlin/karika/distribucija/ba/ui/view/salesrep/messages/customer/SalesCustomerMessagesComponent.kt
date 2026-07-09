@@ -24,6 +24,9 @@ class SalesCustomerMessagesComponent(
 
     init {
         load()
+        scope.launch {
+            stateHolder.refreshCustomerMessages.collect { load() }
+        }
     }
 
     fun setFilter(f: String) {

@@ -114,6 +114,7 @@ class SalesCustomerNewMessageComponent(
                             if (newThreadId != null) {
                                 _threadId.value = newThreadId
                                 loadMessages(newThreadId)
+                                stateHolder.refreshCustomerMessages()
                             }
                         } else {
                             loadMessages(currentThread)

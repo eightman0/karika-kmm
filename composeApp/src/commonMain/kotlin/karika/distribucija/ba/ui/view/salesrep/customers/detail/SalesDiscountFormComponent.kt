@@ -167,6 +167,7 @@ class SalesDiscountFormComponent(
                     is ResultState.Loading -> _isSaving.value = true
                     is ResultState.Success -> {
                         _isSaving.value = false
+                        stateHolder.refreshDiscounts()
                         salesRepBack()
                     }
                     is ResultState.Error -> {

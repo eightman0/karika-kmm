@@ -39,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -74,7 +73,7 @@ private fun String?.formatTime(): String {
 
 private fun String.isImageFile() = lowercase().let {
     it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".png") ||
-    it.endsWith(".gif") || it.endsWith(".webp")
+            it.endsWith(".gif") || it.endsWith(".webp")
 }
 
 // ── View ───────────────────────────────────────────────────────────────────────
@@ -376,7 +375,10 @@ fun SalesAdminNewMessageView(component: SalesAdminNewMessageComponent) {
                     }
                 }
 
-                HorizontalDivider(color = KarikaColors.Gray10, modifier = Modifier.padding(horizontal = 20.dp))
+                HorizontalDivider(
+                    color = KarikaColors.Gray10,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
 
                 Row(
                     modifier = Modifier
