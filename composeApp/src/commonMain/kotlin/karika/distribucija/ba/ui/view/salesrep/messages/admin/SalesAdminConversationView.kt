@@ -9,20 +9,28 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,17 +47,24 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.domain.HttpClientProvider.chatImage
+import karika.distribucija.ba.domain.model.FileData
 import karika.distribucija.ba.domain.model.Message
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_attachment
+import karikav2.composeapp.generated.resources.ic_cancel_circle
+import karikav2.composeapp.generated.resources.ic_pdf
+import karikav2.composeapp.generated.resources.ic_photo
 import karikav2.composeapp.generated.resources.ic_send_receipt
+import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.vectorResource
 
-// ── Time formatter ─────────────────────────────────────────────────────────────
-// Extracts HH:mm from "YYYY-MM-DD HH:mm:ss"
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
 private fun String?.formatTime(): String {
     if (this == null) return ""
     val timePart = this.split(" ").getOrNull(1) ?: return ""
@@ -57,20 +72,26 @@ private fun String?.formatTime(): String {
     return if (parts.size >= 2) "${parts[0]}:${parts[1]}" else timePart
 }
 
+private fun String.isImageFile() = lowercase().let {
+    it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".png") ||
+    it.endsWith(".gif") || it.endsWith(".webp")
+}
 
+// ── View ───────────────────────────────────────────────────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
     val messages by component.messages.collectAsState()
+    val attachment by component.attachment.collectAsState()
     val listState = rememberLazyListState()
     val keyboard = LocalSoftwareKeyboardController.current
 
     var text by remember { mutableStateOf("") }
+    var showAttachSheet by remember { mutableStateOf(false) }
 
-    // Auto-scroll to bottom on new messages
     LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) {
-            listState.scrollToItem(messages.size - 1)
-        }
+        if (messages.isNotEmpty()) listState.scrollToItem(messages.size - 1)
     }
 
     Column(
@@ -88,10 +109,7 @@ fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(messages) { message ->
-                MessageBubble(
-                    message = message,
-                    vendorName = component.conversation.senderName()
-                )
+                MessageBubble(message = message, vendorName = component.conversation.senderName())
             }
         }
 
@@ -104,6 +122,49 @@ fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
                 .navigationBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
+            // Attachment thumbnail
+            if (attachment != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(KarikaColors.Blue.copy(alpha = 0.08f))
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = vectorResource(
+                            if (attachment!!.first.isImageFile()) Res.drawable.ic_photo
+                            else Res.drawable.ic_attachment
+                        ),
+                        contentDescription = null,
+                        tint = KarikaColors.Blue,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    KarikaText(
+                        text = attachment!!.first.take(32),
+                        color = KarikaColors.Blue,
+                        textSize = 12.sp,
+                        fontWeight = FontWeight.W500,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        imageVector = vectorResource(Res.drawable.ic_cancel_circle),
+                        contentDescription = "Ukloni prilog",
+                        tint = KarikaColors.Gray6,
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) { component.attachment.value = null }
+                    )
+                }
+            }
+
             // Text input row
             Row(
                 modifier = Modifier
@@ -122,13 +183,13 @@ fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
-                        ) { component.pickFile() },
+                        ) { showAttachSheet = true },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = vectorResource(Res.drawable.ic_attachment),
                         contentDescription = "Priloži",
-                        tint = KarikaColors.Gray6,
+                        tint = if (attachment != null) KarikaColors.Blue else KarikaColors.Gray6,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -167,11 +228,14 @@ fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
                     modifier = Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(if (text.isNotBlank()) KarikaColors.Blue else KarikaColors.Gray9)
+                        .background(
+                            if (text.isNotBlank() || attachment != null) KarikaColors.Blue
+                            else KarikaColors.Gray9
+                        )
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
-                            enabled = text.isNotBlank()
+                            enabled = text.isNotBlank() || attachment != null
                         ) {
                             keyboard?.hide()
                             component.sendMessage(text)
@@ -187,8 +251,169 @@ fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
                     )
                 }
             }
-
         }
+    }
+
+    // ── Attach bottom sheet ────────────────────────────────────────────────────
+    if (showAttachSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showAttachSheet = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = KarikaColors.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(bottom = 24.dp)
+            ) {
+                KarikaText(
+                    text = "Dodaj prilog",
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W700,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
+                )
+                HorizontalDivider(color = KarikaColors.Gray9)
+                Spacer(Modifier.height(8.dp))
+
+                // File option
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            showAttachSheet = false
+                            component.pickFile()
+                        }
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(KarikaColors.Blue.copy(alpha = 0.10f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_attachment),
+                            contentDescription = null,
+                            tint = KarikaColors.Blue,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Column {
+                        KarikaText(
+                            text = "Fajl",
+                            color = KarikaColors.Gray2,
+                            textSize = 15.sp,
+                            fontWeight = FontWeight.W600
+                        )
+                        KarikaText(
+                            text = "Dokument, PDF, tabela...",
+                            color = KarikaColors.Gray6,
+                            textSize = 12.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                }
+
+                HorizontalDivider(color = KarikaColors.Gray10, modifier = Modifier.padding(horizontal = 20.dp))
+
+                // Photo option
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            showAttachSheet = false
+                            component.pickPhoto()
+                        }
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(KarikaColors.Blue.copy(alpha = 0.10f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_photo),
+                            contentDescription = null,
+                            tint = KarikaColors.Blue,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Column {
+                        KarikaText(
+                            text = "Slika",
+                            color = KarikaColors.Gray2,
+                            textSize = 15.sp,
+                            fontWeight = FontWeight.W600
+                        )
+                        KarikaText(
+                            text = "Fotografija iz galerije ili kamere",
+                            color = KarikaColors.Gray6,
+                            textSize = 12.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ── Attachment renderer ────────────────────────────────────────────────────────
+
+@Composable
+private fun MessageAttachment(images: String?, bubbleColor: androidx.compose.ui.graphics.Color) {
+    val filename = images
+        ?.takeIf { it.isNotEmpty() }
+        ?.let { runCatching { Json.decodeFromString<FileData>(it) }.getOrNull() }
+        ?.filename
+        ?.firstOrNull()
+        ?.takeIf { it.isNotEmpty() }
+        ?: return
+
+    if (filename.endsWith("pdf", ignoreCase = true)) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_pdf),
+                contentDescription = null,
+                tint = KarikaColors.White,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            KarikaText(
+                text = filename,
+                color = KarikaColors.White,
+                textSize = 12.sp,
+                fontWeight = FontWeight.W500
+            )
+        }
+    } else {
+        KarikaImage(
+            modifier = Modifier
+                .widthIn(max = 220.dp)
+                .padding(8.dp)
+                .clip(RoundedCornerShape(12.dp)),
+            model = chatImage(filename),
+            contentScale = ContentScale.Inside
+        )
     }
 }
 
@@ -199,7 +424,6 @@ private fun MessageBubble(message: Message, vendorName: String) {
     val isVendor = message.isVendorMessage()
 
     if (isVendor) {
-        // My message — right aligned, Blue bg
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.End
@@ -221,12 +445,13 @@ private fun MessageBubble(message: Message, vendorName: String) {
                         )
                     )
                     .background(KarikaColors.Blue)
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
+                MessageAttachment(images = message.images, bubbleColor = KarikaColors.Blue)
                 if (!message.message.isNullOrEmpty()) {
                     HtmlTextWithStyles(
                         html = message.message(),
-                        textColor = KarikaColors.White
+                        textColor = KarikaColors.White,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
                     )
                 }
             }
@@ -239,7 +464,6 @@ private fun MessageBubble(message: Message, vendorName: String) {
             )
         }
     } else {
-        // Admin message — left aligned, Primary (pink) bg
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start
@@ -261,12 +485,13 @@ private fun MessageBubble(message: Message, vendorName: String) {
                         )
                     )
                     .background(KarikaColors.Primary)
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
+                MessageAttachment(images = message.images, bubbleColor = KarikaColors.Primary)
                 if (!message.message.isNullOrEmpty()) {
                     HtmlTextWithStyles(
                         html = message.message(),
-                        textColor = KarikaColors.White
+                        textColor = KarikaColors.White,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
                     )
                 }
             }
