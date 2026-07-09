@@ -59,6 +59,7 @@ class SalesAdminNewMessageComponent(
                             if (newThreadId != null) {
                                 _threadId.value = newThreadId
                                 loadMessages(newThreadId)
+                                stateHolder.refreshAdminMessages()
                             }
                         } else {
                             loadMessages(currentThread)

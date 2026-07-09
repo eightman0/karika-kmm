@@ -27,6 +27,9 @@ class SalesAdminMessagesComponent(
 
     init {
         load()
+        scope.launch {
+            stateHolder.refreshAdminMessages.collect { load() }
+        }
     }
 
     fun setFilter(f: String) {

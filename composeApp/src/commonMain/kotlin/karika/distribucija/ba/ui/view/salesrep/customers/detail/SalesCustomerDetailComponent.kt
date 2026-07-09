@@ -25,6 +25,9 @@ class SalesCustomerDetailComponent(
 
     init {
         loadDiscounts()
+        scope.launch {
+            stateHolder.refreshDiscounts.collect { loadDiscounts() }
+        }
     }
 
     fun loadDiscounts() {
