@@ -21,10 +21,10 @@ fun SalesInternalMessagesView(component: SalesInternalMessagesComponent) {
         contentAlignment = Alignment.Center
     ) {
         KarikaText(
-            text = "Interne poruke",
-            color = KarikaColors.Gray2,
-            textSize = 18.sp,
-            fontWeight = FontWeight.W600
+            text = "Uskoro dostupno",
+            color = KarikaColors.Gray7,
+            textSize = 14.sp,
+            fontWeight = FontWeight.W400
         )
     }
 }

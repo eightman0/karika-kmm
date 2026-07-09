@@ -48,9 +48,12 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaLogo
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.salesrep.customers.SalesCustomersView
+import karika.distribucija.ba.ui.view.salesrep.customers.SalesNewCustomerView
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesCustomerDetailView
+import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesDiscountFormView
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminConversationView
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminMessagesView
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerConversationView
@@ -58,11 +61,10 @@ import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerMe
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalMessagesView
 import karika.distribucija.ba.ui.view.salesrep.operations.SalesOperationsView
 import karika.distribucija.ba.ui.view.salesrep.orders.SalesOrdersView
-import karika.distribucija.ba.ui.view.salesrep.customers.SalesNewCustomerView
-import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesDiscountFormView
 import karika.distribucija.ba.ui.view.salesrep.orders.detail.SalesOrderDetailView
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_action
+import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_customers
 import karikav2.composeapp.generated.resources.ic_email
 import karikav2.composeapp.generated.resources.ic_logout
@@ -96,20 +98,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             // Avatar circle with initials
-                            Box(
-                                modifier = Modifier
-                                    .size(52.dp)
-                                    .clip(CircleShape)
-                                    .background(KarikaColors.Blue),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                KarikaText(
-                                    text = "K",
-                                    color = KarikaColors.White,
-                                    textSize = 20.sp,
-                                    fontWeight = FontWeight.W700
-                                )
-                            }
+                            KarikaLogo(size = 52)
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f)) {
                                 KarikaText(
@@ -171,7 +160,10 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             selected = navState.value.active.instance is SalesChild.CustomerMessages,
                             badge = 0, // TODO: wire to unread count
                             onClick = {
-                                component.salesRepNavigate(SalesRepConfig.CustomerMessages, replace = true)
+                                component.salesRepNavigate(
+                                    SalesRepConfig.CustomerMessages,
+                                    replace = true
+                                )
                                 coroutineScope.launch { drawerState.close() }
                             }
                         )
@@ -180,7 +172,10 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             text = "Poruke admina",
                             selected = navState.value.active.instance is SalesChild.AdminMessages,
                             onClick = {
-                                component.salesRepNavigate(SalesRepConfig.AdminMessages, replace = true)
+                                component.salesRepNavigate(
+                                    SalesRepConfig.AdminMessages,
+                                    replace = true
+                                )
                                 coroutineScope.launch { drawerState.close() }
                             }
                         )
@@ -189,7 +184,10 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             text = "Interne poruke",
                             selected = navState.value.active.instance is SalesChild.InternalMessages,
                             onClick = {
-                                component.salesRepNavigate(SalesRepConfig.InternalMessages, replace = true)
+                                component.salesRepNavigate(
+                                    SalesRepConfig.InternalMessages,
+                                    replace = true
+                                )
                                 coroutineScope.launch { drawerState.close() }
                             }
                         )
@@ -198,7 +196,10 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             text = "Operacije",
                             selected = navState.value.active.instance is SalesChild.Operations,
                             onClick = {
-                                component.salesRepNavigate(SalesRepConfig.Operations, replace = true)
+                                component.salesRepNavigate(
+                                    SalesRepConfig.Operations,
+                                    replace = true
+                                )
                                 coroutineScope.launch { drawerState.close() }
                             }
                         )
@@ -272,10 +273,49 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
             }
         ) {
             KarikaScaffold(
-                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
+                modifier = Modifier
+                    .hideKeyboard()
+                    .windowInsetsPadding(WindowInsets.safeDrawing),
                 containerColor = KarikaColors.White,
                 topBar = {
-                    SalesTopBar(onMenuClick = { coroutineScope.launch { drawerState.open() } })
+                    val menuClick = { coroutineScope.launch { drawerState.open() } }
+                    when (val child = navState.value.active.instance) {
+                        is SalesChild.Orders -> SalesRootTopBar("Upravljanje narudžbama") { menuClick() }
+                        is SalesChild.Customers -> SalesRootTopBar("Upravljanje kupcima") { menuClick() }
+                        is SalesChild.CustomerMessages -> SalesRootTopBar("Poruke kupaca") { menuClick() }
+                        is SalesChild.AdminMessages -> SalesRootTopBar("Poruke admina") { menuClick() }
+                        is SalesChild.InternalMessages -> SalesRootTopBar("Interne poruke") { menuClick() }
+                        is SalesChild.Operations -> SalesRootTopBar("Operacije") { menuClick() }
+                        is SalesChild.CustomerDetail -> SalesDetailTopBar(
+                            title = child.component.customer.fullName,
+                            onBack = { child.component.goBack() }
+                        )
+
+                        is SalesChild.OrderDetail -> SalesDetailTopBar(
+                            title = "Narudžba #${child.component.order.incrementId}",
+                            onBack = { child.component.goBack() }
+                        )
+
+                        is SalesChild.DiscountForm -> SalesDetailTopBar(
+                            title = if (child.component.isEdit) "Izmijeni popust" else "Novi popust",
+                            onBack = { child.component.goBack() }
+                        )
+
+                        is SalesChild.NewCustomer -> SalesDetailTopBar(
+                            title = "Novi kupac",
+                            onBack = { child.component.goBack() }
+                        )
+
+                        is SalesChild.AdminConversation -> SalesDetailTopBar(
+                            title = child.component.conversation.subject ?: "Poruka",
+                            onBack = { child.component.goBack() }
+                        )
+
+                        is SalesChild.CustomerConversation -> SalesDetailTopBar(
+                            title = child.component.conversation.customerName(),
+                            onBack = { child.component.goBack() }
+                        )
+                    }
                 },
                 component = component
             ) {
@@ -324,6 +364,60 @@ private fun SalesTopBar(onMenuClick: () -> Unit) {
                 imageVector = vectorResource(Res.drawable.ic_menu),
                 contentDescription = "",
                 tint = KarikaColors.Gray2
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SalesRootTopBar(title: String, onMenuClick: () -> Unit = {}) {
+    TopAppBar(
+        modifier = Modifier.fillMaxWidth(),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = KarikaColors.White),
+        title = {
+            KarikaText(
+                text = title,
+                color = KarikaColors.Gray2,
+                textSize = 18.sp,
+                fontWeight = FontWeight.W700
+            )
+        },
+        navigationIcon = {
+            Icon(
+                modifier = Modifier
+                    .onClick { onMenuClick() }
+                    .padding(horizontal = 4.dp),
+                imageVector = vectorResource(Res.drawable.ic_menu),
+                contentDescription = "",
+                tint = KarikaColors.Gray2
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SalesDetailTopBar(title: String, onBack: () -> Unit) {
+    TopAppBar(
+        modifier = Modifier.fillMaxWidth(),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = KarikaColors.White),
+        title = {
+            KarikaText(
+                text = title,
+                color = KarikaColors.Gray2,
+                textSize = 18.sp,
+                fontWeight = FontWeight.W700
+            )
+        },
+        navigationIcon = {
+            Icon(
+                modifier = Modifier
+                    .onClick { onBack() }
+                    .padding(horizontal = 4.dp),
+                imageVector = vectorResource(Res.drawable.ic_arrow_back),
+                contentDescription = "Nazad",
+                tint = KarikaColors.Blue
             )
         }
     )

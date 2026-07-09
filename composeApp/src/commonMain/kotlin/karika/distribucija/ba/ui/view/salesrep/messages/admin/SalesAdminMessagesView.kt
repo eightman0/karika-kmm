@@ -41,7 +41,6 @@ import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.YSpacer16
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_add_plus
-import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_arrow_right
 import karikav2.composeapp.generated.resources.ic_email
 import org.jetbrains.compose.resources.vectorResource
@@ -78,41 +77,6 @@ fun SalesAdminMessagesView(component: SalesAdminMessagesComponent) {
     Box(modifier = Modifier.fillMaxSize().background(KarikaColors.Gray20)) {
 
         Column(modifier = Modifier.fillMaxSize()) {
-
-            // ── Top bar ────────────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(KarikaColors.White)
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { component.goBack() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_arrow_back),
-                        contentDescription = "Nazad",
-                        tint = KarikaColors.Blue,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                Spacer(Modifier.width(4.dp))
-                KarikaText(
-                    text = "Poruke admina",
-                    color = KarikaColors.Blue,
-                    textSize = 18.sp,
-                    fontWeight = FontWeight.W700,
-                    modifier = Modifier.weight(1f)
-                )
-            }
 
             // ── Filter chips ───────────────────────────────────────────────────
             Row(
