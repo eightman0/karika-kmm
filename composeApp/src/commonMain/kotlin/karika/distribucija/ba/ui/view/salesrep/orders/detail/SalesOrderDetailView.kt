@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,14 +41,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.YSpacer8
+import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.components.rememberImeVisible
 import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_location
@@ -65,6 +69,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
     val comments by component.comments.collectAsState()
     val isSendingComment by component.isSendingComment.collectAsState()
     var commentText by remember { mutableStateOf("") }
+    val imeVisible = rememberImeVisible()
 
     // Derived values — prefer vendorOrder fields when loaded, fall back to OnBehalfOrder
     val vpcTotal = vendorOrder?.orderTotal?.toDoubleOrNull()
@@ -82,6 +87,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
 
     Box(
         modifier = Modifier
+            .hideKeyboard()
             .fillMaxSize()
             .background(KarikaColors.Gray20)
     ) {
@@ -346,7 +352,6 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                                 ),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(100.dp)
                             )
                         }
 
@@ -398,30 +403,32 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
         }
 
         // ── Print FAB ────────────────────────────────────────────────────────────
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .navigationBarsPadding()
-                .padding(20.dp)
-                .size(56.dp)
-                .clip(RoundedCornerShape(18.dp))
-                .background(KarikaColors.Blue)
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {}
-        ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_print),
-                contentDescription = "Printaj",
-                tint = KarikaColors.White,
+        if (!imeVisible) {
+            Box(
                 modifier = Modifier
-                    .size(24.dp)
-                    .align(Alignment.Center)
-                    .onClick {
-                        component.printOrder()
-                    }
-            )
+                    .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
+                    .padding(20.dp)
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(KarikaColors.Blue)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {}
+            ) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_print),
+                    contentDescription = "Printaj",
+                    tint = KarikaColors.White,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(Alignment.Center)
+                        .onClick {
+                            component.printOrder()
+                        }
+                )
+            }
         }
     }
 }

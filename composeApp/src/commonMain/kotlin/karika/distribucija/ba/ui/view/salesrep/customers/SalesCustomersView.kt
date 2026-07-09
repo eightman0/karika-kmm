@@ -57,7 +57,6 @@ import karikav2.composeapp.generated.resources.ic_cancel
 import karikav2.composeapp.generated.resources.ic_check_circle_filled
 import karikav2.composeapp.generated.resources.ic_email
 import karikav2.composeapp.generated.resources.ic_filter_alt
-import karikav2.composeapp.generated.resources.ic_person
 import karikav2.composeapp.generated.resources.ic_search
 import karikav2.composeapp.generated.resources.ic_shopping_cart
 import karikav2.composeapp.generated.resources.ic_storefront
@@ -75,10 +74,10 @@ private fun String?.initials(): String =
 
 /** Partnership status values used for filtering */
 private val statusOptions = listOf(
-    "active"   to "Aktivno",
-    "pending"  to "Na čekanju",
+    "active" to "Aktivno",
+    "pending" to "Na čekanju",
     "rejected" to "Odbijeno",
-    "revoked"  to "Opozvano"
+    "revoked" to "Opozvano"
 )
 
 // ── Screen ───────────────────────────────────────────────────────────────────
@@ -165,7 +164,8 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
             }
 
             // Status filter chip — replaces generic Filter
-            val statusLabel = statusOptions.firstOrNull { it.first == selectedStatus }?.second ?: "Svi statusi"
+            val statusLabel =
+                statusOptions.firstOrNull { it.first == selectedStatus }?.second ?: "Svi statusi"
             val isFiltered = selectedStatus != null
             Row(
                 modifier = Modifier
@@ -225,7 +225,8 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
                 item {
                     val hasSearch = searchText.isNotBlank()
                     val hasStatus = selectedStatus != null
-                    val statusLabel = statusOptions.firstOrNull { it.first == selectedStatus }?.second
+                    val statusLabel =
+                        statusOptions.firstOrNull { it.first == selectedStatus }?.second
 
                     Column(
                         modifier = Modifier
@@ -508,37 +509,27 @@ private fun CustomerCard(customer: OperationalCustomer, onClick: () -> Unit = {}
     ) {
         // Card body
         Column(modifier = Modifier.padding(16.dp)) {
-
             // Avatar + status badge
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(if (customer.isActive) KarikaColors.Red2 else KarikaColors.Gray5),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_person),
-                        contentDescription = "",
-                        tint = if (customer.isActive) KarikaColors.Blue else KarikaColors.Gray6,
-                        modifier = Modifier.size(26.dp)
-                    )
-                }
-
                 val badgeBg = if (customer.isActive) KarikaColors.Green4 else KarikaColors.Gray5
                 val badgeLabel = when (customer.partnershipStatus) {
-                    "active"   -> "AKTIVAN"
-                    "pending"  -> "NA ČEKANJU"
-                    "revoked"  -> "OPOZVAN"
+                    "active" -> "AKTIVAN"
+                    "pending" -> "NA ČEKANJU"
+                    "revoked" -> "OPOZVAN"
                     "rejected" -> "ODBIJEN"
                     else -> customer.partnershipStatus.uppercase()
                 }
                 val badgeColor = if (customer.isActive) KarikaColors.Green3 else KarikaColors.Gray6
+
+                KarikaText(
+                    text = customer.fullName,
+                    color = KarikaColors.Gray2,
+                    textSize = 18.sp,
+                    fontWeight = FontWeight.W700
+                )
 
                 Box(
                     modifier = Modifier
@@ -555,15 +546,6 @@ private fun CustomerCard(customer: OperationalCustomer, onClick: () -> Unit = {}
                     )
                 }
             }
-
-            YSpacer16()
-
-            KarikaText(
-                text = customer.fullName,
-                color = KarikaColors.Gray2,
-                textSize = 18.sp,
-                fontWeight = FontWeight.W700
-            )
 
             YSpacer16()
 
@@ -599,7 +581,8 @@ private fun CustomerCard(customer: OperationalCustomer, onClick: () -> Unit = {}
                 if (reps.isNotEmpty()) {
                     val avatarSize = 26
                     val overlap = 10
-                    val totalWidth = (avatarSize + overlap * (reps.size - 1)).coerceAtLeast(avatarSize)
+                    val totalWidth =
+                        (avatarSize + overlap * (reps.size - 1)).coerceAtLeast(avatarSize)
 
                     Box(modifier = Modifier.width(totalWidth.dp).height(avatarSize.dp)) {
                         reps.forEachIndexed { idx, emp ->
