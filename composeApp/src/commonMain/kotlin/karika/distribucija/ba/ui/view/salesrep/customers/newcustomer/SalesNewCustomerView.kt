@@ -1,4 +1,4 @@
-package karika.distribucija.ba.ui.view.salesrep.customers
+package karika.distribucija.ba.ui.view.salesrep.customers.newcustomer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

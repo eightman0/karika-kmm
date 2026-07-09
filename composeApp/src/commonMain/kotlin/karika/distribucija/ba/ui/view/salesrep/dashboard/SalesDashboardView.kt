@@ -53,7 +53,7 @@ import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.salesrep.customers.SalesCustomersView
-import karika.distribucija.ba.ui.view.salesrep.customers.SalesNewCustomerView
+import karika.distribucija.ba.ui.view.salesrep.customers.newcustomer.SalesNewCustomerView
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesCustomerDetailView
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesDiscountFormView
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminConversationView

@@ -8,7 +8,7 @@ import com.arkivanov.essenty.backhandler.BackCallback
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.salesrep.customers.SalesCustomersComponent
-import karika.distribucija.ba.ui.view.salesrep.customers.SalesNewCustomerComponent
+import karika.distribucija.ba.ui.view.salesrep.customers.newcustomer.SalesNewCustomerComponent
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesCustomerDetailComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminConversationComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminMessagesComponent
