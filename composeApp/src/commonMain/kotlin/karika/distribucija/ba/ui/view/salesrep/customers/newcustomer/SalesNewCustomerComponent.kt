@@ -1,4 +1,4 @@
-package karika.distribucija.ba.ui.view.salesrep.customers
+package karika.distribucija.ba.ui.view.salesrep.customers.newcustomer
 
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.SalesRepository
