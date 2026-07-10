@@ -7,6 +7,7 @@ import karika.distribucija.ba.ui.common.KarikaHandler
 import karika.distribucija.ba.ui.common.state.customer.CartHandler
 import karika.distribucija.ba.ui.common.state.customer.CustomerNotificationHandler
 import karika.distribucija.ba.ui.common.state.customer.CustomerSpecificHandler
+import karika.distribucija.ba.ui.common.state.salesrep.SalesSpecificHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorNotificationHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorSpecificHandler
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,6 +20,7 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
     var commonHandler = CommonHandler()
     var customerSpecificHandler = CustomerSpecificHandler()
     var vendorSpecificHandler = VendorSpecificHandler()
+    var salesSpecificHandler = SalesSpecificHandler()
     var vendorNotificationHandler = VendorNotificationHandler()
     var customerNotificationHandler = CustomerNotificationHandler()
     var cartHandler = CartHandler(commonHandler)
@@ -45,6 +47,7 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
         messageHandler = MessageHandler()
         customerSpecificHandler = CustomerSpecificHandler()
         vendorSpecificHandler = VendorSpecificHandler()
+        salesSpecificHandler = SalesSpecificHandler()
         vendorNotificationHandler = VendorNotificationHandler()
         customerNotificationHandler = CustomerNotificationHandler()
         cartHandler = CartHandler(commonHandler)

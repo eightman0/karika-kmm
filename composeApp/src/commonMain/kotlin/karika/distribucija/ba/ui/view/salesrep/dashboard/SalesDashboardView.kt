@@ -52,6 +52,8 @@ import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderCartView
+import karika.distribucija.ba.ui.view.salesrep.catalog.SalesOrderCatalogView
 import karika.distribucija.ba.ui.view.salesrep.customers.SalesCustomersView
 import karika.distribucija.ba.ui.view.salesrep.customers.newcustomer.SalesNewCustomerView
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesCustomerDetailView
@@ -84,6 +86,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
     val navState = component.stack.subscribeAsState()
+    val salesManager by component.stateHolder.salesSpecificHandler.me.collectAsState()
 
     BoxWithConstraints(
         modifier = Modifier
@@ -106,13 +109,13 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f)) {
                                 KarikaText(
-                                    text = "Komercijalista",
+                                    text = "${salesManager.managerName}",
                                     color = KarikaColors.Gray2,
                                     textSize = 16.sp,
                                     fontWeight = FontWeight.W700
                                 )
                                 KarikaText(
-                                    text = "B2B Prodaja",
+                                    text = "Komercijalista",
                                     color = KarikaColors.Gray6,
                                     textSize = 13.sp,
                                     fontWeight = FontWeight.W400
@@ -195,18 +198,18 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                                 coroutineScope.launch { drawerState.close() }
                             }
                         )
-                        SalesNavItem(
-                            icon = vectorResource(Res.drawable.ic_action),
-                            text = "Operacije",
-                            selected = navState.value.active.instance is SalesChild.Operations,
-                            onClick = {
-                                component.salesRepNavigate(
-                                    SalesRepConfig.Operations,
-                                    replace = true
-                                )
-                                coroutineScope.launch { drawerState.close() }
-                            }
-                        )
+                        //SalesNavItem(
+                        //    icon = vectorResource(Res.drawable.ic_action),
+                        //    text = "Operacije",
+                        //    selected = navState.value.active.instance is SalesChild.Operations,
+                        //    onClick = {
+                        //        component.salesRepNavigate(
+                        //            SalesRepConfig.Operations,
+                        //            replace = true
+                        //        )
+                        //        coroutineScope.launch { drawerState.close() }
+                        //    }
+                        //)
                     }
 
                     // ── Footer ──────────────────────────────────────────────
@@ -336,6 +339,14 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             title = child.component.conversation.customerName(),
                             onBack = { child.component.goBack() }
                         )
+                        is SalesChild.OrderCatalog -> SalesDetailTopBar(
+                            title = "Naruči: ${child.component.customer.fullName}",
+                            onBack = { child.component.goBack() }
+                        )
+                        is SalesChild.OrderCart -> SalesDetailTopBar(
+                            title = "Korpa: ${child.component.customer.fullName}",
+                            onBack = { child.component.goBack() }
+                        )
                     }
                 },
                 component = component
@@ -356,6 +367,8 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         is SalesChild.CustomerConversation -> SalesCustomerConversationView(child.component)
                         is SalesChild.AdminNewMessage -> SalesAdminNewMessageView(child.component)
                         is SalesChild.CustomerNewMessage -> SalesCustomerNewMessageView(child.component)
+                        is SalesChild.OrderCatalog -> SalesOrderCatalogView(child.component)
+                        is SalesChild.OrderCart -> SalesOrderCartView(child.component)
                     }
                 }
             }

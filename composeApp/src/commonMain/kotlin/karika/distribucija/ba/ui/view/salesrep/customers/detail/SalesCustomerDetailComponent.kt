@@ -75,5 +75,9 @@ class SalesCustomerDetailComponent(
         }
     }
 
+    fun openOrderCatalog() {
+        salesRepPush(SalesRepConfig.OrderCatalog(customer))
+    }
+
     fun goBack() = salesRepBack()
 }

@@ -332,7 +332,7 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
-                    ) {}
+                    ) { component.openOrderCatalog() }
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center
             ) {

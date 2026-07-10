@@ -26,7 +26,7 @@ class SalesDiscountFormComponent(
 ) : CommonComponent(componentContext, stateHolder) {
 
     private val repository = SalesRepository()
-    private val vendorId = stateHolder.vendorSpecificHandler.vendorDetails.value.entityId
+    private val vendorId = stateHolder.salesSpecificHandler.vendorId
 
     val isEdit = existingRule != null
 
