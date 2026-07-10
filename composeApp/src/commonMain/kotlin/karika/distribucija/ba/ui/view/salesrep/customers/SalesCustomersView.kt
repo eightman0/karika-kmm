@@ -85,23 +85,16 @@ private val statusOptions = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesCustomersView(component: SalesCustomersComponent) {
-    var selectedTab by remember { mutableStateOf(0) }
     var showStatusSheet by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
+    val selectedTab by component.selectedTab.collectAsState()
     val customers by component.customers.collectAsState()
     val isLoadingMore by component.isLoadingMore.collectAsState()
     val searchText by component.searchQuery.collectAsState()
     val selectedStatus by component.statusFilter.collectAsState()
-
-    // Only tab is still client-side ("Moji kupci" scopes to customers with assignees)
-    val visibleCustomers = remember(customers, selectedTab) {
-        customers.filter { c ->
-            if (selectedTab == 1) c.assignedEmployees.isNotEmpty() else true
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -116,8 +109,14 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
                     .background(KarikaColors.Gray9)
                     .padding(4.dp)
             ) {
-                TabPill(label = "Svi kupci", selected = selectedTab == 0) { selectedTab = 0 }
-                TabPill(label = "Moji kupci", selected = selectedTab == 1) { selectedTab = 1 }
+                TabPill(
+                    label = "Svi kupci",
+                    selected = selectedTab == SalesCustomersComponent.CustomerTab.ALL_CUSTOMERS
+                ) { component.selectTab(SalesCustomersComponent.CustomerTab.ALL_CUSTOMERS) }
+                TabPill(
+                    label = "Moji kupci",
+                    selected = selectedTab == SalesCustomersComponent.CustomerTab.MY_CUSTOMERS
+                ) { component.selectTab(SalesCustomersComponent.CustomerTab.MY_CUSTOMERS) }
             }
         }
 
@@ -211,17 +210,18 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(
-                items = visibleCustomers,
+                items = customers,
                 key = { it.customerId }
             ) { customer ->
                 CustomerCard(
                     customer = customer,
-                    onClick = { component.openCustomer(customer) }
+                    onClick = { component.openCustomer(customer) },
+                    onOrder = { component.openOrderCatalog(customer) }
                 )
             }
 
             // Empty state
-            if (visibleCustomers.isEmpty() && !isLoadingMore) {
+            if (customers.isEmpty() && !isLoadingMore) {
                 item {
                     val hasSearch = searchText.isNotBlank()
                     val hasStatus = selectedStatus != null
@@ -316,7 +316,7 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
                             color = KarikaColors.Blue,
                             strokeWidth = 2.5.dp
                         )
-                    } else if (component.hasMore && visibleCustomers.isNotEmpty()) {
+                    } else if (component.hasMore && customers.isNotEmpty()) {
                         Row(
                             modifier = Modifier
                                 .clickable(
@@ -494,7 +494,11 @@ private fun ActionChip(
 // ── Customer card ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun CustomerCard(customer: OperationalCustomer, onClick: () -> Unit = {}) {
+private fun CustomerCard(
+    customer: OperationalCustomer,
+    onClick: () -> Unit = {},
+    onOrder: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -637,7 +641,7 @@ private fun CustomerCard(customer: OperationalCustomer, onClick: () -> Unit = {}
                             .clickable(
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }
-                            ) {}
+                            ) { onOrder() }
                             .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)

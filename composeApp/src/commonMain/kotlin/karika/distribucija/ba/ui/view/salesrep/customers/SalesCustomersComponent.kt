@@ -12,13 +12,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class SalesCustomersComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder
 ) : CommonComponent(componentContext, stateHolder) {
 
+    enum class CustomerTab { ALL_CUSTOMERS, MY_CUSTOMERS }
+
     private val repository = SalesRepository()
+
+    private val _selectedTab = MutableStateFlow(CustomerTab.ALL_CUSTOMERS)
+    val selectedTab = _selectedTab.asStateFlow()
 
     private val _customers = MutableStateFlow<List<OperationalCustomer>>(emptyList())
     val customers = _customers.asStateFlow()
@@ -44,12 +50,20 @@ class SalesCustomersComponent(
         loadPage(page = 1, replace = true)
     }
 
+    fun selectTab(tab: CustomerTab) {
+        if (_selectedTab.value == tab) return
+        _selectedTab.value = tab
+        _searchQuery.value = ""
+        _statusFilter.value = null
+        loadPage(page = 1, replace = true)
+    }
+
     /** Debounced — resets to page 1 after 400 ms of no input. */
     fun setSearch(query: String) {
         _searchQuery.value = query
         searchJob?.cancel()
         searchJob = scope.launch {
-            delay(400)
+            delay(400.milliseconds)
             loadPage(page = 1, replace = true)
         }
     }
@@ -65,26 +79,44 @@ class SalesCustomersComponent(
         loadPage(page = currentPage + 1, replace = false)
     }
 
-    fun openCustomer(customer: karika.distribucija.ba.domain.model.OperationalCustomer) {
-        salesRepPush(karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig.CustomerDetail(customer))
+    fun openCustomer(customer: OperationalCustomer) {
+        salesRepPush(
+            karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig.CustomerDetail(
+                customer
+            )
+        )
     }
 
     fun openNewCustomer() {
         salesRepPush(karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig.NewCustomer)
     }
 
-    fun refresh() {
-        loadPage(page = 1, replace = true)
+    fun openOrderCatalog(customer: OperationalCustomer) {
+        salesRepPush(
+            karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig.OrderCatalog(
+                customer
+            )
+        )
     }
 
     private fun loadPage(page: Int, replace: Boolean) {
         scope.launch {
-            repository.getCustomers(
-                page = page,
-                pageSize = 10,
-                search = _searchQuery.value.takeIf { it.isNotBlank() },
-                status = _statusFilter.value
-            ).collect { result ->
+            val flow = if (_selectedTab.value == CustomerTab.MY_CUSTOMERS) {
+                repository.getEmployeeCustomers(
+                    employeeId = stateHolder.salesSpecificHandler.employeeId,
+                    page = page,
+                    pageSize = 10,
+                    search = _searchQuery.value.takeIf { it.isNotBlank() }
+                )
+            } else {
+                repository.getCustomers(
+                    page = page,
+                    pageSize = 10,
+                    search = _searchQuery.value.takeIf { it.isNotBlank() },
+                    status = _statusFilter.value
+                )
+            }
+            flow.collect { result ->
                 when (result) {
                     is ResultState.Loading -> {
                         if (replace) showLoader() else _isLoadingMore.value = true

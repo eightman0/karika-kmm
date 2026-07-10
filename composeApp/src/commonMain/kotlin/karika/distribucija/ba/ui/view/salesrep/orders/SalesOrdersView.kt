@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -38,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,7 +47,6 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
-import karika.distribucija.ba.ui.components.karikaFonts
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_calendar
 import karikav2.composeapp.generated.resources.ic_check_circle_filled
@@ -114,78 +111,78 @@ fun SalesOrdersView(component: SalesOrdersComponent) {
             .fillMaxSize()
     ) {
         // ── Search + Filteri bar ───────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(KarikaColors.White)
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_search),
-                contentDescription = "",
-                tint = KarikaColors.Gray7,
-                modifier = Modifier.size(20.dp)
-            )
-
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                if (searchText.isEmpty()) {
-                    KarikaText(
-                        text = "Pretraži narudžbe...",
-                        color = KarikaColors.Gray8,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W400
-                    )
-                }
-                BasicTextField(
-                    value = searchText,
-                    onValueChange = { component.setSearch(it) },
-                    singleLine = true,
-                    textStyle = TextStyle(
-                        color = KarikaColors.Gray2,
-                        fontSize = 14.sp,
-                        fontFamily = karikaFonts()
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            // Status filter chip
-            val statusLabel =
-                orderStatusOptions.firstOrNull { it.first == selectedStatus }?.second ?: "Filteri"
-            val isFiltered = selectedStatus != null
-            Row(
+        /*    Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isFiltered) KarikaColors.Blue else KarikaColors.Gray10)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { showStatusSheet = true }
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(KarikaColors.White)
+                    .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
-                    imageVector = vectorResource(Res.drawable.ic_filter_alt),
+                    imageVector = vectorResource(Res.drawable.ic_search),
                     contentDescription = "",
-                    tint = if (isFiltered) KarikaColors.White else KarikaColors.Gray2,
-                    modifier = Modifier.size(14.dp)
+                    tint = KarikaColors.Gray7,
+                    modifier = Modifier.size(20.dp)
                 )
-                KarikaText(
-                    text = statusLabel,
-                    color = if (isFiltered) KarikaColors.White else KarikaColors.Gray2,
-                    textSize = 12.sp,
-                    fontWeight = FontWeight.W600
-                )
-            }
-        }
 
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    if (searchText.isEmpty()) {
+                        KarikaText(
+                            text = "Pretraži narudžbe...",
+                            color = KarikaColors.Gray8,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                    BasicTextField(
+                        value = searchText,
+                        onValueChange = { component.setSearch(it) },
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            color = KarikaColors.Gray2,
+                            fontSize = 14.sp,
+                            fontFamily = karikaFonts()
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                // Status filter chip
+                val statusLabel =
+                    orderStatusOptions.firstOrNull { it.first == selectedStatus }?.second ?: "Filteri"
+                val isFiltered = selectedStatus != null
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isFiltered) KarikaColors.Blue else KarikaColors.Gray10)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { showStatusSheet = true }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = vectorResource(Res.drawable.ic_filter_alt),
+                        contentDescription = "",
+                        tint = if (isFiltered) KarikaColors.White else KarikaColors.Gray2,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    KarikaText(
+                        text = statusLabel,
+                        color = if (isFiltered) KarikaColors.White else KarikaColors.Gray2,
+                        textSize = 12.sp,
+                        fontWeight = FontWeight.W600
+                    )
+                }
+            }
+    */
         YSpacer16()
 
         // ── Orders list ────────────────────────────────────────────────────────

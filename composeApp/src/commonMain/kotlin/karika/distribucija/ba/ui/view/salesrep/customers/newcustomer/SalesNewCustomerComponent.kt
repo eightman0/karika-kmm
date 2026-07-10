@@ -2,6 +2,8 @@ package karika.distribucija.ba.ui.view.salesrep.customers.newcustomer
 
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.SalesRepository
+import karika.distribucija.ba.domain.model.CustomAttribute
+import karika.distribucija.ba.domain.model.NewCustomerAddress
 import karika.distribucija.ba.domain.model.NewCustomerPayload
 import karika.distribucija.ba.domain.model.NewCustomerRequest
 import karika.distribucija.ba.domain.model.ResultState
@@ -169,23 +171,40 @@ class SalesNewCustomerComponent(
         if (_phone.value.isBlank()) { showErrorMessage("Unesite broj telefona"); return }
         if (_email.value.isBlank()) { showErrorMessage("Unesite email adresu"); return }
 
+        val entityId = KarikaConstants.entries.find { it.name == entity }?.id ?: 1
+        val city = _city.value ?: _canton.value ?: ""
+
+        val customAttributes = buildList {
+            add(CustomAttribute("b2b_pravno_lice", _company.value.trim()))
+            add(CustomAttribute("b2b_id", _idNumber.value.trim()))
+            add(CustomAttribute("b2b_velicina_objekta", storeSize))
+            add(CustomAttribute("b2b_tip_objekta", storeType))
+            add(CustomAttribute("b2b_entitet", entityId.toString()))
+            add(CustomAttribute("b2b_grad", city))
+            if (entityId == 1) {
+                // Federacija — kanton is required
+                add(CustomAttribute("b2b_kanton", _canton.value ?: ""))
+            }
+            val vat = _vatNumber.value.trim()
+            if (vat.isNotBlank()) add(CustomAttribute("b2b_pdv_broj", vat))
+            val empCount = _employeeCount.value.trim()
+            if (empCount.isNotBlank()) add(CustomAttribute("b2b_broj_zaposlenih", empCount))
+        }
+
         val request = NewCustomerRequest(
             customer = NewCustomerPayload(
+                email = _email.value.trim(),
                 firstname = _firstname.value.trim(),
                 lastname = _lastname.value.trim(),
-                email = _email.value.trim(),
-                telephone = _phone.value.trim(),
-                company = _company.value.trim(),
-                idNumber = _idNumber.value.trim(),
-                vatNumber = _vatNumber.value.trim().ifBlank { null },
-                street = _street.value.trim(),
-                postcode = _postcode.value.trim(),
-                entity = entity,
-                canton = _canton.value,
-                city = _city.value,
-                storeSize = storeSize,
-                storeType = storeType,
-                employeeCount = _employeeCount.value.toIntOrNull()
+                addresses = listOf(
+                    NewCustomerAddress(
+                        street = _street.value.trim(),
+                        postcode = _postcode.value.trim(),
+                        telephone = _phone.value.trim(),
+                        city = city
+                    )
+                ),
+                customAttributes = customAttributes
             )
         )
 

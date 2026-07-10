@@ -1,0 +1,135 @@
+package karika.distribucija.ba.ui.view.salesrep.catalog
+
+import com.arkivanov.decompose.ComponentContext
+import karika.distribucija.ba.domain.api.SalesRepository
+import karika.distribucija.ba.domain.model.Category
+import karika.distribucija.ba.domain.model.OnBehalfProduct
+import karika.distribucija.ba.domain.model.OperationalCustomer
+import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
+
+class SalesOrderCatalogComponent(
+    componentContext: ComponentContext,
+    stateHolder: KarikaStateHolder,
+    val customer: OperationalCustomer
+) : CommonComponent(componentContext, stateHolder) {
+
+    private val salesRepository = SalesRepository()
+
+    // ── Products ───────────────────────────────────────────────────────────────
+    private val _products = MutableStateFlow<List<OnBehalfProduct>>(emptyList())
+    val products = _products.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore = _isLoadingMore.asStateFlow()
+
+    private val _hasNext = MutableStateFlow(false)
+    val hasNext = _hasNext.asStateFlow()
+
+    // ── Search + category filter ───────────────────────────────────────────────
+    private val _searchText = MutableStateFlow("")
+    val searchText = _searchText.asStateFlow()
+
+    private val _selectedCategory = MutableStateFlow<Category?>(null)
+    val selectedCategory = _selectedCategory.asStateFlow()
+
+    // ── Shared cart via stateHolder ───────────────────────────────────────────
+    val cartItems: StateFlow<Map<String, Pair<OnBehalfProduct, Int>>> = stateHolder.salesSpecificHandler.salesRepCart
+
+    val cartCount: StateFlow<Int> = stateHolder.salesSpecificHandler.salesRepCart
+        .map { map -> map.values.sumOf { it.second } }
+        .stateIn(scope, SharingStarted.Eagerly, 0)
+
+    private var searchJob: Job? = null
+    private var loadJob: Job? = null
+
+    init {
+        stateHolder.salesSpecificHandler.clearSalesRepCart()
+        loadProducts(reset = true)
+    }
+
+    fun setSearch(text: String) {
+        _searchText.value = text
+        searchJob?.cancel()
+        searchJob = scope.launch {
+            delay(400.milliseconds)
+            loadProducts(reset = true)
+        }
+    }
+
+    fun selectCategory(category: Category?) {
+        _selectedCategory.value = category
+        loadProducts(reset = true)
+    }
+
+    fun loadNextPage() {
+        if (_isLoadingMore.value || _isLoading.value || !_hasNext.value) return
+        loadProducts(reset = false)
+    }
+
+    fun setCartQty(product: OnBehalfProduct, qty: Int) {
+        stateHolder.salesSpecificHandler.salesRepCart.update { cart ->
+            if (qty <= 0) cart - product.key else cart + (product.key to (product to qty))
+        }
+    }
+
+    fun getCartQty(product: OnBehalfProduct): Int =
+        stateHolder.salesSpecificHandler.salesRepCart.value[product.key]?.second ?: 0
+
+    fun openCart() = salesRepPush(SalesRepConfig.OrderCart(customer))
+
+    fun goBack() = salesRepBack()
+
+    private fun loadProducts(reset: Boolean) {
+        loadJob?.cancel()
+        loadJob = scope.launch {
+            val page = if (reset) { currentPage = 1; 1 } else currentPage
+
+            if (reset) _isLoading.value = true else _isLoadingMore.value = true
+
+            salesRepository.getProducts(
+                page = page,
+                pageSize = pageSize,
+                search = _searchText.value.takeIf { it.isNotBlank() },
+                categoryId = _selectedCategory.value?.id?.toLong()
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> { /* loader set above */ }
+                    is ResultState.Success -> {
+                        val items = result.data.items
+                        _hasNext.value = items.size >= pageSize
+                        if (reset) {
+                            _products.value = items
+                        } else {
+                            _products.value = _products.value + items
+                        }
+                        if (_hasNext.value) currentPage++
+                        _isLoading.value = false
+                        _isLoadingMore.value = false
+                    }
+                    is ResultState.Error -> {
+                        _isLoading.value = false
+                        _isLoadingMore.value = false
+                        showErrorMessage(result.message)
+                    }
+                }
+            }
+        }
+    }
+}
