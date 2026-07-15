@@ -74,12 +74,20 @@ private fun Cart(modifier: Modifier, component: ShippingDetailsComponent) {
     val cart = component.stateHolder.cartHandler.cart.collectAsState()
     Column(
         modifier = modifier
+            .padding(horizontal = 16.dp)
             .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        KarikaText(
+        KarikaTextField1(
             modifier = Modifier
-                .padding(start = 16.dp),
+                .fillMaxWidth(),
+            title = "Napomena za dobavljača",
+            value = component.vendorNote.asState(),
+            placeholder = "Napomena za dobavljaca (opcionalno)",
+            imeAction = ImeAction.Done
+        )
+        KarikaText(
+            modifier = Modifier,
             color = KarikaColors.Black,
             text = "Ukupno:",
             fontWeight = FontWeight.W700,
@@ -95,7 +103,6 @@ private fun Cart(modifier: Modifier, component: ShippingDetailsComponent) {
 private fun VendorItem(entry: Map.Entry<Vendor, List<Pair<Product, Int>>>) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
             .background(color = KarikaColors.Gray10, shape = RoundedCornerShape(4.dp))
             .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -355,7 +362,7 @@ private fun PinnedFooter(component: ShippingDetailsComponent) {
             .height(48.dp)
             .padding(horizontal = 16.dp)
             .fillMaxWidth(),
-        title = if (newAddress.value) "Spasi i nastavi dalje" else "Pošalji narudžbu",
+        title = if (newAddress.value) "Spasi i nastavi dalje" else "Završi narudžbu",
         fontWeight = FontWeight.W700,
         textSize = 18.sp,
         enabled = if (newAddress.value) component.validateNewAddress() else true

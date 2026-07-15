@@ -38,6 +38,7 @@ class ShippingDetailsComponent(
     val city = mutableStateOf("")
     val postal = mutableStateOf("")
     val telephone = mutableStateOf("")
+    val vendorNote = mutableStateOf("")
 
     fun handleShippingAddress() {
         if (newAddress.value) {
