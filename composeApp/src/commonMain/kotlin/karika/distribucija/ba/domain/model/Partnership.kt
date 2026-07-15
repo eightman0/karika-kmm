@@ -107,3 +107,18 @@ private fun String.toPartnershipDateTime(): String {
         this
     }
 }
+
+@Serializable
+data class Partnership(
+    @SerialName("partnership_id") val partnershipId: Long? = null,
+    @SerialName("vendor_id") val vendorId: Long? = null,
+    @SerialName("customer_id") val customerId: Long? = null,
+    @SerialName("status") val status: String? = null,
+    @SerialName("requested_by") val requestedBy: String? = null,
+    @SerialName("created_by_employee_id") val createdByEmployeeId: Long? = null
+)
+
+@Serializable
+data class PartnershipRequestBody(
+    @SerialName("request") val request: PartnershipRequest
+)

@@ -46,10 +46,6 @@ class SalesCustomersComponent(
 
     private var searchJob: Job? = null
 
-    init {
-        loadPage(page = 1, replace = true)
-    }
-
     fun selectTab(tab: CustomerTab) {
         if (_selectedTab.value == tab) return
         _selectedTab.value = tab
@@ -91,6 +87,10 @@ class SalesCustomersComponent(
         salesRepPush(karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig.NewCustomer)
     }
 
+    fun openInviteCustomer() {
+        salesRepPush(karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig.InviteCustomer())
+    }
+
     fun openOrderCatalog(customer: OperationalCustomer) {
         salesRepPush(
             karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig.OrderCatalog(
@@ -99,7 +99,7 @@ class SalesCustomersComponent(
         )
     }
 
-    private fun loadPage(page: Int, replace: Boolean) {
+    fun loadPage(page: Int, replace: Boolean) {
         scope.launch {
             val flow = if (_selectedTab.value == CustomerTab.MY_CUSTOMERS) {
                 repository.getEmployeeCustomers(

@@ -55,21 +55,21 @@ import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderCartView
 import karika.distribucija.ba.ui.view.salesrep.catalog.SalesOrderCatalogView
 import karika.distribucija.ba.ui.view.salesrep.customers.SalesCustomersView
-import karika.distribucija.ba.ui.view.salesrep.customers.newcustomer.SalesNewCustomerView
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesCustomerDetailView
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesDiscountFormView
+import karika.distribucija.ba.ui.view.salesrep.customers.invite.SalesInviteCustomerView
+import karika.distribucija.ba.ui.view.salesrep.customers.newcustomer.SalesNewCustomerView
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminConversationView
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminMessagesView
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminNewMessageView
-import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerNewMessageView
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerConversationView
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerMessagesView
+import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerNewMessageView
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalMessagesView
 import karika.distribucija.ba.ui.view.salesrep.operations.SalesOperationsView
 import karika.distribucija.ba.ui.view.salesrep.orders.SalesOrdersView
 import karika.distribucija.ba.ui.view.salesrep.orders.detail.SalesOrderDetailView
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_action
 import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_customers
 import karikav2.composeapp.generated.resources.ic_email
@@ -93,6 +93,13 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
             .background(color = KarikaColors.White)
             .fillMaxSize()
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(KarikaColors.Gray20)
+                .align(Alignment.BottomCenter)
+                .height(100.dp)
+        )
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
@@ -313,10 +320,16 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             onBack = { child.component.goBack() }
                         )
 
+                        is SalesChild.InviteCustomer -> SalesDetailTopBar(
+                            title = "Pozovi kupca",
+                            onBack = { child.component.goBack() }
+                        )
+
                         is SalesChild.AdminConversation -> SalesDetailTopBar(
                             title = child.component.conversation.subject ?: "Poruka",
                             onBack = { child.component.goBack() }
                         )
+
                         is SalesChild.AdminNewMessage -> {
                             val threadId by child.component.threadId.collectAsState()
                             val subject by child.component.subject.collectAsState()
@@ -339,10 +352,12 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             title = child.component.conversation.customerName(),
                             onBack = { child.component.goBack() }
                         )
+
                         is SalesChild.OrderCatalog -> SalesDetailTopBar(
                             title = "Naruči: ${child.component.customer.fullName}",
                             onBack = { child.component.goBack() }
                         )
+
                         is SalesChild.OrderCart -> SalesDetailTopBar(
                             title = "Korpa: ${child.component.customer.fullName}",
                             onBack = { child.component.goBack() }
@@ -369,6 +384,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         is SalesChild.CustomerNewMessage -> SalesCustomerNewMessageView(child.component)
                         is SalesChild.OrderCatalog -> SalesOrderCatalogView(child.component)
                         is SalesChild.OrderCart -> SalesOrderCartView(child.component)
+                        is SalesChild.InviteCustomer -> SalesInviteCustomerView(child.component)
                     }
                 }
             }

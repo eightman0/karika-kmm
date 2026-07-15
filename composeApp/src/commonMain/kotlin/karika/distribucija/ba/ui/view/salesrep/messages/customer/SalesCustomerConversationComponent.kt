@@ -1,6 +1,7 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.customer
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.backhandler.BackCallback
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.Message
 import karika.distribucija.ba.domain.model.ResultState
@@ -24,6 +25,14 @@ class SalesCustomerConversationComponent(
 
     init {
         load()
+        backHandler.register(BackCallback {
+            if (stateHolder.imagePreview.value != null) {
+                stateHolder.imagePreview.value = null
+                return@BackCallback
+            }
+
+            super.salesRepBack()
+        })
     }
 
     private fun load() {
@@ -40,6 +49,7 @@ class SalesCustomerConversationComponent(
                         _messages.value = result.data.firstOrNull()?.messages?.firstOrNull()
                             ?: emptyList()
                     }
+
                     is ResultState.Error -> {
                         hideLoader()
                         showErrorMessage(result.message)
@@ -69,6 +79,7 @@ class SalesCustomerConversationComponent(
                         attachment.value = null
                         load()
                     }
+
                     is ResultState.Error -> {
                         hideLoader()
                         showErrorMessage(result.message)

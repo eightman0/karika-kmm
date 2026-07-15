@@ -16,6 +16,7 @@ import karika.distribucija.ba.ui.view.salesrep.catalog.SalesOrderCatalogComponen
 import karika.distribucija.ba.ui.view.salesrep.customers.SalesCustomersComponent
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesCustomerDetailComponent
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesDiscountFormComponent
+import karika.distribucija.ba.ui.view.salesrep.customers.invite.SalesInviteCustomerComponent
 import karika.distribucija.ba.ui.view.salesrep.customers.newcustomer.SalesNewCustomerComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminConversationComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminMessagesComponent
@@ -128,6 +129,10 @@ class SalesDashboardComponent(
             is SalesRepConfig.OrderCart -> SalesChild.OrderCart(
                 SalesOrderCartComponent(componentContext, stateHolder, config.customer)
             )
+
+            is SalesRepConfig.InviteCustomer -> SalesChild.InviteCustomer(
+                SalesInviteCustomerComponent(componentContext, stateHolder, config.email)
+            )
         }
 }
 
@@ -169,6 +174,8 @@ sealed class SalesRepConfig {
     data class OrderCatalog(val customer: OperationalCustomer) : SalesRepConfig()
     @Serializable
     data class OrderCart(val customer: OperationalCustomer) : SalesRepConfig()
+    @Serializable
+    data class InviteCustomer(val email: String = "") : SalesRepConfig()
 }
 
 sealed class SalesChild {
@@ -190,4 +197,5 @@ sealed class SalesChild {
     data class CustomerNewMessage(val component: SalesCustomerNewMessageComponent) : SalesChild()
     data class OrderCatalog(val component: SalesOrderCatalogComponent) : SalesChild()
     data class OrderCart(val component: SalesOrderCartComponent) : SalesChild()
+    data class InviteCustomer(val component: SalesInviteCustomerComponent) : SalesChild()
 }

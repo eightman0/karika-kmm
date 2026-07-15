@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.internal
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,7 @@ import karika.distribucija.ba.ui.components.KarikaText
 fun SalesInternalMessagesView(component: SalesInternalMessagesComponent) {
     Box(
         modifier = Modifier
+            .background(KarikaColors.Gray20)
             .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
