@@ -5,6 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NewCustomerRequest(
+    @SerialName("request") val request: NewCustomerRequestBody
+)
+
+@Serializable
+data class NewCustomerRequestBody(
     @SerialName("customer") val customer: NewCustomerPayload,
     @SerialName("auto_assign_to_caller") val autoAssignToCaller: Boolean? = null
 )
@@ -20,11 +25,15 @@ data class NewCustomerPayload(
 
 @Serializable
 data class NewCustomerAddress(
-    @SerialName("street") val street: String,
-    @SerialName("postcode") val postcode: String,
+    @SerialName("country_id") val countryId: String,
+    @SerialName("street") val street: List<String>,
     @SerialName("telephone") val telephone: String,
+    @SerialName("postcode") val postcode: String,
     @SerialName("city") val city: String,
-    @SerialName("country_id") val countryId: String = "BA"
+    @SerialName("firstname") val firstname: String,
+    @SerialName("lastname") val lastname: String,
+    @SerialName("default_billing") val defaultBilling: Boolean,
+    @SerialName("default_shipping") val defaultShipping: Boolean
 )
 
 @Serializable

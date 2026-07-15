@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -41,7 +40,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +55,7 @@ import karika.distribucija.ba.ui.common.HtmlTextWithStyles
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.onClick
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_attachment
 import karikav2.composeapp.generated.resources.ic_cancel_circle
@@ -74,7 +76,7 @@ private fun String?.formatTime(): String {
 
 private fun String.isImageFile() = lowercase().let {
     it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".png") ||
-    it.endsWith(".gif") || it.endsWith(".webp")
+            it.endsWith(".gif") || it.endsWith(".webp")
 }
 
 // ── View ───────────────────────────────────────────────────────────────────────
@@ -109,7 +111,11 @@ fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(messages) { message ->
-                MessageBubble(message = message, vendorName = component.conversation.senderName())
+                MessageBubble(
+                    message = message,
+                    vendorName = component.conversation.senderName(),
+                    component
+                )
             }
         }
 
@@ -322,7 +328,10 @@ fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
                     }
                 }
 
-                HorizontalDivider(color = KarikaColors.Gray10, modifier = Modifier.padding(horizontal = 20.dp))
+                HorizontalDivider(
+                    color = KarikaColors.Gray10,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
 
                 // Photo option
                 Row(
@@ -376,7 +385,11 @@ fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
 // ── Attachment renderer ────────────────────────────────────────────────────────
 
 @Composable
-private fun MessageAttachment(images: String?, bubbleColor: androidx.compose.ui.graphics.Color) {
+private fun MessageAttachment(
+    images: String?,
+    bubbleColor: Color,
+    component: SalesAdminConversationComponent
+) {
     val filename = images
         ?.takeIf { it.isNotEmpty() }
         ?.let { runCatching { Json.decodeFromString<FileData>(it) }.getOrNull() }
@@ -388,6 +401,9 @@ private fun MessageAttachment(images: String?, bubbleColor: androidx.compose.ui.
     if (filename.endsWith("pdf", ignoreCase = true)) {
         Row(
             modifier = Modifier
+                .onClick {
+                    component.downloadReceipt(filename)
+                }
                 .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -408,6 +424,9 @@ private fun MessageAttachment(images: String?, bubbleColor: androidx.compose.ui.
     } else {
         KarikaImage(
             modifier = Modifier
+                .onClick {
+                    component.showImagePreview(chatImage(filename))
+                }
                 .widthIn(max = 220.dp)
                 .padding(8.dp)
                 .clip(RoundedCornerShape(12.dp)),
@@ -420,7 +439,11 @@ private fun MessageAttachment(images: String?, bubbleColor: androidx.compose.ui.
 // ── Message bubble ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun MessageBubble(message: Message, vendorName: String) {
+private fun MessageBubble(
+    message: Message,
+    vendorName: String,
+    component: SalesAdminConversationComponent
+) {
     val isVendor = message.isVendorMessage()
 
     if (isVendor) {
@@ -446,7 +469,11 @@ private fun MessageBubble(message: Message, vendorName: String) {
                     )
                     .background(KarikaColors.Blue)
             ) {
-                MessageAttachment(images = message.images, bubbleColor = KarikaColors.Blue)
+                MessageAttachment(
+                    images = message.images,
+                    bubbleColor = KarikaColors.Blue,
+                    component
+                )
                 if (!message.message.isNullOrEmpty()) {
                     HtmlTextWithStyles(
                         html = message.message(),
@@ -456,7 +483,7 @@ private fun MessageBubble(message: Message, vendorName: String) {
                 }
             }
             KarikaText(
-                text = message.date().formatTime(),
+                text = message.date(),
                 color = KarikaColors.Gray7,
                 textSize = 10.sp,
                 fontWeight = FontWeight.W400,
@@ -486,7 +513,11 @@ private fun MessageBubble(message: Message, vendorName: String) {
                     )
                     .background(KarikaColors.Primary)
             ) {
-                MessageAttachment(images = message.images, bubbleColor = KarikaColors.Primary)
+                MessageAttachment(
+                    images = message.images,
+                    bubbleColor = KarikaColors.Primary,
+                    component = component
+                )
                 if (!message.message.isNullOrEmpty()) {
                     HtmlTextWithStyles(
                         html = message.message(),
@@ -496,7 +527,7 @@ private fun MessageBubble(message: Message, vendorName: String) {
                 }
             }
             KarikaText(
-                text = message.date().formatTime(),
+                text = message.date(),
                 color = KarikaColors.Gray7,
                 textSize = 10.sp,
                 fontWeight = FontWeight.W400,

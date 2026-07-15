@@ -6,9 +6,15 @@ import karika.distribucija.ba.domain.model.CustomAttribute
 import karika.distribucija.ba.domain.model.NewCustomerAddress
 import karika.distribucija.ba.domain.model.NewCustomerPayload
 import karika.distribucija.ba.domain.model.NewCustomerRequest
+import karika.distribucija.ba.domain.model.NewCustomerRequestBody
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.components.isEmailFormat
+import karika.distribucija.ba.ui.components.isEmailFormat
+import karika.distribucija.ba.ui.components.isPhoneFormat
+import karika.distribucija.ba.ui.components.isPostalCodeValid
+import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig
 import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -89,6 +95,16 @@ class SalesNewCustomerComponent(
     private val _isSaving = MutableStateFlow(false)
     val isSaving = _isSaving.asStateFlow()
 
+    private val _showInviteDialog = MutableStateFlow(false)
+    val showInviteDialog = _showInviteDialog.asStateFlow()
+
+    fun dismissInviteDialog() { _showInviteDialog.value = false }
+
+    fun openInviteCustomer() {
+        _showInviteDialog.value = false
+        salesRepPush(SalesRepConfig.InviteCustomer(email = _email.value.trim()))
+    }
+
     // ── Setters ───────────────────────────────────────────────────────────────
     fun setCompany(v: String) { _company.value = v }
     fun setIdNumber(v: String) { _idNumber.value = v }
@@ -149,27 +165,28 @@ class SalesNewCustomerComponent(
 
     // ── Save ──────────────────────────────────────────────────────────────────
     fun save() {
-        val entity = _entity.value ?: run { showErrorMessage("Odaberite entitet"); return }
-        val storeSize = _storeSize.value ?: run { showErrorMessage("Odaberite veličinu objekta"); return }
-        val storeType = _storeType.value ?: run { showErrorMessage("Odaberite tip objekta"); return }
+        if (_company.value.isEmpty()) { showErrorMessage("Naziv pravnog lica je obavezno polje!"); return }
+        if (_idNumber.value.isEmpty()) { showErrorMessage("ID broj je obavezno polje!"); return }
 
-        if (_company.value.isBlank()) { showErrorMessage("Unesite naziv pravnog lica"); return }
-        if (_idNumber.value.isBlank()) { showErrorMessage("Unesite ID broj"); return }
-        if (_street.value.isBlank()) { showErrorMessage("Unesite adresu"); return }
-        if (_postcode.value.isBlank()) { showErrorMessage("Unesite poštanski broj"); return }
+        val entity = _entity.value ?: run { showErrorMessage("Entitet je obavezno polje!"); return }
 
-        // Location validation
         if (entity == "Federacija") {
-            if (_canton.value.isNullOrBlank()) { showErrorMessage("Odaberite kanton"); return }
-            if (_city.value.isNullOrBlank()) { showErrorMessage("Odaberite grad"); return }
-        } else if (entity == "Republika Srpska") {
-            if (_canton.value.isNullOrBlank()) { showErrorMessage("Odaberite općinu"); return }
+            if (_canton.value.isNullOrEmpty()) { showErrorMessage("Kanton je obavezno polje!"); return }
         }
+        if (_city.value.isNullOrEmpty()) { showErrorMessage("Grad je obavezno polje!"); return }
 
-        if (_firstname.value.isBlank()) { showErrorMessage("Unesite ime"); return }
-        if (_lastname.value.isBlank()) { showErrorMessage("Unesite prezime"); return }
-        if (_phone.value.isBlank()) { showErrorMessage("Unesite broj telefona"); return }
-        if (_email.value.isBlank()) { showErrorMessage("Unesite email adresu"); return }
+        val storeSize = _storeSize.value ?: run { showErrorMessage("Veličina objekta je obavezno polje!"); return }
+        val storeType = _storeType.value ?: run { showErrorMessage("Tip objekta je obavezno polje!"); return }
+
+        if (_firstname.value.isEmpty()) { showErrorMessage("Ime je obavezno polje!"); return }
+        if (_lastname.value.isEmpty()) { showErrorMessage("Prezime je obavezno polje!"); return }
+        if (_street.value.isEmpty()) { showErrorMessage("Adresa je obavezno polje!"); return }
+        if (_postcode.value.isEmpty()) { showErrorMessage("Poštanski broj je obavezno polje!"); return }
+        if (!_postcode.value.isPostalCodeValid()) { showErrorMessage("Poštanski broj nije u odgovarajućem formatu!"); return }
+        if (_phone.value.isEmpty()) { showErrorMessage("Broj telefona je obavezno polje!"); return }
+        if (!_phone.value.isPhoneFormat()) { showErrorMessage("Broj telefona nije u odgovarajućem formatu!"); return }
+        if (_email.value.isEmpty()) { showErrorMessage("Email adresa je obavezno polje!"); return }
+        if (!_email.value.isEmailFormat()) { showErrorMessage("Email nije u odgovarajućem formatu!"); return }
 
         val entityId = KarikaConstants.entries.find { it.name == entity }?.id ?: 1
         val city = _city.value ?: _canton.value ?: ""
@@ -192,19 +209,38 @@ class SalesNewCustomerComponent(
         }
 
         val request = NewCustomerRequest(
-            customer = NewCustomerPayload(
-                email = _email.value.trim(),
-                firstname = _firstname.value.trim(),
-                lastname = _lastname.value.trim(),
-                addresses = listOf(
-                    NewCustomerAddress(
-                        street = _street.value.trim(),
-                        postcode = _postcode.value.trim(),
-                        telephone = _phone.value.trim(),
-                        city = city
-                    )
+            request = NewCustomerRequestBody(
+                customer = NewCustomerPayload(
+                    email = _email.value.trim(),
+                    firstname = _firstname.value.trim(),
+                    lastname = _lastname.value.trim(),
+                    addresses = listOf(
+                        NewCustomerAddress(
+                            countryId = "BA",
+                            street = listOf(_street.value.trim()),
+                            postcode = _postcode.value.trim(),
+                            telephone = _phone.value.trim(),
+                            city = city,
+                            firstname = _firstname.value.trim(),
+                            lastname = _lastname.value.trim(),
+                            defaultBilling = true,
+                            defaultShipping = false
+                        ),
+                        NewCustomerAddress(
+                            countryId = "BA",
+                            street = listOf(_street.value.trim()),
+                            postcode = _postcode.value.trim(),
+                            telephone = _phone.value.trim(),
+                            city = city,
+                            firstname = _firstname.value.trim(),
+                            lastname = _lastname.value.trim(),
+                            defaultBilling = false,
+                            defaultShipping = true
+                        )
+                    ),
+                    customAttributes = customAttributes
                 ),
-                customAttributes = customAttributes
+                autoAssignToCaller = true
             )
         )
 
@@ -218,7 +254,11 @@ class SalesNewCustomerComponent(
                     }
                     is ResultState.Error -> {
                         _isSaving.value = false
-                        showErrorMessage(result.message)
+                        if (result.message == "Kupac sa ovim email-om već postoji.") {
+                            _showInviteDialog.value = true
+                        } else {
+                            showErrorMessage(result.message)
+                        }
                     }
                 }
             }

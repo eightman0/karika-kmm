@@ -166,7 +166,7 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
 
                         val (badgeBg, badgeText, badgeColor) = when (customer.partnershipStatus) {
                             "active"   -> Triple(KarikaColors.Green4, "AKTIVNO",  KarikaColors.Green3)
-                            "pending"  -> Triple(KarikaColors.Yellow2, "NA ČEKANJU", KarikaColors.Yellow1)
+                            "pending"  -> Triple(KarikaColors.Blue3_10, "NA ČEKANJU", KarikaColors.Blue)
                             "rejected" -> Triple(KarikaColors.Red2, "ODBIJENO", KarikaColors.Error)
                             "revoked"  -> Triple(KarikaColors.Gray5, "OPOZVANO", KarikaColors.Gray6)
                             else       -> Triple(KarikaColors.Gray5, customer.partnershipStatus.uppercase(), KarikaColors.Gray6)

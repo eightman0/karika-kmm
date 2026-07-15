@@ -7,6 +7,7 @@ import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.HttpClientProvider
+import karika.distribucija.ba.domain.HttpClientProvider.chatImage
 import karika.distribucija.ba.domain.api.AnalyticsRepository
 import karika.distribucija.ba.domain.api.CartRepository
 import karika.distribucija.ba.domain.api.MessagesRepository
@@ -717,5 +718,9 @@ open class CommonComponent(
                     }
                 }
         }
+    }
+
+    fun downloadReceipt(it: String) {
+        openPdf(chatImage("/$it"))
     }
 }

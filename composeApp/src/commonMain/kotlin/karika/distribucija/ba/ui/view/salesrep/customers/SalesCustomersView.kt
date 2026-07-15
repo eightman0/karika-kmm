@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.domain.model.AssignedEmployeeSummary
 import karika.distribucija.ba.domain.model.OperationalCustomer
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
@@ -57,6 +59,7 @@ import karikav2.composeapp.generated.resources.ic_cancel
 import karikav2.composeapp.generated.resources.ic_check_circle_filled
 import karikav2.composeapp.generated.resources.ic_email
 import karikav2.composeapp.generated.resources.ic_filter_alt
+import karikav2.composeapp.generated.resources.ic_menu
 import karikav2.composeapp.generated.resources.ic_search
 import karikav2.composeapp.generated.resources.ic_shopping_cart
 import karikav2.composeapp.generated.resources.ic_storefront
@@ -86,6 +89,11 @@ private val statusOptions = listOf(
 @Composable
 fun SalesCustomersView(component: SalesCustomersComponent) {
     var showStatusSheet by remember { mutableStateOf(false) }
+    var showAddSheet by remember { mutableStateOf(false) }
+    var showRepsSheet by remember { mutableStateOf(false) }
+    var repsSheetList by remember { mutableStateOf<List<AssignedEmployeeSummary>>(emptyList()) }
+    val addSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val repsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
@@ -162,6 +170,20 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
                 )
             }
 
+            if (searchText.isNotEmpty()) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_cancel),
+                    contentDescription = "Poništi pretragu",
+                    tint = KarikaColors.Gray6,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { component.setSearch("") }
+                )
+            }
+
             // Status filter chip — replaces generic Filter
             val statusLabel =
                 statusOptions.firstOrNull { it.first == selectedStatus }?.second ?: "Svi statusi"
@@ -192,13 +214,24 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
                 )
             }
 
-            ActionChip(
-                icon = Res.drawable.ic_add_plus,
-                label = "Novi kupac",
-                bgColor = KarikaColors.Blue,
-                textColor = KarikaColors.White,
-                iconColor = KarikaColors.White
-            ) { component.openNewCustomer() }
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(KarikaColors.Blue)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { showAddSheet = true },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_menu),
+                    contentDescription = "",
+                    tint = KarikaColors.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
 
         YSpacer16()
@@ -216,7 +249,8 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
                 CustomerCard(
                     customer = customer,
                     onClick = { component.openCustomer(customer) },
-                    onOrder = { component.openOrderCatalog(customer) }
+                    onOrder = { component.openOrderCatalog(customer) },
+                    onShowReps = { repsSheetList = it; showRepsSheet = true }
                 )
             }
 
@@ -345,6 +379,138 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
         }
     }
 
+    // ── Add customer bottom sheet ──────────────────────────────────────────────
+    if (showAddSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showAddSheet = false },
+            sheetState = addSheetState,
+            containerColor = KarikaColors.White,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
+            ) {
+                KarikaText(
+                    text = "Dodaj kupca",
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W700,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                AddOptionItem(
+                    icon = Res.drawable.ic_add_plus,
+                    title = "Novi kupac",
+                    subtitle = "Kreiraj novog kupca i partnerstvo"
+                ) {
+                    showAddSheet = false
+                    component.openNewCustomer()
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                AddOptionItem(
+                    icon = Res.drawable.ic_email,
+                    title = "Pozovi kupca",
+                    subtitle = "Pošalji zahtjev za partnerstvo postojećem kupcu"
+                ) {
+                    showAddSheet = false
+                    component.openInviteCustomer()
+                }
+
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+    }
+
+    // ── Komercijalisti bottom sheet ───────────────────────────────────────────
+    if (showRepsSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showRepsSheet = false },
+            sheetState = repsSheetState,
+            containerColor = KarikaColors.White,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    KarikaText(
+                        text = "Komercijalisti",
+                        color = KarikaColors.Gray2,
+                        textSize = 16.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(KarikaColors.Gray10)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) { showRepsSheet = false },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_cancel),
+                            contentDescription = "Zatvori",
+                            tint = KarikaColors.Gray2,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                repsSheetList.forEachIndexed { idx, emp ->
+                    val colors = listOf(KarikaColors.Blue, KarikaColors.Secondary)
+                    val bg = colors[idx % colors.size]
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(bg),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            KarikaText(
+                                text = emp.displayName.initials(),
+                                color = KarikaColors.White,
+                                textSize = 11.sp,
+                                fontWeight = FontWeight.W700
+                            )
+                        }
+                        KarikaText(
+                            text = emp.displayName ?: "-",
+                            color = KarikaColors.Gray2,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W500
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+    }
+
     // ── Status bottom sheet ────────────────────────────────────────────────────
     if (showStatusSheet) {
         ModalBottomSheet(
@@ -394,6 +560,10 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
                 Spacer(Modifier.height(8.dp))
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        component.loadPage(page = 1, replace = true)
     }
 }
 
@@ -497,7 +667,8 @@ private fun ActionChip(
 private fun CustomerCard(
     customer: OperationalCustomer,
     onClick: () -> Unit = {},
-    onOrder: () -> Unit = {}
+    onOrder: () -> Unit = {},
+    onShowReps: (List<AssignedEmployeeSummary>) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -518,7 +689,7 @@ private fun CustomerCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                val badgeBg = if (customer.isActive) KarikaColors.Green4 else KarikaColors.Gray5
+                val badgeBg = if (customer.isActive) KarikaColors.Green4 else KarikaColors.Blue3_10
                 val badgeLabel = when (customer.partnershipStatus) {
                     "active" -> "AKTIVAN"
                     "pending" -> "NA ČEKANJU"
@@ -526,7 +697,7 @@ private fun CustomerCard(
                     "rejected" -> "ODBIJEN"
                     else -> customer.partnershipStatus.uppercase()
                 }
-                val badgeColor = if (customer.isActive) KarikaColors.Green3 else KarikaColors.Gray6
+                val badgeColor = if (customer.isActive) KarikaColors.Green3 else KarikaColors.Blue
 
                 KarikaText(
                     text = customer.fullName,
@@ -563,126 +734,191 @@ private fun CustomerCard(
             }
         }
 
-        // Card footer
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
-                .background(KarikaColors.Gray20)
-                .border(
-                    width = 1.dp,
-                    color = KarikaColors.Gray9,
-                    shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
-                )
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Company name + Komercijalisti chips
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // Komercijalisti chips using assigned_employees
-                val reps = customer.assignedEmployees.take(3)
-                if (reps.isNotEmpty()) {
-                    val avatarSize = 26
-                    val overlap = 10
-                    val totalWidth =
-                        (avatarSize + overlap * (reps.size - 1)).coerceAtLeast(avatarSize)
-
-                    Box(modifier = Modifier.width(totalWidth.dp).height(avatarSize.dp)) {
-                        reps.forEachIndexed { idx, emp ->
-                            val bg = if (idx % 2 == 0) KarikaColors.Blue else KarikaColors.Secondary
-                            Box(
-                                modifier = Modifier
-                                    .offset(x = (idx * overlap).dp)
-                                    .size(avatarSize.dp)
-                                    .clip(CircleShape)
-                                    .background(bg)
-                                    .border(2.dp, KarikaColors.White, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                KarikaText(
-                                    text = emp.displayName.initials(),
-                                    color = KarikaColors.White,
-                                    textSize = 8.sp,
-                                    fontWeight = FontWeight.W700,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-                    Spacer(Modifier.width(8.dp))
-                    KarikaText(
-                        text = "Komercijalisti",
-                        color = KarikaColors.Gray7,
-                        textSize = 10.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                } else if (customer.company.isNullOrBlank()) {
-                    KarikaText(
-                        text = "Nije dodijeljen",
-                        color = KarikaColors.Gray7,
-                        textSize = 10.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                }
-            }
-
-            // Buttons
+        if (customer.isActive) {
+            // Card footer
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+                    .background(KarikaColors.Gray20)
+                    .border(
+                        width = 1.dp,
+                        color = KarikaColors.Gray9,
+                        shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Order button
-                if (customer.isActive) {
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(KarikaColors.Blue)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) { onOrder() }
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_shopping_cart),
-                            contentDescription = "",
-                            tint = KarikaColors.White,
-                            modifier = Modifier.size(14.dp)
-                        )
+                // Company name + Komercijalisti chips
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Komercijalisti chips using assigned_employees
+                    val reps = customer.assignedEmployees.take(3)
+                    if (reps.isNotEmpty()) {
+                        val avatarSize = 26
+                        val overlap = 10
+                        val totalWidth =
+                            (avatarSize + overlap * (reps.size - 1)).coerceAtLeast(avatarSize)
+
+                        Box(
+                            modifier = Modifier
+                                .width(totalWidth.dp)
+                                .height(avatarSize.dp)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) { onShowReps(customer.assignedEmployees) }
+                        ) {
+                            reps.forEachIndexed { idx, emp ->
+                                val bg =
+                                    if (idx % 2 == 0) KarikaColors.Blue else KarikaColors.Secondary
+                                Box(
+                                    modifier = Modifier
+                                        .offset(x = (idx * overlap).dp)
+                                        .size(avatarSize.dp)
+                                        .clip(CircleShape)
+                                        .background(bg)
+                                        .border(2.dp, KarikaColors.White, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    KarikaText(
+                                        text = emp.displayName.initials(),
+                                        color = KarikaColors.White,
+                                        textSize = 8.sp,
+                                        fontWeight = FontWeight.W700,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(Modifier.width(8.dp))
                         KarikaText(
-                            text = "Naruči",
-                            color = KarikaColors.White,
-                            textSize = 12.sp,
+                            text = "Komercijalisti",
+                            color = KarikaColors.Gray7,
+                            textSize = 10.sp,
                             fontWeight = FontWeight.W700
                         )
-                    }
-                } else {
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(KarikaColors.Gray5)
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_cancel),
-                            contentDescription = "",
-                            tint = KarikaColors.Gray6,
-                            modifier = Modifier.size(14.dp)
-                        )
+                    } else if (customer.company.isNullOrBlank()) {
                         KarikaText(
-                            text = "Naruči",
-                            color = KarikaColors.Gray6,
-                            textSize = 12.sp,
+                            text = "Nije dodijeljen",
+                            color = KarikaColors.Gray7,
+                            textSize = 10.sp,
                             fontWeight = FontWeight.W700
                         )
                     }
                 }
+
+                // Buttons
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Order button
+                    if (customer.isActive) {
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(KarikaColors.Blue)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) { onOrder() }
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.ic_shopping_cart),
+                                contentDescription = "",
+                                tint = KarikaColors.White,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            KarikaText(
+                                text = "Naruči",
+                                color = KarikaColors.White,
+                                textSize = 12.sp,
+                                fontWeight = FontWeight.W700
+                            )
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(KarikaColors.Gray5)
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.ic_cancel),
+                                contentDescription = "",
+                                tint = KarikaColors.Gray6,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            KarikaText(
+                                text = "Naruči",
+                                color = KarikaColors.Gray6,
+                                textSize = 12.sp,
+                                fontWeight = FontWeight.W700
+                            )
+                        }
+                    }
+                }
             }
+        }
+    }
+}
+
+// ── Add option item ───────────────────────────────────────────────────────────
+
+@Composable
+private fun AddOptionItem(
+    icon: org.jetbrains.compose.resources.DrawableResource,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(KarikaColors.Gray20)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onClick
+            )
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(KarikaColors.Blue.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = vectorResource(icon),
+                contentDescription = "",
+                tint = KarikaColors.Blue,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Column {
+            KarikaText(
+                text = title,
+                color = KarikaColors.Gray2,
+                textSize = 15.sp,
+                fontWeight = FontWeight.W700
+            )
+            KarikaText(
+                text = subtitle,
+                color = KarikaColors.Gray6,
+                textSize = 12.sp,
+                fontWeight = FontWeight.W400
+            )
         }
     }
 }

@@ -175,8 +175,4 @@ class MessagesOverviewComponent(
             else -> conversationState.value.receiverName
         }
     }
-
-    fun downloadReceipt(it: String) {
-        openPdf(chatImage("/$it"))
-    }
 }

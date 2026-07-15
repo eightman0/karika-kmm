@@ -87,14 +87,20 @@ fun SalesDiscountFormView(component: SalesDiscountFormComponent) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(
-                                if (showDropdown) RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
+                                if (showDropdown) RoundedCornerShape(
+                                    topStart = 12.dp,
+                                    topEnd = 12.dp
+                                )
                                 else RoundedCornerShape(12.dp)
                             )
                             .background(KarikaColors.Gray20)
                             .border(
                                 1.dp,
                                 if (selectedItem != null) KarikaColors.Blue else KarikaColors.Gray9,
-                                if (showDropdown) RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
+                                if (showDropdown) RoundedCornerShape(
+                                    topStart = 12.dp,
+                                    topEnd = 12.dp
+                                )
                                 else RoundedCornerShape(12.dp)
                             )
                             .padding(horizontal = 12.dp, vertical = 12.dp),
@@ -160,7 +166,11 @@ fun SalesDiscountFormView(component: SalesDiscountFormComponent) {
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
                                 .background(KarikaColors.White)
-                                .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
+                                .border(
+                                    1.dp,
+                                    KarikaColors.Gray9,
+                                    RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
+                                )
                         ) {
                             searchResults.forEachIndexed { index, item ->
                                 SearchItemRow(
@@ -203,12 +213,21 @@ fun SalesDiscountFormView(component: SalesDiscountFormComponent) {
                             ) {
                                 Box(modifier = Modifier.weight(1f)) {
                                     if (minQty.isEmpty()) {
-                                        KarikaText(text = "Opcionalno", color = KarikaColors.Gray7, textSize = 14.sp, fontWeight = FontWeight.W400)
+                                        KarikaText(
+                                            text = "Opcionalno",
+                                            color = KarikaColors.Gray7,
+                                            textSize = 14.sp,
+                                            fontWeight = FontWeight.W400
+                                        )
                                     }
                                     BasicTextField(
                                         value = minQty,
                                         onValueChange = { component.setMinQty(it) },
-                                        textStyle = TextStyle(color = KarikaColors.Gray2, fontSize = 14.sp, fontWeight = FontWeight.W500),
+                                        textStyle = TextStyle(
+                                            color = KarikaColors.Gray2,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.W500
+                                        ),
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         cursorBrush = SolidColor(KarikaColors.Blue),
                                         singleLine = true,
@@ -237,12 +256,21 @@ fun SalesDiscountFormView(component: SalesDiscountFormComponent) {
                             ) {
                                 Box(modifier = Modifier.weight(1f)) {
                                     if (discountPercent.isEmpty()) {
-                                        KarikaText(text = "0", color = KarikaColors.Gray7, textSize = 14.sp, fontWeight = FontWeight.W400)
+                                        KarikaText(
+                                            text = "0",
+                                            color = KarikaColors.Gray7,
+                                            textSize = 14.sp,
+                                            fontWeight = FontWeight.W400
+                                        )
                                     }
                                     BasicTextField(
                                         value = discountPercent,
                                         onValueChange = { component.setDiscountPercent(it) },
-                                        textStyle = TextStyle(color = KarikaColors.Gray2, fontSize = 14.sp, fontWeight = FontWeight.W500),
+                                        textStyle = TextStyle(
+                                            color = KarikaColors.Gray2,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.W500
+                                        ),
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         cursorBrush = SolidColor(KarikaColors.Blue),
                                         singleLine = true,
@@ -250,7 +278,12 @@ fun SalesDiscountFormView(component: SalesDiscountFormComponent) {
                                     )
                                 }
                                 Spacer(Modifier.width(4.dp))
-                                KarikaText(text = "%", color = KarikaColors.Gray6, textSize = 14.sp, fontWeight = FontWeight.W600)
+                                KarikaText(
+                                    text = "%",
+                                    color = KarikaColors.Gray6,
+                                    textSize = 14.sp,
+                                    fontWeight = FontWeight.W600
+                                )
                             }
                         }
                     }
@@ -259,40 +292,58 @@ fun SalesDiscountFormView(component: SalesDiscountFormComponent) {
         }
 
         // ── Footer ─────────────────────────────────────────────────────────────
-        Column(
+        Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 16.dp)
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
+                    .weight(1f)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .border(1.dp, KarikaColors.Blue, RoundedCornerShape(18.dp))
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }) { component.goBack() },
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    text = "Odustani",
+                    color = KarikaColors.Blue,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
                     .clip(RoundedCornerShape(18.dp))
                     .background(if (isSaving) KarikaColors.Gray9 else KarikaColors.Blue)
-                    .clickable(enabled = !isSaving, indication = null, interactionSource = remember { MutableInteractionSource() }) { component.save() },
+                    .clickable(
+                        enabled = !isSaving,
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }) { component.save() },
                 contentAlignment = Alignment.Center
             ) {
                 if (isSaving) {
-                    CircularProgressIndicator(color = KarikaColors.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    CircularProgressIndicator(
+                        color = KarikaColors.White,
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp
+                    )
                 } else {
-                    KarikaText(text = "Sačuvaj", color = KarikaColors.White, textSize = 16.sp, fontWeight = FontWeight.W700)
+                    KarikaText(
+                        text = "Sačuvaj",
+                        color = KarikaColors.White,
+                        textSize = 16.sp,
+                        fontWeight = FontWeight.W700
+                    )
                 }
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .clip(RoundedCornerShape(18.dp))
-                    .border(1.dp, KarikaColors.Blue, RoundedCornerShape(18.dp))
-                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { component.goBack() },
-                contentAlignment = Alignment.Center
-            ) {
-                KarikaText(text = "Odustani", color = KarikaColors.Blue, textSize = 16.sp, fontWeight = FontWeight.W700)
             }
         }
     }
@@ -341,6 +392,7 @@ private fun SearchItemRow(item: DiscountSearchItem, onClick: () -> Unit) {
                         fontWeight = FontWeight.W600
                     )
                 }
+
                 is DiscountSearchItem.ProductItem -> {
                     KarikaText(
                         text = item.product.name ?: "—",

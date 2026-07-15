@@ -14,7 +14,10 @@ import karika.distribucija.ba.domain.HttpClientProvider.url
 import karika.distribucija.ba.domain.model.DiscountRule
 import karika.distribucija.ba.domain.model.DiscountRuleBody
 import karika.distribucija.ba.domain.model.DiscountRuleSearchResults
+import karika.distribucija.ba.domain.model.ErrorResponse
 import karika.distribucija.ba.domain.model.NewCustomerRequest
+import karika.distribucija.ba.domain.model.Partnership
+import karika.distribucija.ba.domain.model.PartnershipRequestBody
 import karika.distribucija.ba.domain.model.OnBehalfCartItemInput
 import karika.distribucija.ba.domain.model.OnBehalfCartItemRequest
 import karika.distribucija.ba.domain.model.OnBehalfCartResponse
@@ -63,6 +66,13 @@ internal class SalesApi {
                 parameter("searchCriteria[filter_groups][$groupIdx][filters][0][value]", status)
                 parameter("searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]", "eq")
             }
+        }
+    }
+
+    /** POST /V1/vendor-operations/partnerships/request */
+    suspend fun requestPartnership(data: PartnershipRequestBody): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(url("vendor-operations/partnerships/request")) {
+            setBody(data)
         }
     }
 
@@ -259,6 +269,22 @@ class SalesRepository internal constructor() {
         }
     }.flowOn(Dispatchers.Default)
 
+    fun requestPartnership(data: PartnershipRequestBody): Flow<ResultState<Partnership>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().requestPartnership(data).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<Partnership>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
     fun createCustomer(data: NewCustomerRequest): Flow<ResultState<OperationalCustomer>> = flow {
         emit(ResultState.Loading)
         try {
@@ -267,7 +293,13 @@ class SalesRepository internal constructor() {
                 emit(ResultState.Success(response.body<OperationalCustomer>()))
                 return@flow
             }
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            val errorCode = runCatching { response.body<ErrorResponse>() }.getOrNull()
+            val errorMsg = when (errorCode?.message) {
+                "A customer with this email already exists. Use the partnership request flow to link to an existing customer." ->
+                    "Kupac sa ovim email-om već postoji."
+                else -> "Došlo je do greške. Pokušajte ponovo!"
+            }
+            emit(ResultState.Error(errorMsg))
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {

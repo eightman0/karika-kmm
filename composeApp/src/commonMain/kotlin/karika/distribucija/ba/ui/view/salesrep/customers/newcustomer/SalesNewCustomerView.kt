@@ -7,25 +7,33 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,12 +45,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.YSpacer8
 import karikav2.composeapp.generated.resources.Res
@@ -78,6 +88,44 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
     val phone by component.phone.collectAsState()
     val email by component.email.collectAsState()
     val isSaving by component.isSaving.collectAsState()
+    val showInviteDialog by component.showInviteDialog.collectAsState()
+
+    if (showInviteDialog) {
+        AlertDialog(
+            onDismissRequest = { component.dismissInviteDialog() },
+            containerColor = KarikaColors.White,
+            title = {
+                KarikaText(
+                    text = "Kupac već postoji",
+                    color = KarikaColors.Gray2,
+                    fontWeight = FontWeight.W700,
+                    textSize = 18.sp
+                )
+            },
+            text = {
+                KarikaText(
+                    text = "Kupac sa ovim email-om već postoji. Želiš li ga pozvati kao partnera?",
+                    color = KarikaColors.Gray2,
+                    textSize = 14.sp
+                )
+            },
+            dismissButton = {
+                TextButton(onClick = { component.dismissInviteDialog() }) {
+                    KarikaText(text = "Odustani", color = KarikaColors.Blue, textSize = 14.sp)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { component.openInviteCustomer() }) {
+                    KarikaText(
+                        text = "Pozovi",
+                        color = KarikaColors.Blue,
+                        fontWeight = FontWeight.W700,
+                        textSize = 14.sp
+                    )
+                }
+            }
+        )
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -96,11 +144,77 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
     // Brčko: city is pre-filled "Brčko Grad", shown as read-only chip
     val brckoCity = if (isBrcko) city else null
 
-    Box(modifier = Modifier.fillMaxSize().background(KarikaColors.Gray20)) {
+    KarikaScaffold(
+        modifier = Modifier.fillMaxSize(),
+        component = component,
+        containerColor = KarikaColors.Gray20,
+        bottomBar = {
+            // ── Footer ─────────────────────────────────────────────────────────────
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .border(1.dp, KarikaColors.Blue, RoundedCornerShape(18.dp))
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { component.goBack() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    KarikaText(
+                        text = "Odustani",
+                        color = KarikaColors.Blue,
+                        textSize = 16.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                }
 
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(if (isSaving) KarikaColors.Gray9 else KarikaColors.Blue)
+                        .clickable(
+                            enabled = !isSaving,
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { component.save() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isSaving) {
+                        CircularProgressIndicator(
+                            color = KarikaColors.White,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        KarikaText(
+                            text = "Sačuvaj kupca",
+                            color = KarikaColors.White,
+                            textSize = 16.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
+                }
+            }
+        }
+    ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 160.dp)
+            modifier = Modifier
+                .windowInsetsPadding(
+                    WindowInsets.ime
+                        .union(WindowInsets.navigationBars)
+                        .only(WindowInsetsSides.Bottom)
+                )
+                .fillMaxSize()
         ) {
             // ── Info banner ────────────────────────────────────────────────────
             item {
@@ -110,7 +224,11 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(KarikaColors.Blue.copy(alpha = 0.08f))
-                        .border(1.dp, KarikaColors.Blue.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                        .border(
+                            1.dp,
+                            KarikaColors.Blue.copy(alpha = 0.2f),
+                            RoundedCornerShape(16.dp)
+                        )
                         .padding(14.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -131,7 +249,10 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
 
             // ── Section 1: Informacije o pravnom licu ──────────────────────────
             item {
-                FormSection(icon = Res.drawable.ic_storefront, title = "Informacije o pravnom licu") {
+                FormSection(
+                    icon = Res.drawable.ic_storefront,
+                    title = "Informacije o pravnom licu"
+                ) {
 
                     // Naziv pravnog lica (full width)
                     FormField(label = "Naziv pravnog lica*") {
@@ -145,7 +266,10 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                     Spacer(Modifier.height(16.dp))
 
                     // ID broj + PDV broj
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         Column(modifier = Modifier.weight(1f)) {
                             FormField(label = "ID broj*") {
                                 FormTextField(
@@ -182,7 +306,10 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                     Spacer(Modifier.height(16.dp))
 
                     // Poštanski broj + Entitet
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         Column(modifier = Modifier.weight(1f)) {
                             FormField(label = "Poštanski broj*") {
                                 FormTextField(
@@ -254,7 +381,10 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                     Spacer(Modifier.height(16.dp))
 
                     // Veličina + Tip objekta
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         Column(modifier = Modifier.weight(1f)) {
                             FormField(label = "Veličina objekta*") {
                                 FormPicker(
@@ -294,7 +424,10 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                 FormSection(icon = Res.drawable.ic_person, title = "Kontakt osoba") {
 
                     // Ime + Prezime
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         Column(modifier = Modifier.weight(1f)) {
                             FormField(label = "Ime*") {
                                 FormTextField(
@@ -318,7 +451,10 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                     Spacer(Modifier.height(16.dp))
 
                     // Telefon + Email
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         Column(modifier = Modifier.weight(1f)) {
                             FormField(label = "Broj telefona*") {
                                 FormTextField(
@@ -343,64 +479,6 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                         }
                     }
                 }
-            }
-        }
-
-        // ── Footer ─────────────────────────────────────────────────────────────
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 16.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(if (isSaving) KarikaColors.Gray9 else KarikaColors.Blue)
-                    .clickable(
-                        enabled = !isSaving,
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { component.save() },
-                contentAlignment = Alignment.Center
-            ) {
-                if (isSaving) {
-                    CircularProgressIndicator(
-                        color = KarikaColors.White,
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    KarikaText(
-                        text = "Sačuvaj kupca",
-                        color = KarikaColors.White,
-                        textSize = 16.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .clip(RoundedCornerShape(18.dp))
-                    .border(1.dp, KarikaColors.Blue, RoundedCornerShape(18.dp))
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { component.goBack() },
-                contentAlignment = Alignment.Center
-            ) {
-                KarikaText(
-                    text = "Odustani",
-                    color = KarikaColors.Blue,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W700
-                )
             }
         }
     }
@@ -428,6 +506,7 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                             closeSheet()
                         }
                     )
+
                     "canton" -> SimplePickerSheet(
                         title = if (isFBiH) "Kanton" else "Općina",
                         options = cantonOptions,
@@ -437,6 +516,7 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                             closeSheet()
                         }
                     )
+
                     "city" -> SimplePickerSheet(
                         title = "Grad",
                         options = cityOptions,
@@ -446,6 +526,7 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                             closeSheet()
                         }
                     )
+
                     "storeSize" -> SimplePickerSheet(
                         title = "Veličina objekta",
                         options = component.storeSizeOptions,
@@ -455,6 +536,7 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                             closeSheet()
                         }
                     )
+
                     "storeType" -> SimplePickerSheet(
                         title = "Tip objekta",
                         options = component.storeTypeOptions,
@@ -590,6 +672,8 @@ private fun FormTextField(
 
 @Composable
 private fun FormPicker(value: String?, placeholder: String, onClick: () -> Unit) {
+    val focusManager = LocalFocusManager.current
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -599,7 +683,10 @@ private fun FormPicker(value: String?, placeholder: String, onClick: () -> Unit)
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
-                onClick = onClick
+                onClick = {
+                    focusManager.clearFocus()
+                    onClick()
+                }
             )
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

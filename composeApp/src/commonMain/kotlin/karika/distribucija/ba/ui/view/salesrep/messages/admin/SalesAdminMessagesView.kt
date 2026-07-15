@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.YSpacer16
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_add_plus
 import karikav2.composeapp.generated.resources.ic_arrow_right
