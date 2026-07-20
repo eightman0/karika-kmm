@@ -86,7 +86,7 @@ class ShippingDetailsComponent(
                     when (it) {
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
-                            placeOrder()
+                            placeOrder(vendorNote.value)
                             stateHolder.customerSpecificHandler.getUserDetails()
                         }
 
@@ -100,9 +100,9 @@ class ShippingDetailsComponent(
         }
     }
 
-    private fun placeOrder() {
+    private fun placeOrder(note: String) {
         scope.launch {
-            repository.placeOrder()
+            repository.placeOrder(note)
                 .collect {
                     when (it) {
                         is ResultState.Loading -> showLoader()
