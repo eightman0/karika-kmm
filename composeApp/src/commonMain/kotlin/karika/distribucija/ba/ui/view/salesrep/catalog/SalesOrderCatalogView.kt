@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -67,6 +68,7 @@ import karikav2.composeapp.generated.resources.ic_arrow_right
 import karikav2.composeapp.generated.resources.ic_cancel
 import karikav2.composeapp.generated.resources.ic_cart_add
 import karikav2.composeapp.generated.resources.ic_check_circle_filled
+import karikav2.composeapp.generated.resources.ic_close
 import karikav2.composeapp.generated.resources.ic_navigation_category
 import karikav2.composeapp.generated.resources.ic_products
 import karikav2.composeapp.generated.resources.ic_search
@@ -87,6 +89,13 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
     val isLoadingMore by component.isLoadingMore.collectAsState()
     val hasNext by component.hasNext.collectAsState()
     val allCategories by component.stateHolder.commonHandler.categories.collectAsState()
+    val allFlatCategories = remember(allCategories) { flattenToDepth(allCategories, emptyList(), 3) }
+    val selectedCategoryPath = remember(selectedCategory, allFlatCategories) {
+        selectedCategory?.let { cat ->
+            val flat = allFlatCategories.find { it.category.id == cat.id }
+            (flat?.ancestors ?: emptyList()) + cat
+        } ?: emptyList()
+    }
 
     val listState = rememberLazyListState()
     val reachedEnd by remember {
@@ -102,6 +111,7 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
     }
 
     var showCategorySheet by remember { mutableStateOf(false) }
+    var categorySheetInitialStack by remember { mutableStateOf<List<Category>>(emptyList()) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -179,7 +189,10 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
-                        ) { showCategorySheet = true },
+                        ) {
+                            categorySheetInitialStack = emptyList()
+                            showCategorySheet = true
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -202,19 +215,44 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
                 ) {
                     Row(
                         modifier = Modifier
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(14.dp))
                             .background(KarikaColors.Blue.copy(alpha = 0.1f))
-                            .border(1.dp, KarikaColors.Blue.copy(alpha = 0.2f), CircleShape)
+                            .border(1.dp, KarikaColors.Blue.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                             .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        KarikaText(
-                            text = selectedCategory!!.name,
-                            color = KarikaColors.Blue,
-                            textSize = 12.sp,
-                            fontWeight = FontWeight.W600
-                        )
+                        FlowRow(
+                            modifier = Modifier.weight(1f, fill = false),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            selectedCategoryPath.forEachIndexed { index, pathCategory ->
+                                val isLastLevel = index == selectedCategoryPath.lastIndex
+                                KarikaText(
+                                    modifier = if (isLastLevel) Modifier else Modifier
+                                        .clickable(
+                                            indication = null,
+                                            interactionSource = remember { MutableInteractionSource() }
+                                        ) {
+                                            categorySheetInitialStack = selectedCategoryPath.subList(0, index + 1)
+                                            showCategorySheet = true
+                                        },
+                                    text = pathCategory.name,
+                                    color = KarikaColors.Blue,
+                                    textSize = 12.sp,
+                                    fontWeight = FontWeight.W600
+                                )
+                                if (!isLastLevel) {
+                                    KarikaText(
+                                        text = "->",
+                                        color = KarikaColors.Blue,
+                                        textSize = 12.sp,
+                                        fontWeight = FontWeight.W600
+                                    )
+                                }
+                            }
+                        }
                         Box(
                             modifier = Modifier
                                 .size(18.dp)
@@ -227,7 +265,7 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = vectorResource(Res.drawable.ic_cancel),
+                                imageVector = vectorResource(Res.drawable.ic_close),
                                 contentDescription = "Ukloni",
                                 tint = KarikaColors.White,
                                 modifier = Modifier.size(10.dp)
@@ -366,6 +404,7 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
             CategorySheet(
                 allCategories = allCategories,
                 selectedCategory = selectedCategory,
+                initialNavStack = categorySheetInitialStack,
                 onSelect = { category ->
                     component.selectCategory(category)
                     coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
@@ -586,18 +625,18 @@ private fun ProductCard(
 
 // ── Category bottom sheet helpers ──────────────────────────────────────────────
 
-private data class FlatCategory(val category: Category, val breadcrumb: List<String>)
+private data class FlatCategory(val category: Category, val ancestors: List<Category>)
 
 private fun flattenToDepth(
     categories: List<Category>,
-    parentBreadcrumb: List<String>,
+    parentAncestors: List<Category>,
     remaining: Int
 ): List<FlatCategory> {
     if (remaining <= 0) return emptyList()
     return categories.flatMap { cat ->
-        listOf(FlatCategory(cat, parentBreadcrumb)) +
+        listOf(FlatCategory(cat, parentAncestors)) +
             if (cat.childrenData.isNotEmpty()) {
-                flattenToDepth(cat.childrenData, parentBreadcrumb + cat.name, remaining - 1)
+                flattenToDepth(cat.childrenData, parentAncestors + cat, remaining - 1)
             } else emptyList()
     }
 }
@@ -608,10 +647,11 @@ private fun flattenToDepth(
 private fun CategorySheet(
     allCategories: List<Category>,
     selectedCategory: Category?,
+    initialNavStack: List<Category> = emptyList(),
     onSelect: (Category?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var categoryNavStack by remember { mutableStateOf<List<Category>>(emptyList()) }
+    var categoryNavStack by remember { mutableStateOf(initialNavStack) }
     var categorySearch by remember { mutableStateOf("") }
 
     // Reset search when navigating to a different level
@@ -794,9 +834,9 @@ private fun CategorySheet(
                                 textSize = 14.sp,
                                 fontWeight = FontWeight.W600
                             )
-                            if (flat.breadcrumb.isNotEmpty()) {
+                            if (flat.ancestors.isNotEmpty()) {
                                 KarikaText(
-                                    text = flat.breadcrumb.joinToString(" › "),
+                                    text = flat.ancestors.joinToString(" › ") { it.name },
                                     color = KarikaColors.Gray7,
                                     textSize = 11.sp,
                                     fontWeight = FontWeight.W400
