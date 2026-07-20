@@ -42,6 +42,11 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
 
     fun refreshAdminMessages() { _refreshAdminMessages.tryEmit(Unit) }
 
+    private val _refreshInternalMessages = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val refreshInternalMessages = _refreshInternalMessages.asSharedFlow()
+
+    fun refreshInternalMessages() { _refreshInternalMessages.tryEmit(Unit) }
+
     fun logout() {
         sessionHandler = SessionHandler()
         messageHandler = MessageHandler()

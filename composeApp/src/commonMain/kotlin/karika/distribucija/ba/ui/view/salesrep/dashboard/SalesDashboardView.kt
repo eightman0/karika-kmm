@@ -65,7 +65,9 @@ import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminNewMessa
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerConversationView
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerMessagesView
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerNewMessageView
+import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalConversationView
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalMessagesView
+import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalNewMessageView
 import karika.distribucija.ba.ui.view.salesrep.operations.SalesOperationsView
 import karika.distribucija.ba.ui.view.salesrep.orders.SalesOrdersView
 import karika.distribucija.ba.ui.view.salesrep.orders.detail.SalesOrderDetailView
@@ -353,6 +355,16 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             onBack = { child.component.goBack() }
                         )
 
+                        is SalesChild.InternalConversation -> SalesDetailTopBar(
+                            title = child.component.counterpartName,
+                            onBack = { child.component.goBack() }
+                        )
+
+                        is SalesChild.InternalNewMessage -> SalesDetailTopBar(
+                            title = "Nova interna poruka",
+                            onBack = { child.component.goBack() }
+                        )
+
                         is SalesChild.OrderCatalog -> SalesDetailTopBar(
                             title = "Naruči: ${child.component.customer.fullName}",
                             onBack = { child.component.goBack() }
@@ -373,6 +385,8 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         is SalesChild.CustomerMessages -> SalesCustomerMessagesView(child.component)
                         is SalesChild.AdminMessages -> SalesAdminMessagesView(child.component)
                         is SalesChild.InternalMessages -> SalesInternalMessagesView(child.component)
+                        is SalesChild.InternalConversation -> SalesInternalConversationView(child.component)
+                        is SalesChild.InternalNewMessage -> SalesInternalNewMessageView(child.component)
                         is SalesChild.Operations -> SalesOperationsView(child.component)
                         is SalesChild.CustomerDetail -> SalesCustomerDetailView(child.component)
                         is SalesChild.OrderDetail -> SalesOrderDetailView(child.component)
