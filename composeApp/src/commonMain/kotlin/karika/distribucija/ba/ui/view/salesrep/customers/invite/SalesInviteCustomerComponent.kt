@@ -11,6 +11,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+enum class ContactMethod(val label: String) {
+    PHONE("Broj telefona"),
+    EMAIL("Email"),
+    VIBER("Viber")
+}
+
 class SalesInviteCustomerComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
@@ -22,14 +28,22 @@ class SalesInviteCustomerComponent(
     private val _email = MutableStateFlow(prefillEmail)
     val email = _email.asStateFlow()
 
+    private val _phone = MutableStateFlow("")
+    val phone = _phone.asStateFlow()
+
     private val _note = MutableStateFlow("")
     val note = _note.asStateFlow()
+
+    private val _contactMethod = MutableStateFlow(ContactMethod.EMAIL)
+    val contactMethod = _contactMethod.asStateFlow()
 
     private val _isSaving = MutableStateFlow(false)
     val isSaving = _isSaving.asStateFlow()
 
     fun setEmail(v: String) { _email.value = v }
+    fun setPhone(v: String) { _phone.value = v }
     fun setNote(v: String) { _note.value = v }
+    fun setContactMethod(v: ContactMethod) { _contactMethod.value = v }
 
     fun send() {
         val email = _email.value.trim()
@@ -57,6 +71,18 @@ class SalesInviteCustomerComponent(
                     }
                 }
             }
+        }
+    }
+
+    fun callTarget(): String? {
+        val sanitized = _phone.value.trim().filter { it.isDigit() || it == '+' }
+        if (sanitized.isBlank()) {
+            showErrorMessage("Unesite broj telefona kupca")
+            return null
+        }
+        return when (_contactMethod.value) {
+            ContactMethod.VIBER -> "viber://contact?number=$sanitized"
+            else -> "tel:$sanitized"
         }
     }
 
