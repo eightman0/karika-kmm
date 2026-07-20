@@ -24,7 +24,9 @@ import karika.distribucija.ba.ui.view.salesrep.messages.admin.SalesAdminNewMessa
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerConversationComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerMessagesComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerNewMessageComponent
+import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalConversationComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalMessagesComponent
+import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalNewMessageComponent
 import karika.distribucija.ba.ui.view.salesrep.operations.SalesOperationsComponent
 import karika.distribucija.ba.ui.view.salesrep.orders.SalesOrdersComponent
 import karika.distribucija.ba.ui.view.salesrep.orders.detail.SalesOrderDetailComponent
@@ -122,6 +124,19 @@ class SalesDashboardComponent(
                 SalesCustomerNewMessageComponent(componentContext, stateHolder)
             )
 
+            is SalesRepConfig.InternalConversation -> SalesChild.InternalConversation(
+                SalesInternalConversationComponent(
+                    componentContext,
+                    stateHolder,
+                    config.threadId,
+                    config.counterpartName
+                )
+            )
+
+            is SalesRepConfig.InternalNewMessage -> SalesChild.InternalNewMessage(
+                SalesInternalNewMessageComponent(componentContext, stateHolder)
+            )
+
             is SalesRepConfig.OrderCatalog -> SalesChild.OrderCatalog(
                 SalesOrderCatalogComponent(componentContext, stateHolder, config.customer)
             )
@@ -171,6 +186,10 @@ sealed class SalesRepConfig {
     @Serializable
     data object CustomerNewMessage : SalesRepConfig()
     @Serializable
+    data class InternalConversation(val threadId: Long, val counterpartName: String) : SalesRepConfig()
+    @Serializable
+    data object InternalNewMessage : SalesRepConfig()
+    @Serializable
     data class OrderCatalog(val customer: OperationalCustomer) : SalesRepConfig()
     @Serializable
     data class OrderCart(val customer: OperationalCustomer) : SalesRepConfig()
@@ -195,6 +214,8 @@ sealed class SalesChild {
 
     data class AdminNewMessage(val component: SalesAdminNewMessageComponent) : SalesChild()
     data class CustomerNewMessage(val component: SalesCustomerNewMessageComponent) : SalesChild()
+    data class InternalConversation(val component: SalesInternalConversationComponent) : SalesChild()
+    data class InternalNewMessage(val component: SalesInternalNewMessageComponent) : SalesChild()
     data class OrderCatalog(val component: SalesOrderCatalogComponent) : SalesChild()
     data class OrderCart(val component: SalesOrderCartComponent) : SalesChild()
     data class InviteCustomer(val component: SalesInviteCustomerComponent) : SalesChild()
