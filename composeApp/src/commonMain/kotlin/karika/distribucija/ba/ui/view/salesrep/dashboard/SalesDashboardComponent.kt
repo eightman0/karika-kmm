@@ -27,6 +27,7 @@ import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerNe
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalConversationComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalMessagesComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalNewMessageComponent
+import karika.distribucija.ba.ui.view.salesrep.notifications.SalesNotificationsComponent
 import karika.distribucija.ba.ui.view.salesrep.operations.SalesOperationsComponent
 import karika.distribucija.ba.ui.view.salesrep.orders.SalesOrdersComponent
 import karika.distribucija.ba.ui.view.salesrep.orders.detail.SalesOrderDetailComponent
@@ -46,6 +47,7 @@ class SalesDashboardComponent(
         })
 
         stateHolder.salesSpecificHandler.getMe()
+        stateHolder.vendorNotificationHandler.notificationReceived()
     }
 
     val stack: Value<ChildStack<*, SalesChild>> =
@@ -148,6 +150,10 @@ class SalesDashboardComponent(
             is SalesRepConfig.InviteCustomer -> SalesChild.InviteCustomer(
                 SalesInviteCustomerComponent(componentContext, stateHolder, config.email)
             )
+
+            is SalesRepConfig.Notifications -> SalesChild.Notifications(
+                SalesNotificationsComponent(componentContext, stateHolder)
+            )
         }
 }
 
@@ -195,6 +201,8 @@ sealed class SalesRepConfig {
     data class OrderCart(val customer: OperationalCustomer) : SalesRepConfig()
     @Serializable
     data class InviteCustomer(val email: String = "") : SalesRepConfig()
+    @Serializable
+    data object Notifications : SalesRepConfig()
 }
 
 sealed class SalesChild {
@@ -219,4 +227,5 @@ sealed class SalesChild {
     data class OrderCatalog(val component: SalesOrderCatalogComponent) : SalesChild()
     data class OrderCart(val component: SalesOrderCartComponent) : SalesChild()
     data class InviteCustomer(val component: SalesInviteCustomerComponent) : SalesChild()
+    data class Notifications(val component: SalesNotificationsComponent) : SalesChild()
 }

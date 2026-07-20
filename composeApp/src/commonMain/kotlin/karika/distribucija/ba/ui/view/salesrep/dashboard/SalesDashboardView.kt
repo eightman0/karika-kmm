@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -68,6 +69,7 @@ import karika.distribucija.ba.ui.view.salesrep.messages.customer.SalesCustomerNe
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalConversationView
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalMessagesView
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalNewMessageView
+import karika.distribucija.ba.ui.view.salesrep.notifications.SalesNotificationsView
 import karika.distribucija.ba.ui.view.salesrep.operations.SalesOperationsView
 import karika.distribucija.ba.ui.view.salesrep.orders.SalesOrdersView
 import karika.distribucija.ba.ui.view.salesrep.orders.detail.SalesOrderDetailView
@@ -78,6 +80,7 @@ import karikav2.composeapp.generated.resources.ic_email
 import karikav2.composeapp.generated.resources.ic_logout
 import karikav2.composeapp.generated.resources.ic_menu
 import karikav2.composeapp.generated.resources.ic_messages
+import karikav2.composeapp.generated.resources.ic_notifications
 import karikav2.composeapp.generated.resources.ic_orders
 import karikav2.composeapp.generated.resources.ic_tertiary
 import kotlinx.coroutines.launch
@@ -89,6 +92,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
     val navState = component.stack.subscribeAsState()
     val salesManager by component.stateHolder.salesSpecificHandler.me.collectAsState()
+    val notificationBadge by component.stateHolder.vendorNotificationHandler.notificationCount.collectAsState()
 
     BoxWithConstraints(
         modifier = Modifier
@@ -295,13 +299,18 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                 containerColor = KarikaColors.White,
                 topBar = {
                     val menuClick = { coroutineScope.launch { drawerState.open() } }
+                    val onNotifications = { component.salesRepNavigate(SalesRepConfig.Notifications) }
                     when (val child = navState.value.active.instance) {
-                        is SalesChild.Orders -> SalesRootTopBar("Upravljanje narudžbama") { menuClick() }
-                        is SalesChild.Customers -> SalesRootTopBar("Upravljanje kupcima") { menuClick() }
-                        is SalesChild.CustomerMessages -> SalesRootTopBar("Poruke kupaca") { menuClick() }
-                        is SalesChild.AdminMessages -> SalesRootTopBar("Poruke admina") { menuClick() }
-                        is SalesChild.InternalMessages -> SalesRootTopBar("Interne poruke") { menuClick() }
-                        is SalesChild.Operations -> SalesRootTopBar("Operacije") { menuClick() }
+                        is SalesChild.Orders -> SalesRootTopBar("Upravljanje narudžbama", notificationBadge, onNotifications) { menuClick() }
+                        is SalesChild.Customers -> SalesRootTopBar("Upravljanje kupcima", notificationBadge, onNotifications) { menuClick() }
+                        is SalesChild.CustomerMessages -> SalesRootTopBar("Poruke kupaca", notificationBadge, onNotifications) { menuClick() }
+                        is SalesChild.AdminMessages -> SalesRootTopBar("Poruke admina", notificationBadge, onNotifications) { menuClick() }
+                        is SalesChild.InternalMessages -> SalesRootTopBar("Interne poruke", notificationBadge, onNotifications) { menuClick() }
+                        is SalesChild.Operations -> SalesRootTopBar("Operacije", notificationBadge, onNotifications) { menuClick() }
+                        is SalesChild.Notifications -> SalesDetailTopBar(
+                            title = "Obavijesti",
+                            onBack = { child.component.goBack() }
+                        )
                         is SalesChild.CustomerDetail -> SalesDetailTopBar(
                             title = child.component.customer.fullName,
                             onBack = { child.component.goBack() }
@@ -399,6 +408,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         is SalesChild.OrderCatalog -> SalesOrderCatalogView(child.component)
                         is SalesChild.OrderCart -> SalesOrderCartView(child.component)
                         is SalesChild.InviteCustomer -> SalesInviteCustomerView(child.component)
+                        is SalesChild.Notifications -> SalesNotificationsView(child.component)
                     }
                 }
             }
@@ -437,7 +447,12 @@ private fun SalesTopBar(onMenuClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SalesRootTopBar(title: String, onMenuClick: () -> Unit = {}) {
+private fun SalesRootTopBar(
+    title: String,
+    notificationBadge: Int = 0,
+    onNotifications: () -> Unit = {},
+    onMenuClick: () -> Unit = {}
+) {
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         colors = TopAppBarDefaults.topAppBarColors(containerColor = KarikaColors.White),
@@ -458,6 +473,35 @@ private fun SalesRootTopBar(title: String, onMenuClick: () -> Unit = {}) {
                 contentDescription = "",
                 tint = KarikaColors.Gray2
             )
+        },
+        actions = {
+            Box(modifier = Modifier) {
+                Icon(
+                    modifier = Modifier
+                        .onClick { onNotifications() }
+                        .padding(horizontal = 4.dp),
+                    imageVector = vectorResource(Res.drawable.ic_notifications),
+                    contentDescription = "Obavijesti",
+                    tint = KarikaColors.Gray2
+                )
+                if (notificationBadge > 0) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .offset(16.dp, (-8).dp)
+                            .background(color = KarikaColors.Red, shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        KarikaText(
+                            modifier = Modifier.padding(0.dp),
+                            text = "$notificationBadge",
+                            textSize = 10.sp,
+                            fontWeight = FontWeight.W400,
+                            color = KarikaColors.White
+                        )
+                    }
+                }
+            }
         }
     )
 }
