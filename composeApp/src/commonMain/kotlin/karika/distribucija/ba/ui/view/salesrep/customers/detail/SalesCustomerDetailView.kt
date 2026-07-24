@@ -347,7 +347,7 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
                         modifier = Modifier.size(22.dp)
                     )
                     KarikaText(
-                        text = "Naruči u ime kupca",
+                        text = "Naruči za kupca",
                         color = KarikaColors.White,
                         textSize = 16.sp,
                         fontWeight = FontWeight.W700

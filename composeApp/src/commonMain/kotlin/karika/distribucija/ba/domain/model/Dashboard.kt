@@ -400,7 +400,8 @@ data class ShopAddress(
 @Serializable
 data class Shop(
     @SerialName("id") var id: String? = null,
-    @SerialName("b2b_pravno_lice") var name: String? = null
+    @SerialName("b2b_pravno_lice") var name: String? = null,
+    var email: String? = null
 )
 
 @Serializable
