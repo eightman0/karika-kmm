@@ -73,28 +73,39 @@ class LoginComponent(
                             hideLoader()
                             stateHolder.sessionHandler.setAccessToken(result.data)
 
-                            SalesRepository().getMe().collect { me ->
-                                when (me) {
-                                    is ResultState.Loading -> showLoader()
-                                    is ResultState.Success -> {
-                                        hideLoader()
-                                        userType =
-                                            if (me.data.role == "sales_employee") KarikaType.SALES_REP else KarikaType.VENDOR
-                                        stateHolder.sessionHandler.saveJWT(
-                                            result.data,
-                                            LoginDto(email.value, pass.value, userType),
-                                            rememberMe.value
-                                        )
-                                        savePushHandle()
-                                        navigatePostLogin()
-                                        callback()
-                                    }
+                            if (userType == KarikaType.VENDOR) {
+                                SalesRepository().getMe().collect { me ->
+                                    when (me) {
+                                        is ResultState.Loading -> showLoader()
+                                        is ResultState.Success -> {
+                                            hideLoader()
+                                            userType =
+                                                if (me.data.role == "sales_employee") KarikaType.SALES_REP else KarikaType.VENDOR
+                                            stateHolder.sessionHandler.saveJWT(
+                                                result.data,
+                                                LoginDto(email.value, pass.value, userType),
+                                                rememberMe.value
+                                            )
+                                            savePushHandle()
+                                            navigatePostLogin()
+                                            callback()
+                                        }
 
-                                    is ResultState.Error -> {
-                                        hideLoader()
-                                        showMessage(me.message)
+                                        is ResultState.Error -> {
+                                            hideLoader()
+                                            showMessage(me.message)
+                                        }
                                     }
                                 }
+                            } else {
+                               stateHolder.sessionHandler.saveJWT(
+                                    result.data,
+                                    LoginDto(email.value, pass.value, userType),
+                                    rememberMe.value
+                                )
+                                savePushHandle()
+                                navigatePostLogin()
+                                callback()
                             }
                         }
 
