@@ -4,16 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -34,7 +36,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -43,6 +44,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -80,6 +82,7 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
+    val selectedTab by component.selectedTab.collectAsState()
     val products by component.products.collectAsState()
     val searchText by component.searchText.collectAsState()
     val selectedCategory by component.selectedCategory.collectAsState()
@@ -89,7 +92,8 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
     val isLoadingMore by component.isLoadingMore.collectAsState()
     val hasNext by component.hasNext.collectAsState()
     val allCategories by component.stateHolder.commonHandler.categories.collectAsState()
-    val allFlatCategories = remember(allCategories) { flattenToDepth(allCategories, emptyList(), 3) }
+    val allFlatCategories =
+        remember(allCategories) { flattenToDepth(allCategories, emptyList(), 3) }
     val selectedCategoryPath = remember(selectedCategory, allFlatCategories) {
         selectedCategory?.let { cat ->
             val flat = allFlatCategories.find { it.category.id == cat.id }
@@ -180,32 +184,57 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
                     }
                 }
 
-                // Category filter button
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(if (selectedCategory != null) KarikaColors.Blue else KarikaColors.Gray20)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            categorySheetInitialStack = emptyList()
-                            showCategorySheet = true
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_navigation_category),
-                        contentDescription = "Kategorije",
-                        tint = if (selectedCategory != null) KarikaColors.White else KarikaColors.Gray6,
-                        modifier = Modifier.size(20.dp)
-                    )
+                // Category filter button (only applies to the full catalog)
+                if (selectedTab == SalesOrderCatalogComponent.CatalogTab.ALL_ITEMS) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(if (selectedCategory != null) KarikaColors.Blue else KarikaColors.Gray20)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                categorySheetInitialStack = emptyList()
+                                showCategorySheet = true
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_navigation_category),
+                            contentDescription = "Kategorije",
+                            tint = if (selectedCategory != null) KarikaColors.White else KarikaColors.Gray6,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 
+            // ── Tabs ────────────────────────────────────────────────────────────
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(KarikaColors.White)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 14.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CatalogTabPill(
+                    label = "Svi artikli",
+                    selected = selectedTab == SalesOrderCatalogComponent.CatalogTab.ALL_ITEMS
+                ) { component.selectTab(SalesOrderCatalogComponent.CatalogTab.ALL_ITEMS) }
+                CatalogTabPill(
+                    label = "Na akciji",
+                    selected = selectedTab == SalesOrderCatalogComponent.CatalogTab.ON_SALE
+                ) { component.selectTab(SalesOrderCatalogComponent.CatalogTab.ON_SALE) }
+                CatalogTabPill(
+                    label = "Prethodno naručeno",
+                    selected = selectedTab == SalesOrderCatalogComponent.CatalogTab.PREVIOUSLY_ORDERED
+                ) { component.selectTab(SalesOrderCatalogComponent.CatalogTab.PREVIOUSLY_ORDERED) }
+            }
+
             // ── Active category chip ───────────────────────────────────────────
-            if (selectedCategory != null) {
+            if (selectedCategory != null && selectedTab == SalesOrderCatalogComponent.CatalogTab.ALL_ITEMS) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -217,7 +246,11 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
                         modifier = Modifier
                             .clip(RoundedCornerShape(14.dp))
                             .background(KarikaColors.Blue.copy(alpha = 0.1f))
-                            .border(1.dp, KarikaColors.Blue.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                            .border(
+                                1.dp,
+                                KarikaColors.Blue.copy(alpha = 0.2f),
+                                RoundedCornerShape(14.dp)
+                            )
                             .padding(start = 12.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -235,7 +268,8 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
                                             indication = null,
                                             interactionSource = remember { MutableInteractionSource() }
                                         ) {
-                                            categorySheetInitialStack = selectedCategoryPath.subList(0, index + 1)
+                                            categorySheetInitialStack =
+                                                selectedCategoryPath.subList(0, index + 1)
                                             showCategorySheet = true
                                         },
                                     text = pathCategory.name,
@@ -296,9 +330,14 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
                                 modifier = Modifier.size(48.dp)
                             )
                             KarikaText(
-                                text = "Nema artikala",
+                                text = when (selectedTab) {
+                                    SalesOrderCatalogComponent.CatalogTab.ON_SALE -> "Trenutno nema artikala na akciji"
+                                    SalesOrderCatalogComponent.CatalogTab.PREVIOUSLY_ORDERED -> "Ovaj kupac nema prethodno naručenih artikala"
+                                    SalesOrderCatalogComponent.CatalogTab.ALL_ITEMS -> "Nema artikala"
+                                },
                                 color = KarikaColors.Gray6,
-                                textSize = 15.sp
+                                textSize = 15.sp,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
@@ -418,6 +457,41 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
                 }
             )
         }
+    }
+}
+
+// ── Catalog tab pill ──────────────────────────────────────────────────────────
+
+@Composable
+private fun CatalogTabPill(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (selected) KarikaColors.Blue else KarikaColors.Gray20)
+            .border(
+                width = 1.dp,
+                color = if (selected) KarikaColors.Blue else KarikaColors.Gray9,
+                shape = RoundedCornerShape(10.dp)
+            )
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onClick
+            )
+            .padding(horizontal = 14.dp, vertical = 9.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        KarikaText(
+            text = label,
+            color = if (selected) KarikaColors.White else KarikaColors.Gray2,
+            textSize = 13.sp,
+            fontWeight = FontWeight.W600,
+            maxLines = 1
+        )
     }
 }
 
@@ -635,9 +709,9 @@ private fun flattenToDepth(
     if (remaining <= 0) return emptyList()
     return categories.flatMap { cat ->
         listOf(FlatCategory(cat, parentAncestors)) +
-            if (cat.childrenData.isNotEmpty()) {
-                flattenToDepth(cat.childrenData, parentAncestors + cat, remaining - 1)
-            } else emptyList()
+                if (cat.childrenData.isNotEmpty()) {
+                    flattenToDepth(cat.childrenData, parentAncestors + cat, remaining - 1)
+                } else emptyList()
     }
 }
 
@@ -849,9 +923,11 @@ private fun CategorySheet(
                 // ── Normal hierarchical navigation ────────────────────────────
                 item {
                     val parentCat = categoryNavStack.lastOrNull()
-                    val isParentSelected = if (parentCat != null) selectedCategory?.id == parentCat.id
-                    else selectedCategory == null
-                    val label = if (parentCat != null) "Svi artikli: ${parentCat.name}" else "Sve kategorije"
+                    val isParentSelected =
+                        if (parentCat != null) selectedCategory?.id == parentCat.id
+                        else selectedCategory == null
+                    val label =
+                        if (parentCat != null) "Svi artikli: ${parentCat.name}" else "Sve kategorije"
 
                     Row(
                         modifier = Modifier

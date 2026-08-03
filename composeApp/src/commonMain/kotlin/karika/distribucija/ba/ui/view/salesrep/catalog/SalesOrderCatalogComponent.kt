@@ -9,6 +9,7 @@ import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig
+import karika.distribucija.ba.util.KarikaConfig
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,13 @@ class SalesOrderCatalogComponent(
     val customer: OperationalCustomer
 ) : CommonComponent(componentContext, stateHolder) {
 
+    enum class CatalogTab { ALL_ITEMS, ON_SALE, PREVIOUSLY_ORDERED }
+
     private val salesRepository = SalesRepository()
+
+    // ── Tabs ───────────────────────────────────────────────────────────────────
+    private val _selectedTab = MutableStateFlow(CatalogTab.ALL_ITEMS)
+    val selectedTab = _selectedTab.asStateFlow()
 
     // ── Products ───────────────────────────────────────────────────────────────
     private val _products = MutableStateFlow<List<OnBehalfProduct>>(emptyList())
@@ -50,7 +57,8 @@ class SalesOrderCatalogComponent(
     val selectedCategory = _selectedCategory.asStateFlow()
 
     // ── Shared cart via stateHolder ───────────────────────────────────────────
-    val cartItems: StateFlow<Map<String, Pair<OnBehalfProduct, Int>>> = stateHolder.salesSpecificHandler.salesRepCart
+    val cartItems: StateFlow<Map<String, Pair<OnBehalfProduct, Int>>> =
+        stateHolder.salesSpecificHandler.salesRepCart
 
     val cartCount: StateFlow<Int> = stateHolder.salesSpecificHandler.salesRepCart
         .map { map -> map.values.sumOf { it.second } }
@@ -61,6 +69,12 @@ class SalesOrderCatalogComponent(
 
     init {
         stateHolder.salesSpecificHandler.clearSalesRepCart()
+        loadProducts(reset = true)
+    }
+
+    fun selectTab(tab: CatalogTab) {
+        if (_selectedTab.value == tab) return
+        _selectedTab.value = tab
         loadProducts(reset = true)
     }
 
@@ -98,31 +112,55 @@ class SalesOrderCatalogComponent(
 
     private fun loadProducts(reset: Boolean) {
         loadJob?.cancel()
+
         loadJob = scope.launch {
-            val page = if (reset) { currentPage = 1; 1 } else currentPage
+            val page = if (reset) {
+                currentPage = 1; 1
+            } else currentPage
 
             if (reset) _isLoading.value = true else _isLoadingMore.value = true
 
-            salesRepository.getProducts(
-                page = page,
-                pageSize = pageSize,
-                search = _searchText.value.takeIf { it.isNotBlank() },
-                categoryId = _selectedCategory.value?.id?.toLong()
-            ).collect { result ->
+            val resultFlow = when (_selectedTab.value) {
+                CatalogTab.PREVIOUSLY_ORDERED -> salesRepository.getPreviouslyOrderedProducts(
+                    customerId = customer.customerId,
+                    page = page,
+                    pageSize = pageSize,
+                    search = _searchText.value.takeIf { it.isNotBlank() }
+                )
+
+                CatalogTab.ON_SALE -> salesRepository.getProducts(
+                    page = page,
+                    pageSize = pageSize,
+                    search = _searchText.value.takeIf { it.isNotBlank() },
+                    categoryId = "${KarikaConfig.getActionId()},${KarikaConfig.getOutletId()}"
+                )
+
+                else -> salesRepository.getProducts(
+                    page = page,
+                    pageSize = pageSize,
+                    search = _searchText.value.takeIf { it.isNotBlank() },
+                    categoryId = _selectedCategory.value?.id?.toString()
+                )
+            }
+
+            resultFlow.collect { result ->
                 when (result) {
-                    is ResultState.Loading -> { /* loader set above */ }
+                    is ResultState.Loading -> { /* loader set above */
+                    }
+
                     is ResultState.Success -> {
                         val items = result.data.items
                         _hasNext.value = items.size >= pageSize
                         if (reset) {
                             _products.value = items
                         } else {
-                            _products.value = _products.value + items
+                            _products.value += items
                         }
                         if (_hasNext.value) currentPage++
                         _isLoading.value = false
                         _isLoadingMore.value = false
                     }
+
                     is ResultState.Error -> {
                         _isLoading.value = false
                         _isLoadingMore.value = false
