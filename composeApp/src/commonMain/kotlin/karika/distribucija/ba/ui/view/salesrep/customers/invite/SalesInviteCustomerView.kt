@@ -219,18 +219,18 @@ fun SalesInviteCustomerView(component: SalesInviteCustomerComponent) {
                             onClick = {}
                         )
                     } else {
-                        searchResults.forEach { shop ->
+                        searchResults.forEach { customer ->
                             DropdownMenuItem(
                                 text = {
                                     KarikaText(
-                                        text = shop.name ?: "",
+                                        text = customer.company ?: customer.fullName,
                                         color = KarikaColors.Gray2,
                                         textSize = 14.sp,
                                         fontWeight = FontWeight.W400
                                     )
                                 },
                                 onClick = {
-                                    component.selectShop(shop)
+                                    component.selectCustomer(customer)
                                     searchExpanded = false
                                 }
                             )

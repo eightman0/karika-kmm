@@ -2,10 +2,10 @@ package karika.distribucija.ba.ui.view.salesrep.customers.invite
 
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.SalesRepository
+import karika.distribucija.ba.domain.model.OperationalCustomer
 import karika.distribucija.ba.domain.model.PartnershipRequest
 import karika.distribucija.ba.domain.model.PartnershipRequestBody
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.Shop
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.Job
@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class ContactMethod(val label: String) {
     PHONE("Broj telefona"),
@@ -31,7 +32,7 @@ class SalesInviteCustomerComponent(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
 
-    private val _searchResults = MutableStateFlow<List<Shop>>(emptyList())
+    private val _searchResults = MutableStateFlow<List<OperationalCustomer>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
 
     private val _isSearching = MutableStateFlow(false)
@@ -62,13 +63,13 @@ class SalesInviteCustomerComponent(
         }
         searchJob?.cancel()
         searchJob = scope.launch {
-            delay(300)
-            messagesRepository.shops(searchText = v).collect { result ->
+            delay(300.milliseconds)
+            repository.getInvitableCustomers(page = 1, search = v).collect { result ->
                 when (result) {
                     is ResultState.Loading -> _isSearching.value = true
                     is ResultState.Success -> {
                         _isSearching.value = false
-                        _searchResults.value = result.data
+                        _searchResults.value = result.data.items
                     }
 
                     is ResultState.Error -> _isSearching.value = false
@@ -77,26 +78,14 @@ class SalesInviteCustomerComponent(
         }
     }
 
-    fun selectShop(shop: Shop) {
-        _searchQuery.value = shop.name ?: ""
+    fun selectCustomer(customer: OperationalCustomer) {
+        _searchQuery.value = customer.company ?: customer.fullName
         _searchResults.value = emptyList()
-        _email.update { shop.email ?: "" }
-    }
-
-    fun setEmail(v: String) {
-        _email.value = v
-    }
-
-    fun setPhone(v: String) {
-        _phone.value = v
+        _email.update { customer.email ?: "" }
     }
 
     fun setNote(v: String) {
         _note.value = v
-    }
-
-    fun setContactMethod(v: ContactMethod) {
-        _contactMethod.value = v
     }
 
     fun send() {
