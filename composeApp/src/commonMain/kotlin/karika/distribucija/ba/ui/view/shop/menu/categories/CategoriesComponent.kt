@@ -38,7 +38,6 @@ class CategoriesComponent(componentContext: ComponentContext, stateHolder: Karik
                                 result.data.childrenData.apply {
                                     add(
                                         0, Category(
-                                            id = result.data.id,
                                             name = "SVI PROIZVODI",
                                             childrenData = mutableListOf()
                                         )

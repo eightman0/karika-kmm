@@ -28,7 +28,8 @@ data class Category(
         }
     }
 
-    fun getAllCategoryIds(): String {
+    fun getAllCategoryIds(): String? {
+        if (id == 0) return null
         return id.toString()
 
         //if (childrenData.isEmpty()) {
