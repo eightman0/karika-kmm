@@ -25,8 +25,13 @@ class SalesSpecificHandler {
         get() = _me.value.vendorId?.toInt() ?: 0
 
     val salesRepCart = MutableStateFlow<Map<String, Pair<OnBehalfProduct, Int>>>(emptyMap())
+
+    /** Rabat (%) per cart item, keyed by [OnBehalfProduct.key] */
+    val cartDiscounts = MutableStateFlow<Map<String, Int>>(emptyMap())
+
     fun clearSalesRepCart() {
         salesRepCart.value = emptyMap()
+        cartDiscounts.value = emptyMap()
     }
 
     fun getMe(callback: () -> Unit = {}) {

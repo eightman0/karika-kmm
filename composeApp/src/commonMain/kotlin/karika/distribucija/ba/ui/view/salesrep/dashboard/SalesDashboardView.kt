@@ -54,6 +54,7 @@ import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderCartView
+import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderReviewView
 import karika.distribucija.ba.ui.view.salesrep.catalog.SalesOrderCatalogView
 import karika.distribucija.ba.ui.view.salesrep.customers.SalesCustomersView
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesCustomerDetailView
@@ -383,6 +384,11 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             title = "Korpa: ${child.component.customer.fullName}",
                             onBack = { child.component.goBack() }
                         )
+
+                        is SalesChild.OrderReview -> SalesDetailTopBar(
+                            title = "Pregled narudžbe",
+                            onBack = { child.component.goBack() }
+                        )
                     }
                 },
                 component = component
@@ -407,6 +413,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         is SalesChild.CustomerNewMessage -> SalesCustomerNewMessageView(child.component)
                         is SalesChild.OrderCatalog -> SalesOrderCatalogView(child.component)
                         is SalesChild.OrderCart -> SalesOrderCartView(child.component)
+                        is SalesChild.OrderReview -> SalesOrderReviewView(child.component)
                         is SalesChild.InviteCustomer -> SalesInviteCustomerView(child.component)
                         is SalesChild.Notifications -> SalesNotificationsView(child.component)
                     }

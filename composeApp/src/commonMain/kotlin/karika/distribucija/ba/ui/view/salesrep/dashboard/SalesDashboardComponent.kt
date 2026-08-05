@@ -12,6 +12,7 @@ import karika.distribucija.ba.domain.model.OperationalCustomer
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderCartComponent
+import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderReviewComponent
 import karika.distribucija.ba.ui.view.salesrep.catalog.SalesOrderCatalogComponent
 import karika.distribucija.ba.ui.view.salesrep.customers.SalesCustomersComponent
 import karika.distribucija.ba.ui.view.salesrep.customers.detail.SalesCustomerDetailComponent
@@ -147,6 +148,10 @@ class SalesDashboardComponent(
                 SalesOrderCartComponent(componentContext, stateHolder, config.customer)
             )
 
+            is SalesRepConfig.OrderReview -> SalesChild.OrderReview(
+                SalesOrderReviewComponent(componentContext, stateHolder, config.customer)
+            )
+
             is SalesRepConfig.InviteCustomer -> SalesChild.InviteCustomer(
                 SalesInviteCustomerComponent(componentContext, stateHolder, config.email)
             )
@@ -200,6 +205,8 @@ sealed class SalesRepConfig {
     @Serializable
     data class OrderCart(val customer: OperationalCustomer) : SalesRepConfig()
     @Serializable
+    data class OrderReview(val customer: OperationalCustomer) : SalesRepConfig()
+    @Serializable
     data class InviteCustomer(val email: String = "") : SalesRepConfig()
     @Serializable
     data object Notifications : SalesRepConfig()
@@ -226,6 +233,7 @@ sealed class SalesChild {
     data class InternalNewMessage(val component: SalesInternalNewMessageComponent) : SalesChild()
     data class OrderCatalog(val component: SalesOrderCatalogComponent) : SalesChild()
     data class OrderCart(val component: SalesOrderCartComponent) : SalesChild()
+    data class OrderReview(val component: SalesOrderReviewComponent) : SalesChild()
     data class InviteCustomer(val component: SalesInviteCustomerComponent) : SalesChild()
     data class Notifications(val component: SalesNotificationsComponent) : SalesChild()
 }

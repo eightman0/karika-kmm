@@ -23,13 +23,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,6 +39,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.OnBehalfProduct
@@ -56,12 +57,14 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun SalesOrderCartView(component: SalesOrderCartComponent) {
     val cartItems by component.cartItems.collectAsState()
-    val isPlacingOrder by component.isPlacingOrder.collectAsState()
+    val cartDiscounts by component.cartDiscounts.collectAsState()
     val items = cartItems.values.toList()
 
     val vpcTotal = items.sumOf { (product, qty) -> product.vpc(qty) }
-    val pdvTotal = items.sumOf { (product, qty) -> product.pdv(qty) }
-    val grandTotal = vpcTotal + pdvTotal
+    val discountTotal = items.sumOf { (product, qty) ->
+        product.vpc(qty) * (cartDiscounts[product.key] ?: 0) / 100.0
+    }
+    val grandTotal = vpcTotal - discountTotal
 
     Column(
         modifier = Modifier
@@ -101,7 +104,9 @@ fun SalesOrderCartView(component: SalesOrderCartComponent) {
                     CartItemRow(
                         product = product,
                         qty = qty,
+                        discount = cartDiscounts[product.key] ?: 0,
                         onQtyChange = { newQty -> component.updateQty(product, newQty) },
+                        onDiscountChange = { newDiscount -> component.updateDiscount(product, newDiscount) },
                         onRemove = { component.removeItem(product) }
                     )
                 }
@@ -117,14 +122,14 @@ fun SalesOrderCartView(component: SalesOrderCartComponent) {
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // VPC subtotal
+            // Međuzbir
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 KarikaText(
-                    text = "Cijena (VPC)",
+                    text = "Međuzbir",
                     color = KarikaColors.Gray6,
                     textSize = 13.sp,
                     fontWeight = FontWeight.W500
@@ -137,21 +142,21 @@ fun SalesOrderCartView(component: SalesOrderCartComponent) {
                 )
             }
 
-            // PDV
+            // Popust
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 KarikaText(
-                    text = "PDV (17%)",
+                    text = "Popust",
                     color = KarikaColors.Gray6,
                     textSize = 13.sp,
                     fontWeight = FontWeight.W500
                 )
                 KarikaText(
-                    text = karikaPriceFormat(pdvTotal) + " KM",
-                    color = KarikaColors.Gray2,
+                    text = "-" + karikaPriceFormat(discountTotal) + " KM",
+                    color = KarikaColors.Red,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W600
                 )
@@ -181,35 +186,27 @@ fun SalesOrderCartView(component: SalesOrderCartComponent) {
 
             Spacer(Modifier.height(4.dp))
 
-            // Završi narudžbu
-            val canPlace = items.isNotEmpty() && !isPlacingOrder
+            // Pregledaj narudžbu
+            val canReview = items.isNotEmpty()
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(if (canPlace) KarikaColors.Blue else KarikaColors.Gray9)
+                    .background(if (canReview) KarikaColors.Blue else KarikaColors.Gray9)
                     .clickable(
-                        enabled = canPlace,
+                        enabled = canReview,
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
-                    ) { component.placeOrder() },
+                    ) { component.openOrderReview() },
                 contentAlignment = Alignment.Center
             ) {
-                if (isPlacingOrder) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(22.dp),
-                        color = KarikaColors.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    KarikaText(
-                        text = "Završi narudžbu",
-                        color = KarikaColors.White,
-                        textSize = 15.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                }
+                KarikaText(
+                    text = "Pregledaj narudžbu",
+                    color = KarikaColors.White,
+                    textSize = 15.sp,
+                    fontWeight = FontWeight.W700
+                )
             }
 
             // Isprazni korpu
@@ -244,10 +241,13 @@ fun SalesOrderCartView(component: SalesOrderCartComponent) {
 private fun CartItemRow(
     product: OnBehalfProduct,
     qty: Int,
+    discount: Int,
     onQtyChange: (Int) -> Unit,
+    onDiscountChange: (Int) -> Unit,
     onRemove: () -> Unit
 ) {
     var localQty by remember(qty) { mutableIntStateOf(qty) }
+    var localDiscount by remember(discount) { mutableStateOf(if (discount > 0) discount.toString() else "") }
 
     Column(
         modifier = Modifier
@@ -304,12 +304,29 @@ private fun CartItemRow(
                     fontWeight = FontWeight.W500
                 )
                 Spacer(Modifier.height(4.dp))
-                KarikaText(
-                    text = karikaPriceFormat(product.vpc(localQty)) + " KM",
-                    color = KarikaColors.Blue,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W700
-                )
+                val discountPercent = localDiscount.toIntOrNull() ?: 0
+                val vpc = product.vpc(localQty)
+                val discountedVpc = vpc * (1 - discountPercent / 100.0)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    if (discountPercent > 0) {
+                        KarikaText(
+                            text = karikaPriceFormat(vpc) + " KM",
+                            color = KarikaColors.Gray6,
+                            textSize = 12.sp,
+                            fontWeight = FontWeight.W500,
+                            decoration = TextDecoration.LineThrough
+                        )
+                    }
+                    KarikaText(
+                        text = karikaPriceFormat(discountedVpc) + " KM",
+                        color = KarikaColors.Blue,
+                        textSize = 16.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                }
             }
 
             // Delete button
@@ -333,92 +350,147 @@ private fun CartItemRow(
             }
         }
 
-        // ── Bottom row: stepper ───────────────────────────────────────────────
+        // ── Bottom row: stepper + rabat ───────────────────────────────────────
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(KarikaColors.Gray20)
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            KarikaText(
-                text = "Količina:",
-                color = KarikaColors.Gray6,
-                textSize = 13.sp,
-                fontWeight = FontWeight.W500
-            )
-
             Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(KarikaColors.White)
-                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(10.dp))
-                    .padding(horizontal = 2.dp, vertical = 2.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            if (localQty > 1) {
-                                localQty--
-                                onQtyChange(localQty)
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    KarikaText(
-                        text = "−",
-                        color = KarikaColors.Gray2,
-                        textSize = 18.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                }
-
-                BasicTextField(
-                    value = localQty.toString(),
-                    onValueChange = { v ->
-                        val n = v.filter { it.isDigit() }.toIntOrNull()
-                        if (n != null && n > 0) {
-                            localQty = n
-                            onQtyChange(n)
-                        }
-                    },
-                    modifier = Modifier.width(46.dp),
-                    textStyle = TextStyle(
-                        fontFamily = karikaFonts(),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.W700,
-                        color = KarikaColors.Gray2,
-                        textAlign = TextAlign.Center
-                    ),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true
+                KarikaText(
+                    text = "Količina:",
+                    color = KarikaColors.Gray6,
+                    textSize = 13.sp,
+                    fontWeight = FontWeight.W500
                 )
 
-                Box(
+                Row(
                     modifier = Modifier
-                        .size(34.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            localQty++
-                            onQtyChange(localQty)
-                        },
-                    contentAlignment = Alignment.Center
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(KarikaColors.White)
+                        .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(10.dp))
+                        .padding(horizontal = 2.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_add_plus),
-                        contentDescription = "+",
-                        tint = KarikaColors.Gray2,
-                        modifier = Modifier.size(16.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                if (localQty > 1) {
+                                    localQty--
+                                    onQtyChange(localQty)
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        KarikaText(
+                            text = "−",
+                            color = KarikaColors.Gray2,
+                            textSize = 18.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
+
+                    BasicTextField(
+                        value = localQty.toString(),
+                        onValueChange = { v ->
+                            val n = v.filter { it.isDigit() }.toIntOrNull()
+                            if (n != null && n > 0) {
+                                localQty = n
+                                onQtyChange(n)
+                            }
+                        },
+                        modifier = Modifier.width(46.dp),
+                        textStyle = TextStyle(
+                            fontFamily = karikaFonts(),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.W700,
+                            color = KarikaColors.Gray2,
+                            textAlign = TextAlign.Center
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                localQty++
+                                onQtyChange(localQty)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_add_plus),
+                            contentDescription = "+",
+                            tint = KarikaColors.Gray2,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                KarikaText(
+                    text = "Rabat:",
+                    color = KarikaColors.Gray6,
+                    textSize = 13.sp,
+                    fontWeight = FontWeight.W500
+                )
+
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(KarikaColors.White)
+                        .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(10.dp))
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    BasicTextField(
+                        value = localDiscount,
+                        onValueChange = { v ->
+                            val digits = v.filter { it.isDigit() }
+                            localDiscount = when {
+                                digits.isEmpty() -> ""
+                                (digits.toIntOrNull() ?: 0) > 100 -> "100"
+                                else -> digits
+                            }
+                            onDiscountChange(localDiscount.toIntOrNull() ?: 0)
+                        },
+                        modifier = Modifier.width(30.dp),
+                        textStyle = TextStyle(
+                            fontFamily = karikaFonts(),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.W700,
+                            color = KarikaColors.Gray2,
+                            textAlign = TextAlign.End
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true
+                    )
+                    KarikaText(
+                        text = "%",
+                        color = KarikaColors.Gray6,
+                        textSize = 14.sp,
+                        fontWeight = FontWeight.W600
                     )
                 }
             }
