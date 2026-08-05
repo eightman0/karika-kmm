@@ -92,7 +92,7 @@ class ProductByCategoryComponent(
                         vendors = "${if (selectedVendor.value.second == 0) null else selectedVendor.value.second}"
                     ),
                     sort = sortBy.value.sortType(),
-                    categoryIds = category.value.getAllCategoryIds()
+                    categoryIds = "${category.value.getAllCategoryIds()}"
                 )
             }
         }
@@ -129,7 +129,7 @@ class ProductByCategoryComponent(
     fun loadFeatureProducts() {
         scope.launch {
             repository.loadFeaturedProducts(
-                categoryId = category.value.getAllCategoryIds()
+                categoryId = category.value.getAllCategoryIds() ?: return@launch
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> {}
