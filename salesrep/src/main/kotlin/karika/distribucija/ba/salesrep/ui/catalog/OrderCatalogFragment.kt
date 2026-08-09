@@ -43,8 +43,9 @@ class OrderCatalogFragment : Fragment() {
         (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.customers_order_for) + ": $customerName"
 
         adapter = ProductCatalogAdapter(
+            lifecycleOwner = viewLifecycleOwner,
             getQty = { product -> viewModel.getCartQty(product) },
-            onQtyChanged = { product, qty -> viewModel.changeQty(product, qty) }
+            onAdd = { product, qty -> viewModel.changeQty(product, qty) }
         )
         binding.recyclerProducts.adapter = adapter
         binding.recyclerProducts.layoutManager = LinearLayoutManager(requireContext())
@@ -58,18 +59,15 @@ class OrderCatalogFragment : Fragment() {
             }
         })
 
-        binding.toggleTab.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            when (checkedId) {
-                R.id.button_tab_all -> viewModel.selectTab(OrderCatalogViewModel.Tab.ALL)
-                R.id.button_tab_previous -> viewModel.selectTab(OrderCatalogViewModel.Tab.PREVIOUSLY_ORDERED)
-            }
-        }
-        binding.toggleTab.check(R.id.button_tab_all)
+        binding.pillTabAll.setOnClickListener { selectTab(OrderCatalogViewModel.Tab.ALL) }
+        binding.pillTabPrevious.setOnClickListener { selectTab(OrderCatalogViewModel.Tab.PREVIOUSLY_ORDERED) }
 
         binding.editSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
-            viewModel.setSearch(text?.toString().orEmpty())
+            val query = text?.toString().orEmpty()
+            binding.buttonClearSearch.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
+            viewModel.setSearch(query)
         })
+        binding.buttonClearSearch.setOnClickListener { binding.editSearch.setText("") }
 
         binding.buttonCart.setOnClickListener {
             findNavController().navigate(
@@ -85,7 +83,17 @@ class OrderCatalogFragment : Fragment() {
 
         viewModel.products.observe(viewLifecycleOwner) { products ->
             adapter.submitList(products)
-            binding.textEmpty.visibility = if (products.isEmpty()) View.VISIBLE else View.GONE
+            renderEmptyState()
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            binding.progressLoading.visibility = if (it == true) View.VISIBLE else View.GONE
+            binding.recyclerProducts.visibility = if (it == true) View.GONE else View.VISIBLE
+            renderEmptyState()
+        }
+
+        viewModel.isLoadingMore.observe(viewLifecycleOwner) { loadingMore ->
+            binding.progressLoadingMore.visibility = if (loadingMore == true) View.VISIBLE else View.GONE
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
@@ -98,6 +106,37 @@ class OrderCatalogFragment : Fragment() {
             binding.textCartBadge.text = count.toString()
             adapter.refreshQuantities()
         }
+    }
+
+    private fun selectTab(tab: OrderCatalogViewModel.Tab) {
+        viewModel.selectTab(tab)
+        val allSelected = tab == OrderCatalogViewModel.Tab.ALL
+        binding.pillTabAll.setBackgroundResource(
+            if (allSelected) R.drawable.bg_catalog_tab_selected else R.drawable.bg_catalog_tab_unselected
+        )
+        binding.pillTabAll.setTextColor(
+            requireContext().getColor(if (allSelected) R.color.karika_white else R.color.karika_gray2)
+        )
+        binding.pillTabPrevious.setBackgroundResource(
+            if (!allSelected) R.drawable.bg_catalog_tab_selected else R.drawable.bg_catalog_tab_unselected
+        )
+        binding.pillTabPrevious.setTextColor(
+            requireContext().getColor(if (!allSelected) R.color.karika_white else R.color.karika_gray2)
+        )
+        renderEmptyState()
+    }
+
+    private fun renderEmptyState() {
+        val isLoading = viewModel.isLoading.value == true
+        val isEmpty = viewModel.products.value.orEmpty().isEmpty()
+        binding.layoutEmpty.visibility = if (!isLoading && isEmpty) View.VISIBLE else View.GONE
+        binding.textEmpty.text = getString(
+            if (viewModel.tab.value == OrderCatalogViewModel.Tab.PREVIOUSLY_ORDERED) {
+                R.string.catalog_empty_previous
+            } else {
+                R.string.catalog_empty
+            }
+        )
     }
 
     override fun onDestroyView() {

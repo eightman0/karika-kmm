@@ -1,100 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="12dp"
-    android:layout_marginTop="8dp"
-    android:background="@color/karika_white"
-    android:elevation="1dp"
-    android:padding="14dp">
-
-    <TextView
-        android:id="@+id/text_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textColor="@color/karika_gray2"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/text_price"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Artikal XY sa dužim nazivom" />
-
-    <TextView
-        android:id="@+id/text_price"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/karika_gray2"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="12,50 KM" />
-
-    <TextView
-        android:id="@+id/text_sku"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="@color/karika_gray6"
-        android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_name"
-        tools:text="SKU-12345" />
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/bg_catalog_product_card"
+    android:clipToOutline="true"
+    android:orientation="vertical">
 
     <LinearLayout
-        android:id="@+id/layout_stepper"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:layout_marginTop="10dp"
-        android:background="@color/karika_gray20"
-        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_sku">
+        android:padding="12dp">
 
-        <ImageButton
-            android:id="@+id/button_minus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/action_delete"
-            android:src="@drawable/ic_remove"
-            app:tint="@color/karika_gray6" />
+        <FrameLayout
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:background="@drawable/bg_catalog_image_box">
 
-        <TextView
-            android:id="@+id/text_qty"
-            android:layout_width="32dp"
+            <ImageView
+                android:id="@+id/image_product"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="centerCrop" />
+
+            <FrameLayout
+                android:id="@+id/badge_in_cart"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="2dp"
+                android:background="@drawable/bg_catalog_check_badge"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_check_circle_filled"
+                    app:tint="@color/karika_white" />
+            </FrameLayout>
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textColor="@color/karika_gray2"
-            android:textSize="14sp"
-            tools:text="0" />
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/button_plus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/catalog_add"
-            android:src="@drawable/ic_add"
-            app:tint="@color/karika_blue" />
+            <TextView
+                android:id="@+id/text_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/karika_gray2"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                tools:text="Artikal XY sa dužim nazivom" />
+
+            <TextView
+                android:id="@+id/text_sku"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/karika_gray6"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="#SKU-12345"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/karika_gray6"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="Kategorija"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/karika_blue"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="12,50 KM" />
+        </LinearLayout>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/text_in_cart"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/catalog_in_cart"
-        android:textColor="@color/status_approved"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/layout_stepper"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/layout_stepper" />
+        android:background="@drawable/bg_catalog_product_footer"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <LinearLayout
+            android:id="@+id/layout_stepper"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_catalog_stepper_box"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="2dp">
+
+            <TextView
+                android:id="@+id/button_minus"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_catalog_stepper_button"
+                android:contentDescription="@string/catalog_decrease_cd"
+                android:gravity="center"
+                android:text="−"
+                android:textColor="@color/karika_gray2"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edit_qty"
+                android:layout_width="42dp"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLines="1"
+                android:padding="0dp"
+                android:textColor="@color/karika_gray2"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="1" />
+
+            <ImageView
+                android:id="@+id/button_plus"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_catalog_stepper_button"
+                android:contentDescription="@string/catalog_increase_cd"
+                android:padding="9dp"
+                android:src="@drawable/ic_add_plus"
+                app:tint="@color/karika_gray2" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/button_add"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_catalog_add_button"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_cart_add" />
+
+            <TextView
+                android:id="@+id/text_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="@string/catalog_add"
+                android:textColor="@color/karika_white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

@@ -4,52 +4,107 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_white">
+    android:background="@color/karika_gray20">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/toggle_tab"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            app:selectionRequired="true"
-            app:singleSelection="true">
+            android:background="@color/karika_white"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_tab_all"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/catalog_tab_all" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_tab_previous"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/catalog_tab_previous" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            app:startIconDrawable="@drawable/ic_search">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_search"
+            <LinearLayout
+                android:id="@+id/search_field_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/catalog_search_hint"
-                android:inputType="text"
-                android:maxLines="1" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:background="@drawable/bg_catalog_search_field"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="10dp">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/karika_gray6" />
+
+                <EditText
+                    android:id="@+id/edit_search"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="@string/catalog_search_hint"
+                    android:maxLines="1"
+                    android:padding="0dp"
+                    android:textColor="@color/karika_gray2"
+                    android:textColorHint="@color/karika_gray7"
+                    android:textSize="14sp" />
+
+                <ImageView
+                    android:id="@+id/button_clear_search"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="8dp"
+                    android:contentDescription="@string/catalog_clear_search_cd"
+                    android:src="@drawable/ic_cancel"
+                    android:visibility="gone"
+                    app:tint="@color/karika_gray6" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/karika_white"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="14dp">
+
+                <TextView
+                    android:id="@+id/pill_tab_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_catalog_tab_selected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="9dp"
+                    android:text="@string/catalog_tab_all"
+                    android:textColor="@color/karika_white"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/pill_tab_previous"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_catalog_tab_unselected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="9dp"
+                    android:text="@string/catalog_tab_previous"
+                    android:textColor="@color/karika_gray2"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </HorizontalScrollView>
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -61,16 +116,52 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingTop="8dp"
-                android:paddingBottom="96dp" />
+                android:paddingHorizontal="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="80dp" />
 
-            <TextView
-                android:id="@+id/text_empty"
+            <LinearLayout
+                android:id="@+id/layout_empty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/catalog_empty"
-                android:textColor="@color/karika_gray6"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_products"
+                    app:tint="@color/karika_gray9" />
+
+                <TextView
+                    android:id="@+id/text_empty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:textColor="@color/karika_gray6"
+                    android:textSize="15sp"
+                    tools:text="@string/catalog_empty" />
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/progress_loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/karika_blue"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/progress_loading_more"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="16dp"
+                android:indeterminateTint="@color/karika_blue"
                 android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>
@@ -79,30 +170,39 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="20dp">
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="24dp">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <FrameLayout
             android:id="@+id/button_cart"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/karika_blue"
-            android:contentDescription="@string/cart_title"
-            android:src="@drawable/ic_cart" />
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_catalog_cart_fab"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/catalog_cart_cd"
+                android:src="@drawable/ic_shopping_cart"
+                app:tint="@color/karika_white" />
+        </FrameLayout>
 
         <TextView
             android:id="@+id/text_cart_badge"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
             android:layout_gravity="top|end"
-            android:layout_marginTop="-4dp"
-            android:layout_marginEnd="-4dp"
-            android:background="@drawable/bg_status_badge"
-            android:backgroundTint="@color/karika_error"
+            android:background="@drawable/bg_catalog_cart_badge"
             android:gravity="center"
             android:textColor="@color/karika_white"
-            android:textSize="10sp"
+            android:textSize="9sp"
+            android:textStyle="bold"
             android:visibility="gone"
-            tools:text="3" />
+            tools:text="3"
+            tools:visibility="visible" />
     </FrameLayout>
 
 </FrameLayout>
