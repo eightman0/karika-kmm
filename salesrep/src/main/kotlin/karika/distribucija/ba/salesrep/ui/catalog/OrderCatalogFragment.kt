@@ -63,6 +63,7 @@ class OrderCatalogFragment : Fragment() {
         })
 
         binding.pillTabAll.setOnClickListener { selectTab(OrderCatalogViewModel.Tab.ALL) }
+        binding.pillTabSale.setOnClickListener { selectTab(OrderCatalogViewModel.Tab.ON_SALE) }
         binding.pillTabPrevious.setOnClickListener { selectTab(OrderCatalogViewModel.Tab.PREVIOUSLY_ORDERED) }
 
         binding.editSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
@@ -116,20 +117,17 @@ class OrderCatalogFragment : Fragment() {
 
     private fun selectTab(tab: OrderCatalogViewModel.Tab) {
         viewModel.selectTab(tab)
-        val allSelected = tab == OrderCatalogViewModel.Tab.ALL
-        binding.pillTabAll.setBackgroundResource(
-            if (allSelected) R.drawable.bg_catalog_tab_selected else R.drawable.bg_catalog_tab_unselected
-        )
-        binding.pillTabAll.setTextColor(
-            requireContext().getColor(if (allSelected) R.color.karika_white else R.color.karika_gray2)
-        )
-        binding.pillTabPrevious.setBackgroundResource(
-            if (!allSelected) R.drawable.bg_catalog_tab_selected else R.drawable.bg_catalog_tab_unselected
-        )
-        binding.pillTabPrevious.setTextColor(
-            requireContext().getColor(if (!allSelected) R.color.karika_white else R.color.karika_gray2)
-        )
+        stylePill(binding.pillTabAll, tab == OrderCatalogViewModel.Tab.ALL)
+        stylePill(binding.pillTabSale, tab == OrderCatalogViewModel.Tab.ON_SALE)
+        stylePill(binding.pillTabPrevious, tab == OrderCatalogViewModel.Tab.PREVIOUSLY_ORDERED)
         renderEmptyState()
+    }
+
+    private fun stylePill(pill: android.widget.TextView, selected: Boolean) {
+        pill.setBackgroundResource(
+            if (selected) R.drawable.bg_catalog_tab_selected else R.drawable.bg_catalog_tab_unselected
+        )
+        pill.setTextColor(requireContext().getColor(if (selected) R.color.karika_white else R.color.karika_gray2))
     }
 
     private fun renderEmptyState() {
@@ -137,10 +135,10 @@ class OrderCatalogFragment : Fragment() {
         val isEmpty = viewModel.products.value.orEmpty().isEmpty()
         binding.layoutEmpty.visibility = if (!isLoading && isEmpty) View.VISIBLE else View.GONE
         binding.textEmpty.text = getString(
-            if (viewModel.tab.value == OrderCatalogViewModel.Tab.PREVIOUSLY_ORDERED) {
-                R.string.catalog_empty_previous
-            } else {
-                R.string.catalog_empty
+            when (viewModel.tab.value) {
+                OrderCatalogViewModel.Tab.PREVIOUSLY_ORDERED -> R.string.catalog_empty_previous
+                OrderCatalogViewModel.Tab.ON_SALE -> R.string.catalog_empty_sale
+                else -> R.string.catalog_empty
             }
         )
     }

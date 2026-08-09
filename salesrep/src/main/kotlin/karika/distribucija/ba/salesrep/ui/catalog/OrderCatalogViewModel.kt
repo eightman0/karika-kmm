@@ -9,19 +9,20 @@ import karika.distribucija.ba.salesrep.api.SalesRepository
 import karika.distribucija.ba.salesrep.model.OnBehalfProduct
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.session.CartState
+import karika.distribucija.ba.salesrep.util.KarikaConstants
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Mirrors composeApp's SalesOrderCatalogComponent.kt, simplified to 2 tabs (ALL/PREVIOUSLY_ORDERED)
- * - the ON_SALE tab is dropped since it depends on hardcoded vendor-specific category IDs
- * (KarikaConfig.getActionId()/getOutletId()) not available here. Category filtering (hierarchical
- * tree) is also dropped, same simplification as the discount form's item search.
+ * Mirrors composeApp's SalesOrderCatalogComponent.kt. ON_SALE filters by the same hardcoded
+ * KarikaConstants.ON_SALE_CATEGORY_ID composeApp's KarikaConfig.getActionId()/getOutletId() combine
+ * into. Category filtering (hierarchical tree) is dropped, same simplification as the discount
+ * form's item search.
  */
 class OrderCatalogViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    enum class Tab { ALL, PREVIOUSLY_ORDERED }
+    enum class Tab { ALL, ON_SALE, PREVIOUSLY_ORDERED }
 
     private val repository = SalesRepository()
     val customerId: Long = savedStateHandle.get<Long>("customerId") ?: 0L
@@ -130,7 +131,8 @@ class OrderCatalogViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
                 repository.getProducts(
                     page = page,
                     pageSize = pageSize,
-                    search = searchQuery.takeIf { it.isNotBlank() }
+                    search = searchQuery.takeIf { it.isNotBlank() },
+                    categoryId = if (_tab.value == Tab.ON_SALE) KarikaConstants.ON_SALE_CATEGORY_ID else null
                 )
             }
 

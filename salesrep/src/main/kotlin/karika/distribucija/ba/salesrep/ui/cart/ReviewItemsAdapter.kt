@@ -1,6 +1,7 @@
 package karika.distribucija.ba.salesrep.ui.cart
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -17,11 +18,11 @@ class ReviewItemsAdapter : ListAdapter<OnBehalfCartResponseItem, ReviewItemsAdap
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), isLast = position == itemCount - 1)
     }
 
     class ViewHolder(private val binding: ItemReviewBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: OnBehalfCartResponseItem) {
+        fun bind(item: OnBehalfCartResponseItem, isLast: Boolean) {
             binding.textName.text = item.name
             binding.textRowTotal.text = item.rowTotalString()
             val discount = item.discountPercent?.takeIf { it > 0 }
@@ -30,6 +31,7 @@ class ReviewItemsAdapter : ListAdapter<OnBehalfCartResponseItem, ReviewItemsAdap
             } else {
                 "${item.qty} x ${item.priceString()}"
             }
+            binding.divider.visibility = if (isLast) View.GONE else View.VISIBLE
         }
     }
 

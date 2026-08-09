@@ -166,9 +166,11 @@
     <string name="new_customer_duplicate_invite">Pozovi</string>
 
     <string name="catalog_tab_all">Svi artikli</string>
+    <string name="catalog_tab_sale">Na akciji</string>
     <string name="catalog_tab_previous">Prethodno naručeno</string>
     <string name="catalog_search_hint">Pretraži artikle…</string>
     <string name="catalog_empty">Nema artikala</string>
+    <string name="catalog_empty_sale">Trenutno nema artikala na akciji</string>
     <string name="catalog_empty_previous">Ovaj kupac nema prethodno naručenih artikala</string>
     <string name="catalog_add">Dodaj</string>
     <string name="catalog_update">Ažuriraj</string>
@@ -195,6 +197,7 @@
 
     <string name="review_title">Pregled narudžbe</string>
     <string name="review_items">Stavke narudžbe</string>
+    <string name="review_note_title">Napomena</string>
     <string name="review_note_hint">Napomena uz narudžbu (opcionalno)</string>
     <string name="review_confirm">Potvrdi narudžbu</string>
     <string name="review_back_to_cart">Nazad na korpu</string>

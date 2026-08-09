@@ -50,7 +50,7 @@ class OrderReviewFragment : Fragment() {
                 else -> visibility = View.GONE
             }
         }
-        binding.buttonConfirm.isEnabled = viewModel.isEligible
+        updateConfirmButtonState(isPlacingOrder = false)
 
         renderCustomerInfo()
 
@@ -71,7 +71,7 @@ class OrderReviewFragment : Fragment() {
         }
 
         viewModel.isPlacingOrder.observe(viewLifecycleOwner) { saving ->
-            binding.buttonConfirm.isEnabled = viewModel.isEligible && !saving
+            updateConfirmButtonState(isPlacingOrder = saving == true)
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
@@ -108,6 +108,21 @@ class OrderReviewFragment : Fragment() {
                 )
             }
         }
+    }
+
+    /** Blocks the rest of the form and shows an in-button spinner while the order is being
+     * placed, mirroring Compose's CircularProgressIndicator-inside-the-button pattern. */
+    private fun updateConfirmButtonState(isPlacingOrder: Boolean) {
+        val canConfirm = viewModel.isEligible && !isPlacingOrder
+        binding.buttonConfirm.isEnabled = canConfirm
+        binding.buttonConfirm.setBackgroundResource(
+            if (canConfirm) R.drawable.bg_fab_order_customer else R.drawable.bg_button_filled_disabled
+        )
+        binding.textConfirm.visibility = if (isPlacingOrder) View.GONE else View.VISIBLE
+        binding.progressConfirm.visibility = if (isPlacingOrder) View.VISIBLE else View.GONE
+
+        binding.buttonBack.isEnabled = !isPlacingOrder
+        binding.editNote.isEnabled = !isPlacingOrder
     }
 
     /** Mirrors the Compose Review screen's "Informacije o narudžbi" card: customer company/email,

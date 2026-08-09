@@ -190,19 +190,29 @@ internal class SalesApi {
     suspend fun getProducts(
         page: Int,
         pageSize: Int,
-        search: String? = null
+        search: String? = null,
+        categoryId: String? = null
     ): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.get(HttpClientProvider.url("vendor-operations/products")) {
             parameter("searchCriteria[current_page]", page)
             parameter("searchCriteria[page_size]", pageSize)
 
+            var groupIdx = 0
+
             if (!search.isNullOrBlank()) {
-                parameter("searchCriteria[filter_groups][0][filters][0][field]", "name")
-                parameter("searchCriteria[filter_groups][0][filters][0][value]", "%$search%")
-                parameter("searchCriteria[filter_groups][0][filters][0][condition_type]", "like")
-                parameter("searchCriteria[filter_groups][0][filters][1][field]", "sku")
-                parameter("searchCriteria[filter_groups][0][filters][1][value]", "%$search%")
-                parameter("searchCriteria[filter_groups][0][filters][1][condition_type]", "like")
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][field]", "name")
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][value]", "%$search%")
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]", "like")
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][1][field]", "sku")
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][1][value]", "%$search%")
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][1][condition_type]", "like")
+                groupIdx++
+            }
+
+            if (categoryId != null) {
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][field]", "category_id")
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][value]", categoryId)
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]", "in")
             }
         }
     }
@@ -504,11 +514,12 @@ class SalesRepository internal constructor() {
     fun getProducts(
         page: Int,
         pageSize: Int = 20,
-        search: String? = null
+        search: String? = null,
+        categoryId: String? = null
     ): Flow<ResultState<OnBehalfProductSearchResults>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = SalesApi().getProducts(page, pageSize, search).getOrNoInternet()
+            val response = SalesApi().getProducts(page, pageSize, search, categoryId).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<OnBehalfProductSearchResults>()))
                 return@flow

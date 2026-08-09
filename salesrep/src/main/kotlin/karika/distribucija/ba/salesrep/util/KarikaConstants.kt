@@ -108,4 +108,8 @@ object KarikaConstants {
     )
 
     val companySizes: List<String> = listOf("do 50 m2", "do 200 m2", "do 500 m2", "preko 500 m2")
+
+    /** Matches composeApp's KarikaConfig.getActionId()/getOutletId() (301,303) - the "Na akciji"
+     * catalog tab filters products by this combined category_id, not per-vendor config. */
+    const val ON_SALE_CATEGORY_ID = "301,303"
 }
