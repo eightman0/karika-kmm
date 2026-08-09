@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -11,6 +13,7 @@ import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.SalesRepApp
 import karika.distribucija.ba.salesrep.databinding.FragmentLoginBinding
 import karika.distribucija.ba.salesrep.model.ResultState
+import karika.distribucija.ba.salesrep.util.isEmailFormatValid
 
 class LoginFragment : Fragment() {
 
@@ -30,9 +33,31 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        updateFormValid()
+
+        binding.editEmail.addTextChangedListener(onTextChanged = { text, _, _, _ ->
+            val email = text?.toString().orEmpty()
+            val isInvalid = email.isNotEmpty() && !email.isEmailFormatValid()
+            binding.textEmailError.visibility = if (isInvalid) {
+                binding.textEmailError.text = getString(R.string.login_email_invalid)
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+            binding.editEmail.setBackgroundResource(
+                if (isInvalid) R.drawable.bg_field_border_error else R.drawable.bg_field_border
+            )
+            updateFormValid()
+        })
+        binding.editPassword.addTextChangedListener(onTextChanged = { _, _, _, _ -> updateFormValid() })
+
+        binding.textForgotPassword.setOnClickListener {
+            Toast.makeText(requireContext(), R.string.coming_soon, Toast.LENGTH_SHORT).show()
+        }
+
         binding.buttonLogin.setOnClickListener {
             viewModel.login(
-                binding.editUsername.text?.toString()?.trim().orEmpty(),
+                binding.editEmail.text?.toString()?.trim().orEmpty(),
                 binding.editPassword.text?.toString().orEmpty()
             )
         }
@@ -60,6 +85,12 @@ class LoginFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun updateFormValid() {
+        val email = binding.editEmail.text?.toString().orEmpty()
+        val password = binding.editPassword.text?.toString().orEmpty()
+        binding.buttonLogin.isEnabled = email.isEmailFormatValid() && password.isNotEmpty()
     }
 
     override fun onDestroyView() {

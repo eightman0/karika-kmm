@@ -3,8 +3,11 @@
     <string name="app_name">Karika Komercijalista</string>
 
     <string name="login_title">Prijava</string>
-    <string name="login_username_hint">Korisničko ime</string>
-    <string name="login_password_hint">Lozinka</string>
+    <string name="login_email_label">Email Adresa</string>
+    <string name="login_password_label">Šifra</string>
+    <string name="login_email_invalid">Unesite valjanu email adresu (npr. johndoe@domain.com).</string>
+    <string name="login_remember_me">Zapamti me</string>
+    <string name="login_forgot_password">Zaboravili ste šifru?</string>
     <string name="login_button">Prijavi se</string>
     <string name="login_error_generic">Došlo je do greške. Pokušajte ponovo!</string>
 
