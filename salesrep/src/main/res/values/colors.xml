@@ -7,10 +7,12 @@
     <color name="karika_gray2">#242424</color>
     <color name="karika_gray4">#333840</color>
     <color name="karika_gray6">#626262</color>
-    <color name="karika_gray9">#E5E5E5</color>
-    <color name="karika_gray20">#F7F7F8</color>
+    <color name="karika_gray7">#BBBBBB</color>
+    <color name="karika_gray9">#DFE0E1</color>
+    <color name="karika_gray20">#F5F5F5</color>
     <color name="karika_error">#CC1818</color>
     <color name="karika_green">#2E8B57</color>
+    <color name="karika_green1">#4CAF50</color>
     <color name="karika_orange">#E08E00</color>
     <color name="karika_border">#D6D7D9</color>
     <color name="karika_placeholder">#A8A8A8</color>

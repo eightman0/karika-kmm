@@ -30,13 +30,10 @@
             app:navGraph="@navigation/nav_graph" />
     </LinearLayout>
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+    <include
+        layout="@layout/nav_drawer_content"
+        android:layout_width="304dp"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="@color/karika_gray20"
-        app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/drawer_menu" />
+        android:layout_gravity="start" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

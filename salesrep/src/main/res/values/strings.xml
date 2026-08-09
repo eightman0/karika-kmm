@@ -18,6 +18,7 @@
     <string name="drawer_internal_messages">Interne poruke</string>
     <string name="drawer_logout">Odjavi se</string>
     <string name="drawer_role_label">Komercijalista</string>
+    <string name="notifications_title">Obavijesti</string>
     <string name="coming_soon">Uskoro dostupno</string>
 
     <string name="orders_title">Upravljanje narudžbama</string>

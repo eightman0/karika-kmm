@@ -1,7 +1,10 @@
 package karika.distribucija.ba.salesrep
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -9,13 +12,15 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.navOptions
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.navigation.NavigationView
 import karika.distribucija.ba.salesrep.api.SalesRepository
 import karika.distribucija.ba.salesrep.model.ResultState
+import karika.distribucija.ba.salesrep.network.PlatformEnv
 import karika.distribucija.ba.salesrep.session.CurrentUser
 import kotlinx.coroutines.launch
 
@@ -24,6 +29,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var toolbar: MaterialToolbar
     private lateinit var navController: NavController
+    private lateinit var appBarConfig: AppBarConfiguration
+
+    private data class NavRow(val container: View, val icon: ImageView, val text: TextView, val destinationId: Int)
+    private lateinit var navRows: List<NavRow>
+
+    private var notificationsMenuItem: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,104 +42,127 @@ class MainActivity : AppCompatActivity() {
 
         drawerLayout = findViewById(R.id.drawer_layout)
         toolbar = findViewById(R.id.toolbar)
-        val navView: NavigationView = findViewById(R.id.nav_view)
-
         setSupportActionBar(toolbar)
+
+        navRows = listOf(
+            NavRow(findViewById(R.id.row_nav_orders), findViewById(R.id.icon_nav_orders), findViewById(R.id.text_nav_orders), R.id.ordersListFragment),
+            NavRow(findViewById(R.id.row_nav_customers), findViewById(R.id.icon_nav_customers), findViewById(R.id.text_nav_customers), R.id.customersListFragment)
+        )
 
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHost.navController
 
-        val appBarConfig = AppBarConfiguration(
+        appBarConfig = AppBarConfiguration(
             setOf(R.id.ordersListFragment, R.id.customersListFragment),
             drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfig)
 
+        findViewById<View>(R.id.button_close_drawer).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+        }
+        findViewById<View>(R.id.row_nav_orders).setOnClickListener { navigateToRoot(R.id.ordersListFragment) }
+        findViewById<View>(R.id.row_nav_customers).setOnClickListener { navigateToRoot(R.id.customersListFragment) }
+        findViewById<View>(R.id.row_nav_customer_messages).setOnClickListener { showComingSoon() }
+        findViewById<View>(R.id.row_nav_admin_messages).setOnClickListener { showComingSoon() }
+        findViewById<View>(R.id.row_nav_internal_messages).setOnClickListener { showComingSoon() }
+        findViewById<View>(R.id.row_logout).setOnClickListener {
+            drawerLayout.closeDrawer(GravityCompat.START)
+            (application as SalesRepApp).sessionManager.logout()
+            navController.navigate(
+                R.id.loginFragment,
+                null,
+                navOptions { popUpTo(navController.graph.id) { inclusive = true } }
+            )
+        }
+        findViewById<TextView>(R.id.text_app_version).text = PlatformEnv.appVersionName()
+
         if ((application as SalesRepApp).sessionManager.hasToken()) {
             navController.navigate(
                 R.id.ordersListFragment,
                 null,
-                androidx.navigation.navOptions {
-                    popUpTo(R.id.loginFragment) { inclusive = true }
-                }
+                navOptions { popUpTo(R.id.loginFragment) { inclusive = true } }
             )
-            loadRepName(navView)
+            loadRepName()
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val isLogin = destination.id == R.id.loginFragment
-            (findViewById<View>(R.id.toolbar)).visibility = if (isLogin) View.GONE else View.VISIBLE
+            toolbar.visibility = if (isLogin) View.GONE else View.VISIBLE
             drawerLayout.setDrawerLockMode(
                 if (isLogin) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED
             )
-            when (destination.id) {
-                R.id.ordersListFragment -> {
-                    navView.setCheckedItem(R.id.nav_orders)
-                    loadRepName(navView)
-                }
-                R.id.customersListFragment -> navView.setCheckedItem(R.id.nav_customers)
+            updateSelectedNavRow(destination)
+            notificationsMenuItem?.isVisible = destination.id in appBarConfig.topLevelDestinations
+            if (destination.id == R.id.ordersListFragment) {
+                loadRepName()
             }
         }
+    }
 
-        navView.setNavigationItemSelectedListener { item ->
-            drawerLayout.closeDrawer(GravityCompat.START)
-            when (item.itemId) {
-                R.id.nav_orders -> {
-                    if (navController.currentDestination?.id != R.id.ordersListFragment) {
-                        navController.popBackStack(R.id.ordersListFragment, false)
-                    }
-                    true
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.toolbar_menu, menu)
+        notificationsMenuItem = menu.findItem(R.id.action_notifications)
+        notificationsMenuItem?.isVisible = navController.currentDestination?.id in appBarConfig.topLevelDestinations
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_notifications) {
+            showComingSoon()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun navigateToRoot(destinationId: Int) {
+        drawerLayout.closeDrawer(GravityCompat.START)
+        if (navController.currentDestination?.id == destinationId) return
+        if (!navController.popBackStack(destinationId, false)) {
+            navController.navigate(
+                destinationId,
+                null,
+                navOptions {
+                    popUpTo(R.id.ordersListFragment) { inclusive = false }
+                    launchSingleTop = true
                 }
-                R.id.nav_customers -> {
-                    if (navController.currentDestination?.id != R.id.customersListFragment) {
-                        if (!navController.popBackStack(R.id.customersListFragment, false)) {
-                            navController.navigate(
-                                R.id.customersListFragment,
-                                null,
-                                androidx.navigation.navOptions {
-                                    popUpTo(R.id.ordersListFragment) { inclusive = false }
-                                    launchSingleTop = true
-                                }
-                            )
-                        }
-                    }
-                    true
-                }
-                R.id.nav_logout -> {
-                    (application as SalesRepApp).sessionManager.logout()
-                    navController.navigate(
-                        R.id.loginFragment,
-                        null,
-                        androidx.navigation.navOptions {
-                            popUpTo(navController.graph.id) { inclusive = true }
-                        }
-                    )
-                    true
-                }
-                else -> {
-                    Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
-                    false
-                }
-            }
+            )
+        }
+    }
+
+    private fun showComingSoon() {
+        drawerLayout.closeDrawer(GravityCompat.START)
+        Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun updateSelectedNavRow(destination: NavDestination) {
+        navRows.forEach { row ->
+            val selected = destination.id == row.destinationId
+            row.container.setBackgroundResource(
+                if (selected) R.drawable.bg_drawer_item_selected else R.drawable.bg_drawer_item_unselected
+            )
+            val color = getColor(if (selected) R.color.karika_white else R.color.karika_gray6)
+            row.icon.setColorFilter(color)
+            row.text.setTextColor(color)
+            row.text.setTypeface(row.text.typeface, if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
         }
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
+        return navController.navigateUp(appBarConfig) || super.onSupportNavigateUp()
     }
 
     private var repNameLoaded = false
 
-    private fun loadRepName(navView: NavigationView) {
+    private fun loadRepName() {
         if (repNameLoaded) return
         repNameLoaded = true
         lifecycleScope.launch {
             SalesRepository().getMe().collect { result ->
                 if (result is ResultState.Success) {
                     CurrentUser.me = result.data
-                    navView.getHeaderView(0)
-                        ?.findViewById<TextView>(R.id.text_rep_name)
-                        ?.text = result.data.name ?: getString(R.string.drawer_role_label)
+                    findViewById<TextView>(R.id.text_rep_name).text =
+                        result.data.name ?: getString(R.string.drawer_role_label)
                 }
             }
         }

@@ -1,11 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
+    android:width="25dp"
     android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24"
-    android:tint="@color/karika_error">
+    android:viewportWidth="25"
+    android:viewportHeight="24">
+  <group>
+    <clip-path
+        android:pathData="M0.871,0h24v24h-24z"/>
     <path
-        android:fillColor="#FF000000"
-        android:pathData="M17,7l-1.41,1.41L18.17,11H8v2h10.17l-2.58,2.59L17,17l5,-5zM4,5h8V3H4c-1.1,0 -2,0.9 -2,2v14c0,1.1 0.9,2 2,2h8v-2H4V5z" />
+        android:pathData="M6.179,20.5C5.674,20.5 5.246,20.325 4.896,19.975C4.546,19.625 4.371,19.197 4.371,18.692V5.308C4.371,4.803 4.546,4.375 4.896,4.025C5.246,3.675 5.674,3.5 6.179,3.5H12.881V5H6.179C6.102,5 6.031,5.032 5.967,5.096C5.903,5.16 5.871,5.231 5.871,5.308V18.692C5.871,18.769 5.903,18.84 5.967,18.904C6.031,18.968 6.102,19 6.179,19H12.881V20.5H6.179ZM17.102,16.269L16.063,15.185L18.498,12.75H9.967V11.25H18.498L16.063,8.815L17.102,7.731L21.371,12L17.102,16.269Z"
+        android:fillColor="#FF2A86"/>
+  </group>
 </vector>
