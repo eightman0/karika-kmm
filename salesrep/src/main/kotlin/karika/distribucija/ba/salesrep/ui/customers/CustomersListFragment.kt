@@ -37,7 +37,7 @@ class CustomersListFragment : Fragment() {
 
         adapter = CustomersAdapter(
             onClick = ::openCustomer,
-            onOrderClick = { Toast.makeText(requireContext(), R.string.coming_soon, Toast.LENGTH_SHORT).show() }
+            onOrderClick = ::openCatalog
         )
         binding.recyclerCustomers.adapter = adapter
         binding.recyclerCustomers.layoutManager = LinearLayoutManager(requireContext())
@@ -105,6 +105,16 @@ class CustomersListFragment : Fragment() {
                 "email" to customer.email,
                 "partnershipStatus" to customer.partnershipStatus,
                 "assignedNames" to customer.assignedEmployees.joinToString(", ") { it.displayName ?: "—" }
+            )
+        )
+    }
+
+    private fun openCatalog(customer: OperationalCustomer) {
+        findNavController().navigate(
+            R.id.action_customers_to_catalog,
+            bundleOf(
+                "customerId" to customer.customerId,
+                "customerName" to (customer.company ?: customer.fullName)
             )
         )
     }

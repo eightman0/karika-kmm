@@ -85,4 +85,23 @@
     <string name="new_customer_duplicate_title">Kupac već postoji</string>
     <string name="new_customer_duplicate_message">Kupac sa ovim email-om već postoji. Da li želite poslati zahtjev za partnerstvo?</string>
     <string name="new_customer_duplicate_invite">Pozovi kupca</string>
+
+    <string name="catalog_tab_all">Svi artikli</string>
+    <string name="catalog_tab_previous">Prethodno naručeno</string>
+    <string name="catalog_search_hint">Pretraži artikle</string>
+    <string name="catalog_empty">Nema artikala.</string>
+    <string name="catalog_add">Dodaj</string>
+    <string name="catalog_update">Ažuriraj</string>
+    <string name="catalog_in_cart">U korpi</string>
+
+    <string name="cart_title">Korpa</string>
+    <string name="cart_empty">Korpa je prazna.</string>
+    <string name="cart_subtotal">Međuzbir</string>
+    <string name="cart_discount">Popust</string>
+    <string name="cart_grand_total">Ukupno</string>
+    <string name="cart_review_order">Pregledaj narudžbu</string>
+    <string name="cart_clear">Isprazni korpu</string>
+    <string name="cart_clear_title">Isprazni korpu</string>
+    <string name="cart_clear_message">Da li ste sigurni da želite isprazniti korpu?</string>
+    <string name="cart_discount_hint">Rabat %</string>
 </resources>

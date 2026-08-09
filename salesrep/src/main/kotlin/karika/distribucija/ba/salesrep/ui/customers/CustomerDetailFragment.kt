@@ -60,7 +60,13 @@ class CustomerDetailFragment : Fragment() {
 
         binding.buttonNewDiscount.setOnClickListener { openNewDiscount() }
         binding.buttonOrderForCustomer.setOnClickListener {
-            Toast.makeText(requireContext(), R.string.coming_soon, Toast.LENGTH_SHORT).show()
+            findNavController().navigate(
+                R.id.action_customer_detail_to_catalog,
+                bundleOf(
+                    "customerId" to viewModel.customerId,
+                    "customerName" to displayName
+                )
+            )
         }
 
         viewModel.discounts.observe(viewLifecycleOwner) { discounts ->

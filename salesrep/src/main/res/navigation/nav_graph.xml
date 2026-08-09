@@ -49,6 +49,9 @@
         <action
             android:id="@+id/action_customers_to_invite"
             app:destination="@id/inviteCustomerFragment" />
+        <action
+            android:id="@+id/action_customers_to_catalog"
+            app:destination="@id/orderCatalogFragment" />
     </fragment>
 
     <fragment
@@ -65,6 +68,28 @@
         <action
             android:id="@+id/action_customer_detail_to_discount_form"
             app:destination="@id/discountFormFragment" />
+        <action
+            android:id="@+id/action_customer_detail_to_catalog"
+            app:destination="@id/orderCatalogFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/orderCatalogFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.catalog.OrderCatalogFragment"
+        android:label="@string/customers_order_for">
+        <argument android:name="customerId" app:argType="long" />
+        <argument android:name="customerName" app:argType="string" app:nullable="true" />
+        <action
+            android:id="@+id/action_catalog_to_cart"
+            app:destination="@id/orderCartFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/orderCartFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.cart.OrderCartFragment"
+        android:label="@string/cart_title">
+        <argument android:name="customerId" app:argType="long" />
+        <argument android:name="customerName" app:argType="string" app:nullable="true" />
     </fragment>
 
     <fragment
