@@ -9,6 +9,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -38,11 +42,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_main)
 
         drawerLayout = findViewById(R.id.drawer_layout)
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
+        applyEdgeToEdgeInsets()
 
         navRows = listOf(
             NavRow(findViewById(R.id.row_nav_orders), findViewById(R.id.icon_nav_orders), findViewById(R.id.text_nav_orders), R.id.ordersListFragment),
@@ -133,6 +139,43 @@ class MainActivity : AppCompatActivity() {
     private fun showComingSoon() {
         drawerLayout.closeDrawer(GravityCompat.START)
         Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * With decorFitsSystemWindows(false) the whole window draws edge-to-edge (system bars are
+     * transparent overlays), so each piece of shared chrome must reserve its own space for the
+     * status/navigation bars. Fragment content (including the login screen's background, which
+     * is meant to bleed under the status bar) is left alone - only the toolbar, the fragment
+     * container's bottom edge (so sticky footer buttons clear the gesture bar), and the drawer
+     * get padding.
+     */
+    private fun applyEdgeToEdgeInsets() {
+        val toolbarInitialTop = toolbar.paddingTop
+        ViewCompat.setOnApplyWindowInsetsListener(toolbar) { view, insets ->
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.updatePadding(top = toolbarInitialTop + statusBars.top)
+            insets
+        }
+
+        val fragmentContainer = findViewById<View>(R.id.nav_host_fragment)
+        val containerInitialBottom = fragmentContainer.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(fragmentContainer) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(bottom = containerInitialBottom + systemBars.bottom)
+            insets
+        }
+
+        val drawerContent = findViewById<View>(R.id.drawer_content_root)
+        val drawerInitialTop = drawerContent.paddingTop
+        val drawerInitialBottom = drawerContent.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(drawerContent) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(
+                top = drawerInitialTop + systemBars.top,
+                bottom = drawerInitialBottom + systemBars.bottom
+            )
+            insets
+        }
     }
 
     private fun updateSelectedNavRow(destination: NavDestination) {

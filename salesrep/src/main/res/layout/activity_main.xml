@@ -14,7 +14,8 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
             android:background="@color/karika_white"
             android:elevation="2dp"
             app:navigationIconTint="@color/karika_gray2"
@@ -31,6 +32,7 @@
     </LinearLayout>
 
     <include
+        android:id="@+id/drawer_content_root"
         layout="@layout/nav_drawer_content"
         android:layout_width="304dp"
         android:layout_height="match_parent"

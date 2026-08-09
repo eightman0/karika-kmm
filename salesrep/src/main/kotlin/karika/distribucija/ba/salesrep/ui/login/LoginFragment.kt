@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -34,6 +37,16 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         updateFormValid()
+
+        // The gradient/background image (this fragment's root FrameLayout) is left alone so it
+        // bleeds edge-to-edge under the status bar; only the actual form content is pushed down
+        // clear of it.
+        val contentInitialTop = binding.contentContainer.paddingTop
+        ViewCompat.setOnApplyWindowInsetsListener(binding.contentContainer) { view, insets ->
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.updatePadding(top = contentInitialTop + statusBars.top)
+            insets
+        }
 
         binding.editEmail.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             val email = text?.toString().orEmpty()
