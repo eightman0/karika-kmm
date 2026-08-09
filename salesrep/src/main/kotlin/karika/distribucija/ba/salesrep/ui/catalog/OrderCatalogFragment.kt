@@ -1,9 +1,11 @@
 package karika.distribucija.ba.salesrep.ui.catalog
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentOrderCatalogBinding
+import karika.distribucija.ba.salesrep.model.Category
 import karika.distribucija.ba.salesrep.session.CartState
 
 class OrderCatalogFragment : Fragment() {
@@ -73,6 +76,9 @@ class OrderCatalogFragment : Fragment() {
         })
         binding.buttonClearSearch.setOnClickListener { binding.editSearch.setText("") }
 
+        binding.buttonCategoryFilter.setOnClickListener { openCategorySheet() }
+        binding.buttonCategoryChipRemove.setOnClickListener { viewModel.selectCategory(null) }
+
         binding.buttonCart.setOnClickListener {
             findNavController().navigate(
                 R.id.action_catalog_to_cart,
@@ -113,6 +119,8 @@ class OrderCatalogFragment : Fragment() {
             binding.textCartBadge.text = count.toString()
             adapter.refreshQuantities()
         }
+
+        viewModel.selectedCategory.observe(viewLifecycleOwner) { renderCategoryFilter() }
     }
 
     private fun selectTab(tab: OrderCatalogViewModel.Tab) {
@@ -121,7 +129,66 @@ class OrderCatalogFragment : Fragment() {
         stylePill(binding.pillTabSale, tab == OrderCatalogViewModel.Tab.ON_SALE)
         stylePill(binding.pillTabPrevious, tab == OrderCatalogViewModel.Tab.PREVIOUSLY_ORDERED)
         renderEmptyState()
+        renderCategoryFilter()
     }
+
+    private fun openCategorySheet() {
+        CategoryFilterBottomSheet(
+            allCategories = viewModel.categories.value.orEmpty(),
+            selectedCategory = viewModel.selectedCategory.value,
+            onSelect = { category -> viewModel.selectCategory(category) }
+        ).show(parentFragmentManager, "category_filter")
+    }
+
+    /** Mirrors the Compose catalog's category filter button + active-category chip, both only
+     * shown on the ALL tab (matches SalesOrderCatalogView.kt's ALL_ITEMS-only visibility). */
+    private fun renderCategoryFilter() {
+        val isAllTab = viewModel.tab.value == OrderCatalogViewModel.Tab.ALL
+        val selected = viewModel.selectedCategory.value
+
+        binding.buttonCategoryFilter.visibility = if (isAllTab) View.VISIBLE else View.GONE
+        binding.buttonCategoryFilter.setBackgroundResource(
+            if (selected != null) R.drawable.bg_catalog_category_button_active else R.drawable.bg_catalog_category_button_inactive
+        )
+        binding.iconCategoryFilter.setColorFilter(
+            requireContext().getColor(if (selected != null) R.color.karika_white else R.color.karika_gray6)
+        )
+
+        val showChip = isAllTab && selected != null
+        binding.rowCategoryChip.visibility = if (showChip) View.VISIBLE else View.GONE
+        if (showChip && selected != null) {
+            renderCategoryBreadcrumb(categoryPath(viewModel.categories.value.orEmpty(), selected))
+        }
+    }
+
+    private fun renderCategoryBreadcrumb(path: List<Category>) {
+        val container = binding.layoutCategoryBreadcrumb
+        container.removeAllViews()
+        path.forEachIndexed { index, category ->
+            val isLast = index == path.lastIndex
+            container.addView(TextView(requireContext()).apply {
+                text = category.name
+                setTextColor(requireContext().getColor(R.color.karika_blue))
+                textSize = 12f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+            })
+            if (!isLast) {
+                container.addView(TextView(requireContext()).apply {
+                    text = "→"
+                    setTextColor(requireContext().getColor(R.color.karika_blue))
+                    textSize = 12f
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    setPadding(dp(4), 0, dp(4), 0)
+                })
+            }
+        }
+    }
+
+    private fun dp(value: Int): Int = TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        value.toFloat(),
+        resources.displayMetrics
+    ).toInt()
 
     private fun stylePill(pill: android.widget.TextView, selected: Boolean) {
         pill.setBackgroundResource(

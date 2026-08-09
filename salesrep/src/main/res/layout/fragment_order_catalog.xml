@@ -21,8 +21,9 @@
 
             <LinearLayout
                 android:id="@+id/search_field_container"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:background="@drawable/bg_catalog_search_field"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -60,6 +61,25 @@
                     android:visibility="gone"
                     app:tint="@color/karika_gray6" />
             </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/button_category_filter"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_catalog_category_button_inactive"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/icon_category_filter"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/catalog_category_filter_cd"
+                    android:src="@drawable/ic_navigation_category"
+                    app:tint="@color/karika_gray6" />
+            </FrameLayout>
         </LinearLayout>
 
         <HorizontalScrollView
@@ -120,6 +140,52 @@
                     android:textStyle="bold" />
             </LinearLayout>
         </HorizontalScrollView>
+
+        <LinearLayout
+            android:id="@+id/row_category_chip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/karika_white"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="10dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_category_chip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="6dp"
+                android:paddingVertical="5dp">
+
+                <LinearLayout
+                    android:id="@+id/layout_category_breadcrumb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+
+                <FrameLayout
+                    android:id="@+id/button_category_chip_remove"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_category_chip_close"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/catalog_category_remove_cd"
+                        android:src="@drawable/ic_close"
+                        app:tint="@color/karika_white" />
+                </FrameLayout>
+            </LinearLayout>
+        </LinearLayout>
 
         <FrameLayout
             android:layout_width="match_parent"

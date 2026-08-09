@@ -180,6 +180,18 @@
     <string name="catalog_clear_search_cd">Obriši</string>
     <string name="catalog_decrease_cd">Umanji</string>
     <string name="catalog_increase_cd">+</string>
+    <string name="catalog_category_filter_cd">Kategorije</string>
+    <string name="catalog_category_remove_cd">Ukloni</string>
+
+    <string name="category_sheet_title_root">Katalog</string>
+    <string name="category_sheet_search_title">Pretraga kategorija</string>
+    <string name="category_sheet_search_hint">Pretraži kategorije…</string>
+    <string name="category_sheet_search_empty_format">Nema rezultata za „%s„</string>
+    <string name="category_sheet_all_root">Sve kategorije</string>
+    <string name="category_sheet_all_in_format">Svi artikli: %s</string>
+    <string name="category_sheet_back_cd">Nazad</string>
+    <string name="category_sheet_close_cd">Zatvori</string>
+    <string name="category_sheet_clear_search_cd">Obriši</string>
 
     <string name="cart_title">Korpa</string>
     <string name="cart_empty">Korpa je prazna.</string>

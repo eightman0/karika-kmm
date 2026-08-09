@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import karika.distribucija.ba.salesrep.api.SalesRepository
+import karika.distribucija.ba.salesrep.model.Category
 import karika.distribucija.ba.salesrep.model.OnBehalfProduct
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.session.CartState
@@ -17,8 +18,9 @@ import kotlinx.coroutines.launch
 /**
  * Mirrors composeApp's SalesOrderCatalogComponent.kt. ON_SALE filters by the same hardcoded
  * KarikaConstants.ON_SALE_CATEGORY_ID composeApp's KarikaConfig.getActionId()/getOutletId() combine
- * into. Category filtering (hierarchical tree) is dropped, same simplification as the discount
- * form's item search.
+ * into. The ALL_ITEMS tab's category filter mirrors selectCategory()/selectedCategory - unlike
+ * composeApp, categories are loaded once per screen instance rather than cached in an app-wide
+ * state holder, since this module has no equivalent to CommonHandler.
  */
 class OrderCatalogViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
@@ -42,6 +44,12 @@ class OrderCatalogViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
 
+    private val _categories = MutableLiveData<List<Category>>(emptyList())
+    val categories: LiveData<List<Category>> = _categories
+
+    private val _selectedCategory = MutableLiveData<Category?>(null)
+    val selectedCategory: LiveData<Category?> = _selectedCategory
+
     private var currentPage = 1
     private var hasNext = false
     private var searchQuery = ""
@@ -51,6 +59,22 @@ class OrderCatalogViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     init {
         loadCart()
+        loadCategories()
+        loadProducts(reset = true)
+    }
+
+    private fun loadCategories() {
+        viewModelScope.launch {
+            repository.getCategories().collect { result ->
+                if (result is ResultState.Success) {
+                    _categories.value = result.data.childrenData
+                }
+            }
+        }
+    }
+
+    fun selectCategory(category: Category?) {
+        _selectedCategory.value = category
         loadProducts(reset = true)
     }
 
@@ -132,7 +156,10 @@ class OrderCatalogViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
                     page = page,
                     pageSize = pageSize,
                     search = searchQuery.takeIf { it.isNotBlank() },
-                    categoryId = if (_tab.value == Tab.ON_SALE) KarikaConstants.ON_SALE_CATEGORY_ID else null
+                    categoryId = when (_tab.value) {
+                        Tab.ON_SALE -> KarikaConstants.ON_SALE_CATEGORY_ID
+                        else -> _selectedCategory.value?.id?.toString()
+                    }
                 )
             }
 

@@ -12,6 +12,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import karika.distribucija.ba.salesrep.model.Category
 import karika.distribucija.ba.salesrep.model.Comment
 import karika.distribucija.ba.salesrep.model.DiscountRule
 import karika.distribucija.ba.salesrep.model.DiscountRuleBody
@@ -305,6 +306,12 @@ internal class SalesApi {
         HttpClientProvider.client.get(HttpClientProvider.url("mobile/vendor/order/pdf")) {
             parameter("orderId", orderId)
         }
+    }
+
+    /** GET /V1/categories - shop-wide category tree, same shared endpoint composeApp's
+     * CategoryApi uses (not vendor/customer-scoped). */
+    suspend fun getCategories(): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("categories"))
     }
 }
 
@@ -686,6 +693,23 @@ class SalesRepository internal constructor() {
             val response = SalesApi().getOrderPdf(orderId).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.bodyAsText().trim('"')))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    /** The response is a single root Category whose childrenData is the top-level list. */
+    fun getCategories(): Flow<ResultState<Category>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().getCategories().getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<Category>()))
                 return@flow
             }
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))

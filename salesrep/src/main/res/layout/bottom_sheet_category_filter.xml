@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp">
+
+        <ImageView
+            android:id="@+id/button_category_back"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:contentDescription="@string/category_sheet_back_cd"
+            android:padding="8dp"
+            android:src="@drawable/ic_back"
+            android:visibility="gone"
+            app:tint="@color/karika_blue" />
+
+        <TextView
+            android:id="@+id/text_category_sheet_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/karika_gray2"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="Katalog" />
+
+        <ImageView
+            android:id="@+id/button_category_close"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:contentDescription="@string/category_sheet_close_cd"
+            android:padding="9dp"
+            android:src="@drawable/ic_cancel"
+            app:tint="@color/karika_gray6" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bg_catalog_search_field"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_search"
+            app:tint="@color/karika_gray6" />
+
+        <EditText
+            android:id="@+id/edit_category_search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="@string/category_sheet_search_hint"
+            android:maxLines="1"
+            android:padding="0dp"
+            android:textColor="@color/karika_gray2"
+            android:textColorHint="@color/karika_gray7"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/button_clear_category_search"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/category_sheet_clear_search_cd"
+            android:src="@drawable/ic_cancel"
+            android:visibility="gone"
+            app:tint="@color/karika_gray6" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/row_category_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_category_header_row_unselected"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
+
+        <TextView
+            android:id="@+id/text_category_header_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/karika_gray2"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="Sve kategorije" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_categories"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp" />
+
+        <TextView
+            android:id="@+id/text_category_search_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@color/karika_gray6"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:text="Nema rezultata za „mlijeko„"
+            tools:visibility="visible" />
+    </FrameLayout>
+
+</LinearLayout>
