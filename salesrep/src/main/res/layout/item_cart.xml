@@ -1,116 +1,227 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="12dp"
-    android:layout_marginTop="8dp"
-    android:background="@color/karika_white"
-    android:elevation="1dp"
-    android:padding="14dp">
-
-    <TextView
-        android:id="@+id/text_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textColor="@color/karika_gray2"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/button_remove"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Artikal XY sa dužim nazivom" />
-
-    <ImageButton
-        android:id="@+id/button_remove"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/action_delete"
-        android:src="@drawable/ic_delete"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/karika_error" />
-
-    <TextView
-        android:id="@+id/text_sku"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="@color/karika_gray6"
-        android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_name"
-        tools:text="SKU-12345 · 12,50 KM" />
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/bg_cart_item_card"
+    android:clipToOutline="true"
+    android:orientation="vertical">
 
     <LinearLayout
-        android:id="@+id/layout_stepper"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:layout_marginTop="10dp"
-        android:background="@color/karika_gray20"
-        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="top"
         android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_sku">
+        android:padding="12dp">
 
-        <ImageButton
-            android:id="@+id/button_minus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/action_delete"
-            android:src="@drawable/ic_remove"
-            app:tint="@color/karika_gray6" />
+        <FrameLayout
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/bg_catalog_image_box">
 
-        <TextView
-            android:id="@+id/text_qty"
-            android:layout_width="32dp"
+            <ImageView
+                android:id="@+id/image_product"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="centerCrop" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textColor="@color/karika_gray2"
-            android:textSize="14sp"
-            tools:text="2" />
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/button_plus"
+            <TextView
+                android:id="@+id/text_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/karika_gray2"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="Artikal XY sa dužim nazivom" />
+
+            <TextView
+                android:id="@+id/text_sku"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/karika_gray6"
+                android:textSize="11sp"
+                android:visibility="gone"
+                tools:text="#SKU-12345"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/text_vpc_strike"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:textColor="@color/karika_gray6"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    tools:text="30,00 KM"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/text_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/karika_blue"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    tools:text="25,00 KM" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/button_remove"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/catalog_add"
-            android:src="@drawable/ic_add"
-            app:tint="@color/karika_blue" />
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_cart_delete_button"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/action_delete"
+                android:src="@drawable/ic_delete"
+                app:tint="@color/karika_red" />
+        </FrameLayout>
     </LinearLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/layout_discount"
-        android:layout_width="90dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:hint="@string/cart_discount_hint"
-        app:layout_constraintBottom_toBottomOf="@id/layout_stepper"
-        app:layout_constraintStart_toEndOf="@id/layout_stepper"
-        app:layout_constraintTop_toTopOf="@id/layout_stepper">
+        android:background="@drawable/bg_catalog_product_footer"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edit_discount"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="number" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:text="@string/cart_quantity_label"
+            android:textColor="@color/karika_gray6"
+            android:textSize="13sp" />
 
-    <TextView
-        android:id="@+id/text_row_total"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/karika_gray2"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/layout_stepper"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/layout_stepper"
-        tools:text="25,00 KM" />
+        <LinearLayout
+            android:id="@+id/layout_stepper"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_catalog_stepper_box"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="2dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/button_minus"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_catalog_stepper_button"
+                android:contentDescription="@string/catalog_decrease_cd"
+                android:gravity="center"
+                android:text="−"
+                android:textColor="@color/karika_gray2"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edit_qty"
+                android:layout_width="46dp"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:gravity="center"
+                android:inputType="number"
+                android:maxLines="1"
+                android:padding="0dp"
+                android:textColor="@color/karika_gray2"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="2" />
+
+            <ImageView
+                android:id="@+id/button_plus"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_catalog_stepper_button"
+                android:contentDescription="@string/catalog_increase_cd"
+                android:padding="9dp"
+                android:src="@drawable/ic_add_plus"
+                app:tint="@color/karika_gray2" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/layout_discount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_catalog_stepper_box"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="6dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/cart_discount_label"
+                android:textColor="@color/karika_gray6"
+                android:textSize="13sp" />
+
+            <EditText
+                android:id="@+id/edit_discount"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:gravity="end"
+                android:inputType="number"
+                android:maxLines="1"
+                android:padding="0dp"
+                android:textColor="@color/karika_gray2"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="10" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="@string/discount_form_percent_suffix"
+                android:textColor="@color/karika_gray6"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_discount_readonly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/karika_gray6"
+            android:textSize="13sp"
+            android:visibility="gone"
+            tools:text="Rabat: 10%" />
+    </LinearLayout>
+
+</LinearLayout>

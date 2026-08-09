@@ -32,6 +32,8 @@
     <color name="karika_bg1">#EAEEEF</color>
     <color name="karika_bg2">#F7F7F7</color>
     <color name="karika_red2">#FFEAF3</color>
+    <color name="karika_red">#E00000</color>
+    <color name="karika_red_08">#14E00000</color>
     <color name="karika_yellow1">#FAF0CD</color>
     <color name="karika_yellow2">#A65F00</color>
 

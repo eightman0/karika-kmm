@@ -224,6 +224,9 @@ class CustomersListFragment : Fragment() {
             bundleOf(
                 "customerId" to customer.customerId,
                 "customerName" to (customer.company ?: customer.fullName),
+                "customerCompany" to customer.company,
+                "customerEmail" to customer.email,
+                "partnershipStatus" to customer.partnershipStatus,
                 "customerActive" to customer.isActive,
                 "hasShippingAddress" to (customer.defaultShippingAddressId != null)
             )

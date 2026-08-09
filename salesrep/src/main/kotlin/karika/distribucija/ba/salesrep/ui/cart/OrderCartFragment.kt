@@ -37,11 +37,15 @@ class OrderCartFragment : Fragment() {
 
         val args = requireArguments()
         val customerName = args.getString("customerName").orEmpty()
+        val customerCompany = args.getString("customerCompany")
+        val customerEmail = args.getString("customerEmail")
+        val partnershipStatus = args.getString("partnershipStatus").orEmpty()
         val customerActive = args.getBoolean("customerActive")
         val hasShippingAddress = args.getBoolean("hasShippingAddress")
         (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.cart_title) + ": $customerName"
 
         adapter = CartAdapter(
+            lifecycleOwner = viewLifecycleOwner,
             canDiscount = viewModel.canCreateDiscountFor,
             onQtyChanged = { item, qty -> viewModel.updateQty(item, qty) },
             onDiscountChanged = { item, percent -> viewModel.updateDiscount(item, percent) },
@@ -60,11 +64,15 @@ class OrderCartFragment : Fragment() {
         }
 
         binding.buttonReview.setOnClickListener {
+            if (CartState.cart.value?.isEmpty != false) return@setOnClickListener
             findNavController().navigate(
                 R.id.action_cart_to_review,
                 bundleOf(
                     "customerId" to viewModel.customerId,
                     "customerName" to customerName,
+                    "customerCompany" to customerCompany,
+                    "customerEmail" to customerEmail,
+                    "partnershipStatus" to partnershipStatus,
                     "customerActive" to customerActive,
                     "hasShippingAddress" to hasShippingAddress
                 )
@@ -76,12 +84,18 @@ class OrderCartFragment : Fragment() {
         }
 
         CartState.cart.observe(viewLifecycleOwner) { cart ->
-            adapter.submitList(cart?.items.orEmpty())
-            binding.textEmpty.visibility = if (cart?.items.isNullOrEmpty()) View.VISIBLE else View.GONE
-            binding.layoutSummary.visibility = if (cart?.items.isNullOrEmpty()) View.GONE else View.VISIBLE
+            val items = cart?.items.orEmpty()
+            adapter.submitList(items)
+            binding.layoutEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            binding.layoutSummary.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
             binding.textSubtotal.text = cart?.subtotalString() ?: "0,00 KM"
-            binding.textDiscount.text = cart?.discountString() ?: "0,00 KM"
+            binding.textDiscount.text = "-" + (cart?.discountString() ?: "0,00 KM")
             binding.textGrandTotal.text = cart?.grandTotalString() ?: "0,00 KM"
+            binding.buttonReview.setBackgroundResource(
+                if (items.isNotEmpty()) R.drawable.bg_cart_review_button else R.drawable.bg_cart_review_button_disabled
+            )
+            binding.buttonReview.isEnabled = items.isNotEmpty()
+            binding.buttonClear.visibility = if (items.isNotEmpty()) View.VISIBLE else View.GONE
         }
     }
 

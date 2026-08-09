@@ -81,6 +81,9 @@
         android:label="@string/customers_order_for">
         <argument android:name="customerId" app:argType="long" />
         <argument android:name="customerName" app:argType="string" app:nullable="true" />
+        <argument android:name="customerCompany" app:argType="string" app:nullable="true" />
+        <argument android:name="customerEmail" app:argType="string" app:nullable="true" />
+        <argument android:name="partnershipStatus" app:argType="string" android:defaultValue="" />
         <argument android:name="customerActive" app:argType="boolean" android:defaultValue="false" />
         <argument android:name="hasShippingAddress" app:argType="boolean" android:defaultValue="false" />
         <action
@@ -94,6 +97,9 @@
         android:label="@string/cart_title">
         <argument android:name="customerId" app:argType="long" />
         <argument android:name="customerName" app:argType="string" app:nullable="true" />
+        <argument android:name="customerCompany" app:argType="string" app:nullable="true" />
+        <argument android:name="customerEmail" app:argType="string" app:nullable="true" />
+        <argument android:name="partnershipStatus" app:argType="string" android:defaultValue="" />
         <argument android:name="customerActive" app:argType="boolean" android:defaultValue="false" />
         <argument android:name="hasShippingAddress" app:argType="boolean" android:defaultValue="false" />
         <action
@@ -107,6 +113,9 @@
         android:label="@string/review_title">
         <argument android:name="customerId" app:argType="long" />
         <argument android:name="customerName" app:argType="string" app:nullable="true" />
+        <argument android:name="customerCompany" app:argType="string" app:nullable="true" />
+        <argument android:name="customerEmail" app:argType="string" app:nullable="true" />
+        <argument android:name="partnershipStatus" app:argType="string" android:defaultValue="" />
         <argument android:name="customerActive" app:argType="boolean" android:defaultValue="false" />
         <argument android:name="hasShippingAddress" app:argType="boolean" android:defaultValue="false" />
     </fragment>

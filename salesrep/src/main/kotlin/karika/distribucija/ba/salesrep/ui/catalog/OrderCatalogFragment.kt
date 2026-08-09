@@ -38,6 +38,9 @@ class OrderCatalogFragment : Fragment() {
 
         val args = requireArguments()
         val customerName = args.getString("customerName").orEmpty()
+        val customerCompany = args.getString("customerCompany")
+        val customerEmail = args.getString("customerEmail")
+        val partnershipStatus = args.getString("partnershipStatus").orEmpty()
         val customerActive = args.getBoolean("customerActive")
         val hasShippingAddress = args.getBoolean("hasShippingAddress")
         (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.customers_order_for) + ": $customerName"
@@ -75,6 +78,9 @@ class OrderCatalogFragment : Fragment() {
                 bundleOf(
                     "customerId" to viewModel.customerId,
                     "customerName" to customerName,
+                    "customerCompany" to customerCompany,
+                    "customerEmail" to customerEmail,
+                    "partnershipStatus" to partnershipStatus,
                     "customerActive" to customerActive,
                     "hasShippingAddress" to hasShippingAddress
                 )

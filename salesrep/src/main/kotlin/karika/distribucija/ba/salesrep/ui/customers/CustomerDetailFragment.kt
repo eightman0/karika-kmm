@@ -70,6 +70,9 @@ class CustomerDetailFragment : Fragment() {
                 bundleOf(
                     "customerId" to viewModel.customerId,
                     "customerName" to customer.fullName,
+                    "customerCompany" to customer.company,
+                    "customerEmail" to customer.email,
+                    "partnershipStatus" to customer.partnershipStatus,
                     "customerActive" to customer.isActive,
                     "hasShippingAddress" to args.getBoolean("hasShippingAddress")
                 )

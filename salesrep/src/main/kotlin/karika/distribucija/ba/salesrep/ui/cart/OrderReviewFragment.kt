@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentOrderReviewBinding
 import karika.distribucija.ba.salesrep.session.CartState
+import karika.distribucija.ba.salesrep.util.karikaPriceFormat
 
 class OrderReviewFragment : Fragment() {
 
@@ -51,6 +52,8 @@ class OrderReviewFragment : Fragment() {
         }
         binding.buttonConfirm.isEnabled = viewModel.isEligible
 
+        renderCustomerInfo()
+
         binding.buttonBack.setOnClickListener { findNavController().popBackStack() }
         binding.buttonConfirm.setOnClickListener {
             viewModel.confirmOrder(binding.editNote.text?.toString().orEmpty())
@@ -58,9 +61,13 @@ class OrderReviewFragment : Fragment() {
 
         CartState.cart.observe(viewLifecycleOwner) { cart ->
             adapter.submitList(cart?.items.orEmpty())
-            binding.textSubtotal.text = cart?.subtotalString() ?: "0,00 KM"
-            binding.textDiscount.text = cart?.discountString() ?: "0,00 KM"
-            binding.textGrandTotal.text = cart?.grandTotalString() ?: "0,00 KM"
+            binding.textItemsCount.text = (cart?.itemsCount ?: cart?.items?.size ?: 0).toString()
+            binding.textTotalVpc.text = cart?.grandTotalString() ?: "0,00 KM"
+            binding.textReviewSubtotal.text = cart?.subtotalString() ?: "0,00 KM"
+            binding.textReviewPdv.text = karikaPriceFormat(cart?.totalTax ?: 0.0) + " KM"
+            binding.textReviewDiscount.text = "-" + (cart?.discountString() ?: "0,00 KM")
+            binding.textReviewTotalWithTax.text = karikaPriceFormat(cart?.totalWithTax ?: 0.0) + " KM"
+            binding.textReviewCommission.text = karikaPriceFormat(cart?.fee ?: 0.0) + " KM"
         }
 
         viewModel.isPlacingOrder.observe(viewLifecycleOwner) { saving ->
@@ -101,6 +108,31 @@ class OrderReviewFragment : Fragment() {
                 )
             }
         }
+    }
+
+    /** Mirrors the Compose Review screen's "Informacije o narudžbi" card: customer company/email,
+     * a two-state (active/not-active) partnership badge, and the items count. */
+    private fun renderCustomerInfo() {
+        val customerName = requireArguments().getString("customerName").orEmpty()
+        binding.textCustomerCompany.text = viewModel.customerCompany?.takeIf { it.isNotBlank() } ?: customerName
+        binding.textCustomerEmail.text =
+            viewModel.customerEmail?.takeIf { it.isNotBlank() } ?: getString(R.string.order_detail_dash)
+
+        val badgeLabel = when (viewModel.partnershipStatus) {
+            "active" -> R.string.review_badge_active
+            "pending" -> R.string.review_badge_pending
+            "rejected" -> R.string.review_badge_rejected
+            "revoked" -> R.string.review_badge_revoked
+            else -> R.string.review_badge_pending
+        }
+        binding.textPartnershipBadge.text = getString(badgeLabel)
+        val (badgeBgRes, badgeColorRes) = if (viewModel.customerActive) {
+            R.drawable.bg_review_badge_active to R.color.karika_green3
+        } else {
+            R.drawable.bg_review_badge_pending to R.color.karika_blue
+        }
+        binding.textPartnershipBadge.setBackgroundResource(badgeBgRes)
+        binding.textPartnershipBadge.setTextColor(requireContext().getColor(badgeColorRes))
     }
 
     override fun onDestroyView() {

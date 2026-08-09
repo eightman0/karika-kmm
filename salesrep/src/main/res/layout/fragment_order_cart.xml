@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_white"
+    android:background="@color/karika_gray20"
     android:orientation="vertical">
 
     <FrameLayout
@@ -16,24 +17,42 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingTop="8dp"
-            android:paddingBottom="16dp" />
+            android:paddingHorizontal="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp" />
 
-        <TextView
-            android:id="@+id/text_empty"
+        <LinearLayout
+            android:id="@+id/layout_empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/cart_empty"
-            android:textColor="@color/karika_gray6"
-            android:visibility="gone" />
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_products"
+                app:tint="@color/karika_gray9" />
+
+            <TextView
+                android:id="@+id/text_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/cart_empty"
+                android:textColor="@color/karika_gray6"
+                android:textSize="15sp" />
+        </LinearLayout>
     </FrameLayout>
 
     <LinearLayout
         android:id="@+id/layout_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/karika_gray20"
+        android:background="@color/karika_white"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -55,14 +74,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/karika_gray2"
-                android:textSize="13sp"
+                android:textSize="14sp"
+                android:textStyle="bold"
                 tools:text="100,00 KM" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <TextView
@@ -77,15 +97,22 @@
                 android:id="@+id/text_discount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/karika_gray2"
-                android:textSize="13sp"
-                tools:text="10,00 KM" />
+                android:textColor="@color/karika_red"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="-10,00 KM" />
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/karika_gray9" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <TextView
@@ -101,29 +128,49 @@
                 android:id="@+id/text_grand_total"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/karika_gray2"
-                android:textSize="15sp"
+                android:textColor="@color/karika_blue"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 tools:text="90,00 KM" />
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
+        <LinearLayout
             android:id="@+id/button_review"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginTop="12dp"
-            android:backgroundTint="@color/karika_blue"
-            android:paddingVertical="14dp"
-            android:text="@string/cart_review_order" />
+            android:background="@drawable/bg_cart_review_button"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center">
 
-        <com.google.android.material.button.MaterialButton
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cart_review_order"
+                android:textColor="@color/karika_white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/button_clear"
-            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/cart_clear"
-            android:textColor="@color/karika_error" />
+            android:layout_height="44dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_cart_clear_button"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cart_clear"
+                android:textColor="@color/karika_gray4"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
     </LinearLayout>
 

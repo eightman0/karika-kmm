@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_white"
+    android:background="@color/karika_gray20"
     android:orientation="vertical">
 
     <ScrollView
@@ -21,86 +21,315 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/karika_gray20"
+                android:layout_margin="16dp"
+                android:background="@drawable/bg_cart_item_card"
+                android:clipToOutline="true"
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/review_info_title"
+                    android:textColor="@color/karika_gray2"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="14dp"
+                    android:background="@color/karika_gray9" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/cart_subtotal"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="13sp" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_label_customer"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/text_customer_company"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="Firma d.o.o." />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_label_email"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/text_customer_email"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="kupac@firma.ba" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_label_partnership"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/text_partnership_badge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            tools:text="Aktivno" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_label_items"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/text_items_count"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="3" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/text_subtotal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="@string/review_label_total_vpc"
+                        android:textColor="@color/karika_gray6"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/text_total_vpc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:textColor="@color/karika_gray2"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
                         tools:text="100,00 KM" />
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="14dp"
+                    android:background="@color/karika_gray9" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="14dp"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/cart_discount"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_label_subtotal"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/text_review_subtotal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="100,00 KM" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_label_pdv"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/text_review_pdv"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="17,00 KM" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_label_discount"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/text_review_discount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="-10,00 KM" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_label_total_with_tax"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/text_review_total_with_tax"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_blue"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            tools:text="107,00 KM" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="14dp"
+                    android:background="@color/karika_gray9" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/review_label_commission"
                         android:textColor="@color/karika_gray6"
-                        android:textSize="13sp" />
+                        android:textSize="11sp" />
 
                     <TextView
-                        android:id="@+id/text_discount"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/text_review_commission"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:textColor="@color/karika_gray2"
-                        android:textSize="13sp"
-                        tools:text="10,00 KM" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/cart_grand_total"
-                        android:textColor="@color/karika_gray2"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/text_grand_total"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/karika_gray2"
-                        android:textSize="15sp"
+                        android:textSize="14sp"
                         android:textStyle="bold"
-                        tools:text="90,00 KM" />
+                        tools:text="5,00 KM" />
                 </LinearLayout>
+
             </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="0dp"
                 android:text="@string/review_items"
                 android:textColor="@color/karika_gray2"
                 android:textSize="15sp"

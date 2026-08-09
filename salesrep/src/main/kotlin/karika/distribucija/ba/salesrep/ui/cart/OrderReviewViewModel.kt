@@ -22,7 +22,10 @@ class OrderReviewViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     private val repository = SalesRepository()
 
     val customerId: Long = savedStateHandle.get<Long>("customerId") ?: 0L
-    private val customerActive: Boolean = savedStateHandle.get<Boolean>("customerActive") ?: false
+    val customerCompany: String? = savedStateHandle.get<String>("customerCompany")
+    val customerEmail: String? = savedStateHandle.get<String>("customerEmail")
+    val partnershipStatus: String = savedStateHandle.get<String>("partnershipStatus").orEmpty()
+    val customerActive: Boolean = savedStateHandle.get<Boolean>("customerActive") ?: false
     private val hasShippingAddress: Boolean = savedStateHandle.get<Boolean>("hasShippingAddress") ?: false
 
     val canPlaceOrderFor: Boolean

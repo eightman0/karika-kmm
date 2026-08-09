@@ -189,6 +189,9 @@
     <string name="cart_clear_title">Isprazni korpu</string>
     <string name="cart_clear_message">Da li ste sigurni da želite isprazniti korpu?</string>
     <string name="cart_discount_hint">Rabat %</string>
+    <string name="cart_quantity_label">Količina:</string>
+    <string name="cart_discount_label">Rabat:</string>
+    <string name="cart_discount_readonly_format">Rabat: %d%%</string>
 
     <string name="review_title">Pregled narudžbe</string>
     <string name="review_items">Stavke narudžbe</string>
@@ -198,4 +201,20 @@
     <string name="review_warning_no_capability">Nemate ovlaštenje za kreiranje narudžbi za kupce.</string>
     <string name="review_warning_inactive">Kupac nije aktivan, narudžba se ne može kreirati.</string>
     <string name="review_warning_no_shipping">Kupac nema podešenu adresu za dostavu.</string>
+
+    <string name="review_info_title">Informacije o narudžbi</string>
+    <string name="review_label_customer">KUPAC</string>
+    <string name="review_label_email">EMAIL</string>
+    <string name="review_label_partnership">PARTNERSTVO</string>
+    <string name="review_label_items">STAVKI</string>
+    <string name="review_label_total_vpc">UKUPNO VPC</string>
+    <string name="review_label_subtotal">MEĐUZBIR</string>
+    <string name="review_label_pdv">PDV (17%)</string>
+    <string name="review_label_discount">POPUST</string>
+    <string name="review_label_total_with_tax">UKUPNO SA PDV</string>
+    <string name="review_label_commission">KARIKA PROVIZIJA</string>
+    <string name="review_badge_active">Aktivno</string>
+    <string name="review_badge_pending">Na čekanju</string>
+    <string name="review_badge_rejected">Odbijeno</string>
+    <string name="review_badge_revoked">Opozvano</string>
 </resources>
