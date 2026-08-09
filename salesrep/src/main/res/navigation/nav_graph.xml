@@ -30,6 +30,7 @@
         android:label="@string/orders_title">
         <argument android:name="orderId" app:argType="long" />
         <argument android:name="incrementId" app:argType="string" />
+        <argument android:name="customerId" app:argType="long" android:defaultValue="0L" />
         <argument android:name="customerName" app:argType="string" app:nullable="true" />
         <argument android:name="grandTotal" app:argType="float" />
         <argument android:name="status" app:argType="string" />

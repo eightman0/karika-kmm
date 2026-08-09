@@ -26,10 +26,36 @@
     <string name="orders_empty">Nema narudžbi.</string>
     <string name="orders_status_all">Sve</string>
 
-    <string name="order_detail_customer">Kupac</string>
-    <string name="order_detail_date">Datum</string>
-    <string name="order_detail_total">Ukupno</string>
-    <string name="order_detail_status">Status</string>
+    <string name="order_detail_section_info">Informacije o narudžbi</string>
+    <string name="order_detail_label_order_number">BROJ NARUDŽBE</string>
+    <string name="order_detail_label_date">DATUM</string>
+    <string name="order_detail_label_total_vpc_upper">UKUPNO VPC</string>
+    <string name="order_detail_label_with_pdv_upper">SA PDV</string>
+    <string name="order_detail_label_commission_upper">PROVIZIJA</string>
+    <string name="order_detail_label_customer_name">NAZIV KUPCA</string>
+    <string name="order_detail_customer_id_format">ID: %s</string>
+    <string name="order_detail_label_shipping_address">ADRESA ZA ISPORUKU</string>
+    <string name="order_detail_label_contact_phone">KONTAKT TELEFON</string>
+    <string name="order_detail_dash">—</string>
+
+    <string name="order_detail_section_spec">Specifikacija narudžbe</string>
+    <string name="order_detail_items_count_format">%d artikala</string>
+
+    <string name="order_detail_qty_format">Količina: %1$s %2$s</string>
+    <string name="order_detail_rabat_format">Rabat %s%%</string>
+    <string name="order_detail_price_vpc">Cijena VPC</string>
+    <string name="order_detail_total_vpc">Ukupno VPC</string>
+    <string name="order_detail_total_with_pdv">Ukupno sa PDV</string>
+    <string name="order_detail_commission_format">Provizija (%s%%)</string>
+
+    <string name="order_detail_total_pdv17">Ukupno PDV 17%%</string>
+    <string name="order_detail_karika_commission">Karika provizija</string>
+    <string name="order_detail_for_payment">ZA PLAĆANJE</string>
+
+    <string name="order_detail_section_comments">Komentari narudžbe</string>
+    <string name="order_detail_comment_hint">Napiši komentar kupcu...</string>
+    <string name="order_detail_send_comment">Pošalji komentar</string>
+    <string name="order_detail_print_cd">Printaj</string>
 
     <string name="customers_title">Upravljanje kupcima</string>
     <string name="customers_tab_all">Svi kupci</string>

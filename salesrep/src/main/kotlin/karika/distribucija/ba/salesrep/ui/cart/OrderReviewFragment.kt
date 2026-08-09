@@ -89,6 +89,7 @@ class OrderReviewFragment : Fragment() {
                     bundleOf(
                         "orderId" to order.orderId,
                         "incrementId" to order.incrementId,
+                        "customerId" to viewModel.customerId,
                         "customerName" to customerName,
                         "grandTotal" to order.grandTotal.toFloat(),
                         "status" to order.status,

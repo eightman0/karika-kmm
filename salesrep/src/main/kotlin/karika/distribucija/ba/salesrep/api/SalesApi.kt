@@ -2,6 +2,8 @@ package karika.distribucija.ba.salesrep.api
 
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
@@ -10,6 +12,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import karika.distribucija.ba.salesrep.model.Comment
 import karika.distribucija.ba.salesrep.model.DiscountRule
 import karika.distribucija.ba.salesrep.model.DiscountRuleBody
 import karika.distribucija.ba.salesrep.model.DiscountRuleSearchResults
@@ -28,6 +31,7 @@ import karika.distribucija.ba.salesrep.model.Partnership
 import karika.distribucija.ba.salesrep.model.PartnershipRequestBody
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.model.VendorOperationsMe
+import karika.distribucija.ba.salesrep.model.VendorOrder
 import karika.distribucija.ba.salesrep.network.HttpClientProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -255,6 +259,41 @@ internal class SalesApi {
             if (!message.isNullOrBlank()) {
                 setBody(OnBehalfPlaceOrderRequest(OnBehalfPlaceRequestMessage(message)))
             }
+        }
+    }
+
+    /** GET /V1/mobile/vendor/order - full order detail (line items, address, commission). */
+    suspend fun getOrder(orderId: String): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("mobile/vendor/order")) {
+            parameter("orderId", orderId)
+        }
+    }
+
+    /** GET /V1/mobile/vendor/order/messages */
+    suspend fun getOrderComments(orderId: String): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("mobile/vendor/order/messages")) {
+            parameter("orderId", orderId)
+        }
+    }
+
+    /** POST /V1/mobile/vendor/order/messages */
+    suspend fun sendOrderComment(orderId: String, message: String): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("mobile/vendor/order/messages")) {
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("orderId", orderId)
+                        append("message", message)
+                    }
+                )
+            )
+        }
+    }
+
+    /** GET /V1/mobile/vendor/order/pdf */
+    suspend fun getOrderPdf(orderId: String): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("mobile/vendor/order/pdf")) {
+            parameter("orderId", orderId)
         }
     }
 }
@@ -575,6 +614,70 @@ class SalesRepository internal constructor() {
                 return@flow
             }
             emit(ResultState.Error("Greška pri kreiranju narudžbe."))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun getOrder(orderId: String): Flow<ResultState<VendorOrder>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().getOrder(orderId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<VendorOrder>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun getOrderComments(orderId: String): Flow<ResultState<List<Comment>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().getOrderComments(orderId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<List<Comment>>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun sendOrderComment(orderId: String, message: String): Flow<ResultState<Unit>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().sendOrderComment(orderId, message).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(Unit))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun getOrderPdfUrl(orderId: String): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().getOrderPdf(orderId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.bodyAsText().trim('"')))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {

@@ -75,6 +75,7 @@ class OrdersListFragment : Fragment() {
             bundleOf(
                 "orderId" to order.orderId,
                 "incrementId" to order.incrementId,
+                "customerId" to order.customerId,
                 "customerName" to order.customerName,
                 "grandTotal" to order.grandTotal,
                 "status" to order.status,
