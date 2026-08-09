@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Karika Komercijalista</string>
+
+    <string name="login_title">Prijava</string>
+    <string name="login_username_hint">Korisničko ime</string>
+    <string name="login_password_hint">Lozinka</string>
+    <string name="login_button">Prijavi se</string>
+    <string name="login_error_generic">Došlo je do greške. Pokušajte ponovo!</string>
+
+    <string name="drawer_orders">Upravljanje narudžbama</string>
+    <string name="drawer_customers">Upravljanje kupcima</string>
+    <string name="drawer_customer_messages">Poruke kupaca</string>
+    <string name="drawer_admin_messages">Poruke admina</string>
+    <string name="drawer_internal_messages">Interne poruke</string>
+    <string name="drawer_logout">Odjavi se</string>
+    <string name="drawer_role_label">Komercijalista</string>
+    <string name="coming_soon">Uskoro dostupno</string>
+
+    <string name="orders_title">Upravljanje narudžbama</string>
+    <string name="orders_search_hint">Pretraži po broju narudžbe</string>
+    <string name="orders_empty">Nema narudžbi.</string>
+    <string name="orders_status_all">Sve</string>
+
+    <string name="order_detail_customer">Kupac</string>
+    <string name="order_detail_date">Datum</string>
+    <string name="order_detail_total">Ukupno</string>
+    <string name="order_detail_status">Status</string>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="karika_blue">#1F6FEB</color>
+    <color name="karika_white">#FFFFFF</color>
+    <color name="karika_gray2">#1A1A1A</color>
+    <color name="karika_gray6">#6B6B6B</color>
+    <color name="karika_gray9">#E5E5E5</color>
+    <color name="karika_gray20">#F7F7F8</color>
+    <color name="karika_error">#D32F2F</color>
+    <color name="karika_green">#2E8B57</color>
+    <color name="karika_orange">#E08E00</color>
+
+    <color name="status_pending">#E08E00</color>
+    <color name="status_processing">#1F6FEB</color>
+    <color name="status_approved">#2E8B57</color>
+    <color name="status_bill_sent">#2E8B57</color>
+    <color name="status_estimate_sent">#E08E00</color>
+    <color name="status_rejected">#D32F2F</color>
+    <color name="status_cancelled">#6B6B6B</color>
+    <color name="status_default">#6B6B6B</color>
+</resources>
