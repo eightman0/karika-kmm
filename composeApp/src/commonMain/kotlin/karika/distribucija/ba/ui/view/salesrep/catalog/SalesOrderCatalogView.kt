@@ -86,7 +86,7 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
     val products by component.products.collectAsState()
     val searchText by component.searchText.collectAsState()
     val selectedCategory by component.selectedCategory.collectAsState()
-    val cartItems by component.cartItems.collectAsState()
+    val cart by component.cart.collectAsState()
     val cartCount by component.cartCount.collectAsState()
     val isLoading by component.isLoading.collectAsState()
     val isLoadingMore by component.isLoadingMore.collectAsState()
@@ -353,8 +353,8 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
                         items(products, key = { it.key }) { product ->
                             ProductCard(
                                 product = product,
-                                cartQty = cartItems[product.key]?.second ?: 0,
-                                onAdd = { qty -> component.setCartQty(product, qty) }
+                                cartQty = cart?.items?.find { it.sku == product.sku }?.qty ?: 0,
+                                onAdd = { qty -> component.changeQty(product, qty) }
                             )
                         }
                         if (isLoadingMore) {

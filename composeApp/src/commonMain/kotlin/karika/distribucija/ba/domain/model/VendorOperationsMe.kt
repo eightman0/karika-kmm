@@ -17,8 +17,8 @@ data class VendorOperationsMe(
     @SerialName("manager_employee_id")
     val managerEmployeeId: Long? = null,
 
-    @SerialName("manager_name")
-    val managerName: String? = null,
+    @SerialName("name")
+    val name: String? = null,
 
     /** ApiRole: "customer" | "vendor_admin" | "vendor_manager" | "sales_employee" */
     @SerialName("role")

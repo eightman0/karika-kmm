@@ -21,7 +21,8 @@ import karika.distribucija.ba.domain.model.OnBehalfCartItemRequest
 import karika.distribucija.ba.domain.model.OnBehalfCartResponse
 import karika.distribucija.ba.domain.model.OnBehalfOrderResult
 import karika.distribucija.ba.domain.model.OnBehalfOrderSearchResults
-import karika.distribucija.ba.domain.model.OnBehalfProduct
+import karika.distribucija.ba.domain.model.OnBehalfPlaceOrderRequest
+import karika.distribucija.ba.domain.model.OnBehalfPlaceRequestMessage
 import karika.distribucija.ba.domain.model.OnBehalfProductSearchResults
 import karika.distribucija.ba.domain.model.OperationalCustomer
 import karika.distribucija.ba.domain.model.OperationalCustomerSearchResults
@@ -253,10 +254,19 @@ internal class SalesApi {
     }
 
     /** POST /V1/vendor-operations/customers/{customerId}/cart/items */
-    suspend fun addCartItem(customerId: Long, sku: String, qty: Int): Result<HttpResponse> =
+    suspend fun addCartItem(
+        customerId: Long,
+        sku: String,
+        qty: Int,
+        discountPercent: Int? = null
+    ): Result<HttpResponse> =
         runCatching {
             HttpClientProvider.client.post(url("vendor-operations/customers/$customerId/cart/items")) {
-                setBody(OnBehalfCartItemRequest(OnBehalfCartItemInput(sku = sku, qty = qty)))
+                setBody(
+                    OnBehalfCartItemRequest(
+                        OnBehalfCartItemInput(sku = sku, qty = qty, discountPercent = discountPercent)
+                    )
+                )
             }
         }
 
@@ -266,9 +276,14 @@ internal class SalesApi {
     }
 
     /** POST /V1/vendor-operations/customers/{customerId}/orders */
-    suspend fun placeOnBehalfOrder(customerId: Long): Result<HttpResponse> = runCatching {
-        HttpClientProvider.client.post(url("vendor-operations/customers/$customerId/orders"))
-    }
+    suspend fun placeOnBehalfOrder(customerId: Long, message: String? = null): Result<HttpResponse> =
+        runCatching {
+            HttpClientProvider.client.post(url("vendor-operations/customers/$customerId/orders")) {
+                if (!message.isNullOrBlank()) {
+                    setBody(OnBehalfPlaceOrderRequest(OnBehalfPlaceRequestMessage(message)))
+                }
+            }
+        }
 
     /** GET /V1/vendor-operations/orders */
     suspend fun getOrders(
@@ -585,33 +600,76 @@ class SalesRepository internal constructor() {
         }
     }.flowOn(Dispatchers.Default)
 
+    fun getCart(customerId: Long): Flow<ResultState<OnBehalfCartResponse>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().getCart(customerId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<OnBehalfCartResponse>()))
+                return@flow
+            }
+            emit(ResultState.Error("An error occurred. Please try again."))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun addCartItem(
+        customerId: Long,
+        sku: String,
+        qty: Int,
+        discountPercent: Int? = null
+    ): Flow<ResultState<OnBehalfCartResponse>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().addCartItem(customerId, sku, qty, discountPercent).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<OnBehalfCartResponse>()))
+                return@flow
+            }
+            emit(ResultState.Error("Greška pri ažuriranju korpe."))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun removeCartItem(customerId: Long, itemId: Long): Flow<ResultState<OnBehalfCartResponse>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().removeCartItem(customerId, itemId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<OnBehalfCartResponse>()))
+                return@flow
+            }
+            emit(ResultState.Error("Greška pri ažuriranju korpe."))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
     fun placeOrder(
         customerId: Long,
-        items: List<Pair<OnBehalfProduct, Int>>
+        message: String? = null
     ): Flow<ResultState<OnBehalfOrderResult>> = flow {
         emit(ResultState.Loading)
         val api = SalesApi()
         try {
-            // 1. GET existing server cart and DELETE all stale items
+            // Re-validate the server cart isn't empty before placing.
             val cartResponse = api.getCart(customerId).getOrNoInternet()
             if (cartResponse.status == HttpStatusCode.OK) {
-                val existingCart = cartResponse.body<OnBehalfCartResponse>()
-                for (cartItem in existingCart.items) {
-                    api.removeCartItem(customerId, cartItem.itemId)
-                }
-            }
-
-            // 2. POST each local item to server cart
-            for ((product, qty) in items) {
-                val addResponse = api.addCartItem(customerId, product.sku, qty).getOrNoInternet()
-                if (addResponse.status != HttpStatusCode.OK) {
-                    emit(ResultState.Error("Greška pri dodavanju artikla \"${product.name}\" u korpu."))
+                if (cartResponse.body<OnBehalfCartResponse>().isEmpty) {
+                    emit(ResultState.Error("Korpa je prazna."))
                     return@flow
                 }
             }
 
-            // 3. Place the order
-            val orderResponse = api.placeOnBehalfOrder(customerId).getOrNoInternet()
+            val orderResponse = api.placeOnBehalfOrder(customerId, message).getOrNoInternet()
             if (orderResponse.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(orderResponse.body<OnBehalfOrderResult>()))
                 return@flow

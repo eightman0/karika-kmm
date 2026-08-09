@@ -3,6 +3,7 @@ package karika.distribucija.ba.ui.view.salesrep.catalog
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.SalesRepository
 import karika.distribucija.ba.domain.model.Category
+import karika.distribucija.ba.domain.model.OnBehalfCartResponse
 import karika.distribucija.ba.domain.model.OnBehalfProduct
 import karika.distribucija.ba.domain.model.OperationalCustomer
 import karika.distribucija.ba.domain.model.ResultState
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -56,20 +56,30 @@ class SalesOrderCatalogComponent(
     private val _selectedCategory = MutableStateFlow<Category?>(null)
     val selectedCategory = _selectedCategory.asStateFlow()
 
-    // ── Shared cart via stateHolder ───────────────────────────────────────────
-    val cartItems: StateFlow<Map<String, Pair<OnBehalfProduct, Int>>> =
-        stateHolder.salesSpecificHandler.salesRepCart
+    // ── Shared server cart via stateHolder ─────────────────────────────────────
+    val cart: StateFlow<OnBehalfCartResponse?> = stateHolder.salesSpecificHandler.cart
 
-    val cartCount: StateFlow<Int> = stateHolder.salesSpecificHandler.salesRepCart
-        .map { map -> map.values.sumOf { it.second } }
+    val cartCount: StateFlow<Int> = stateHolder.salesSpecificHandler.cart
+        .map { it?.itemsCount ?: 0 }
         .stateIn(scope, SharingStarted.Eagerly, 0)
 
     private var searchJob: Job? = null
     private var loadJob: Job? = null
+    private val qtyJobs = mutableMapOf<String, Job>()
 
     init {
-        stateHolder.salesSpecificHandler.clearSalesRepCart()
+        loadCart()
         loadProducts(reset = true)
+    }
+
+    private fun loadCart() {
+        scope.launch {
+            salesRepository.getCart(customer.customerId).collect { result ->
+                if (result is ResultState.Success) {
+                    stateHolder.salesSpecificHandler.cart.value = result.data
+                }
+            }
+        }
     }
 
     fun selectTab(tab: CatalogTab) {
@@ -97,14 +107,31 @@ class SalesOrderCatalogComponent(
         loadProducts(reset = false)
     }
 
-    fun setCartQty(product: OnBehalfProduct, qty: Int) {
-        stateHolder.salesSpecificHandler.salesRepCart.update { cart ->
-            if (qty <= 0) cart - product.key else cart + (product.key to (product to qty))
+    fun getCartQty(product: OnBehalfProduct): Int =
+        cart.value?.items?.find { it.sku == product.sku }?.qty ?: 0
+
+    fun changeQty(product: OnBehalfProduct, qty: Int) {
+        qtyJobs[product.sku]?.cancel()
+        qtyJobs[product.sku] = scope.launch {
+            delay(400.milliseconds)
+
+            val existingItemId = cart.value?.items?.find { it.sku == product.sku }?.itemId
+            val resultFlow = if (qty <= 0) {
+                if (existingItemId == null) return@launch
+                salesRepository.removeCartItem(customer.customerId, existingItemId)
+            } else {
+                salesRepository.addCartItem(customer.customerId, product.sku, qty)
+            }
+
+            resultFlow.collect { result ->
+                when (result) {
+                    is ResultState.Success -> stateHolder.salesSpecificHandler.cart.value = result.data
+                    is ResultState.Error -> showErrorMessage(result.message)
+                    is ResultState.Loading -> { /* no-op */ }
+                }
+            }
         }
     }
-
-    fun getCartQty(product: OnBehalfProduct): Int =
-        stateHolder.salesSpecificHandler.salesRepCart.value[product.key]?.second ?: 0
 
     fun openCart() = salesRepPush(SalesRepConfig.OrderCart(customer))
 

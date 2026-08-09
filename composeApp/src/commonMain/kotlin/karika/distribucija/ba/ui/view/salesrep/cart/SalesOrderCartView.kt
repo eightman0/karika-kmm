@@ -42,7 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.OnBehalfProduct
+import karika.distribucija.ba.domain.model.OnBehalfCartResponseItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
@@ -56,15 +56,13 @@ import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun SalesOrderCartView(component: SalesOrderCartComponent) {
-    val cartItems by component.cartItems.collectAsState()
-    val cartDiscounts by component.cartDiscounts.collectAsState()
-    val items = cartItems.values.toList()
+    val cart by component.cart.collectAsState()
+    val items = cart?.items.orEmpty()
 
-    val vpcTotal = items.sumOf { (product, qty) -> product.vpc(qty) }
-    val discountTotal = items.sumOf { (product, qty) ->
-        product.vpc(qty) * (cartDiscounts[product.key] ?: 0) / 100.0
-    }
-    val grandTotal = vpcTotal - discountTotal
+    val vpcTotal = items.sumOf { it.price * it.qty }
+    val rowTotal = items.sumOf { it.rowTotal }
+    val discountTotal = vpcTotal - rowTotal
+    val grandTotal = rowTotal
 
     Column(
         modifier = Modifier
@@ -100,14 +98,13 @@ fun SalesOrderCartView(component: SalesOrderCartComponent) {
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(items, key = { (product, _) -> product.key }) { (product, qty) ->
+                items(items, key = { it.itemId }) { item ->
                     CartItemRow(
-                        product = product,
-                        qty = qty,
-                        discount = cartDiscounts[product.key] ?: 0,
-                        onQtyChange = { newQty -> component.updateQty(product, newQty) },
-                        onDiscountChange = { newDiscount -> component.updateDiscount(product, newDiscount) },
-                        onRemove = { component.removeItem(product) }
+                        item = item,
+                        canDiscount = component.canCreateDiscountFor,
+                        onQtyChange = { newQty -> component.updateQty(item, newQty) },
+                        onDiscountChange = { newDiscount -> component.updateDiscount(item, newDiscount) },
+                        onRemove = { component.removeItem(item) }
                     )
                 }
             }
@@ -239,15 +236,16 @@ fun SalesOrderCartView(component: SalesOrderCartComponent) {
 
 @Composable
 private fun CartItemRow(
-    product: OnBehalfProduct,
-    qty: Int,
-    discount: Int,
+    item: OnBehalfCartResponseItem,
+    canDiscount: Boolean,
     onQtyChange: (Int) -> Unit,
     onDiscountChange: (Int) -> Unit,
     onRemove: () -> Unit
 ) {
-    var localQty by remember(qty) { mutableIntStateOf(qty) }
-    var localDiscount by remember(discount) { mutableStateOf(if (discount > 0) discount.toString() else "") }
+    var localQty by remember(item.qty) { mutableIntStateOf(item.qty) }
+    var localDiscount by remember(item.discountPercent) {
+        mutableStateOf(item.discountPercent?.takeIf { it > 0 }?.toString() ?: "")
+    }
 
     Column(
         modifier = Modifier
@@ -273,7 +271,7 @@ private fun CartItemRow(
                     .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(12.dp))
             ) {
                 KarikaImage(
-                    model = product.imageUrl,
+                    model = item.imageUrl,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -284,28 +282,22 @@ private fun CartItemRow(
                 verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 KarikaText(
-                    text = product.name,
+                    text = item.name,
                     color = KarikaColors.Gray2,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W700
                 )
-                if (product.sku.isNotBlank()) {
+                if (item.sku.isNotBlank()) {
                     KarikaText(
-                        text = "#${product.sku}",
+                        text = "#${item.sku}",
                         color = KarikaColors.Gray6,
                         textSize = 11.sp,
                         fontWeight = FontWeight.W500
                     )
                 }
-                KarikaText(
-                    text = "${product.categoryLabel}",
-                    color = KarikaColors.Gray6,
-                    textSize = 11.sp,
-                    fontWeight = FontWeight.W500
-                )
                 Spacer(Modifier.height(4.dp))
                 val discountPercent = localDiscount.toIntOrNull() ?: 0
-                val vpc = product.vpc(localQty)
+                val vpc = item.price * localQty
                 val discountedVpc = vpc * (1 - discountPercent / 100.0)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -445,54 +437,63 @@ private fun CartItemRow(
                 }
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            if (canDiscount) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    KarikaText(
+                        text = "Rabat:",
+                        color = KarikaColors.Gray6,
+                        textSize = 13.sp,
+                        fontWeight = FontWeight.W500
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(KarikaColors.White)
+                            .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(10.dp))
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        BasicTextField(
+                            value = localDiscount,
+                            onValueChange = { v ->
+                                val digits = v.filter { it.isDigit() }
+                                localDiscount = when {
+                                    digits.isEmpty() -> ""
+                                    (digits.toIntOrNull() ?: 0) > 100 -> "100"
+                                    else -> digits
+                                }
+                                onDiscountChange(localDiscount.toIntOrNull() ?: 0)
+                            },
+                            modifier = Modifier.width(30.dp),
+                            textStyle = TextStyle(
+                                fontFamily = karikaFonts(),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.W700,
+                                color = KarikaColors.Gray2,
+                                textAlign = TextAlign.End
+                            ),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true
+                        )
+                        KarikaText(
+                            text = "%",
+                            color = KarikaColors.Gray6,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W600
+                        )
+                    }
+                }
+            } else if ((item.discountPercent ?: 0) > 0) {
                 KarikaText(
-                    text = "Rabat:",
+                    text = "Rabat: ${item.discountPercent}%",
                     color = KarikaColors.Gray6,
                     textSize = 13.sp,
                     fontWeight = FontWeight.W500
                 )
-
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(KarikaColors.White)
-                        .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(10.dp))
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    BasicTextField(
-                        value = localDiscount,
-                        onValueChange = { v ->
-                            val digits = v.filter { it.isDigit() }
-                            localDiscount = when {
-                                digits.isEmpty() -> ""
-                                (digits.toIntOrNull() ?: 0) > 100 -> "100"
-                                else -> digits
-                            }
-                            onDiscountChange(localDiscount.toIntOrNull() ?: 0)
-                        },
-                        modifier = Modifier.width(30.dp),
-                        textStyle = TextStyle(
-                            fontFamily = karikaFonts(),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.W700,
-                            color = KarikaColors.Gray2,
-                            textAlign = TextAlign.End
-                        ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true
-                    )
-                    KarikaText(
-                        text = "%",
-                        color = KarikaColors.Gray6,
-                        textSize = 14.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                }
             }
         }
     }

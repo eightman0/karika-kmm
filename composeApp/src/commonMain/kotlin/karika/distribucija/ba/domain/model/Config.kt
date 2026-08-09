@@ -20,7 +20,15 @@ data class DeliveryProvider(
     @SerialName("name") var name: String? = null,
     @SerialName("shipping_price_increase_percentage") var percent: String? = null,
     @SerialName("price_list") var price: List<DeliveryPrice> = emptyList()
-)
+) {
+    /** Band lookup + provider markup for a given chargeable weight/volume. */
+    fun priceFor(chargeable: Double): Double {
+        val band = price.find { it.min() <= chargeable && it.max() >= chargeable } ?: price.lastOrNull()
+        val base = band?.price() ?: 0.0
+        val pct = percent?.toDoubleOrNull() ?: 0.0
+        return base * (1 + pct / 100)
+    }
+}
 
 @Serializable
 data class DeliveryPrice(
