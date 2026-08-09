@@ -42,6 +42,15 @@ data class OperationalCustomer(
         "rejected" -> "ODBIJEN"
         else -> partnershipStatus.uppercase()
     }
+
+    /** Matches SalesCustomerDetailView.kt's profile badge wording - a third, distinct variant. */
+    fun detailBadgeLabel(): String = when (partnershipStatus) {
+        "active" -> "AKTIVNO"
+        "pending" -> "NA ČEKANJU"
+        "rejected" -> "ODBIJENO"
+        "revoked" -> "OPOZVANO"
+        else -> partnershipStatus.uppercase()
+    }
 }
 
 @Serializable

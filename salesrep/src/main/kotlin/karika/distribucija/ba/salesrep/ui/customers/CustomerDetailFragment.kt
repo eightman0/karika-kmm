@@ -1,6 +1,7 @@
 package karika.distribucija.ba.salesrep.ui.customers
 
 import android.app.AlertDialog
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,13 +16,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomerDetailBinding
 import karika.distribucija.ba.salesrep.model.DiscountRule
+import karika.distribucija.ba.salesrep.model.OperationalCustomer
 
+/** Mirrors composeApp's ui/view/salesrep/customers/detail/SalesCustomerDetailView.kt. */
 class CustomerDetailFragment : Fragment() {
 
     private var _binding: FragmentCustomerDetailBinding? = null
     private val binding get() = _binding!!
     private val viewModel: CustomerDetailViewModel by viewModels()
     private lateinit var adapter: DiscountsAdapter
+    private lateinit var customer: OperationalCustomer
+    private var assignedNames: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,20 +41,19 @@ class CustomerDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val args = requireArguments()
-        val company = args.getString("company")
-        val firstname = args.getString("firstname")
-        val lastname = args.getString("lastname")
-        val status = args.getString("partnershipStatus").orEmpty()
-        val isActive = status == "active"
+        customer = OperationalCustomer(
+            customerId = viewModel.customerId,
+            email = args.getString("email"),
+            firstname = args.getString("firstname"),
+            lastname = args.getString("lastname"),
+            company = args.getString("company"),
+            partnershipId = 0L,
+            partnershipStatus = args.getString("partnershipStatus").orEmpty()
+        )
+        assignedNames = args.getString("assignedNames").orEmpty()
 
-        val displayName = company ?: listOfNotNull(firstname, lastname).joinToString(" ").ifEmpty { "—" }
-        binding.textCompany.text = displayName
-        (activity as? AppCompatActivity)?.supportActionBar?.title = displayName
-        binding.textEmail.text = args.getString("email").orEmpty()
-        binding.textAssigned.text = args.getString("assignedNames").orEmpty()
-        binding.textStatus.text = statusLabel(status)
-        binding.textStatus.background.setTint(statusColor(status))
-        binding.buttonOrderForCustomer.visibility = if (isActive) View.VISIBLE else View.GONE
+        (activity as? AppCompatActivity)?.supportActionBar?.title = customer.fullName
+        renderProfile()
 
         adapter = DiscountsAdapter(
             onEdit = ::openEditDiscount,
@@ -59,13 +63,14 @@ class CustomerDetailFragment : Fragment() {
         binding.recyclerDiscounts.layoutManager = LinearLayoutManager(requireContext())
 
         binding.buttonNewDiscount.setOnClickListener { openNewDiscount() }
+        binding.buttonOrderForCustomer.visibility = if (customer.isActive) View.VISIBLE else View.GONE
         binding.buttonOrderForCustomer.setOnClickListener {
             findNavController().navigate(
                 R.id.action_customer_detail_to_catalog,
                 bundleOf(
                     "customerId" to viewModel.customerId,
-                    "customerName" to displayName,
-                    "customerActive" to isActive,
+                    "customerName" to customer.fullName,
+                    "customerActive" to customer.isActive,
                     "hasShippingAddress" to args.getBoolean("hasShippingAddress")
                 )
             )
@@ -81,6 +86,30 @@ class CustomerDetailFragment : Fragment() {
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun renderProfile() {
+        binding.textProfileName.text = customer.fullName
+        binding.textBadge.text = customer.detailBadgeLabel()
+        val (badgeBgRes, badgeColorRes) = when (customer.partnershipStatus) {
+            "active" -> R.drawable.bg_detail_badge_active to R.color.karika_green3
+            "pending" -> R.drawable.bg_detail_badge_pending to R.color.karika_blue
+            "rejected" -> R.drawable.bg_detail_badge_rejected to R.color.karika_error
+            "revoked" -> R.drawable.bg_detail_badge_revoked to R.color.karika_gray6
+            else -> R.drawable.bg_detail_badge_revoked to R.color.karika_gray6
+        }
+        binding.textBadge.setBackgroundResource(badgeBgRes)
+        binding.textBadge.setTextColor(requireContext().getColor(badgeColorRes))
+
+        val hasEmail = !customer.email.isNullOrBlank()
+        binding.rowEmail.visibility = if (hasEmail) View.VISIBLE else View.GONE
+        binding.spacerEmail.visibility = if (hasEmail) View.VISIBLE else View.GONE
+        binding.textEmail.text = customer.email.orEmpty()
+
+        binding.textFullname.text = customer.fullName
+
+        binding.rowReps.visibility = if (assignedNames.isNotBlank()) View.VISIBLE else View.GONE
+        binding.textReps.text = assignedNames
     }
 
     override fun onResume() {
@@ -116,31 +145,21 @@ class CustomerDetailFragment : Fragment() {
     }
 
     private fun confirmDelete(rule: DiscountRule) {
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.discount_delete_title)
-            .setMessage(R.string.discount_delete_message)
-            .setNegativeButton(R.string.action_cancel, null)
-            .setPositiveButton(R.string.action_delete) { _, _ -> viewModel.deleteDiscount(rule) }
-            .show()
-    }
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_confirm_delete, null)
+        dialogView.findViewById<android.widget.TextView>(R.id.text_dialog_title).setText(R.string.discount_delete_title)
+        dialogView.findViewById<android.widget.TextView>(R.id.text_dialog_message).setText(R.string.discount_delete_message)
 
-    private fun statusLabel(status: String): String = when (status) {
-        "active" -> getString(R.string.customers_status_active)
-        "pending" -> getString(R.string.customers_status_pending)
-        "rejected" -> getString(R.string.customers_status_rejected)
-        "revoked" -> getString(R.string.customers_status_revoked)
-        else -> status
-    }
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
 
-    private fun statusColor(status: String): Int {
-        val colorRes = when (status) {
-            "active" -> R.color.status_approved
-            "pending" -> R.color.status_pending
-            "rejected" -> R.color.status_rejected
-            "revoked" -> R.color.status_cancelled
-            else -> R.color.status_default
+        dialogView.findViewById<View>(R.id.button_dialog_cancel).setOnClickListener { dialog.dismiss() }
+        dialogView.findViewById<View>(R.id.button_dialog_confirm).setOnClickListener {
+            viewModel.deleteDiscount(rule)
+            dialog.dismiss()
         }
-        return requireContext().getColor(colorRes)
+        dialog.show()
     }
 
     override fun onDestroyView() {

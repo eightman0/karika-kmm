@@ -42,13 +42,18 @@ data class DiscountRule(
     /** "approved" | "pending" | "rejected" */
     @SerialName("approval_status") val approvalStatus: String? = null
 ) {
-    fun targetLabel(): String = productName ?: categoryName ?: "Svi artikli"
+    fun targetLabel(): String = when {
+        productId != null -> productName ?: "Artikal #$productId"
+        categoryId != null -> categoryName ?: "Kategorija #$categoryId"
+        else -> "Svi artikli i kategorije"
+    }
 
+    /** Uppercase to match DiscountCard's badge text in SalesCustomerDetailView.kt. */
     fun approvalLabel(): String = when (approvalStatus) {
-        "approved" -> "Odobreno"
-        "pending" -> "Na čekanju"
-        "rejected" -> "Odbijeno"
-        else -> approvalStatus?.replaceFirstChar { it.uppercase() } ?: ""
+        "approved" -> "ODOBRENO"
+        "pending" -> "NA ČEKANJU"
+        "rejected" -> "ODBIJENO"
+        else -> approvalStatus?.uppercase() ?: "—"
     }
 }
 

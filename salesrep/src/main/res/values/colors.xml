@@ -29,6 +29,9 @@
     <color name="karika_placeholder">#A8A8A8</color>
     <color name="karika_bg1">#EAEEEF</color>
     <color name="karika_bg2">#F7F7F7</color>
+    <color name="karika_red2">#FFEAF3</color>
+    <color name="karika_yellow1">#FAF0CD</color>
+    <color name="karika_yellow2">#A65F00</color>
 
     <!-- Order status badge palette, matches SalesOrdersView.kt's statusBg()/statusColor() -->
     <color name="order_status_bg_success">#EDF7E4</color>

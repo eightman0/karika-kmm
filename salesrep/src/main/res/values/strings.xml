@@ -98,10 +98,19 @@
 
     <string name="customer_detail_discounts">Popusti</string>
     <string name="customer_detail_new_discount">Novi popust</string>
-    <string name="customer_detail_no_discounts">Nema definisanih popusta.</string>
+    <string name="customer_detail_no_discounts">Nema popusta za ovog kupca</string>
     <string name="customer_detail_order_for">Naruči za kupca</string>
+    <string name="customer_detail_profile_label">PROFIL KUPCA</string>
+    <string name="customer_detail_email_label">Email adresa</string>
+    <string name="customer_detail_fullname_label">Puno ime</string>
+    <string name="customer_detail_reps_label">KOMERCIJALISTI</string>
+    <string name="discount_label_target">CILJ</string>
+    <string name="discount_label_min_qty">Min. kol.</string>
+    <string name="discount_label_percent">Rabat %%</string>
+    <string name="discount_created_by">Administrator</string>
     <string name="discount_delete_title">Obriši popust</string>
-    <string name="discount_delete_message">Da li ste sigurni da želite obrisati ovaj popust?</string>
+    <string name="discount_delete_message">Sigurno želite obrisati ovaj popust? Ova radnja se ne može poništiti.</string>
+    <string name="discount_delete_cancel">Odustani</string>
     <string name="action_delete">Obriši</string>
     <string name="action_edit">Izmijeni</string>
     <string name="action_cancel">Otkaži</string>

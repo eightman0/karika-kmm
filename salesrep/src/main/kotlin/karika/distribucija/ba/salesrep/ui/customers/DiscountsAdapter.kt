@@ -27,28 +27,33 @@ class DiscountsAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(rule: DiscountRule) {
+            val context = binding.root.context
+
             binding.textTarget.text = rule.targetLabel()
             binding.textApproval.text = rule.approvalLabel()
-            binding.textApproval.background.setTint(approvalColor(rule.approvalStatus))
-            val minQty = rule.minQty?.toInt()
-            val percent = rule.discountPercent.toInt()
-            binding.textRule.text = if (minQty != null && minQty > 0) {
-                "Min. kol. $minQty · Rabat $percent%"
-            } else {
-                "Rabat $percent%"
-            }
+            binding.textApproval.setBackgroundResource(approvalBgRes(rule.approvalStatus))
+            binding.textApproval.setTextColor(context.getColor(approvalColorRes(rule.approvalStatus)))
+
+            binding.textMinQty.text = rule.minQty?.toInt()?.toString() ?: "—"
+            binding.textPercent.text = "${rule.discountPercent.toInt()}%"
+
             binding.buttonEdit.setOnClickListener { onEdit(rule) }
             binding.buttonDelete.setOnClickListener { onDelete(rule) }
         }
 
-        private fun approvalColor(status: String?): Int {
-            val colorRes = when (status) {
-                "approved" -> R.color.status_approved
-                "pending" -> R.color.status_pending
-                "rejected" -> R.color.status_rejected
-                else -> R.color.status_default
-            }
-            return binding.root.context.getColor(colorRes)
+        // Mirrors SalesCustomerDetailView.kt's DiscountCard approval Triple.
+        private fun approvalBgRes(status: String?): Int = when (status) {
+            "approved" -> R.drawable.bg_discount_badge_approved
+            "pending" -> R.drawable.bg_discount_badge_pending
+            "rejected" -> R.drawable.bg_discount_badge_rejected
+            else -> R.drawable.bg_discount_badge_default
+        }
+
+        private fun approvalColorRes(status: String?): Int = when (status) {
+            "approved" -> R.color.karika_green3
+            "pending" -> R.color.karika_yellow1
+            "rejected" -> R.color.karika_error
+            else -> R.color.karika_gray6
         }
     }
 
