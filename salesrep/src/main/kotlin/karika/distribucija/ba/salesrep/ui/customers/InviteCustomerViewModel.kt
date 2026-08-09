@@ -19,11 +19,14 @@ class InviteCustomerViewModel(savedStateHandle: SavedStateHandle) : ViewModel() 
 
     private val repository = SalesRepository()
 
-    private val _searchQuery = MutableLiveData(savedStateHandle.get<String>("prefillEmail") ?: "")
+    private val _searchQuery = MutableLiveData("")
     val searchQuery: LiveData<String> = _searchQuery
 
     private val _searchResults = MutableLiveData<List<OperationalCustomer>>(emptyList())
     val searchResults: LiveData<List<OperationalCustomer>> = _searchResults
+
+    private val _isSearching = MutableLiveData(false)
+    val isSearching: LiveData<Boolean> = _isSearching
 
     private val _email = MutableLiveData(savedStateHandle.get<String>("prefillEmail") ?: "")
     val email: LiveData<String> = _email
@@ -52,8 +55,14 @@ class InviteCustomerViewModel(savedStateHandle: SavedStateHandle) : ViewModel() 
         searchJob = viewModelScope.launch {
             delay(300)
             repository.getInvitableCustomers(page = 1, search = query).collect { result ->
-                if (result is ResultState.Success) {
-                    _searchResults.value = result.data.items
+                when (result) {
+                    is ResultState.Loading -> _isSearching.value = true
+                    is ResultState.Success -> {
+                        _isSearching.value = false
+                        _searchResults.value = result.data.items
+                    }
+
+                    is ResultState.Error -> _isSearching.value = false
                 }
             }
         }
@@ -63,10 +72,6 @@ class InviteCustomerViewModel(savedStateHandle: SavedStateHandle) : ViewModel() 
         _searchQuery.value = customer.company ?: customer.fullName
         _searchResults.value = emptyList()
         _email.value = customer.email ?: ""
-    }
-
-    fun setEmail(value: String) {
-        _email.value = value
     }
 
     fun send(note: String) {

@@ -124,9 +124,13 @@
     <string name="discount_form_save">Sačuvaj</string>
 
     <string name="invite_title">Pozovi kupca</string>
-    <string name="invite_search_hint">Pretraži kupca po nazivu ili emailu</string>
-    <string name="invite_email_hint">Email adresa</string>
-    <string name="invite_note_hint">Napomena (opcionalno)</string>
+    <string name="invite_info_banner">Kupac dobija zahtjev za partnerstvo i mora ga prihvatiti da bi se pojavio na vašoj listi.</string>
+    <string name="invite_search_label">Pretraži kupca</string>
+    <string name="invite_search_hint">Pretraži kupca po imenu, kompaniji ili emailu</string>
+    <string name="invite_search_min_chars">Pretraži kupce (unesite najmanje 2 znaka)</string>
+    <string name="invite_search_no_results">Nema korisnika za taj pretragu</string>
+    <string name="invite_note_label">Napomena (opcionalno)</string>
+    <string name="invite_note_hint">Kratka napomena za kupca</string>
     <string name="invite_send">Pošalji zahtjev</string>
 
     <string name="new_customer_title">Novi kupac</string>

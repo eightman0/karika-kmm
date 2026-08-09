@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_white"
+    android:background="@color/karika_gray20"
     android:orientation="vertical">
 
     <ScrollView
@@ -15,66 +15,198 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
-            <com.google.android.material.textfield.TextInputLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:startIconDrawable="@drawable/ic_search">
+                android:background="@drawable/bg_info_banner"
+                android:gravity="top"
+                android:orientation="horizontal"
+                android:padding="14dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edit_customer_search"
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_info"
+                    app:tint="@color/karika_blue" />
+
+                <TextView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:text="@string/invite_info_banner"
+                    android:textColor="@color/karika_gray2"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/invite_search_label"
+                android:textColor="@color/karika_gray2"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="6dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_search_field_14"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="14dp">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/karika_gray6" />
+
+                <EditText
+                    android:id="@+id/edit_customer_search"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@null"
                     android:hint="@string/invite_search_hint"
                     android:inputType="text"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:maxLines="1"
+                    android:padding="0dp"
+                    android:textColor="@color/karika_gray2"
+                    android:textColorHint="@color/karika_gray8"
+                    android:textSize="15sp" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_search_results"
+                <ProgressBar
+                    android:id="@+id/progress_search"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:indeterminateTint="@color/karika_blue"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/icon_clear_search"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="@string/customers_search_clear_cd"
+                    android:src="@drawable/ic_close"
+                    android:visibility="gone"
+                    app:tint="@color/karika_gray6" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/results_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:background="@color/karika_gray20"
+                android:background="@drawable/bg_dropdown_card"
+                android:elevation="4dp"
+                android:orientation="vertical"
                 android:visibility="gone" />
 
-            <com.google.android.material.textfield.TextInputLayout
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/invite_note_label"
+                android:textColor="@color/karika_gray2"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="6dp" />
+
+            <EditText
+                android:id="@+id/edit_note"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:background="@drawable/bg_search_field_14"
+                android:gravity="top|start"
+                android:hint="@string/invite_note_hint"
+                android:inputType="textMultiLine"
+                android:padding="14dp"
+                android:textColor="@color/karika_gray2"
+                android:textColorHint="@color/karika_gray8"
+                android:textSize="15sp" />
+
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="32dp" />
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
+                android:orientation="horizontal">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edit_email"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/invite_email_hint"
-                    android:inputType="textEmailAddress" />
-            </com.google.android.material.textfield.TextInputLayout>
+                <LinearLayout
+                    android:id="@+id/button_cancel"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_button_outline_blue"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/action_cancel"
+                        android:textColor="@color/karika_blue"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edit_note"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/invite_note_hint"
-                    android:inputType="textMultiLine"
-                    android:minLines="3" />
-            </com.google.android.material.textfield.TextInputLayout>
+                <LinearLayout
+                    android:id="@+id/button_send"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_fab_order_customer"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/text_send"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/invite_send"
+                        android:textColor="@color/karika_white"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_send"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:indeterminateTint="@color/karika_white"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="16dp" />
+
         </LinearLayout>
     </ScrollView>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_send"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/karika_blue"
-        android:paddingVertical="14dp"
-        android:text="@string/invite_send" />
 
 </LinearLayout>

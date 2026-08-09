@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import karika.distribucija.ba.salesrep.databinding.ItemCustomerSearchBinding
 import karika.distribucija.ba.salesrep.model.OperationalCustomer
 
+/** Mirrors composeApp's SalesInviteCustomerView.kt DropdownMenuItem (single-line, name/company only). */
 class CustomerSearchAdapter(
     private val onClick: (OperationalCustomer) -> Unit
 ) : RecyclerView.Adapter<CustomerSearchAdapter.ViewHolder>() {
@@ -32,8 +33,7 @@ class CustomerSearchAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(customer: OperationalCustomer) {
-            binding.textName.text = customer.company ?: customer.fullName
-            binding.textEmail.text = customer.email.orEmpty()
+            binding.root.text = customer.company ?: customer.fullName
             binding.root.setOnClickListener { onClick(customer) }
         }
     }
