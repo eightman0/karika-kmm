@@ -40,7 +40,7 @@ class CustomersViewModel : ViewModel() {
     private var statusFilter: String? = null
     private var searchJob: Job? = null
 
-    private val hasMore: Boolean
+    val hasMore: Boolean
         get() = (_customers.value?.size ?: 0).toLong() < totalCount
 
     init {

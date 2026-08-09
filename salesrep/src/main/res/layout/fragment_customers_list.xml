@@ -3,74 +3,129 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_white"
+    android:background="@color/karika_gray20"
     android:orientation="vertical">
-
-    <com.google.android.material.button.MaterialButtonToggleGroup
-        android:id="@+id/toggle_tab"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="12dp"
-        app:selectionRequired="true"
-        app:singleSelection="true">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_tab_all"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/customers_tab_all" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_tab_mine"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/customers_tab_mine" />
-    </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp">
+        android:padding="4dp"
+        android:layout_margin="16dp"
+        android:layout_marginBottom="0dp"
+        android:background="@drawable/bg_tab_pill_container">
 
-        <com.google.android.material.textfield.TextInputLayout
+        <TextView
+            android:id="@+id/tab_all"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:startIconDrawable="@drawable/ic_search">
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingVertical="8dp"
+            android:text="@string/customers_tab_all"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_search"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/customers_search_hint"
-                android:inputType="text"
-                android:maxLines="1" />
-        </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+            android:id="@+id/tab_mine"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingVertical="8dp"
+            android:text="@string/customers_tab_mine"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/button_status_filter"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="4dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/customers_status_all"
-            android:src="@drawable/ic_filter"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_search_bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_search"
+            app:tint="@color/karika_gray7" />
+
+        <EditText
+            android:id="@+id/edit_search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="@string/customers_search_hint"
+            android:inputType="text"
+            android:maxLines="1"
+            android:paddingVertical="4dp"
+            android:textColor="@color/karika_gray2"
+            android:textColorHint="@color/karika_gray8"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/icon_clear_search"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="@string/customers_search_clear_cd"
+            android:src="@drawable/ic_cancel"
+            android:visibility="gone"
             app:tint="@color/karika_gray6" />
 
-        <ImageButton
+        <LinearLayout
+            android:id="@+id/chip_status_filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_chip_filter_inactive"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_filter_alt"
+                app:tint="@color/karika_gray2" />
+
+            <TextView
+                android:id="@+id/text_status_filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="@string/customers_status_all_sheet"
+                android:textColor="@color/karika_gray2"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ImageView
             android:id="@+id/button_add"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_button_square_blue"
+            android:clickable="true"
             android:contentDescription="@string/customers_add_new"
-            android:src="@drawable/ic_add"
-            app:tint="@color/karika_blue" />
+            android:focusable="true"
+            android:padding="9dp"
+            android:src="@drawable/ic_menu"
+            app:tint="@color/karika_white" />
     </LinearLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -88,16 +143,116 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp"
                 android:paddingBottom="16dp" />
 
-            <TextView
-                android:id="@+id/text_empty"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/empty_state_container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/customers_empty"
-                android:textColor="@color/karika_gray6"
-                android:visibility="gone" />
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp"
+                android:paddingVertical="48dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/icon_empty_state"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_tab_pill_container"
+                    android:contentDescription="@null"
+                    android:padding="16dp"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/karika_gray6" />
+
+                <TextView
+                    android:id="@+id/text_empty_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:textColor="@color/karika_gray2"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/row_reset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_chip_filter_inactive"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="20dp"
+                    android:paddingVertical="10dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_cancel"
+                        app:tint="@color/karika_gray2" />
+
+                    <TextView
+                        android:id="@+id/text_reset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textColor="@color/karika_gray2"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/footer_load_more"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:paddingVertical="24dp">
+
+                <ProgressBar
+                    android:id="@+id/progress_load_more"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/karika_blue"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/row_load_more"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/customers_load_more"
+                        android:textColor="@color/karika_blue"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="4dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_arrow_down"
+                        app:tint="@color/karika_blue" />
+                </LinearLayout>
+            </FrameLayout>
 
         </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

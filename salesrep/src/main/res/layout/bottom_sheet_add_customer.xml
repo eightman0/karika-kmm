@@ -1,17 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingVertical="12dp">
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="8dp">
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/customers_add_sheet_title"
+        android:textColor="@color/karika_gray2"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
         android:id="@+id/option_new_customer"
-        style="@style/BottomSheetOption"
-        android:text="@string/customers_add_new" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_add_option_item"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
 
-    <TextView
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_add_option_icon"
+            android:contentDescription="@null"
+            android:padding="10dp"
+            android:src="@drawable/ic_add_plus"
+            app:tint="@color/karika_blue" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/customers_add_new"
+                android:textColor="@color/karika_gray2"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/customers_add_new_subtitle"
+                android:textColor="@color/karika_gray6"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <Space
+        android:layout_width="1dp"
+        android:layout_height="8dp" />
+
+    <LinearLayout
         android:id="@+id/option_invite_customer"
-        style="@style/BottomSheetOption"
-        android:text="@string/customers_add_invite" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_add_option_item"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_add_option_icon"
+            android:contentDescription="@null"
+            android:padding="10dp"
+            android:src="@drawable/ic_email"
+            app:tint="@color/karika_blue" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/customers_add_invite"
+                android:textColor="@color/karika_gray2"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/customers_add_invite_subtitle"
+                android:textColor="@color/karika_gray6"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <Space
+        android:layout_width="1dp"
+        android:layout_height="8dp" />
+
 </LinearLayout>

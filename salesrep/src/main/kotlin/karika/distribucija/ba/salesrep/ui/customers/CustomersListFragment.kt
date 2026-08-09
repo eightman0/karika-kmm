@@ -23,6 +23,17 @@ class CustomersListFragment : Fragment() {
     private val viewModel: CustomersViewModel by viewModels()
     private lateinit var adapter: CustomersAdapter
 
+    /** Kept alongside the ViewModel's own filter state so the chip label and empty-state
+     * message can be rendered without re-querying the ViewModel for display text. */
+    private var selectedStatusValue: String? = null
+
+    private val statusOptions = listOf(
+        "active" to R.string.customers_filter_active,
+        "pending" to R.string.customers_filter_pending,
+        "rejected" to R.string.customers_filter_rejected,
+        "revoked" to R.string.customers_filter_revoked
+    )
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -37,7 +48,10 @@ class CustomersListFragment : Fragment() {
 
         adapter = CustomersAdapter(
             onClick = ::openCustomer,
-            onOrderClick = ::openCatalog
+            onOrderClick = ::openCatalog,
+            onShowReps = { reps ->
+                RepsBottomSheet(reps).show(childFragmentManager, "reps")
+            }
         )
         binding.recyclerCustomers.adapter = adapter
         binding.recyclerCustomers.layoutManager = LinearLayoutManager(requireContext())
@@ -51,40 +65,72 @@ class CustomersListFragment : Fragment() {
             }
         })
 
-        binding.toggleTab.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            when (checkedId) {
-                R.id.button_tab_all -> viewModel.selectTab(CustomersViewModel.Tab.ALL)
-                R.id.button_tab_mine -> viewModel.selectTab(CustomersViewModel.Tab.MINE)
-            }
+        updateTabSelection(CustomersViewModel.Tab.ALL)
+        binding.tabAll.setOnClickListener {
+            updateTabSelection(CustomersViewModel.Tab.ALL)
+            viewModel.selectTab(CustomersViewModel.Tab.ALL)
+            clearStatusFilterUi()
         }
-        binding.toggleTab.check(R.id.button_tab_all)
+        binding.tabMine.setOnClickListener {
+            updateTabSelection(CustomersViewModel.Tab.MINE)
+            viewModel.selectTab(CustomersViewModel.Tab.MINE)
+            clearStatusFilterUi()
+        }
 
         binding.swipeRefresh.setOnRefreshListener { viewModel.refresh() }
 
         binding.editSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
-            viewModel.setSearch(text?.toString().orEmpty())
+            val query = text?.toString().orEmpty()
+            binding.iconClearSearch.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
+            viewModel.setSearch(query)
         })
+        binding.iconClearSearch.setOnClickListener {
+            binding.editSearch.setText("")
+        }
 
-        binding.buttonStatusFilter.setOnClickListener {
-            StatusFilterBottomSheet { status -> viewModel.setStatus(status) }
-                .show(childFragmentManager, "status_filter")
+        binding.chipStatusFilter.setOnClickListener {
+            StatusFilterBottomSheet(selectedStatusValue) { status ->
+                selectedStatusValue = status
+                updateStatusChip(status)
+                viewModel.setStatus(status)
+            }.show(childFragmentManager, "status_filter")
         }
 
         binding.buttonAdd.setOnClickListener {
             AddCustomerBottomSheet(
                 onNewCustomer = { findNavController().navigate(R.id.action_customers_to_new_customer) },
-                onInviteCustomer = { findNavController().navigate(R.id.action_customers_to_invite, bundleOf("prefillEmail" to "")) }
+                onInviteCustomer = {
+                    findNavController().navigate(
+                        R.id.action_customers_to_invite,
+                        bundleOf("prefillEmail" to "")
+                    )
+                }
             ).show(childFragmentManager, "add_customer")
         }
 
+        binding.rowReset.setOnClickListener {
+            val hasSearch = binding.editSearch.text?.toString().orEmpty().isNotBlank()
+            if (hasSearch) binding.editSearch.setText("")
+            if (selectedStatusValue != null) {
+                selectedStatusValue = null
+                updateStatusChip(null)
+                viewModel.setStatus(null)
+            }
+        }
+
+        binding.rowLoadMore.setOnClickListener { viewModel.loadNextPage() }
+
         viewModel.customers.observe(viewLifecycleOwner) { customers ->
             adapter.submitList(customers)
-            binding.textEmpty.visibility = if (customers.isEmpty()) View.VISIBLE else View.GONE
+            renderEmptyState(customers.isEmpty())
         }
 
         viewModel.isRefreshing.observe(viewLifecycleOwner) { refreshing ->
             binding.swipeRefresh.isRefreshing = refreshing
+        }
+
+        viewModel.isLoadingMore.observe(viewLifecycleOwner) { loadingMore ->
+            renderLoadMoreFooter(loadingMore)
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
@@ -92,6 +138,68 @@ class CustomersListFragment : Fragment() {
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun updateTabSelection(tab: CustomersViewModel.Tab) {
+        val allSelected = tab == CustomersViewModel.Tab.ALL
+        binding.tabAll.setBackgroundResource(if (allSelected) R.drawable.bg_tab_pill_selected else 0)
+        binding.tabMine.setBackgroundResource(if (!allSelected) R.drawable.bg_tab_pill_selected else 0)
+        binding.tabAll.setTextColor(requireContext().getColor(if (allSelected) R.color.karika_blue else R.color.karika_gray6))
+        binding.tabMine.setTextColor(requireContext().getColor(if (!allSelected) R.color.karika_blue else R.color.karika_gray6))
+    }
+
+    private fun clearStatusFilterUi() {
+        selectedStatusValue = null
+        updateStatusChip(null)
+        binding.editSearch.setText("")
+    }
+
+    private fun updateStatusChip(status: String?) {
+        val isFiltered = status != null
+        binding.chipStatusFilter.setBackgroundResource(
+            if (isFiltered) R.drawable.bg_chip_filter_active else R.drawable.bg_chip_filter_inactive
+        )
+        val color = requireContext().getColor(if (isFiltered) R.color.karika_white else R.color.karika_gray2)
+        binding.textStatusFilter.setTextColor(color)
+        binding.textStatusFilter.text = status?.let { value ->
+            statusOptions.firstOrNull { it.first == value }?.second?.let { getString(it) }
+        } ?: getString(R.string.customers_status_all_sheet)
+    }
+
+    private fun renderEmptyState(isEmpty: Boolean) {
+        if (!isEmpty) {
+            binding.emptyStateContainer.visibility = View.GONE
+            return
+        }
+        binding.emptyStateContainer.visibility = View.VISIBLE
+
+        val searchText = binding.editSearch.text?.toString().orEmpty()
+        val hasSearch = searchText.isNotBlank()
+        val hasStatus = selectedStatusValue != null
+        val statusLabel = selectedStatusValue?.let { value ->
+            statusOptions.firstOrNull { it.first == value }?.second?.let { getString(it) }
+        }
+
+        binding.iconEmptyState.setImageResource(if (hasSearch) R.drawable.ic_search else R.drawable.ic_filter_alt)
+        binding.textEmptyMessage.text = when {
+            hasSearch -> getString(R.string.customers_empty_search, searchText)
+            hasStatus -> getString(R.string.customers_empty_status, statusLabel)
+            else -> getString(R.string.customers_empty_default)
+        }
+
+        binding.rowReset.visibility = if (hasSearch || hasStatus) View.VISIBLE else View.GONE
+        binding.textReset.text = when {
+            hasSearch && hasStatus -> getString(R.string.customers_reset_both)
+            hasSearch -> getString(R.string.customers_reset_search)
+            else -> getString(R.string.customers_reset_filter)
+        }
+    }
+
+    private fun renderLoadMoreFooter(isLoadingMore: Boolean) {
+        val customers = viewModel.customers.value.orEmpty()
+        binding.progressLoadMore.visibility = if (isLoadingMore) View.VISIBLE else View.GONE
+        binding.rowLoadMore.visibility =
+            if (!isLoadingMore && viewModel.hasMore && customers.isNotEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun openCustomer(customer: OperationalCustomer) {

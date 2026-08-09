@@ -1,36 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingVertical="12dp">
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="8dp">
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/customers_status_sheet_title"
+        android:textColor="@color/karika_gray2"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
         android:id="@+id/option_all"
-        style="@style/BottomSheetOption"
-        android:text="@string/customers_status_all" />
+        style="@style/StatusSheetRow"
+        android:tag="@null">
 
-    <TextView
+        <TextView
+            android:id="@+id/label_all"
+            style="@style/StatusSheetRowLabel"
+            android:text="@string/customers_status_all_sheet" />
+
+        <ImageView
+            android:id="@+id/check_all"
+            style="@style/StatusSheetCheckIcon"
+            app:tint="@color/karika_blue" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/option_active"
-        style="@style/BottomSheetOption"
-        android:tag="active"
-        android:text="@string/customers_status_active" />
+        style="@style/StatusSheetRow"
+        android:tag="active">
 
-    <TextView
+        <TextView
+            android:id="@+id/label_active"
+            style="@style/StatusSheetRowLabel"
+            android:text="@string/customers_filter_active" />
+
+        <ImageView
+            android:id="@+id/check_active"
+            style="@style/StatusSheetCheckIcon"
+            app:tint="@color/karika_blue" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/option_pending"
-        style="@style/BottomSheetOption"
-        android:tag="pending"
-        android:text="@string/customers_status_pending" />
+        style="@style/StatusSheetRow"
+        android:tag="pending">
 
-    <TextView
+        <TextView
+            android:id="@+id/label_pending"
+            style="@style/StatusSheetRowLabel"
+            android:text="@string/customers_filter_pending" />
+
+        <ImageView
+            android:id="@+id/check_pending"
+            style="@style/StatusSheetCheckIcon"
+            app:tint="@color/karika_blue" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/option_rejected"
-        style="@style/BottomSheetOption"
-        android:tag="rejected"
-        android:text="@string/customers_status_rejected" />
+        style="@style/StatusSheetRow"
+        android:tag="rejected">
 
-    <TextView
+        <TextView
+            android:id="@+id/label_rejected"
+            style="@style/StatusSheetRowLabel"
+            android:text="@string/customers_filter_rejected" />
+
+        <ImageView
+            android:id="@+id/check_rejected"
+            style="@style/StatusSheetCheckIcon"
+            app:tint="@color/karika_blue" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/option_revoked"
-        style="@style/BottomSheetOption"
-        android:tag="revoked"
-        android:text="@string/customers_status_revoked" />
+        style="@style/StatusSheetRow"
+        android:tag="revoked">
+
+        <TextView
+            android:id="@+id/label_revoked"
+            style="@style/StatusSheetRowLabel"
+            android:text="@string/customers_filter_revoked" />
+
+        <ImageView
+            android:id="@+id/check_revoked"
+            style="@style/StatusSheetCheckIcon"
+            app:tint="@color/karika_blue" />
+    </LinearLayout>
+
+    <Space
+        android:layout_width="1dp"
+        android:layout_height="8dp" />
+
 </LinearLayout>

@@ -33,6 +33,15 @@ data class OperationalCustomer(
         "revoked" -> "Ukinut"
         else -> partnershipStatus.replaceFirstChar { it.uppercase() }
     }
+
+    /** Matches SalesCustomersView.kt's CustomerCard badgeLabel (uppercase, distinct from statusLabel()). */
+    fun badgeLabel(): String = when (partnershipStatus) {
+        "active" -> "AKTIVAN"
+        "pending" -> "NA ČEKANJU"
+        "revoked" -> "OPOZVAN"
+        "rejected" -> "ODBIJEN"
+        else -> partnershipStatus.uppercase()
+    }
 }
 
 @Serializable
