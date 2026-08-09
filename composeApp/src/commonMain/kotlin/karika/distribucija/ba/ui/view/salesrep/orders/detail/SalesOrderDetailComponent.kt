@@ -9,6 +9,7 @@ import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.openPdf
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -16,12 +17,12 @@ import kotlinx.coroutines.launch
 class SalesOrderDetailComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
-    val order: OnBehalfOrder
+    order: OnBehalfOrder
 ) : CommonComponent(componentContext, stateHolder) {
 
     private val repository = DashRepository()
 
-    private val _vendorOrder = MutableStateFlow<VendorOrder?>(null)
+    private val _vendorOrder = MutableStateFlow(order.toVendorOrderSeed())
     val vendorOrder = _vendorOrder.asStateFlow()
 
     private val _comments = MutableStateFlow<List<Comment>>(emptyList())
@@ -32,7 +33,7 @@ class SalesOrderDetailComponent(
 
     init {
         scope.launch {
-            repository.getOrder(order.incrementId).collect { result ->
+            repository.getOrder(vendorOrder.value.orderId ?: "").collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
@@ -52,7 +53,7 @@ class SalesOrderDetailComponent(
 
     fun loadComments() {
         scope.launch {
-            repository.getOrderComments(order.incrementId).collect { result ->
+            repository.getOrderComments(vendorOrder.value.orderId ?: "").collect { result ->
                 when (result) {
                     is ResultState.Loading -> Unit
                     is ResultState.Success -> _comments.value = result.data
@@ -65,7 +66,7 @@ class SalesOrderDetailComponent(
     fun sendComment(text: String) {
         if (text.isBlank()) return
         scope.launch {
-            repository.sendComment(order.incrementId, text).collect { result ->
+            repository.sendComment(vendorOrder.value.orderId ?: "", text).collect { result ->
                 when (result) {
                     is ResultState.Loading -> _isSendingComment.value = true
                     is ResultState.Success -> {
@@ -82,12 +83,14 @@ class SalesOrderDetailComponent(
         }
     }
 
-    fun goBack() = salesRepBack()
+    fun goBack() {
+        salesRepNavigate(SalesRepConfig.Orders, true)
+    }
 
     fun printOrder() {
         scope.launch {
             repository.getPdf(
-                orderId = order.incrementId
+                orderId = vendorOrder.value.orderId ?: ""
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
@@ -105,3 +108,13 @@ class SalesOrderDetailComponent(
         }
     }
 }
+
+/** Lightweight placeholder shown until the real [VendorOrder] loads from the server. */
+private fun OnBehalfOrder.toVendorOrderSeed(): VendorOrder = VendorOrder(
+    orderId = incrementId,
+    customerId = customerId.toString(),
+    billingName = customerName,
+    orderTotal = (grandTotal / 1.17f).toString(),
+    realOrderStatus = status,
+    createdAt = createdAt
+)

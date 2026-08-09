@@ -1,7 +1,7 @@
 package karika.distribucija.ba.ui.common.state.salesrep
 
 import karika.distribucija.ba.domain.api.SalesRepository
-import karika.distribucija.ba.domain.model.OnBehalfProduct
+import karika.distribucija.ba.domain.model.OnBehalfCartResponse
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorOperationsMe
 import kotlinx.coroutines.CoroutineScope
@@ -24,14 +24,11 @@ class SalesSpecificHandler {
     val vendorId: Int
         get() = _me.value.vendorId?.toInt() ?: 0
 
-    val salesRepCart = MutableStateFlow<Map<String, Pair<OnBehalfProduct, Int>>>(emptyMap())
+    /** Server-backed on-behalf cart, shared across catalog/cart/review screens. */
+    val cart = MutableStateFlow<OnBehalfCartResponse?>(null)
 
-    /** Rabat (%) per cart item, keyed by [OnBehalfProduct.key] */
-    val cartDiscounts = MutableStateFlow<Map<String, Int>>(emptyMap())
-
-    fun clearSalesRepCart() {
-        salesRepCart.value = emptyMap()
-        cartDiscounts.value = emptyMap()
+    fun clearCartState() {
+        cart.value = null
     }
 
     fun getMe(callback: () -> Unit = {}) {

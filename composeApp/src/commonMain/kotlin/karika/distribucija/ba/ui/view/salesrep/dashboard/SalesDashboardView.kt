@@ -123,7 +123,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f)) {
                                 KarikaText(
-                                    text = "${salesManager.managerName}",
+                                    text = "${salesManager.name}",
                                     color = KarikaColors.Gray2,
                                     textSize = 16.sp,
                                     fontWeight = FontWeight.W700
@@ -318,7 +318,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         )
 
                         is SalesChild.OrderDetail -> SalesDetailTopBar(
-                            title = "Narudžba #${child.component.order.incrementId}",
+                            title = "Narudžba #${child.component.vendorOrder.value.orderId}",
                             onBack = { child.component.goBack() }
                         )
 

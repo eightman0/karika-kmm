@@ -37,6 +37,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,8 +55,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.OnBehalfProduct
-import karika.distribucija.ba.ui.components.KarikaCheckboxSecondary
+import karika.distribucija.ba.domain.model.OnBehalfCartResponseItem
+import karika.distribucija.ba.domain.model.VendorDeliveryServiceData
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
@@ -72,22 +73,22 @@ import karikav2.composeapp.generated.resources.img_express_post
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
 
-// TODO: no per-item commission rate available from the on-behalf order API yet — placeholder until backend exposes it
-private const val PROVIZIJA_RATE_PERCENT = 10.0
-
 @Composable
 fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
-    val cartItems by component.cartItems.collectAsState()
-    val cartDiscounts by component.cartDiscounts.collectAsState()
+    val cart by component.cart.collectAsState()
+    val shippingDefaults by component.shippingDefaults.collectAsState()
     val isPlacingOrder by component.isPlacingOrder.collectAsState()
-    val items = cartItems.values.toList()
+    val items = cart?.items.orEmpty()
     val customer = component.customer
 
-    val vpcTotal = items.sumOf { (product, qty) -> product.vpc(qty) }
-    val pdvTotal = items.sumOf { (product, qty) -> product.pdv(qty) }
-    val discountTotal = 0.0
-    val grandTotal = vpcTotal + pdvTotal - discountTotal
-    val karikaProvizija = vpcTotal * PROVIZIJA_RATE_PERCENT / 100
+    // Per the cart response: grand_total is the pre-tax VPC total (post-discount), subtotal is
+    // the pre-discount VPC total, and total_with_tax is the actual final total shown to the user.
+    val vpcTotal = cart?.grandTotal ?: 0.0
+    val subtotal = cart?.subtotal ?: 0.0
+    val discountTotal = cart?.discountAmount ?: 0.0
+    val pdvTotal = cart?.totalTax ?: 0.0
+    val totalWithTax = cart?.totalWithTax ?: 0.0
+    val karikaProvizija = cart?.fee ?: 0.0
 
     var deliveryExpanded by remember { mutableStateOf(false) }
     val contactName = remember { mutableStateOf("") }
@@ -101,8 +102,30 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
     val packageDepth = remember { mutableStateOf("") }
     val packageWeight = remember { mutableStateOf("") }
     val deliveryNote = remember { mutableStateOf("") }
+    var selectedCarrierCode by remember { mutableStateOf("") }
+    var shippingCost by remember { mutableStateOf<Pair<Double?, Double?>?>(null) }
+    var defaultsApplied by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf("") }
-    var editingItem by remember { mutableStateOf<Pair<OnBehalfProduct, Int>?>(null) }
+    var editingItem by remember { mutableStateOf<OnBehalfCartResponseItem?>(null) }
+
+    LaunchedEffect(shippingDefaults) {
+        val defaults = shippingDefaults
+        if (defaults != null && !defaultsApplied) {
+            contactName.value = defaults.contactName ?: ""
+            contactEmail.value = defaults.email ?: ""
+            contactPhone.value = defaults.telephone ?: ""
+            city.value = defaults.city ?: ""
+            address.value = defaults.street ?: ""
+            postalCode.value = defaults.postcode ?: ""
+            packageWidth.value = defaults.packageWidth ?: ""
+            packageHeight.value = defaults.packageHeight ?: ""
+            packageDepth.value = defaults.packageDepth ?: ""
+            packageWeight.value = defaults.packageWeight ?: ""
+            deliveryNote.value = defaults.note ?: ""
+            selectedCarrierCode = defaults.shippingCompany ?: ""
+            defaultsApplied = true
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -157,7 +180,7 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
                         InfoField(
                             modifier = Modifier.weight(1f),
                             label = "STAVKI",
-                            value = "${items.size}"
+                            value = "${cart?.itemsCount ?: items.size}"
                         )
                     }
 
@@ -175,7 +198,7 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
                         InfoField(
                             modifier = Modifier.weight(1f),
                             label = "MEĐUZBIR",
-                            value = karikaPriceFormat(vpcTotal) + " KM"
+                            value = karikaPriceFormat(subtotal) + " KM"
                         )
                         InfoField(
                             modifier = Modifier.weight(1f),
@@ -193,7 +216,7 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
                         InfoField(
                             modifier = Modifier.weight(1f),
                             label = "UKUPNO SA PDV",
-                            value = karikaPriceFormat(grandTotal) + " KM",
+                            value = karikaPriceFormat(totalWithTax) + " KM",
                             valueColor = KarikaColors.Blue,
                             valueSize = 18.sp
                         )
@@ -401,59 +424,23 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
                             color = KarikaColors.Divider
                         )
 
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Image(
-                                modifier = Modifier.width(93.dp),
-                                contentScale = ContentScale.FillWidth,
-                                painter = painterResource(Res.drawable.img_ab_post),
-                                contentDescription = ""
-                            )
-                            KarikaText(
-                                text = "A2B Express",
-                                color = KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W600
-                            )
-                        }
-                        KarikaText(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            text = "Cijena dostave sa PDV: —",
-                            color = KarikaColors.Gray2,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W600
+                        ShippingProviderRow(
+                            image = Res.drawable.img_ab_post,
+                            label = "A2B Express",
+                            cost = shippingCost?.first,
+                            selected = selectedCarrierCode == "A2B",
+                            onSelect = { selectedCarrierCode = "A2B" }
                         )
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             color = KarikaColors.Divider
                         )
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Image(
-                                modifier = Modifier.width(93.dp),
-                                contentScale = ContentScale.FillWidth,
-                                painter = painterResource(Res.drawable.img_express_post),
-                                contentDescription = ""
-                            )
-                            KarikaText(
-                                text = "EuroExpress",
-                                color = KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W600
-                            )
-                        }
-                        KarikaText(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            text = "Cijena dostave sa PDV: —",
-                            color = KarikaColors.Gray2,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W600
+                        ShippingProviderRow(
+                            image = Res.drawable.img_express_post,
+                            label = "EuroExpress",
+                            cost = shippingCost?.second,
+                            selected = selectedCarrierCode == "EURO_EXPRESS",
+                            onSelect = { selectedCarrierCode = "EURO_EXPRESS" }
                         )
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
@@ -485,7 +472,12 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
                                 .fillMaxWidth(),
                             title = "Izračunaj cijenu"
                         ) {
-                            component.calculateShipping()
+                            shippingCost = component.calculateShipping(
+                                packageWidth.value,
+                                packageHeight.value,
+                                packageDepth.value,
+                                packageWeight.value
+                            )
                         }
                     }
                 }
@@ -519,8 +511,7 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
 
                     SpecificationTable(
                         items = items,
-                        discounts = cartDiscounts,
-                        onEditClick = { product, qty -> editingItem = product to qty }
+                        onEditClick = { item -> editingItem = item }
                     )
 
                     Row(
@@ -534,7 +525,7 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        StatCard(modifier = Modifier.weight(1f), label = "Ukupno sa PDV", value = karikaPriceFormat(grandTotal) + " KM")
+                        StatCard(modifier = Modifier.weight(1f), label = "Ukupno sa PDV", value = karikaPriceFormat(totalWithTax) + " KM")
                         StatCard(modifier = Modifier.weight(1f), label = "Karika provizija", value = karikaPriceFormat(karikaProvizija) + " KM")
                     }
                 }
@@ -577,7 +568,27 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             // Potvrdi narudžbu
-            val canConfirm = items.isNotEmpty() && !isPlacingOrder
+            val canConfirm = items.isNotEmpty() &&
+                !isPlacingOrder &&
+                customer.isActive &&
+                customer.defaultShippingAddressId != null
+
+            if (!customer.isActive) {
+                KarikaText(
+                    text = "Narudžbu možete kreirati samo za kupce sa aktivnim partnerstvom.",
+                    color = KarikaColors.Red,
+                    textSize = 12.sp,
+                    fontWeight = FontWeight.W500
+                )
+            } else if (customer.defaultShippingAddressId == null) {
+                KarikaText(
+                    text = "Kupac nema zadanu adresu dostave.",
+                    color = KarikaColors.Red,
+                    textSize = 12.sp,
+                    fontWeight = FontWeight.W500
+                )
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -588,7 +599,38 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
                         enabled = canConfirm,
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
-                    ) { component.confirmOrder() },
+                    ) {
+                        val shippingComplete = selectedCarrierCode.isNotBlank() &&
+                            contactName.value.isNotBlank() &&
+                            contactEmail.value.isNotBlank() &&
+                            contactPhone.value.isNotBlank() &&
+                            city.value.isNotBlank() &&
+                            address.value.isNotBlank() &&
+                            postalCode.value.isNotBlank() &&
+                            packageWeight.value.isNotBlank() &&
+                            packageWidth.value.isNotBlank() &&
+                            packageHeight.value.isNotBlank() &&
+                            packageDepth.value.isNotBlank()
+
+                        val shippingForm = if (shippingComplete) {
+                            VendorDeliveryServiceData(
+                                name = contactName.value,
+                                email = contactEmail.value,
+                                telephone = contactPhone.value,
+                                city = city.value,
+                                street = address.value,
+                                postcode = postalCode.value,
+                                weight = packageWeight.value,
+                                width = packageWidth.value,
+                                height = packageHeight.value,
+                                depth = packageDepth.value,
+                                note = deliveryNote.value,
+                                companyCode = selectedCarrierCode
+                            )
+                        } else null
+
+                        component.confirmOrder(note, shippingForm)
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 if (isPlacingOrder) {
@@ -631,21 +673,66 @@ fun SalesOrderReviewView(component: SalesOrderReviewComponent) {
         }
     }
 
-    editingItem?.let { (product, qty) ->
+    editingItem?.let { item ->
         EditCartItemModal(
-            product = product,
-            qty = qty,
-            currentDiscount = cartDiscounts[product.key] ?: 0,
+            item = item,
+            canDiscount = component.canCreateDiscountFor,
             onDismiss = { editingItem = null },
-            onConfirm = { newQty, newDiscount, applyToAll ->
-                component.updateQty(product, newQty)
-                if (applyToAll) {
-                    component.updateDiscountForAll(newDiscount)
-                } else {
-                    component.updateDiscount(product, newDiscount)
-                }
+            onConfirm = { newQty, newDiscount ->
+                component.updateItem(item, newQty, newDiscount)
                 editingItem = null
             }
+        )
+    }
+}
+
+@Composable
+private fun ShippingProviderRow(
+    image: org.jetbrains.compose.resources.DrawableResource,
+    label: String,
+    cost: Double?,
+    selected: Boolean,
+    onSelect: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (selected) KarikaColors.Blue.copy(alpha = 0.08f) else androidx.compose.ui.graphics.Color.Transparent)
+            .border(
+                width = if (selected) 1.dp else 0.dp,
+                color = if (selected) KarikaColors.Blue else androidx.compose.ui.graphics.Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) { onSelect() }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Image(
+                modifier = Modifier.width(93.dp),
+                contentScale = ContentScale.FillWidth,
+                painter = painterResource(image),
+                contentDescription = ""
+            )
+            KarikaText(
+                text = label,
+                color = KarikaColors.Gray2,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W600
+            )
+        }
+        KarikaText(
+            text = "Cijena dostave sa PDV: " + (cost?.let { karikaPriceFormat(it) + " KM" } ?: "—"),
+            color = KarikaColors.Gray2,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W600
         )
     }
 }
@@ -759,9 +846,8 @@ private val TABLE_COLUMN_WIDTHS = listOf(110.dp, 85.dp, 105.dp, 95.dp, 115.dp, 1
 
 @Composable
 private fun SpecificationTable(
-    items: List<Pair<OnBehalfProduct, Int>>,
-    discounts: Map<String, Int>,
-    onEditClick: (OnBehalfProduct, Int) -> Unit
+    items: List<OnBehalfCartResponseItem>,
+    onEditClick: (OnBehalfCartResponseItem) -> Unit
 ) {
     val headers = listOf(
         "ARTIKAL", "RABAT %", "CIJENA VPC", "KOLIČINA",
@@ -791,17 +877,16 @@ private fun SpecificationTable(
         HorizontalDivider(color = KarikaColors.Gray9, thickness = 1.dp)
 
         // ── Data rows ────────────────────────────────────────────────────
-        items.forEachIndexed { rowIndex, (product, qty) ->
-            val rowVpc = product.vpc(qty)
+        items.forEachIndexed { rowIndex, item ->
             val cells = listOf(
-                product.name,
-                "${discounts[product.key] ?: 0}",
-                product.priceString(),
-                "$qty kom",
-                karikaPriceFormat(rowVpc) + " KM",
-                karikaPriceFormat(rowVpc * 1.17) + " KM",
-                "${PROVIZIJA_RATE_PERCENT.toInt()}",
-                karikaPriceFormat(rowVpc * PROVIZIJA_RATE_PERCENT / 100) + " KM"
+                item.name,
+                "${item.discountPercent ?: 0}",
+                item.priceString(),
+                "${item.qty} ${item.quantityUnit ?: "kom"}",
+                karikaPriceFormat(item.price * item.qty) + " KM",
+                item.rowTotalString(),
+                "${item.commissionPercent.toInt()}",
+                karikaPriceFormat(item.commission) + " KM"
             )
 
             Row(
@@ -812,7 +897,7 @@ private fun SpecificationTable(
                     TableCell(text, width = TABLE_COLUMN_WIDTHS[colIndex], bold = colIndex == 0)
                     VerticalDivider(color = KarikaColors.Gray9, thickness = 1.dp, modifier = Modifier.fillMaxHeight())
                 }
-                TableActionCell(width = TABLE_COLUMN_WIDTHS[cells.size]) { onEditClick(product, qty) }
+                TableActionCell(width = TABLE_COLUMN_WIDTHS[cells.size]) { onEditClick(item) }
             }
             if (rowIndex != items.lastIndex) {
                 HorizontalDivider(color = KarikaColors.Gray9, thickness = 1.dp)
@@ -869,16 +954,16 @@ private fun TableActionCell(width: Dp, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditCartItemModal(
-    product: OnBehalfProduct,
-    qty: Int,
-    currentDiscount: Int,
+    item: OnBehalfCartResponseItem,
+    canDiscount: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (newQty: Int, newDiscount: Int, applyToAll: Boolean) -> Unit
+    onConfirm: (newQty: Int, newDiscount: Int) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var discountText by remember { mutableStateOf(if (currentDiscount > 0) "$currentDiscount" else "") }
-    var qtyText by remember { mutableStateOf("$qty") }
-    var applyToAll by remember { mutableStateOf(false) }
+    var discountText by remember {
+        mutableStateOf(item.discountPercent?.takeIf { it > 0 }?.toString() ?: "")
+    }
+    var qtyText by remember { mutableStateOf("${item.qty}") }
     val qtyValid = (qtyText.toIntOrNull() ?: 0) > 0
 
     ModalBottomSheet(
@@ -907,31 +992,34 @@ private fun EditCartItemModal(
             HorizontalDivider(color = KarikaColors.Gray9, thickness = 1.dp)
 
             KarikaText(
-                text = product.name,
+                text = item.name,
                 color = KarikaColors.Gray2,
                 textSize = 15.sp,
                 fontWeight = FontWeight.W700
             )
 
-            LabeledTextField(
-                label = "Rabat (%)",
-                value = discountText,
-                onValueChange = { v ->
-                    val digits = v.filter { it.isDigit() }
-                    discountText = when {
-                        digits.isEmpty() -> ""
-                        (digits.toIntOrNull() ?: 0) > 100 -> "100"
-                        else -> digits
-                    }
-                },
-                keyboardType = KeyboardType.Number
-            )
-
-            KarikaCheckboxSecondary(
-                modifier = Modifier.fillMaxWidth(),
-                title = "Primijeni za sve stavke u narudžbi",
-                value = applyToAll
-            ) { applyToAll = it }
+            if (canDiscount) {
+                LabeledTextField(
+                    label = "Rabat (%)",
+                    value = discountText,
+                    onValueChange = { v ->
+                        val digits = v.filter { it.isDigit() }
+                        discountText = when {
+                            digits.isEmpty() -> ""
+                            (digits.toIntOrNull() ?: 0) > 100 -> "100"
+                            else -> digits
+                        }
+                    },
+                    keyboardType = KeyboardType.Number
+                )
+            } else if ((item.discountPercent ?: 0) > 0) {
+                KarikaText(
+                    text = "Rabat: ${item.discountPercent}%",
+                    color = KarikaColors.Gray6,
+                    textSize = 13.sp,
+                    fontWeight = FontWeight.W500
+                )
+            }
 
             LabeledTextField(
                 label = "Količina",
@@ -976,7 +1064,7 @@ private fun EditCartItemModal(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ) {
-                            onConfirm(qtyText.toIntOrNull() ?: qty, discountText.toIntOrNull() ?: 0, applyToAll)
+                            onConfirm(qtyText.toIntOrNull() ?: item.qty, discountText.toIntOrNull() ?: 0)
                         },
                     contentAlignment = Alignment.Center
                 ) {

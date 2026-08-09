@@ -64,25 +64,22 @@ import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
-    val order = component.order
     val vendorOrder by component.vendorOrder.collectAsState()
     val comments by component.comments.collectAsState()
     val isSendingComment by component.isSendingComment.collectAsState()
     var commentText by remember { mutableStateOf("") }
     val imeVisible = rememberImeVisible()
 
-    // Derived values — prefer vendorOrder fields when loaded, fall back to OnBehalfOrder
-    val vpcTotal = vendorOrder?.orderTotal?.toDoubleOrNull()
-        ?: (order.grandTotal / 1.17).toDouble()
+    val vpcTotal = vendorOrder.orderTotal?.toDoubleOrNull() ?: 0.0
     val pdvTotal = (vpcTotal * 0.17)
     val grandTotal = vpcTotal + pdvTotal
-    val commission = vendorOrder?.shopCommissionFee?.toDoubleOrNull()
+    val commission = vendorOrder.shopCommissionFee?.toDoubleOrNull()
 
-    val address = vendorOrder?.address?.let { a ->
+    val address = vendorOrder.address?.let { a ->
         listOfNotNull(a.street, a.city, a.postcode).filter { it.isNotBlank() }.joinToString(", ")
     }.takeIf { !it.isNullOrBlank() } ?: "—"
 
-    val phone = vendorOrder?.address?.telephone
+    val phone = vendorOrder.address?.telephone
         .takeIf { !it.isNullOrBlank() } ?: "—"
 
     Box(
@@ -116,13 +113,13 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                         ) {
                             InfoCell(
                                 label = "BROJ NARUDŽBE",
-                                value = "#${order.incrementId}",
+                                value = "#${vendorOrder.orderId}",
                                 valueColor = KarikaColors.Gray2,
                                 modifier = Modifier.weight(1f)
                             )
                             InfoCell(
                                 label = "DATUM",
-                                value = order.date().ifBlank { "—" },
+                                value = vendorOrder.date(),
                                 valueColor = KarikaColors.Gray2,
                                 modifier = Modifier.weight(1f)
                             )
@@ -165,8 +162,8 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                         CustomerInfoRow(
                             icon = Res.drawable.ic_person,
                             label = "NAZIV KUPCA",
-                            line1 = order.displayName(),
-                            line2 = "ID: ${order.customerId}"
+                            line1 = vendorOrder.billingName ?: "Kupac #${vendorOrder.customerId}",
+                            line2 = "ID: ${vendorOrder.customerId}"
                         )
                         Spacer(Modifier.height(16.dp))
                         CustomerInfoRow(
@@ -187,7 +184,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
             // ── Specifikacija narudžbe ───────────────────────────────────────────
             item {
                 Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
-                    val products = vendorOrder?.products ?: emptyList()
+                    val products = vendorOrder.products
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -232,7 +229,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
             }
 
             // Product items
-            val products = vendorOrder?.products ?: emptyList()
+            val products = vendorOrder.products
             items(products, key = { it.itemId ?: it.productId ?: "" }) { product ->
                 ProductCard(
                     product = product,
