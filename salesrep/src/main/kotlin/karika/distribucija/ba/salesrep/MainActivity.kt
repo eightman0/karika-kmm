@@ -16,6 +16,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.navigation.NavigationView
 import karika.distribucija.ba.salesrep.api.SalesRepository
 import karika.distribucija.ba.salesrep.model.ResultState
+import karika.distribucija.ba.salesrep.session.CurrentUser
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -37,7 +38,10 @@ class MainActivity : AppCompatActivity() {
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHost.navController
 
-        val appBarConfig = AppBarConfiguration(setOf(R.id.ordersListFragment), drawerLayout)
+        val appBarConfig = AppBarConfiguration(
+            setOf(R.id.ordersListFragment, R.id.customersListFragment),
+            drawerLayout
+        )
         setupActionBarWithNavController(navController, appBarConfig)
 
         if ((application as SalesRepApp).sessionManager.hasToken()) {
@@ -57,9 +61,12 @@ class MainActivity : AppCompatActivity() {
             drawerLayout.setDrawerLockMode(
                 if (isLogin) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED
             )
-            if (destination.id == R.id.ordersListFragment) {
-                navView.setCheckedItem(R.id.nav_orders)
-                loadRepName(navView)
+            when (destination.id) {
+                R.id.ordersListFragment -> {
+                    navView.setCheckedItem(R.id.nav_orders)
+                    loadRepName(navView)
+                }
+                R.id.customersListFragment -> navView.setCheckedItem(R.id.nav_customers)
             }
         }
 
@@ -69,6 +76,21 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_orders -> {
                     if (navController.currentDestination?.id != R.id.ordersListFragment) {
                         navController.popBackStack(R.id.ordersListFragment, false)
+                    }
+                    true
+                }
+                R.id.nav_customers -> {
+                    if (navController.currentDestination?.id != R.id.customersListFragment) {
+                        if (!navController.popBackStack(R.id.customersListFragment, false)) {
+                            navController.navigate(
+                                R.id.customersListFragment,
+                                null,
+                                androidx.navigation.navOptions {
+                                    popUpTo(R.id.ordersListFragment) { inclusive = false }
+                                    launchSingleTop = true
+                                }
+                            )
+                        }
                     }
                     true
                 }
@@ -103,6 +125,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             SalesRepository().getMe().collect { result ->
                 if (result is ResultState.Success) {
+                    CurrentUser.me = result.data
                     navView.getHeaderView(0)
                         ?.findViewById<TextView>(R.id.text_rep_name)
                         ?.text = result.data.name ?: getString(R.string.drawer_role_label)

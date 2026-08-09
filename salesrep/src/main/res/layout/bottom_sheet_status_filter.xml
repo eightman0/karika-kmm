@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="12dp">
+
+    <TextView
+        android:id="@+id/option_all"
+        style="@style/BottomSheetOption"
+        android:text="@string/customers_status_all" />
+
+    <TextView
+        android:id="@+id/option_active"
+        style="@style/BottomSheetOption"
+        android:tag="active"
+        android:text="@string/customers_status_active" />
+
+    <TextView
+        android:id="@+id/option_pending"
+        style="@style/BottomSheetOption"
+        android:tag="pending"
+        android:text="@string/customers_status_pending" />
+
+    <TextView
+        android:id="@+id/option_rejected"
+        style="@style/BottomSheetOption"
+        android:tag="rejected"
+        android:text="@string/customers_status_rejected" />
+
+    <TextView
+        android:id="@+id/option_revoked"
+        style="@style/BottomSheetOption"
+        android:tag="revoked"
+        android:text="@string/customers_status_revoked" />
+</LinearLayout>

@@ -35,4 +35,66 @@
         <argument android:name="status" app:argType="string" />
         <argument android:name="createdAt" app:argType="string" app:nullable="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/customersListFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.customers.CustomersListFragment"
+        android:label="@string/customers_title">
+        <action
+            android:id="@+id/action_customers_to_detail"
+            app:destination="@id/customerDetailFragment" />
+        <action
+            android:id="@+id/action_customers_to_new_customer"
+            app:destination="@id/newCustomerFragment" />
+        <action
+            android:id="@+id/action_customers_to_invite"
+            app:destination="@id/inviteCustomerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/customerDetailFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.customers.CustomerDetailFragment"
+        android:label="@string/customers_title">
+        <argument android:name="customerId" app:argType="long" />
+        <argument android:name="company" app:argType="string" app:nullable="true" />
+        <argument android:name="firstname" app:argType="string" app:nullable="true" />
+        <argument android:name="lastname" app:argType="string" app:nullable="true" />
+        <argument android:name="email" app:argType="string" app:nullable="true" />
+        <argument android:name="partnershipStatus" app:argType="string" />
+        <argument android:name="assignedNames" app:argType="string" app:nullable="true" />
+        <action
+            android:id="@+id/action_customer_detail_to_discount_form"
+            app:destination="@id/discountFormFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/discountFormFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.customers.DiscountFormFragment"
+        android:label="@string/discount_form_title_new">
+        <argument android:name="customerId" app:argType="long" />
+        <argument android:name="ruleId" app:argType="long" android:defaultValue="0L" />
+        <argument android:name="productId" app:argType="long" android:defaultValue="0L" />
+        <argument android:name="productName" app:argType="string" app:nullable="true" />
+        <argument android:name="categoryId" app:argType="long" android:defaultValue="0L" />
+        <argument android:name="categoryName" app:argType="string" app:nullable="true" />
+        <argument android:name="minQty" app:argType="float" android:defaultValue="0.0" />
+        <argument android:name="discountPercent" app:argType="float" android:defaultValue="0.0" />
+        <argument android:name="isActive" app:argType="integer" android:defaultValue="1" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/inviteCustomerFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.customers.InviteCustomerFragment"
+        android:label="@string/invite_title">
+        <argument android:name="prefillEmail" app:argType="string" android:defaultValue="" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/newCustomerFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.customers.NewCustomerFragment"
+        android:label="@string/new_customer_title">
+        <action
+            android:id="@+id/action_new_customer_to_invite"
+            app:destination="@id/inviteCustomerFragment" />
+    </fragment>
 </navigation>
