@@ -3,26 +3,64 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:clickable="true"
-    android:focusable="true"
-    android:orientation="vertical"
-    android:padding="12dp">
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/text_name"
+    <LinearLayout
+        android:id="@+id/content_row"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/karika_gray2"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        tools:text="Artikal XY" />
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="11dp">
 
-    <TextView
-        android:id="@+id/text_sku"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_discount_badge_art"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="3dp"
+            android:text="@string/discount_form_badge_product"
+            android:textColor="@color/karika_gray6"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/text_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/karika_gray2"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                tools:text="Artikal XY" />
+
+            <TextView
+                android:id="@+id/text_sku"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/karika_gray6"
+                android:textSize="11sp"
+                android:visibility="gone"
+                tools:text="SKU-12345"
+                tools:visibility="visible" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/karika_gray6"
-        android:textSize="12sp"
-        tools:text="SKU-12345" />
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="12dp"
+        android:background="@color/karika_gray10" />
+
 </LinearLayout>

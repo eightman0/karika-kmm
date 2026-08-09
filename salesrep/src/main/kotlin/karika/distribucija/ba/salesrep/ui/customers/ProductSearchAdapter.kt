@@ -1,6 +1,7 @@
 package karika.distribucija.ba.salesrep.ui.customers
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import karika.distribucija.ba.salesrep.databinding.ItemProductSearchBinding
@@ -23,7 +24,7 @@ class ProductSearchAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(items[position], isLast = position == items.lastIndex)
     }
 
     override fun getItemCount(): Int = items.size
@@ -31,10 +32,13 @@ class ProductSearchAdapter(
     inner class ViewHolder(private val binding: ItemProductSearchBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(product: OnBehalfProduct) {
+        fun bind(product: OnBehalfProduct, isLast: Boolean) {
             binding.textName.text = product.name
+            val hasSku = !product.sku.isNullOrBlank()
+            binding.textSku.visibility = if (hasSku) View.VISIBLE else View.GONE
             binding.textSku.text = product.sku
-            binding.root.setOnClickListener { onClick(product) }
+            binding.divider.visibility = if (isLast) View.GONE else View.VISIBLE
+            binding.contentRow.setOnClickListener { onClick(product) }
         }
     }
 }

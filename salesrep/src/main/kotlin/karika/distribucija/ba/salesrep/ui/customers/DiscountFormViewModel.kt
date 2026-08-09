@@ -34,6 +34,7 @@ class DiscountFormViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     val itemSearch: LiveData<String> = _itemSearch
 
     private var selectedProductId: Long? = savedStateHandle.get<Long>("productId")?.takeIf { it != 0L }
+    val hasSelectedItem: Boolean get() = selectedProductId != null
 
     private val _searchResults = MutableLiveData<List<OnBehalfProduct>>(emptyList())
     val searchResults: LiveData<List<OnBehalfProduct>> = _searchResults

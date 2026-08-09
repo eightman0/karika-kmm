@@ -106,7 +106,7 @@
     <string name="customer_detail_reps_label">KOMERCIJALISTI</string>
     <string name="discount_label_target">CILJ</string>
     <string name="discount_label_min_qty">Min. kol.</string>
-    <string name="discount_label_percent">Rabat %%</string>
+    <string name="discount_label_percent">Rabat %</string>
     <string name="discount_created_by">Administrator</string>
     <string name="discount_delete_title">Obriši popust</string>
     <string name="discount_delete_message">Sigurno želite obrisati ovaj popust? Ova radnja se ne može poništiti.</string>
@@ -117,10 +117,14 @@
 
     <string name="discount_form_title_new">Novi popust</string>
     <string name="discount_form_title_edit">Izmijeni popust</string>
-    <string name="discount_form_item_label">Artikal (opcionalno)</string>
-    <string name="discount_form_item_hint">Svi artikli</string>
+    <string name="discount_form_item_label">Artikal ili kategorija</string>
+    <string name="discount_form_item_hint">Svi artikli i kategorije</string>
     <string name="discount_form_min_qty">Min. količina</string>
+    <string name="discount_form_min_qty_placeholder">Opcionalno</string>
     <string name="discount_form_percent">Rabat %</string>
+    <string name="discount_form_percent_placeholder">0</string>
+    <string name="discount_form_percent_suffix">%</string>
+    <string name="discount_form_badge_product">ART.</string>
     <string name="discount_form_save">Sačuvaj</string>
 
     <string name="invite_title">Pozovi kupca</string>
