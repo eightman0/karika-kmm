@@ -5,73 +5,119 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="12dp"
-    android:layout_marginTop="8dp"
-    android:background="@color/karika_white"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_order_card"
     android:clickable="true"
-    android:elevation="1dp"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
     android:padding="16dp">
 
+    <ImageView
+        android:id="@+id/icon_storefront"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_storefront"
+        app:layout_constraintBottom_toBottomOf="@id/text_customer_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/text_customer_name"
+        app:tint="@color/karika_blue" />
+
     <TextView
-        android:id="@+id/text_increment_id"
+        android:id="@+id/text_customer_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:textColor="@color/karika_gray2"
         android:textSize="15sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/text_status"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/icon_storefront"
         app:layout_constraintTop_toTopOf="parent"
+        tools:text="Kupac d.o.o." />
+
+    <TextView
+        android:id="@+id/text_increment_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/karika_gray6"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@id/icon_storefront"
+        app:layout_constraintTop_toBottomOf="@id/text_customer_name"
         tools:text="#100000123" />
 
     <TextView
         android:id="@+id/text_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_status_badge"
-        android:paddingHorizontal="10dp"
+        android:background="@drawable/bg_order_status_badge"
+        android:paddingHorizontal="8dp"
         android:paddingVertical="4dp"
-        android:textColor="@color/karika_white"
-        android:textSize="11sp"
+        android:textSize="10sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Na čekanju" />
+        tools:text="NA ČEKANJU"
+        tools:textColor="@color/karika_blue" />
 
-    <TextView
-        android:id="@+id/text_customer_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textColor="@color/karika_gray6"
-        android:textSize="13sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_increment_id"
-        tools:text="Kupac d.o.o." />
-
-    <TextView
-        android:id="@+id/text_date"
+    <View
+        android:id="@+id/divider"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:textColor="@color/karika_gray6"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toStartOf="@id/text_total"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/karika_gray9"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_customer_name"
-        tools:text="09.08.2026. 12:30" />
+        app:layout_constraintTop_toBottomOf="@id/text_increment_id" />
+
+    <ImageView
+        android:id="@+id/icon_total"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginTop="8dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_orders"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider"
+        app:tint="@color/karika_gray6" />
 
     <TextView
         android:id="@+id/text_total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="4dp"
         android:textColor="@color/karika_gray2"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_customer_name"
+        app:layout_constraintBottom_toBottomOf="@id/icon_total"
+        app:layout_constraintStart_toEndOf="@id/icon_total"
+        app:layout_constraintTop_toTopOf="@id/icon_total"
         tools:text="123,45 KM" />
+
+    <TextView
+        android:id="@+id/text_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/karika_gray6"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/icon_total"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/icon_total"
+        tools:text="09.08.2026. 12:30" />
+
+    <ImageView
+        android:id="@+id/icon_date"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginEnd="4dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_calendar"
+        app:layout_constraintBottom_toBottomOf="@id/icon_total"
+        app:layout_constraintEnd_toStartOf="@id/text_date"
+        app:layout_constraintTop_toTopOf="@id/icon_total"
+        app:tint="@color/karika_gray6" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

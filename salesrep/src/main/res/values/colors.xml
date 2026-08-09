@@ -19,6 +19,15 @@
     <color name="karika_bg1">#EAEEEF</color>
     <color name="karika_bg2">#F7F7F7</color>
 
+    <!-- Order status badge palette, matches SalesOrdersView.kt's statusBg()/statusColor() -->
+    <color name="order_status_bg_success">#EDF7E4</color>
+    <color name="order_status_bg_error">#FFEAF3</color>
+    <color name="order_status_bg_neutral">#E5E5E5</color>
+    <color name="order_status_bg_info">#E8F0FD</color>
+    <color name="order_status_bg_warning">#FFF0E8</color>
+    <color name="order_status_color_success">#1A7431</color>
+    <color name="order_status_color_warning">#F26419</color>
+
     <color name="status_pending">#E08E00</color>
     <color name="status_processing">#1F6FEB</color>
     <color name="status_approved">#2E8B57</color>

@@ -36,6 +36,13 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val sessionManager = (requireActivity().application as SalesRepApp).sessionManager
+        val rememberedEmail = sessionManager.rememberedEmail()
+        val rememberedPassword = sessionManager.rememberedPassword()
+        binding.editEmail.setText(rememberedEmail)
+        binding.editPassword.setText(rememberedPassword)
+        binding.switchRememberMe.isChecked = rememberedPassword.isNotEmpty()
+
         updateFormValid()
 
         // The gradient/background image (this fragment's root FrameLayout) is left alone so it
@@ -86,7 +93,15 @@ class LoginFragment : Fragment() {
                 is ResultState.Success -> {
                     binding.progressLogin.visibility = View.GONE
                     binding.buttonLogin.isEnabled = true
-                    (requireActivity().application as SalesRepApp).sessionManager.saveToken(result.data)
+                    sessionManager.saveToken(result.data)
+                    if (binding.switchRememberMe.isChecked) {
+                        sessionManager.saveRememberedCredentials(
+                            binding.editEmail.text?.toString()?.trim().orEmpty(),
+                            binding.editPassword.text?.toString().orEmpty()
+                        )
+                    } else {
+                        sessionManager.clearRememberedCredentials()
+                    }
                     findNavController().navigate(R.id.action_login_to_orders)
                 }
 

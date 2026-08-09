@@ -26,27 +26,36 @@ class OrdersAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(order: OnBehalfOrder) {
-            binding.textIncrementId.text = "#${order.incrementId}"
             binding.textCustomerName.text = order.displayName()
-            binding.textDate.text = order.date()
+            binding.textIncrementId.text = "#${order.incrementId}"
             binding.textTotal.text = order.totalString()
-            binding.textStatus.text = order.statusLabel()
-            binding.textStatus.background.setTint(statusColor(order.status, binding.root.context))
+            binding.textDate.text = order.date()
+            binding.textStatus.text = order.statusLabel().uppercase()
+
+            val context = binding.root.context
+            binding.textStatus.background.setTint(context.getColor(statusBgRes(order.status)))
+            binding.textStatus.setTextColor(context.getColor(statusColorRes(order.status)))
+
             binding.root.setOnClickListener { onClick(order) }
         }
 
-        private fun statusColor(status: String, context: android.content.Context): Int {
-            val colorRes = when (status) {
-                "pending" -> R.color.status_pending
-                "processing" -> R.color.status_processing
-                "approved" -> R.color.status_approved
-                "bill-sent" -> R.color.status_bill_sent
-                "estimate-sent" -> R.color.status_estimate_sent
-                "rejected" -> R.color.status_rejected
-                "cancelled" -> R.color.status_cancelled
-                else -> R.color.status_default
-            }
-            return context.getColor(colorRes)
+        // Mirrors SalesOrdersView.kt's statusBg()/statusColor().
+        private fun statusBgRes(status: String): Int = when (status) {
+            "approved" -> R.color.order_status_bg_success
+            "rejected" -> R.color.order_status_bg_error
+            "cancelled" -> R.color.order_status_bg_neutral
+            "pending", "processing" -> R.color.order_status_bg_info
+            "bill-sent", "estimate-sent" -> R.color.order_status_bg_warning
+            else -> R.color.order_status_bg_neutral
+        }
+
+        private fun statusColorRes(status: String): Int = when (status) {
+            "approved" -> R.color.order_status_color_success
+            "rejected" -> R.color.karika_error
+            "cancelled" -> R.color.karika_gray6
+            "pending", "processing" -> R.color.karika_blue
+            "bill-sent", "estimate-sent" -> R.color.order_status_color_warning
+            else -> R.color.karika_gray6
         }
     }
 
