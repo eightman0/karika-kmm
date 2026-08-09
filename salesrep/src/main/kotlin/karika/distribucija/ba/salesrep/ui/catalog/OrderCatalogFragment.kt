@@ -36,7 +36,10 @@ class OrderCatalogFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val customerName = requireArguments().getString("customerName").orEmpty()
+        val args = requireArguments()
+        val customerName = args.getString("customerName").orEmpty()
+        val customerActive = args.getBoolean("customerActive")
+        val hasShippingAddress = args.getBoolean("hasShippingAddress")
         (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.customers_order_for) + ": $customerName"
 
         adapter = ProductCatalogAdapter(
@@ -73,7 +76,9 @@ class OrderCatalogFragment : Fragment() {
                 R.id.action_catalog_to_cart,
                 bundleOf(
                     "customerId" to viewModel.customerId,
-                    "customerName" to customerName
+                    "customerName" to customerName,
+                    "customerActive" to customerActive,
+                    "hasShippingAddress" to hasShippingAddress
                 )
             )
         }

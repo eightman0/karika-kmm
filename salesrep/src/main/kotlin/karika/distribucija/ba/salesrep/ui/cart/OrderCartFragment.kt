@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentOrderCartBinding
@@ -33,7 +35,10 @@ class OrderCartFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val customerName = requireArguments().getString("customerName").orEmpty()
+        val args = requireArguments()
+        val customerName = args.getString("customerName").orEmpty()
+        val customerActive = args.getBoolean("customerActive")
+        val hasShippingAddress = args.getBoolean("hasShippingAddress")
         (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.cart_title) + ": $customerName"
 
         adapter = CartAdapter(
@@ -55,7 +60,15 @@ class OrderCartFragment : Fragment() {
         }
 
         binding.buttonReview.setOnClickListener {
-            Toast.makeText(requireContext(), R.string.coming_soon, Toast.LENGTH_SHORT).show()
+            findNavController().navigate(
+                R.id.action_cart_to_review,
+                bundleOf(
+                    "customerId" to viewModel.customerId,
+                    "customerName" to customerName,
+                    "customerActive" to customerActive,
+                    "hasShippingAddress" to hasShippingAddress
+                )
+            )
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->

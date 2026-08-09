@@ -65,6 +65,7 @@
         <argument android:name="email" app:argType="string" app:nullable="true" />
         <argument android:name="partnershipStatus" app:argType="string" />
         <argument android:name="assignedNames" app:argType="string" app:nullable="true" />
+        <argument android:name="hasShippingAddress" app:argType="boolean" android:defaultValue="false" />
         <action
             android:id="@+id/action_customer_detail_to_discount_form"
             app:destination="@id/discountFormFragment" />
@@ -79,6 +80,8 @@
         android:label="@string/customers_order_for">
         <argument android:name="customerId" app:argType="long" />
         <argument android:name="customerName" app:argType="string" app:nullable="true" />
+        <argument android:name="customerActive" app:argType="boolean" android:defaultValue="false" />
+        <argument android:name="hasShippingAddress" app:argType="boolean" android:defaultValue="false" />
         <action
             android:id="@+id/action_catalog_to_cart"
             app:destination="@id/orderCartFragment" />
@@ -90,6 +93,21 @@
         android:label="@string/cart_title">
         <argument android:name="customerId" app:argType="long" />
         <argument android:name="customerName" app:argType="string" app:nullable="true" />
+        <argument android:name="customerActive" app:argType="boolean" android:defaultValue="false" />
+        <argument android:name="hasShippingAddress" app:argType="boolean" android:defaultValue="false" />
+        <action
+            android:id="@+id/action_cart_to_review"
+            app:destination="@id/orderReviewFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/orderReviewFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.cart.OrderReviewFragment"
+        android:label="@string/review_title">
+        <argument android:name="customerId" app:argType="long" />
+        <argument android:name="customerName" app:argType="string" app:nullable="true" />
+        <argument android:name="customerActive" app:argType="boolean" android:defaultValue="false" />
+        <argument android:name="hasShippingAddress" app:argType="boolean" android:defaultValue="false" />
     </fragment>
 
     <fragment

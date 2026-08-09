@@ -64,7 +64,9 @@ class CustomerDetailFragment : Fragment() {
                 R.id.action_customer_detail_to_catalog,
                 bundleOf(
                     "customerId" to viewModel.customerId,
-                    "customerName" to displayName
+                    "customerName" to displayName,
+                    "customerActive" to isActive,
+                    "hasShippingAddress" to args.getBoolean("hasShippingAddress")
                 )
             )
         }

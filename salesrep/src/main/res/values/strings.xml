@@ -104,4 +104,13 @@
     <string name="cart_clear_title">Isprazni korpu</string>
     <string name="cart_clear_message">Da li ste sigurni da želite isprazniti korpu?</string>
     <string name="cart_discount_hint">Rabat %</string>
+
+    <string name="review_title">Pregled narudžbe</string>
+    <string name="review_items">Stavke narudžbe</string>
+    <string name="review_note_hint">Napomena uz narudžbu (opcionalno)</string>
+    <string name="review_confirm">Potvrdi narudžbu</string>
+    <string name="review_back_to_cart">Nazad na korpu</string>
+    <string name="review_warning_no_capability">Nemate ovlaštenje za kreiranje narudžbi za kupce.</string>
+    <string name="review_warning_inactive">Kupac nije aktivan, narudžba se ne može kreirati.</string>
+    <string name="review_warning_no_shipping">Kupac nema podešenu adresu za dostavu.</string>
 </resources>

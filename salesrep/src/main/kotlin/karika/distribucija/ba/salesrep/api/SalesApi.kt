@@ -17,7 +17,10 @@ import karika.distribucija.ba.salesrep.model.NewCustomerRequest
 import karika.distribucija.ba.salesrep.model.OnBehalfCartItemRequest
 import karika.distribucija.ba.salesrep.model.OnBehalfCartItemInput
 import karika.distribucija.ba.salesrep.model.OnBehalfCartResponse
+import karika.distribucija.ba.salesrep.model.OnBehalfOrderResult
 import karika.distribucija.ba.salesrep.model.OnBehalfOrderSearchResults
+import karika.distribucija.ba.salesrep.model.OnBehalfPlaceOrderRequest
+import karika.distribucija.ba.salesrep.model.OnBehalfPlaceRequestMessage
 import karika.distribucija.ba.salesrep.model.OnBehalfProductSearchResults
 import karika.distribucija.ba.salesrep.model.OperationalCustomer
 import karika.distribucija.ba.salesrep.model.OperationalCustomerSearchResults
@@ -244,6 +247,15 @@ internal class SalesApi {
     /** DELETE /V1/vendor-operations/customers/{customerId}/cart/items/{itemId} */
     suspend fun removeCartItem(customerId: Long, itemId: Long): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.delete(HttpClientProvider.url("vendor-operations/customers/$customerId/cart/items/$itemId"))
+    }
+
+    /** POST /V1/vendor-operations/customers/{customerId}/orders */
+    suspend fun placeOnBehalfOrder(customerId: Long, message: String? = null): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/customers/$customerId/orders")) {
+            if (!message.isNullOrBlank()) {
+                setBody(OnBehalfPlaceOrderRequest(OnBehalfPlaceRequestMessage(message)))
+            }
+        }
     }
 }
 
@@ -537,6 +549,32 @@ class SalesRepository internal constructor() {
                 return@flow
             }
             emit(ResultState.Error("Greška pri ažuriranju korpe."))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun placeOrder(customerId: Long, message: String? = null): Flow<ResultState<OnBehalfOrderResult>> = flow {
+        emit(ResultState.Loading)
+        val api = SalesApi()
+        try {
+            // Re-validate the server cart isn't empty before placing.
+            val cartResponse = api.getCart(customerId).getOrNoInternet()
+            if (cartResponse.status == HttpStatusCode.OK) {
+                if (cartResponse.body<OnBehalfCartResponse>().isEmpty) {
+                    emit(ResultState.Error("Korpa je prazna."))
+                    return@flow
+                }
+            }
+
+            val orderResponse = api.placeOnBehalfOrder(customerId, message).getOrNoInternet()
+            if (orderResponse.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(orderResponse.body<OnBehalfOrderResult>()))
+                return@flow
+            }
+            emit(ResultState.Error("Greška pri kreiranju narudžbe."))
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {

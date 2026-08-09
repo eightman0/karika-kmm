@@ -39,3 +39,23 @@ data class OnBehalfOrderSearchResults(
     @SerialName("items") val items: List<OnBehalfOrder> = emptyList(),
     @SerialName("total_count") val totalCount: Long = 0
 )
+
+/** Response from POST /V1/vendor-operations/customers/{customerId}/orders */
+@Serializable
+data class OnBehalfOrderResult(
+    @SerialName("order_id") val orderId: Long = 0,
+    @SerialName("increment_id") val incrementId: String = "",
+    @SerialName("status") val status: String = "",
+    @SerialName("grand_total") val grandTotal: Double = 0.0
+)
+
+/** Request body for POST /V1/vendor-operations/customers/{customerId}/orders */
+@Serializable
+data class OnBehalfPlaceOrderRequest(
+    @SerialName("placeRequest") val placeRequest: OnBehalfPlaceRequestMessage
+)
+
+@Serializable
+data class OnBehalfPlaceRequestMessage(
+    @SerialName("message") val message: String
+)

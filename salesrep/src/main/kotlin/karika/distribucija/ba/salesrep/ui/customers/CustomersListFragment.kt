@@ -104,7 +104,8 @@ class CustomersListFragment : Fragment() {
                 "lastname" to customer.lastname,
                 "email" to customer.email,
                 "partnershipStatus" to customer.partnershipStatus,
-                "assignedNames" to customer.assignedEmployees.joinToString(", ") { it.displayName ?: "—" }
+                "assignedNames" to customer.assignedEmployees.joinToString(", ") { it.displayName ?: "—" },
+                "hasShippingAddress" to (customer.defaultShippingAddressId != null)
             )
         )
     }
@@ -114,7 +115,9 @@ class CustomersListFragment : Fragment() {
             R.id.action_customers_to_catalog,
             bundleOf(
                 "customerId" to customer.customerId,
-                "customerName" to (customer.company ?: customer.fullName)
+                "customerName" to (customer.company ?: customer.fullName),
+                "customerActive" to customer.isActive,
+                "hasShippingAddress" to (customer.defaultShippingAddressId != null)
             )
         )
     }
