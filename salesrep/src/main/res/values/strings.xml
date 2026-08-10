@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Karika Komercijalista</string>
+    <string name="app_name">Karika.ba</string>
 
     <string name="login_title">Prijava</string>
     <string name="login_email_label">Email Adresa</string>
