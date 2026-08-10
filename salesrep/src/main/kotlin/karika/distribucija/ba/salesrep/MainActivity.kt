@@ -188,6 +188,9 @@ class MainActivity : AppCompatActivity() {
             row.container.setBackgroundResource(
                 if (selected) R.drawable.bg_drawer_item_selected else R.drawable.bg_drawer_item_unselected
             )
+            val color = getColor(if (selected) R.color.karika_white else R.color.karika_gray6)
+            row.icon.setColorFilter(color)
+            row.text.setTextColor(color)
             row.text.setTypeface(row.text.typeface, if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
         }
     }
