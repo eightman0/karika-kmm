@@ -4,6 +4,7 @@ import android.graphics.Rect
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.updatePadding
 
 /**
@@ -26,7 +27,10 @@ fun View.applyImeBottomPadding() {
         val imeBottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
         view.updatePadding(bottom = initialBottom + imeBottom)
         if (imeBottom > 0) {
-            view.post {
+            // requestLayout() from updatePadding() above hasn't run yet - a ScrollView computes
+            // "what's visible" from its own (height - padding), so scrolling now would still use
+            // the pre-keyboard padding. doOnLayout defers this until that layout pass lands.
+            view.doOnLayout {
                 view.findFocus()?.let { focused ->
                     focused.requestRectangleOnScreen(Rect(0, 0, focused.width, focused.height), true)
                 }
