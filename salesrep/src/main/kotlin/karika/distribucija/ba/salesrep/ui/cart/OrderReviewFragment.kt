@@ -19,6 +19,7 @@ import karika.distribucija.ba.salesrep.databinding.FragmentOrderReviewBinding
 import karika.distribucija.ba.salesrep.model.OnBehalfCartResponseItem
 import karika.distribucija.ba.salesrep.model.VendorDeliveryServiceData
 import karika.distribucija.ba.salesrep.session.CartState
+import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 import karika.distribucija.ba.salesrep.util.karikaPriceFormat
 
 /** Mirrors composeApp's SalesOrderReviewView.kt. */
@@ -50,6 +51,7 @@ class OrderReviewFragment : Fragment() {
 
         val customerName = requireArguments().getString("customerName").orEmpty()
         (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.review_title)
+        binding.scrollContent.applyImeBottomPadding()
 
         binding.textWarning.apply {
             when (viewModel.ineligibleReason) {
