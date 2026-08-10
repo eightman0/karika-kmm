@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomerNewMessageBinding
 import karika.distribucija.ba.salesrep.model.OperationalCustomer
+import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 
 /** Mirrors composeApp's SalesCustomerNewMessageView.kt. */
 class CustomerNewMessageFragment : Fragment() {
@@ -37,6 +38,7 @@ class CustomerNewMessageFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.customer_new_message_title)
+        binding.root.applyImeBottomPadding()
 
         messageAdapter = CustomerMessageAdapter(
             counterpartName = { viewModel.selectedCustomer.value?.let { it.company ?: it.fullName }.orEmpty() },

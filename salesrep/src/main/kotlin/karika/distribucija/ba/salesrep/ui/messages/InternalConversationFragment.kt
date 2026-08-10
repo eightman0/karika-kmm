@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentInternalConversationBinding
+import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 
 /** Mirrors composeApp's SalesInternalConversationView.kt. */
 class InternalConversationFragment : Fragment() {
@@ -34,6 +35,7 @@ class InternalConversationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         (activity as? AppCompatActivity)?.supportActionBar?.title = viewModel.counterpartName
+        binding.root.applyImeBottomPadding()
 
         adapter = InternalMessageAdapter { viewModel.counterpartName }
         binding.recyclerMessages.adapter = adapter

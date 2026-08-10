@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentAdminNewMessageBinding
+import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 
 /** Mirrors composeApp's SalesAdminNewMessageView.kt - the subject-header + bubble-list + input
  * bar, with no recipient picker (unlike CustomerNewMessageFragment, which has one). */
@@ -35,6 +36,7 @@ class AdminNewMessageFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.admin_new_message_default_title)
+        binding.root.applyImeBottomPadding()
 
         adapter = CustomerMessageAdapter(
             counterpartName = { getString(R.string.admin_conversation_counterpart_label) },
