@@ -11,7 +11,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -113,6 +112,8 @@ class OrderReviewFragment : Fragment() {
             binding.textStatPdv.text = karikaPriceFormat(cart?.totalTax ?: 0.0) + " KM"
             binding.textStatTotal.text = karikaPriceFormat(cart?.totalWithTax ?: 0.0) + " KM"
             binding.textStatCommission.text = karikaPriceFormat(cart?.fee ?: 0.0) + " KM"
+
+            updateConfirmButtonState(isPlacingOrder = viewModel.isPlacingOrder.value == true)
         }
 
         viewModel.shippingDefaults.observe(viewLifecycleOwner) { defaults ->
@@ -337,9 +338,12 @@ class OrderReviewFragment : Fragment() {
     }
 
     /** Blocks the rest of the form and shows an in-button spinner while the order is being
-     * placed, mirroring Compose's CircularProgressIndicator-inside-the-button pattern. */
+     * placed, mirroring Compose's CircularProgressIndicator-inside-the-button pattern. Also
+     * matches Compose's `canConfirm` requiring a non-empty cart - relevant if the rep empties
+     * the cart via the specification table's edit sheet without leaving this screen. */
     private fun updateConfirmButtonState(isPlacingOrder: Boolean) {
-        val canConfirm = viewModel.isEligible && !isPlacingOrder
+        val hasItems = CartState.cart.value?.isEmpty == false
+        val canConfirm = viewModel.isEligible && hasItems && !isPlacingOrder
         binding.buttonConfirm.isEnabled = canConfirm
         binding.buttonConfirm.setBackgroundResource(
             if (canConfirm) R.drawable.bg_fab_order_customer else R.drawable.bg_button_filled_disabled

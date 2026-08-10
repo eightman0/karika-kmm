@@ -307,7 +307,6 @@
     <string name="review_delivery_note_title">Napomena za dostavu</string>
     <string name="review_delivery_note_hint">Napiši svoju napomenu za dostavu ovdje…</string>
     <string name="review_delivery_calculate_button">Izračunaj cijenu</string>
-    <string name="review_delivery_calc_error">Unesite sve dimenzije i težinu paketa.</string>
 
     <string name="review_specification_title">Specifikacija narudžbe</string>
     <string name="review_spec_header_item">ARTIKAL</string>
