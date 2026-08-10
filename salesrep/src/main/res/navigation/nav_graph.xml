@@ -229,4 +229,19 @@
         android:id="@+id/adminNewMessageFragment"
         android:name="karika.distribucija.ba.salesrep.ui.messages.AdminNewMessageFragment"
         android:label="@string/admin_new_message_default_title" />
+
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.notifications.NotificationsFragment"
+        android:label="@string/notifications_title">
+        <action
+            android:id="@+id/action_notifications_to_order_detail"
+            app:destination="@id/orderDetailFragment" />
+        <action
+            android:id="@+id/action_notifications_to_customer_conversation"
+            app:destination="@id/customerConversationFragment" />
+        <action
+            android:id="@+id/action_notifications_to_admin_conversation"
+            app:destination="@id/adminConversationFragment" />
+    </fragment>
 </navigation>

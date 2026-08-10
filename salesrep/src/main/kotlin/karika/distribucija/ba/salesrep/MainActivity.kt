@@ -6,7 +6,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -119,7 +118,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_notifications) {
-            showComingSoon()
+            navController.navigate(R.id.notificationsFragment)
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -138,11 +137,6 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }
-    }
-
-    private fun showComingSoon() {
-        drawerLayout.closeDrawer(GravityCompat.START)
-        Toast.makeText(this, R.string.coming_soon, Toast.LENGTH_SHORT).show()
     }
 
     /**

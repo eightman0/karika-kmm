@@ -23,6 +23,7 @@ import karika.distribucija.ba.salesrep.model.DiscountRuleBody
 import karika.distribucija.ba.salesrep.model.DiscountRuleSearchResults
 import karika.distribucija.ba.salesrep.model.Message
 import karika.distribucija.ba.salesrep.model.NewCustomerRequest
+import karika.distribucija.ba.salesrep.model.Notification
 import karika.distribucija.ba.salesrep.model.OnBehalfCartItemInput
 import karika.distribucija.ba.salesrep.model.OnBehalfCartItemRequest
 import karika.distribucija.ba.salesrep.model.OnBehalfCartResponse
@@ -522,6 +523,18 @@ internal class SalesApi {
     suspend fun markMessageRead(threadId: String?): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.post(HttpClientProvider.url("mobile/message/markAsRead")) {
             parameter("threadId", threadId)
+        }
+    }
+
+    /** GET /V1/mobile/vendor/notifications */
+    suspend fun notifications(): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("mobile/vendor/notifications"))
+    }
+
+    /** POST /V1/mobile/vendor/notification/mark_read */
+    suspend fun markNotificationRead(notificationId: String): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("mobile/vendor/notification/mark_read")) {
+            parameter("notificationId", notificationId)
         }
     }
 }
@@ -1136,6 +1149,38 @@ class SalesRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = SalesApi().markMessageRead(threadId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(Unit))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun notifications(): Flow<ResultState<List<Notification>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().notifications().getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<List<Notification>>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun markNotificationRead(notificationId: String): Flow<ResultState<Unit>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().markNotificationRead(notificationId).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(Unit))
                 return@flow
