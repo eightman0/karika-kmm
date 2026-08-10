@@ -254,7 +254,6 @@
     <string name="cart_discount_readonly_format">Rabat: %d%%</string>
 
     <string name="review_title">Pregled narudžbe</string>
-    <string name="review_items">Stavke narudžbe</string>
     <string name="review_note_title">Napomena</string>
     <string name="review_note_hint">Napomena uz narudžbu (opcionalno)</string>
     <string name="review_confirm">Potvrdi narudžbu</string>
@@ -278,4 +277,59 @@
     <string name="review_badge_pending">Na čekanju</string>
     <string name="review_badge_rejected">Odbijeno</string>
     <string name="review_badge_revoked">Opozvano</string>
+
+    <string name="review_delivery_title">Usluga dostave</string>
+    <string name="review_delivery_address_title">Adresa za utovar</string>
+    <string name="review_delivery_contact_name">Kontakt osoba*</string>
+    <string name="review_delivery_contact_name_hint">Kontakt osoba</string>
+    <string name="review_delivery_email">Email adresa*</string>
+    <string name="review_delivery_email_hint">Email adresa</string>
+    <string name="review_delivery_phone">Telefon*</string>
+    <string name="review_delivery_phone_hint">Telefon</string>
+    <string name="review_delivery_city">Grad*</string>
+    <string name="review_delivery_city_hint">Grad</string>
+    <string name="review_delivery_address">Adresa*</string>
+    <string name="review_delivery_address_hint">Adresa</string>
+    <string name="review_delivery_postal_code">Poštanski broj*</string>
+    <string name="review_delivery_postal_code_hint">Poštanski broj</string>
+    <string name="review_delivery_calculator_title">Kalkulator dostave</string>
+    <string name="review_delivery_calculator_description">Unesite dimenzije paketa i izračunajte cijene za brzu dostavu, ukoliko odobrite paket u tom koraku ćete moći izabrati da li i koju opciju dostave želite</string>
+    <string name="review_delivery_width">Ukupna širina*</string>
+    <string name="review_delivery_height">Ukupna visina*</string>
+    <string name="review_delivery_depth">Ukupna dubina*</string>
+    <string name="review_delivery_weight">Ukupna težina*</string>
+    <string name="review_delivery_unit_cm">cm</string>
+    <string name="review_delivery_unit_kg">kg</string>
+    <string name="review_delivery_provider_a2b">A2B Express</string>
+    <string name="review_delivery_provider_express">EuroExpress</string>
+    <string name="review_delivery_price_format">Cijena dostave sa PDV: %1$s</string>
+    <string name="review_delivery_price_dash">—</string>
+    <string name="review_delivery_note_title">Napomena za dostavu</string>
+    <string name="review_delivery_note_hint">Napiši svoju napomenu za dostavu ovdje…</string>
+    <string name="review_delivery_calculate_button">Izračunaj cijenu</string>
+    <string name="review_delivery_calc_error">Unesite sve dimenzije i težinu paketa.</string>
+
+    <string name="review_specification_title">Specifikacija narudžbe</string>
+    <string name="review_spec_header_item">ARTIKAL</string>
+    <string name="review_spec_header_discount">RABAT %</string>
+    <string name="review_spec_header_price">CIJENA VPC</string>
+    <string name="review_spec_header_qty">KOLIČINA</string>
+    <string name="review_spec_header_total_vpc">UKUPNO VPC</string>
+    <string name="review_spec_header_total_with_tax">UKUPNO SA PDV</string>
+    <string name="review_spec_header_commission_percent">KARIKA PROVIZIJA %</string>
+    <string name="review_spec_header_commission">PROVIZIJA</string>
+    <string name="review_spec_header_actions">AKCIJE</string>
+    <string name="review_spec_edit_action">Izmijeni</string>
+    <string name="review_spec_default_qty_unit">kom</string>
+    <string name="review_spec_stat_vpc">Ukupno VPC</string>
+    <string name="review_spec_stat_pdv">Ukupno PDV 17%</string>
+    <string name="review_spec_stat_total">Ukupno sa PDV</string>
+    <string name="review_spec_stat_commission">Karika provizija</string>
+
+    <string name="review_edit_item_title">Izmijeni stavku</string>
+    <string name="review_edit_item_discount_label">Rabat (%)</string>
+    <string name="review_edit_item_discount_readonly_format">Rabat: %1$d%%</string>
+    <string name="review_edit_item_qty_label">Količina</string>
+    <string name="review_edit_item_cancel">Odustani</string>
+    <string name="review_edit_item_confirm">Izmijeni</string>
 </resources>

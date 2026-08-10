@@ -14,6 +14,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.salesrep.model.Category
 import karika.distribucija.ba.salesrep.model.Comment
+import karika.distribucija.ba.salesrep.model.Config
 import karika.distribucija.ba.salesrep.model.Conversation
 import karika.distribucija.ba.salesrep.model.DiscountRule
 import karika.distribucija.ba.salesrep.model.DiscountRuleBody
@@ -43,6 +44,7 @@ import karika.distribucija.ba.salesrep.model.StaffStartThreadRequest
 import karika.distribucija.ba.salesrep.model.StaffThread
 import karika.distribucija.ba.salesrep.model.StaffThreadMessageSearchResults
 import karika.distribucija.ba.salesrep.model.StaffThreadSearchResults
+import karika.distribucija.ba.salesrep.model.VendorDeliveryServiceData
 import karika.distribucija.ba.salesrep.model.VendorOperationsMe
 import karika.distribucija.ba.salesrep.model.VendorOrder
 import karika.distribucija.ba.salesrep.network.HttpClientProvider
@@ -340,6 +342,39 @@ internal class SalesApi {
             if (!message.isNullOrBlank()) {
                 setBody(OnBehalfPlaceOrderRequest(OnBehalfPlaceRequestMessage(message)))
             }
+        }
+    }
+
+    /** GET /V1/mobile/config - shipping provider price tables, for the Review screen's
+     * delivery-price calculator. */
+    suspend fun config(): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("mobile/config"))
+    }
+
+    /** POST /V1/mobile/vendor/order/shippingDetails (multipart) - saves the rep-filled shipping
+     * address/package form against a just-placed order. */
+    suspend fun updateDelivery(data: VendorDeliveryServiceData): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("mobile/vendor/order/shippingDetails")) {
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("orderId", data.id)
+                        append("address[contact_name]", data.name)
+                        append("address[email]", data.email)
+                        append("address[telephone]", data.telephone)
+                        append("address[city]", data.city)
+                        append("address[street]", data.street)
+                        append("address[postcode]", data.postcode)
+                        append("package[weight]", data.weight)
+                        append("package[width]", data.width)
+                        append("package[height]", data.height)
+                        append("package[depth]", data.depth)
+                        append("note", data.note)
+                        append("company_code", data.companyCode)
+                    },
+                    boundary = "WebAppBoundary"
+                )
+            )
         }
     }
 
@@ -808,6 +843,38 @@ class SalesRepository internal constructor() {
                 return@flow
             }
             emit(ResultState.Error("Greška pri kreiranju narudžbe."))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun config(): Flow<ResultState<Config>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().config().getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<Config>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun updateDelivery(data: VendorDeliveryServiceData): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().updateDelivery(data).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<String>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
