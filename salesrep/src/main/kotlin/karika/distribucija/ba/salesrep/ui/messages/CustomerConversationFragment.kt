@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomerConversationBinding
+import karika.distribucija.ba.salesrep.model.Message
 
 /** Mirrors composeApp's SalesCustomerConversationView.kt. */
 open class CustomerConversationFragment : Fragment() {
@@ -30,6 +31,11 @@ open class CustomerConversationFragment : Fragment() {
      * the literal "Administrator" (never derived from the conversation). */
     protected open val counterpartDisplayName: String get() = viewModel.customerName
 
+    /** "Is this my message" - Customer's Compose view checks `sender == "vendor"`, Admin's
+     * checks `receiverId == "0" || sender == "customer"` (`Message.isVendorMessage()`) - a
+     * genuine difference between the two Compose source files, not a copy-paste slip. */
+    protected open val isMine: (Message) -> Boolean = { it.isVendor() }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -46,7 +52,8 @@ open class CustomerConversationFragment : Fragment() {
 
         adapter = CustomerMessageAdapter(
             counterpartName = { counterpartDisplayName },
-            formatTimestamp = { it.orEmpty() }
+            formatTimestamp = { it.orEmpty() },
+            isMine = isMine
         )
         binding.recyclerMessages.adapter = adapter
         binding.recyclerMessages.layoutManager = LinearLayoutManager(requireContext())

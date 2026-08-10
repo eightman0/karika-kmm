@@ -38,7 +38,8 @@ class AdminNewMessageFragment : Fragment() {
 
         adapter = CustomerMessageAdapter(
             counterpartName = { getString(R.string.admin_conversation_counterpart_label) },
-            formatTimestamp = { formatTime(it) }
+            formatTimestamp = { formatTime(it) },
+            isMine = { it.isVendorMessage() }
         )
         binding.recyclerMessages.adapter = adapter
         binding.recyclerMessages.layoutManager = LinearLayoutManager(requireContext())

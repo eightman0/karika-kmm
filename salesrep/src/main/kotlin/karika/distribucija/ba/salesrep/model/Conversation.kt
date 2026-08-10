@@ -45,9 +45,16 @@ data class Message(
     @SerialName("id") val id: String? = null,
     @SerialName("message") val message: String? = null,
     @SerialName("sender") val sender: String? = null,
+    @SerialName("receiver_id") val receiverId: String? = null,
     @SerialName("created_at") val createdAt: String? = null
 ) {
     fun isVendor() = sender == "vendor"
+
+    /** Used by the admin conversation/new-message bubbles instead of [isVendor] - Admin's
+     * Compose views classify "mine" by receiverId=="0"/sender=="customer" rather than
+     * sender=="vendor" (see SalesAdminConversationView.kt/SalesAdminNewMessageView.kt's
+     * `message.isVendorMessage()` vs Customer's `message.sender == "vendor"`). */
+    fun isVendorMessage() = receiverId == "0" || sender == "customer"
 
     fun date(): String? = createdAt
 

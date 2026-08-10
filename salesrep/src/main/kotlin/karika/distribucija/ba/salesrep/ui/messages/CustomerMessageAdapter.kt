@@ -17,10 +17,14 @@ import karika.distribucija.ba.salesrep.model.Message
  * replicate its own Compose counterpart's timestamp quirk: the conversation screen shows the raw
  * unformatted date (a dead `formatTime()` helper in that Compose file is never actually called),
  * while the new-message screen does call it and shows HH:mm - so callers pass either
- * `{ it }` (raw) or a real HH:mm formatter to match. */
+ * `{ it }` (raw) or a real HH:mm formatter to match. [isMine] defaults to [Message.isVendor] for
+ * Customer's screens; Admin's screens pass [Message.isVendorMessage] instead - the two Compose
+ * source files genuinely use different "is this my message" logic (see SalesAdminConversationView.kt/
+ * SalesAdminNewMessageView.kt's `message.isVendorMessage()` vs Customer's `message.sender == "vendor"`). */
 class CustomerMessageAdapter(
     private val counterpartName: () -> String,
-    private val formatTimestamp: (String?) -> String
+    private val formatTimestamp: (String?) -> String,
+    private val isMine: (Message) -> Boolean = { it.isVendor() }
 ) : ListAdapter<Message, CustomerMessageAdapter.ViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ViewHolder {
@@ -37,7 +41,7 @@ class CustomerMessageAdapter(
 
         fun bind(message: Message) {
             val context = binding.root.context
-            val isMine = message.isVendor()
+            val isMine = isMine(message)
 
             binding.textSenderLabel.text = if (isMine) context.getString(R.string.customer_message_me_label) else counterpartName()
             binding.textSenderLabel.setTextColor(
