@@ -487,7 +487,7 @@ internal class SalesApi {
             }
         }
 
-    /** POST /V1/mobile/message/send (multipart, text-only - no files[] part). */
+    /** POST /V1/mobile/message/send (multipart; appends a files[] part when request.file is set). */
     suspend fun sendMessage(request: SendMessageRequest): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.post(HttpClientProvider.url("mobile/message/send")) {
             setBody(
