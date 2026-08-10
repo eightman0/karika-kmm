@@ -18,9 +18,10 @@ import karika.distribucija.ba.salesrep.model.Conversation
 import karika.distribucija.ba.salesrep.model.DiscountRule
 import karika.distribucija.ba.salesrep.model.DiscountRuleBody
 import karika.distribucija.ba.salesrep.model.DiscountRuleSearchResults
+import karika.distribucija.ba.salesrep.model.Message
 import karika.distribucija.ba.salesrep.model.NewCustomerRequest
-import karika.distribucija.ba.salesrep.model.OnBehalfCartItemRequest
 import karika.distribucija.ba.salesrep.model.OnBehalfCartItemInput
+import karika.distribucija.ba.salesrep.model.OnBehalfCartItemRequest
 import karika.distribucija.ba.salesrep.model.OnBehalfCartResponse
 import karika.distribucija.ba.salesrep.model.OnBehalfOrderResult
 import karika.distribucija.ba.salesrep.model.OnBehalfOrderSearchResults
@@ -75,16 +76,28 @@ internal class SalesApi {
             var groupIdx = 0
 
             if (!search.isNullOrBlank()) {
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][field]", "increment_id")
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][value]", "%$search%")
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]", "like")
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][field]",
+                    "increment_id"
+                )
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][value]",
+                    "%$search%"
+                )
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]",
+                    "like"
+                )
                 groupIdx++
             }
 
             if (status != null) {
                 parameter("searchCriteria[filter_groups][$groupIdx][filters][0][field]", "status")
                 parameter("searchCriteria[filter_groups][$groupIdx][filters][0][value]", status)
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]", "eq")
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]",
+                    "eq"
+                )
             }
         }
     }
@@ -104,15 +117,27 @@ internal class SalesApi {
 
             if (!search.isNullOrBlank()) {
                 parameter("searchCriteria[filter_groups][$groupIdx][filters][0][field]", "company")
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][value]", "%$search%")
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]", "like")
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][value]",
+                    "%$search%"
+                )
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]",
+                    "like"
+                )
                 groupIdx++
             }
 
             if (status != null) {
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][field]", "partnership_status")
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][field]",
+                    "partnership_status"
+                )
                 parameter("searchCriteria[filter_groups][$groupIdx][filters][0][value]", status)
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]", "eq")
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]",
+                    "eq"
+                )
             }
         }
     }
@@ -155,11 +180,12 @@ internal class SalesApi {
     }
 
     /** POST /V1/vendor-operations/partnerships/request */
-    suspend fun requestPartnership(data: PartnershipRequestBody): Result<HttpResponse> = runCatching {
-        HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/partnerships/request")) {
-            setBody(data)
+    suspend fun requestPartnership(data: PartnershipRequestBody): Result<HttpResponse> =
+        runCatching {
+            HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/partnerships/request")) {
+                setBody(data)
+            }
         }
-    }
 
     /** POST /V1/vendor-operations/customers */
     suspend fun createCustomer(data: NewCustomerRequest): Result<HttpResponse> = runCatching {
@@ -174,7 +200,10 @@ internal class SalesApi {
     }
 
     /** POST /V1/vendor-operations/customers/{customerId}/discounts */
-    suspend fun createCustomerDiscount(customerId: Long, data: DiscountRuleBody): Result<HttpResponse> =
+    suspend fun createCustomerDiscount(
+        customerId: Long,
+        data: DiscountRuleBody
+    ): Result<HttpResponse> =
         runCatching {
             HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/customers/$customerId/discounts")) {
                 setBody(data)
@@ -182,11 +211,12 @@ internal class SalesApi {
         }
 
     /** PUT /V1/vendor-operations/discounts/{ruleId} */
-    suspend fun updateDiscount(ruleId: Long, data: DiscountRuleBody): Result<HttpResponse> = runCatching {
-        HttpClientProvider.client.put(HttpClientProvider.url("vendor-operations/discounts/$ruleId")) {
-            setBody(data)
+    suspend fun updateDiscount(ruleId: Long, data: DiscountRuleBody): Result<HttpResponse> =
+        runCatching {
+            HttpClientProvider.client.put(HttpClientProvider.url("vendor-operations/discounts/$ruleId")) {
+                setBody(data)
+            }
         }
-    }
 
     /** DELETE /V1/vendor-operations/discounts/{ruleId} */
     suspend fun deleteDiscount(ruleId: Long): Result<HttpResponse> = runCatching {
@@ -213,18 +243,36 @@ internal class SalesApi {
 
             if (!search.isNullOrBlank()) {
                 parameter("searchCriteria[filter_groups][$groupIdx][filters][0][field]", "name")
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][value]", "%$search%")
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]", "like")
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][value]",
+                    "%$search%"
+                )
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]",
+                    "like"
+                )
                 parameter("searchCriteria[filter_groups][$groupIdx][filters][1][field]", "sku")
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][1][value]", "%$search%")
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][1][condition_type]", "like")
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][1][value]",
+                    "%$search%"
+                )
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][1][condition_type]",
+                    "like"
+                )
                 groupIdx++
             }
 
             if (categoryId != null) {
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][field]", "category_id")
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][field]",
+                    "category_id"
+                )
                 parameter("searchCriteria[filter_groups][$groupIdx][filters][0][value]", categoryId)
-                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]", "in")
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]",
+                    "in"
+                )
             }
         }
     }
@@ -266,7 +314,15 @@ internal class SalesApi {
         discountPercent: Int? = null
     ): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/customers/$customerId/cart/items")) {
-            setBody(OnBehalfCartItemRequest(OnBehalfCartItemInput(sku = sku, qty = qty, discountPercent = discountPercent)))
+            setBody(
+                OnBehalfCartItemRequest(
+                    OnBehalfCartItemInput(
+                        sku = sku,
+                        qty = qty,
+                        discountPercent = discountPercent
+                    )
+                )
+            )
         }
     }
 
@@ -276,7 +332,10 @@ internal class SalesApi {
     }
 
     /** POST /V1/vendor-operations/customers/{customerId}/orders */
-    suspend fun placeOnBehalfOrder(customerId: Long, message: String? = null): Result<HttpResponse> = runCatching {
+    suspend fun placeOnBehalfOrder(
+        customerId: Long,
+        message: String? = null
+    ): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/customers/$customerId/orders")) {
             if (!message.isNullOrBlank()) {
                 setBody(OnBehalfPlaceOrderRequest(OnBehalfPlaceRequestMessage(message)))
@@ -299,18 +358,19 @@ internal class SalesApi {
     }
 
     /** POST /V1/mobile/vendor/order/messages */
-    suspend fun sendOrderComment(orderId: String, message: String): Result<HttpResponse> = runCatching {
-        HttpClientProvider.client.post(HttpClientProvider.url("mobile/vendor/order/messages")) {
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append("orderId", orderId)
-                        append("message", message)
-                    }
+    suspend fun sendOrderComment(orderId: String, message: String): Result<HttpResponse> =
+        runCatching {
+            HttpClientProvider.client.post(HttpClientProvider.url("mobile/vendor/order/messages")) {
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("orderId", orderId)
+                            append("message", message)
+                        }
+                    )
                 )
-            )
+            }
         }
-    }
 
     /** GET /V1/mobile/vendor/order/pdf */
     suspend fun getOrderPdf(orderId: String): Result<HttpResponse> = runCatching {
@@ -326,12 +386,13 @@ internal class SalesApi {
     }
 
     /** GET /V1/vendor-operations/conversations - internal staff-to-staff message threads. */
-    suspend fun listConversations(page: Int = 1, pageSize: Int = 50): Result<HttpResponse> = runCatching {
-        HttpClientProvider.client.get(HttpClientProvider.url("vendor-operations/conversations")) {
-            parameter("searchCriteria[current_page]", page)
-            parameter("searchCriteria[page_size]", pageSize)
+    suspend fun listConversations(page: Int = 1, pageSize: Int = 50): Result<HttpResponse> =
+        runCatching {
+            HttpClientProvider.client.get(HttpClientProvider.url("vendor-operations/conversations")) {
+                parameter("searchCriteria[current_page]", page)
+                parameter("searchCriteria[page_size]", pageSize)
+            }
         }
-    }
 
     /** POST /V1/vendor-operations/conversations */
     suspend fun startConversation(counterpartEmployeeId: Long): Result<HttpResponse> = runCatching {
@@ -358,11 +419,12 @@ internal class SalesApi {
     }
 
     /** POST /V1/vendor-operations/conversations/{threadId}/messages */
-    suspend fun sendConversationMessage(threadId: Long, message: String): Result<HttpResponse> = runCatching {
-        HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/conversations/$threadId/messages")) {
-            setBody(StaffSendMessage(StaffSendMessageRequest(message)))
+    suspend fun sendConversationMessage(threadId: Long, message: String): Result<HttpResponse> =
+        runCatching {
+            HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/conversations/$threadId/messages")) {
+                setBody(StaffSendMessage(StaffSendMessageRequest(message)))
+            }
         }
-    }
 
     /** POST /V1/vendor-operations/conversations/{threadId}/read */
     suspend fun markConversationRead(threadId: Long): Result<HttpResponse> = runCatching {
@@ -380,12 +442,13 @@ internal class SalesApi {
     }
 
     /** GET /V1/mobile/message/thread */
-    suspend fun getMessageThread(threadId: String?, admin: Boolean): Result<HttpResponse> = runCatching {
-        HttpClientProvider.client.get(HttpClientProvider.url("mobile/message/thread")) {
-            parameter("threadId", threadId)
-            parameter("admin", admin)
+    suspend fun getMessageThread(threadId: String?, admin: Boolean): Result<HttpResponse> =
+        runCatching {
+            HttpClientProvider.client.get(HttpClientProvider.url("mobile/message/thread")) {
+                parameter("threadId", threadId)
+                parameter("admin", admin)
+            }
         }
-    }
 
     /** POST /V1/mobile/message/send (multipart, text-only - no files[] part). */
     suspend fun sendMessage(request: SendMessageRequest): Result<HttpResponse> = runCatching {
@@ -481,7 +544,8 @@ class SalesRepository internal constructor() {
     ): Flow<ResultState<OperationalCustomerSearchResults>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = SalesApi().getEmployeeCustomers(employeeId, page, pageSize, search).getOrNoInternet()
+            val response = SalesApi().getEmployeeCustomers(employeeId, page, pageSize, search)
+                .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<OperationalCustomerSearchResults>()))
                 return@flow
@@ -501,7 +565,8 @@ class SalesRepository internal constructor() {
     ): Flow<ResultState<OperationalCustomerSearchResults>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = SalesApi().getInvitableCustomers(page, pageSize, search).getOrNoInternet()
+            val response =
+                SalesApi().getInvitableCustomers(page, pageSize, search).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<OperationalCustomerSearchResults>()))
                 return@flow
@@ -552,23 +617,27 @@ class SalesRepository internal constructor() {
         }
     }.flowOn(Dispatchers.Default)
 
-    fun getCustomerDiscounts(customerId: Long): Flow<ResultState<DiscountRuleSearchResults>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = SalesApi().getCustomerDiscounts(customerId).getOrNoInternet()
-            if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<DiscountRuleSearchResults>()))
-                return@flow
+    fun getCustomerDiscounts(customerId: Long): Flow<ResultState<DiscountRuleSearchResults>> =
+        flow {
+            emit(ResultState.Loading)
+            try {
+                val response = SalesApi().getCustomerDiscounts(customerId).getOrNoInternet()
+                if (response.status == HttpStatusCode.OK) {
+                    emit(ResultState.Success(response.body<DiscountRuleSearchResults>()))
+                    return@flow
+                }
+                emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                emit(ResultState.Error(e.message))
             }
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
-        }
-    }.flowOn(Dispatchers.Default)
+        }.flowOn(Dispatchers.Default)
 
-    fun createCustomerDiscount(customerId: Long, data: DiscountRuleBody): Flow<ResultState<DiscountRule>> = flow {
+    fun createCustomerDiscount(
+        customerId: Long,
+        data: DiscountRuleBody
+    ): Flow<ResultState<DiscountRule>> = flow {
         emit(ResultState.Loading)
         try {
             val response = SalesApi().createCustomerDiscount(customerId, data).getOrNoInternet()
@@ -584,21 +653,22 @@ class SalesRepository internal constructor() {
         }
     }.flowOn(Dispatchers.Default)
 
-    fun updateDiscount(ruleId: Long, data: DiscountRuleBody): Flow<ResultState<DiscountRule>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = SalesApi().updateDiscount(ruleId, data).getOrNoInternet()
-            if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<DiscountRule>()))
-                return@flow
+    fun updateDiscount(ruleId: Long, data: DiscountRuleBody): Flow<ResultState<DiscountRule>> =
+        flow {
+            emit(ResultState.Loading)
+            try {
+                val response = SalesApi().updateDiscount(ruleId, data).getOrNoInternet()
+                if (response.status == HttpStatusCode.OK) {
+                    emit(ResultState.Success(response.body<DiscountRule>()))
+                    return@flow
+                }
+                emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                emit(ResultState.Error(e.message))
             }
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
-        }
-    }.flowOn(Dispatchers.Default)
+        }.flowOn(Dispatchers.Default)
 
     fun deleteDiscount(ruleId: Long): Flow<ResultState<Unit>> = flow {
         emit(ResultState.Loading)
@@ -624,7 +694,8 @@ class SalesRepository internal constructor() {
     ): Flow<ResultState<OnBehalfProductSearchResults>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = SalesApi().getProducts(page, pageSize, search, categoryId).getOrNoInternet()
+            val response =
+                SalesApi().getProducts(page, pageSize, search, categoryId).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<OnBehalfProductSearchResults>()))
                 return@flow
@@ -645,7 +716,9 @@ class SalesRepository internal constructor() {
     ): Flow<ResultState<OnBehalfProductSearchResults>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = SalesApi().getPreviouslyOrderedProducts(customerId, page, pageSize, search).getOrNoInternet()
+            val response =
+                SalesApi().getPreviouslyOrderedProducts(customerId, page, pageSize, search)
+                    .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<OnBehalfProductSearchResults>()))
                 return@flow
@@ -682,7 +755,8 @@ class SalesRepository internal constructor() {
     ): Flow<ResultState<OnBehalfCartResponse>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = SalesApi().addCartItem(customerId, sku, qty, discountPercent).getOrNoInternet()
+            val response =
+                SalesApi().addCartItem(customerId, sku, qty, discountPercent).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<OnBehalfCartResponse>()))
                 return@flow
@@ -695,23 +769,27 @@ class SalesRepository internal constructor() {
         }
     }.flowOn(Dispatchers.Default)
 
-    fun removeCartItem(customerId: Long, itemId: Long): Flow<ResultState<OnBehalfCartResponse>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = SalesApi().removeCartItem(customerId, itemId).getOrNoInternet()
-            if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<OnBehalfCartResponse>()))
-                return@flow
+    fun removeCartItem(customerId: Long, itemId: Long): Flow<ResultState<OnBehalfCartResponse>> =
+        flow {
+            emit(ResultState.Loading)
+            try {
+                val response = SalesApi().removeCartItem(customerId, itemId).getOrNoInternet()
+                if (response.status == HttpStatusCode.OK) {
+                    emit(ResultState.Success(response.body<OnBehalfCartResponse>()))
+                    return@flow
+                }
+                emit(ResultState.Error("Greška pri ažuriranju korpe."))
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                emit(ResultState.Error(e.message))
             }
-            emit(ResultState.Error("Greška pri ažuriranju korpe."))
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
-        }
-    }.flowOn(Dispatchers.Default)
+        }.flowOn(Dispatchers.Default)
 
-    fun placeOrder(customerId: Long, message: String? = null): Flow<ResultState<OnBehalfOrderResult>> = flow {
+    fun placeOrder(
+        customerId: Long,
+        message: String? = null
+    ): Flow<ResultState<OnBehalfOrderResult>> = flow {
         emit(ResultState.Loading)
         val api = SalesApi()
         try {
@@ -866,21 +944,22 @@ class SalesRepository internal constructor() {
         }
     }.flowOn(Dispatchers.Default)
 
-    fun getConversationMessages(threadId: Long): Flow<ResultState<StaffThreadMessageSearchResults>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = SalesApi().getConversationMessages(threadId).getOrNoInternet()
-            if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<StaffThreadMessageSearchResults>()))
-                return@flow
+    fun getConversationMessages(threadId: Long): Flow<ResultState<StaffThreadMessageSearchResults>> =
+        flow {
+            emit(ResultState.Loading)
+            try {
+                val response = SalesApi().getConversationMessages(threadId).getOrNoInternet()
+                if (response.status == HttpStatusCode.OK) {
+                    emit(ResultState.Success(response.body<StaffThreadMessageSearchResults>()))
+                    return@flow
+                }
+                emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                emit(ResultState.Error(e.message))
             }
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
-        }
-    }.flowOn(Dispatchers.Default)
+        }.flowOn(Dispatchers.Default)
 
     fun sendConversationMessage(threadId: Long, message: String): Flow<ResultState<Unit>> = flow {
         emit(ResultState.Loading)
@@ -932,22 +1011,28 @@ class SalesRepository internal constructor() {
 
     /** The response is an array wrapping one conversation; only its first inner message list
      * is used (matches composeApp's `result.data.firstOrNull()?.messages?.firstOrNull()`). */
-    fun getMessageThread(threadId: String?, admin: Boolean): Flow<ResultState<List<Message>>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = SalesApi().getMessageThread(threadId, admin).getOrNoInternet()
-            if (response.status == HttpStatusCode.OK) {
-                val conversations = response.body<List<Conversation>>()
-                emit(ResultState.Success(conversations.firstOrNull()?.messages?.firstOrNull() ?: emptyList()))
-                return@flow
+    fun getMessageThread(threadId: String?, admin: Boolean): Flow<ResultState<List<Message>>> =
+        flow {
+            emit(ResultState.Loading)
+            try {
+                val response = SalesApi().getMessageThread(threadId, admin).getOrNoInternet()
+                if (response.status == HttpStatusCode.OK) {
+                    val conversations = response.body<List<Conversation>>()
+                    emit(
+                        ResultState.Success(
+                            conversations.firstOrNull()?.messages?.firstOrNull()
+                                ?: emptyList<Message>()
+                        )
+                    )
+                    return@flow
+                }
+                emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                emit(ResultState.Error(e.message))
             }
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
-        }
-    }.flowOn(Dispatchers.Default)
+        }.flowOn(Dispatchers.Default)
 
     fun sendMessage(request: SendMessageRequest): Flow<ResultState<SendMessageResponse>> = flow {
         emit(ResultState.Loading)

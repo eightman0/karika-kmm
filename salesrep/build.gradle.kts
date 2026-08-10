@@ -23,7 +23,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "ENV_PREFIX", "\"test.\"")
+            buildConfigField("String", "ENV_PREFIX", "\"stage.\"")
             buildConfigField("String", "ENV_JWT", "\"09kqzjtmz5cf1klm9hjxw9yt3uaa63hk\"")
         }
         release {
