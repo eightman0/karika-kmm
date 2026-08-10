@@ -29,6 +29,8 @@ object HttpClientProvider {
 
     fun urlV1(query: String): String = "https://${PlatformEnv.envPrefix()}karika.ba/api/V1/$query"
 
+    fun chatImage(name: String): String = "$HOST/media/csmessaging/chat_images/$name"
+
     var token: String? = PlatformEnv.envJwt()
 
     val client: HttpClient by lazy {

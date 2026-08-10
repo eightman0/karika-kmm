@@ -12,7 +12,9 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentAdminNewMessageBinding
+import karika.distribucija.ba.salesrep.util.AttachmentPicker
 import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
+import karika.distribucija.ba.salesrep.util.isImageAttachmentFile
 
 /** Mirrors composeApp's SalesAdminNewMessageView.kt - the subject-header + bubble-list + input
  * bar, with no recipient picker (unlike CustomerNewMessageFragment, which has one). */
@@ -22,6 +24,7 @@ class AdminNewMessageFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: AdminNewMessageViewModel by viewModels()
     private lateinit var adapter: CustomerMessageAdapter
+    private val attachmentPicker = AttachmentPicker(this) { name, bytes -> viewModel.setAttachment(name, bytes) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,6 +42,7 @@ class AdminNewMessageFragment : Fragment() {
         binding.root.applyImeBottomPadding()
 
         adapter = CustomerMessageAdapter(
+            lifecycleOwner = viewLifecycleOwner,
             counterpartName = { getString(R.string.admin_conversation_counterpart_label) },
             formatTimestamp = { formatTime(it) },
             isMine = { it.isVendorMessage() }
@@ -51,6 +55,15 @@ class AdminNewMessageFragment : Fragment() {
         })
 
         binding.editMessage.addTextChangedListener(onTextChanged = { _, _, _, _ -> renderSendButton() })
+
+        binding.buttonAttach.setOnClickListener {
+            AttachSheet(
+                onPickFile = { attachmentPicker.pickFile() },
+                onPickPhoto = { attachmentPicker.pickPhoto() }
+            ).show(childFragmentManager, "attach_sheet")
+        }
+
+        binding.buttonRemoveAttachment.setOnClickListener { viewModel.clearAttachment() }
 
         binding.buttonSend.setOnClickListener {
             val text = binding.editMessage.text?.toString().orEmpty()
@@ -70,6 +83,7 @@ class AdminNewMessageFragment : Fragment() {
                 if (messages.isNotEmpty()) binding.recyclerMessages.scrollToPosition(messages.size - 1)
             }
         }
+        viewModel.attachment.observe(viewLifecycleOwner) { renderAttachment(it) }
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
             if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         }
@@ -77,8 +91,24 @@ class AdminNewMessageFragment : Fragment() {
         renderSendButton()
     }
 
+    /** Mirrors the pending-attachment chip in SalesAdminNewMessageView.kt (see
+     * CustomerConversationFragment's identical renderAttachment for the exact Compose match). */
+    private fun renderAttachment(attachment: Pair<String, ByteArray>?) {
+        binding.layoutPendingAttachment.visibility = if (attachment != null) View.VISIBLE else View.GONE
+        if (attachment != null) {
+            binding.iconAttachmentType.setImageResource(
+                if (isImageAttachmentFile(attachment.first)) R.drawable.ic_photo else R.drawable.ic_attachment
+            )
+            binding.textAttachmentName.text = attachment.first.take(32)
+        }
+        binding.iconAttach.setColorFilter(
+            requireContext().getColor(if (attachment != null) R.color.karika_blue else R.color.karika_gray6)
+        )
+        renderSendButton()
+    }
+
     private fun renderSendButton() {
-        val canSend = !binding.editMessage.text.isNullOrBlank()
+        val canSend = !binding.editMessage.text.isNullOrBlank() || viewModel.attachment.value != null
         binding.buttonSend.setBackgroundResource(
             if (canSend) R.drawable.bg_message_send_active else R.drawable.bg_message_send_inactive
         )

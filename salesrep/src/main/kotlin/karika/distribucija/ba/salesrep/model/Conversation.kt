@@ -2,6 +2,7 @@ package karika.distribucija.ba.salesrep.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /** Mirrors composeApp's domain/model/Conversation.kt, scoped to what the text-only
  * customer/admin message screens actually render (no attachment/admin-transient-flag fields -
@@ -46,7 +47,8 @@ data class Message(
     @SerialName("message") val message: String? = null,
     @SerialName("sender") val sender: String? = null,
     @SerialName("receiver_id") val receiverId: String? = null,
-    @SerialName("created_at") val createdAt: String? = null
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("images") val images: String? = null
 ) {
     fun isVendor() = sender == "vendor"
 
@@ -77,7 +79,11 @@ data class SendMessageRequest(
     val message: String,
     val subject: String?,
     val receiverId: Int?,
-    val threadId: Int?
+    val threadId: Int?,
+    /** (filename, bytes) of a pending attachment, if any - never JSON-encoded, pulled out
+     * manually when building the multipart body, matching composeApp's identical `@Transient`
+     * field on its own SendMessageRequest. */
+    @Transient val file: Pair<String?, ByteArray?>? = null
 )
 
 @Serializable
@@ -88,3 +94,8 @@ data class SendMessageResponse(
     @SerialName("success_message") val successMessage: String? = null,
     @SerialName("thread_id") val threadId: String? = null
 )
+
+/** Decode-only - never constructed/encoded client-side, only decoded from a Message's `images`
+ * JSON-string field when rendering an already-sent attachment. */
+@Serializable
+data class FileData(val filename: List<String>? = null)

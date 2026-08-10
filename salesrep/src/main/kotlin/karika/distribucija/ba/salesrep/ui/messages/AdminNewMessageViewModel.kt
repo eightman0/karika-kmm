@@ -30,14 +30,25 @@ class AdminNewMessageViewModel : ViewModel() {
     private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
 
+    private val _attachment = MutableLiveData<Pair<String, ByteArray>?>(null)
+    val attachment: LiveData<Pair<String, ByteArray>?> = _attachment
+
     fun setSubject(value: String) {
         _subject.value = value
+    }
+
+    fun setAttachment(filename: String, bytes: ByteArray) {
+        _attachment.value = filename to bytes
+    }
+
+    fun clearAttachment() {
+        _attachment.value = null
     }
 
     fun send(text: String) {
         val currentThread = _threadId.value
         val message = text.trim()
-        if (message.isBlank()) return
+        if (message.isBlank() && _attachment.value == null) return
 
         viewModelScope.launch {
             repository.sendMessage(
@@ -46,12 +57,14 @@ class AdminNewMessageViewModel : ViewModel() {
                     message = message,
                     subject = if (currentThread == null) _subject.value.orEmpty().trim() else null,
                     receiverId = 0,
-                    threadId = currentThread?.toIntOrNull()
+                    threadId = currentThread?.toIntOrNull(),
+                    file = _attachment.value
                 )
             ).collect { result ->
                 when (result) {
                     is ResultState.Loading -> Unit
                     is ResultState.Success -> {
+                        _attachment.value = null
                         if (currentThread == null) {
                             val newThreadId = result.data.threadId
                             if (newThreadId != null) {

@@ -67,6 +67,17 @@
     <string name="admin_conversation_counterpart_label">Administrator</string>
     <string name="admin_new_message_default_title">Nova poruka</string>
 
+    <string name="attach_sheet_title">Dodaj prilog</string>
+    <string name="attach_sheet_file_title">Fajl</string>
+    <string name="attach_sheet_file_subtitle">Dokument, PDF, tabela…</string>
+    <string name="attach_sheet_photo_title">Slika</string>
+    <string name="attach_sheet_photo_subtitle">Fotografija iz galerije ili kamere</string>
+    <string name="message_attach_cd">Priloži</string>
+    <string name="message_remove_attachment_cd">Ukloni prilog</string>
+    <string name="message_attachment_pdf_cd">PDF prilog</string>
+    <string name="message_attachment_image_cd">Slika u razgovoru</string>
+    <string name="message_image_preview_close_cd">Zatvori</string>
+
     <string name="orders_title">Upravljanje narudžbama</string>
     <string name="orders_search_hint">Pretraži po broju narudžbe</string>
     <string name="orders_empty">Nema narudžbi.</string>

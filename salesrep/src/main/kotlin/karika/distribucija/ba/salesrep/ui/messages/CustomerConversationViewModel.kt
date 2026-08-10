@@ -30,9 +30,20 @@ open class CustomerConversationViewModel(savedStateHandle: SavedStateHandle) : V
     private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
 
+    private val _attachment = MutableLiveData<Pair<String, ByteArray>?>(null)
+    val attachment: LiveData<Pair<String, ByteArray>?> = _attachment
+
     init {
         markRead()
         load()
+    }
+
+    fun setAttachment(filename: String, bytes: ByteArray) {
+        _attachment.value = filename to bytes
+    }
+
+    fun clearAttachment() {
+        _attachment.value = null
     }
 
     private fun load() {
@@ -49,7 +60,7 @@ open class CustomerConversationViewModel(savedStateHandle: SavedStateHandle) : V
 
     fun sendMessage(text: String) {
         val message = text.trim()
-        if (message.isBlank()) return
+        if (message.isBlank() && _attachment.value == null) return
         viewModelScope.launch {
             repository.sendMessage(
                 SendMessageRequest(
@@ -57,10 +68,12 @@ open class CustomerConversationViewModel(savedStateHandle: SavedStateHandle) : V
                     message = message,
                     subject = subject ?: "",
                     receiverId = receiverId,
-                    threadId = threadId.toIntOrNull()
+                    threadId = threadId.toIntOrNull(),
+                    file = _attachment.value
                 )
             ).collect { result ->
                 if (result is ResultState.Success) {
+                    _attachment.value = null
                     load()
                 } else if (result is ResultState.Error) {
                     _errorMessage.value = result.message

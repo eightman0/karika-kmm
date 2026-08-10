@@ -11,6 +11,8 @@ import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.salesrep.model.Category
 import karika.distribucija.ba.salesrep.model.Comment
@@ -496,6 +498,19 @@ internal class SalesApi {
                         append("subject", request.subject ?: "")
                         request.receiverId?.let { append("receiver_id", it) }
                         request.threadId?.let { append("thread_id", it) }
+                        request.file?.let { (filename, bytes) ->
+                            append(
+                                "files[]",
+                                bytes ?: return@let,
+                                Headers.build {
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        if (filename?.endsWith(".pdf", ignoreCase = true) == true) "application/pdf" else "image/png"
+                                    )
+                                    append(HttpHeaders.ContentDisposition, "filename=\"$filename\"")
+                                }
+                            )
+                        }
                     },
                     boundary = "WebAppBoundary"
                 )
