@@ -150,4 +150,29 @@
             android:id="@+id/action_new_customer_to_invite"
             app:destination="@id/inviteCustomerFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/internalMessagesFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.messages.InternalMessagesFragment"
+        android:label="@string/internal_messages_title">
+        <action
+            android:id="@+id/action_internal_messages_to_conversation"
+            app:destination="@id/internalConversationFragment" />
+        <action
+            android:id="@+id/action_internal_messages_to_new_message"
+            app:destination="@id/internalNewMessageFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/internalConversationFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.messages.InternalConversationFragment"
+        android:label="@string/internal_messages_title">
+        <argument android:name="threadId" app:argType="long" />
+        <argument android:name="counterpartName" app:argType="string" app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/internalNewMessageFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.messages.InternalNewMessageFragment"
+        android:label="@string/internal_new_message_title" />
 </navigation>

@@ -53,14 +53,15 @@ class MainActivity : AppCompatActivity() {
 
         navRows = listOf(
             NavRow(findViewById(R.id.row_nav_orders), findViewById(R.id.icon_nav_orders), findViewById(R.id.text_nav_orders), R.id.ordersListFragment),
-            NavRow(findViewById(R.id.row_nav_customers), findViewById(R.id.icon_nav_customers), findViewById(R.id.text_nav_customers), R.id.customersListFragment)
+            NavRow(findViewById(R.id.row_nav_customers), findViewById(R.id.icon_nav_customers), findViewById(R.id.text_nav_customers), R.id.customersListFragment),
+            NavRow(findViewById(R.id.row_nav_internal_messages), findViewById(R.id.icon_nav_internal_messages), findViewById(R.id.text_nav_internal_messages), R.id.internalMessagesFragment)
         )
 
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHost.navController
 
         appBarConfig = AppBarConfiguration(
-            setOf(R.id.ordersListFragment, R.id.customersListFragment),
+            setOf(R.id.ordersListFragment, R.id.customersListFragment, R.id.internalMessagesFragment),
             drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfig)
@@ -72,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.row_nav_customers).setOnClickListener { navigateToRoot(R.id.customersListFragment) }
         findViewById<View>(R.id.row_nav_customer_messages).setOnClickListener { showComingSoon() }
         findViewById<View>(R.id.row_nav_admin_messages).setOnClickListener { showComingSoon() }
-        findViewById<View>(R.id.row_nav_internal_messages).setOnClickListener { showComingSoon() }
+        findViewById<View>(R.id.row_nav_internal_messages).setOnClickListener { navigateToRoot(R.id.internalMessagesFragment) }
         findViewById<View>(R.id.row_logout).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
             (application as SalesRepApp).sessionManager.logout()

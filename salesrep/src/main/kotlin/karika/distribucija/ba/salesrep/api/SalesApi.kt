@@ -31,6 +31,14 @@ import karika.distribucija.ba.salesrep.model.OperationalCustomerSearchResults
 import karika.distribucija.ba.salesrep.model.Partnership
 import karika.distribucija.ba.salesrep.model.PartnershipRequestBody
 import karika.distribucija.ba.salesrep.model.ResultState
+import karika.distribucija.ba.salesrep.model.StaffRecipient
+import karika.distribucija.ba.salesrep.model.StaffSendMessage
+import karika.distribucija.ba.salesrep.model.StaffSendMessageRequest
+import karika.distribucija.ba.salesrep.model.StaffStartThread
+import karika.distribucija.ba.salesrep.model.StaffStartThreadRequest
+import karika.distribucija.ba.salesrep.model.StaffThread
+import karika.distribucija.ba.salesrep.model.StaffThreadMessageSearchResults
+import karika.distribucija.ba.salesrep.model.StaffThreadSearchResults
 import karika.distribucija.ba.salesrep.model.VendorOperationsMe
 import karika.distribucija.ba.salesrep.model.VendorOrder
 import karika.distribucija.ba.salesrep.network.HttpClientProvider
@@ -312,6 +320,50 @@ internal class SalesApi {
      * CategoryApi uses (not vendor/customer-scoped). */
     suspend fun getCategories(): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.get(HttpClientProvider.url("categories"))
+    }
+
+    /** GET /V1/vendor-operations/conversations - internal staff-to-staff message threads. */
+    suspend fun listConversations(page: Int = 1, pageSize: Int = 50): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("vendor-operations/conversations")) {
+            parameter("searchCriteria[current_page]", page)
+            parameter("searchCriteria[page_size]", pageSize)
+        }
+    }
+
+    /** POST /V1/vendor-operations/conversations */
+    suspend fun startConversation(counterpartEmployeeId: Long): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/conversations")) {
+            setBody(StaffStartThread(StaffStartThreadRequest(counterpartEmployeeId)))
+        }
+    }
+
+    /** GET /V1/vendor-operations/conversations/recipients */
+    suspend fun getConversationRecipients(): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("vendor-operations/conversations/recipients"))
+    }
+
+    /** GET /V1/vendor-operations/conversations/{threadId}/messages */
+    suspend fun getConversationMessages(
+        threadId: Long,
+        page: Int = 1,
+        pageSize: Int = 100
+    ): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("vendor-operations/conversations/$threadId/messages")) {
+            parameter("searchCriteria[current_page]", page)
+            parameter("searchCriteria[page_size]", pageSize)
+        }
+    }
+
+    /** POST /V1/vendor-operations/conversations/{threadId}/messages */
+    suspend fun sendConversationMessage(threadId: Long, message: String): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/conversations/$threadId/messages")) {
+            setBody(StaffSendMessage(StaffSendMessageRequest(message)))
+        }
+    }
+
+    /** POST /V1/vendor-operations/conversations/{threadId}/read */
+    suspend fun markConversationRead(threadId: Long): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/conversations/$threadId/read"))
     }
 }
 
@@ -710,6 +762,102 @@ class SalesRepository internal constructor() {
             val response = SalesApi().getCategories().getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<Category>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun listConversations(): Flow<ResultState<StaffThreadSearchResults>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().listConversations().getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<StaffThreadSearchResults>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun startConversation(counterpartEmployeeId: Long): Flow<ResultState<StaffThread>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().startConversation(counterpartEmployeeId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<StaffThread>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun getConversationRecipients(): Flow<ResultState<List<StaffRecipient>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().getConversationRecipients().getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<List<StaffRecipient>>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun getConversationMessages(threadId: Long): Flow<ResultState<StaffThreadMessageSearchResults>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().getConversationMessages(threadId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<StaffThreadMessageSearchResults>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun sendConversationMessage(threadId: Long, message: String): Flow<ResultState<Unit>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().sendConversationMessage(threadId, message).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(Unit))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun markConversationRead(threadId: Long): Flow<ResultState<Unit>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().markConversationRead(threadId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(Unit))
                 return@flow
             }
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))

@@ -21,6 +21,21 @@
     <string name="notifications_title">Obavijesti</string>
     <string name="coming_soon">Uskoro dostupno</string>
 
+    <string name="internal_messages_title">Interne poruke</string>
+    <string name="internal_messages_empty_title">Nema internih poruka</string>
+    <string name="internal_messages_empty_subtitle">Ovdje će se prikazati vaše interne\nporuke s kolegama.</string>
+    <string name="internal_messages_fab">Nova interna poruka</string>
+    <string name="internal_messages_unread_format">NOVO  %d</string>
+    <string name="internal_new_message_title">Nova interna poruka</string>
+    <string name="internal_message_subject_label">Predmet:</string>
+    <string name="internal_message_subject_hint">Unesite predmet poruke…</string>
+    <string name="internal_message_recipient_label">Prima:</string>
+    <string name="internal_message_recipient_hint">Pretraži sagovornika…</string>
+    <string name="internal_message_input_hint">Napiši poruku…</string>
+    <string name="internal_message_me_label">Ja</string>
+    <string name="internal_message_send_cd">Pošalji</string>
+    <string name="internal_message_remove_recipient_cd">Ukloni</string>
+
     <string name="orders_title">Upravljanje narudžbama</string>
     <string name="orders_search_hint">Pretraži po broju narudžbe</string>
     <string name="orders_empty">Nema narudžbi.</string>
