@@ -5,6 +5,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import karika.distribucija.ba.salesrep.model.ForgotPasswordRequest
 import karika.distribucija.ba.salesrep.model.LoginRequest
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.network.HttpClientProvider
@@ -17,6 +18,12 @@ internal class LoginApi {
     suspend fun login(request: LoginRequest): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.post(HttpClientProvider.url("integration/customer/token?type=vendor")) {
             setBody(request)
+        }
+    }
+
+    suspend fun forgotPass(email: String): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.urlV1("auth/reset-password")) {
+            setBody(ForgotPasswordRequest(email = email, template = "email_reset"))
         }
     }
 }
@@ -39,6 +46,27 @@ class LoginRepository internal constructor() {
                     }
                 )
             )
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    /** Mirrors composeApp's UserApi.forgotPass() Flow wrapper: the same privacy-preserving
+     * message is shown on both a non-OK response and success, so the caller can't tell whether
+     * the email actually exists in the system - only a genuine network/exception error gets its
+     * own message. */
+    fun forgotPassword(email: String): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = LoginApi().forgotPass(email).getOrNoInternet()
+            val message = "Ako postoji nalog povezan sa '$email', dobićete e-poruku sa vezom za resetovanje Vaše lozinke."
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(message))
+            } else {
+                emit(ResultState.Error(message))
+            }
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {

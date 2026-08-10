@@ -13,3 +13,9 @@ data class LoginRequest(
     val username: String,
     val password: String
 )
+
+@Serializable
+data class ForgotPasswordRequest(
+    val email: String,
+    val template: String
+)

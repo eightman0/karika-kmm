@@ -11,6 +11,11 @@
     <string name="login_button">Prijavi se</string>
     <string name="login_error_generic">Došlo je do greške. Pokušajte ponovo!</string>
 
+    <string name="forgot_password_description">Unesite vašu email adresu da resetujete vašu lozinku.</string>
+    <string name="forgot_password_email_hint">Unesite email</string>
+    <string name="forgot_password_close">Zatvori</string>
+    <string name="forgot_password_confirm">Potvrdi</string>
+
     <string name="drawer_orders">Upravljanje narudžbama</string>
     <string name="drawer_customers">Upravljanje kupcima</string>
     <string name="drawer_customer_messages">Poruke kupaca</string>

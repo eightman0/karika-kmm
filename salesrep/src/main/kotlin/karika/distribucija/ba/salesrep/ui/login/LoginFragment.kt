@@ -23,6 +23,7 @@ class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()
+    private val forgotPasswordViewModel: ForgotPasswordViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,7 +73,17 @@ class LoginFragment : Fragment() {
         binding.editPassword.addTextChangedListener(onTextChanged = { _, _, _, _ -> updateFormValid() })
 
         binding.textForgotPassword.setOnClickListener {
-            Toast.makeText(requireContext(), R.string.coming_soon, Toast.LENGTH_SHORT).show()
+            ForgotPasswordBottomSheet { email -> forgotPasswordViewModel.submit(email) }
+                .show(parentFragmentManager, "ForgotPasswordBottomSheet")
+        }
+
+        forgotPasswordViewModel.state.observe(viewLifecycleOwner) { result ->
+            val message = when (result) {
+                is ResultState.Success -> result.data
+                is ResultState.Error -> result.message
+                else -> null
+            } ?: return@observe
+            Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
         }
 
         binding.buttonLogin.setOnClickListener {

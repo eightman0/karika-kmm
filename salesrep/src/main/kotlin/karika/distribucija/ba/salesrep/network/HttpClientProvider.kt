@@ -27,6 +27,8 @@ object HttpClientProvider {
 
     fun url(arg: String): String = BASE_URL + arg
 
+    fun urlV1(query: String): String = "https://${PlatformEnv.envPrefix()}karika.ba/api/V1/$query"
+
     var token: String? = PlatformEnv.envJwt()
 
     val client: HttpClient by lazy {
