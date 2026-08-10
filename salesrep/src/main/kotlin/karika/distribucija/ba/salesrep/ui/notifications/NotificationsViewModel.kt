@@ -56,13 +56,17 @@ class NotificationsViewModel : ViewModel() {
         }
     }
 
+    /** Mirrors SalesNotificationsComponent.kt's markAsRead(): the mark-read call (+ list refresh
+     * on success) and the navigation resolution are siblings, not sequential - Compose fires
+     * PushHandler.handleNewPushIfExistsVendor() right after launching the mark-read coroutine,
+     * not after it completes, so navigation doesn't wait on that network round trip either. */
     fun markAsRead(item: Notification) {
         viewModelScope.launch {
             repository.markNotificationRead(item.id).collect { result ->
                 if (result is ResultState.Success) load()
             }
-            resolveDestination(item.route)?.let { _navigateTo.value = it }
         }
+        resolveDestination(item.route)?.let { _navigateTo.value = it }
     }
 
     fun clearNavigation() {
