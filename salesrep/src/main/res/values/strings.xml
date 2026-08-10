@@ -36,6 +36,32 @@
     <string name="internal_message_send_cd">Pošalji</string>
     <string name="internal_message_remove_recipient_cd">Ukloni</string>
 
+    <string name="customer_messages_title">Poruke kupaca</string>
+    <string name="customer_messages_filter_all">Sve</string>
+    <string name="customer_messages_filter_sent">Poslano</string>
+    <string name="customer_messages_filter_received">Primljeno</string>
+    <string name="customer_messages_empty_all">Nema poruka</string>
+    <string name="customer_messages_empty_sent">Nema poslanih poruka</string>
+    <string name="customer_messages_empty_received">Nema primljenih poruka</string>
+    <string name="customer_messages_empty_subtitle">Ovdje će se prikazati vaše poruke\nsa kupcima.</string>
+    <string name="customer_messages_fab">Pošalji novu poruku</string>
+    <string name="customer_messages_badge_new">NOVO</string>
+    <string name="customer_message_subject_label">Predmet:</string>
+    <string name="customer_message_subject_hint">Unesite predmet poruke…</string>
+    <string name="customer_message_recipient_label">Kupac:</string>
+    <string name="customer_message_recipient_hint">Pretraži kupca…</string>
+    <string name="customer_message_input_hint">Napiši poruku…</string>
+    <string name="customer_message_me_label">Ja</string>
+    <string name="customer_message_send_cd">Pošalji</string>
+    <string name="customer_message_remove_recipient_cd">Ukloni</string>
+    <string name="customer_new_message_title">Nova poruka</string>
+    <string name="customer_message_subject_missing">—</string>
+
+    <string name="admin_messages_empty_subtitle">Ovdje će se prikazati vaše poruke\nsa administratorom.</string>
+    <string name="admin_conversation_default_title">Poruka</string>
+    <string name="admin_conversation_counterpart_label">Administrator</string>
+    <string name="admin_new_message_default_title">Nova poruka</string>
+
     <string name="orders_title">Upravljanje narudžbama</string>
     <string name="orders_search_hint">Pretraži po broju narudžbe</string>
     <string name="orders_empty">Nema narudžbi.</string>

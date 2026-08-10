@@ -14,6 +14,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.salesrep.model.Category
 import karika.distribucija.ba.salesrep.model.Comment
+import karika.distribucija.ba.salesrep.model.Conversation
 import karika.distribucija.ba.salesrep.model.DiscountRule
 import karika.distribucija.ba.salesrep.model.DiscountRuleBody
 import karika.distribucija.ba.salesrep.model.DiscountRuleSearchResults
@@ -31,6 +32,8 @@ import karika.distribucija.ba.salesrep.model.OperationalCustomerSearchResults
 import karika.distribucija.ba.salesrep.model.Partnership
 import karika.distribucija.ba.salesrep.model.PartnershipRequestBody
 import karika.distribucija.ba.salesrep.model.ResultState
+import karika.distribucija.ba.salesrep.model.SendMessageRequest
+import karika.distribucija.ba.salesrep.model.SendMessageResponse
 import karika.distribucija.ba.salesrep.model.StaffRecipient
 import karika.distribucija.ba.salesrep.model.StaffSendMessage
 import karika.distribucija.ba.salesrep.model.StaffSendMessageRequest
@@ -364,6 +367,49 @@ internal class SalesApi {
     /** POST /V1/vendor-operations/conversations/{threadId}/read */
     suspend fun markConversationRead(threadId: Long): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.post(HttpClientProvider.url("vendor-operations/conversations/$threadId/read"))
+    }
+
+    /** GET /V1/mobile/message/list - customer/admin message threads (the same endpoint serves
+     * both areas, differentiated only by the admin query param). */
+    suspend fun listMessages(admin: Boolean): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("mobile/message/list")) {
+            parameter("pageSize", 1000)
+            parameter("curPage", 1)
+            parameter("admin", admin)
+        }
+    }
+
+    /** GET /V1/mobile/message/thread */
+    suspend fun getMessageThread(threadId: String?, admin: Boolean): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("mobile/message/thread")) {
+            parameter("threadId", threadId)
+            parameter("admin", admin)
+        }
+    }
+
+    /** POST /V1/mobile/message/send (multipart, text-only - no files[] part). */
+    suspend fun sendMessage(request: SendMessageRequest): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("mobile/message/send")) {
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("send_to_admin", request.sendToAdmin)
+                        append("message", request.message)
+                        append("subject", request.subject ?: "")
+                        request.receiverId?.let { append("receiver_id", it) }
+                        request.threadId?.let { append("thread_id", it) }
+                    },
+                    boundary = "WebAppBoundary"
+                )
+            )
+        }
+    }
+
+    /** POST /V1/mobile/message/markAsRead */
+    suspend fun markMessageRead(threadId: String?): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("mobile/message/markAsRead")) {
+            parameter("threadId", threadId)
+        }
     }
 }
 
@@ -856,6 +902,73 @@ class SalesRepository internal constructor() {
         emit(ResultState.Loading)
         try {
             val response = SalesApi().markConversationRead(threadId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(Unit))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun listMessages(admin: Boolean): Flow<ResultState<List<Conversation>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().listMessages(admin).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<List<Conversation>>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    /** The response is an array wrapping one conversation; only its first inner message list
+     * is used (matches composeApp's `result.data.firstOrNull()?.messages?.firstOrNull()`). */
+    fun getMessageThread(threadId: String?, admin: Boolean): Flow<ResultState<List<Message>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().getMessageThread(threadId, admin).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                val conversations = response.body<List<Conversation>>()
+                emit(ResultState.Success(conversations.firstOrNull()?.messages?.firstOrNull() ?: emptyList()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun sendMessage(request: SendMessageRequest): Flow<ResultState<SendMessageResponse>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().sendMessage(request).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<SendMessageResponse>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun markMessageRead(threadId: String?): Flow<ResultState<Unit>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().markMessageRead(threadId).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(Unit))
                 return@flow

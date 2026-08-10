@@ -175,4 +175,58 @@
         android:id="@+id/internalNewMessageFragment"
         android:name="karika.distribucija.ba.salesrep.ui.messages.InternalNewMessageFragment"
         android:label="@string/internal_new_message_title" />
+
+    <fragment
+        android:id="@+id/customerMessagesFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.messages.CustomerMessagesFragment"
+        android:label="@string/customer_messages_title">
+        <action
+            android:id="@+id/action_customer_messages_to_conversation"
+            app:destination="@id/customerConversationFragment" />
+        <action
+            android:id="@+id/action_customer_messages_to_new_message"
+            app:destination="@id/customerNewMessageFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/customerConversationFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.messages.CustomerConversationFragment"
+        android:label="@string/customer_messages_title">
+        <argument android:name="threadId" app:argType="string" />
+        <argument android:name="customerName" app:argType="string" app:nullable="true" />
+        <argument android:name="subject" app:argType="string" app:nullable="true" />
+        <argument android:name="receiverId" app:argType="integer" android:defaultValue="-1" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/customerNewMessageFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.messages.CustomerNewMessageFragment"
+        android:label="@string/customer_new_message_title" />
+
+    <fragment
+        android:id="@+id/adminMessagesFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.messages.AdminMessagesFragment"
+        android:label="@string/drawer_admin_messages">
+        <action
+            android:id="@+id/action_admin_messages_to_conversation"
+            app:destination="@id/adminConversationFragment" />
+        <action
+            android:id="@+id/action_admin_messages_to_new_message"
+            app:destination="@id/adminNewMessageFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminConversationFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.messages.AdminConversationFragment"
+        android:label="@string/drawer_admin_messages">
+        <argument android:name="threadId" app:argType="string" />
+        <argument android:name="customerName" app:argType="string" app:nullable="true" />
+        <argument android:name="subject" app:argType="string" app:nullable="true" />
+        <argument android:name="receiverId" app:argType="integer" android:defaultValue="-1" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminNewMessageFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.messages.AdminNewMessageFragment"
+        android:label="@string/admin_new_message_default_title" />
 </navigation>
