@@ -24,6 +24,7 @@ class CustomerNewMessageFragment : Fragment() {
     private lateinit var messageAdapter: CustomerMessageAdapter
     private lateinit var customerAdapter: CustomerRowAdapter
     private var customerFieldFocused = false
+    private var customerSearchWatcher: android.text.TextWatcher? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,7 +60,7 @@ class CustomerNewMessageFragment : Fragment() {
             customerFieldFocused = hasFocus
             renderCustomerField()
         }
-        binding.editCustomerSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
+        customerSearchWatcher = binding.editCustomerSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             viewModel.setCustomerSearch(text?.toString().orEmpty())
         })
         binding.buttonClearCustomer.setOnClickListener {
@@ -94,9 +95,17 @@ class CustomerNewMessageFragment : Fragment() {
         renderSendButton()
     }
 
+    /** Sets the selection in the ViewModel, then mirrors the name into the search field without
+     * letting that setText() re-fire the search TextWatcher - [viewModel]'s setCustomerSearch()
+     * clears the selection on every text change (that's how live-filtering-while-typing detects
+     * "the user is typing something new"), so a watcher left attached during this programmatic
+     * setText() would immediately undo the selection we just made - and worse, send() would
+     * then submit with no receiverId at all. */
     private fun selectCustomer(customer: OperationalCustomer) {
         viewModel.selectCustomer(customer)
+        customerSearchWatcher?.let { binding.editCustomerSearch.removeTextChangedListener(it) }
         binding.editCustomerSearch.setText(customer.company ?: customer.fullName)
+        customerSearchWatcher?.let { binding.editCustomerSearch.addTextChangedListener(it) }
         customerFieldFocused = false
         binding.editCustomerSearch.clearFocus()
     }

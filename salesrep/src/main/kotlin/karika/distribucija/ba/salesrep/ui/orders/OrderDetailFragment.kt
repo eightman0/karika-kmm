@@ -20,6 +20,7 @@ import karika.distribucija.ba.salesrep.databinding.ItemOrderDetailProductBinding
 import karika.distribucija.ba.salesrep.model.Comment
 import karika.distribucija.ba.salesrep.model.VendorOrder
 import karika.distribucija.ba.salesrep.model.VendorProduct
+import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 import karika.distribucija.ba.salesrep.util.karikaPriceFormat
 
 /** Mirrors composeApp's ui/view/salesrep/orders/detail/SalesOrderDetailView.kt. */
@@ -40,6 +41,8 @@ class OrderDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.scrollContent.applyImeBottomPadding()
 
         binding.buttonSendComment.setOnClickListener {
             val text = binding.editComment.text?.toString().orEmpty()

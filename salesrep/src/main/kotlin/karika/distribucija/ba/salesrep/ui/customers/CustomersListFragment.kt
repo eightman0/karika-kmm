@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomersListBinding
 import karika.distribucija.ba.salesrep.model.OperationalCustomer
+import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 
 class CustomersListFragment : Fragment() {
 
@@ -55,6 +56,7 @@ class CustomersListFragment : Fragment() {
         )
         binding.recyclerCustomers.adapter = adapter
         binding.recyclerCustomers.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerCustomers.applyImeBottomPadding()
         binding.recyclerCustomers.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager

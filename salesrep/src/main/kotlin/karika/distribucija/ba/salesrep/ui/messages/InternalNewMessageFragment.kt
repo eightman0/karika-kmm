@@ -24,6 +24,7 @@ class InternalNewMessageFragment : Fragment() {
     private lateinit var messageAdapter: InternalMessageAdapter
     private lateinit var recipientAdapter: RecipientRowAdapter
     private var recipientFieldFocused = false
+    private var recipientSearchWatcher: android.text.TextWatcher? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,7 +57,7 @@ class InternalNewMessageFragment : Fragment() {
             recipientFieldFocused = hasFocus
             renderRecipientField()
         }
-        binding.editRecipientSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
+        recipientSearchWatcher = binding.editRecipientSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             viewModel.setRecipientSearch(text?.toString().orEmpty())
         })
         binding.buttonClearRecipient.setOnClickListener {
@@ -94,9 +95,16 @@ class InternalNewMessageFragment : Fragment() {
         renderSendButton()
     }
 
+    /** Sets the selection in the ViewModel, then mirrors the name into the search field without
+     * letting that setText() re-fire the search TextWatcher - [viewModel]'s setRecipientSearch()
+     * clears the selection on every text change (that's how live-filtering-while-typing detects
+     * "the user is typing something new"), so a watcher left attached during this programmatic
+     * setText() would immediately undo the selection we just made. */
     private fun selectRecipient(recipient: StaffRecipient) {
         viewModel.selectRecipient(recipient)
+        recipientSearchWatcher?.let { binding.editRecipientSearch.removeTextChangedListener(it) }
         binding.editRecipientSearch.setText(recipient.name)
+        recipientSearchWatcher?.let { binding.editRecipientSearch.addTextChangedListener(it) }
         recipientFieldFocused = false
         binding.editRecipientSearch.clearFocus()
     }
