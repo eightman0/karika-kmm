@@ -311,7 +311,7 @@ private fun EnterComment(component: MessagesOverviewComponent) {
                     .weight(1f)
             ) {
                 KarikaTextFieldWithoutBorder(
-                    modifier = Modifier,
+                    modifier = Modifier.fillMaxWidth(),
                     value = comment,
                     placeholder = "Napiši komentar",
                     keyboardType = KeyboardType.Text,
