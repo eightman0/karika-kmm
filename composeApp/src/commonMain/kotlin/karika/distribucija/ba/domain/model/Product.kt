@@ -185,6 +185,10 @@ data class Product(
                 ?.content)
     }
 
+    fun getImages(): List<String> {
+        return listOf(image())
+    }
+
     fun isInStockLabel(): String {
         if (stockData == null) {
             stockData = extensionAttributes?.stockData

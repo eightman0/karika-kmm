@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -48,6 +50,7 @@ import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaIntTextField
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.PagerIndicator
 import karika.distribucija.ba.ui.components.PrimaryButton
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
 import karika.distribucija.ba.ui.components.TopBarWithBack
@@ -204,25 +207,7 @@ fun ProductImage(component: ProductComponent) {
                 .border(width = 1.dp, color = KarikaColors.Gray5)
                 .aspectRatio(1f),
         ) {
-            Box(
-                modifier = Modifier
-                    .blur(radius = if (product.hasOnStock()) 0.dp else 5.dp)
-                    .fillMaxSize()
-            ) {
-                KarikaImage(
-                    modifier = Modifier
-                        .onClick {
-                            component.showImagePreview(product.image())
-                        }
-                        .fillMaxSize(),
-                    model = product.image()
-                )
-                Column {
-                    DiscountView(product)
-                    NewView(product)
-                }
-            }
-            NotAvailableOverlay(product)
+            ProductImageContent(product, component)
         }
         if (grid == 4) {
             Box(
@@ -245,26 +230,49 @@ fun ProductImageTablet(modifier: Modifier, component: ProductComponent) {
             .border(width = 1.dp, color = KarikaColors.Gray5)
             .aspectRatio(1f),
     ) {
-        Box(
+        ProductImageContent(product, component)
+    }
+}
+
+@Composable
+private fun ProductImageContent(product: Product, component: ProductComponent) {
+    val images = product.getImages()
+    val pagerState = rememberPagerState { images.size }
+
+    Box(
+        modifier = Modifier
+            .blur(radius = if (product.hasOnStock()) 0.dp else 5.dp)
+            .fillMaxSize()
+    ) {
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
-                .blur(radius = if (product.hasOnStock()) 0.dp else 5.dp)
                 .fillMaxSize()
-        ) {
+        ) { page ->
             KarikaImage(
                 modifier = Modifier
                     .onClick {
-                        component.showImagePreview(product.image())
+                        component.showImagesPreview(images, page)
                     }
                     .fillMaxSize(),
-                model = product.image()
+                model = images[page]
             )
-            Column {
-                DiscountView(product)
-                NewView(product)
-            }
         }
-        NotAvailableOverlay(product)
+        Column {
+            DiscountView(product)
+            NewView(product)
+        }
+        if (images.size > 1) {
+            PagerIndicator(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 8.dp),
+                pageCount = images.size,
+                currentPage = pagerState.currentPage
+            )
+        }
     }
+    NotAvailableOverlay(product)
 }
 
 @Composable

@@ -28,6 +28,7 @@ import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.TrackingPayload
 import karika.distribucija.ba.domain.model.Vendor
+import karika.distribucija.ba.ui.common.state.ImagePreviewState
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
 import karika.distribucija.ba.ui.view.main.MainConfig
@@ -512,7 +513,11 @@ open class CommonComponent(
     }
 
     fun showImagePreview(imageUrl: Any?) {
-        stateHolder.imagePreview.value = imageUrl
+        stateHolder.imagePreview.value = imageUrl?.let { ImagePreviewState(listOf(it)) }
+    }
+
+    fun showImagesPreview(images: List<Any?>, startIndex: Int = 0) {
+        stateHolder.imagePreview.value = if (images.isEmpty()) null else ImagePreviewState(images, startIndex)
     }
 
     fun dashNavigate(config: DashConfig, replace: Boolean = false) {

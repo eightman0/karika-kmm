@@ -2,8 +2,13 @@ package karika.distribucija.ba.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateCentroid
+import androidx.compose.foundation.gestures.calculateCentroidSize
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -27,6 +34,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
@@ -35,29 +43,49 @@ import coil3.compose.rememberAsyncImagePainter
 import karika.distribucija.ba.ui.common.CommonComponent
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_tertiary
+import kotlin.math.abs
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun ImagePreview(component: CommonComponent) {
-    val image by component.stateHolder.imagePreview.asState()
+    val preview by component.stateHolder.imagePreview.asState()
 
-    if (image != null) {
+    if (preview != null) {
+        val images = preview!!.images
+        val pagerState = rememberPagerState(initialPage = preview!!.startIndex) { images.size }
+
         Box(
             modifier = Modifier
                 .hideKeyboard()
                 .background(color = KarikaColors.White)
                 .fillMaxSize()
         ) {
-            ZoomableImage(
-                painter = rememberAsyncImagePainter(image),
+            HorizontalPager(
+                state = pagerState,
                 modifier = Modifier
                     .windowInsetsPadding(WindowInsets.safeDrawing)
-                    .fillMaxSize(),
-                contentScale = ContentScale.Fit,
-                minScale = 1f,
-                maxScale = 5f,
-                doubleTapScale = 2f
-            )
+                    .fillMaxSize()
+            ) { page ->
+                ZoomableImage(
+                    painter = rememberAsyncImagePainter(images[page]),
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentScale = ContentScale.Fit,
+                    minScale = 1f,
+                    maxScale = 5f,
+                    doubleTapScale = 2f
+                )
+            }
+            if (images.size > 1) {
+                PagerIndicator(
+                    modifier = Modifier
+                        .windowInsetsPadding(WindowInsets.safeDrawing)
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 16.dp),
+                    pageCount = images.size,
+                    currentPage = pagerState.currentPage
+                )
+            }
             Box(
                 modifier = Modifier
                     .windowInsetsPadding(WindowInsets.safeDrawing)
@@ -108,17 +136,51 @@ fun ZoomableImage(
             .clipToBounds()
             .onSizeChanged { containerSize = it }
             .pointerInput(Unit) {
-                detectTransformGestures(
-                    onGesture = { centroid, pan, zoom, _ ->
-                        val newScale = (scale * zoom).coerceIn(minScale, maxScale)
-                        val scaleChange = newScale / scale
+                awaitEachGesture {
+                    var pastTouchSlop = false
+                    var accumulatedZoom = 1f
+                    var accumulatedPan = Offset.Zero
+                    val touchSlop = viewConfiguration.touchSlop
 
-                        val newOffset = (offset - centroid) * scaleChange + centroid + pan
+                    awaitFirstDown(requireUnconsumed = false)
+                    do {
+                        val event = awaitPointerEvent()
+                        val canceled = event.changes.any { it.isConsumed }
+                        if (!canceled) {
+                            val zoomChange = event.calculateZoom()
+                            val panChange = event.calculatePan()
+                            val multitouch = event.changes.size > 1
 
-                        scale = newScale
-                        offset = clampToBounds(newOffset, scale, containerSize)
-                    }
-                )
+                            if (!pastTouchSlop) {
+                                accumulatedZoom *= zoomChange
+                                accumulatedPan += panChange
+                                val centroidSize = event.calculateCentroidSize(useCurrent = false)
+                                val zoomMotion = abs(1 - accumulatedZoom) * centroidSize
+                                val panMotion = accumulatedPan.getDistance()
+                                if (zoomMotion > touchSlop || panMotion > touchSlop) {
+                                    pastTouchSlop = true
+                                }
+                            }
+
+                            if (pastTouchSlop && (multitouch || scale > 1f)) {
+                                if (zoomChange != 1f || panChange != Offset.Zero) {
+                                    val centroid = event.calculateCentroid(useCurrent = false)
+                                    val newScale = (scale * zoomChange).coerceIn(minScale, maxScale)
+                                    val scaleChange = newScale / scale
+                                    val newOffset = (offset - centroid) * scaleChange + centroid + panChange
+
+                                    scale = newScale
+                                    offset = clampToBounds(newOffset, scale, containerSize)
+                                }
+                                event.changes.forEach {
+                                    if (it.positionChanged()) {
+                                        it.consume()
+                                    }
+                                }
+                            }
+                        }
+                    } while (!canceled && event.changes.any { it.pressed })
+                }
             }
             .pointerInput(Unit) {
                 detectTapGestures(

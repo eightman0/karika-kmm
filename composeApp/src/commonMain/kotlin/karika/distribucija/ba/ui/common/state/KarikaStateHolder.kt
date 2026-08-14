@@ -10,6 +10,8 @@ import karika.distribucija.ba.ui.common.state.customer.CustomerSpecificHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorNotificationHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorSpecificHandler
 
+data class ImagePreviewState(val images: List<Any?>, val startIndex: Int = 0)
+
 class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
     var sessionHandler = SessionHandler()
     var messageHandler = MessageHandler()
@@ -21,7 +23,7 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
     var customerNotificationHandler = CustomerNotificationHandler()
     var cartHandler = CartHandler(commonHandler)
 
-    val imagePreview = mutableStateOf<Any?>(null)
+    val imagePreview = mutableStateOf<ImagePreviewState?>(null)
 
     fun logout() {
         sessionHandler = SessionHandler()
