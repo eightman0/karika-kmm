@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -388,15 +388,16 @@ fun TopBarDashboard(
                     if (badge > 0) {
                         Box(
                             modifier = Modifier
-                                .size(16.dp)
+                                .defaultMinSize(minWidth = 16.dp, minHeight = 16.dp)
                                 .offset(16.dp, (-8).dp)
-                                .background(color = KarikaColors.Red, shape = CircleShape),
+                                .background(color = KarikaColors.Red, shape = RoundedCornerShape(50))
+                                .padding(horizontal = 4.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             KarikaText(
                                 modifier = Modifier
                                     .padding(0.dp),
-                                text = "$badge",
+                                text = if (badge > 9) "9+" else "$badge",
                                 textSize = 10.sp,
                                 fontWeight = FontWeight.W400,
                                 color = KarikaColors.White

@@ -264,11 +264,12 @@ private fun RuleSection(
                                     label = rule.itemOrCategoryLabel,
                                     value = rule.itemOrCategoryName
                                 )
-                                RuleInfoRow(
-                                    label = "Min. količina:",
-                                    value = rule.minQtyForDiscount.toDoubleOrNull()?.toInt()
-                                        ?.toString() ?: "0"
-                                )
+                                rule.minQtyForDiscount.toDoubleOrNull()?.toInt()?.let { minQty ->
+                                    RuleInfoRow(
+                                        label = "Min. količina:",
+                                        value = minQty.toString()
+                                    )
+                                }
                                 RuleInfoRow(
                                     label = "Rabat:",
                                     value = "${rule.discountPercent.replace(".", ",")}%",

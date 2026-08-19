@@ -426,7 +426,7 @@ private fun CustomerRegionDropdown(
                         )
                     },
                     onClick = {
-                        component.onCustomerRegionSelected(region.label())
+                        component.onCustomerRegionSelected(region)
                         dropdownState.negate()
                     }
                 )
@@ -460,7 +460,7 @@ private fun ItemOrCategoryDropdown(
                     .fillMaxWidth(),
                 title = "Odaberi artikal ili kategoriju",
                 value = itemOrCategory,
-                placeholder = "Odaberi artikal ili kategoriju",
+                placeholder = "Svi artikli ili kategorije",
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next,
                 onValueChange = {

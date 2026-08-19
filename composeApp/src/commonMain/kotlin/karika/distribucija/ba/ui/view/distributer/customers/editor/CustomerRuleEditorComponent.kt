@@ -6,6 +6,7 @@ import karika.distribucija.ba.domain.api.DashRepository
 import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.CustomerRuleRequest
 import karika.distribucija.ba.domain.model.DiscountRule
+import karika.distribucija.ba.domain.model.KarikaUnit
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Shop
@@ -32,6 +33,11 @@ class CustomerRuleEditorComponent(
 
     val target = mutableStateOf(initialRule?.targetName ?: "")
     val selectedShop = mutableStateOf<Shop?>(null)
+    val selectedCustomerRegion = mutableStateOf(
+        initialRule?.targetValue?.let { value ->
+            stateHolder.commonHandler.config.value.customerRegionList.firstOrNull { it.unit() == value }
+        }
+    )
     val itemOrCategory = mutableStateOf(
         initialRule?.let { rule ->
             if (rule.itemId != null && rule.itemType != null) {
@@ -123,8 +129,9 @@ class CustomerRuleEditorComponent(
         _filteredCustomerGroups.update { customerGroups }
     }
 
-    fun onCustomerRegionSelected(label: String) {
-        target.value = label
+    fun onCustomerRegionSelected(region: KarikaUnit) {
+        target.value = region.label()
+        selectedCustomerRegion.value = region
         _filteredCustomerRegions.update { customerRegions }
     }
 
@@ -203,7 +210,7 @@ class CustomerRuleEditorComponent(
 
         scope.launch {
             val discount = discountPercent.value.replace(',', '.').toFloatOrNull() ?: 0f
-            val minQty = minQtyForDiscount.value.replace(',', '.').toFloatOrNull() ?: 0f
+            val minQty = minQtyForDiscount.value.replace(',', '.').toFloatOrNull()
 
             val productId = if (itemOrCategory.value?.third == "proizvod") itemOrCategory.value?.first?.toLongOrNull() else null
             val categoryId = if (itemOrCategory.value?.third == "category") itemOrCategory.value?.first?.toLongOrNull() else null
@@ -212,8 +219,8 @@ class CustomerRuleEditorComponent(
                 discountRule = DiscountRule(
                     discountType = ruleScope.toApiScope(),
                     customerId = if (ruleScope == RuleScope.CUSTOMER) selectedShop.value?.id?.toLongOrNull() else null,
-                    customerGroupValue = if (ruleScope == RuleScope.CUSTOMER_TYPE) target.value.trim() else null,
-                    customerRegionValue = if (ruleScope == RuleScope.CUSTOMER_REGION) target.value.trim() else null,
+                    customerGroupValue = if (ruleScope == RuleScope.CUSTOMER_TYPE) target.value.trim().ifBlank { null } else null,
+                    customerRegionValue = if (ruleScope == RuleScope.CUSTOMER_REGION) selectedCustomerRegion.value?.unit()?.ifBlank { null } else null,
                     productId = productId,
                     categoryId = categoryId,
                     minQty = minQty,
@@ -272,17 +279,8 @@ class CustomerRuleEditorComponent(
     }
 
     private fun validate(): Boolean {
-        if (target.value.isBlank()) {
+        if (ruleScope != RuleScope.CUSTOMER && target.value.isBlank()) {
             showErrorMessage("Molimo odaberite ${ruleScope.targetField()}.")
-            return false
-        }
-        if (itemOrCategory.value == null) {
-            showErrorMessage("Molimo odaberite artikal ili kategoriju.")
-            return false
-        }
-        val minQty = minQtyForDiscount.value.replace(',', '.').toFloatOrNull()
-        if (minQty == null || minQty <= 0f) {
-            showErrorMessage("Min. količina za rabat mora biti veća od 0.")
             return false
         }
         val discount = discountPercent.value.replace(',', '.').toDoubleOrNull()

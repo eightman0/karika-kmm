@@ -103,10 +103,14 @@ private fun DiscountRule.toUiRule(component: CustomersComponent): ScopedRule {
         else -> RuleScope.CUSTOMER
     }
 
+    val regionList = component.stateHolder.commonHandler.config.value.customerRegionList
+
     val targetLabel = when (parsedScope) {
-        RuleScope.CUSTOMER -> "$customerName"
-        RuleScope.CUSTOMER_TYPE -> customerGroupValue ?: ""
-        RuleScope.CUSTOMER_REGION -> customerRegionValue ?: ""
+        RuleScope.CUSTOMER -> customerName ?: "Svi kupci"
+        RuleScope.CUSTOMER_TYPE -> customerGroupValue ?: "Svi tipovi kupaca"
+        RuleScope.CUSTOMER_REGION -> regionList.firstOrNull { it.unit() == customerRegionValue }
+            ?.label()
+            ?: (customerRegionValue ?: "Sve regije")
     }
 
     val itemLabel = when {
@@ -125,6 +129,7 @@ private fun DiscountRule.toUiRule(component: CustomersComponent): ScopedRule {
         id = ruleId?.toString() ?: "",
         label = "$targetLabel — $itemLabel ($discountPercent%)",
         targetName = targetLabel,
+        targetValue = if (parsedScope == RuleScope.CUSTOMER_REGION) customerRegionValue else null,
         itemOrCategoryLabel = itemTitle,
         itemOrCategoryName = itemLabel,
         minQtyForDiscount = minQty?.toString() ?: "",
@@ -160,7 +165,7 @@ fun RuleScope.targetFieldTitle(): String = when (this) {
 }
 
 fun RuleScope.targetFieldPlaceholder(): String = when (this) {
-    RuleScope.CUSTOMER -> "Odaberi kupca"
+    RuleScope.CUSTOMER -> "Svi kupci"
     RuleScope.CUSTOMER_TYPE -> "Odaberi tip kupca"
     RuleScope.CUSTOMER_REGION -> "Odaberi regiju kupca"
 }
@@ -172,6 +177,7 @@ data class CustomerRule(
     val id: String = "",
     val label: String = "",
     val targetName: String = "",
+    val targetValue: String? = null,
     val itemOrCategoryLabel: String = "",
     val itemOrCategoryName: String = "",
     val minQtyForDiscount: String = "",
