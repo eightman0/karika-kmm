@@ -17,8 +17,11 @@ import karika.distribucija.ba.domain.model.ChangePasswordRequest
 import karika.distribucija.ba.domain.model.ChangePasswordResponse
 import karika.distribucija.ba.domain.model.Config
 import karika.distribucija.ba.domain.model.ForgotPasswordRequest
+import karika.distribucija.ba.domain.model.NotificationPreferences
+import karika.distribucija.ba.domain.model.NotificationPreferencesResponse
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.UpdateCustomerRequest
+import karika.distribucija.ba.domain.model.UpdateNotificationPreferencesRequest
 import karika.distribucija.ba.domain.model.UserDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -84,6 +87,22 @@ internal class UserApi {
         return@runCatching HttpClientProvider.client.get(
             url("mobile/customer/me/delete")
         )
+    }
+
+    suspend fun notificationPreferences(): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.get(
+            url("mobile/customer/notification-preferences")
+        )
+    }
+
+    suspend fun updateNotificationPreferences(
+        request: UpdateNotificationPreferencesRequest
+    ): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.put(
+            url("mobile/customer/notification-preferences")
+        ) {
+            setBody(request)
+        }
     }
 }
 
@@ -253,6 +272,48 @@ class UserRepository internal constructor() {
                 .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<String>() ))
+            } else {
+                emit(
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
+                )
+            }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun getNotificationPreferences(): Flow<ResultState<NotificationPreferences>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = UserApi()
+                .notificationPreferences()
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<NotificationPreferencesResponse>().notificationPreferences))
+            } else {
+                emit(
+                    ResultState.Error("Došlo je do greške. Pokušajte ponovo!")
+                )
+            }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun updateNotificationPreferences(
+        preferences: NotificationPreferences
+    ): Flow<ResultState<NotificationPreferences>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = UserApi()
+                .updateNotificationPreferences(UpdateNotificationPreferencesRequest(preferences))
+                .getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<NotificationPreferencesResponse>().notificationPreferences))
             } else {
                 emit(
                     ResultState.Error("Došlo je do greške. Pokušajte ponovo!")

@@ -3,12 +3,14 @@ package karika.distribucija.ba.ui.view.main.profile.account
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.model.Address
+import karika.distribucija.ba.domain.model.Attributes
 import karika.distribucija.ba.domain.model.EventType
 import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.UpdateCustomerRequest
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.view.distributer.products.details.toInt
 import kotlinx.coroutines.launch
 
 class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
@@ -31,6 +33,10 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     val employeeCount = mutableStateOf("")
     val viberPhoneNumber = mutableStateOf("")
 
+    val emailNotifications = mutableStateOf(true)
+    val viberNotifications = mutableStateOf(true)
+    val pushNotifications = mutableStateOf(true)
+
     fun updateAddress() {
         scope.launch {
             userRepository.put(
@@ -52,6 +58,33 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                                     } else {
                                         it
                                     }
+                                },
+                            customAttributes = stateHolder.customerSpecificHandler.userDetails.value.customAttributes
+                                .filter {
+                                    it.attributeCode != "notification_email_enabled" ||
+                                            it.attributeCode != "notification_viber_enabled" ||
+                                            it.attributeCode != "notification_push_enabled"
+                                }
+                                .toMutableList()
+                                .apply {
+                                    add(
+                                        Attributes(
+                                            "notification_email_enabled",
+                                            emailNotifications.value.toInt()
+                                        )
+                                    )
+                                    add(
+                                        Attributes(
+                                            "notification_viber_enabled",
+                                            viberNotifications.value.toInt()
+                                        )
+                                    )
+                                    add(
+                                        Attributes(
+                                            "notification_push_enabled",
+                                            pushNotifications.value.toInt()
+                                        )
+                                    )
                                 }
                         )
                 )
@@ -81,6 +114,32 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                     customer = stateHolder.customerSpecificHandler.userDetails.value
                         .copy(
                             customAttributes = stateHolder.customerSpecificHandler.userDetails.value.customAttributes
+                                .filter {
+                                    it.attributeCode != "notification_email_enabled" ||
+                                            it.attributeCode != "notification_viber_enabled" ||
+                                            it.attributeCode != "notification_push_enabled"
+                                }
+                                .toMutableList()
+                                .apply {
+                                    add(
+                                        Attributes(
+                                            "notification_email_enabled",
+                                            emailNotifications.value.toInt()
+                                        )
+                                    )
+                                    add(
+                                        Attributes(
+                                            "notification_viber_enabled",
+                                            viberNotifications.value.toInt()
+                                        )
+                                    )
+                                    add(
+                                        Attributes(
+                                            "notification_push_enabled",
+                                            pushNotifications.value.toInt()
+                                        )
+                                    )
+                                }
                                 .map {
                                     when (it.attributeCode) {
                                         "b2b_velicina_objekta" -> it.copy(value = objectSize.value)
@@ -148,6 +207,13 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                 stateHolder.customerSpecificHandler.userDetails.value.employeeCount()
             viberPhoneNumber.value =
                 stateHolder.customerSpecificHandler.userDetails.value.viberPhoneNumber()
+
+            emailNotifications.value =
+                stateHolder.customerSpecificHandler.userDetails.value.customAttributes.find { it.attributeCode == "notification_email_enabled" }?.value == "1"
+            viberNotifications.value =
+                stateHolder.customerSpecificHandler.userDetails.value.customAttributes.find { it.attributeCode == "notification_viber_enabled" }?.value == "1"
+            pushNotifications.value =
+                stateHolder.customerSpecificHandler.userDetails.value.customAttributes.find { it.attributeCode == "notification_push_enabled" }?.value == "1"
 
             editContact.value = true
             return

@@ -75,13 +75,15 @@ fun KarikaSwitch(
 
 @Composable
 fun KarikaSwitch1(
+    modifier: Modifier = Modifier,
     title: String,
-    checked: MutableState<Boolean>
+    checked: MutableState<Boolean>,
+    onCheckedChange: (Boolean) -> Unit = {}
 ) {
     Row(
-        modifier = Modifier,
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         KarikaText(
             text = title,
@@ -103,6 +105,7 @@ fun KarikaSwitch1(
                 checked = checked.value,
                 onCheckedChange = {
                     checked.value = it
+                    onCheckedChange(it)
                 },
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = KarikaColors.Blue,

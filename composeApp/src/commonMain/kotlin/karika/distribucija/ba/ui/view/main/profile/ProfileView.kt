@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -209,6 +210,26 @@ private fun Actions(component: ProfileComponent) {
                 contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.Notifications)
+            }
+        }
+        YSpacer16()
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            PrimaryButton(
+                modifier = Modifier
+                    .height(50.dp)
+                    .weight(1f),
+                title = "Zahtjevi za partnerstvo",
+                icon = Res.drawable.ic_messages,
+                color = KarikaColors.Gray2,
+                contentPadding = PaddingValues(4.dp)
+            ) {
+                component.appNavigate(AppConfig.PartnershipRequests)
             }
         }
         YSpacer16()

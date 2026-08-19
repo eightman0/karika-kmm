@@ -274,7 +274,7 @@ private fun Boolean.toStatus(): String {
     }
 }
 
-private fun Boolean.toInt(): String {
+fun Boolean.toInt(): String {
     return when (this) {
         true -> "1"
         false -> "0"

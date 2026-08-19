@@ -121,3 +121,20 @@ data class ChangePasswordResponse(
     val status: String? = null,
     val message: String? = null
 )
+
+@Serializable
+data class NotificationPreferences(
+    val email: Boolean = true,
+    val viber: Boolean = true,
+    val push: Boolean = true
+)
+
+@Serializable
+data class NotificationPreferencesResponse(
+    @SerialName("notification_preferences") val notificationPreferences: NotificationPreferences
+)
+
+@Serializable
+data class UpdateNotificationPreferencesRequest(
+    val notificationPreferences: NotificationPreferences
+)

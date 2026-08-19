@@ -33,6 +33,7 @@ import karika.distribucija.ba.ui.view.main.profile.notifications.NotificationsCo
 import karika.distribucija.ba.ui.view.main.profile.order.OrdersComponent
 import karika.distribucija.ba.ui.view.main.profile.order.comments.CommentsComponent
 import karika.distribucija.ba.ui.view.main.profile.order.details.OrderDetailsComponent
+import karika.distribucija.ba.ui.view.main.profile.partnership.PartnershipRequestsComponent
 import karika.distribucija.ba.ui.view.main.profile.points.PointsComponent
 import karika.distribucija.ba.ui.view.main.vendor.details.VendorDetailsComponent
 import karika.distribucija.ba.ui.view.prelogin.PreLoginComponent
@@ -87,6 +88,9 @@ sealed class AppConfig {
     @Serializable
     data object Notifications : AppConfig()
 
+    @Serializable
+    data object PartnershipRequests : AppConfig()
+
     // vendor_side
 
     @Serializable
@@ -116,6 +120,7 @@ sealed class Child {
 
     class Points(val component: PointsComponent) : Child()
     class Notifications(val component: NotificationsComponent) : Child()
+    class PartnershipRequests(val component: PartnershipRequestsComponent) : Child()
     class Faq(val component: FaqComponent) : Child()
 
     //vendor_side
@@ -234,6 +239,10 @@ class AppComponent(
 
             is AppConfig.Notifications -> Child.Notifications(
                 NotificationsComponent(componentContext, stateHolder)
+            )
+
+            is AppConfig.PartnershipRequests -> Child.PartnershipRequests(
+                PartnershipRequestsComponent(componentContext, stateHolder)
             )
 
             is AppConfig.Dashboard -> Child.Dashboard(

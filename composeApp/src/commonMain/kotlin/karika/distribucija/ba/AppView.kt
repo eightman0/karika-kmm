@@ -43,6 +43,7 @@ import karika.distribucija.ba.ui.view.main.profile.notifications.NotificationsVi
 import karika.distribucija.ba.ui.view.main.profile.order.OrdersView
 import karika.distribucija.ba.ui.view.main.profile.order.comments.CommentsView
 import karika.distribucija.ba.ui.view.main.profile.order.details.OrderDetailsView
+import karika.distribucija.ba.ui.view.main.profile.partnership.PartnershipRequestsView
 import karika.distribucija.ba.ui.view.main.profile.points.PointsView
 import karika.distribucija.ba.ui.view.main.vendor.details.VendorDetailsView
 import karika.distribucija.ba.ui.view.prelogin.PreLoginView
@@ -91,6 +92,7 @@ fun App(component: AppComponent) {
 
                     is Child.Points -> PointsView(child.component)
                     is Child.Notifications -> NotificationsView(child.component)
+                    is Child.PartnershipRequests -> PartnershipRequestsView(child.component)
 
                     is Child.Faq -> FaqView(child.component)
 

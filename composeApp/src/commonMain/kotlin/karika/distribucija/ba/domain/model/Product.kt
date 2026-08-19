@@ -37,6 +37,7 @@ data class Product(
     @SerialName("status") var status: Int? = null,
     @SerialName("image") val image: String? = null,
     @SerialName("media_gallery_entries") var mediaGalleryEntries: ArrayList<MediaGalleryEntries> = arrayListOf(),
+    @SerialName("media_gallery") var mediaGallery: ArrayList<MediaGalleryItem> = arrayListOf(),
     @SerialName("custom_attributes") var customAttributes: ArrayList<CustomAttributes> = arrayListOf(),
     @SerialName("extension_attributes") var extensionAttributes: ExtensionAttributes? = null,
     @SerialName("rewardPoints") var rewardPoints: Double? = null,
@@ -186,6 +187,13 @@ data class Product(
     }
 
     fun getImages(): List<String> {
+        if (mediaGallery.isNotEmpty()) {
+            return mediaGallery
+                .sortedBy { it.position ?: Int.MAX_VALUE }
+                .mapNotNull { it.file }
+                .map { imageUrl(it) }
+        }
+
         return listOf(image())
     }
 
@@ -274,6 +282,16 @@ data class Product(
     }
 }
 
+
+@Serializable
+data class MediaGalleryItem(
+    @SerialName("file") var file: String? = null,
+    @SerialName("image_url") var imageUrl: String? = null,
+    @SerialName("thumbnail_url") var thumbnailUrl: String? = null,
+    @SerialName("position") var position: Int? = null,
+    @SerialName("label") var label: String? = null,
+    @SerialName("is_main") var isMain: Boolean? = null
+)
 
 @Serializable
 data class MediaGalleryEntries(
