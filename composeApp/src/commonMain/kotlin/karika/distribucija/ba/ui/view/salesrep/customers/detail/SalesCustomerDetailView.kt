@@ -157,7 +157,7 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
                             )
                             Spacer(Modifier.height(4.dp))
                             KarikaText(
-                                text = customer.fullName,
+                                text = customer.company,
                                 color = KarikaColors.Gray2,
                                 textSize = 20.sp,
                                 fontWeight = FontWeight.W700
@@ -201,7 +201,7 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
                     // Full name row
                     ProfileInfoRow(
                         icon = Res.drawable.ic_person,
-                        label = "Puno ime",
+                        label = "Kontakt osoba",
                         value = customer.fullName
                     )
 

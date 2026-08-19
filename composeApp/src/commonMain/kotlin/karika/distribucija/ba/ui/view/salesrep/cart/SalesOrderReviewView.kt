@@ -878,13 +878,17 @@ private fun SpecificationTable(
 
         // ── Data rows ────────────────────────────────────────────────────
         items.forEachIndexed { rowIndex, item ->
+            val discountMultiplier = 1.0 - (item.discountPercent ?: 0) / 100.0
+            val discountedPrice = item.price * discountMultiplier
+            val rowTotalVpc = discountedPrice * item.qty
+            val rowTotalWithPdv = rowTotalVpc * 1.17
             val cells = listOf(
                 item.name,
                 "${item.discountPercent ?: 0}",
-                item.priceString(),
+                karikaPriceFormat(discountedPrice) + " KM",
                 "${item.qty} ${item.quantityUnit ?: "kom"}",
-                karikaPriceFormat(item.price * item.qty) + " KM",
-                item.rowTotalString(),
+                karikaPriceFormat(rowTotalVpc) + " KM",
+                karikaPriceFormat(rowTotalWithPdv) + " KM",
                 "${item.commissionPercent.toInt()}",
                 karikaPriceFormat(item.commission) + " KM"
             )

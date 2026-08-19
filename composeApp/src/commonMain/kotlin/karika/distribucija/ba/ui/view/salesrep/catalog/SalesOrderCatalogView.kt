@@ -585,6 +585,14 @@ private fun ProductCard(
                     textSize = 18.sp,
                     fontWeight = FontWeight.W700
                 )
+                if (!product.isInStock) {
+                    KarikaText(
+                        text = "Nije na stanju",
+                        color = KarikaColors.Red4,
+                        textSize = 12.sp,
+                        fontWeight = FontWeight.W600
+                    )
+                }
             }
         }
 
@@ -602,7 +610,7 @@ private fun ProductCard(
                 modifier = Modifier
                     .height(44.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(KarikaColors.White)
+                    .background(if (product.isInStock) KarikaColors.White else KarikaColors.Gray20)
                     .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(10.dp))
                     .padding(horizontal = 2.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -611,15 +619,17 @@ private fun ProductCard(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { if (qty > 1) qty-- },
+                        .then(
+                            if (product.isInStock) Modifier.clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) { if (qty > 1) qty-- } else Modifier
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     KarikaText(
                         text = "−",
-                        color = KarikaColors.Gray2,
+                        color = if (product.isInStock) KarikaColors.Gray2 else KarikaColors.Gray7,
                         textSize = 18.sp,
                         fontWeight = FontWeight.W700
                     )
@@ -631,12 +641,13 @@ private fun ProductCard(
                         val n = v.filter { it.isDigit() }.toIntOrNull()
                         if (n != null && n > 0) qty = n
                     },
+                    enabled = product.isInStock,
                     modifier = Modifier.width(42.dp),
                     textStyle = TextStyle(
                         fontFamily = karikaFonts(),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.W700,
-                        color = KarikaColors.Gray2,
+                        color = if (product.isInStock) KarikaColors.Gray2 else KarikaColors.Gray7,
                         textAlign = TextAlign.Center
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -647,16 +658,18 @@ private fun ProductCard(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { qty++ },
+                        .then(
+                            if (product.isInStock) Modifier.clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) { qty++ } else Modifier
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = vectorResource(Res.drawable.ic_add_plus),
                         contentDescription = "+",
-                        tint = KarikaColors.Gray2,
+                        tint = if (product.isInStock) KarikaColors.Gray2 else KarikaColors.Gray7,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -668,11 +681,13 @@ private fun ProductCard(
                     .weight(1f)
                     .height(44.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(KarikaColors.Blue)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { onAdd(qty) },
+                    .background(if (product.isInStock) KarikaColors.Blue else KarikaColors.Gray9)
+                    .then(
+                        if (product.isInStock) Modifier.clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { onAdd(qty) } else Modifier
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Row(
@@ -682,12 +697,12 @@ private fun ProductCard(
                     Icon(
                         imageVector = vectorResource(Res.drawable.ic_cart_add),
                         contentDescription = "",
-                        tint = KarikaColors.White,
+                        tint = if (product.isInStock) KarikaColors.White else KarikaColors.Gray6,
                         modifier = Modifier.size(16.dp)
                     )
                     KarikaText(
                         text = if (cartQty > 0) "Ažuriraj" else "Dodaj",
-                        color = KarikaColors.White,
+                        color = if (product.isInStock) KarikaColors.White else KarikaColors.Gray6,
                         textSize = 13.sp,
                         fontWeight = FontWeight.W700
                     )
