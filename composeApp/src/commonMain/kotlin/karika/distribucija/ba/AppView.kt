@@ -30,7 +30,7 @@ import karika.distribucija.ba.ui.components.MandatoryUpdateModal
 import karika.distribucija.ba.ui.components.ScreenSaver
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardView
-import karika.distribucija.ba.ui.view.main.profile.partnership.PartnershipRequestsView
+import karika.distribucija.ba.ui.view.shop.profile.partnership.PartnershipRequestsView
 import karika.distribucija.ba.ui.view.prelogin.PreLoginView
 import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesDashboardView
 import karika.distribucija.ba.ui.view.shop.MainView

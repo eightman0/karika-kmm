@@ -1,4 +1,4 @@
-package karika.distribucija.ba.ui.view.main.profile.partnership
+package karika.distribucija.ba.ui.view.shop.profile.partnership
 
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext

@@ -20,7 +20,7 @@ import karika.distribucija.ba.ui.common.appVersion
 import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardComponent
-import karika.distribucija.ba.ui.view.main.profile.partnership.PartnershipRequestsComponent
+import karika.distribucija.ba.ui.view.shop.profile.partnership.PartnershipRequestsComponent
 import karika.distribucija.ba.ui.view.prelogin.PreLoginComponent
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesDashboardComponent
