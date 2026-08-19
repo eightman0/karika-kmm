@@ -4,6 +4,10 @@ import androidx.compose.ui.graphics.Color
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.view.distributer.orders.toDateTime
 import karika.distribucija.ba.util.karikaPriceFormat
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toInstant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -11,6 +15,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.roundToInt
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 @Serializable
 data class OrdersResponse(
@@ -60,6 +66,8 @@ data class Order(
     @SerialName("order_id") var orderId: String? = null,
     @SerialName("products") var products: ArrayList<OrderProduct> = arrayListOf(),
     @SerialName("has_changes") var hasChange: String = "0",
+    @SerialName("is_archived") var isArchived: Boolean? = false,
+    @SerialName("comments_open_until") var commentsOpenUntil: String? = null,
 ) {
     fun vpcString() = karikaPriceFormat(total) + " KM"
     fun vpcPdvString() = karikaPriceFormat(total * 1.17) + " KM"
@@ -100,6 +108,26 @@ data class Order(
     fun canceled() = listOf("cancelled", "rejected", "approved").contains(status)
 
     fun showAddBill() = status == "estimate-sent"
+
+    @OptIn(ExperimentalTime::class)
+    fun commentsArchived(): Boolean {
+        if (isArchived == true) return true
+        val until = commentsOpenUntil ?: return false
+        return try {
+            val formatter = LocalDateTime.Format {
+                year(); char('-')
+                monthNumber(); char('-')
+                day(); char(' ')
+                hour(); char(':')
+                minute(); char(':')
+                second()
+            }
+            val closesAt = LocalDateTime.parse(until, formatter).toInstant(TimeZone.UTC)
+            Clock.System.now() >= closesAt
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
 
 @Serializable

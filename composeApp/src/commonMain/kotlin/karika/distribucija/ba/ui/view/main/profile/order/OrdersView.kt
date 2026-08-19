@@ -474,7 +474,11 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
                 KarikaText(
                     modifier = Modifier
                         .onClick {
-                            component.navigateToComments(order)
+                            if (order.commentsArchived()) {
+                                component.showWarningMessage("Komentari narudžbe su arhivirani.")
+                            } else {
+                                component.navigateToComments(order)
+                            }
                         }
                         .weight(1f),
                     text = "Komentari(${order.commentCount})",
