@@ -50,7 +50,6 @@ import karika.distribucija.ba.domain.model.OperationalCustomer
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.YSpacer16
-import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.karikaFonts
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_add_plus
@@ -59,10 +58,12 @@ import karikav2.composeapp.generated.resources.ic_cancel
 import karikav2.composeapp.generated.resources.ic_check_circle_filled
 import karikav2.composeapp.generated.resources.ic_email
 import karikav2.composeapp.generated.resources.ic_filter_alt
+import karikav2.composeapp.generated.resources.ic_gift
 import karikav2.composeapp.generated.resources.ic_menu
+import karikav2.composeapp.generated.resources.ic_messages
+import karikav2.composeapp.generated.resources.ic_orders
 import karikav2.composeapp.generated.resources.ic_search
 import karikav2.composeapp.generated.resources.ic_shopping_cart
-import karikav2.composeapp.generated.resources.ic_storefront
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.vectorResource
@@ -250,6 +251,9 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
                     customer = customer,
                     onClick = { component.openCustomer(customer) },
                     onOrder = { component.openOrderCatalog(customer) },
+                    onMessage = { component.openMessageCustomer(customer) },
+                    onDiscount = { component.openDiscount(customer) },
+                    onHistory = { component.openOrderHistory() },
                     onShowReps = { repsSheetList = it; showRepsSheet = true }
                 )
             }
@@ -668,6 +672,9 @@ private fun CustomerCard(
     customer: OperationalCustomer,
     onClick: () -> Unit = {},
     onOrder: () -> Unit = {},
+    onMessage: () -> Unit = {},
+    onDiscount: () -> Unit = {},
+    onHistory: () -> Unit = {},
     onShowReps: (List<AssignedEmployeeSummary>) -> Unit = {}
 ) {
     Column(
@@ -687,7 +694,8 @@ private fun CustomerCard(
             // Avatar + status badge
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
                 val badgeBg = if (customer.isActive) KarikaColors.Green4 else KarikaColors.Blue3_10
                 val badgeLabel = when (customer.partnershipStatus) {
@@ -700,11 +708,16 @@ private fun CustomerCard(
                 val badgeColor = if (customer.isActive) KarikaColors.Green3 else KarikaColors.Blue
 
                 KarikaText(
-                    text = customer.fullName,
+                    text = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName,
                     color = KarikaColors.Gray2,
                     textSize = 18.sp,
-                    fontWeight = FontWeight.W700
+                    fontWeight = FontWeight.W700,
+                    modifier = Modifier.weight(1f),
+                    textOverflow = TextOverflow.Ellipsis,
+                    maxLines = 2
                 )
+
+                Spacer(Modifier.width(8.dp))
 
                 Box(
                     modifier = Modifier
@@ -721,22 +734,11 @@ private fun CustomerCard(
                     )
                 }
             }
-
-            YSpacer16()
-
-            if (!customer.company.isNullOrBlank()) {
-                InfoRow(iconRes = Res.drawable.ic_storefront, text = customer.company)
-                YSpacer8()
-            }
-
-            if (!customer.email.isNullOrBlank()) {
-                InfoRow(iconRes = Res.drawable.ic_email, text = customer.email)
-            }
         }
 
         if (customer.isActive) {
             // Card footer
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
@@ -746,15 +748,12 @@ private fun CustomerCard(
                         color = KarikaColors.Gray9,
                         shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
                     )
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                // Company name + Komercijalisti chips
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Komercijalisti chips using assigned_employees
-                    val reps = customer.assignedEmployees.take(3)
-                    if (reps.isNotEmpty()) {
+                // Komercijalisti chips using assigned_employees
+                val reps = customer.assignedEmployees.take(3)
+                if (reps.isNotEmpty()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         val avatarSize = 26
                         val overlap = 10
                         val totalWidth =
@@ -798,74 +797,89 @@ private fun CustomerCard(
                             textSize = 10.sp,
                             fontWeight = FontWeight.W700
                         )
-                    } else if (customer.company.isNullOrBlank()) {
-                        KarikaText(
-                            text = "Nije dodijeljen",
-                            color = KarikaColors.Gray7,
-                            textSize = 10.sp,
-                            fontWeight = FontWeight.W700
-                        )
                     }
+                    Spacer(Modifier.height(10.dp))
                 }
 
-                // Buttons
+                // Action buttons
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Order button
-                    if (customer.isActive) {
-                        Row(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(KarikaColors.Blue)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() }
-                                ) { onOrder() }
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            Icon(
-                                imageVector = vectorResource(Res.drawable.ic_shopping_cart),
-                                contentDescription = "",
-                                tint = KarikaColors.White,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            KarikaText(
-                                text = "Naruči",
-                                color = KarikaColors.White,
-                                textSize = 12.sp,
-                                fontWeight = FontWeight.W700
-                            )
-                        }
-                    } else {
-                        Row(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(KarikaColors.Gray5)
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            Icon(
-                                imageVector = vectorResource(Res.drawable.ic_cancel),
-                                contentDescription = "",
-                                tint = KarikaColors.Gray6,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            KarikaText(
-                                text = "Naruči",
-                                color = KarikaColors.Gray6,
-                                textSize = 12.sp,
-                                fontWeight = FontWeight.W700
-                            )
-                        }
-                    }
+                    CustomerActionButton(
+                        icon = Res.drawable.ic_messages,
+                        label = "Pošalji poruku",
+                        modifier = Modifier.weight(1f),
+                        onClick = onMessage
+                    )
+                    CustomerActionButton(
+                        icon = Res.drawable.ic_gift,
+                        label = "Dodijeli rabat",
+                        modifier = Modifier.weight(1f),
+                        onClick = onDiscount
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CustomerActionButton(
+                        icon = Res.drawable.ic_orders,
+                        label = "Historija narudžbi",
+                        modifier = Modifier.weight(1f),
+                        onClick = onHistory
+                    )
+                    CustomerActionButton(
+                        icon = Res.drawable.ic_shopping_cart,
+                        label = "Naruči",
+                        modifier = Modifier.weight(1f),
+                        onClick = onOrder
+                    )
                 }
             }
         }
+    }
+}
+
+// ── Card action button ────────────────────────────────────────────────────────
+
+@Composable
+private fun CustomerActionButton(
+    icon: DrawableResource,
+    label: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(KarikaColors.Blue)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onClick
+            )
+            .padding(horizontal = 10.dp, vertical = 9.dp),
+        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = vectorResource(icon),
+            contentDescription = "",
+            tint = KarikaColors.White,
+            modifier = Modifier.size(13.dp)
+        )
+        KarikaText(
+            text = label,
+            color = KarikaColors.White,
+            textSize = 11.sp,
+            fontWeight = FontWeight.W700,
+            maxLines = 1,
+            textOverflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -920,37 +934,5 @@ private fun AddOptionItem(
                 fontWeight = FontWeight.W400
             )
         }
-    }
-}
-
-// ── Info row ──────────────────────────────────────────────────────────────────
-
-@Composable
-private fun InfoRow(iconRes: DrawableResource, text: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .size(30.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(KarikaColors.Gray10),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = vectorResource(iconRes),
-                contentDescription = "",
-                tint = KarikaColors.Gray6,
-                modifier = Modifier.size(15.dp)
-            )
-        }
-        Spacer(Modifier.width(10.dp))
-        KarikaText(
-            text = text,
-            color = KarikaColors.Gray6,
-            textSize = 13.sp,
-            fontWeight = FontWeight.W400,
-            modifier = Modifier.fillMaxWidth(),
-            textOverflow = TextOverflow.Ellipsis,
-            maxLines = 1
-        )
     }
 }

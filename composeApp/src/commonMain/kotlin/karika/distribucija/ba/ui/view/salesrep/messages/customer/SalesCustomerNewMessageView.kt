@@ -97,7 +97,8 @@ fun SalesCustomerNewMessageView(component: SalesCustomerNewMessageComponent) {
     var showAttachSheet by remember { mutableStateOf(false) }
     var customerFieldFocused by remember { mutableStateOf(false) }
 
-    val canSend = text.isNotBlank() || attachment != null
+    val canSend = (text.isNotBlank() || attachment != null) &&
+        (threadId != null || subject.isNotBlank())
     val showDropdown = customerFieldFocused && selectedCustomer == null && customers.isNotEmpty()
 
     LaunchedEffect(messages.size) {
@@ -163,25 +164,13 @@ fun SalesCustomerNewMessageView(component: SalesCustomerNewMessageComponent) {
                 }
 
                 // Customer search/select field
-                Column {
+                if (component.customerLocked) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(
-                                if (showDropdown)
-                                    RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp)
-                                else
-                                    RoundedCornerShape(14.dp)
-                            )
-                            .border(
-                                1.dp,
-                                if (customerFieldFocused) KarikaColors.Blue else KarikaColors.Gray9,
-                                if (showDropdown)
-                                    RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp)
-                                else
-                                    RoundedCornerShape(14.dp)
-                            )
-                            .background(KarikaColors.Gray20)
+                            .clip(RoundedCornerShape(14.dp))
+                            .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(14.dp))
+                            .background(KarikaColors.Gray9.copy(alpha = 0.3f))
                             .padding(horizontal = 14.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -192,82 +181,121 @@ fun SalesCustomerNewMessageView(component: SalesCustomerNewMessageComponent) {
                             fontWeight = FontWeight.W600,
                             modifier = Modifier.padding(end = 8.dp)
                         )
-                        Box(
-                            modifier = Modifier.weight(1f),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            if (customerSearch.isEmpty()) {
-                                KarikaText(
-                                    text = "Pretraži kupca...",
-                                    color = KarikaColors.Gray7,
-                                    textSize = 13.sp,
-                                    fontWeight = FontWeight.W400
-                                )
-                            }
-                            BasicTextField(
-                                value = customerSearch,
-                                onValueChange = { component.setCustomerSearch(it) },
-                                modifier = Modifier.fillMaxWidth(),
-                                textStyle = TextStyle(
-                                    color = if (selectedCustomer != null) KarikaColors.Blue else KarikaColors.Gray2,
-                                    fontSize = 13.sp,
-                                    fontWeight = if (selectedCustomer != null) FontWeight.W600 else FontWeight.W500
-                                ),
-                                cursorBrush = SolidColor(KarikaColors.Blue),
-                                singleLine = true,
-                                readOnly = selectedCustomer != null,
-                                onTextLayout = {},
-                                decorationBox = { innerTextField ->
-                                    LaunchedEffect(Unit) { customerFieldFocused = true }
-                                    innerTextField()
-                                }
-                            )
-                        }
-                        if (selectedCustomer != null || customerSearch.isNotEmpty()) {
-                            Spacer(Modifier.width(6.dp))
-                            Icon(
-                                imageVector = vectorResource(Res.drawable.ic_cancel_circle),
-                                contentDescription = "Ukloni",
-                                tint = KarikaColors.Gray6,
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() }
-                                    ) {
-                                        component.clearCustomer()
-                                        customerFieldFocused = true
-                                    }
-                            )
-                        }
+                        KarikaText(
+                            text = selectedCustomer?.company ?: selectedCustomer?.fullName ?: "",
+                            color = KarikaColors.Gray6,
+                            textSize = 13.sp,
+                            fontWeight = FontWeight.W600,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
-
-                    // Dropdown results
-                    if (showDropdown) {
-                        Column(
+                } else {
+                    Column {
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp))
+                                .clip(
+                                    if (showDropdown)
+                                        RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp)
+                                    else
+                                        RoundedCornerShape(14.dp)
+                                )
                                 .border(
                                     1.dp,
-                                    KarikaColors.Blue,
-                                    RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp)
+                                    if (customerFieldFocused) KarikaColors.Blue else KarikaColors.Gray9,
+                                    if (showDropdown)
+                                        RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp)
+                                    else
+                                        RoundedCornerShape(14.dp)
                                 )
-                                .background(KarikaColors.White)
+                                .background(KarikaColors.Gray20)
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            customers.take(6).forEachIndexed { index, customer ->
-                                CustomerRow(
-                                    customer = customer,
-                                    onClick = {
-                                        component.selectCustomer(customer)
-                                        customerFieldFocused = false
+                            KarikaText(
+                                text = "Kupac:",
+                                color = KarikaColors.Gray6,
+                                textSize = 13.sp,
+                                fontWeight = FontWeight.W600,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                if (customerSearch.isEmpty()) {
+                                    KarikaText(
+                                        text = "Pretraži kupca...",
+                                        color = KarikaColors.Gray7,
+                                        textSize = 13.sp,
+                                        fontWeight = FontWeight.W400
+                                    )
+                                }
+                                BasicTextField(
+                                    value = customerSearch,
+                                    onValueChange = { component.setCustomerSearch(it) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textStyle = TextStyle(
+                                        color = if (selectedCustomer != null) KarikaColors.Blue else KarikaColors.Gray2,
+                                        fontSize = 13.sp,
+                                        fontWeight = if (selectedCustomer != null) FontWeight.W600 else FontWeight.W500
+                                    ),
+                                    cursorBrush = SolidColor(KarikaColors.Blue),
+                                    singleLine = true,
+                                    readOnly = selectedCustomer != null,
+                                    onTextLayout = {},
+                                    decorationBox = { innerTextField ->
+                                        LaunchedEffect(Unit) { customerFieldFocused = true }
+                                        innerTextField()
                                     }
                                 )
-                                if (index < minOf(customers.size, 6) - 1) {
-                                    HorizontalDivider(
-                                        color = KarikaColors.Gray10,
-                                        modifier = Modifier.padding(horizontal = 14.dp)
+                            }
+                            if (selectedCustomer != null || customerSearch.isNotEmpty()) {
+                                Spacer(Modifier.width(6.dp))
+                                Icon(
+                                    imageVector = vectorResource(Res.drawable.ic_cancel_circle),
+                                    contentDescription = "Ukloni",
+                                    tint = KarikaColors.Gray6,
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .clickable(
+                                            indication = null,
+                                            interactionSource = remember { MutableInteractionSource() }
+                                        ) {
+                                            component.clearCustomer()
+                                            customerFieldFocused = true
+                                        }
+                                )
+                            }
+                        }
+
+                        // Dropdown results
+                        if (showDropdown) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp))
+                                    .border(
+                                        1.dp,
+                                        KarikaColors.Blue,
+                                        RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp)
                                     )
+                                    .background(KarikaColors.White)
+                            ) {
+                                customers.take(6).forEachIndexed { index, customer ->
+                                    CustomerRow(
+                                        customer = customer,
+                                        onClick = {
+                                            component.selectCustomer(customer)
+                                            customerFieldFocused = false
+                                        }
+                                    )
+                                    if (index < minOf(customers.size, 6) - 1) {
+                                        HorizontalDivider(
+                                            color = KarikaColors.Gray10,
+                                            modifier = Modifier.padding(horizontal = 14.dp)
+                                        )
+                                    }
                                 }
                             }
                         }

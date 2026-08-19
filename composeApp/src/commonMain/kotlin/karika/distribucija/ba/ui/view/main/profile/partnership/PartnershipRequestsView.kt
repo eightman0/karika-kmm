@@ -38,9 +38,8 @@ import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.rounded
 import karika.distribucija.ba.ui.components.roundedWithBorder
-import karika.distribucija.ba.ui.view.main.profile.account.ConfirmationModal
+import karika.distribucija.ba.ui.view.shop.profile.account.ConfirmationModal
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_calendar
 import karikav2.composeapp.generated.resources.ic_cancel_circle
 import karikav2.composeapp.generated.resources.ic_check_circle_filled
 
@@ -154,14 +153,17 @@ private fun ErrorState(message: String?, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun RequestList(requests: List<PartnershipRequest>, component: PartnershipRequestsComponent) {
+private fun RequestList(
+    requests: List<PartnershipRequest>,
+    component: PartnershipRequestsComponent
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(items = requests, key = { it.partnershipId }) { request ->
+        items(items = requests, key = { it.partnershipId ?: it.hashCode() }) { request ->
             RequestItem(request = request, component = component)
         }
     }

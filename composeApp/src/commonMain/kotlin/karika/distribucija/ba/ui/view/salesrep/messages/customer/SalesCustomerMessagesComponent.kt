@@ -38,7 +38,7 @@ class SalesCustomerMessagesComponent(
     }
 
     fun openNewMessage() {
-        salesRepPush(SalesRepConfig.CustomerNewMessage)
+        salesRepPush(SalesRepConfig.CustomerNewMessage())
     }
 
     fun goBack() = salesRepBack()

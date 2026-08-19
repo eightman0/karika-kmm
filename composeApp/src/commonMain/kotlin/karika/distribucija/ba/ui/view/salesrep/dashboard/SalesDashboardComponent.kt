@@ -124,7 +124,7 @@ class SalesDashboardComponent(
             )
 
             is SalesRepConfig.CustomerNewMessage -> SalesChild.CustomerNewMessage(
-                SalesCustomerNewMessageComponent(componentContext, stateHolder)
+                SalesCustomerNewMessageComponent(componentContext, stateHolder, config.initialCustomer)
             )
 
             is SalesRepConfig.InternalConversation -> SalesChild.InternalConversation(
@@ -195,7 +195,7 @@ sealed class SalesRepConfig {
     @Serializable
     data object AdminNewMessage : SalesRepConfig()
     @Serializable
-    data object CustomerNewMessage : SalesRepConfig()
+    data class CustomerNewMessage(val initialCustomer: OperationalCustomer? = null) : SalesRepConfig()
     @Serializable
     data class InternalConversation(val threadId: Long, val counterpartName: String) : SalesRepConfig()
     @Serializable

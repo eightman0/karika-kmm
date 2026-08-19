@@ -30,6 +30,8 @@ import karika.distribucija.ba.ui.components.MandatoryUpdateModal
 import karika.distribucija.ba.ui.components.ScreenSaver
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashboardView
+import karika.distribucija.ba.ui.view.main.profile.partnership.PartnershipRequestsView
+import karika.distribucija.ba.ui.view.prelogin.PreLoginView
 import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesDashboardView
 import karika.distribucija.ba.ui.view.shop.MainView
 import karika.distribucija.ba.ui.view.shop.menu.blog.BlogsView
@@ -46,23 +48,6 @@ import karika.distribucija.ba.ui.view.shop.profile.order.comments.CommentsView
 import karika.distribucija.ba.ui.view.shop.profile.order.details.OrderDetailsView
 import karika.distribucija.ba.ui.view.shop.profile.points.PointsView
 import karika.distribucija.ba.ui.view.shop.vendor.details.VendorDetailsView
-import karika.distribucija.ba.ui.view.main.MainView
-import karika.distribucija.ba.ui.view.main.menu.blog.BlogsView
-import karika.distribucija.ba.ui.view.main.menu.blog.overview.BlogOverviewView
-import karika.distribucija.ba.ui.view.main.menu.faq.FaqView
-import karika.distribucija.ba.ui.view.main.product.ProductView
-import karika.distribucija.ba.ui.view.main.profile.account.AccountView
-import karika.distribucija.ba.ui.view.main.profile.messages.admin.AdminMessagesView
-import karika.distribucija.ba.ui.view.main.profile.messages.overview.MessagesOverviewView
-import karika.distribucija.ba.ui.view.main.profile.messages.vendor.VendorMessagesView
-import karika.distribucija.ba.ui.view.main.profile.notifications.NotificationsView
-import karika.distribucija.ba.ui.view.main.profile.order.OrdersView
-import karika.distribucija.ba.ui.view.main.profile.order.comments.CommentsView
-import karika.distribucija.ba.ui.view.main.profile.order.details.OrderDetailsView
-import karika.distribucija.ba.ui.view.main.profile.partnership.PartnershipRequestsView
-import karika.distribucija.ba.ui.view.main.profile.points.PointsView
-import karika.distribucija.ba.ui.view.main.vendor.details.VendorDetailsView
-import karika.distribucija.ba.ui.view.prelogin.PreLoginView
 import karika.distribucija.ba.util.asyncImageLoader
 import karika.distribucija.ba.util.enableDiskCache
 

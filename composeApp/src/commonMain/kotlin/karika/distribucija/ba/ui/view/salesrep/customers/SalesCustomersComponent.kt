@@ -99,6 +99,33 @@ class SalesCustomersComponent(
         )
     }
 
+    fun openDiscount(customer: OperationalCustomer) {
+        if (!stateHolder.salesSpecificHandler.me.value.capabilities.canCreateDiscountFor) {
+            showErrorMessage("Nemate dozvolu za kreiranje rabata za ovog kupca.")
+            return
+        }
+        salesRepPush(
+            karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig.DiscountForm(
+                customer = customer
+            )
+        )
+    }
+
+    fun openMessageCustomer(customer: OperationalCustomer) {
+        salesRepPush(
+            karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig.CustomerNewMessage(
+                initialCustomer = customer
+            )
+        )
+    }
+
+    fun openOrderHistory() {
+        salesRepNavigate(
+            karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig.Orders,
+            replace = true
+        )
+    }
+
     fun loadPage(page: Int, replace: Boolean) {
         scope.launch {
             val flow = if (_selectedTab.value == CustomerTab.MY_CUSTOMERS) {

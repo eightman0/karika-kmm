@@ -49,11 +49,19 @@ class SalesCustomerDetailComponent(
     }
 
     fun openNewDiscount() {
+        if (!canCreateDiscount()) return
         salesRepPush(SalesRepConfig.DiscountForm(customer = customer))
     }
 
     fun openEditDiscount(rule: DiscountRule) {
+        if (!canCreateDiscount()) return
         salesRepPush(SalesRepConfig.DiscountForm(customer = customer, existingRule = rule))
+    }
+
+    private fun canCreateDiscount(): Boolean {
+        if (stateHolder.salesSpecificHandler.me.value.capabilities.canCreateDiscountFor) return true
+        showErrorMessage("Nemate dozvolu za kreiranje rabata za ovog kupca.")
+        return false
     }
 
     fun deleteDiscount(rule: DiscountRule) {

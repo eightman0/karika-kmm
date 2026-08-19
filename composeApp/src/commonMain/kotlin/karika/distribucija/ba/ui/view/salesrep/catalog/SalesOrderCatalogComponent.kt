@@ -111,13 +111,17 @@ class SalesOrderCatalogComponent(
         cart.value?.items?.find { it.sku == product.sku }?.qty ?: 0
 
     fun changeQty(product: OnBehalfProduct, qty: Int) {
+        showLoader()
         qtyJobs[product.sku]?.cancel()
         qtyJobs[product.sku] = scope.launch {
             delay(400.milliseconds)
 
             val existingItemId = cart.value?.items?.find { it.sku == product.sku }?.itemId
             val resultFlow = if (qty <= 0) {
-                if (existingItemId == null) return@launch
+                if (existingItemId == null) {
+                    hideLoader()
+                    return@launch
+                }
                 salesRepository.removeCartItem(customer.customerId, existingItemId)
             } else {
                 salesRepository.addCartItem(customer.customerId, product.sku, qty)
@@ -125,8 +129,14 @@ class SalesOrderCatalogComponent(
 
             resultFlow.collect { result ->
                 when (result) {
-                    is ResultState.Success -> stateHolder.salesSpecificHandler.cart.value = result.data
-                    is ResultState.Error -> showErrorMessage(result.message)
+                    is ResultState.Success -> {
+                        hideLoader()
+                        stateHolder.salesSpecificHandler.cart.value = result.data
+                    }
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showErrorMessage(result.message)
+                    }
                     is ResultState.Loading -> { /* no-op */ }
                 }
             }

@@ -16,8 +16,11 @@ import kotlinx.coroutines.launch
 
 class SalesCustomerNewMessageComponent(
     componentContext: ComponentContext,
-    stateHolder: KarikaStateHolder
+    stateHolder: KarikaStateHolder,
+    initialCustomer: OperationalCustomer? = null
 ) : CommonComponent(componentContext, stateHolder) {
+
+    val customerLocked = initialCustomer != null
 
     private val salesRepository = SalesRepository()
 
@@ -47,6 +50,7 @@ class SalesCustomerNewMessageComponent(
 
     init {
         loadCustomers("")
+        if (initialCustomer != null) selectCustomer(initialCustomer)
     }
 
     fun setSubject(v: String) { _subject.value = v }

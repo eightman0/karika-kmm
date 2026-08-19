@@ -13,7 +13,7 @@ import kotlin.time.Instant
 @Serializable
 data class PartnershipRequest(
     @SerialName("partnership_id")
-    val partnershipId: Long,
+    val partnershipId: Long? = null,
     @SerialName("vendor_id")
     val vendorId: Long? = null,
     @SerialName("customer_id")

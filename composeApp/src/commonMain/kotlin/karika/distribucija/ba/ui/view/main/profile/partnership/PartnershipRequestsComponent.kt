@@ -12,7 +12,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class PartnershipRequestsComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
+class PartnershipRequestsComponent(
+    componentContext: ComponentContext,
+    stateHolder: KarikaStateHolder
+) :
     CommonComponent(componentContext, stateHolder) {
     private val repository = PartnershipRepository()
 
@@ -54,7 +57,7 @@ class PartnershipRequestsComponent(componentContext: ComponentContext, stateHold
 
     fun approve(request: PartnershipRequest) {
         scope.launch {
-            repository.approve(request.partnershipId).collect { result ->
+            repository.approve(request.partnershipId ?: return@launch).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
@@ -74,7 +77,7 @@ class PartnershipRequestsComponent(componentContext: ComponentContext, stateHold
 
     fun reject(request: PartnershipRequest, reason: String?) {
         scope.launch {
-            repository.reject(request.partnershipId, reason).collect { result ->
+            repository.reject(request.partnershipId ?: return@launch, reason).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
