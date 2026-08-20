@@ -192,7 +192,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                         CustomerInfoRow(
                             icon = Res.drawable.ic_person,
                             label = "NAZIV KUPCA",
-                            line1 = vendorOrder.billingName ?: "Kupac #${vendorOrder.customerId}",
+                            line1 = vendorOrder.b2bPravnoLice ?: "Kupac #${vendorOrder.customerId}",
                             line2 = "ID: ${vendorOrder.customerId}"
                         )
                         Spacer(Modifier.height(16.dp))

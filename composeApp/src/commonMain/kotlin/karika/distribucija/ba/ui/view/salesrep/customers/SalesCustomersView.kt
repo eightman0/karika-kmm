@@ -56,7 +56,6 @@ import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.karikaFonts
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_add_plus
-import karikav2.composeapp.generated.resources.ic_arrow_down
 import karikav2.composeapp.generated.resources.ic_cancel
 import karikav2.composeapp.generated.resources.ic_check_circle_filled
 import karikav2.composeapp.generated.resources.ic_email
@@ -348,36 +347,32 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 24.dp),
+                        .padding(vertical = 12.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isLoadingMore) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(28.dp),
                             color = KarikaColors.Blue,
-                            strokeWidth = 2.5.dp
+                            strokeWidth = 2.dp
                         )
                     } else if (component.hasMore && customers.isNotEmpty()) {
-                        Row(
+                        Box(
                             modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(KarikaColors.White)
+                                .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(12.dp))
                                 .clickable(
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
-                                ) { component.loadNextPage() },
-                            verticalAlignment = Alignment.CenterVertically
+                                ) { component.loadNextPage() }
+                                .padding(horizontal = 24.dp, vertical = 10.dp)
                         ) {
                             KarikaText(
                                 text = "Učitaj više kupaca",
-                                color = KarikaColors.Blue,
-                                textSize = 15.sp,
-                                fontWeight = FontWeight.W500
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Icon(
-                                imageVector = vectorResource(Res.drawable.ic_arrow_down),
-                                contentDescription = "",
-                                tint = KarikaColors.Blue,
-                                modifier = Modifier.size(20.dp)
+                                color = KarikaColors.Gray2,
+                                textSize = 14.sp,
+                                fontWeight = FontWeight.W600
                             )
                         }
                     }
