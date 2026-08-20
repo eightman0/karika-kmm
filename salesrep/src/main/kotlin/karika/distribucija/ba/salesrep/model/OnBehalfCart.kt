@@ -53,7 +53,6 @@ data class OnBehalfCartResponseItem(
     @SerialName("row_total") val rowTotal: Double = 0.0,
     @SerialName("image_url") val imageUrl: String? = null
 ) {
-    fun priceString(): String = karikaPriceFormat(price) + " KM"
     fun rowTotalString(): String = karikaPriceFormat(rowTotal) + " KM"
 }
 

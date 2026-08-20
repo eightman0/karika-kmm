@@ -270,13 +270,21 @@ class OrderReviewFragment : Fragment() {
                 orientation = LinearLayout.HORIZONTAL
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
             }
+            // Mirrors composeApp's ProductSpecificationTable in SalesOrderReviewView.kt - CIJENA
+            // VPC/UKUPNO VPC/UKUPNO SA PDV are derived from price/discount/qty locally rather than
+            // the server's row_total, since that stays keyed to whatever was last committed while
+            // the rep is still typing a new qty/discount into this row's edit sheet.
+            val discountMultiplier = 1.0 - (item.discountPercent ?: 0) / 100.0
+            val discountedPrice = item.price * discountMultiplier
+            val rowTotalVpc = discountedPrice * item.qty
+            val rowTotalWithPdv = rowTotalVpc * 1.17
             val cells = listOf(
                 item.name,
                 "${item.discountPercent ?: 0}",
-                item.priceString(),
+                karikaPriceFormat(discountedPrice) + " KM",
                 "${item.qty} ${item.quantityUnit ?: getString(R.string.review_spec_default_qty_unit)}",
-                karikaPriceFormat(item.price * item.qty) + " KM",
-                item.rowTotalString(),
+                karikaPriceFormat(rowTotalVpc) + " KM",
+                karikaPriceFormat(rowTotalWithPdv) + " KM",
                 "${item.commissionPercent.toInt()}",
                 karikaPriceFormat(item.commission) + " KM"
             )

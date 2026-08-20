@@ -364,13 +364,598 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Usluga dostave (foldable) - visible only while the order is still pending and unlocked -->
+            <LinearLayout
+                android:id="@+id/layout_delivery_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:background="@drawable/bg_delivery_card_yellow"
+                android:clipToOutline="true"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/row_delivery_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/review_delivery_title"
+                        android:textColor="@color/karika_yellow2"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/icon_delivery_chevron"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_arrow_down"
+                        app:tint="@color/karika_yellow2" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_delivery_expanded"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="16dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:text="@string/review_delivery_address_title"
+                        android:textColor="@color/karika_gray2"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_contact_name"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+
+                        <EditText
+                            android:id="@+id/edit_contact_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_form_field"
+                            android:hint="@string/review_delivery_contact_name_hint"
+                            android:maxLines="1"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="12dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textColorHint="@color/karika_gray7"
+                            android:textSize="14sp" />
+
+                        <Space android:layout_width="1dp" android:layout_height="16dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_email"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+
+                        <EditText
+                            android:id="@+id/edit_contact_email"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_form_field"
+                            android:hint="@string/review_delivery_email_hint"
+                            android:inputType="textEmailAddress"
+                            android:maxLines="1"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="12dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textColorHint="@color/karika_gray7"
+                            android:textSize="14sp" />
+
+                        <Space android:layout_width="1dp" android:layout_height="16dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_phone"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+
+                        <EditText
+                            android:id="@+id/edit_contact_phone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_form_field"
+                            android:hint="@string/review_delivery_phone_hint"
+                            android:inputType="phone"
+                            android:maxLines="1"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="12dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textColorHint="@color/karika_gray7"
+                            android:textSize="14sp" />
+
+                        <Space android:layout_width="1dp" android:layout_height="16dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_city"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+
+                        <EditText
+                            android:id="@+id/edit_city"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_form_field"
+                            android:hint="@string/review_delivery_city_hint"
+                            android:maxLines="1"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="12dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textColorHint="@color/karika_gray7"
+                            android:textSize="14sp" />
+
+                        <Space android:layout_width="1dp" android:layout_height="16dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_address"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+
+                        <EditText
+                            android:id="@+id/edit_delivery_address"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_form_field"
+                            android:hint="@string/review_delivery_address_hint"
+                            android:maxLines="1"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="12dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textColorHint="@color/karika_gray7"
+                            android:textSize="14sp" />
+
+                        <Space android:layout_width="1dp" android:layout_height="16dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_postal_code"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+
+                        <EditText
+                            android:id="@+id/edit_postal_code"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_form_field"
+                            android:hint="@string/review_delivery_postal_code_hint"
+                            android:inputType="number"
+                            android:maxLines="1"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="12dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textColorHint="@color/karika_gray7"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/review_delivery_calculator_title"
+                        android:textColor="@color/karika_gray2"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_width"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_form_field"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp">
+
+                            <EditText
+                                android:id="@+id/edit_package_width"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:hint="@string/review_delivery_width"
+                                android:inputType="numberDecimal"
+                                android:maxLines="1"
+                                android:paddingVertical="12dp"
+                                android:textColor="@color/karika_gray2"
+                                android:textColorHint="@color/karika_gray7"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/review_delivery_unit_cm"
+                                android:textColor="@color/karika_gray6"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <Space android:layout_width="1dp" android:layout_height="16dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_height"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_form_field"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp">
+
+                            <EditText
+                                android:id="@+id/edit_package_height"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:hint="@string/review_delivery_height"
+                                android:inputType="numberDecimal"
+                                android:maxLines="1"
+                                android:paddingVertical="12dp"
+                                android:textColor="@color/karika_gray2"
+                                android:textColorHint="@color/karika_gray7"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/review_delivery_unit_cm"
+                                android:textColor="@color/karika_gray6"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <Space android:layout_width="1dp" android:layout_height="16dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_depth"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_form_field"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp">
+
+                            <EditText
+                                android:id="@+id/edit_package_depth"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:hint="@string/review_delivery_depth"
+                                android:inputType="numberDecimal"
+                                android:maxLines="1"
+                                android:paddingVertical="12dp"
+                                android:textColor="@color/karika_gray2"
+                                android:textColorHint="@color/karika_gray7"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/review_delivery_unit_cm"
+                                android:textColor="@color/karika_gray6"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <Space android:layout_width="1dp" android:layout_height="16dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_weight"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_form_field"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp">
+
+                            <EditText
+                                android:id="@+id/edit_package_weight"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:hint="@string/review_delivery_weight"
+                                android:inputType="numberDecimal"
+                                android:maxLines="1"
+                                android:paddingVertical="12dp"
+                                android:textColor="@color/karika_gray2"
+                                android:textColorHint="@color/karika_gray7"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/review_delivery_unit_kg"
+                                android:textColor="@color/karika_gray6"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@color/karika_border" />
+
+                    <LinearLayout
+                        android:id="@+id/row_provider_a2b"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="93dp"
+                                android:layout_height="24dp"
+                                android:contentDescription="@null"
+                                android:scaleType="fitStart"
+                                android:src="@drawable/img_ab_post" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:text="@string/review_delivery_provider_a2b"
+                                android:textColor="@color/karika_gray2"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/text_price_a2b"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:text="Cijena dostave sa PDV: —" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@color/karika_border" />
+
+                    <LinearLayout
+                        android:id="@+id/row_provider_express"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="93dp"
+                                android:layout_height="24dp"
+                                android:contentDescription="@null"
+                                android:scaleType="fitStart"
+                                android:src="@drawable/img_express_post" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:text="@string/review_delivery_provider_express"
+                                android:textColor="@color/karika_gray2"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/text_price_express"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:text="Cijena dostave sa PDV: —" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@color/karika_border" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/review_delivery_note_title"
+                        android:textColor="@color/karika_gray4"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/edit_delivery_note"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_form_field"
+                        android:gravity="top|start"
+                        android:hint="@string/review_delivery_note_hint"
+                        android:inputType="textMultiLine"
+                        android:minLines="2"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="12dp"
+                        android:textColor="@color/karika_gray2"
+                        android:textColorHint="@color/karika_gray7"
+                        android:textSize="14sp" />
+
+                    <LinearLayout
+                        android:id="@+id/button_calculate_shipping"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_button_pill_primary"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/review_delivery_calculate_button"
+                            android:textColor="@color/karika_white"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/button_save_shipping"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_button_pill_primary"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/order_detail_save_shipping"
+                            android:textColor="@color/karika_white"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
             <!-- Specifikacija narudžbe -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:background="@drawable/bg_order_card"
                 android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp">
+                android:padding="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -383,8 +968,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/order_detail_section_spec"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="15sp"
+                        android:textColor="@color/karika_gray2"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -400,173 +985,190 @@
                         tools:text="3 artikala" />
                 </LinearLayout>
 
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="8dp" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="14dp"
+                    android:background="@color/karika_gray9" />
 
                 <TextView
                     android:id="@+id/text_no_items"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_order_card"
+                    android:layout_marginTop="14dp"
                     android:gravity="center"
                     android:padding="24dp"
                     android:text="@string/order_detail_dash"
                     android:textColor="@color/karika_gray6"
                     android:textSize="15sp"
                     android:visibility="gone" />
-            </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/products_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp" />
+                <HorizontalScrollView
+                    android:id="@+id/scroll_spec_table"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:scrollbars="none">
 
-            <!-- Za plaćanje -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_order_card"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginVertical="4dp"
-                android:orientation="vertical"
-                android:padding="20dp">
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:cardBackgroundColor="@color/karika_white"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/karika_gray9"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:id="@+id/row_spec_header"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@color/karika_gray20"
+                                android:orientation="horizontal" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/karika_gray9" />
+
+                            <LinearLayout
+                                android:id="@+id/table_rows_container"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </HorizontalScrollView>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp"
                         android:layout_weight="1"
-                        android:text="@string/order_detail_total_vpc"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="14sp" />
+                        android:background="@drawable/bg_stat_card"
+                        android:orientation="vertical"
+                        android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/text_summary_vpc"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/order_detail_total_vpc"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/text_stat_vpc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            tools:text="100,00 KM" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/karika_gray2"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        tools:text="100,00 KM" />
+                        android:layout_marginStart="5dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_stat_card"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/order_detail_total_pdv17"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/text_stat_pdv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            tools:text="17,00 KM" />
+                    </LinearLayout>
                 </LinearLayout>
 
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="8dp" />
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp"
                         android:layout_weight="1"
-                        android:text="@string/order_detail_total_pdv17"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="14sp" />
+                        android:background="@drawable/bg_stat_card"
+                        android:orientation="vertical"
+                        android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/text_summary_pdv"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/karika_gray2"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        tools:text="17,00 KM" />
-                </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/order_detail_total_with_pdv"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
 
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="8dp" />
+                        <TextView
+                            android:id="@+id/text_stat_total"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            tools:text="117,00 KM" />
+                    </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
                         android:layout_weight="1"
-                        android:text="@string/order_detail_total_with_pdv"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="14sp" />
+                        android:background="@drawable/bg_stat_card"
+                        android:orientation="vertical"
+                        android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/text_summary_total"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/karika_gray2"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        tools:text="117,00 KM" />
-                </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/order_detail_karika_commission"
+                            android:textColor="@color/karika_gray6"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
 
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="8dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/order_detail_karika_commission"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/text_summary_commission"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/karika_blue"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        tools:text="5,00 KM" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@color/karika_gray9" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/order_detail_for_payment"
-                        android:textColor="@color/karika_gray2"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/text_summary_grand_total"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/karika_blue"
-                        android:textSize="22sp"
-                        android:textStyle="bold"
-                        tools:text="117,00 KM" />
+                        <TextView
+                            android:id="@+id/text_stat_commission"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/karika_gray2"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            tools:text="5,00 KM" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
@@ -685,5 +1287,25 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@color/karika_white" />
+
+    <FrameLayout
+        android:id="@+id/layout_loading_overlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/karika_scrim"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/karika_blue" />
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

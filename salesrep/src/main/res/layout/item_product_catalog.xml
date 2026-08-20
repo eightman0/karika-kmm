@@ -94,6 +94,17 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 tools:text="12,50 KM" />
+
+            <TextView
+                android:id="@+id/text_out_of_stock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/catalog_out_of_stock"
+                android:textColor="@color/karika_red4"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible" />
         </LinearLayout>
     </LinearLayout>
 
@@ -167,10 +178,12 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/icon_add"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_cart_add" />
+                android:src="@drawable/ic_cart_add"
+                app:tint="@color/karika_white" />
 
             <TextView
                 android:id="@+id/text_add"

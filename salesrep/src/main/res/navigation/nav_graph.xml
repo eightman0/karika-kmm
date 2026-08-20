@@ -53,6 +53,12 @@
         <action
             android:id="@+id/action_customers_to_catalog"
             app:destination="@id/orderCatalogFragment" />
+        <action
+            android:id="@+id/action_customers_to_discount_form"
+            app:destination="@id/discountFormFragment" />
+        <action
+            android:id="@+id/action_customers_to_new_message"
+            app:destination="@id/customerNewMessageFragment" />
     </fragment>
 
     <fragment
@@ -201,7 +207,12 @@
     <fragment
         android:id="@+id/customerNewMessageFragment"
         android:name="karika.distribucija.ba.salesrep.ui.messages.CustomerNewMessageFragment"
-        android:label="@string/customer_new_message_title" />
+        android:label="@string/customer_new_message_title">
+        <argument android:name="initialCustomerId" app:argType="long" android:defaultValue="0L" />
+        <argument android:name="initialCustomerCompany" app:argType="string" app:nullable="true" android:defaultValue="@null" />
+        <argument android:name="initialCustomerFirstname" app:argType="string" app:nullable="true" android:defaultValue="@null" />
+        <argument android:name="initialCustomerLastname" app:argType="string" app:nullable="true" android:defaultValue="@null" />
+    </fragment>
 
     <fragment
         android:id="@+id/adminMessagesFragment"

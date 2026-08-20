@@ -55,6 +55,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * Ported from composeApp's domain/api/SalesApi.kt. Covers login/dashboard/orders (phase 1) and
@@ -385,6 +388,38 @@ internal class SalesApi {
     suspend fun getOrder(orderId: String): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.get(HttpClientProvider.url("mobile/vendor/order")) {
             parameter("orderId", orderId)
+        }
+    }
+
+    /** POST /V1/mobile/vendor/order/items/change - edits a line item's qty/discount on a still
+     * pending, unlocked order. [items] is a list of (itemId, qty, discountPercent) triples. */
+    suspend fun updateOrder(
+        orderId: String,
+        items: List<Triple<String, String, String>>
+    ): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("mobile/vendor/order/items/change")) {
+            setBody(
+                JsonObject(
+                    mapOf(
+                        "orderId" to JsonPrimitive(orderId),
+                        "items" to JsonObject(
+                            mutableMapOf<String, JsonElement>().apply {
+                                items.forEach {
+                                    put(
+                                        it.first,
+                                        JsonObject(
+                                            mapOf(
+                                                "qty" to JsonPrimitive(it.second),
+                                                "discount" to JsonPrimitive(it.third)
+                                            )
+                                        )
+                                    )
+                                }
+                            }
+                        )
+                    )
+                )
+            )
         }
     }
 
@@ -916,6 +951,22 @@ class SalesRepository internal constructor() {
             val response = SalesApi().getOrder(orderId).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<VendorOrder>()))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun updateOrder(orderId: String, items: List<Triple<String, String, String>>): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().updateOrder(orderId, items).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(""))
                 return@flow
             }
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))

@@ -11,7 +11,8 @@ data class OnBehalfProduct(
     @SerialName("name") val name: String = "",
     @SerialName("price") val price: Double = 0.0,
     @SerialName("image_url") val imageUrl: String? = null,
-    @SerialName("category_label") val categoryLabel: String? = null
+    @SerialName("category_label") val categoryLabel: String? = null,
+    @SerialName("is_in_stock") val isInStock: Boolean = true
 ) {
     fun priceString(): String = karikaPriceFormat(price) + " KM"
 

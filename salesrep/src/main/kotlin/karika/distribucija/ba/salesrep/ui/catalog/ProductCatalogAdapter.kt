@@ -60,6 +60,28 @@ class ProductCatalogAdapter(
                 if (cartQty > 0) R.string.catalog_update else R.string.catalog_add
             )
 
+            val inStock = product.isInStock
+            binding.textOutOfStock.visibility = if (inStock) View.GONE else View.VISIBLE
+
+            binding.layoutStepper.setBackgroundResource(
+                if (inStock) R.drawable.bg_catalog_stepper_box else R.drawable.bg_catalog_stepper_box_disabled
+            )
+            val stepperTextColor = context.getColor(if (inStock) R.color.karika_gray2 else R.color.karika_gray7)
+            binding.buttonMinus.isEnabled = inStock
+            binding.buttonMinus.setTextColor(stepperTextColor)
+            binding.editQty.isEnabled = inStock
+            binding.editQty.setTextColor(stepperTextColor)
+            binding.buttonPlus.isEnabled = inStock
+            binding.buttonPlus.setColorFilter(stepperTextColor)
+
+            binding.buttonAdd.isEnabled = inStock
+            binding.buttonAdd.setBackgroundResource(
+                if (inStock) R.drawable.bg_catalog_add_button else R.drawable.bg_catalog_add_button_disabled
+            )
+            val addContentColor = context.getColor(if (inStock) R.color.karika_white else R.color.karika_gray6)
+            binding.iconAdd.setColorFilter(addContentColor)
+            binding.textAdd.setTextColor(addContentColor)
+
             binding.buttonMinus.setOnClickListener {
                 val current = binding.editQty.text?.toString()?.toIntOrNull() ?: initialQty
                 if (current > 1) binding.editQty.setText((current - 1).toString())

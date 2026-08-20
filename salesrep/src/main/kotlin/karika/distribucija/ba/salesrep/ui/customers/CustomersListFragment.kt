@@ -10,11 +10,13 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomersListBinding
 import karika.distribucija.ba.salesrep.model.OperationalCustomer
+import karika.distribucija.ba.salesrep.session.CurrentUser
 import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 
 class CustomersListFragment : Fragment() {
@@ -50,6 +52,9 @@ class CustomersListFragment : Fragment() {
         adapter = CustomersAdapter(
             onClick = ::openCustomer,
             onOrderClick = ::openCatalog,
+            onMessageClick = ::openMessage,
+            onDiscountClick = ::openDiscount,
+            onHistoryClick = { openHistory() },
             onShowReps = { reps ->
                 RepsBottomSheet(reps).show(childFragmentManager, "reps")
             }
@@ -119,8 +124,6 @@ class CustomersListFragment : Fragment() {
                 viewModel.setStatus(null)
             }
         }
-
-        binding.rowLoadMore.setOnClickListener { viewModel.loadNextPage() }
 
         viewModel.customers.observe(viewLifecycleOwner) { customers ->
             adapter.submitList(customers)
@@ -197,11 +200,11 @@ class CustomersListFragment : Fragment() {
         }
     }
 
+    /** Pagination is driven entirely by the RecyclerView scroll listener above (near-bottom
+     * triggers loadNextPage()) - this footer only ever shows the in-flight spinner, no manual
+     * "load more" button. */
     private fun renderLoadMoreFooter(isLoadingMore: Boolean) {
-        val customers = viewModel.customers.value.orEmpty()
         binding.progressLoadMore.visibility = if (isLoadingMore) View.VISIBLE else View.GONE
-        binding.rowLoadMore.visibility =
-            if (!isLoadingMore && viewModel.hasMore && customers.isNotEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun openCustomer(customer: OperationalCustomer) {
@@ -232,6 +235,41 @@ class CustomersListFragment : Fragment() {
                 "customerActive" to customer.isActive,
                 "hasShippingAddress" to (customer.defaultShippingAddressId != null)
             )
+        )
+    }
+
+    private fun openMessage(customer: OperationalCustomer) {
+        findNavController().navigate(
+            R.id.action_customers_to_new_message,
+            bundleOf(
+                "initialCustomerId" to customer.customerId,
+                "initialCustomerCompany" to customer.company,
+                "initialCustomerFirstname" to customer.firstname,
+                "initialCustomerLastname" to customer.lastname
+            )
+        )
+    }
+
+    /** Mirrors composeApp's SalesCustomersComponent.openDiscount() - gated on the same
+     * capability, with the same error message, before navigating. */
+    private fun openDiscount(customer: OperationalCustomer) {
+        if (CurrentUser.me?.capabilities?.canCreateDiscountFor != true) {
+            Toast.makeText(requireContext(), R.string.customers_discount_no_permission, Toast.LENGTH_SHORT).show()
+            return
+        }
+        findNavController().navigate(
+            R.id.action_customers_to_discount_form,
+            bundleOf("customerId" to customer.customerId)
+        )
+    }
+
+    /** Mirrors composeApp's SalesCustomersComponent.openOrderHistory() - switches to the Orders
+     * root destination, replacing this screen in the back stack. */
+    private fun openHistory() {
+        findNavController().navigate(
+            R.id.ordersListFragment,
+            null,
+            navOptions { popUpTo(R.id.ordersListFragment) { inclusive = true } }
         )
     }
 

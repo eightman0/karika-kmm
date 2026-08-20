@@ -224,34 +224,6 @@
                     android:layout_gravity="center"
                     android:indeterminateTint="@color/karika_blue"
                     android:visibility="gone" />
-
-                <LinearLayout
-                    android:id="@+id/row_load_more"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/customers_load_more"
-                        android:textColor="@color/karika_blue"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginStart="4dp"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_arrow_down"
-                        app:tint="@color/karika_blue" />
-                </LinearLayout>
             </FrameLayout>
 
         </FrameLayout>

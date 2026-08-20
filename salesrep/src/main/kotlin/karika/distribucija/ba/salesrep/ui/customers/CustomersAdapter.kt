@@ -22,9 +22,15 @@ private fun String?.initials(): String =
         ?.mapNotNull { it.firstOrNull()?.uppercaseChar() }
         ?.joinToString("") ?: "?"
 
+/** Mirrors SalesCustomersView.kt's CustomerCard: header (KLIJENT label + company/name + status
+ * pill), then - for active partnerships only - a fading divider and a footer with the assigned
+ * reps' avatars plus four actions (message/discount/history quiet buttons, "Naruči" primary). */
 class CustomersAdapter(
     private val onClick: (OperationalCustomer) -> Unit,
     private val onOrderClick: (OperationalCustomer) -> Unit,
+    private val onMessageClick: (OperationalCustomer) -> Unit,
+    private val onDiscountClick: (OperationalCustomer) -> Unit,
+    private val onHistoryClick: (OperationalCustomer) -> Unit,
     private val onShowReps: (List<AssignedEmployeeSummary>) -> Unit
 ) : ListAdapter<OperationalCustomer, CustomersAdapter.ViewHolder>(DIFF) {
 
@@ -43,7 +49,7 @@ class CustomersAdapter(
         fun bind(customer: OperationalCustomer) {
             val context = binding.root.context
 
-            binding.textCustomerName.text = customer.fullName
+            binding.textCustomerName.text = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName
             binding.textBadge.text = customer.badgeLabel()
             if (customer.isActive) {
                 binding.textBadge.setBackgroundResource(R.drawable.bg_customer_badge_active)
@@ -53,19 +59,14 @@ class CustomersAdapter(
                 binding.textBadge.setTextColor(context.getColor(R.color.karika_blue))
             }
 
-            val hasCompany = !customer.company.isNullOrBlank()
-            binding.rowCompany.visibility = if (hasCompany) View.VISIBLE else View.GONE
-            binding.spacerCompany.visibility = if (hasCompany) View.VISIBLE else View.GONE
-            binding.textCompany.text = customer.company.orEmpty()
-
-            val hasEmail = !customer.email.isNullOrBlank()
-            binding.rowEmail.visibility = if (hasEmail) View.VISIBLE else View.GONE
-            binding.textEmail.text = customer.email.orEmpty()
-
+            binding.dividerFade.visibility = if (customer.isActive) View.VISIBLE else View.GONE
             binding.footerContainer.visibility = if (customer.isActive) View.VISIBLE else View.GONE
             if (customer.isActive) {
                 bindReps(customer)
                 binding.buttonOrder.setOnClickListener { onOrderClick(customer) }
+                binding.buttonMessage.setOnClickListener { onMessageClick(customer) }
+                binding.buttonDiscount.setOnClickListener { onDiscountClick(customer) }
+                binding.buttonHistory.setOnClickListener { onHistoryClick(customer) }
             }
 
             binding.root.setOnClickListener { onClick(customer) }
@@ -76,44 +77,35 @@ class CustomersAdapter(
             val reps = customer.assignedEmployees.take(3)
             binding.repsAvatarContainer.removeAllViews()
 
-            if (reps.isNotEmpty()) {
-                binding.repsAvatarContainer.visibility = View.VISIBLE
-                binding.textRepsLabel.visibility = View.VISIBLE
-                binding.textUnassigned.visibility = View.GONE
+            val hasReps = reps.isNotEmpty()
+            binding.rowReps.visibility = if (hasReps) View.VISIBLE else View.GONE
+            binding.spacerReps.visibility = if (hasReps) View.VISIBLE else View.GONE
+            if (!hasReps) return
 
-                val avatarSizePx = 26.dpToPx(context)
-                val overlapPx = 10.dpToPx(context)
-                binding.repsAvatarContainer.layoutParams =
-                    binding.repsAvatarContainer.layoutParams.apply {
-                        width = avatarSizePx + overlapPx * (reps.size - 1)
-                    }
-
-                reps.forEachIndexed { idx, employee ->
-                    val avatar = TextView(context).apply {
-                        layoutParams = FrameLayout.LayoutParams(avatarSizePx, avatarSizePx).apply {
-                            leftMargin = idx * overlapPx
-                        }
-                        setBackgroundResource(
-                            if (idx % 2 == 0) R.drawable.bg_avatar_blue else R.drawable.bg_avatar_secondary
-                        )
-                        gravity = Gravity.CENTER
-                        setTextColor(context.getColor(R.color.karika_white))
-                        setTypeface(typeface, Typeface.BOLD)
-                        textSize = 8f
-                        text = employee.displayName.initials()
-                    }
-                    binding.repsAvatarContainer.addView(avatar)
+            val avatarSizePx = 26.dpToPx(context)
+            val overlapPx = 10.dpToPx(context)
+            binding.repsAvatarContainer.layoutParams =
+                binding.repsAvatarContainer.layoutParams.apply {
+                    width = avatarSizePx + overlapPx * (reps.size - 1)
                 }
-                binding.repsAvatarContainer.setOnClickListener { onShowReps(customer.assignedEmployees) }
-            } else if (customer.company.isNullOrBlank()) {
-                binding.repsAvatarContainer.visibility = View.GONE
-                binding.textRepsLabel.visibility = View.GONE
-                binding.textUnassigned.visibility = View.VISIBLE
-            } else {
-                binding.repsAvatarContainer.visibility = View.GONE
-                binding.textRepsLabel.visibility = View.GONE
-                binding.textUnassigned.visibility = View.GONE
+
+            reps.forEachIndexed { idx, employee ->
+                val avatar = TextView(context).apply {
+                    layoutParams = FrameLayout.LayoutParams(avatarSizePx, avatarSizePx).apply {
+                        leftMargin = idx * overlapPx
+                    }
+                    setBackgroundResource(
+                        if (idx % 2 == 0) R.drawable.bg_avatar_blue else R.drawable.bg_avatar_secondary
+                    )
+                    gravity = Gravity.CENTER
+                    setTextColor(context.getColor(R.color.karika_white))
+                    setTypeface(typeface, Typeface.BOLD)
+                    textSize = 8f
+                    text = employee.displayName.initials()
+                }
+                binding.repsAvatarContainer.addView(avatar)
             }
+            binding.repsAvatarContainer.setOnClickListener { onShowReps(customer.assignedEmployees) }
         }
     }
 

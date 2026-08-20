@@ -97,17 +97,14 @@
 
     <string name="order_detail_section_spec">Specifikacija narudžbe</string>
     <string name="order_detail_items_count_format">%d artikala</string>
+    <string name="order_detail_spec_header_commission_percent">PROVIZIJA %%</string>
 
-    <string name="order_detail_qty_format">Količina: %1$s %2$s</string>
-    <string name="order_detail_rabat_format">Rabat %s%%</string>
-    <string name="order_detail_price_vpc">Cijena VPC</string>
     <string name="order_detail_total_vpc">Ukupno VPC</string>
     <string name="order_detail_total_with_pdv">Ukupno sa PDV</string>
-    <string name="order_detail_commission_format">Provizija (%s%%)</string>
-
     <string name="order_detail_total_pdv17">Ukupno PDV 17%%</string>
     <string name="order_detail_karika_commission">Karika provizija</string>
-    <string name="order_detail_for_payment">ZA PLAĆANJE</string>
+
+    <string name="order_detail_save_shipping">Sačuvaj podatke o dostavi</string>
 
     <string name="order_detail_section_comments">Komentari narudžbe</string>
     <string name="order_detail_comment_hint">Napiši komentar kupcu...</string>
@@ -126,13 +123,17 @@
     <string name="customers_reset_search">Poništi pretragu</string>
     <string name="customers_reset_filter">Poništi filter</string>
     <string name="customers_reset_both">Poništi pretragu i filter</string>
-    <string name="customers_load_more">Učitaj više kupaca</string>
     <string name="customers_add_new">Novi kupac</string>
     <string name="customers_add_new_subtitle">Kreiraj novog kupca i partnerstvo</string>
     <string name="customers_add_invite">Pozovi kupca</string>
     <string name="customers_add_invite_subtitle">Pošalji zahtjev za partnerstvo postojećem kupcu</string>
     <string name="customers_add_sheet_title">Dodaj kupca</string>
     <string name="customers_order_for">Naruči</string>
+    <string name="customers_card_label">KLIJENT</string>
+    <string name="customers_action_message">Pošalji poruku</string>
+    <string name="customers_action_discount">Dodijeli rabat</string>
+    <string name="customers_action_history">Historija narudžbi</string>
+    <string name="customers_discount_no_permission">Nemate dozvolu za kreiranje rabata za ovog kupca.</string>
     <string name="customers_status_sheet_title">Filtriraj po statusu</string>
     <string name="customers_status_all_sheet">Svi statusi</string>
     <string name="customers_filter_active">Aktivno</string>
@@ -144,7 +145,6 @@
     <string name="customers_badge_rejected">ODBIJEN</string>
     <string name="customers_badge_revoked">OPOZVAN</string>
     <string name="customers_reps_sheet_title">Komercijalisti</string>
-    <string name="customers_reps_unassigned">Nije dodijeljen</string>
     <string name="customers_reps_label">Komercijalisti</string>
     <string name="customers_sheet_close_cd">Zatvori</string>
     <string name="customers_status_all">Sve</string>
@@ -231,6 +231,7 @@
     <string name="catalog_empty_previous">Ovaj kupac nema prethodno naručenih artikala</string>
     <string name="catalog_add">Dodaj</string>
     <string name="catalog_update">Ažuriraj</string>
+    <string name="catalog_out_of_stock">Nije na stanju</string>
     <string name="catalog_in_cart">U korpi</string>
     <string name="catalog_sku_format">#%s</string>
     <string name="catalog_cart_cd">Korpa</string>

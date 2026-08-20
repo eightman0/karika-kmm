@@ -2,6 +2,7 @@ package karika.distribucija.ba.salesrep.ui.messages
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import karika.distribucija.ba.salesrep.api.SalesRepository
@@ -18,9 +19,14 @@ import kotlinx.coroutines.launch
  * threadId exists, later sends omit it - matching `if (currentThread == null) subject else null`).
  * Also matching Compose exactly: send is only gated on non-blank text, not on a customer being
  * selected. */
-class CustomerNewMessageViewModel : ViewModel() {
+class CustomerNewMessageViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     private val repository = SalesRepository()
+
+    /** Reached from the customer list's "Pošalji poruku" quick action pre-selects the customer,
+     * matching composeApp's SalesCustomersComponent.openMessageCustomer(initialCustomer). Reached
+     * from the inbox's own "new message" button, these args are absent and the field starts empty. */
+    private val initialCustomerId = savedStateHandle.get<Long>("initialCustomerId") ?: 0L
 
     private val _subject = MutableLiveData("")
     val subject: LiveData<String> = _subject
@@ -49,6 +55,18 @@ class CustomerNewMessageViewModel : ViewModel() {
     private var searchJob: Job? = null
 
     init {
+        if (initialCustomerId != 0L) {
+            selectCustomer(
+                OperationalCustomer(
+                    customerId = initialCustomerId,
+                    firstname = savedStateHandle.get<String>("initialCustomerFirstname"),
+                    lastname = savedStateHandle.get<String>("initialCustomerLastname"),
+                    company = savedStateHandle.get<String>("initialCustomerCompany"),
+                    partnershipId = 0L,
+                    partnershipStatus = "active"
+                )
+            )
+        }
         loadCustomers(null)
     }
 

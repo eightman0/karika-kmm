@@ -18,8 +18,10 @@
     <color name="karika_gray20">#F5F5F5</color>
     <color name="karika_divider">#D9D9D9</color>
     <color name="karika_secondary">#616370</color>
+    <color name="karika_blue_06">#0F3575E2</color>
     <color name="karika_blue_08">#143575E2</color>
     <color name="karika_blue_10">#1A3575E2</color>
+    <color name="karika_blue_18">#2E3575E2</color>
     <color name="karika_blue_20">#333575E2</color>
     <color name="karika_blue_25">#403575E2</color>
     <color name="karika_blue3_10">#1A2B7FFF</color>
@@ -36,11 +38,13 @@
     <color name="karika_bg2">#F7F7F7</color>
     <color name="karika_red2">#FFEAF3</color>
     <color name="karika_red3">#B30000</color>
+    <color name="karika_red4">#E7000B</color>
     <color name="karika_red">#E00000</color>
     <color name="karika_red_08">#14E00000</color>
     <color name="karika_yellow">#FFC107</color>
     <color name="karika_yellow1">#FAF0CD</color>
     <color name="karika_yellow2">#A65F00</color>
+    <color name="karika_scrim">#66000000</color>
 
     <!-- Order status badge palette, matches SalesOrdersView.kt's statusBg()/statusColor() -->
     <color name="order_status_bg_success">#EDF7E4</color>
