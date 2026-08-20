@@ -7,9 +7,11 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -689,9 +692,8 @@ private fun CustomerCard(
                 onClick = onClick
             )
     ) {
-        // Card body
+        // Card header
         Column(modifier = Modifier.padding(16.dp)) {
-            // Avatar + status badge
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -707,15 +709,25 @@ private fun CustomerCard(
                 }
                 val badgeColor = if (customer.isActive) KarikaColors.Green3 else KarikaColors.Blue
 
-                KarikaText(
-                    text = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName,
-                    color = KarikaColors.Gray2,
-                    textSize = 18.sp,
-                    fontWeight = FontWeight.W700,
+                Column(
                     modifier = Modifier.weight(1f),
-                    textOverflow = TextOverflow.Ellipsis,
-                    maxLines = 2
-                )
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    KarikaText(
+                        text = "KLIJENT",
+                        color = KarikaColors.Blue,
+                        textSize = 11.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                    KarikaText(
+                        text = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName,
+                        color = KarikaColors.Gray2,
+                        textSize = 20.sp,
+                        fontWeight = FontWeight.W700,
+                        textOverflow = TextOverflow.Ellipsis,
+                        maxLines = 2
+                    )
+                }
 
                 Spacer(Modifier.width(8.dp))
 
@@ -737,17 +749,25 @@ private fun CustomerCard(
         }
 
         if (customer.isActive) {
+            // Fading divider between header and actions
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            0f to KarikaColors.Transparent,
+                            0.12f to KarikaColors.Gray9,
+                            0.88f to KarikaColors.Gray9,
+                            1f to KarikaColors.Transparent
+                        )
+                    )
+            )
+
             // Card footer
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
-                    .background(KarikaColors.Gray20)
-                    .border(
-                        width = 1.dp,
-                        color = KarikaColors.Gray9,
-                        shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
-                    )
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 // Komercijalisti chips using assigned_employees
@@ -801,41 +821,40 @@ private fun CustomerCard(
                     Spacer(Modifier.height(10.dp))
                 }
 
-                // Action buttons
+                // Action buttons — quiet actions on the left, primary "Naruči" spanning the right
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    CustomerActionButton(
-                        icon = Res.drawable.ic_messages,
-                        label = "Pošalji poruku",
+                    Column(
                         modifier = Modifier.weight(1f),
-                        onClick = onMessage
-                    )
-                    CustomerActionButton(
-                        icon = Res.drawable.ic_gift,
-                        label = "Dodijeli rabat",
-                        modifier = Modifier.weight(1f),
-                        onClick = onDiscount
-                    )
-                }
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        QuietActionButton(
+                            icon = Res.drawable.ic_messages,
+                            label = "Pošalji poruku",
+                            onClick = onMessage
+                        )
+                        QuietActionButton(
+                            icon = Res.drawable.ic_gift,
+                            label = "Dodijeli rabat",
+                            onClick = onDiscount
+                        )
+                        QuietActionButton(
+                            icon = Res.drawable.ic_orders,
+                            label = "Historija narudžbi",
+                            onClick = onHistory
+                        )
+                    }
 
-                Spacer(Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    CustomerActionButton(
-                        icon = Res.drawable.ic_orders,
-                        label = "Historija narudžbi",
-                        modifier = Modifier.weight(1f),
-                        onClick = onHistory
-                    )
-                    CustomerActionButton(
+                    OrderActionButton(
                         icon = Res.drawable.ic_shopping_cart,
                         label = "Naruči",
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(0.72f)
+                            .fillMaxHeight(),
                         onClick = onOrder
                     )
                 }
@@ -844,16 +863,55 @@ private fun CustomerCard(
     }
 }
 
-// ── Card action button ────────────────────────────────────────────────────────
+// ── Card action buttons ───────────────────────────────────────────────────────
 
 @Composable
-private fun CustomerActionButton(
+private fun QuietActionButton(
     icon: DrawableResource,
     label: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(KarikaColors.Blue.copy(alpha = 0.06f))
+            .border(1.dp, KarikaColors.Blue.copy(alpha = 0.18f), RoundedCornerShape(10.dp))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onClick
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = vectorResource(icon),
+            contentDescription = "",
+            tint = KarikaColors.Blue,
+            modifier = Modifier.size(17.dp)
+        )
+        KarikaText(
+            text = label,
+            color = KarikaColors.Gray2,
+            textSize = 13.sp,
+            fontWeight = FontWeight.W600,
+            maxLines = 1,
+            textOverflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun OrderActionButton(
+    icon: DrawableResource,
+    label: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Column(
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
             .background(KarikaColors.Blue)
@@ -862,21 +920,22 @@ private fun CustomerActionButton(
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick
             )
-            .padding(horizontal = 10.dp, vertical = 9.dp),
-        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             imageVector = vectorResource(icon),
             contentDescription = "",
             tint = KarikaColors.White,
-            modifier = Modifier.size(13.dp)
+            modifier = Modifier.size(24.dp)
         )
         KarikaText(
             text = label,
             color = KarikaColors.White,
-            textSize = 11.sp,
+            textSize = 13.sp,
             fontWeight = FontWeight.W700,
+            textAlign = TextAlign.Center,
             maxLines = 1,
             textOverflow = TextOverflow.Ellipsis
         )
