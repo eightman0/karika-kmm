@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Verzije - Karika Kiosk Admin{% endblock %}
+{% block content %}
+<h1>Verzija aplikacije (salesrep)</h1>
+
+{% if error %}<p class="error">Greška pri objavi: {{ error }}</p>{% endif %}
+
+<h2>Trenutno objavljeno</h2>
+<table class="detail-table">
+  <tr><th>Version code</th><td>{{ current.version_code }}</td></tr>
+  <tr><th>Version name</th><td>{{ current.version_name or "-" }}</td></tr>
+  <tr><th>APK URL</th><td>{{ current.apk_url or "-" }}</td></tr>
+  <tr><th>SHA-256</th><td>{{ current.apk_sha256 or "-" }}</td></tr>
+  <tr><th>Obavezno (mandatory)</th><td>{{ current.mandatory }}</td></tr>
+</table>
+
+<h2>Objavi novu verziju</h2>
+<form method="post" action="/versions/publish">
+  <label>Version code
+    <input type="number" name="version_code" required>
+  </label>
+  <label>Version name
+    <input type="text" name="version_name" required>
+  </label>
+  <label>APK URL
+    <input type="url" name="apk_url" required>
+  </label>
+  <label>SHA-256 (opciono, ali preporučeno - provjerava integritet prije instalacije)
+    <input type="text" name="apk_sha256">
+  </label>
+  <label class="checkbox">
+    <input type="checkbox" name="mandatory"> Obavezan update
+  </label>
+  <button type="submit">Objavi</button>
+</form>
+<p class="hint">Objava odmah stiže na sve upaljene uređaje preko real-time Remote Config listenera - nema čekanja na periodičnu provjeru.</p>
+{% endblock %}

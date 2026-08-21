@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Uređaji - Karika Kiosk Admin{% endblock %}
+{% block content %}
+<h1>Uređaji ({{ devices|length }})</h1>
+<table class="devices-table">
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Uređaj</th>
+      <th>Instalirana verzija</th>
+      <th>Zadnja aktivnost</th>
+      <th>Zadnji log</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in devices %}
+    <tr>
+      <td><span class="badge badge-{{ d.status }}">{{ d.status }}</span></td>
+      <td><a href="/devices/{{ d.id }}">{{ d.id }}</a></td>
+      <td>{{ d.installedVersionName or "-" }} ({{ d.installedVersionCode or "-" }})</td>
+      <td>{{ d.lastSeenAt.strftime("%Y-%m-%d %H:%M") if d.lastSeenAt else "nikad" }}</td>
+      <td>{{ d.lastLogUploadAt.strftime("%Y-%m-%d %H:%M") if d.lastLogUploadAt else "-" }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Nema uređaja još - pojaviće se čim jedan javi heartbeat ili upload-uje log.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

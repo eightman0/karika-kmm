@@ -65,15 +65,19 @@ object LogUploadManager {
                 addUriToZip(context, zip, "content://$SALESREP_LOG_AUTHORITY/backup", "salesrep.log.1")
             }
 
-            val storageRef = Firebase.storage.reference
-                .child("logs/$deviceId/${requestedAt.seconds}.zip")
+            val storagePath = "logs/$deviceId/${requestedAt.seconds}.zip"
+            val storageRef = Firebase.storage.reference.child(storagePath)
             storageRef.putFile(Uri.fromFile(zipFile)).await()
             val downloadUrl = storageRef.downloadUrl.await()
 
             Firebase.firestore.collection("devices").document(deviceId)
                 .update(
                     mapOf(
+                        // downloadUrl only works for an authenticated Firebase client (subject to
+                        // storage.rules); the admin dashboard reads lastLogUploadPath instead and
+                        // mints its own signed URL server-side, bypassing those rules entirely.
                         "lastLogUploadUrl" to downloadUrl.toString(),
+                        "lastLogUploadPath" to storagePath,
                         "lastLogUploadAt" to Timestamp.now(),
                         "lastLogUploadRequestHandledAt" to requestedAt
                     )
