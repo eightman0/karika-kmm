@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="karika_blue">#3575E2</color>
+    <color name="karika_white">#FFFFFF</color>
+    <color name="karika_black">#000000</color>
+    <color name="karika_gray6">#626262</color>
+    <color name="karika_gray9">#DFE0E1</color>
+    <color name="maintenance_amber">#F2A93B</color>
+</resources>

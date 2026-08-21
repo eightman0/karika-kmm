@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Karika Launcher</string>
+    <string name="maintenance_title">Održavanje u toku</string>
+    <string name="maintenance_message">Aplikacija se ažurira. Ovo obično traje samo par minuta.</string>
+    <string name="tile_installing">Instalira se…</string>
+</resources>
