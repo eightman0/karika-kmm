@@ -15,17 +15,21 @@
 </table>
 
 <h2>Objavi novu verziju</h2>
-<form method="post" action="/versions/publish">
+<form method="post" action="/versions/publish" enctype="multipart/form-data">
   <label>Version code
     <input type="number" name="version_code" required>
   </label>
   <label>Version name
     <input type="text" name="version_name" required>
   </label>
-  <label>APK URL
-    <input type="url" name="apk_url" required>
+  <label>APK fajl
+    <input type="file" name="apk_file" accept=".apk">
   </label>
-  <label>SHA-256 (opciono, ali preporučeno - provjerava integritet prije instalacije)
+  <p class="hint">Upload-uje se u Firebase Storage i SHA-256 se računa automatski - ne moraš ništa ručno kopirati.</p>
+  <label>...ili direktan URL (ako je APK već negdje hostovan - koristi se samo ako fajl nije izabran gore)
+    <input type="url" name="apk_url">
+  </label>
+  <label>SHA-256 (samo uz ručni URL - ignoriše se ako uploaduješ fajl, taj se računa sam)
     <input type="text" name="apk_sha256">
   </label>
   <label class="checkbox">

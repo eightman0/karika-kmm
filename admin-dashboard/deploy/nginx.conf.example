@@ -12,6 +12,9 @@ server {
     listen 80;
     server_name karika.car4hire.ba;
 
+    # nginx's default is 1MB - the /versions/publish APK upload is way past that.
+    client_max_body_size 200M;
+
     location / {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;

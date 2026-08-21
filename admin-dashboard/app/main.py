@@ -1,11 +1,11 @@
 from urllib.parse import quote
 
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from . import devices, remote_config
+from . import apk_storage, devices, remote_config
 
 app = FastAPI(title="Karika Kiosk Admin")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -61,11 +61,17 @@ def versions_page(request: Request, error: str | None = None):
 def publish_version(
     version_code: str = Form(...),
     version_name: str = Form(...),
-    apk_url: str = Form(...),
+    apk_url: str = Form(""),
     apk_sha256: str = Form(""),
     mandatory: str | None = Form(None),
+    apk_file: UploadFile | None = File(None),
 ):
     try:
+        if apk_file is not None and apk_file.filename:
+            apk_url, apk_sha256 = apk_storage.upload_apk(apk_file, version_code)
+        elif not apk_url:
+            raise ValueError("Uploaduj APK fajl ili unesi direktan URL do njega")
+
         remote_config.publish_kiosk_version(
             version_code, version_name, apk_url, apk_sha256, mandatory is not None
         )
