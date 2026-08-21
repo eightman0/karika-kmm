@@ -47,6 +47,9 @@ plugin already on the VPS (same as whatever else you're running there).
 `docker-compose.yml` binds the container to `127.0.0.1:8000` only - **not** a public port. This
 dashboard has no login of its own yet, so put nginx (reverse proxy to `127.0.0.1:8000`, with TLS
 and some access control - basic auth at minimum) in front of it before exposing it externally.
+`deploy/nginx.conf.example` is the actual config used for `karika.car4hire.ba` (basic auth via
+`htpasswd`, then `certbot --nginx` for TLS) - copy it to `/etc/nginx/sites-available/` by hand,
+it's not deployed by the workflow.
 
 **One-time VPS setup (not automated - do this once by hand):**
 
