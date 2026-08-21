@@ -3,6 +3,7 @@ package karika.distribucija.ba.salesrep
 import android.app.Application
 import karika.distribucija.ba.salesrep.session.SessionManager
 import karika.distribucija.ba.salesrep.update.RemoteConfigProvider
+import karika.distribucija.ba.salesrep.update.UpdateScheduler
 
 class SalesRepApp : Application() {
     lateinit var sessionManager: SessionManager
@@ -11,6 +12,7 @@ class SalesRepApp : Application() {
         super.onCreate()
         sessionManager = SessionManager(this)
         sessionManager.restoreTokenIfPresent()
-        RemoteConfigProvider.init()
+        RemoteConfigProvider.init(this)
+        UpdateScheduler.schedulePeriodic(this)
     }
 }

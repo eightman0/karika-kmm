@@ -41,6 +41,7 @@ androidx-swiperefreshlayout = "1.2.0"
 androidx-lifecycle-views = "2.9.2"
 androidx-drawerlayout = "1.2.0"
 material = "1.13.0"
+androidx-work = "2.10.1"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -109,6 +110,7 @@ androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-view
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle-views" }
 androidx-drawerlayout = { module = "androidx.drawerlayout:drawerlayout", version.ref = "androidx-drawerlayout" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

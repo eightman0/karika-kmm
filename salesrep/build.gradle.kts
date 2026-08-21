@@ -71,4 +71,6 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.config)
+
+    implementation(libs.androidx.work.runtime.ktx)
 }

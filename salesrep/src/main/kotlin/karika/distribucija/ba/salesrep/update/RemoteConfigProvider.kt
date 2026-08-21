@@ -1,5 +1,6 @@
 package karika.distribucija.ba.salesrep.update
 
+import android.content.Context
 import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
@@ -49,17 +50,19 @@ object RemoteConfigProvider {
     private var listening = false
 
     /** Call once from Application.onCreate(): does an initial fetch and opens the real-time stream. */
-    fun init() {
+    fun init(context: Context) {
+        val appContext = context.applicationContext
         remoteConfig.fetchAndActivate()
-        startRealtimeListener()
+        startRealtimeListener(appContext)
     }
 
-    private fun startRealtimeListener() {
+    private fun startRealtimeListener(context: Context) {
         if (listening) return
         listening = true
         remoteConfig.addOnConfigUpdateListener(object : ConfigUpdateListener {
             override fun onUpdate(configUpdate: ConfigUpdate) {
                 remoteConfig.activate()
+                UpdateScheduler.triggerImmediateCheck(context)
             }
 
             override fun onError(error: FirebaseRemoteConfigException) {
