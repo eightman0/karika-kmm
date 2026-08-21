@@ -66,8 +66,10 @@ object AppLogger {
         }
     }
 
-    /** The file the launcher's ContentProvider bridge will eventually serve. */
+    /** The files a ContentProvider bridge (see salesrep's LogProvider) serves to the launcher. */
     fun currentLogFile(): File? = logFile
+
+    fun backupLogFile(): File? = backupFile
 
     private fun appendLine(level: String, tag: String, message: String) {
         val user = userId ?: "-"

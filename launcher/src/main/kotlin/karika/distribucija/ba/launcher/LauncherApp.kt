@@ -3,17 +3,20 @@ package karika.distribucija.ba.launcher
 import android.app.Application
 import android.content.Intent
 import android.os.Process
-import android.util.Log
+import karika.distribucija.ba.launcher.diagnostics.LogUploadManager
 import karika.distribucija.ba.launcher.update.RemoteConfigProvider
 import karika.distribucija.ba.launcher.update.UpdateScheduler
+import karika.distribucija.ba.logging.AppLogger
 import kotlin.system.exitProcess
 
 class LauncherApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        AppLogger.init(this)
         RemoteConfigProvider.init(this)
         UpdateScheduler.schedulePeriodic(this)
+        LogUploadManager.start(this)
         installCrashRecovery()
     }
 
@@ -25,14 +28,14 @@ class LauncherApp : Application() {
      */
     private fun installCrashRecovery() {
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            Log.e(TAG, "Uncaught exception on ${thread.name}, recovering", throwable)
+            AppLogger.e(TAG, "Uncaught exception on ${thread.name}, recovering", throwable)
             if (CrashLoopGuard.shouldRelaunch(this)) {
                 startActivity(
                     Intent(this, LauncherActivity::class.java)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 )
             } else {
-                Log.e(TAG, "Too many crashes in a short window, letting the process die without relaunching")
+                AppLogger.e(TAG, "Too many crashes in a short window, letting the process die without relaunching")
             }
             Process.killProcess(Process.myPid())
             exitProcess(10)

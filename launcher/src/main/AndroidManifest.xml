@@ -16,6 +16,9 @@
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATE_INFO" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_WIFI" />
 
+    <!-- normal-level, declared by each payload app individually (see salesrep's manifest) -->
+    <uses-permission android:name="karika.distribucija.ba.salesrep.permission.READ_LOGS" />
+
     <application
         android:name=".LauncherApp"
         android:allowBackup="true"

@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// DRAFT - not yet deployed. Review before running `firebase deploy --only storage`.
+//
+// Any authenticated (anonymous) client can currently read/write anywhere under logs/ - this is
+// intentionally loose for now since there's no admin dashboard/auth to distinguish "this device's
+// own upload" from "an admin downloading it" yet. Before this holds real customer data at scale,
+// tighten `read`/`write` the same way firestore.rules does: match the path's {deviceId} segment
+// against a per-device claim (custom auth claim, or a firestore.get() lookup against
+// devices/{deviceId}.authUid) so one device can't read or overwrite another's logs.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /logs/{deviceId}/{fileName} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

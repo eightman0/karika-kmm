@@ -1,0 +1,31 @@
+rules_version = '2';
+
+// DRAFT - not yet deployed. Review before running `firebase deploy --only firestore:rules`.
+//
+// Devices authenticate anonymously (see launcher's LogUploadManager) and self-claim their
+// document on first contact by writing their own auth uid into `authUid`. After that, only the
+// same auth uid may read/update that document - so one device can't read another's log-upload
+// state or its (eventual) heartbeat/version data.
+//
+// There is no admin auth wired up yet: for now, triggering a log pull means editing
+// `devices/{deviceId}.logRequestedAt` directly in the Firebase console, which uses elevated
+// console access and is not subject to these rules at all. Once an admin dashboard exists, add a
+// rule here gating writes to `logRequestedAt` on a custom `isAdmin` claim instead of opening it
+// to any authenticated client.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /devices/{deviceId} {
+      allow read: if request.auth != null
+        && (resource == null || resource.data.authUid == request.auth.uid);
+
+      allow create: if request.auth != null
+        && request.resource.data.authUid == request.auth.uid;
+
+      allow update: if request.auth != null
+        && resource.data.authUid == request.auth.uid
+        && request.resource.data.authUid == resource.data.authUid;
+
+      allow delete: if false;
+    }
+  }
+}
