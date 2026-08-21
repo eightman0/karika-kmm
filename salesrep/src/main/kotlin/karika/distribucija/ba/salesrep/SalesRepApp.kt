@@ -3,7 +3,7 @@ package karika.distribucija.ba.salesrep
 import android.app.Application
 import android.content.Intent
 import android.os.Process
-import android.util.Log
+import karika.distribucija.ba.logging.AppLogger
 import karika.distribucija.ba.salesrep.session.SessionManager
 import kotlin.system.exitProcess
 
@@ -12,6 +12,7 @@ class SalesRepApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        AppLogger.init(this)
         sessionManager = SessionManager(this)
         sessionManager.restoreTokenIfPresent()
         installCrashRecovery()
@@ -25,14 +26,14 @@ class SalesRepApp : Application() {
      */
     private fun installCrashRecovery() {
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            Log.e(TAG, "Uncaught exception on ${thread.name}, recovering", throwable)
+            AppLogger.e(TAG, "Uncaught exception on ${thread.name}, recovering", throwable)
             if (CrashLoopGuard.shouldRelaunch(this)) {
                 startActivity(
                     Intent(this, MainActivity::class.java)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 )
             } else {
-                Log.e(TAG, "Too many crashes in a short window, letting the process die without relaunching")
+                AppLogger.e(TAG, "Too many crashes in a short window, letting the process die without relaunching")
             }
             Process.killProcess(Process.myPid())
             exitProcess(10)

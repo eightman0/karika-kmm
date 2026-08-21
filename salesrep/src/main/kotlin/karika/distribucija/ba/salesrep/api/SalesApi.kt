@@ -14,6 +14,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import karika.distribucija.ba.logging.AppLogger
 import karika.distribucija.ba.salesrep.model.Category
 import karika.distribucija.ba.salesrep.model.Comment
 import karika.distribucija.ba.salesrep.model.Config
@@ -576,6 +577,10 @@ internal class SalesApi {
 
 class SalesRepository internal constructor() {
 
+    companion object {
+        private const val TAG = "SalesRepository"
+    }
+
     fun getMe(): Flow<ResultState<VendorOperationsMe>> = flow {
         emit(ResultState.Loading)
         try {
@@ -588,6 +593,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -609,6 +615,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -630,6 +637,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -652,6 +660,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -673,6 +682,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -689,6 +699,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -711,6 +722,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -728,6 +740,7 @@ class SalesRepository internal constructor() {
             } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                AppLogger.e(TAG, "Network call failed", e)
                 emit(ResultState.Error(e.message))
             }
         }.flowOn(Dispatchers.Default)
@@ -747,6 +760,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -764,6 +778,7 @@ class SalesRepository internal constructor() {
             } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                AppLogger.e(TAG, "Network call failed", e)
                 emit(ResultState.Error(e.message))
             }
         }.flowOn(Dispatchers.Default)
@@ -780,6 +795,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -802,6 +818,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -825,6 +842,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -841,6 +859,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -863,6 +882,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -880,6 +900,7 @@ class SalesRepository internal constructor() {
             } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                AppLogger.e(TAG, "Network call failed", e)
                 emit(ResultState.Error(e.message))
             }
         }.flowOn(Dispatchers.Default)
@@ -909,6 +930,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -925,6 +947,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -941,6 +964,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -957,6 +981,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -989,6 +1014,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1005,6 +1031,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1021,6 +1048,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1038,6 +1066,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1054,6 +1083,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1070,6 +1100,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1086,6 +1117,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1103,6 +1135,7 @@ class SalesRepository internal constructor() {
             } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                AppLogger.e(TAG, "Network call failed", e)
                 emit(ResultState.Error(e.message))
             }
         }.flowOn(Dispatchers.Default)
@@ -1119,6 +1152,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1135,6 +1169,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1151,6 +1186,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1176,6 +1212,7 @@ class SalesRepository internal constructor() {
             } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                AppLogger.e(TAG, "Network call failed", e)
                 emit(ResultState.Error(e.message))
             }
         }.flowOn(Dispatchers.Default)
@@ -1192,6 +1229,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1208,6 +1246,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1224,6 +1263,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -1240,6 +1280,7 @@ class SalesRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)

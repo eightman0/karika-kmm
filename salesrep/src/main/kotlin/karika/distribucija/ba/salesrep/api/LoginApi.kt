@@ -5,6 +5,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import karika.distribucija.ba.logging.AppLogger
 import karika.distribucija.ba.salesrep.model.ForgotPasswordRequest
 import karika.distribucija.ba.salesrep.model.LoginRequest
 import karika.distribucija.ba.salesrep.model.ResultState
@@ -29,6 +30,11 @@ internal class LoginApi {
 }
 
 class LoginRepository internal constructor() {
+
+    companion object {
+        private const val TAG = "LoginRepository"
+    }
+
     fun login(username: String, password: String): Flow<ResultState<String>> = flow {
         emit(ResultState.Loading)
         try {
@@ -49,6 +55,7 @@ class LoginRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
@@ -70,6 +77,7 @@ class LoginRepository internal constructor() {
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)

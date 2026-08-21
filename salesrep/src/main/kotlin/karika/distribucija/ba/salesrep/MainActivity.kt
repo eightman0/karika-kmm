@@ -22,6 +22,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.appbar.MaterialToolbar
+import karika.distribucija.ba.logging.AppLogger
 import karika.distribucija.ba.salesrep.api.SalesRepository
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.network.PlatformEnv
@@ -202,6 +203,7 @@ class MainActivity : AppCompatActivity() {
             SalesRepository().getMe().collect { result ->
                 if (result is ResultState.Success) {
                     CurrentUser.me = result.data
+                    AppLogger.setUser(result.data.employeeId?.toString())
                     findViewById<TextView>(R.id.text_rep_name).text =
                         result.data.name ?: getString(R.string.drawer_role_label)
                 }

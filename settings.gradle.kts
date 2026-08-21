@@ -34,3 +34,4 @@ dependencyResolutionManagement {
 include(":composeApp")
 include(":salesrep")
 include(":launcher")
+include(":core-logging")

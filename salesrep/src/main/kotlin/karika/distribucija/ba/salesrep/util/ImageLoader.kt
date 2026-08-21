@@ -6,6 +6,7 @@ import android.util.LruCache
 import android.widget.ImageView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import karika.distribucija.ba.logging.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,6 +39,7 @@ fun ImageView.loadUrl(url: String?, owner: LifecycleOwner) {
                     inputStream.use { BitmapFactory.decodeStream(it) }
                 }
             } catch (e: Exception) {
+                AppLogger.w("ImageLoader", "Failed to load $url: ${e.message}")
                 null
             }
         }

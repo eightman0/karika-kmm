@@ -5,15 +5,15 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.observer.ResponseObserver
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.client.request.header
-import io.ktor.client.statement.bodyAsText
-import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
-import karika.distribucija.ba.salesrep.BuildConfig
+import karika.distribucija.ba.logging.AppLogger
 import kotlinx.serialization.json.Json
 
 /**
@@ -66,12 +66,17 @@ object HttpClientProvider {
                 }
             }
 
-            if (BuildConfig.DEBUG) {
-                install(ResponseObserver) {
-                    onResponse {
-                        println("SalesRep request: ${it.request.method.value} ${it.status} ${it.request.url}\nResponse: ${it.bodyAsText()}")
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        val redacted = message.replace(
+                            Regex("(?i)Authorization: Bearer \\S+"),
+                            "Authorization: Bearer ***REDACTED***"
+                        )
+                        AppLogger.i("Http", redacted)
                     }
                 }
+                level = LogLevel.ALL
             }
         }
     }

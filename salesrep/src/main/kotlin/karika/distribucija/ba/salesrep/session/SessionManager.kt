@@ -2,6 +2,7 @@ package karika.distribucija.ba.salesrep.session
 
 import android.content.Context
 import androidx.core.content.edit
+import karika.distribucija.ba.logging.AppLogger
 import karika.distribucija.ba.salesrep.network.HttpClientProvider
 import karika.distribucija.ba.salesrep.network.PlatformEnv
 
@@ -32,6 +33,7 @@ class SessionManager(context: Context) {
     fun logout() {
         prefs.edit { remove(KEY_JWT) }
         HttpClientProvider.token = PlatformEnv.envJwt()
+        AppLogger.setUser(null)
     }
 
     fun rememberedEmail(): String = prefs.getString(KEY_REMEMBERED_EMAIL, "").orEmpty()
