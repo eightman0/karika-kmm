@@ -37,6 +37,41 @@ SDKs. For Python, the only option is the REST API
 with an OAuth token minted from the same service account credentials - which is what
 `app/remote_config.py` does.
 
+## Deploy (Contabo VPS, no Docker)
+
+`.github/workflows/deploy-admin-dashboard.yml` pushes `admin-dashboard/` to the VPS via
+`appleboy/scp-action` on every push to `develop` that touches this directory, then SSHes in
+(`appleboy/ssh-action`) to reinstall dependencies and restart a systemd service. No Docker -
+`deploy/karika-admin-dashboard.service` runs `uvicorn` directly; put nginx in front of
+`127.0.0.1:8000` for TLS/routing.
+
+**One-time VPS setup (not automated - do this once by hand):**
+
+1. `sudo mkdir -p /opt/karika-admin-dashboard /etc/karika-admin-dashboard`
+2. Put your Firebase service account key at `/etc/karika-admin-dashboard/serviceAccountKey.json`.
+3. Create `/etc/karika-admin-dashboard/env` (systemd `EnvironmentFile` - `KEY=VALUE` per line, no
+   quotes/`export`):
+   ```
+   FIREBASE_SERVICE_ACCOUNT_PATH=/etc/karika-admin-dashboard/serviceAccountKey.json
+   FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+   FIREBASE_PROJECT_ID=your-project-id
+   ```
+4. `sudo cp admin-dashboard/deploy/karika-admin-dashboard.service /etc/systemd/system/`
+   (adjust `User=` if `www-data` shouldn't own it), then
+   `sudo systemctl daemon-reload && sudo systemctl enable karika-admin-dashboard`.
+5. Give the deploy SSH user passwordless sudo for just this service, e.g. in
+   `/etc/sudoers.d/karika-admin-dashboard`:
+   ```
+   deployuser ALL=(ALL) NOPASSWD: /bin/systemctl restart karika-admin-dashboard, /bin/systemctl status karika-admin-dashboard, /usr/bin/journalctl -u karika-admin-dashboard *
+   ```
+6. Set the repo's GitHub Actions secrets: `VPS_HOST`, `VPS_USER`, `SSH_PRIVATE_KEY`, and
+   optionally `SSH_PORT` (defaults to 22).
+
+The workflow wipes and re-copies `/opt/karika-admin-dashboard` on every deploy (including its
+`.venv`, rebuilt fresh each time) - secrets live outside it in `/etc/karika-admin-dashboard/`
+specifically so a deploy can never delete them. Adjust the trigger branch in the workflow if
+`develop` isn't this repo's deploy branch.
+
 ## Security rules
 
 `../firestore.rules` and `../storage.rules` at the repo root are drafts written for the *mobile
