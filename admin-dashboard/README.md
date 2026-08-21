@@ -25,6 +25,10 @@ on the rest of the repo - moving it to its own repo later is just copying this d
   server-generated signed Storage URL - the log itself isn't publicly readable.
 - **Versions** (`/versions`) - view and publish the `salesrep` version Remote Config parameters
   the launcher's silent-update pipeline reads (`kiosk_version_code`, `kiosk_apk_url`, etc.).
+- **Login** (`/login`) - session-cookie auth gates every other page. Defaults to `admin`/`admin`
+  (see `ADMIN_USERNAME`/`ADMIN_PASSWORD` in `.env.example`) - change those before this is
+  anything but a throwaway internal tool. Set `SESSION_SECRET` too, or every deploy (which
+  restarts the container) logs everyone out.
 
 ## Why `app/remote_config.py` calls the REST API directly
 
@@ -47,9 +51,9 @@ plugin already on the VPS (same as whatever else you're running there).
 `docker-compose.yml` binds the container to `127.0.0.1:8000` only - **not** a public port.
 `deploy/nginx.conf.example` is the actual config used for `karika.car4hire.ba` (reverse proxy +
 `certbot --nginx` for TLS) - copy it to `/etc/nginx/sites-available/` by hand, it's not deployed
-by the workflow. Currently no auth in front of it (deliberate call, for now) - the dashboard has
-none of its own either, so anyone with the URL can trigger installs and pull device logs. Add
-`auth_basic` back in the nginx config (or real login in the app) before that's a real exposure.
+by the workflow. The app's own login (above) is what actually gates access now - nginx has no
+`auth_basic` in front of it, which is fine as a second layer but not a substitute for changing
+`ADMIN_PASSWORD` off the default.
 
 **One-time VPS setup (not automated - do this once by hand):**
 
@@ -63,6 +67,9 @@ none of its own either, so anyone with the URL can trigger installs and pull dev
    FIREBASE_SERVICE_ACCOUNT_PATH=/run/secrets/serviceAccountKey.json
    FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
    FIREBASE_PROJECT_ID=your-project-id
+   ADMIN_USERNAME=admin
+   ADMIN_PASSWORD=change-me
+   SESSION_SECRET=paste-a-generated-secrets.token_hex(32)-here
    ```
 4. Set the repo's GitHub Actions secrets: `VPS_HOST`, `VPS_USER`, `SSH_PRIVATE_KEY`, and
    optionally `SSH_PORT` (defaults to 22).

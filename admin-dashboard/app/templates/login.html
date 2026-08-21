@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Prijava - Karika Kiosk Admin{% endblock %}
+{% block content %}
+<h1>Prijava</h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post" action="/login">
+  <label>Korisničko ime
+    <input type="text" name="username" required autofocus autocomplete="username">
+  </label>
+  <label>Lozinka
+    <input type="password" name="password" required autocomplete="current-password">
+  </label>
+  <button type="submit">Prijavi se</button>
+</form>
+{% endblock %}

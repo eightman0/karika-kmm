@@ -1,15 +1,19 @@
 from urllib.parse import quote
 
-from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 
-from . import apk_storage, devices, remote_config
+from . import apk_storage, auth, devices, remote_config
 
 app = FastAPI(title="Karika Kiosk Admin")
+app.add_middleware(SessionMiddleware, secret_key=auth.SESSION_SECRET, same_site="lax")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+
+require_login = Depends(auth.require_login)
 
 
 @app.get("/")
@@ -17,14 +21,35 @@ def root():
     return RedirectResponse("/devices")
 
 
-@app.get("/devices")
+@app.get("/login")
+def login_page(request: Request, error: str | None = None):
+    return templates.TemplateResponse(request, "login.html", {"error": error})
+
+
+@app.post("/login")
+def login_submit(request: Request, username: str = Form(...), password: str = Form(...)):
+    if not auth.check_credentials(username, password):
+        return RedirectResponse(
+            f"/login?error={quote('Pogrešno korisničko ime ili lozinka')}", status_code=303
+        )
+    request.session["logged_in"] = True
+    return RedirectResponse("/devices", status_code=303)
+
+
+@app.get("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse("/login", status_code=303)
+
+
+@app.get("/devices", dependencies=[require_login])
 def devices_page(request: Request):
     return templates.TemplateResponse(
         request, "devices.html", {"devices": devices.list_devices()}
     )
 
 
-@app.get("/devices/{device_id}")
+@app.get("/devices/{device_id}", dependencies=[require_login])
 def device_detail_page(request: Request, device_id: str):
     device = devices.get_device(device_id)
     if device is None:
@@ -34,13 +59,13 @@ def device_detail_page(request: Request, device_id: str):
     )
 
 
-@app.post("/devices/{device_id}/request-logs")
+@app.post("/devices/{device_id}/request-logs", dependencies=[require_login])
 def request_logs(device_id: str):
     devices.request_logs(device_id)
     return RedirectResponse(f"/devices/{device_id}", status_code=303)
 
 
-@app.get("/devices/{device_id}/log")
+@app.get("/devices/{device_id}/log", dependencies=[require_login])
 def download_log(device_id: str):
     device = devices.get_device(device_id)
     path = device.get("lastLogUploadPath") if device else None
@@ -49,7 +74,7 @@ def download_log(device_id: str):
     return RedirectResponse(devices.signed_log_url(path))
 
 
-@app.get("/versions")
+@app.get("/versions", dependencies=[require_login])
 def versions_page(request: Request, error: str | None = None):
     current = remote_config.get_kiosk_version()
     return templates.TemplateResponse(
@@ -57,7 +82,7 @@ def versions_page(request: Request, error: str | None = None):
     )
 
 
-@app.post("/versions/publish")
+@app.post("/versions/publish", dependencies=[require_login])
 def publish_version(
     version_code: str = Form(...),
     version_name: str = Form(...),
