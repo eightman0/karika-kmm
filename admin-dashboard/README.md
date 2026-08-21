@@ -44,12 +44,12 @@ with an OAuth token minted from the same service account credentials - which is 
 (`appleboy/ssh-action`) and runs `docker compose up -d --build`. Requires Docker + the Compose
 plugin already on the VPS (same as whatever else you're running there).
 
-`docker-compose.yml` binds the container to `127.0.0.1:8000` only - **not** a public port. This
-dashboard has no login of its own yet, so put nginx (reverse proxy to `127.0.0.1:8000`, with TLS
-and some access control - basic auth at minimum) in front of it before exposing it externally.
-`deploy/nginx.conf.example` is the actual config used for `karika.car4hire.ba` (basic auth via
-`htpasswd`, then `certbot --nginx` for TLS) - copy it to `/etc/nginx/sites-available/` by hand,
-it's not deployed by the workflow.
+`docker-compose.yml` binds the container to `127.0.0.1:8000` only - **not** a public port.
+`deploy/nginx.conf.example` is the actual config used for `karika.car4hire.ba` (reverse proxy +
+`certbot --nginx` for TLS) - copy it to `/etc/nginx/sites-available/` by hand, it's not deployed
+by the workflow. Currently no auth in front of it (deliberate call, for now) - the dashboard has
+none of its own either, so anyone with the URL can trigger installs and pull device logs. Add
+`auth_basic` back in the nginx config (or real login in the app) before that's a real exposure.
 
 **One-time VPS setup (not automated - do this once by hand):**
 
