@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinxSerialization)
-    alias(libs.plugins.gms)
 }
 
 android {
@@ -68,9 +67,4 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.datetime)
-
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.config)
-
-    implementation(libs.androidx.work.runtime.ktx)
 }
