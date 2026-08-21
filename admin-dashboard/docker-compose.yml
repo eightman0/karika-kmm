@@ -1,0 +1,13 @@
+services:
+  admin-dashboard:
+    build: .
+    container_name: karika-admin-dashboard
+    restart: unless-stopped
+    # Bound to localhost only - this dashboard has no login of its own yet, so it must not be
+    # reachable from the internet until nginx sits in front of it (TLS + some access control).
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - /etc/karika-admin-dashboard/env
+    volumes:
+      - /etc/karika-admin-dashboard/serviceAccountKey.json:/run/secrets/serviceAccountKey.json:ro

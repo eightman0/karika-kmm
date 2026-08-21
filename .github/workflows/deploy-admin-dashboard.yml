@@ -40,12 +40,8 @@ jobs:
             set -e
             cd /opt/karika-admin-dashboard
 
-            echo "📦 Instaliram zavisnosti..."
-            python3 -m venv .venv
-            .venv/bin/pip install -q -r requirements.txt
-
-            echo "🔄 Restartujem servis..."
-            sudo systemctl restart karika-admin-dashboard
+            echo "🚀 Building and starting the container..."
+            docker compose up -d --build
 
             echo "⏳ Čekanje na zdravlje servisa..."
             for i in $(seq 1 15); do
@@ -55,11 +51,12 @@ jobs:
               fi
               if [ "$i" -eq 15 ]; then
                 echo "❌ Servis se nije podigao na vrijeme, zadnjih 50 linija loga:"
-                sudo journalctl -u karika-admin-dashboard --no-pager -n 50
+                docker compose logs --tail 50
                 exit 1
               fi
               sleep 2
             done
 
-            sudo systemctl --no-pager status karika-admin-dashboard
+            docker compose ps
+            docker image prune -f
             echo "✅ Deployment završen uspešno!"
