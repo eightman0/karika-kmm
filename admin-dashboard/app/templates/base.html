@@ -3,17 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Karika Kiosk Admin{% endblock %}</title>
+  <title>{% block title %}Karika Ops{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  {% if request.session.get("logged_in") %}
   <nav class="topnav">
-    <a href="/devices" class="brand">Karika Kiosk Admin</a>
-    <a href="/devices">Uređaji</a>
-    <a href="/versions">Verzije</a>
-    <a href="/logout">Odjava</a>
+    <a href="/devices" class="brand">Karika Ops</a>
+    <div class="nav-links">
+      <a href="/devices" class="{{ 'active' if active_page == 'devices' else '' }}">Uređaji</a>
+      <span class="nav-sep">|</span>
+      <a href="/versions" class="{{ 'active' if active_page == 'versions' else '' }}">Verzije</a>
+      <span class="nav-sep">|</span>
+      <a href="/analitika" class="{{ 'active' if active_page == 'analitika' else '' }}">Analitika</a>
+    </div>
+    <a href="/logout" class="nav-logout">Odjava</a>
   </nav>
-  <main>
+  {% endif %}
+  <main class="{{ 'login-shell' if active_page == 'login' else '' }}">
     {% block content %}{% endblock %}
   </main>
 </body>

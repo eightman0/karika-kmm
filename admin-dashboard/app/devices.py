@@ -7,6 +7,11 @@ from .firebase import bucket, db
 STALE_AFTER_SECONDS = 12 * 60 * 60  # 12h - covers the 6h periodic worker plus one missed cycle
 SIGNED_URL_MINUTES = 30
 
+APP_PACKAGES = {
+    "launcher": "karika.distribucija.ba.launcher",
+    "salesrep": "karika.distribucija.ba.salesrep",
+}
+
 
 def list_devices() -> list[dict]:
     devices = []
@@ -15,6 +20,35 @@ def list_devices() -> list[dict]:
 
     devices.sort(key=lambda d: d["lastSeenAt"] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     return devices
+
+
+def filter_devices(all_devices: list[dict], query: str = "", app_filter: str = "all") -> list[dict]:
+    result = all_devices
+    if query:
+        needle = query.lower()
+        result = [d for d in result if needle in d["id"].lower()]
+    if app_filter != "all":
+        package = APP_PACKAGES.get(app_filter, app_filter)
+        result = [d for d in result if d.get("installedPackage") == package]
+    return result
+
+
+def fleet_summary(all_devices: list[dict]) -> dict:
+    return {
+        "total": len(all_devices),
+        "online": sum(1 for d in all_devices if d["status"] == "online"),
+        "stale": sum(1 for d in all_devices if d["status"] == "stale"),
+        "never": sum(1 for d in all_devices if d["status"] == "never"),
+    }
+
+
+def count_on_version(all_devices: list[dict], package_name: str, version_code) -> int:
+    target = str(version_code)
+    return sum(
+        1
+        for d in all_devices
+        if d.get("installedPackage") == package_name and str(d.get("installedVersionCode")) == target
+    )
 
 
 def get_device(device_id: str) -> dict | None:

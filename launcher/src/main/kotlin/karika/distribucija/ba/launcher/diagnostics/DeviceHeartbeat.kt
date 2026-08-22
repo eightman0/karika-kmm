@@ -1,6 +1,7 @@
 package karika.distribucija.ba.launcher.diagnostics
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
@@ -30,6 +31,9 @@ object DeviceHeartbeat {
                         "installedPackage" to packageName,
                         "installedVersionCode" to versionCode,
                         "installedVersionName" to versionName,
+                        "androidSdkInt" to Build.VERSION.SDK_INT,
+                        "androidRelease" to Build.VERSION.RELEASE,
+                        "deviceModel" to Build.MODEL,
                         "lastSeenAt" to Timestamp.now()
                     ),
                     SetOptions.merge()

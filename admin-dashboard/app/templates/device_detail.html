@@ -1,26 +1,53 @@
 {% extends "base.html" %}
-{% block title %}{{ device.id }} - Karika Kiosk Admin{% endblock %}
+{% block title %}{{ device.id }} - Karika Ops{% endblock %}
 {% block content %}
 <p><a href="/devices">&larr; Nazad na listu</a></p>
-<h1>{{ device.id }}</h1>
-<span class="badge badge-{{ device.status }}">{{ device.status }}</span>
+<div class="page-header">
+  <div>
+    <h1 class="mono-id">{{ device.id }}</h1>
+    <span class="status status-{{ device.status }}"><span class="status-dot"></span>{{ {"online": "online", "stale": "stale", "never": "nikad javio"}[device.status] }}</span>
+  </div>
+</div>
 
-<table class="detail-table">
-  <tr><th>Instalirana verzija</th><td>{{ device.installedVersionName or "-" }} ({{ device.installedVersionCode or "-" }})</td></tr>
-  <tr><th>Paket</th><td>{{ device.installedPackage or "-" }}</td></tr>
-  <tr><th>Zadnja aktivnost</th><td>{{ device.lastSeenAt.strftime("%Y-%m-%d %H:%M:%S") if device.lastSeenAt else "nikad" }}</td></tr>
-  <tr><th>Zadnji log upload</th><td>{{ device.lastLogUploadAt.strftime("%Y-%m-%d %H:%M:%S") if device.lastLogUploadAt else "-" }}</td></tr>
-</table>
+<div class="metrics-grid">
+  <div class="metric-card">
+    <p class="metric-label">Verzija</p>
+    <p class="metric-value">{{ device.installedVersionName or "-" }}</p>
+    <p class="metric-sub">code {{ device.installedVersionCode or "-" }}</p>
+  </div>
+  <div class="metric-card">
+    <p class="metric-label">Paket</p>
+    <p class="metric-value">{{ device.installedPackage or "-" }}</p>
+  </div>
+  <div class="metric-card">
+    <p class="metric-label">Zadnja aktivnost</p>
+    <p class="metric-value">{{ device.lastSeenAt.strftime("%d.%m.%Y %H:%M:%S") if device.lastSeenAt else "nikad" }}</p>
+  </div>
+  <div class="metric-card">
+    <p class="metric-label">Android &middot; Model</p>
+    <p class="metric-value">{{ device.androidRelease or "?" }} (SDK {{ device.androidSdkInt or "?" }})</p>
+    <p class="metric-sub">{{ device.deviceModel or "-" }}</p>
+  </div>
+</div>
 
-<h2>Logovi</h2>
-<form method="post" action="/devices/{{ device.id }}/request-logs">
-  <button type="submit">Zatraži nove logove</button>
-</form>
-<p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (real-time Firestore listener).</p>
+<div class="card">
+  <h2>Logovi</h2>
+  <div class="log-actions">
+    <form method="post" action="/devices/{{ device.id }}/request-logs">
+      <button type="submit" class="btn btn-primary">Zatraži nove logove</button>
+    </form>
+    {% if device.logRequestedAt and (not device.lastLogUploadRequestHandledAt or device.logRequestedAt > device.lastLogUploadRequestHandledAt) %}
+    <span class="log-pending">Zahtjev poslan - čeka se da uređaj otpremi log...</span>
+    {% endif %}
+  </div>
+  <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (real-time Firestore listener).</p>
 
-{% if device.lastLogUploadPath %}
-<p><a href="/devices/{{ device.id }}/log">Preuzmi zadnji log (.zip)</a></p>
-{% else %}
-<p>Još nema upload-ovanog loga za ovaj uređaj.</p>
-{% endif %}
+  {% if device.lastLogUploadPath %}
+  <p><a href="/devices/{{ device.id }}/log">Preuzmi zadnji log (.zip)</a>
+    <span class="hint">&middot; {{ device.lastLogUploadAt.strftime("%d.%m.%Y %H:%M:%S") if device.lastLogUploadAt else "" }}</span>
+  </p>
+  {% else %}
+  <p class="hint">Još nema upload-ovanog loga za ovaj uređaj.</p>
+  {% endif %}
+</div>
 {% endblock %}

@@ -1,7 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Uređaji - Karika Kiosk Admin{% endblock %}
+{% block title %}Uređaji - Karika Ops{% endblock %}
 {% block content %}
-<h1>Uređaji ({{ devices|length }})</h1>
+<div class="page-header">
+  <div>
+    <h1>Uređaji</h1>
+    <p class="summary-line">
+      <strong>{{ summary.total }}</strong> ukupno &middot;
+      <strong>{{ summary.online }}</strong> online &middot;
+      <strong>{{ summary.stale }}</strong> stale &middot;
+      <strong>{{ summary.never }}</strong> nikad javio
+    </p>
+  </div>
+  <div class="header-actions">
+    <a href="/devices?app={{ app_filter }}&q={{ q|urlencode }}" class="btn btn-secondary">Osvježi</a>
+  </div>
+</div>
+
+<form method="get" action="/devices" class="toolbar">
+  <input class="search-input" type="text" name="q" value="{{ q }}" placeholder="Pretraži po ID-u uređaja...">
+  <input type="hidden" name="app" value="{{ app_filter }}">
+  <div class="pill-group">
+    <a href="/devices?app=all&q={{ q|urlencode }}" class="pill {{ 'active' if app_filter == 'all' else '' }}">Sve</a>
+    <a href="/devices?app=launcher&q={{ q|urlencode }}" class="pill {{ 'active' if app_filter == 'launcher' else '' }}">Launcher</a>
+    <a href="/devices?app=salesrep&q={{ q|urlencode }}" class="pill {{ 'active' if app_filter == 'salesrep' else '' }}">Salesrep</a>
+  </div>
+</form>
+
+{% if devices %}
 <div class="table-scroll">
 <table class="devices-table">
   <thead>
@@ -16,16 +41,35 @@
   <tbody>
     {% for d in devices %}
     <tr>
-      <td data-label="Status"><span class="badge badge-{{ d.status }}">{{ d.status }}</span></td>
-      <td data-label="Uređaj"><a href="/devices/{{ d.id }}">{{ d.id }}</a></td>
-      <td data-label="Verzija">{{ d.installedVersionName or "-" }} ({{ d.installedVersionCode or "-" }})</td>
-      <td data-label="Zadnja aktivnost">{{ d.lastSeenAt.strftime("%Y-%m-%d %H:%M") if d.lastSeenAt else "nikad" }}</td>
-      <td data-label="Zadnji log">{{ d.lastLogUploadAt.strftime("%Y-%m-%d %H:%M") if d.lastLogUploadAt else "-" }}</td>
+      <td data-label="Status">
+        <span class="status status-{{ d.status }}"><span class="status-dot"></span>{{ {"online": "online", "stale": "stale", "never": "nikad"}[d.status] }}</span>
+      </td>
+      <td data-label="Uređaj"><a class="mono-id" href="/devices/{{ d.id }}">{{ d.id }}</a></td>
+      <td data-label="Verzija">
+        {{ d.installedVersionName or "-" }} ({{ d.installedVersionCode or "-" }})
+        {% if latest_salesrep_code and d.installedPackage == "karika.distribucija.ba.salesrep" and (d.installedVersionCode | string) != (latest_salesrep_code | string) %}
+        <span class="tag tag-lagging">zaostaje</span>
+        {% endif %}
+      </td>
+      <td data-label="Zadnja aktivnost">{{ d.lastSeenAt.strftime("%d.%m. %H:%M") if d.lastSeenAt else "nikad" }}</td>
+      <td data-label="Zadnji log">{{ d.lastLogUploadAt.strftime("%d.%m. %H:%M") if d.lastLogUploadAt else "-" }}</td>
     </tr>
-    {% else %}
-    <tr><td colspan="5">Nema uređaja još - pojaviće se čim jedan javi heartbeat ili upload-uje log.</td></tr>
     {% endfor %}
   </tbody>
 </table>
 </div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon"></div>
+  {% if summary.total == 0 %}
+  <p>Nema uređaja još - pojaviće se čim jedan javi heartbeat ili upload-uje log.</p>
+  {% else %}
+  <p>Nema uređaja koji odgovaraju pretrazi ili filteru.</p>
+  {% endif %}
+  <div class="empty-actions">
+    <a href="/devices" class="btn btn-secondary">Obriši filtere</a>
+    <a href="/versions" class="btn btn-ghost">Pogledaj verzije</a>
+  </div>
+</div>
+{% endif %}
 {% endblock %}
