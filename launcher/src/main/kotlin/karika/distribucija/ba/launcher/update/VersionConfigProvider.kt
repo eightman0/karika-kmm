@@ -4,6 +4,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeout
 
 /**
  * Backs the silent-update mechanism for the payload app (salesrep): the admin dashboard writes
@@ -15,13 +16,18 @@ import kotlinx.coroutines.tasks.await
 object VersionConfigProvider {
     private const val COLLECTION = "config"
     private const val DOCUMENT = "kiosk_version"
+    private const val TIMEOUT_MS = 15_000L
 
-    suspend fun fetchLatest(): KioskVersion {
+    // Firestore's client has no deadline of its own for a stuck connection - it just keeps
+    // retrying its stream underneath - so without this a bad network moment hangs the whole
+    // UpdateWorker run (and eats into WorkManager's execution budget) instead of failing fast into
+    // Result.retry() like every other transient error here already does.
+    suspend fun fetchLatest(): KioskVersion = withTimeout(TIMEOUT_MS) {
         if (Firebase.auth.currentUser == null) {
             Firebase.auth.signInAnonymously().await()
         }
         val snapshot = Firebase.firestore.collection(COLLECTION).document(DOCUMENT).get().await()
-        return KioskVersion(
+        KioskVersion(
             versionCode = snapshot.getLong("versionCode") ?: 0L,
             versionName = snapshot.getString("versionName").orEmpty(),
             apkUrl = snapshot.getString("apkUrl").orEmpty(),

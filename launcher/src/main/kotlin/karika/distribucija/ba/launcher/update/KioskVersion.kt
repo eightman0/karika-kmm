@@ -7,5 +7,5 @@ data class KioskVersion(
     val apkSha256: String,
     val mandatory: Boolean
 ) {
-    val isPublished: Boolean get() = versionCode > 0 && apkUrl.isNotBlank()
+    val isPublished: Boolean get() = apkUrl.isNotBlank()
 }

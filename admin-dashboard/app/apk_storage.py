@@ -2,8 +2,13 @@ import hashlib
 
 from androguard.core.apk import APK
 from fastapi import UploadFile
+from loguru import logger
 
 from .firebase import bucket
+
+# androguard logs every parsed AXML attribute at DEBUG level via loguru by default - hundreds of
+# lines per upload that would drown out anything else in the container's logs.
+logger.disable("androguard")
 
 
 def upload_apk(apk_file: UploadFile) -> tuple[str, str, str, str]:

@@ -14,9 +14,11 @@ import java.security.MessageDigest
 
 private data class InstalledInfo(val versionCode: Long, val versionName: String)
 
-/** Keeps KnownApps.PRIMARY (salesrep) up to date - not the launcher itself. Also handles the
- * very first install: a not-yet-installed package reads as version 0, which always compares as
- * older than any published version. */
+/** Keeps KnownApps.PRIMARY (salesrep) up to date - not the launcher itself. Whether to install is
+ * decided by comparing the published APK's sha256 against the one this device last installed,
+ * not by version numbers - a publish only has to contain a new APK, nothing has to be typed or
+ * incremented correctly for the update to actually reach devices. The heartbeat below still
+ * reports whatever version is genuinely installed, whatever that happens to be. */
 class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result = try {
@@ -26,11 +28,13 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
 
         DeviceHeartbeat.report(applicationContext, targetPackage, installed.versionCode, installed.versionName)
 
-        if (!latest.isPublished || latest.versionCode <= installed.versionCode) {
-            Log.i(TAG, "$targetPackage already on latest version (${installed.versionCode})")
+        val alreadyInstalled = latest.apkSha256.isNotBlank() &&
+            latest.apkSha256.equals(InstalledApkState.lastInstalledSha256(applicationContext), ignoreCase = true)
+        if (!latest.isPublished || alreadyInstalled) {
+            Log.i(TAG, "$targetPackage already on the published build")
             Result.success()
         } else {
-            Log.i(TAG, "New version available for $targetPackage: ${latest.versionCode} (${latest.versionName})")
+            Log.i(TAG, "New build published for $targetPackage (${latest.versionName}), installing")
             runUpdate(latest)
         }
     } catch (e: Exception) {
@@ -54,7 +58,7 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             val apkFile = ApkDownloader.download(applicationContext, latest.apkUrl) ?: return Result.retry()
 
             if (!verifyChecksum(apkFile, latest.apkSha256)) {
-                Log.e(TAG, "Checksum mismatch for downloaded APK (version ${latest.versionCode}), discarding")
+                Log.e(TAG, "Checksum mismatch for downloaded APK (${latest.versionName}), discarding")
                 apkFile.delete()
                 return Result.retry()
             }
@@ -63,6 +67,7 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             apkFile.delete()
             if (!installed) return Result.retry()
 
+            InstalledApkState.setLastInstalledSha256(applicationContext, latest.apkSha256)
             // Otherwise the dashboard keeps showing the pre-update version (and a stale
             // "lagging" tag) until whatever unrelated event triggers the next heartbeat -
             // there's no guarantee that happens soon after a real-time-triggered install.
