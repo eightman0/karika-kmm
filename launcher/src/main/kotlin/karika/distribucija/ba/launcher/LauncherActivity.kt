@@ -59,11 +59,16 @@ class LauncherActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun launchApp(packageName: String, userInitiated: Boolean) {
         val launchIntent = packageManager.getLaunchIntentForPackage(packageName) ?: return
         if (!userInitiated && !RelaunchGuard.shouldAutoLaunch(this, packageName)) return
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(launchIntent)
+        // Belt-and-suspenders on top of the theme's windowAnimationStyle overrides: this covers
+        // the leg we explicitly trigger (launching salesrep), in case any animation category the
+        // theme doesn't catch still applies to an explicit startActivity() call.
+        overridePendingTransition(0, 0)
     }
 
     companion object {
