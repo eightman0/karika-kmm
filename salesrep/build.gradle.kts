@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
@@ -12,13 +14,26 @@ android {
         applicationId = "karika.distribucija.ba.salesrep"
         minSdk = 30
         targetSdk = 37
-        versionCode = 8
-        versionName = "0.1.7"
+        versionCode = 10
+        versionName = "1"
     }
 
     buildFeatures {
         viewBinding = true
         buildConfig = true
+    }
+
+    val keystorePropsFile = file("keystore.properties")
+    signingConfigs {
+        if (keystorePropsFile.exists()) {
+            val keystoreProps = Properties().apply { load(keystorePropsFile.inputStream()) }
+            create("release") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
@@ -30,9 +45,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Matches the debug-signed build already running on the fleet (salesrep has no
-            // dedicated release keystore yet) so this variant can replace it in place.
-            signingConfig = signingConfigs.getByName("debug")
+            if (keystorePropsFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             buildConfigField("String", "ENV_PREFIX", "\"\"")
             buildConfigField("String", "ENV_JWT", "\"lbzgyy1qylr7unu707eblcphftb2fzha\"")
         }

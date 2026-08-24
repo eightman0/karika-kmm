@@ -25,3 +25,7 @@ captures
 # Launcher release signing - never commit the production Device Owner signing key.
 /launcher/keystore/
 /launcher/keystore.properties
+
+# Salesrep release signing - never commit the production signing key.
+/salesrep/keystore/
+/salesrep/keystore.properties
