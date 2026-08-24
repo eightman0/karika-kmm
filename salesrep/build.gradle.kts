@@ -27,7 +27,12 @@ android {
             buildConfigField("String", "ENV_JWT", "\"09kqzjtmz5cf1klm9hjxw9yt3uaa63hk\"")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Matches the debug-signed build already running on the fleet (salesrep has no
+            // dedicated release keystore yet) so this variant can replace it in place.
+            signingConfig = signingConfigs.getByName("debug")
             buildConfigField("String", "ENV_PREFIX", "\"\"")
             buildConfigField("String", "ENV_JWT", "\"lbzgyy1qylr7unu707eblcphftb2fzha\"")
         }
