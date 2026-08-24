@@ -12,6 +12,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import karika.distribucija.ba.salesrep.BuildConfig
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.SalesRepApp
 import karika.distribucija.ba.salesrep.databinding.FragmentLoginBinding
@@ -45,6 +46,8 @@ class LoginFragment : Fragment() {
         binding.switchRememberMe.isChecked = rememberedPassword.isNotEmpty()
 
         updateFormValid()
+
+        binding.textAppVersion.text = "v${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
 
         // The gradient/background image (this fragment's root FrameLayout) is left alone so it
         // bleeds edge-to-edge under the status bar; only the actual form content is pushed down
