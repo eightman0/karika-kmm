@@ -19,9 +19,6 @@
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATE_INFO" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_WIFI" />
-    <!-- Keeps this process out of Android's cached-app freezer while salesrep is in the
-         foreground (its normal state), so the Remote Config/Firestore real-time listeners keep
-         getting CPU time instead of silently queuing pushes until the OS next wakes the process. -->
 
     <!-- normal-level, declared by each payload app individually (see salesrep's manifest) -->
     <uses-permission android:name="karika.distribucija.ba.salesrep.permission.READ_LOGS" />
@@ -120,5 +117,13 @@
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".update.KioskMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

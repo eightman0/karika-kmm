@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
-from . import analytics, apk_storage, auth, devices, remote_config, version_history
+from . import analytics, apk_storage, auth, devices, version_config, version_history
 
 app = FastAPI(title="Karika Kiosk Admin")
 app.add_middleware(SessionMiddleware, secret_key=auth.SESSION_SECRET, same_site="lax")
@@ -57,7 +57,7 @@ def devices_page(request: Request, q: str = "", app: str = "all"):
     all_devices = devices.list_devices()
     filtered = devices.filter_devices(all_devices, q, app)
     try:
-        latest_salesrep_code = remote_config.get_kiosk_version()["version_code"]
+        latest_salesrep_code = version_config.get_kiosk_version()["version_code"]
     except Exception:
         latest_salesrep_code = None
     return templates.TemplateResponse(
@@ -106,7 +106,7 @@ def versions_page(request: Request, app: str = "salesrep", error: str | None = N
 
     all_devices = devices.list_devices()
     history = version_history.get_history(app)
-    current = remote_config.get_kiosk_version() if app in PUBLISHABLE_APPS else None
+    current = version_config.get_kiosk_version() if app in PUBLISHABLE_APPS else None
     is_published = bool(current and current["version_code"] not in ("0", "", None))
     rollout_count = 0
     if is_published:
@@ -140,7 +140,6 @@ def publish_version(
     version_name: str = Form(...),
     apk_url: str = Form(""),
     apk_sha256: str = Form(""),
-    mandatory: str | None = Form(None),
     apk_file: UploadFile | None = File(None),
 ):
     if app not in PUBLISHABLE_APPS:
@@ -152,8 +151,9 @@ def publish_version(
         elif not apk_url:
             raise ValueError("Uploaduj APK fajl ili unesi direktan URL do njega")
 
-        is_mandatory = mandatory is not None
-        remote_config.publish_kiosk_version(version_code, version_name, apk_url, apk_sha256, is_mandatory)
+        # Every publish is mandatory - there's no supported "optional update" UX on the device.
+        is_mandatory = True
+        version_config.publish_kiosk_version(version_code, version_name, apk_url, apk_sha256, is_mandatory)
         version_history.record_publish(
             app,
             version_code,

@@ -20,11 +20,10 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 /**
- * Support-log pull: an admin sets `logRequestedAt` on this device's Firestore document (today,
- * by hand in the Firebase console - there's no admin dashboard yet), a real-time listener here
- * picks it up, and every known app's local log (this app's own via AppLogger, salesrep's via its
- * LogProvider content URI) gets zipped and uploaded to Storage. No polling, same real-time
- * pattern as RemoteConfigProvider.
+ * Support-log pull: the admin dashboard sets `logRequestedAt` on this device's Firestore
+ * document, a real-time listener here picks it up, and every known app's local log (this app's
+ * own via AppLogger, salesrep's via its LogProvider content URI) gets zipped and uploaded to
+ * Storage. No polling.
  */
 object LogUploadManager {
     private const val TAG = "LogUploadManager"

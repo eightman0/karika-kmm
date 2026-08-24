@@ -20,8 +20,7 @@ private data class InstalledInfo(val versionCode: Long, val versionName: String)
 class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result = try {
-        RemoteConfigProvider.fetchLatest()
-        val latest = RemoteConfigProvider.latestVersion()
+        val latest = VersionConfigProvider.fetchLatest()
         val targetPackage = KnownApps.PRIMARY.packageName
         val installed = installedInfo(targetPackage)
 

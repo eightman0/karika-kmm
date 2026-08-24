@@ -1,11 +1,11 @@
 # Karika Kiosk Admin Dashboard
 
 FastAPI admin tool for the Android kiosk fleet (`salesrep` + `launcher`). Talks directly to
-Firebase (Firestore, Storage, Remote Config) - no separate database of its own.
+Firebase (Firestore, Storage, Cloud Messaging) - no separate database of its own.
 
-Currently a subdirectory of the `karika-kmm` monorepo so it can share context (Firestore schema,
-Remote Config parameter names) with the mobile code while both are moving. It has no dependency
-on the rest of the repo - moving it to its own repo later is just copying this directory.
+Currently a subdirectory of the `karika-kmm` monorepo so it can share context (Firestore schema)
+with the mobile code while both are moving. It has no dependency on the rest of the repo - moving
+it to its own repo later is just copying this directory.
 
 ## Setup
 
@@ -23,23 +23,14 @@ on the rest of the repo - moving it to its own repo later is just copying this d
 - **Device detail** (`/devices/{id}`) - request a fresh log pull (sets `logRequestedAt`, which the
   launcher's real-time Firestore listener picks up), download the last uploaded log via a
   server-generated signed Storage URL - the log itself isn't publicly readable.
-- **Versions** (`/versions`) - view and publish the `salesrep` version Remote Config parameters
-  the launcher's silent-update pipeline reads (`kiosk_version_code`, `kiosk_apk_url`, etc.).
+- **Versions** (`/versions`) - view and publish the `salesrep` version doc
+  (`config/kiosk_version` in Firestore) the launcher's silent-update pipeline reads. Publishing
+  also sends an FCM data message so devices check right away instead of waiting for their next
+  periodic poll (at most ~30 min later).
 - **Login** (`/login`) - session-cookie auth gates every other page. Defaults to `admin`/`admin`
   (see `ADMIN_USERNAME`/`ADMIN_PASSWORD` in `.env.example`) - change those before this is
   anything but a throwaway internal tool. Set `SESSION_SECRET` too, or every deploy (which
   restarts the container) logs everyone out.
-
-## Why `app/remote_config.py` calls the REST API directly
-
-The Python Admin SDK's `firebase_admin.remote_config` module only supports the newer
-"Remote Config for servers" feature (`get_server_template`/`init_server_template`) - it has no
-`get_template`/`publish_template` for the classic, client-facing template that `fetchAndActivate()`
-reads on Android. That classic-template management API only exists in the Node.js and Java Admin
-SDKs. For Python, the only option is the REST API
-(`https://firebaseremoteconfig.googleapis.com/v1/projects/{project}/remoteConfig`), authenticated
-with an OAuth token minted from the same service account credentials - which is what
-`app/remote_config.py` does.
 
 ## Deploy (Contabo VPS, Docker)
 

@@ -65,12 +65,9 @@
     <label>SHA-256 (samo uz ručni URL)
       <input type="text" name="apk_sha256">
     </label>
-    <label class="checkbox">
-      <input type="checkbox" name="mandatory"> Obavezan update
-    </label>
     <button type="submit" class="btn btn-primary">Objavi</button>
   </form>
-  <p class="hint">Objava odmah stiže na sve upaljene uređaje preko real-time Remote Config listenera - nema čekanja na periodičnu provjeru.</p>
+  <p class="hint">Svaki update je obavezan. Objava odmah šalje push (FCM) na sve upaljene uređaje da provjere odmah - a i bez push-a, svaki uređaj sam provjeri periodično najkasnije za 30 min.</p>
 </div>
 
 <div class="card">

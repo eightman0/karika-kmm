@@ -27,5 +27,12 @@ service cloud.firestore {
 
       allow delete: if false;
     }
+
+    // Published by the admin dashboard (Admin SDK, bypasses these rules); devices only ever
+    // read the current version to decide whether to update.
+    match /config/{document} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
   }
 }
