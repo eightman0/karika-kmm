@@ -21,3 +21,7 @@ captures
 /composeApp/stage/release/baselineProfiles/0/composeApp-stage-release.dm
 /composeApp/stage/release/baselineProfiles/1/composeApp-stage-release.dm
 /composeApp/stage/release/output-metadata.json
+
+# Launcher release signing - never commit the production Device Owner signing key.
+/launcher/keystore/
+/launcher/keystore.properties
