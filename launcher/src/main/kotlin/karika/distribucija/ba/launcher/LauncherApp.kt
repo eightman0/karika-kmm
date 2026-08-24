@@ -1,10 +1,13 @@
 package karika.distribucija.ba.launcher
 
 import android.app.Application
+import android.app.admin.DevicePolicyManager
+import android.content.Context
 import android.content.Intent
 import android.os.Process
 import karika.distribucija.ba.launcher.diagnostics.KeepAliveService
 import karika.distribucija.ba.launcher.diagnostics.LogUploadManager
+import karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver
 import karika.distribucija.ba.launcher.update.RemoteConfigProvider
 import karika.distribucija.ba.launcher.update.UpdateScheduler
 import karika.distribucija.ba.logging.AppLogger
@@ -25,8 +28,11 @@ class LauncherApp : Application() {
     /**
      * The launcher is Device Owner, so its own crash recovery matters more than any payload
      * app's: relaunch LauncherActivity on an uncaught exception rather than trusting the OEM's
-     * lock-task implementation alone. CrashLoopGuard caps relaunches so a startup crash can't
-     * spin an unattended device forever.
+     * lock-task implementation alone. CrashLoopGuard caps quick in-process relaunches so a
+     * startup crash can't spin in a tight loop - but once that cap is hit, escalate to a full
+     * device reboot instead of just giving up. A kiosk that sits there with nothing running,
+     * locked into lock task with no way out for whoever's in front of it, is a worse failure
+     * mode than one that reboots every few minutes until it recovers.
      */
     private fun installCrashRecovery() {
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
@@ -36,11 +42,24 @@ class LauncherApp : Application() {
                     Intent(this, LauncherActivity::class.java)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 )
+            } else if (CrashLoopGuard.shouldReboot(this)) {
+                AppLogger.e(TAG, "Too many crashes in a short window, rebooting the device")
+                rebootDevice()
             } else {
-                AppLogger.e(TAG, "Too many crashes in a short window, letting the process die without relaunching")
+                AppLogger.e(TAG, "Crashing again shortly after a reboot - backing off before trying again")
             }
             Process.killProcess(Process.myPid())
             exitProcess(10)
+        }
+    }
+
+    private fun rebootDevice() {
+        try {
+            val devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            val admin = LauncherDeviceAdminReceiver.getReceiverComponentName(this)
+            devicePolicyManager.reboot(admin)
+        } catch (e: Exception) {
+            AppLogger.e(TAG, "Reboot request failed", e)
         }
     }
 

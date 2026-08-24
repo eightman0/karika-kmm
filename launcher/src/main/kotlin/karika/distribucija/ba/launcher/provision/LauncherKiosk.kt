@@ -36,6 +36,7 @@ class LauncherKiosk(private val context: ComponentActivity) {
     private fun setKioskPolicies(enable: Boolean) {
         setRestrictions(enable)
         enableStayOnWhilePluggedIn(enable)
+        disableScreenTimeout(enable)
         setUpdatePolicy(enable)
         setAsHomeApp(enable)
         setKeyGuardEnabled(enable)
@@ -115,6 +116,18 @@ class LauncherKiosk(private val context: ComponentActivity) {
         }
     }
 
+    /** STAY_ON_WHILE_PLUGGED_IN only helps while charging - an unattended kiosk that's briefly
+     * off power (or on a device the emulator doesn't report as "plugged in" at all) would
+     * otherwise still hit the normal screen-off timeout and go dark with nothing to wake it,
+     * which looks indistinguishable from a dead/hung device to whoever's standing in front of it. */
+    private fun disableScreenTimeout(enable: Boolean) {
+        devicePolicyManager.setSystemSetting(
+            adminComponentName,
+            Settings.System.SCREEN_OFF_TIMEOUT,
+            if (enable) Int.MAX_VALUE.toString() else DEFAULT_SCREEN_OFF_TIMEOUT_MS.toString()
+        )
+    }
+
     private fun setUpdatePolicy(enable: Boolean) {
         if (enable) {
             devicePolicyManager.setSystemUpdatePolicy(
@@ -146,5 +159,11 @@ class LauncherKiosk(private val context: ComponentActivity) {
 
     private fun setKeyGuardEnabled(enable: Boolean) {
         devicePolicyManager.setKeyguardDisabled(adminComponentName, !enable)
+    }
+
+    private companion object {
+        // Android's own out-of-the-box default, restored on exit() so leaving kiosk mode doesn't
+        // leave the screen timeout disabled forever.
+        const val DEFAULT_SCREEN_OFF_TIMEOUT_MS = 30_000
     }
 }
