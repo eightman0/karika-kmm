@@ -17,8 +17,12 @@ class LauncherApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        AppLogger.init(this)
+        // Called first and before anything else: the OS starts counting down to a fatal
+        // ForegroundServiceDidNotStartInTimeException from the moment this is called, so every
+        // millisecond of the rest of onCreate() eats into that budget. Seen live on a loaded
+        // device (system load average 11+): every millisecond mattered.
         KeepAliveService.start(this)
+        AppLogger.init(this)
         RemoteConfigProvider.init(this)
         UpdateScheduler.schedulePeriodic(this)
         LogUploadManager.start(this)
