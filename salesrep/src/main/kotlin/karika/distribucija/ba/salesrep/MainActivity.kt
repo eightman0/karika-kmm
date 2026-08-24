@@ -6,6 +6,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -95,6 +96,19 @@ class MainActivity : AppCompatActivity() {
             )
             loadRepName()
         }
+
+        // Kiosk runs this app as the locked payload: back must never pop the whole task away and
+        // reveal the launcher underneath, so swallow it instead of falling through to the default
+        // finish-the-activity behavior once there's nothing left in the nav back stack.
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    navController.popBackStack()
+                }
+            }
+        })
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val isLogin = destination.id == R.id.loginFragment

@@ -5,7 +5,6 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.os.Process
-import karika.distribucija.ba.launcher.diagnostics.KeepAliveService
 import karika.distribucija.ba.launcher.diagnostics.LogUploadManager
 import karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver
 import karika.distribucija.ba.launcher.update.RemoteConfigProvider
@@ -17,11 +16,6 @@ class LauncherApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // Called first and before anything else: the OS starts counting down to a fatal
-        // ForegroundServiceDidNotStartInTimeException from the moment this is called, so every
-        // millisecond of the rest of onCreate() eats into that budget. Seen live on a loaded
-        // device (system load average 11+): every millisecond mattered.
-        KeepAliveService.start(this)
         AppLogger.init(this)
         RemoteConfigProvider.init(this)
         UpdateScheduler.schedulePeriodic(this)

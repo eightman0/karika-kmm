@@ -46,13 +46,6 @@ class LauncherKiosk(private val context: ComponentActivity) {
             Manifest.permission.REQUEST_INSTALL_PACKAGES,
             DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
         )
-        // So the keep-alive foreground service's notification never blocks on a runtime prompt.
-        devicePolicyManager.setPermissionGrantState(
-            adminComponentName,
-            context.packageName,
-            Manifest.permission.POST_NOTIFICATIONS,
-            DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
-        )
         setLockTask(enable)
     }
 
