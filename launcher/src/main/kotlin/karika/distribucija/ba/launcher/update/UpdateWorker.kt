@@ -62,7 +62,13 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
 
             val installed = ApkInstaller.install(applicationContext, apkFile)
             apkFile.delete()
-            return if (installed) Result.success() else Result.retry()
+            if (!installed) return Result.retry()
+
+            // Otherwise the dashboard keeps showing the pre-update version (and a stale
+            // "lagging" tag) until whatever unrelated event triggers the next heartbeat -
+            // there's no guarantee that happens soon after a real-time-triggered install.
+            DeviceHeartbeat.report(applicationContext, KnownApps.PRIMARY.packageName, latest.versionCode, latest.versionName)
+            return Result.success()
         } finally {
             MaintenanceState.end(applicationContext)
         }
