@@ -3,6 +3,7 @@ package karika.distribucija.ba.launcher
 import android.app.Application
 import android.content.Intent
 import android.os.Process
+import karika.distribucija.ba.launcher.diagnostics.KeepAliveService
 import karika.distribucija.ba.launcher.diagnostics.LogUploadManager
 import karika.distribucija.ba.launcher.update.RemoteConfigProvider
 import karika.distribucija.ba.launcher.update.UpdateScheduler
@@ -14,6 +15,7 @@ class LauncherApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AppLogger.init(this)
+        KeepAliveService.start(this)
         RemoteConfigProvider.init(this)
         UpdateScheduler.schedulePeriodic(this)
         LogUploadManager.start(this)
