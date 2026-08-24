@@ -7,6 +7,10 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+        <!-- Matches activity_launcher.xml's root background, used as the "starting window"
+             placeholder before that layout is even inflated - without this, Material3's default
+             windowBackground shows through as a black flash for that instant instead. -->
+        <item name="android:windowBackground">@color/karika_white</item>
         <!-- Payload app dying mid-install briefly leaves no window on top, which Android fills
              with the system wallpaper for the duration of the default cross-fade - looks like a
              glitch on a kiosk with no home screen of its own. Killing the transition animation
