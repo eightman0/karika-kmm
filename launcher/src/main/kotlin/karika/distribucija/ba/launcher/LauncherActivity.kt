@@ -1,6 +1,7 @@
 package karika.distribucija.ba.launcher
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,11 @@ class LauncherActivity : AppCompatActivity() {
     private lateinit var kiosk: LauncherKiosk
     private lateinit var appGrid: RecyclerView
     private lateinit var maintenanceBanner: View
+
+    /** Fires the moment UpdateWorker's begin()/end() writes, so the banner doesn't stay stuck
+     * showing "maintenance" if it ended while this Activity was already resumed and on screen. */
+    private val maintenanceListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> refreshMaintenanceState() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +35,13 @@ class LauncherActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         kiosk.enter()
+        MaintenanceState.addChangeListener(this, maintenanceListener)
         refreshMaintenanceState()
+    }
+
+    override fun onPause() {
+        MaintenanceState.removeChangeListener(this, maintenanceListener)
+        super.onPause()
     }
 
     /**

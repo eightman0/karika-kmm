@@ -1,6 +1,7 @@
 package karika.distribucija.ba.launcher
 
 import android.content.Context
+import android.content.SharedPreferences
 
 /**
  * Set by UpdateWorker while it's downloading/installing, read by LauncherActivity to show the
@@ -30,5 +31,18 @@ object MaintenanceState {
         val since = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getLong(KEY_SINCE, 0L)
         if (since == 0L) return false
         return System.currentTimeMillis() - since < MAX_AGE_MS
+    }
+
+    /** Lets a visible LauncherActivity react the moment begin()/end() writes, instead of only
+     * re-checking isActive() on its next onResume (which may not come until something else, e.g.
+     * a screen wake, happens to trigger one). */
+    fun addChangeListener(context: Context, listener: SharedPreferences.OnSharedPreferenceChangeListener) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .registerOnSharedPreferenceChangeListener(listener)
+    }
+
+    fun removeChangeListener(context: Context, listener: SharedPreferences.OnSharedPreferenceChangeListener) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .unregisterOnSharedPreferenceChangeListener(listener)
     }
 }
