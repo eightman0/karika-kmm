@@ -21,7 +21,6 @@
   <input type="hidden" name="app" value="{{ app_filter }}">
   <div class="pill-group">
     <a href="/devices?app=all&q={{ q|urlencode }}" class="pill {{ 'active' if app_filter == 'all' else '' }}">Sve</a>
-    <a href="/devices?app=launcher&q={{ q|urlencode }}" class="pill {{ 'active' if app_filter == 'launcher' else '' }}">Launcher</a>
     <a href="/devices?app=salesrep&q={{ q|urlencode }}" class="pill {{ 'active' if app_filter == 'salesrep' else '' }}">Salesrep</a>
   </div>
 </form>

@@ -5,23 +5,8 @@
   <h1>Verzije</h1>
 </div>
 
-<div class="tabs">
-  <a href="/versions?app=salesrep" class="tab {{ 'active' if app == 'salesrep' else '' }}">Salesrep</a>
-  <a href="/versions?app=launcher" class="tab {{ 'active' if app == 'launcher' else '' }}">Launcher</a>
-  {% if app == "launcher" %}
-  <span class="tab disabled-note">Launcher se ne ažurira preko ovog dashboarda</span>
-  {% endif %}
-</div>
-
 {% if error %}<div class="error-banner">Greška pri objavi: {{ error }}</div>{% endif %}
 {% if published %}<div class="banner-success">Verzija objavljena - stiže na sve upaljene uređaje odmah.</div>{% endif %}
-
-{% if not publishable %}
-<div class="card">
-  <h2>Launcher</h2>
-  <p class="hint">Launcher je Device Owner i namjerno se ne ažurira preko ove aplikacije - mijenja se rijetko i ručno, da ostane stabilna tačka za oporavak kad salesrep padne ili se ažurira. Ovdje nema objave verzija za launcher.</p>
-</div>
-{% else %}
 
 <div class="card">
   <h2>Trenutno objavljeno</h2>
@@ -44,27 +29,13 @@
 <div class="card">
   <h2>Objavi novu verziju</h2>
   <form method="post" action="/versions/publish" enctype="multipart/form-data" class="stacked-form">
-    <input type="hidden" name="app" value="{{ app }}">
-    <label>Version code
-      <input type="number" name="version_code" required>
-    </label>
-    <label>Version name
-      <input type="text" name="version_name" required>
-    </label>
     <label>APK fajl
       <label class="dropzone" for="apk_file">
         <span>Prevuci APK ovdje ili klikni da izabereš fajl</span>
-        <input id="apk_file" type="file" name="apk_file" accept=".apk">
+        <input id="apk_file" type="file" name="apk_file" accept=".apk" required>
       </label>
     </label>
-    <p class="hint">Upload-uje se u Firebase Storage i SHA-256 se računa automatski - ne moraš ništa ručno kopirati.</p>
-    <p class="form-divider">ili</p>
-    <label>Direktan URL do APK-a (koristi se samo ako fajl nije izabran gore)
-      <input type="url" name="apk_url">
-    </label>
-    <label>SHA-256 (samo uz ručni URL)
-      <input type="text" name="apk_sha256">
-    </label>
+    <p class="hint">Version code, version name i SHA-256 se čitaju direktno iz APK-a i upload-uje se u Firebase Storage - ne moraš ništa ručno unositi.</p>
     <button type="submit" class="btn btn-primary">Objavi</button>
   </form>
   <p class="hint">Svaki update je obavezan. Objava odmah šalje push (FCM) na sve upaljene uređaje da provjere odmah - a i bez push-a, svaki uređaj sam provjeri periodično najkasnije za 30 min.</p>
@@ -85,6 +56,4 @@
   <p class="hint">Još nema objavljenih verzija.</p>
   {% endif %}
 </div>
-
-{% endif %}
 {% endblock %}

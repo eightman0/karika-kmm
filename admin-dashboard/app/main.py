@@ -15,7 +15,8 @@ templates = Jinja2Templates(directory="app/templates")
 
 require_login = Depends(auth.require_login)
 
-PUBLISHABLE_APPS = {"salesrep"}  # launcher is deliberately not self-updated this way
+APP = "salesrep"  # the only app published through this dashboard - launcher is Device Owner,
+# changes rarely, and is deliberately not self-updated this way
 
 
 @app.get("/")
@@ -100,26 +101,21 @@ def download_log(device_id: str):
 
 
 @app.get("/versions", dependencies=[require_login])
-def versions_page(request: Request, app: str = "salesrep", error: str | None = None, published: str | None = None):
-    if app not in devices.APP_PACKAGES:
-        app = "salesrep"
-
+def versions_page(request: Request, error: str | None = None, published: str | None = None):
     all_devices = devices.list_devices()
-    history = version_history.get_history(app)
-    current = version_config.get_kiosk_version() if app in PUBLISHABLE_APPS else None
+    history = version_history.get_history(APP)
+    current = version_config.get_kiosk_version()
     is_published = bool(current and current["version_code"] not in ("0", "", None))
     rollout_count = 0
     if is_published:
         rollout_count = devices.count_on_version(
-            all_devices, devices.APP_PACKAGES[app], current["version_code"]
+            all_devices, devices.APP_PACKAGES[APP], current["version_code"]
         )
 
     return templates.TemplateResponse(
         request,
         "versions.html",
         {
-            "app": app,
-            "publishable": app in PUBLISHABLE_APPS,
             "current": current,
             "is_published": is_published,
             "history": history,
@@ -133,29 +129,15 @@ def versions_page(request: Request, app: str = "salesrep", error: str | None = N
 
 
 @app.post("/versions/publish", dependencies=[require_login])
-def publish_version(
-    request: Request,
-    app: str = Form("salesrep"),
-    version_code: str = Form(...),
-    version_name: str = Form(...),
-    apk_url: str = Form(""),
-    apk_sha256: str = Form(""),
-    apk_file: UploadFile | None = File(None),
-):
-    if app not in PUBLISHABLE_APPS:
-        return RedirectResponse(f"/versions?app={app}", status_code=303)
-
+def publish_version(request: Request, apk_file: UploadFile = File(...)):
     try:
-        if apk_file is not None and apk_file.filename:
-            apk_url, apk_sha256 = apk_storage.upload_apk(apk_file, version_code)
-        elif not apk_url:
-            raise ValueError("Uploaduj APK fajl ili unesi direktan URL do njega")
+        apk_url, apk_sha256, version_code, version_name = apk_storage.upload_apk(apk_file)
 
         # Every publish is mandatory - there's no supported "optional update" UX on the device.
         is_mandatory = True
         version_config.publish_kiosk_version(version_code, version_name, apk_url, apk_sha256, is_mandatory)
         version_history.record_publish(
-            app,
+            APP,
             version_code,
             version_name,
             apk_url,
@@ -164,8 +146,8 @@ def publish_version(
             published_by=request.session.get("username", "?"),
         )
     except Exception as e:
-        return RedirectResponse(f"/versions?app={app}&error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/versions?app={app}&published=1", status_code=303)
+        return RedirectResponse(f"/versions?error={quote(str(e))}", status_code=303)
+    return RedirectResponse("/versions?published=1", status_code=303)
 
 
 @app.get("/analitika", dependencies=[require_login])

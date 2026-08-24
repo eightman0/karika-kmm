@@ -8,7 +8,6 @@ STALE_AFTER_SECONDS = 12 * 60 * 60  # 12h - covers the 6h periodic worker plus o
 SIGNED_URL_MINUTES = 30
 
 APP_PACKAGES = {
-    "launcher": "karika.distribucija.ba.launcher",
     "salesrep": "karika.distribucija.ba.salesrep",
 }
 
