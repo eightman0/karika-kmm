@@ -1,6 +1,8 @@
 package karika.distribucija.ba.launcher.update
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
@@ -30,6 +32,7 @@ object RemoteConfigProvider {
     private const val KEY_MANDATORY = "kiosk_mandatory"
 
     private const val MIN_FETCH_INTERVAL_SECONDS = 3600L
+    private const val LISTENER_RETRY_DELAY_MS = 30_000L
 
     private val remoteConfig: FirebaseRemoteConfig by lazy {
         Firebase.remoteConfig.apply {
@@ -49,6 +52,7 @@ object RemoteConfigProvider {
     }
 
     private var listening = false
+    private val retryHandler = Handler(Looper.getMainLooper())
 
     /** Call once from Application.onCreate(): does an initial fetch and opens the real-time stream. */
     fun init(context: Context) {
@@ -57,6 +61,10 @@ object RemoteConfigProvider {
         startRealtimeListener(appContext)
     }
 
+    /** The connection can fail on its very first attempt (e.g. a transient "Firebase
+     * Installations Service is unavailable" right at boot) - without a retry, that one failure
+     * would silently strand the device on the 6h periodic fetch for the rest of the process's
+     * life, since nothing else ever calls this again. */
     private fun startRealtimeListener(context: Context) {
         if (listening) return
         listening = true
@@ -67,7 +75,9 @@ object RemoteConfigProvider {
             }
 
             override fun onError(error: FirebaseRemoteConfigException) {
-                Log.w(TAG, "Remote Config real-time listener error, falling back to periodic fetch", error)
+                Log.w(TAG, "Remote Config real-time listener error, retrying in ${LISTENER_RETRY_DELAY_MS}ms", error)
+                listening = false
+                retryHandler.postDelayed({ startRealtimeListener(context) }, LISTENER_RETRY_DELAY_MS)
             }
         })
     }
