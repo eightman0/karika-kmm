@@ -21,5 +21,17 @@
     <style name="NoWindowAnimation">
         <item name="android:windowEnterAnimation">@null</item>
         <item name="android:windowExitAnimation">@null</item>
+        <!-- Salesrep runs in its own task (FLAG_ACTIVITY_NEW_TASK), so switching to/from it is a
+             TASK transition, not an activity open/close - a separate set of animations from the
+             two above, and the ones actually responsible for the slide-and-reveal-wallpaper
+             effect seen on every hand-off. -->
+        <item name="android:taskOpenEnterAnimation">@null</item>
+        <item name="android:taskOpenExitAnimation">@null</item>
+        <item name="android:taskCloseEnterAnimation">@null</item>
+        <item name="android:taskCloseExitAnimation">@null</item>
+        <item name="android:taskToFrontEnterAnimation">@null</item>
+        <item name="android:taskToFrontExitAnimation">@null</item>
+        <item name="android:taskToBackEnterAnimation">@null</item>
+        <item name="android:taskToBackExitAnimation">@null</item>
     </style>
 </resources>
