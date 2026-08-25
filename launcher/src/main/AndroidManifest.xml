@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -20,6 +21,11 @@
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATE_INFO" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_WIFI" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_WIPE_DATA" />
+    <!-- Lets UpdateWorker run its download+install as a foreground service, which the cached-app
+         freezer cannot pause mid-work the way it can a plain background WorkManager job. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- normal-level, declared by each payload app individually (see salesrep's manifest) -->
     <uses-permission android:name="karika.distribucija.ba.salesrep.permission.READ_LOGS" />
@@ -126,5 +132,12 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <!-- WorkManager's own service, overridden to declare the type UpdateWorker requests via
+             setForeground() - required on API 34+, where an undeclared type throws at runtime. -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge" />
     </application>
 </manifest>

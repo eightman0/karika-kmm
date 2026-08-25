@@ -14,7 +14,7 @@ android {
         applicationId = "karika.distribucija.ba.salesrep"
         minSdk = 30
         targetSdk = 37
-        versionCode = 22
+        versionCode = 30
         versionName = "1"
     }
 

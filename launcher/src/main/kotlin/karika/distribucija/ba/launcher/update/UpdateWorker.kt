@@ -1,10 +1,15 @@
 package karika.distribucija.ba.launcher.update
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import karika.distribucija.ba.launcher.KnownApps
 import karika.distribucija.ba.launcher.MaintenanceState
@@ -54,6 +59,12 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
 
     private suspend fun runUpdate(latest: KioskVersion): Result {
         MaintenanceState.begin(applicationContext)
+        // Without this, a backgrounded launcher process (salesrep in front, nothing visible of
+        // ours) is eligible for the OS's cached-app freezer - it can get frozen mid-download with
+        // no CPU time at all, hanging here indefinitely until something else kills the process
+        // (observed: stuck for 8+ minutes until a reinstall tore it down). A foreground service
+        // is explicitly exempt from that freeze.
+        setForeground(createForegroundInfo())
         try {
             val apkFile = ApkDownloader.download(applicationContext, latest.apkUrl) ?: return Result.retry()
 
@@ -78,6 +89,27 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         }
     }
 
+    private fun createForegroundInfo(): ForegroundInfo {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID, "Ažuriranje", NotificationManager.IMPORTANCE_MIN
+            )
+            applicationContext.getSystemService(NotificationManager::class.java)
+                .createNotificationChannel(channel)
+        }
+        val notification = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle(applicationContext.getString(karika.distribucija.ba.launcher.R.string.app_name))
+            .setSmallIcon(karika.distribucija.ba.launcher.R.mipmap.ic_launcher)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setOngoing(true)
+            .build()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(NOTIFICATION_ID, notification)
+        }
+    }
+
     private fun verifyChecksum(file: File, expectedSha256: String): Boolean {
         if (expectedSha256.isBlank()) {
             Log.w(TAG, "No apkSha256 published for this version, skipping integrity check")
@@ -98,5 +130,7 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
     companion object {
         private const val TAG = "UpdateWorker"
         private const val DIGEST_BUFFER_SIZE = 8192
+        private const val NOTIFICATION_CHANNEL_ID = "update_in_progress"
+        private const val NOTIFICATION_ID = 1
     }
 }
