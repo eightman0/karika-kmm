@@ -24,6 +24,7 @@
     <string name="drawer_logout">Odjavi se</string>
     <string name="drawer_role_label">Komercijalista</string>
     <string name="notifications_title">Obavijesti</string>
+    <string name="wifi_settings_title">WiFi podešavanja</string>
     <string name="notifications_empty">Nema obavijesti</string>
 
     <string name="internal_messages_title">Interne poruke</string>

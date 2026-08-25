@@ -1,6 +1,8 @@
 package karika.distribucija.ba.salesrep.ui.login
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,6 +50,14 @@ class LoginFragment : Fragment() {
         updateFormValid()
 
         binding.textAppVersion.text = "v${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+
+        // No account can log in without a network, so this is the one screen where getting stuck
+        // offline (e.g. the kiosk moved to a location with different WiFi) has no other way out.
+        // The kiosk (Device Owner) has "com.android.settings" allowlisted in lock task, so this
+        // opens on top of the locked session instead of needing to leave it.
+        binding.buttonWifiSettings.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+        }
 
         // The gradient/background image (this fragment's root FrameLayout) is left alone so it
         // bleeds edge-to-edge under the status bar; only the actual form content is pushed down
