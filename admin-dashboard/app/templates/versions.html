@@ -6,7 +6,6 @@
 </div>
 
 {% if error %}<div class="error-banner">Greška pri objavi: {{ error }}</div>{% endif %}
-{% if firestore_error %}<div class="error-banner">Trenutno se ne može doći do Firestore-a - podaci ispod mogu biti nepotpuni. Osvježi za koji trenutak.</div>{% endif %}
 {% if published %}<div class="banner-success">Verzija objavljena - stiže na sve upaljene uređaje odmah.</div>{% endif %}
 
 <div class="card">

@@ -11,3 +11,6 @@ services:
       - /etc/karika-admin-dashboard/env
     volumes:
       - /etc/karika-admin-dashboard/serviceAccountKey.json:/run/secrets/serviceAccountKey.json:ro
+      # Fleet state and published version info (local_db.py, SQLite) - must survive
+      # `docker compose up -d --build` rebuilding the container on every deploy.
+      - /etc/karika-admin-dashboard/data:/app/data

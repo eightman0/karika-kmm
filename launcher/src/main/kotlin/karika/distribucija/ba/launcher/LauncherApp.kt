@@ -7,7 +7,7 @@ import android.content.Intent
 import android.os.Process
 import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
-import karika.distribucija.ba.launcher.diagnostics.LogUploadManager
+import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 import karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver
 import karika.distribucija.ba.launcher.update.KioskMessagingService
 import karika.distribucija.ba.launcher.update.UpdateScheduler
@@ -19,9 +19,9 @@ class LauncherApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AppLogger.init(this)
-        Firebase.messaging.subscribeToTopic(KioskMessagingService.TOPIC)
+        Firebase.messaging.subscribeToTopic(KioskMessagingService.BROADCAST_TOPIC)
+        Firebase.messaging.subscribeToTopic(KioskMessagingService.deviceTopic(DeviceIdentity.id(this)))
         UpdateScheduler.schedulePeriodic(this)
-        LogUploadManager.start(this)
         installCrashRecovery()
     }
 

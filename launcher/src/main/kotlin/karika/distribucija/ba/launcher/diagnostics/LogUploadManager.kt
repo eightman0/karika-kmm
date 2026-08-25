@@ -4,14 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.Firebase
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.auth
-import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
+import karika.distribucija.ba.launcher.update.DashboardApi
 import karika.distribucija.ba.logging.AppLogger
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.io.InputStream
@@ -20,41 +16,30 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 /**
- * Support-log pull: the admin dashboard sets `logRequestedAt` on this device's Firestore
- * document, a real-time listener here picks it up, and every known app's local log (this app's
- * own via AppLogger, salesrep's via its LogProvider content URI) gets zipped and uploaded to
- * Storage. No polling.
+ * Support-log pull: the admin dashboard sends an FCM push (see KioskMessagingService) instead of
+ * setting a field a Firestore listener here used to watch for - every known app's local log (this
+ * app's own via AppLogger, salesrep's via its LogProvider content URI) gets zipped and uploaded to
+ * Storage, then the dashboard's device API is told where to find it. Storage itself (not
+ * Firestore) still needs an authenticated client per storage.rules, hence the anonymous sign-in.
  */
 object LogUploadManager {
     private const val TAG = "LogUploadManager"
     private const val SALESREP_LOG_AUTHORITY = "karika.distribucija.ba.salesrep.logs"
 
-    private val scope = CoroutineScope(Dispatchers.IO)
-
-    fun start(context: Context) {
+    suspend fun uploadNow(context: Context, requestedAt: String?) {
         val appContext = context.applicationContext
-        Firebase.auth.signInAnonymously()
-            .addOnSuccessListener { listenForTrigger(appContext) }
-            .addOnFailureListener { e -> Log.e(TAG, "Anonymous sign-in failed, log upload disabled", e) }
-    }
-
-    private fun listenForTrigger(context: Context) {
-        val deviceId = DeviceIdentity.id(context)
-        Firebase.firestore.collection("devices").document(deviceId)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e(TAG, "Firestore listener error", error)
-                    return@addSnapshotListener
-                }
-                val requestedAt = snapshot?.getTimestamp("logRequestedAt") ?: return@addSnapshotListener
-                val handledAt = snapshot.getTimestamp("lastLogUploadRequestHandledAt")
-                if (handledAt != null && handledAt >= requestedAt) return@addSnapshotListener
-
-                scope.launch { uploadLogs(context, deviceId, requestedAt) }
+        try {
+            if (Firebase.auth.currentUser == null) {
+                Firebase.auth.signInAnonymously().await()
             }
+            val deviceId = DeviceIdentity.id(appContext)
+            uploadLogs(appContext, deviceId, requestedAt)
+        } catch (e: Exception) {
+            Log.e(TAG, "Log upload failed", e)
+        }
     }
 
-    private suspend fun uploadLogs(context: Context, deviceId: String, requestedAt: Timestamp) {
+    private suspend fun uploadLogs(context: Context, deviceId: String, requestedAt: String?) {
         val zipFile = File(context.cacheDir, "logs-upload.zip")
         try {
             ZipOutputStream(zipFile.outputStream()).use { zip ->
@@ -64,26 +49,16 @@ object LogUploadManager {
                 addUriToZip(context, zip, "content://$SALESREP_LOG_AUTHORITY/backup", "salesrep.log.1")
             }
 
-            val storagePath = "logs/$deviceId/${requestedAt.seconds}.zip"
+            val storagePath = "logs/$deviceId/${System.currentTimeMillis()}.zip"
             val storageRef = Firebase.storage.reference.child(storagePath)
             storageRef.putFile(Uri.fromFile(zipFile)).await()
             val downloadUrl = storageRef.downloadUrl.await()
 
-            Firebase.firestore.collection("devices").document(deviceId)
-                .update(
-                    mapOf(
-                        // downloadUrl only works for an authenticated Firebase client (subject to
-                        // storage.rules); the admin dashboard reads lastLogUploadPath instead and
-                        // mints its own signed URL server-side, bypassing those rules entirely.
-                        "lastLogUploadUrl" to downloadUrl.toString(),
-                        "lastLogUploadPath" to storagePath,
-                        "lastLogUploadAt" to Timestamp.now(),
-                        "lastLogUploadRequestHandledAt" to requestedAt
-                    )
-                ).await()
+            // downloadUrl only works for an authenticated Firebase client (subject to
+            // storage.rules); the admin dashboard reads the stored path instead and mints its own
+            // signed URL server-side, bypassing those rules entirely.
+            DashboardApi.reportLogUploaded(deviceId, downloadUrl.toString(), storagePath, requestedAt)
             Log.i(TAG, "Log upload complete: $downloadUrl")
-        } catch (e: Exception) {
-            Log.e(TAG, "Log upload failed", e)
         } finally {
             zipFile.delete()
         }

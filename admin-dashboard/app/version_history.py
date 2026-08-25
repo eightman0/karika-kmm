@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import datetime
 
-from .firebase import db
+from . import local_db
 
 
 def record_publish(
@@ -12,28 +12,21 @@ def record_publish(
     mandatory: bool,
     published_by: str,
 ) -> None:
-    db().collection("version_history").add(
-        {
-            "app": app,
-            "versionCode": version_code,
-            "versionName": version_name,
-            "apkUrl": apk_url,
-            "apkSha256": apk_sha256,
-            "mandatory": mandatory,
-            "publishedBy": published_by,
-            "publishedAt": datetime.now(timezone.utc),
-        }
-    )
+    local_db.record_publish(app, int(version_code), version_name, apk_url, apk_sha256, mandatory, published_by)
 
 
 def get_history(app: str, limit: int = 10) -> list[dict]:
-    # Filtered by app here (single equality, no composite index needed) and sorted in Python
-    # rather than via .order_by() - combining that with the .where() would need a composite
-    # index we can't create from here, and this collection is small enough it doesn't matter.
-    docs = db().collection("version_history").where("app", "==", app).stream()
-    records = [doc.to_dict() for doc in docs]
-    records.sort(
-        key=lambda r: r.get("publishedAt") or datetime.min.replace(tzinfo=timezone.utc),
-        reverse=True,
-    )
-    return records[:limit]
+    rows = local_db.get_history(app, limit)
+    return [
+        {
+            "app": row["app"],
+            "versionCode": row["version_code"],
+            "versionName": row["version_name"],
+            "apkUrl": row["apk_url"],
+            "apkSha256": row["apk_sha256"],
+            "mandatory": bool(row["mandatory"]),
+            "publishedBy": row["published_by"],
+            "publishedAt": datetime.fromisoformat(row["published_at"]) if row["published_at"] else None,
+        }
+        for row in rows
+    ]
