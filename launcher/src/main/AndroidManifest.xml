@@ -27,9 +27,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- normal-level, declared by each payload app individually (see salesrep's manifest) -->
-    <uses-permission android:name="karika.distribucija.ba.salesrep.permission.READ_LOGS" />
-
     <!-- Without this, package visibility filtering (targetSdk 30+) hides salesrep from the
          launcher's own PackageManager calls (getPackageInfo, getLaunchIntentForPackage), even
          though the launcher installed it and is Device Owner. -->

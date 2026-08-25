@@ -3,10 +3,6 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <permission
-        android:name="karika.distribucija.ba.salesrep.permission.READ_LOGS"
-        android:protectionLevel="normal" />
-
     <application
         android:name=".SalesRepApp"
         android:allowBackup="true"
@@ -31,7 +27,6 @@
             android:name=".LogProvider"
             android:authorities="karika.distribucija.ba.salesrep.logs"
             android:exported="true"
-            android:grantUriPermissions="false"
-            android:readPermission="karika.distribucija.ba.salesrep.permission.READ_LOGS" />
+            android:grantUriPermissions="false" />
     </application>
 </manifest>

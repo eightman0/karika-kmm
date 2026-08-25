@@ -13,15 +13,20 @@ import java.io.FileNotFoundException
 
 /**
  * Read-only bridge that lets the launcher pull this app's local log files for support requests.
- * Guarded by a `normal`-level custom permission (not `signature`) since a future payload app
- * added to the launcher's KnownApps list may not share its signing key - see AndroidManifest.xml.
+ * Access is checked by calling package here rather than through a manifest-declared custom
+ * permission - the launcher is never reinstalled after its one-time provisioning, and Android does
+ * not reliably back-fill a normal permission grant to an already-installed app once this app (the
+ * one that declares it) is installed later, which left the launcher permanently denied on a real
+ * device despite both manifests being correct.
  */
 class LogProvider : ContentProvider() {
+    private val allowedCallingPackage = "karika.distribucija.ba.launcher"
 
     override fun onCreate(): Boolean = true
 
     @Throws(FileNotFoundException::class)
     override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor {
+        checkCaller()
         val file = fileFor(uri) ?: throw FileNotFoundException("Unknown log uri: $uri")
         if (!file.exists()) throw FileNotFoundException("No log file yet: ${file.name}")
         return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
@@ -34,9 +39,16 @@ class LogProvider : ContentProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor? {
+        checkCaller()
         val file = fileFor(uri) ?: return null
         return MatrixCursor(arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE)).apply {
             addRow(arrayOf(file.name, file.length()))
+        }
+    }
+
+    private fun checkCaller() {
+        if (callingPackage != allowedCallingPackage) {
+            throw SecurityException("$callingPackage is not allowed to read logs")
         }
     }
 
