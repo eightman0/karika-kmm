@@ -15,12 +15,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import karika.distribucija.ba.logging.AnalyticsTracker
+import karika.distribucija.ba.logging.KioskIpc
 import karika.distribucija.ba.salesrep.BuildConfig
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.SalesRepApp
 import karika.distribucija.ba.salesrep.databinding.FragmentLoginBinding
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.util.isEmailFormatValid
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 class LoginFragment : Fragment() {
 
@@ -130,6 +134,7 @@ class LoginFragment : Fragment() {
                     } else {
                         sessionManager.clearRememberedCredentials()
                     }
+                    sendLoginEventToLauncher(binding.editEmail.text?.toString()?.trim().orEmpty())
                     findNavController().navigate(R.id.action_login_to_orders)
                 }
 
@@ -148,6 +153,20 @@ class LoginFragment : Fragment() {
         val email = binding.editEmail.text?.toString().orEmpty()
         val password = binding.editPassword.text?.toString().orEmpty()
         binding.buttonLogin.isEnabled = email.isEmailFormatValid() && password.isNotEmpty()
+    }
+
+    /** Best-effort - the launcher uses this only to know who's currently using the device, so a
+     * missed broadcast (launcher process not up yet) isn't worth retrying or acking. */
+    private fun sendLoginEventToLauncher(email: String) {
+        val timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+            .apply { timeZone = TimeZone.getTimeZone("UTC") }
+            .format(java.util.Date())
+        val intent = Intent(KioskIpc.ACTION_LOGIN_EVENT)
+            .setClassName(KioskIpc.LAUNCHER_PACKAGE, "karika.distribucija.ba.launcher.KioskEventReceiver")
+            .putExtra(KioskIpc.EXTRA_TOKEN, BuildConfig.KIOSK_IPC_TOKEN)
+            .putExtra(KioskIpc.EXTRA_USER_EMAIL, email)
+            .putExtra(KioskIpc.EXTRA_LOGIN_TIMESTAMP, timestamp)
+        runCatching { requireContext().sendBroadcast(intent) }
     }
 
     override fun onDestroyView() {

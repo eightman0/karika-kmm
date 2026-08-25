@@ -64,3 +64,38 @@ def post_analytics_uploaded(device_id: str, body: AnalyticsUploadedBody):
     local_db.set_analytics_uploaded(device_id, body.url, body.path)
     analytics_ingest.ingest(device_id, body.path)
     return {"ok": True}
+
+
+class LoginEventBody(BaseModel):
+    email: str
+    timestamp: str | None = None
+
+
+@router.post("/devices/{device_id}/login-event")
+def post_login_event(device_id: str, body: LoginEventBody):
+    local_db.set_login_event(device_id, body.email, body.timestamp)
+    return {"ok": True}
+
+
+class DeviceMappingBody(BaseModel):
+    customerId: str | None = None
+    siteId: str | None = None
+
+
+@router.post("/devices/{device_id}/mapping")
+def post_device_mapping(device_id: str, body: DeviceMappingBody):
+    local_db.set_device_mapping(device_id, body.customerId, body.siteId)
+    return {"ok": True}
+
+
+class CommandAckBody(BaseModel):
+    command: str
+    requestId: str | None = None
+    status: str
+    message: str | None = None
+
+
+@router.post("/devices/{device_id}/command-ack")
+def post_command_ack(device_id: str, body: CommandAckBody):
+    local_db.record_command_ack(device_id, body.command, body.requestId, body.status, body.message)
+    return {"ok": True}

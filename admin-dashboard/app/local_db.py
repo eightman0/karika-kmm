@@ -65,7 +65,11 @@ def init_db() -> None:
                 fcm_token TEXT,
                 last_analytics_upload_url TEXT,
                 last_analytics_upload_path TEXT,
-                last_analytics_upload_at TEXT
+                last_analytics_upload_at TEXT,
+                customer_id TEXT,
+                site_id TEXT,
+                last_login_email TEXT,
+                last_login_at TEXT
             )
             """
         )
@@ -77,7 +81,27 @@ def init_db() -> None:
                 "last_analytics_upload_url": "TEXT",
                 "last_analytics_upload_path": "TEXT",
                 "last_analytics_upload_at": "TEXT",
+                "customer_id": "TEXT",
+                "site_id": "TEXT",
+                "last_login_email": "TEXT",
+                "last_login_at": "TEXT",
             },
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS command_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id TEXT,
+                command TEXT,
+                request_id TEXT,
+                status TEXT,
+                message TEXT,
+                created_at TEXT
+            )
+            """
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_command_log_device ON command_log(device_id, created_at)"
         )
         conn.execute(
             """
@@ -192,6 +216,55 @@ def set_analytics_uploaded(device_id: str, url: str, path: str) -> None:
             """,
             (device_id, url, path, now_iso()),
         )
+
+
+def set_login_event(device_id: str, email: str, at: str | None) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO devices (id, last_login_email, last_login_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                last_login_email=excluded.last_login_email,
+                last_login_at=excluded.last_login_at
+            """,
+            (device_id, email, at or now_iso()),
+        )
+
+
+def set_device_mapping(device_id: str, customer_id: str | None, site_id: str | None) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO devices (id, customer_id, site_id) VALUES (?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                customer_id=excluded.customer_id,
+                site_id=excluded.site_id
+            """,
+            (device_id, customer_id, site_id),
+        )
+
+
+def record_command_ack(device_id: str, command: str, request_id: str | None, status: str, message: str | None) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO command_log (device_id, command, request_id, status, message, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (device_id, command, request_id, status, message, now_iso()),
+        )
+
+
+def get_command_log(device_id: str, limit: int = 20) -> list[dict]:
+    with _connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT * FROM command_log WHERE device_id = ? ORDER BY created_at DESC LIMIT ?
+            """,
+            (device_id, limit),
+        ).fetchall()
+        return [dict(row) for row in rows]
 
 
 def request_log_pull(device_id: str) -> str:

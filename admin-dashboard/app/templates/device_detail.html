@@ -11,6 +11,8 @@
 
 {% if reset_error %}<div class="error-banner">Greška pri slanju factory reset-a: {{ reset_error }}</div>{% endif %}
 {% if reset_sent %}<div class="banner-success">Zahtjev za factory reset poslan - uređaj će se obrisati čim primi push.</div>{% endif %}
+{% if cmd_error %}<div class="error-banner">Greška pri slanju komande: {{ cmd_error }}</div>{% endif %}
+{% if cmd_sent %}<div class="banner-success">Komanda "{{ cmd_sent }}" poslana.</div>{% endif %}
 
 <div class="metrics-grid">
   <div class="metric-card">
@@ -31,6 +33,16 @@
     <p class="metric-value">{{ device.androidRelease or "?" }} (SDK {{ device.androidSdkInt or "?" }})</p>
     <p class="metric-sub">{{ device.deviceModel or "-" }}</p>
   </div>
+</div>
+
+<div class="card">
+  <h2>Kupac / lokacija</h2>
+  <p class="hint">Popunjeno automatski iz QR provisioning payload-a (ako je dodan), ili ručno ovdje. Zadnji ulogovan: {{ device.lastLoginEmail or "-" }}{% if device.lastLoginAt %} &middot; {{ device.lastLoginAt.strftime("%d.%m.%Y %H:%M") }}{% endif %}</p>
+  <form method="post" action="/devices/{{ device.id }}/mapping" class="toolbar">
+    <input class="search-input" type="text" name="customer_id" value="{{ device.customerId or '' }}" placeholder="customer_id">
+    <input class="search-input" type="text" name="site_id" value="{{ device.siteId or '' }}" placeholder="site_id / lokacija">
+    <button type="submit" class="btn btn-secondary">Sačuvaj</button>
+  </form>
 </div>
 
 <div class="card">
@@ -74,5 +86,65 @@
     <button type="submit" class="btn btn-danger">Pošalji factory reset</button>
   </form>
   <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (push preko FCM-a).</p>
+</div>
+
+<div class="card">
+  <h2>Maintenance mod</h2>
+  <p class="hint">Privremeno izbaci uređaj iz kioska (prikaže "u održavanju" poruku, bez punog reboot-a). Ostaje uključeno dok se ručno ne isključi.</p>
+  <div class="log-actions">
+    <form method="post" action="/devices/{{ device.id }}/maintenance">
+      <input type="hidden" name="enable" value="on">
+      <button type="submit" class="btn btn-secondary">Uključi maintenance</button>
+    </form>
+    <form method="post" action="/devices/{{ device.id }}/maintenance">
+      <input type="hidden" name="enable" value="off">
+      <button type="submit" class="btn btn-secondary">Isključi maintenance</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Izađi iz kiosk moda</h2>
+  <p class="hint">Pokušava meki izlazak (traži od salesrep app-a da sam napusti lock task); ako ne uspije za 10s, launcher forsira izlazak skidanjem sa allowlist-e. Device Owner ostaje - nije potreban novi QR provisioning.</p>
+  <form method="post" action="/devices/{{ device.id }}/exit-kiosk"
+        onsubmit="return confirm('Izbaci uređaj {{ device.id }} iz kiosk moda?')">
+    <button type="submit" class="btn btn-secondary">Izađi iz kioska</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Reboot</h2>
+  <form method="post" action="/devices/{{ device.id }}/reboot"
+        onsubmit="return confirm('Restartovati uređaj {{ device.id }} odmah?')">
+    <button type="submit" class="btn btn-danger">Restartuj sad</button>
+  </form>
+  <p class="hint" style="margin-top: 16px;">Dnevni automatski reboot (podrazumijevano 04h):</p>
+  <form method="post" action="/devices/{{ device.id }}/reboot-schedule" class="toolbar">
+    <input class="search-input" type="number" name="hour" min="0" max="23" value="4" style="max-width: 100px;">
+    <button type="submit" class="btn btn-secondary">Postavi raspored</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Historija komandi</h2>
+  {% if command_log %}
+  <div class="table-scroll">
+  <table class="devices-table">
+    <thead><tr><th>Komanda</th><th>Status</th><th>Poruka</th><th>Vrijeme</th></tr></thead>
+    <tbody>
+      {% for c in command_log %}
+      <tr>
+        <td data-label="Komanda">{{ c.command }}</td>
+        <td data-label="Status">{{ c.status }}</td>
+        <td data-label="Poruka">{{ c.message or "-" }}</td>
+        <td data-label="Vrijeme">{{ c.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="hint">Još nema izvršenih komandi za ovaj uređaj.</p>
+  {% endif %}
 </div>
 {% endblock %}

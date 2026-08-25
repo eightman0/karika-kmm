@@ -16,6 +16,10 @@ android {
         targetSdk = 37
         versionCode = 41
         versionName = "2"
+        // Shared with launcher (see its build.gradle.kts) - checked on both ends of the
+        // launcher<->salesrep broadcasts instead of a signature-level permission, since the two
+        // apps are signed with different keys.
+        buildConfigField("String", "KIOSK_IPC_TOKEN", "\"a746b793be90d5dba0895fdfbcce98e8b43f00e994b551e9\"")
     }
 
     buildFeatures {

@@ -36,11 +36,13 @@ class LauncherActivity : AppCompatActivity() {
         super.onResume()
         kiosk.enter()
         MaintenanceState.addChangeListener(this, maintenanceListener)
+        RemoteMaintenanceState.addChangeListener(this, maintenanceListener)
         refreshMaintenanceState()
     }
 
     override fun onPause() {
         MaintenanceState.removeChangeListener(this, maintenanceListener)
+        RemoteMaintenanceState.removeChangeListener(this, maintenanceListener)
         super.onPause()
     }
 
@@ -50,7 +52,7 @@ class LauncherActivity : AppCompatActivity() {
      * That's the natural trigger for auto-relaunch, no polling/foreground-detection needed.
      */
     private fun refreshMaintenanceState() {
-        val inMaintenance = MaintenanceState.isActive(this)
+        val inMaintenance = MaintenanceState.isActive(this) || RemoteMaintenanceState.isActive(this)
         maintenanceBanner.visibility = if (inMaintenance) View.VISIBLE else View.GONE
         appGrid.visibility = if (inMaintenance) View.GONE else View.VISIBLE
 

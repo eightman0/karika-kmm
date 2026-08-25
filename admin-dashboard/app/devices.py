@@ -2,7 +2,15 @@ from datetime import datetime, timedelta, timezone
 
 from . import local_db
 from .firebase import bucket
-from .push import send_analytics_request_all, send_factory_reset, send_log_request
+from .push import (
+    send_analytics_request_all,
+    send_exit_kiosk,
+    send_factory_reset,
+    send_log_request,
+    send_maintenance,
+    send_reboot,
+    send_reboot_schedule,
+)
 
 STALE_AFTER_SECONDS = 12 * 60 * 60  # 12h - covers the 30min periodic worker plus a lot of slack
 SIGNED_URL_MINUTES = 30
@@ -34,6 +42,10 @@ def _with_computed_fields(row: dict) -> dict:
         "lastAnalyticsUploadUrl": row["last_analytics_upload_url"],
         "lastAnalyticsUploadPath": row["last_analytics_upload_path"],
         "lastAnalyticsUploadAt": _parse_iso(row["last_analytics_upload_at"]),
+        "customerId": row["customer_id"],
+        "siteId": row["site_id"],
+        "lastLoginEmail": row["last_login_email"],
+        "lastLoginAt": _parse_iso(row["last_login_at"]),
         "status": _status(_parse_iso(row["last_seen_at"])),
     }
 
@@ -86,7 +98,7 @@ def request_logs(device_id: str) -> None:
     send_log_request(device_id, requested_at)
 
 
-def request_factory_reset(device_id: str) -> None:
+def _require_token(device_id: str) -> str:
     device = local_db.get_device(device_id)
     token = device.get("fcm_token") if device else None
     if not token:
@@ -94,11 +106,39 @@ def request_factory_reset(device_id: str) -> None:
             "Uređaj nema poznat FCM token - mora se prvo javiti dashboardu (heartbeat) "
             "nakon zadnjeg pokretanja."
         )
-    send_factory_reset(token)
+    return token
+
+
+def request_factory_reset(device_id: str) -> None:
+    send_factory_reset(_require_token(device_id))
+
+
+def request_reboot(device_id: str) -> None:
+    send_reboot(_require_token(device_id))
+
+
+def request_exit_kiosk(device_id: str) -> None:
+    send_exit_kiosk(_require_token(device_id))
+
+
+def request_maintenance(device_id: str, enable: bool) -> None:
+    send_maintenance(_require_token(device_id), enable)
+
+
+def request_reboot_schedule(device_id: str, hour: int) -> None:
+    send_reboot_schedule(_require_token(device_id), hour)
 
 
 def request_analytics_all() -> None:
     send_analytics_request_all()
+
+
+def set_device_mapping(device_id: str, customer_id: str, site_id: str) -> None:
+    local_db.set_device_mapping(device_id, customer_id or None, site_id or None)
+
+
+def command_log(device_id: str, limit: int = 20) -> list[dict]:
+    return local_db.get_command_log(device_id, limit)
 
 
 def signed_log_url(storage_path: str) -> str:

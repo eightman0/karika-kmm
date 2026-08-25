@@ -16,6 +16,11 @@ android {
         targetSdk = 37
         versionCode = 2
         versionName = "1.0"
+        // Shared with salesrep (see its build.gradle.kts) - launcher and salesrep are signed with
+        // different keys, so a signature-level permission can't gate the broadcasts between them.
+        // This token is checked in code instead, the same way LogProvider now checks the calling
+        // package directly rather than trusting a manifest permission grant.
+        buildConfigField("String", "KIOSK_IPC_TOKEN", "\"a746b793be90d5dba0895fdfbcce98e8b43f00e994b551e9\"")
     }
 
     buildFeatures {

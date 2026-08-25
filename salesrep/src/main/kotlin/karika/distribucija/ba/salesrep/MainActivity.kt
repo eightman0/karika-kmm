@@ -1,5 +1,6 @@
 package karika.distribucija.ba.salesrep
 
+import android.app.ActivityManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -42,6 +43,26 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navRows: List<NavRow>
 
     private var notificationsMenuItem: MenuItem? = null
+
+    override fun onResume() {
+        super.onResume()
+        activeInstance = this
+    }
+
+    override fun onPause() {
+        if (activeInstance === this) activeInstance = null
+        super.onPause()
+    }
+
+    /** Called off the KioskCommandReceiver's onReceive() - only the resumed instance (the one
+     * actually holding the locked task, if any) can meaningfully leave it. */
+    private fun exitLockTaskIfActive() {
+        val activityManager = getSystemService(ActivityManager::class.java)
+        if (activityManager.lockTaskModeState != ActivityManager.LOCK_TASK_MODE_NONE) {
+            AnalyticsTracker.trackClick("system", "exit_kiosk_command")
+            stopLockTask()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -242,6 +263,14 @@ class MainActivity : AppCompatActivity() {
                         result.data.name ?: getString(R.string.drawer_role_label)
                 }
             }
+        }
+    }
+
+    companion object {
+        private var activeInstance: MainActivity? = null
+
+        fun requestExitLockTask() {
+            activeInstance?.exitLockTaskIfActive()
         }
     }
 }

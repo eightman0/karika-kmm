@@ -71,6 +71,32 @@ object DashboardApi {
             post("$BASE_URL/api/devices/$deviceId/analytics-uploaded", body)
         }
 
+    suspend fun reportLoginEvent(deviceId: String, email: String, timestamp: String?) =
+        withContext(Dispatchers.IO) {
+            val body = JSONObject()
+                .put("email", email)
+                .put("timestamp", timestamp)
+            post("$BASE_URL/api/devices/$deviceId/login-event", body)
+        }
+
+    suspend fun reportDeviceMapping(deviceId: String, customerId: String?, siteId: String?) =
+        withContext(Dispatchers.IO) {
+            val body = JSONObject()
+                .put("customerId", customerId)
+                .put("siteId", siteId)
+            post("$BASE_URL/api/devices/$deviceId/mapping", body)
+        }
+
+    suspend fun reportCommandAck(deviceId: String, command: String, requestId: String?, status: String, message: String?) =
+        withContext(Dispatchers.IO) {
+            val body = JSONObject()
+                .put("command", command)
+                .put("requestId", requestId)
+                .put("status", status)
+                .put("message", message)
+            post("$BASE_URL/api/devices/$deviceId/command-ack", body)
+        }
+
     private fun get(url: String): JSONObject {
         val connection = openConnection(url, "GET")
         return connection.readResponse()

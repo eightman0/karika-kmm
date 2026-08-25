@@ -80,7 +80,12 @@ def request_analytics_all():
 
 @app.get("/devices/{device_id}", dependencies=[require_login])
 def device_detail_page(
-    request: Request, device_id: str, reset_error: str | None = None, reset_sent: str | None = None
+    request: Request,
+    device_id: str,
+    reset_error: str | None = None,
+    reset_sent: str | None = None,
+    cmd_error: str | None = None,
+    cmd_sent: str | None = None,
 ):
     device = devices.get_device(device_id)
     if device is None:
@@ -93,6 +98,9 @@ def device_detail_page(
             "active_page": "devices",
             "reset_error": reset_error,
             "reset_sent": bool(reset_sent),
+            "cmd_error": cmd_error,
+            "cmd_sent": cmd_sent,
+            "command_log": devices.command_log(device_id),
         },
     )
 
@@ -116,6 +124,48 @@ def factory_reset_device(device_id: str):
     except Exception as e:
         return RedirectResponse(f"/devices/{device_id}?reset_error={quote(str(e))}", status_code=303)
     return RedirectResponse(f"/devices/{device_id}?reset_sent=1", status_code=303)
+
+
+@app.post("/devices/{device_id}/reboot", dependencies=[require_login])
+def reboot_device(device_id: str):
+    try:
+        devices.request_reboot(device_id)
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=reboot", status_code=303)
+
+
+@app.post("/devices/{device_id}/exit-kiosk", dependencies=[require_login])
+def exit_kiosk_device(device_id: str):
+    try:
+        devices.request_exit_kiosk(device_id)
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=exit_kiosk", status_code=303)
+
+
+@app.post("/devices/{device_id}/maintenance", dependencies=[require_login])
+def maintenance_device(device_id: str, enable: str = Form(...)):
+    try:
+        devices.request_maintenance(device_id, enable == "on")
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=maintenance_{enable}", status_code=303)
+
+
+@app.post("/devices/{device_id}/reboot-schedule", dependencies=[require_login])
+def set_reboot_schedule(device_id: str, hour: int = Form(...)):
+    try:
+        devices.request_reboot_schedule(device_id, hour)
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=reboot_schedule", status_code=303)
+
+
+@app.post("/devices/{device_id}/mapping", dependencies=[require_login])
+def set_device_mapping(device_id: str, customer_id: str = Form(""), site_id: str = Form("")):
+    devices.set_device_mapping(device_id, customer_id.strip(), site_id.strip())
+    return RedirectResponse(f"/devices/{device_id}", status_code=303)
 
 
 @app.get("/devices/{device_id}/log", dependencies=[require_login])

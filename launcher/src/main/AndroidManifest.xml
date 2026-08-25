@@ -130,6 +130,12 @@
             </intent-filter>
         </service>
 
+        <!-- Targeted by salesrep via an explicit component (no intent-filter needed), see
+             KioskIpc.kt - exported because it's a cross-app, cross-signing-key broadcast. -->
+        <receiver
+            android:name=".ipc.KioskEventReceiver"
+            android:exported="true" />
+
         <!-- WorkManager's own service, overridden to declare the type UpdateWorker requests via
              setForeground() - required on API 34+, where an undeclared type throws at runtime. -->
         <service

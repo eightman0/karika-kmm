@@ -15,4 +15,13 @@
   <h2>Sadržaj (za ručni unos ili provjeru)</h2>
   <pre style="white-space: pre-wrap; word-break: break-all; font-size: 13px;">{{ provisioning_json }}</pre>
 </div>
+
+<div class="card">
+  <h2>Kupac / lokacija na novom uređaju (opcionalno)</h2>
+  <p class="hint">Ako novi tablet ide direktno kod poznatog kupca, dodaj ovo polje u QR JSON (mora se ručno dodati u ovaj JSON i regenerisati QR - ova stranica to još ne radi automatski) da se customer_id/site_id popune sami čim se provisioning završi, umjesto da se poslije ručno unose na detalj stranici uređaja:</p>
+  <pre style="white-space: pre-wrap; word-break: break-all; font-size: 13px;">"android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
+  "customer_id": "npr. 123",
+  "site_id": "npr. sarajevo-centar"
+}</pre>
+</div>
 {% endblock %}

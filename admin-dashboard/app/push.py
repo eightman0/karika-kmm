@@ -1,11 +1,16 @@
 """
 FCM sends - untouched by the Firestore-to-SQLite migration, since push was never gRPC/Firestore
-based to begin with. Two channels: a broadcast topic every device subscribes to (for "check for
-an update now"), and a per-device topic keyed by the device's own Android ID (for "upload your
-logs now" - this needs to reach exactly one device, not the whole fleet).
+based to begin with. Two targeting modes: topic (broadcast to everyone, or a device's own topic -
+used when there's a periodic fallback so a delivery hiccup isn't fatal) and direct token (for
+commands where the caller wants to know the send itself succeeded right away, or where there's no
+fallback if it's missed - destructive actions in particular).
+
+Every command carries a requestId so the launcher can ack it back via
+/api/devices/{id}/command-ack and it's traceable end to end (see local_db.command_log).
 """
 
 import logging
+import uuid
 
 from firebase_admin import messaging
 
@@ -20,13 +25,17 @@ def _device_topic(device_id: str) -> str:
     return f"device_{device_id}"
 
 
+def new_request_id() -> str:
+    return str(uuid.uuid4())
+
+
 def send_version_check(version_code: str) -> None:
     try:
         init_messaging()
         messaging.send(
             messaging.Message(
                 topic=BROADCAST_TOPIC,
-                data={"type": "version_check", "versionCode": str(version_code)},
+                data={"command": "version_check", "versionCode": str(version_code)},
             )
         )
     except Exception:
@@ -42,36 +51,54 @@ def send_analytics_request_all() -> None:
     try:
         init_messaging()
         messaging.send(
-            messaging.Message(
-                topic=BROADCAST_TOPIC,
-                data={"type": "analytics_request"},
-            )
+            messaging.Message(topic=BROADCAST_TOPIC, data={"command": "analytics_request"})
         )
     except Exception:
         logger.exception("Failed to send FCM analytics-request broadcast")
 
 
-def send_log_request(device_id: str, requested_at: str) -> None:
+def send_log_request(device_id: str, requested_at: str) -> str:
+    request_id = new_request_id()
     try:
         init_messaging()
         messaging.send(
             messaging.Message(
                 topic=_device_topic(device_id),
-                data={"type": "log_request", "requestedAt": requested_at},
+                data={"command": "log_request", "requestId": request_id, "requestedAt": requested_at},
             )
         )
     except Exception:
         logger.exception("Failed to send FCM log-request ping for %s", device_id)
+    return request_id
 
 
-def send_factory_reset(fcm_token: str) -> None:
-    # Sent straight to the device's own token rather than its topic - a topic message can take a
-    # while to propagate, and there's no periodic fallback for this one like there is for version
-    # checks, so the caller needs to know immediately if the send itself failed.
+def send_command_to_token(fcm_token: str, command: str, extra: dict | None = None) -> str:
+    """Direct-to-device send for commands with no periodic fallback - the caller finds out
+    immediately if the send itself failed, and gets a requestId back to track the ack."""
+    request_id = new_request_id()
     init_messaging()
-    messaging.send(
-        messaging.Message(
-            token=fcm_token,
-            data={"type": "factory_reset"},
-        )
-    )
+    data = {"command": command, "requestId": request_id}
+    if extra:
+        data.update({k: str(v) for k, v in extra.items()})
+    messaging.send(messaging.Message(token=fcm_token, data=data))
+    return request_id
+
+
+def send_factory_reset(fcm_token: str) -> str:
+    return send_command_to_token(fcm_token, "factory_reset")
+
+
+def send_reboot(fcm_token: str) -> str:
+    return send_command_to_token(fcm_token, "reboot")
+
+
+def send_exit_kiosk(fcm_token: str) -> str:
+    return send_command_to_token(fcm_token, "exit_kiosk")
+
+
+def send_maintenance(fcm_token: str, enable: bool) -> str:
+    return send_command_to_token(fcm_token, "maintenance_on" if enable else "maintenance_off")
+
+
+def send_reboot_schedule(fcm_token: str, hour: int) -> str:
+    return send_command_to_token(fcm_token, "set_reboot_schedule", {"hour": hour})
