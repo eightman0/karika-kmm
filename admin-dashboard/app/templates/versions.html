@@ -9,6 +9,21 @@
 {% if published %}<div class="banner-success">Verzija objavljena - stiže na sve upaljene uređaje odmah.</div>{% endif %}
 
 <div class="card">
+  <h2>Objavi novu verziju</h2>
+  <form method="post" action="/versions/publish" enctype="multipart/form-data" class="stacked-form">
+    <label>APK fajl
+      <label class="dropzone" for="apk_file">
+        <span>Prevuci APK ovdje ili klikni da izabereš fajl</span>
+        <input id="apk_file" type="file" name="apk_file" accept=".apk" required>
+      </label>
+    </label>
+    <p class="hint">Version code, version name i SHA-256 se čitaju direktno iz APK-a i upload-uje se u Firebase Storage - ne moraš ništa ručno unositi.</p>
+    <button type="submit" class="btn btn-primary">Objavi</button>
+  </form>
+  <p class="hint">Svaki update je obavezan. Objava odmah šalje push (FCM) na sve upaljene uređaje da provjere odmah - a i bez push-a, svaki uređaj sam provjeri periodično najkasnije za 30 min.</p>
+</div>
+
+<div class="card">
   <h2>Trenutno objavljeno</h2>
   {% if is_published %}
   <table class="detail-table">
@@ -24,21 +39,6 @@
   {% else %}
   <p class="hint">Nema objavljene verzije.</p>
   {% endif %}
-</div>
-
-<div class="card">
-  <h2>Objavi novu verziju</h2>
-  <form method="post" action="/versions/publish" enctype="multipart/form-data" class="stacked-form">
-    <label>APK fajl
-      <label class="dropzone" for="apk_file">
-        <span>Prevuci APK ovdje ili klikni da izabereš fajl</span>
-        <input id="apk_file" type="file" name="apk_file" accept=".apk" required>
-      </label>
-    </label>
-    <p class="hint">Version code, version name i SHA-256 se čitaju direktno iz APK-a i upload-uje se u Firebase Storage - ne moraš ništa ručno unositi.</p>
-    <button type="submit" class="btn btn-primary">Objavi</button>
-  </form>
-  <p class="hint">Svaki update je obavezan. Objava odmah šalje push (FCM) na sve upaljene uređaje da provjere odmah - a i bez push-a, svaki uređaj sam provjeri periodično najkasnije za 30 min.</p>
 </div>
 
 <div class="card">

@@ -35,6 +35,7 @@
       <th>Instalirana verzija</th>
       <th>Zadnja aktivnost</th>
       <th>Zadnji log</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -52,6 +53,11 @@
       </td>
       <td data-label="Zadnja aktivnost">{{ d.lastSeenAt.strftime("%d.%m. %H:%M") if d.lastSeenAt else "nikad" }}</td>
       <td data-label="Zadnji log">{{ d.lastLogUploadAt.strftime("%d.%m. %H:%M") if d.lastLogUploadAt else "-" }}</td>
+      <td data-label="">
+        <form method="post" action="/devices/{{ d.id }}/delete" onsubmit="return confirm('Obrisati uređaj {{ d.id }}?')">
+          <button type="submit" class="btn btn-danger btn-sm">Obriši</button>
+        </form>
+      </td>
     </tr>
     {% endfor %}
   </tbody>

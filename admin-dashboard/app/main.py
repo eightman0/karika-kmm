@@ -87,6 +87,12 @@ def request_logs(device_id: str):
     return RedirectResponse(f"/devices/{device_id}", status_code=303)
 
 
+@app.post("/devices/{device_id}/delete", dependencies=[require_login])
+def delete_device(device_id: str):
+    devices.delete_device(device_id)
+    return RedirectResponse("/devices", status_code=303)
+
+
 @app.get("/devices/{device_id}/log", dependencies=[require_login])
 def download_log(device_id: str):
     device = devices.get_device(device_id)

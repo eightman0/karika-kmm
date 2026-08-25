@@ -75,6 +75,10 @@ def get_device(device_id: str) -> dict | None:
     return _with_computed_fields(row) if row else None
 
 
+def delete_device(device_id: str) -> None:
+    local_db.delete_device(device_id)
+
+
 def request_logs(device_id: str) -> None:
     requested_at = local_db.request_log_pull(device_id)
     # The device pulls the actual log content itself once it wakes up - this is only the "please

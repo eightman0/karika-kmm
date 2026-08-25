@@ -95,6 +95,9 @@ main { padding: 28px; max-width: 1080px; margin: 0 auto; }
 .btn-secondary:hover { border-color: var(--accent); }
 .btn-ghost { background: transparent; color: var(--muted); border-color: var(--border); }
 .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+.btn-danger { background: var(--never-dim); color: var(--never); border-color: var(--never); }
+.btn-danger:hover { background: var(--never); color: var(--ground); }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
 .btn:disabled, .btn.disabled {
   opacity: 0.45;
   cursor: not-allowed;

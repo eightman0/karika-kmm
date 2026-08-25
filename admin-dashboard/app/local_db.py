@@ -160,6 +160,11 @@ def get_device(device_id: str) -> dict | None:
         return dict(row) if row else None
 
 
+def delete_device(device_id: str) -> None:
+    with _connect() as conn:
+        conn.execute("DELETE FROM devices WHERE id = ?", (device_id,))
+
+
 # --- kiosk version -------------------------------------------------------------
 
 def get_kiosk_version_row() -> dict | None:
