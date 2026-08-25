@@ -17,6 +17,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentOrderDetailBinding
 import karika.distribucija.ba.salesrep.databinding.ItemOrderCommentBinding
@@ -64,11 +65,15 @@ class OrderDetailFragment : Fragment() {
         binding.buttonSendComment.setOnClickListener {
             val text = binding.editComment.text?.toString().orEmpty()
             if (text.isBlank()) return@setOnClickListener
+            AnalyticsTracker.trackClick("order_detail", "send_comment")
             viewModel.sendComment(text)
             binding.editComment.setText("")
         }
 
-        binding.buttonPrint.setOnClickListener { viewModel.printOrder() }
+        binding.buttonPrint.setOnClickListener {
+            AnalyticsTracker.trackClick("order_detail", "print_order")
+            viewModel.printOrder()
+        }
 
         binding.rowDeliveryHeader.setOnClickListener {
             deliveryExpanded = !deliveryExpanded

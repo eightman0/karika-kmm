@@ -3,6 +3,7 @@ package karika.distribucija.ba.salesrep
 import android.app.Application
 import android.content.Intent
 import android.os.Process
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.logging.AppLogger
 import karika.distribucija.ba.salesrep.session.SessionManager
 import kotlin.system.exitProcess
@@ -13,6 +14,7 @@ class SalesRepApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AppLogger.init(this)
+        AnalyticsTracker.init(this)
         sessionManager = SessionManager(this)
         sessionManager.restoreTokenIfPresent()
         installCrashRecovery()

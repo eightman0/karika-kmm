@@ -7,6 +7,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.storage.storage
 import karika.distribucija.ba.launcher.update.DashboardApi
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.logging.AppLogger
 import kotlinx.coroutines.tasks.await
 import java.io.File
@@ -59,6 +60,43 @@ object LogUploadManager {
             // signed URL server-side, bypassing those rules entirely.
             DashboardApi.reportLogUploaded(deviceId, downloadUrl.toString(), storagePath, requestedAt)
             Log.i(TAG, "Log upload complete: $downloadUrl")
+        } finally {
+            zipFile.delete()
+        }
+    }
+
+    /** Fleet-wide broadcast, not a per-device request-then-fulfill flow like uploadNow() - every
+     * device that's on and connected uploads its own local analytics events independently. */
+    suspend fun uploadAnalyticsNow(context: Context) {
+        val appContext = context.applicationContext
+        try {
+            if (Firebase.auth.currentUser == null) {
+                Firebase.auth.signInAnonymously().await()
+            }
+            val deviceId = DeviceIdentity.id(appContext)
+            uploadAnalytics(appContext, deviceId)
+        } catch (e: Exception) {
+            Log.e(TAG, "Analytics upload failed", e)
+        }
+    }
+
+    private suspend fun uploadAnalytics(context: Context, deviceId: String) {
+        val zipFile = File(context.cacheDir, "analytics-upload.zip")
+        try {
+            ZipOutputStream(zipFile.outputStream()).use { zip ->
+                addFileToZip(zip, AnalyticsTracker.currentFile(), "launcher.jsonl")
+                addFileToZip(zip, AnalyticsTracker.currentBackupFile(), "launcher.jsonl.1")
+                addUriToZip(context, zip, "content://$SALESREP_LOG_AUTHORITY/analytics_current", "salesrep.jsonl")
+                addUriToZip(context, zip, "content://$SALESREP_LOG_AUTHORITY/analytics_backup", "salesrep.jsonl.1")
+            }
+
+            val storagePath = "analytics/$deviceId/${System.currentTimeMillis()}.zip"
+            val storageRef = Firebase.storage.reference.child(storagePath)
+            storageRef.putFile(Uri.fromFile(zipFile)).await()
+            val downloadUrl = storageRef.downloadUrl.await()
+
+            DashboardApi.reportAnalyticsUploaded(deviceId, downloadUrl.toString(), storagePath)
+            Log.i(TAG, "Analytics upload complete: $downloadUrl")
         } finally {
             zipFile.delete()
         }

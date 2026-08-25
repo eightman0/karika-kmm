@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentOrderCartBinding
 import karika.distribucija.ba.salesrep.session.CartState
@@ -55,6 +56,7 @@ class OrderCartFragment : Fragment() {
         binding.recyclerCart.layoutManager = LinearLayoutManager(requireContext())
 
         binding.buttonClear.setOnClickListener {
+            AnalyticsTracker.trackClick("cart", "clear_cart")
             AlertDialog.Builder(requireContext())
                 .setTitle(R.string.cart_clear_title)
                 .setMessage(R.string.cart_clear_message)
@@ -65,6 +67,7 @@ class OrderCartFragment : Fragment() {
 
         binding.buttonReview.setOnClickListener {
             if (CartState.cart.value?.isEmpty != false) return@setOnClickListener
+            AnalyticsTracker.trackClick("cart", "review_order")
             findNavController().navigate(
                 R.id.action_cart_to_review,
                 bundleOf(

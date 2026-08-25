@@ -7,6 +7,7 @@ import android.database.MatrixCursor
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.logging.AppLogger
 import java.io.File
 import java.io.FileNotFoundException
@@ -66,6 +67,8 @@ class LogProvider : ContentProvider() {
     private fun fileFor(uri: Uri): File? = when (uri.lastPathSegment) {
         "current" -> AppLogger.currentLogFile()
         "backup" -> AppLogger.backupLogFile()
+        "analytics_current" -> AnalyticsTracker.currentFile()
+        "analytics_backup" -> AnalyticsTracker.currentBackupFile()
         else -> null
     }
 }

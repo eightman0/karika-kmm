@@ -35,6 +35,22 @@ def send_version_check(version_code: str) -> None:
         logger.exception("Failed to send FCM update-check ping")
 
 
+def send_analytics_request_all() -> None:
+    # Fleet-wide, same channel version-check nudges already use - every device that's on and
+    # connected uploads its own local analytics events independently, no per-device state needed
+    # for the request itself.
+    try:
+        init_messaging()
+        messaging.send(
+            messaging.Message(
+                topic=BROADCAST_TOPIC,
+                data={"type": "analytics_request"},
+            )
+        )
+    except Exception:
+        logger.exception("Failed to send FCM analytics-request broadcast")
+
+
 def send_log_request(device_id: str, requested_at: str) -> None:
     try:
         init_messaging()

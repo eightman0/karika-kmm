@@ -13,8 +13,13 @@
   </div>
   <div class="header-actions">
     <a href="/devices?q={{ q|urlencode }}" class="btn btn-secondary">Osvježi</a>
+    <form method="post" action="/devices/analytics-request">
+      <button type="submit" class="btn btn-secondary">Povuci analitiku (svi)</button>
+    </form>
   </div>
 </div>
+
+{% if analytics_sent %}<div class="banner-success">Zahtjev za analitiku poslan svim uređajima - stiže čim se uređaj javi.</div>{% endif %}
 
 <form method="get" action="/devices" class="toolbar">
   <input class="search-input" type="text" name="q" value="{{ q }}" placeholder="Pretraži po ID-u uređaja...">

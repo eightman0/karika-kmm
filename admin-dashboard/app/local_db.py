@@ -62,11 +62,23 @@ def init_db() -> None:
                 last_log_upload_path TEXT,
                 last_log_upload_at TEXT,
                 last_log_upload_request_handled_at TEXT,
-                fcm_token TEXT
+                fcm_token TEXT,
+                last_analytics_upload_url TEXT,
+                last_analytics_upload_path TEXT,
+                last_analytics_upload_at TEXT
             )
             """
         )
-        _ensure_columns(conn, "devices", {"fcm_token": "TEXT"})
+        _ensure_columns(
+            conn,
+            "devices",
+            {
+                "fcm_token": "TEXT",
+                "last_analytics_upload_url": "TEXT",
+                "last_analytics_upload_path": "TEXT",
+                "last_analytics_upload_at": "TEXT",
+            },
+        )
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS kiosk_version (
@@ -78,6 +90,23 @@ def init_db() -> None:
                 mandatory INTEGER
             )
             """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS analytics_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id TEXT,
+                source TEXT,
+                ts TEXT,
+                user TEXT,
+                type TEXT,
+                screen TEXT,
+                element TEXT
+            )
+            """
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_analytics_events_ts ON analytics_events(ts)"
         )
         conn.execute(
             """
@@ -149,6 +178,22 @@ def set_log_uploaded(device_id: str, url: str, path: str, requested_at: str | No
         )
 
 
+def set_analytics_uploaded(device_id: str, url: str, path: str) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO devices (id, last_analytics_upload_url, last_analytics_upload_path,
+                last_analytics_upload_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                last_analytics_upload_url=excluded.last_analytics_upload_url,
+                last_analytics_upload_path=excluded.last_analytics_upload_path,
+                last_analytics_upload_at=excluded.last_analytics_upload_at
+            """,
+            (device_id, url, path, now_iso()),
+        )
+
+
 def request_log_pull(device_id: str) -> str:
     requested_at = now_iso()
     with _connect() as conn:
@@ -177,6 +222,97 @@ def get_device(device_id: str) -> dict | None:
 def delete_device(device_id: str) -> None:
     with _connect() as conn:
         conn.execute("DELETE FROM devices WHERE id = ?", (device_id,))
+
+
+# --- analytics events -----------------------------------------------------------
+
+def insert_analytics_events(device_id: str, events: list[dict]) -> None:
+    if not events:
+        return
+    with _connect() as conn:
+        conn.executemany(
+            """
+            INSERT INTO analytics_events (device_id, source, ts, user, type, screen, element)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    device_id, e.get("source"), e.get("ts"), e.get("user"),
+                    e.get("type"), e.get("screen"), e.get("element"),
+                )
+                for e in events
+            ],
+        )
+
+
+def count_analytics_events() -> int:
+    with _connect() as conn:
+        return conn.execute("SELECT COUNT(*) FROM analytics_events").fetchone()[0]
+
+
+def count_devices_with_events() -> int:
+    with _connect() as conn:
+        return conn.execute("SELECT COUNT(DISTINCT device_id) FROM analytics_events").fetchone()[0]
+
+
+def avg_events_per_device() -> float:
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS n, COUNT(DISTINCT device_id) AS d FROM analytics_events WHERE type = 'click'"
+        ).fetchone()
+    return round(row["n"] / row["d"], 1) if row["d"] else 0.0
+
+
+def events_per_day(days: int) -> list[dict]:
+    with _connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT strftime('%Y-%m-%d', ts) AS day, COUNT(*) AS n
+            FROM analytics_events
+            WHERE ts >= strftime('%Y-%m-%dT%H:%M:%S', 'now', ?)
+            GROUP BY day
+            ORDER BY day
+            """,
+            (f"-{days} days",),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def events_per_hour() -> list[dict]:
+    with _connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT strftime('%H', ts) AS hour, COUNT(*) AS n
+            FROM analytics_events
+            GROUP BY hour
+            ORDER BY hour
+            """
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def top_screens(limit: int = 8) -> list[dict]:
+    with _connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT screen, COUNT(*) AS n FROM analytics_events
+            WHERE type = 'screen' GROUP BY screen ORDER BY n DESC LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def top_clicks(limit: int = 8) -> list[dict]:
+    with _connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT screen, element, COUNT(*) AS n FROM analytics_events
+            WHERE type = 'click' GROUP BY screen, element ORDER BY n DESC LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        return [dict(row) for row in rows]
 
 
 # --- kiosk version -------------------------------------------------------------

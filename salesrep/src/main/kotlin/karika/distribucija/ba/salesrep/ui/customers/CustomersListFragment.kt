@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomersListBinding
 import karika.distribucija.ba.salesrep.model.OperationalCustomer
@@ -74,11 +75,13 @@ class CustomersListFragment : Fragment() {
 
         updateTabSelection(CustomersViewModel.Tab.ALL)
         binding.tabAll.setOnClickListener {
+            AnalyticsTracker.trackClick("customers", "tab_all")
             updateTabSelection(CustomersViewModel.Tab.ALL)
             viewModel.selectTab(CustomersViewModel.Tab.ALL)
             clearStatusFilterUi()
         }
         binding.tabMine.setOnClickListener {
+            AnalyticsTracker.trackClick("customers", "tab_mine")
             updateTabSelection(CustomersViewModel.Tab.MINE)
             viewModel.selectTab(CustomersViewModel.Tab.MINE)
             clearStatusFilterUi()
@@ -104,6 +107,7 @@ class CustomersListFragment : Fragment() {
         }
 
         binding.buttonAdd.setOnClickListener {
+            AnalyticsTracker.trackClick("customers", "add_customer")
             AddCustomerBottomSheet(
                 onNewCustomer = { findNavController().navigate(R.id.action_customers_to_new_customer) },
                 onInviteCustomer = {

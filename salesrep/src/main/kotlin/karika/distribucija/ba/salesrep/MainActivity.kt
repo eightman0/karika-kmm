@@ -23,6 +23,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.appbar.MaterialToolbar
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.logging.AppLogger
 import karika.distribucija.ba.salesrep.api.SalesRepository
 import karika.distribucija.ba.salesrep.model.ResultState
@@ -72,12 +73,28 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.button_close_drawer).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
         }
-        findViewById<View>(R.id.row_nav_orders).setOnClickListener { navigateToRoot(R.id.ordersListFragment) }
-        findViewById<View>(R.id.row_nav_customers).setOnClickListener { navigateToRoot(R.id.customersListFragment) }
-        findViewById<View>(R.id.row_nav_customer_messages).setOnClickListener { navigateToRoot(R.id.customerMessagesFragment) }
-        findViewById<View>(R.id.row_nav_admin_messages).setOnClickListener { navigateToRoot(R.id.adminMessagesFragment) }
-        findViewById<View>(R.id.row_nav_internal_messages).setOnClickListener { navigateToRoot(R.id.internalMessagesFragment) }
+        findViewById<View>(R.id.row_nav_orders).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "orders")
+            navigateToRoot(R.id.ordersListFragment)
+        }
+        findViewById<View>(R.id.row_nav_customers).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "customers")
+            navigateToRoot(R.id.customersListFragment)
+        }
+        findViewById<View>(R.id.row_nav_customer_messages).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "customer_messages")
+            navigateToRoot(R.id.customerMessagesFragment)
+        }
+        findViewById<View>(R.id.row_nav_admin_messages).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "admin_messages")
+            navigateToRoot(R.id.adminMessagesFragment)
+        }
+        findViewById<View>(R.id.row_nav_internal_messages).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "internal_messages")
+            navigateToRoot(R.id.internalMessagesFragment)
+        }
         findViewById<View>(R.id.row_logout).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "logout")
             drawerLayout.closeDrawer(GravityCompat.START)
             (application as SalesRepApp).sessionManager.logout()
             navController.navigate(
@@ -111,6 +128,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            AnalyticsTracker.trackScreen(resources.getResourceEntryName(destination.id))
             val isLogin = destination.id == R.id.loginFragment
             toolbar.visibility = if (isLogin) View.GONE else View.VISIBLE
             drawerLayout.setDrawerLockMode(
@@ -133,6 +151,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_notifications) {
+            AnalyticsTracker.trackClick("toolbar", "notifications")
             navController.navigate(R.id.notificationsFragment)
             return true
         }
@@ -218,6 +237,7 @@ class MainActivity : AppCompatActivity() {
                 if (result is ResultState.Success) {
                     CurrentUser.me = result.data
                     AppLogger.setUser(result.data.employeeId?.toString())
+                    AnalyticsTracker.setUser(result.data.employeeId?.toString())
                     findViewById<TextView>(R.id.text_rep_name).text =
                         result.data.name ?: getString(R.string.drawer_role_label)
                 }

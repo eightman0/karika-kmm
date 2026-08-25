@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from . import local_db
 from .firebase import bucket
-from .push import send_factory_reset, send_log_request
+from .push import send_analytics_request_all, send_factory_reset, send_log_request
 
 STALE_AFTER_SECONDS = 12 * 60 * 60  # 12h - covers the 30min periodic worker plus a lot of slack
 SIGNED_URL_MINUTES = 30
@@ -31,6 +31,9 @@ def _with_computed_fields(row: dict) -> dict:
         "lastLogUploadPath": row["last_log_upload_path"],
         "lastLogUploadAt": _parse_iso(row["last_log_upload_at"]),
         "lastLogUploadRequestHandledAt": _parse_iso(row["last_log_upload_request_handled_at"]),
+        "lastAnalyticsUploadUrl": row["last_analytics_upload_url"],
+        "lastAnalyticsUploadPath": row["last_analytics_upload_path"],
+        "lastAnalyticsUploadAt": _parse_iso(row["last_analytics_upload_at"]),
         "status": _status(_parse_iso(row["last_seen_at"])),
     }
 
@@ -94,7 +97,16 @@ def request_factory_reset(device_id: str) -> None:
     send_factory_reset(token)
 
 
+def request_analytics_all() -> None:
+    send_analytics_request_all()
+
+
 def signed_log_url(storage_path: str) -> str:
+    blob = bucket().blob(storage_path)
+    return blob.generate_signed_url(expiration=timedelta(minutes=SIGNED_URL_MINUTES))
+
+
+def signed_analytics_url(storage_path: str) -> str:
     blob = bucket().blob(storage_path)
     return blob.generate_signed_url(expiration=timedelta(minutes=SIGNED_URL_MINUTES))
 

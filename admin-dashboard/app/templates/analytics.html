@@ -3,7 +3,7 @@
 {% block content %}
 <div class="page-header">
   <h1>Analitika</h1>
-  <p class="summary-line">Ilustrativni podaci - prava telemetrija dolazi kasnije.</p>
+  <p class="summary-line">Klikovi i pregledani ekrani iz salesrep app-a &middot; {{ kpis.events_total }} eventa sa {{ kpis.devices_with_events }} uređaja.</p>
 </div>
 
 <div class="kpi-grid">
@@ -14,22 +14,24 @@
   <div class="kpi-card">
     <p class="kpi-label">Na najnovijoj verziji</p>
     <p class="kpi-value">{{ kpis.latest_pct }}%</p>
-    <p class="kpi-delta positive">{{ kpis.latest_fraction }} ({{ kpis.latest_delta }})</p>
+    <p class="kpi-delta">{{ kpis.latest_fraction }}</p>
   </div>
   <div class="kpi-card">
-    <p class="kpi-label">Prosječno aktivnih dnevno</p>
-    <p class="kpi-value">{{ kpis.avg_daily_active }}</p>
+    <p class="kpi-label">Uređaja sa analitikom</p>
+    <p class="kpi-value">{{ kpis.devices_with_events }}</p>
   </div>
   <div class="kpi-card">
-    <p class="kpi-label">Sesija po uređaju</p>
-    <p class="kpi-value">{{ kpis.sessions_per_device }}</p>
-    <p class="kpi-delta negative">{{ kpis.sessions_delta }}</p>
+    <p class="kpi-label">Klikova po uređaju</p>
+    <p class="kpi-value">{{ kpis.avg_clicks_per_device }}</p>
   </div>
 </div>
 
 <div class="charts-grid">
   <div class="card chart-card">
-    <h2>Aktivni uređaji ({{ line.dates[0] }} &ndash; {{ line.dates[-1] }})</h2>
+    <h2>Eventi po danu (zadnjih {{ line.dates|length if not line.empty else 15 }} dana)</h2>
+    {% if line.empty %}
+    <p class="hint">Još nema podataka - povuci analitiku sa uređaja.</p>
+    {% else %}
     <svg viewBox="0 0 {{ line.width }} {{ line.height }}" preserveAspectRatio="none">
       <polygon class="chart-area" points="{{ line.area_points }}"></polygon>
       <polyline class="chart-line" points="{{ line.points }}"></polyline>
@@ -46,10 +48,14 @@
         {% endif %}
       {% endfor %}
     </div>
+    {% endif %}
   </div>
 
   <div class="card">
     <h2>Verzije u floti</h2>
+    {% if donut.empty %}
+    <p class="hint">Nema uređaja sa poznatom verzijom još.</p>
+    {% else %}
     <div class="donut-wrap">
       <svg width="{{ donut.size }}" height="{{ donut.size }}" viewBox="0 0 {{ donut.size }} {{ donut.size }}">
         <g transform="rotate(-90 {{ donut.size / 2 }} {{ donut.size / 2 }})">
@@ -68,11 +74,15 @@
         {% endfor %}
       </ul>
     </div>
+    {% endif %}
   </div>
 </div>
 
 <div class="card chart-card">
-  <h2>Aktivnost po satu</h2>
+  <h2>Aktivnost po satu (svi dani zajedno)</h2>
+  {% if bars.empty %}
+  <p class="hint">Još nema podataka - povuci analitiku sa uređaja.</p>
+  {% else %}
   <svg viewBox="0 0 {{ bars.width }} {{ bars.height }}" preserveAspectRatio="none">
     {% for b in bars.bars %}
     <rect class="chart-bar" x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="2"></rect>
@@ -84,6 +94,34 @@
       <span class="hint">{{ b.hour }}h</span>
       {% endif %}
     {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="charts-grid">
+  <div class="card">
+    <h2>Najgledaniji ekrani</h2>
+    {% if top_screens %}
+    <ul class="donut-legend">
+      {% for s in top_screens %}
+      <li>{{ s.screen }}<span class="legend-value">{{ s.n }}</span></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="hint">Još nema podataka.</p>
+    {% endif %}
+  </div>
+  <div class="card">
+    <h2>Najčešći klikovi</h2>
+    {% if top_clicks %}
+    <ul class="donut-legend">
+      {% for c in top_clicks %}
+      <li>{{ c.screen }} &middot; {{ c.element }}<span class="legend-value">{{ c.n }}</span></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="hint">Još nema podataka.</p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

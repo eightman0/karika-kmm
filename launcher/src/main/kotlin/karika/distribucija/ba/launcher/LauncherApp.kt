@@ -11,6 +11,7 @@ import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 import karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver
 import karika.distribucija.ba.launcher.update.KioskMessagingService
 import karika.distribucija.ba.launcher.update.UpdateScheduler
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.logging.AppLogger
 import kotlin.system.exitProcess
 
@@ -19,6 +20,7 @@ class LauncherApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AppLogger.init(this)
+        AnalyticsTracker.init(this)
         Firebase.messaging.subscribeToTopic(KioskMessagingService.BROADCAST_TOPIC)
         Firebase.messaging.subscribeToTopic(KioskMessagingService.deviceTopic(DeviceIdentity.id(this)))
         UpdateScheduler.schedulePeriodic(this)

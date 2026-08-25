@@ -63,6 +63,14 @@ object DashboardApi {
             post("$BASE_URL/api/devices/$deviceId/log-uploaded", body)
         }
 
+    suspend fun reportAnalyticsUploaded(deviceId: String, url: String, path: String) =
+        withContext(Dispatchers.IO) {
+            val body = JSONObject()
+                .put("url", url)
+                .put("path", path)
+            post("$BASE_URL/api/devices/$deviceId/analytics-uploaded", body)
+        }
+
     private fun get(url: String): JSONObject {
         val connection = openConnection(url, "GET")
         return connection.readResponse()

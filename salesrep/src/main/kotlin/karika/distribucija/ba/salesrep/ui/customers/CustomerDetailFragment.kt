@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomerDetailBinding
 import karika.distribucija.ba.salesrep.model.DiscountRule
@@ -62,9 +63,13 @@ class CustomerDetailFragment : Fragment() {
         binding.recyclerDiscounts.adapter = adapter
         binding.recyclerDiscounts.layoutManager = LinearLayoutManager(requireContext())
 
-        binding.buttonNewDiscount.setOnClickListener { openNewDiscount() }
+        binding.buttonNewDiscount.setOnClickListener {
+            AnalyticsTracker.trackClick("customer_detail", "new_discount")
+            openNewDiscount()
+        }
         binding.buttonOrderForCustomer.visibility = if (customer.isActive) View.VISIBLE else View.GONE
         binding.buttonOrderForCustomer.setOnClickListener {
+            AnalyticsTracker.trackClick("customer_detail", "order_for_customer")
             findNavController().navigate(
                 R.id.action_customer_detail_to_catalog,
                 bundleOf(

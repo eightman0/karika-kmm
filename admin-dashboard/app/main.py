@@ -54,7 +54,7 @@ def logout(request: Request):
 
 
 @app.get("/devices", dependencies=[require_login])
-def devices_page(request: Request, q: str = ""):
+def devices_page(request: Request, q: str = "", analytics_sent: str | None = None):
     all_devices = devices.list_devices()
     filtered = devices.filter_devices(all_devices, q)
     latest_salesrep_code = version_config.get_kiosk_version()["version_code"]
@@ -67,8 +67,15 @@ def devices_page(request: Request, q: str = ""):
             "q": q,
             "latest_salesrep_code": latest_salesrep_code,
             "active_page": "devices",
+            "analytics_sent": bool(analytics_sent),
         },
     )
+
+
+@app.post("/devices/analytics-request", dependencies=[require_login])
+def request_analytics_all():
+    devices.request_analytics_all()
+    return RedirectResponse("/devices?analytics_sent=1", status_code=303)
 
 
 @app.get("/devices/{device_id}", dependencies=[require_login])
@@ -118,6 +125,15 @@ def download_log(device_id: str):
     if not path:
         return RedirectResponse(f"/devices/{device_id}")
     return RedirectResponse(devices.signed_log_url(path))
+
+
+@app.get("/devices/{device_id}/analytics", dependencies=[require_login])
+def download_analytics(device_id: str):
+    device = devices.get_device(device_id)
+    path = device.get("lastAnalyticsUploadPath") if device else None
+    if not path:
+        return RedirectResponse(f"/devices/{device_id}")
+    return RedirectResponse(devices.signed_analytics_url(path))
 
 
 @app.get("/versions", dependencies=[require_login])
@@ -180,7 +196,7 @@ def provisioning_page(request: Request):
                 "1r6zVerEdM0pyQzBBDHf_ToS8qliRsL0A_LcfLb2HlE",
             "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION":
                 "https://firebasestorage.googleapis.com/v0/b/kiosklauncher-8c837.firebasestorage.app/o/"
-                "launcher-releases%2Flauncher-release.apk?alt=media&token=83e598db-db8d-4645-8cbb-6256c09d964a",
+                "launcher-releases%2Flauncher-release.apk?alt=media&token=62de3834-b43b-4d38-adaa-4774984878c4",
             "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": True,
         },
         indent=2,
@@ -202,6 +218,8 @@ def analytics_page(request: Request):
             "line": analytics.get_line_chart(),
             "bars": analytics.get_bar_chart(),
             "donut": analytics.get_donut(),
+            "top_screens": analytics.get_top_screens(),
+            "top_clicks": analytics.get_top_clicks(),
             "active_page": "analitika",
         },
     )

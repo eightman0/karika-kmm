@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentOrderCatalogBinding
 import karika.distribucija.ba.salesrep.model.Category
@@ -82,6 +83,7 @@ class OrderCatalogFragment : Fragment() {
         binding.buttonCategoryChipRemove.setOnClickListener { viewModel.selectCategory(null) }
 
         binding.buttonCart.setOnClickListener {
+            AnalyticsTracker.trackClick("catalog", "open_cart")
             findNavController().navigate(
                 R.id.action_catalog_to_cart,
                 bundleOf(
@@ -126,6 +128,7 @@ class OrderCatalogFragment : Fragment() {
     }
 
     private fun selectTab(tab: OrderCatalogViewModel.Tab) {
+        AnalyticsTracker.trackClick("catalog", "tab_${tab.name.lowercase()}")
         viewModel.selectTab(tab)
         stylePill(binding.pillTabAll, tab == OrderCatalogViewModel.Tab.ALL)
         stylePill(binding.pillTabSale, tab == OrderCatalogViewModel.Tab.ON_SALE)

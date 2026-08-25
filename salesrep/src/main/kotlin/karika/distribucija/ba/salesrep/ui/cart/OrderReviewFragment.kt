@@ -14,6 +14,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentOrderReviewBinding
 import karika.distribucija.ba.salesrep.model.OnBehalfCartResponseItem
@@ -94,6 +95,7 @@ class OrderReviewFragment : Fragment() {
 
         binding.buttonBack.setOnClickListener { findNavController().popBackStack() }
         binding.buttonConfirm.setOnClickListener {
+            AnalyticsTracker.trackClick("order_review", "confirm_order")
             viewModel.confirmOrder(binding.editNote.text?.toString().orEmpty(), buildShippingFormIfComplete())
         }
 

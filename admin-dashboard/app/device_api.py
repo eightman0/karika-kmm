@@ -6,7 +6,7 @@ browser. Replaces what the launcher used to read/write directly in Firestore.
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from . import local_db
+from . import analytics_ingest, local_db
 from .version_config import get_kiosk_version
 
 router = APIRouter(prefix="/api")
@@ -51,4 +51,16 @@ class LogUploadedBody(BaseModel):
 @router.post("/devices/{device_id}/log-uploaded")
 def post_log_uploaded(device_id: str, body: LogUploadedBody):
     local_db.set_log_uploaded(device_id, body.url, body.path, body.requestedAt)
+    return {"ok": True}
+
+
+class AnalyticsUploadedBody(BaseModel):
+    url: str
+    path: str
+
+
+@router.post("/devices/{device_id}/analytics-uploaded")
+def post_analytics_uploaded(device_id: str, body: AnalyticsUploadedBody):
+    local_db.set_analytics_uploaded(device_id, body.url, body.path)
+    analytics_ingest.ingest(device_id, body.path)
     return {"ok": True}

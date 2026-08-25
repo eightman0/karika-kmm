@@ -14,6 +14,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.BuildConfig
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.SalesRepApp
@@ -56,6 +57,7 @@ class LoginFragment : Fragment() {
         // The kiosk (Device Owner) has "com.android.settings" allowlisted in lock task, so this
         // opens on top of the locked session instead of needing to leave it.
         binding.buttonWifiSettings.setOnClickListener {
+            AnalyticsTracker.trackClick("login", "wifi_settings")
             startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
         }
 
@@ -86,6 +88,7 @@ class LoginFragment : Fragment() {
         binding.editPassword.addTextChangedListener(onTextChanged = { _, _, _, _ -> updateFormValid() })
 
         binding.textForgotPassword.setOnClickListener {
+            AnalyticsTracker.trackClick("login", "forgot_password")
             ForgotPasswordBottomSheet { email -> forgotPasswordViewModel.submit(email) }
                 .show(parentFragmentManager, "ForgotPasswordBottomSheet")
         }
@@ -100,6 +103,7 @@ class LoginFragment : Fragment() {
         }
 
         binding.buttonLogin.setOnClickListener {
+            AnalyticsTracker.trackClick("login", "login_button")
             viewModel.login(
                 binding.editEmail.text?.toString()?.trim().orEmpty(),
                 binding.editPassword.text?.toString().orEmpty()

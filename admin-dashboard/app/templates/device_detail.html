@@ -55,6 +55,18 @@
 </div>
 
 <div class="card">
+  <h2>Analitika</h2>
+  <p class="hint">Klikovi i pregledani ekrani u salesrep app-u - zatraženo preko dugmeta "Povuci analitiku (svi)" na listi uređaja, stiže po uređaju čim se javi.</p>
+  {% if device.lastAnalyticsUploadPath %}
+  <p><a href="/devices/{{ device.id }}/analytics">Preuzmi zadnju analitiku (.zip)</a>
+    <span class="hint">&middot; {{ device.lastAnalyticsUploadAt.strftime("%d.%m.%Y %H:%M:%S") if device.lastAnalyticsUploadAt else "" }}</span>
+  </p>
+  {% else %}
+  <p class="hint">Još nema upload-ovane analitike za ovaj uređaj.</p>
+  {% endif %}
+</div>
+
+<div class="card">
   <h2>Factory reset</h2>
   <p class="hint">Briše sve podatke i vraća uređaj na fabrička podešavanja preko push-a - bez fizičkog pristupa uređaju. Ovo je trajno i ne može se poništiti.</p>
   <form method="post" action="/devices/{{ device.id }}/factory-reset"

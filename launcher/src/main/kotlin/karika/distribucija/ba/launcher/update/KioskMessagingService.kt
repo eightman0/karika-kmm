@@ -21,6 +21,9 @@ class KioskMessagingService : FirebaseMessagingService() {
             TYPE_LOG_REQUEST -> scope.launch {
                 LogUploadManager.uploadNow(applicationContext, message.data["requestedAt"])
             }
+            TYPE_ANALYTICS_REQUEST -> scope.launch {
+                LogUploadManager.uploadAnalyticsNow(applicationContext)
+            }
             TYPE_FACTORY_RESET -> {
                 val devicePolicyManager =
                     getSystemService(DevicePolicyManager::class.java)
@@ -33,6 +36,7 @@ class KioskMessagingService : FirebaseMessagingService() {
     companion object {
         const val BROADCAST_TOPIC = "kiosk-updates"
         private const val TYPE_LOG_REQUEST = "log_request"
+        private const val TYPE_ANALYTICS_REQUEST = "analytics_request"
         private const val TYPE_FACTORY_RESET = "factory_reset"
 
         fun deviceTopic(deviceId: String) = "device_$deviceId"

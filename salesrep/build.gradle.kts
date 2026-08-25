@@ -14,8 +14,8 @@ android {
         applicationId = "karika.distribucija.ba.salesrep"
         minSdk = 30
         targetSdk = 37
-        versionCode = 32
-        versionName = "1"
+        versionCode = 41
+        versionName = "2"
     }
 
     buildFeatures {
