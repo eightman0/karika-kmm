@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Provisioning - Karika Ops{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>QR kod za provisioning</h1></div>
+</div>
+
+<div class="card">
+  <h2>Skeniraj pri postavljanju tableta</h2>
+  <p class="hint">Nakon factory reset-a, na ekranu dobrodošlice tapni 6 puta pa skeniraj ovaj kod - upisuje launcher kao Device Owner i skida ga sa Firebase Storage-a.</p>
+  <img src="/static/provisioning-qr.png" alt="Provisioning QR kod" style="max-width: 320px; width: 100%; display: block; margin: 16px 0;">
+</div>
+
+<div class="card">
+  <h2>Sadržaj (za ručni unos ili provjeru)</h2>
+  <pre style="white-space: pre-wrap; word-break: break-all; font-size: 13px;">{{ provisioning_json }}</pre>
+</div>
+{% endblock %}

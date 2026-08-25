@@ -1,3 +1,4 @@
+import json
 from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, File, Form, Request, UploadFile
@@ -167,6 +168,28 @@ def publish_version(request: Request, apk_file: UploadFile = File(...)):
     except Exception as e:
         return RedirectResponse(f"/versions?error={quote(str(e))}", status_code=303)
     return RedirectResponse("/versions?published=1", status_code=303)
+
+
+@app.get("/provisioning", dependencies=[require_login])
+def provisioning_page(request: Request):
+    provisioning_json = json.dumps(
+        {
+            "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME":
+                "karika.distribucija.ba.launcher/karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver",
+            "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM":
+                "1r6zVerEdM0pyQzBBDHf_ToS8qliRsL0A_LcfLb2HlE",
+            "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION":
+                "https://firebasestorage.googleapis.com/v0/b/kiosklauncher-8c837.firebasestorage.app/o/"
+                "launcher-releases%2Flauncher-release.apk?alt=media&token=83e598db-db8d-4645-8cbb-6256c09d964a",
+            "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": True,
+        },
+        indent=2,
+    )
+    return templates.TemplateResponse(
+        request,
+        "provisioning.html",
+        {"provisioning_json": provisioning_json, "active_page": "provisioning"},
+    )
 
 
 @app.get("/analitika", dependencies=[require_login])
