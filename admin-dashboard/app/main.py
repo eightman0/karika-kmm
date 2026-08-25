@@ -19,6 +19,15 @@ APP = "salesrep"  # the only app published through this dashboard - launcher is 
 # changes rarely, and is deliberately not self-updated this way
 
 
+def _list_devices_safe() -> tuple[list[dict], bool]:
+    """A Firestore hiccup shouldn't take down a whole page with a raw 500 - every route that
+    needs the device list falls back to an empty one and shows a banner instead."""
+    try:
+        return devices.list_devices(), False
+    except Exception:
+        return [], True
+
+
 @app.get("/")
 def root():
     return RedirectResponse("/devices")
@@ -55,7 +64,7 @@ def logout(request: Request):
 
 @app.get("/devices", dependencies=[require_login])
 def devices_page(request: Request, q: str = "", app: str = "all"):
-    all_devices = devices.list_devices()
+    all_devices, firestore_error = _list_devices_safe()
     filtered = devices.filter_devices(all_devices, q, app)
     try:
         latest_salesrep_code = version_config.get_kiosk_version()["version_code"]
@@ -70,6 +79,7 @@ def devices_page(request: Request, q: str = "", app: str = "all"):
             "q": q,
             "app_filter": app,
             "latest_salesrep_code": latest_salesrep_code,
+            "firestore_error": firestore_error,
             "active_page": "devices",
         },
     )
@@ -102,9 +112,12 @@ def download_log(device_id: str):
 
 @app.get("/versions", dependencies=[require_login])
 def versions_page(request: Request, error: str | None = None, published: str | None = None):
-    all_devices = devices.list_devices()
-    history = version_history.get_history(APP)
-    current = version_config.get_kiosk_version()
+    all_devices, firestore_error = _list_devices_safe()
+    try:
+        history = version_history.get_history(APP)
+        current = version_config.get_kiosk_version()
+    except Exception:
+        history, current, firestore_error = [], None, True
     is_published = bool(current and current["version_code"] not in ("0", "", None))
     rollout_count = 0
     if is_published:
@@ -122,6 +135,7 @@ def versions_page(request: Request, error: str | None = None, published: str | N
             "rollout_count": rollout_count,
             "total_devices": len(all_devices),
             "error": error,
+            "firestore_error": firestore_error,
             "published": bool(published),
             "active_page": "versions",
         },

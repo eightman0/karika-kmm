@@ -16,6 +16,8 @@
   </div>
 </div>
 
+{% if firestore_error %}<div class="error-banner">Trenutno se ne može doći do Firestore-a - lista uređaja je prazna. Osvježi za koji trenutak.</div>{% endif %}
+
 <form method="get" action="/devices" class="toolbar">
   <input class="search-input" type="text" name="q" value="{{ q }}" placeholder="Pretraži po ID-u uređaja...">
   <input type="hidden" name="app" value="{{ app_filter }}">
