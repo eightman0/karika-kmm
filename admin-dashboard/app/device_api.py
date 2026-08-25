@@ -50,3 +50,15 @@ class LogUploadedBody(BaseModel):
 def post_log_uploaded(device_id: str, body: LogUploadedBody):
     local_db.set_log_uploaded(device_id, body.url, body.path, body.requestedAt)
     return {"ok": True}
+
+
+class LocationBody(BaseModel):
+    latitude: float
+    longitude: float
+    accuracy: float
+
+
+@router.post("/devices/{device_id}/location")
+def post_location(device_id: str, body: LocationBody):
+    local_db.set_device_location(device_id, body.latitude, body.longitude, body.accuracy)
+    return {"ok": True}

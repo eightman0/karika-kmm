@@ -34,6 +34,15 @@ def _connect():
         conn.close()
 
 
+def _ensure_columns(conn: sqlite3.Connection, table: str, columns: dict[str, str]) -> None:
+    """SQLite has no `ADD COLUMN IF NOT EXISTS` - this makes adding a column to an existing table
+    (with existing rows already in production) idempotent and safe to just call on every start."""
+    existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+    for name, sql_type in columns.items():
+        if name not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {sql_type}")
+
+
 def init_db() -> None:
     with _connect() as conn:
         conn.execute(
@@ -55,6 +64,13 @@ def init_db() -> None:
             )
             """
         )
+        _ensure_columns(conn, "devices", {
+            "location_lat": "REAL",
+            "location_lng": "REAL",
+            "location_accuracy": "REAL",
+            "location_at": "TEXT",
+            "location_requested_at": "TEXT",
+        })
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS kiosk_version (
@@ -163,6 +179,38 @@ def get_device(device_id: str) -> dict | None:
 def delete_device(device_id: str) -> None:
     with _connect() as conn:
         conn.execute("DELETE FROM devices WHERE id = ?", (device_id,))
+
+
+def request_device_location(device_id: str) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO devices (id, location_requested_at) VALUES (?, ?)
+            ON CONFLICT(id) DO UPDATE SET location_requested_at=excluded.location_requested_at
+            """,
+            (device_id, now_iso()),
+        )
+
+
+def request_all_device_locations() -> None:
+    with _connect() as conn:
+        conn.execute("UPDATE devices SET location_requested_at = ?", (now_iso(),))
+
+
+def set_device_location(device_id: str, lat: float, lng: float, accuracy: float) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO devices (id, location_lat, location_lng, location_accuracy, location_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                location_lat=excluded.location_lat,
+                location_lng=excluded.location_lng,
+                location_accuracy=excluded.location_accuracy,
+                location_at=excluded.location_at
+            """,
+            (device_id, lat, lng, accuracy, now_iso()),
+        )
 
 
 # --- kiosk version -------------------------------------------------------------

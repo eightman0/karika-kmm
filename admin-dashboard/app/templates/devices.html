@@ -12,6 +12,9 @@
     </p>
   </div>
   <div class="header-actions">
+    <form method="post" action="/devices/request-location-all" onsubmit="return confirm('Zatražiti lokaciju od svih uređaja?')">
+      <button type="submit" class="btn btn-secondary">Zatraži lokaciju od svih</button>
+    </form>
     <a href="/devices?q={{ q|urlencode }}" class="btn btn-secondary">Osvježi</a>
   </div>
 </div>

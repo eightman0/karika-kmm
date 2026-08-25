@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from . import local_db
 from .firebase import bucket
-from .push import send_log_request
+from .push import send_location_request, send_location_request_all, send_log_request
 
 STALE_AFTER_SECONDS = 12 * 60 * 60  # 12h - covers the 30min periodic worker plus a lot of slack
 SIGNED_URL_MINUTES = 30
@@ -31,6 +31,11 @@ def _with_computed_fields(row: dict) -> dict:
         "lastLogUploadPath": row["last_log_upload_path"],
         "lastLogUploadAt": _parse_iso(row["last_log_upload_at"]),
         "lastLogUploadRequestHandledAt": _parse_iso(row["last_log_upload_request_handled_at"]),
+        "locationLat": row["location_lat"],
+        "locationLng": row["location_lng"],
+        "locationAccuracy": row["location_accuracy"],
+        "locationAt": _parse_iso(row["location_at"]),
+        "locationRequestedAt": _parse_iso(row["location_requested_at"]),
         "status": _status(_parse_iso(row["last_seen_at"])),
     }
 
@@ -81,6 +86,16 @@ def request_logs(device_id: str) -> None:
     # do that now" nudge, same push channel the silent-update check already uses instead of a
     # Firestore listener.
     send_log_request(device_id, requested_at)
+
+
+def request_location(device_id: str) -> None:
+    local_db.request_device_location(device_id)
+    send_location_request(device_id)
+
+
+def request_all_locations() -> None:
+    local_db.request_all_device_locations()
+    send_location_request_all()
 
 
 def signed_log_url(storage_path: str) -> str:

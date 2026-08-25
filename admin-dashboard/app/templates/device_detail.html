@@ -50,4 +50,25 @@
   <p class="hint">Još nema upload-ovanog loga za ovaj uređaj.</p>
   {% endif %}
 </div>
+
+<div class="card">
+  <h2>Lokacija</h2>
+  <div class="log-actions">
+    <form method="post" action="/devices/{{ device.id }}/request-location">
+      <button type="submit" class="btn btn-primary">Zatraži lokaciju</button>
+    </form>
+    {% if device.locationRequestedAt and (not device.locationAt or device.locationRequestedAt > device.locationAt) %}
+    <span class="log-pending">Zahtjev poslan - čeka se da uređaj javi lokaciju...</span>
+    {% endif %}
+  </div>
+  <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (push preko FCM-a).</p>
+
+  {% if device.locationLat is not none %}
+  <p><a href="https://maps.google.com/?q={{ device.locationLat }},{{ device.locationLng }}" target="_blank" rel="noopener">{{ "%.5f"|format(device.locationLat) }}, {{ "%.5f"|format(device.locationLng) }}</a>
+    <span class="hint">&middot; tačnost &plusmn;{{ device.locationAccuracy|round|int }}m &middot; {{ device.locationAt.strftime("%d.%m.%Y %H:%M:%S") if device.locationAt else "" }}</span>
+  </p>
+  {% else %}
+  <p class="hint">Još nema javljene lokacije za ovaj uređaj.</p>
+  {% endif %}
+</div>
 {% endblock %}
