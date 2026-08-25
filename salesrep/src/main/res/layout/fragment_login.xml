@@ -8,7 +8,8 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_height="wrap_content"
         android:fillViewport="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -219,7 +220,7 @@
         android:contentDescription="@string/wifi_settings_title"
         android:padding="8dp"
         android:src="@drawable/ic_wifi"
-        android:tint="@color/karika_gray4" />
+        app:tint="@color/karika_gray4" />
 
     <TextView
         android:id="@+id/text_app_version"

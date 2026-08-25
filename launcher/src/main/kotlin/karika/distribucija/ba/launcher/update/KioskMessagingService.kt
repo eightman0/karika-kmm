@@ -7,12 +7,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-/** Delivers pushes the admin dashboard sends: an update-check nudge on publish, a log-pull
- * request, or a location request (single device or the "all devices" broadcast). Data-only
- * messages (no `notification` payload), so Play Services wakes this process to hand them to
- * onMessageReceived() even if the process was frozen or not running - the FCM connection lives in
- * Play Services, not in our own process, so it isn't subject to the same cached-app freezing our
- * process is. */
+/** Delivers pushes the admin dashboard sends: an update-check nudge on publish, or a log-pull
+ * request. Data-only messages (no `notification` payload), so Play Services wakes this process to
+ * hand them to onMessageReceived() even if the process was frozen or not running - the FCM
+ * connection lives in Play Services, not in our own process, so it isn't subject to the same
+ * cached-app freezing our process is. */
 class KioskMessagingService : FirebaseMessagingService() {
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -21,9 +20,6 @@ class KioskMessagingService : FirebaseMessagingService() {
             TYPE_LOG_REQUEST -> scope.launch {
                 LogUploadManager.uploadNow(applicationContext, message.data["requestedAt"])
             }
-            TYPE_LOCATION_REQUEST -> scope.launch {
-                LocationReporter.reportNow(applicationContext)
-            }
             else -> UpdateScheduler.triggerImmediateCheck(applicationContext)
         }
     }
@@ -31,7 +27,6 @@ class KioskMessagingService : FirebaseMessagingService() {
     companion object {
         const val BROADCAST_TOPIC = "kiosk-updates"
         private const val TYPE_LOG_REQUEST = "log_request"
-        private const val TYPE_LOCATION_REQUEST = "location_request"
 
         fun deviceTopic(deviceId: String) = "device_$deviceId"
     }

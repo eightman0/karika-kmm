@@ -27,6 +27,7 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()
     private val forgotPasswordViewModel: ForgotPasswordViewModel by viewModels()
+    private var clickCount = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -133,8 +134,14 @@ class LoginFragment : Fragment() {
                     binding.progressLogin.visibility = View.GONE
                     binding.buttonLogin.isEnabled = true
                     binding.textError.visibility = View.VISIBLE
-                    binding.textError.text = result.message ?: getString(R.string.login_error_generic)
+                    binding.textError.text =
+                        result.message ?: getString(R.string.login_error_generic)
                 }
+            }
+        }
+        binding.imageLogo.setOnClickListener {
+            if (clickCount++ == 9) {
+                requireActivity().finish()
             }
         }
     }

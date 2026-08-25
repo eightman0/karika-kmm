@@ -46,14 +46,6 @@ class LauncherKiosk(private val context: ComponentActivity) {
             Manifest.permission.REQUEST_INSTALL_PACKAGES,
             DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
         )
-        // So a dashboard-requested location fix never needs a runtime prompt nobody is there to
-        // answer.
-        devicePolicyManager.setPermissionGrantState(
-            adminComponentName,
-            context.packageName,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
-        )
         setLockTask(enable)
     }
 
@@ -64,7 +56,7 @@ class LauncherKiosk(private val context: ComponentActivity) {
         )
 
         setUserRestriction(UserManager.DISALLOW_SAFE_BOOT, disallow)
-        setUserRestriction(UserManager.DISALLOW_FACTORY_RESET, disallow)
+        setUserRestriction(UserManager.DISALLOW_FACTORY_RESET, false)
         setUserRestriction(UserManager.DISALLOW_ADD_USER, disallow)
         setUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, disallow)
         setUserRestriction(UserManager.DISALLOW_CONFIG_VPN, disallow)

@@ -61,15 +61,6 @@ object DashboardApi {
             post("$BASE_URL/api/devices/$deviceId/log-uploaded", body)
         }
 
-    suspend fun reportLocation(deviceId: String, latitude: Double, longitude: Double, accuracyMeters: Float) =
-        withContext(Dispatchers.IO) {
-            val body = JSONObject()
-                .put("latitude", latitude)
-                .put("longitude", longitude)
-                .put("accuracy", accuracyMeters.toDouble())
-            post("$BASE_URL/api/devices/$deviceId/location", body)
-        }
-
     private fun get(url: String): JSONObject {
         val connection = openConnection(url, "GET")
         return connection.readResponse()

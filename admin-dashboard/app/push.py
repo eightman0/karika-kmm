@@ -46,23 +46,3 @@ def send_log_request(device_id: str, requested_at: str) -> None:
         )
     except Exception:
         logger.exception("Failed to send FCM log-request ping for %s", device_id)
-
-
-def send_location_request(device_id: str) -> None:
-    try:
-        init_messaging()
-        messaging.send(
-            messaging.Message(topic=_device_topic(device_id), data={"type": "location_request"})
-        )
-    except Exception:
-        logger.exception("Failed to send FCM location-request ping for %s", device_id)
-
-
-def send_location_request_all() -> None:
-    try:
-        init_messaging()
-        messaging.send(
-            messaging.Message(topic=BROADCAST_TOPIC, data={"type": "location_request"})
-        )
-    except Exception:
-        logger.exception("Failed to send FCM location-request broadcast")

@@ -92,18 +92,6 @@ def delete_device(device_id: str):
     return RedirectResponse("/devices", status_code=303)
 
 
-@app.post("/devices/{device_id}/request-location", dependencies=[require_login])
-def request_location(device_id: str):
-    devices.request_location(device_id)
-    return RedirectResponse(f"/devices/{device_id}", status_code=303)
-
-
-@app.post("/devices/request-location-all", dependencies=[require_login])
-def request_location_all():
-    devices.request_all_locations()
-    return RedirectResponse("/devices", status_code=303)
-
-
 @app.get("/devices/{device_id}/log", dependencies=[require_login])
 def download_log(device_id: str):
     device = devices.get_device(device_id)

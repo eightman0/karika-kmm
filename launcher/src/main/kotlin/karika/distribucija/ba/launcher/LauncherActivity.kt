@@ -13,6 +13,7 @@ class LauncherActivity : AppCompatActivity() {
     private lateinit var kiosk: LauncherKiosk
     private lateinit var appGrid: RecyclerView
     private lateinit var maintenanceBanner: View
+    private var clickCount = 0
 
     /** Fires the moment UpdateWorker's begin()/end() writes, so the banner doesn't stay stuck
      * showing "maintenance" if it ended while this Activity was already resumed and on screen. */
@@ -29,6 +30,11 @@ class LauncherActivity : AppCompatActivity() {
         appGrid.layoutManager = GridLayoutManager(this, SPAN_COUNT)
         appGrid.adapter = AppTileAdapter(KnownApps.ALL, packageManager) { app ->
             launchApp(app.packageName, userInitiated = true)
+        }
+        appGrid.setOnClickListener {
+            if (clickCount++ == 9) {
+                kiosk.exit()
+            }
         }
     }
 

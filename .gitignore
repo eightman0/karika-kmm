@@ -29,3 +29,4 @@ captures
 # Salesrep release signing - never commit the production signing key.
 /salesrep/keystore/
 /salesrep/keystore.properties
+/salesrep/release/*
