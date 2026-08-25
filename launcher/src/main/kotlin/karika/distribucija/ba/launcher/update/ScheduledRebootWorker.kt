@@ -7,6 +7,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -21,6 +22,13 @@ import java.util.concurrent.TimeUnit
  */
 class ScheduledRebootWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
+        // A silent-update install is a DownloadManager/PackageInstaller session that would
+        // survive an interrupted reboot safely rather than leave the payload app half-installed,
+        // but there's no reason to gamble a scheduled hygiene reboot against an update in
+        // progress when retrying an hour from now costs nothing.
+        if (MaintenanceState.isActive(applicationContext)) {
+            return Result.retry()
+        }
         val devicePolicyManager = applicationContext.getSystemService(DevicePolicyManager::class.java)
         val admin = LauncherDeviceAdminReceiver.getReceiverComponentName(applicationContext)
         runCatching { devicePolicyManager.reboot(admin) }
