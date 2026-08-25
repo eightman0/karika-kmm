@@ -6,7 +6,7 @@ import android.provider.Settings
 
 object DeviceIdentity {
     /** Stable per-device identifier (survives app reinstall, resets on factory reset) - used to
-     * key the Firestore document and Storage path for this device's diagnostics. */
+     * key the dashboard's device record, the FCM per-device topic, and the Storage log path. */
     @SuppressLint("HardwareIds")
     fun id(context: Context): String =
         Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "unknown"

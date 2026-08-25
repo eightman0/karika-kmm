@@ -40,7 +40,7 @@
     <span class="log-pending">Zahtjev poslan - čeka se da uređaj otpremi log...</span>
     {% endif %}
   </div>
-  <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (real-time Firestore listener).</p>
+  <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (push preko FCM-a).</p>
 
   {% if device.lastLogUploadPath %}
   <p><a href="/devices/{{ device.id }}/log">Preuzmi zadnji log (.zip)</a>

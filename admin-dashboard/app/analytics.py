@@ -2,7 +2,7 @@
 Illustrative fleet analytics. There's no real event pipeline yet (the app only ever wanted
 device heartbeats + version history), so these are representative mockup numbers matching the
 Karika Ops design - enough to make the /analitika page useful to look at until real usage
-tracking exists. Replace with real Firestore-backed aggregates once that's built.
+tracking exists. Replace with real local_db-backed aggregates once that's built.
 """
 
 LINE_DATES = [
