@@ -24,6 +24,7 @@ class HeartbeatBody(BaseModel):
     androidSdkInt: int
     androidRelease: str
     deviceModel: str
+    fcmToken: str | None = None
 
 
 @router.post("/devices/{device_id}/heartbeat")
@@ -36,6 +37,7 @@ def post_heartbeat(device_id: str, body: HeartbeatBody):
         body.androidSdkInt,
         body.androidRelease,
         body.deviceModel,
+        body.fcmToken,
     )
     return {"ok": True}
 

@@ -71,12 +71,21 @@ def devices_page(request: Request, q: str = ""):
 
 
 @app.get("/devices/{device_id}", dependencies=[require_login])
-def device_detail_page(request: Request, device_id: str):
+def device_detail_page(
+    request: Request, device_id: str, reset_error: str | None = None, reset_sent: str | None = None
+):
     device = devices.get_device(device_id)
     if device is None:
         return RedirectResponse("/devices")
     return templates.TemplateResponse(
-        request, "device_detail.html", {"device": device, "active_page": "devices"}
+        request,
+        "device_detail.html",
+        {
+            "device": device,
+            "active_page": "devices",
+            "reset_error": reset_error,
+            "reset_sent": bool(reset_sent),
+        },
     )
 
 
@@ -90,6 +99,15 @@ def request_logs(device_id: str):
 def delete_device(device_id: str):
     devices.delete_device(device_id)
     return RedirectResponse("/devices", status_code=303)
+
+
+@app.post("/devices/{device_id}/factory-reset", dependencies=[require_login])
+def factory_reset_device(device_id: str):
+    try:
+        devices.request_factory_reset(device_id)
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?reset_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?reset_sent=1", status_code=303)
 
 
 @app.get("/devices/{device_id}/log", dependencies=[require_login])

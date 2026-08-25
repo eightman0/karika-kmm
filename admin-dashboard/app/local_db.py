@@ -34,6 +34,16 @@ def _connect():
         conn.close()
 
 
+def _ensure_columns(conn: sqlite3.Connection, table: str, columns: dict[str, str]) -> None:
+    """Adds columns introduced after a device's DB file was first created - CREATE TABLE IF NOT
+    EXISTS only runs its body on a brand new file, so an existing devices.db needs its own
+    migration path for each new column."""
+    existing = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+    for name, col_type in columns.items():
+        if name not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {col_type}")
+
+
 def init_db() -> None:
     with _connect() as conn:
         conn.execute(
@@ -51,10 +61,12 @@ def init_db() -> None:
                 last_log_upload_url TEXT,
                 last_log_upload_path TEXT,
                 last_log_upload_at TEXT,
-                last_log_upload_request_handled_at TEXT
+                last_log_upload_request_handled_at TEXT,
+                fcm_token TEXT
             )
             """
         )
+        _ensure_columns(conn, "devices", {"fcm_token": "TEXT"})
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS kiosk_version (
@@ -94,14 +106,15 @@ def upsert_device_heartbeat(
     android_sdk_int: int,
     android_release: str,
     device_model: str,
+    fcm_token: str | None,
 ) -> None:
     with _connect() as conn:
         conn.execute(
             """
             INSERT INTO devices (
                 id, installed_package, installed_version_code, installed_version_name,
-                android_sdk_int, android_release, device_model, last_seen_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                android_sdk_int, android_release, device_model, fcm_token, last_seen_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 installed_package=excluded.installed_package,
                 installed_version_code=excluded.installed_version_code,
@@ -109,11 +122,12 @@ def upsert_device_heartbeat(
                 android_sdk_int=excluded.android_sdk_int,
                 android_release=excluded.android_release,
                 device_model=excluded.device_model,
+                fcm_token=COALESCE(excluded.fcm_token, devices.fcm_token),
                 last_seen_at=excluded.last_seen_at
             """,
             (
                 device_id, installed_package, installed_version_code, installed_version_name,
-                android_sdk_int, android_release, device_model, now_iso(),
+                android_sdk_int, android_release, device_model, fcm_token, now_iso(),
             ),
         )
 

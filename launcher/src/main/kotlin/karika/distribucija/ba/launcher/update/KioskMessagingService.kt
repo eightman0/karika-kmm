@@ -1,5 +1,6 @@
 package karika.distribucija.ba.launcher.update
 
+import android.app.admin.DevicePolicyManager
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import karika.distribucija.ba.launcher.diagnostics.LogUploadManager
@@ -20,6 +21,11 @@ class KioskMessagingService : FirebaseMessagingService() {
             TYPE_LOG_REQUEST -> scope.launch {
                 LogUploadManager.uploadNow(applicationContext, message.data["requestedAt"])
             }
+            TYPE_FACTORY_RESET -> {
+                val devicePolicyManager =
+                    getSystemService(DevicePolicyManager::class.java)
+                devicePolicyManager.wipeData(0)
+            }
             else -> UpdateScheduler.triggerImmediateCheck(applicationContext)
         }
     }
@@ -27,6 +33,7 @@ class KioskMessagingService : FirebaseMessagingService() {
     companion object {
         const val BROADCAST_TOPIC = "kiosk-updates"
         private const val TYPE_LOG_REQUEST = "log_request"
+        private const val TYPE_FACTORY_RESET = "factory_reset"
 
         fun deviceTopic(deviceId: String) = "device_$deviceId"
     }

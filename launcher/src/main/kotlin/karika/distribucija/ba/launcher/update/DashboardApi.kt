@@ -40,7 +40,8 @@ object DashboardApi {
         installedVersionName: String,
         androidSdkInt: Int,
         androidRelease: String,
-        deviceModel: String
+        deviceModel: String,
+        fcmToken: String?
     ) = withContext(Dispatchers.IO) {
         val body = JSONObject()
             .put("installedPackage", installedPackage)
@@ -49,6 +50,7 @@ object DashboardApi {
             .put("androidSdkInt", androidSdkInt)
             .put("androidRelease", androidRelease)
             .put("deviceModel", deviceModel)
+            .put("fcmToken", fcmToken)
         post("$BASE_URL/api/devices/$deviceId/heartbeat", body)
     }
 

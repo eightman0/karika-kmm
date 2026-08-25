@@ -46,3 +46,16 @@ def send_log_request(device_id: str, requested_at: str) -> None:
         )
     except Exception:
         logger.exception("Failed to send FCM log-request ping for %s", device_id)
+
+
+def send_factory_reset(fcm_token: str) -> None:
+    # Sent straight to the device's own token rather than its topic - a topic message can take a
+    # while to propagate, and there's no periodic fallback for this one like there is for version
+    # checks, so the caller needs to know immediately if the send itself failed.
+    init_messaging()
+    messaging.send(
+        messaging.Message(
+            token=fcm_token,
+            data={"type": "factory_reset"},
+        )
+    )

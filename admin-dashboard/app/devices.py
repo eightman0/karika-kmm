@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from . import local_db
 from .firebase import bucket
-from .push import send_log_request
+from .push import send_factory_reset, send_log_request
 
 STALE_AFTER_SECONDS = 12 * 60 * 60  # 12h - covers the 30min periodic worker plus a lot of slack
 SIGNED_URL_MINUTES = 30
@@ -81,6 +81,17 @@ def request_logs(device_id: str) -> None:
     # do that now" nudge, same push channel the silent-update check already uses instead of a
     # Firestore listener.
     send_log_request(device_id, requested_at)
+
+
+def request_factory_reset(device_id: str) -> None:
+    device = local_db.get_device(device_id)
+    token = device.get("fcm_token") if device else None
+    if not token:
+        raise ValueError(
+            "Uređaj nema poznat FCM token - mora se prvo javiti dashboardu (heartbeat) "
+            "nakon zadnjeg pokretanja."
+        )
+    send_factory_reset(token)
 
 
 def signed_log_url(storage_path: str) -> str:

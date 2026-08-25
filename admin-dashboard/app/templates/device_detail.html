@@ -9,6 +9,9 @@
   </div>
 </div>
 
+{% if reset_error %}<div class="error-banner">Greška pri slanju factory reset-a: {{ reset_error }}</div>{% endif %}
+{% if reset_sent %}<div class="banner-success">Zahtjev za factory reset poslan - uređaj će se obrisati čim primi push.</div>{% endif %}
+
 <div class="metrics-grid">
   <div class="metric-card">
     <p class="metric-label">Verzija</p>
@@ -49,5 +52,15 @@
   {% else %}
   <p class="hint">Još nema upload-ovanog loga za ovaj uređaj.</p>
   {% endif %}
+</div>
+
+<div class="card">
+  <h2>Factory reset</h2>
+  <p class="hint">Briše sve podatke i vraća uređaj na fabrička podešavanja preko push-a - bez fizičkog pristupa uređaju. Ovo je trajno i ne može se poništiti.</p>
+  <form method="post" action="/devices/{{ device.id }}/factory-reset"
+        onsubmit="return confirm('Ovo će TRAJNO obrisati sve podatke na uređaju {{ device.id }} i vratiti ga na fabrička podešavanja. Ova akcija se ne može poništiti. Nastaviti?')">
+    <button type="submit" class="btn btn-danger">Pošalji factory reset</button>
+  </form>
+  <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (push preko FCM-a).</p>
 </div>
 {% endblock %}
