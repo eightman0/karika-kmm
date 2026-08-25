@@ -53,9 +53,9 @@ def logout(request: Request):
 
 
 @app.get("/devices", dependencies=[require_login])
-def devices_page(request: Request, q: str = "", app: str = "all"):
+def devices_page(request: Request, q: str = ""):
     all_devices = devices.list_devices()
-    filtered = devices.filter_devices(all_devices, q, app)
+    filtered = devices.filter_devices(all_devices, q)
     latest_salesrep_code = version_config.get_kiosk_version()["version_code"]
     return templates.TemplateResponse(
         request,
@@ -64,7 +64,6 @@ def devices_page(request: Request, q: str = "", app: str = "all"):
             "devices": filtered,
             "summary": devices.fleet_summary(all_devices),
             "q": q,
-            "app_filter": app,
             "latest_salesrep_code": latest_salesrep_code,
             "active_page": "devices",
         },

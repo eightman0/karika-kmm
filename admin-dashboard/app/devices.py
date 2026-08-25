@@ -41,15 +41,11 @@ def list_devices() -> list[dict]:
     return all_devices
 
 
-def filter_devices(all_devices: list[dict], query: str = "", app_filter: str = "all") -> list[dict]:
-    result = all_devices
-    if query:
-        needle = query.lower()
-        result = [d for d in result if needle in d["id"].lower()]
-    if app_filter != "all":
-        package = APP_PACKAGES.get(app_filter, app_filter)
-        result = [d for d in result if d.get("installedPackage") == package]
-    return result
+def filter_devices(all_devices: list[dict], query: str = "") -> list[dict]:
+    if not query:
+        return all_devices
+    needle = query.lower()
+    return [d for d in all_devices if needle in d["id"].lower()]
 
 
 def fleet_summary(all_devices: list[dict]) -> dict:

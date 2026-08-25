@@ -117,20 +117,6 @@ main { padding: 28px; max-width: 1080px; margin: 0 auto; }
   font-size: 15px;
 }
 .search-input::placeholder { color: var(--muted); }
-.pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
-.pill {
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.pill:hover { color: var(--text); text-decoration: none; }
-.pill.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
 /* ---------- Cards ---------- */
 .card {
@@ -321,6 +307,10 @@ input:focus { outline: none; border-color: var(--accent); }
 }
 .dropzone:hover { border-color: var(--accent); color: var(--text); }
 .dropzone input[type=file] { display: none; }
+
+.publish-form { margin: 0 auto; text-align: center; }
+.publish-form .btn { align-self: center; }
+p.hint.publish-form { max-width: 460px; }
 
 .form-divider { color: var(--muted); font-size: 12px; text-align: center; margin: 2px 0; text-transform: uppercase; letter-spacing: 0.4px; }
 

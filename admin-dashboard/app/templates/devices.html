@@ -12,17 +12,12 @@
     </p>
   </div>
   <div class="header-actions">
-    <a href="/devices?app={{ app_filter }}&q={{ q|urlencode }}" class="btn btn-secondary">Osvježi</a>
+    <a href="/devices?q={{ q|urlencode }}" class="btn btn-secondary">Osvježi</a>
   </div>
 </div>
 
 <form method="get" action="/devices" class="toolbar">
   <input class="search-input" type="text" name="q" value="{{ q }}" placeholder="Pretraži po ID-u uređaja...">
-  <input type="hidden" name="app" value="{{ app_filter }}">
-  <div class="pill-group">
-    <a href="/devices?app=all&q={{ q|urlencode }}" class="pill {{ 'active' if app_filter == 'all' else '' }}">Sve</a>
-    <a href="/devices?app=salesrep&q={{ q|urlencode }}" class="pill {{ 'active' if app_filter == 'salesrep' else '' }}">Salesrep</a>
-  </div>
 </form>
 
 {% if devices %}
@@ -69,10 +64,10 @@
   {% if summary.total == 0 %}
   <p>Nema uređaja još - pojaviće se čim jedan javi heartbeat ili upload-uje log.</p>
   {% else %}
-  <p>Nema uređaja koji odgovaraju pretrazi ili filteru.</p>
+  <p>Nema uređaja koji odgovaraju pretrazi.</p>
   {% endif %}
   <div class="empty-actions">
-    <a href="/devices" class="btn btn-secondary">Obriši filtere</a>
+    <a href="/devices" class="btn btn-secondary">Obriši pretragu</a>
     <a href="/versions" class="btn btn-ghost">Pogledaj verzije</a>
   </div>
 </div>
