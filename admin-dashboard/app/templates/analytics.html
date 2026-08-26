@@ -33,6 +33,7 @@
     <p class="hint">Još nema podataka - povuci analitiku sa uređaja.</p>
     {% else %}
     <svg viewBox="0 0 {{ line.width }} {{ line.height }}" preserveAspectRatio="none">
+      <line class="chart-baseline" x1="12" y1="{{ line.height - 12 }}" x2="{{ line.width - 12 }}" y2="{{ line.height - 12 }}"></line>
       <polygon class="chart-area" points="{{ line.area_points }}"></polygon>
       <polyline class="chart-line" points="{{ line.points }}"></polyline>
       {% for p in line.point_list %}
@@ -84,6 +85,7 @@
   <p class="hint">Još nema podataka - povuci analitiku sa uređaja.</p>
   {% else %}
   <svg viewBox="0 0 {{ bars.width }} {{ bars.height }}" preserveAspectRatio="none">
+    <line class="chart-baseline" x1="12" y1="{{ bars.height - 12 }}" x2="{{ bars.width - 12 }}" y2="{{ bars.height - 12 }}"></line>
     {% for b in bars.bars %}
     <rect class="chart-bar" x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="2"></rect>
     {% endfor %}
