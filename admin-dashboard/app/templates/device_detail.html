@@ -79,27 +79,6 @@
 </div>
 
 <div class="card">
-  <h2>Lokacija</h2>
-  <p class="hint">Privremeno digne maintenance ekran (salesrep se izbaci iz fokusa) dok launcher traži GPS/mrežnu lokaciju, pa se maintenance sam isključi čim fix stigne ili istekne 20s.</p>
-  <div class="log-actions">
-    <form method="post" action="/devices/{{ device.id }}/request-location">
-      <button type="submit" class="btn btn-secondary">Zatraži lokaciju</button>
-    </form>
-    {% if device.locationRequestedAt and (not device.locationAt or device.locationRequestedAt > device.locationAt) %}
-    <span class="log-pending">Zahtjev poslan - čeka se fix od uređaja...</span>
-    {% endif %}
-  </div>
-  {% if device.locationLat is not none and device.locationLng is not none %}
-  <p>
-    <a href="https://www.google.com/maps?q={{ device.locationLat }},{{ device.locationLng }}" target="_blank" rel="noopener">{{ "%.5f"|format(device.locationLat) }}, {{ "%.5f"|format(device.locationLng) }}</a>
-    <span class="hint">&middot; preciznost ~{{ device.locationAccuracy|round|int if device.locationAccuracy is not none else "?" }}m &middot; {{ device.locationAt.strftime("%d.%m.%Y %H:%M:%S") if device.locationAt else "" }}</span>
-  </p>
-  {% else %}
-  <p class="hint">Još nema poznate lokacije za ovaj uređaj.</p>
-  {% endif %}
-</div>
-
-<div class="card">
   <h2>Factory reset</h2>
   <p class="hint">Briše sve podatke i vraća uređaj na fabrička podešavanja preko push-a - bez fizičkog pristupa uređaju. Ovo je trajno i ne može se poništiti.</p>
   <form method="post" action="/devices/{{ device.id }}/factory-reset"

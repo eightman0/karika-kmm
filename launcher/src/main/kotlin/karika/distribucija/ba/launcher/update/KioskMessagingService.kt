@@ -42,9 +42,6 @@ class KioskMessagingService : FirebaseMessagingService() {
             CMD_ANALYTICS_REQUEST -> runAcked(command, requestId) {
                 LogUploadManager.uploadAnalyticsNow(applicationContext)
             }
-            CMD_LOCATION_REQUEST -> runAcked(command, requestId) {
-                LocationReporter.reportNow(applicationContext)
-            }
             CMD_FACTORY_RESET -> runAcked(command, requestId) {
                 // The device is about to erase itself, so the ack that follows is moot in
                 // practice - kept anyway since runAcked() is the uniform path for every command.
@@ -112,7 +109,6 @@ class KioskMessagingService : FirebaseMessagingService() {
 
         private const val CMD_LOG_REQUEST = "log_request"
         private const val CMD_ANALYTICS_REQUEST = "analytics_request"
-        private const val CMD_LOCATION_REQUEST = "location_request"
         private const val CMD_FACTORY_RESET = "factory_reset"
         private const val CMD_REBOOT = "reboot"
         private const val CMD_MAINTENANCE_ON = "maintenance_on"

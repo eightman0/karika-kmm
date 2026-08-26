@@ -7,7 +7,6 @@ from .push import (
     send_enter_kiosk,
     send_exit_kiosk,
     send_factory_reset,
-    send_location_request,
     send_log_request,
     send_maintenance,
     send_reboot,
@@ -57,11 +56,6 @@ def _with_computed_fields(row: dict) -> dict:
         # be worse than showing nothing.
         "maintenanceActive": bool(row["maintenance_active"]) if row["maintenance_active"] is not None else None,
         "kioskExitActive": bool(row["kiosk_exit_active"]) if row["kiosk_exit_active"] is not None else None,
-        "locationLat": row["location_lat"],
-        "locationLng": row["location_lng"],
-        "locationAccuracy": row["location_accuracy"],
-        "locationAt": _parse_iso(row["location_at"]),
-        "locationRequestedAt": _parse_iso(row["location_requested_at"]),
     }
 
 
@@ -138,12 +132,6 @@ def request_exit_kiosk(device_id: str) -> None:
 
 def request_enter_kiosk(device_id: str) -> None:
     send_enter_kiosk(_require_token(device_id))
-
-
-def request_location(device_id: str) -> None:
-    token = _require_token(device_id)
-    local_db.request_device_location(device_id)
-    send_location_request(token)
 
 
 def request_maintenance(device_id: str, enable: bool) -> None:

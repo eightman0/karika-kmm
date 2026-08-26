@@ -100,10 +100,6 @@ def send_enter_kiosk(fcm_token: str) -> str:
     return send_command_to_token(fcm_token, "enter_kiosk")
 
 
-def send_location_request(fcm_token: str) -> str:
-    return send_command_to_token(fcm_token, "location_request")
-
-
 def send_maintenance(fcm_token: str, enable: bool) -> str:
     return send_command_to_token(fcm_token, "maintenance_on" if enable else "maintenance_off")
 
