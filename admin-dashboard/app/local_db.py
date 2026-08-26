@@ -90,6 +90,11 @@ def init_db() -> None:
                 "last_login_at": "TEXT",
                 "maintenance_active": "INTEGER",
                 "kiosk_exit_active": "INTEGER",
+                "location_lat": "REAL",
+                "location_lng": "REAL",
+                "location_accuracy": "REAL",
+                "location_at": "TEXT",
+                "location_requested_at": "TEXT",
             },
         )
         conn.execute(
@@ -316,6 +321,35 @@ def get_device(device_id: str) -> dict | None:
 def delete_device(device_id: str) -> None:
     with _connect() as conn:
         conn.execute("DELETE FROM devices WHERE id = ?", (device_id,))
+
+
+def request_device_location(device_id: str) -> str:
+    requested_at = now_iso()
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO devices (id, location_requested_at) VALUES (?, ?)
+            ON CONFLICT(id) DO UPDATE SET location_requested_at=excluded.location_requested_at
+            """,
+            (device_id, requested_at),
+        )
+    return requested_at
+
+
+def set_device_location(device_id: str, lat: float, lng: float, accuracy: float) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO devices (id, location_lat, location_lng, location_accuracy, location_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                location_lat=excluded.location_lat,
+                location_lng=excluded.location_lng,
+                location_accuracy=excluded.location_accuracy,
+                location_at=excluded.location_at
+            """,
+            (device_id, lat, lng, accuracy, now_iso()),
+        )
 
 
 # --- analytics events -----------------------------------------------------------

@@ -91,6 +91,15 @@ object DashboardApi {
             post("$BASE_URL/api/devices/$deviceId/mapping", body)
         }
 
+    suspend fun reportLocation(deviceId: String, latitude: Double, longitude: Double, accuracyMeters: Float) =
+        withContext(Dispatchers.IO) {
+            val body = JSONObject()
+                .put("latitude", latitude)
+                .put("longitude", longitude)
+                .put("accuracy", accuracyMeters)
+            post("$BASE_URL/api/devices/$deviceId/location", body)
+        }
+
     suspend fun reportCommandAck(deviceId: String, command: String, requestId: String?, status: String, message: String?) =
         withContext(Dispatchers.IO) {
             val body = JSONObject()

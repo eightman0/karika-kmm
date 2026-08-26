@@ -180,6 +180,15 @@ def set_reboot_schedule(device_id: str, hour: int = Form(...)):
     return RedirectResponse(f"/devices/{device_id}?cmd_sent=reboot_schedule", status_code=303)
 
 
+@app.post("/devices/{device_id}/request-location", dependencies=[require_login])
+def request_location(device_id: str):
+    try:
+        devices.request_location(device_id)
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=location_request", status_code=303)
+
+
 @app.post("/devices/{device_id}/mapping", dependencies=[require_login])
 def set_device_mapping(device_id: str, customer_id: str = Form(""), site_id: str = Form("")):
     devices.set_device_mapping(device_id, customer_id.strip(), site_id.strip())

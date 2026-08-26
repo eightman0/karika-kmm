@@ -92,6 +92,18 @@ def post_device_mapping(device_id: str, body: DeviceMappingBody):
     return {"ok": True}
 
 
+class LocationBody(BaseModel):
+    latitude: float
+    longitude: float
+    accuracy: float
+
+
+@router.post("/devices/{device_id}/location")
+def post_location(device_id: str, body: LocationBody):
+    local_db.set_device_location(device_id, body.latitude, body.longitude, body.accuracy)
+    return {"ok": True}
+
+
 class CommandAckBody(BaseModel):
     command: str
     requestId: str | None = None
