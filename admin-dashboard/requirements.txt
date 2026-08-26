@@ -9,3 +9,4 @@ requests
 itsdangerous
 androguard
 qrcode[pil]
+tzdata

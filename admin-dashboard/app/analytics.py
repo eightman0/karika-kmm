@@ -6,9 +6,10 @@ AnalyticsTracker wrote (see the "Povuci analitiku" button on the devices page).
 """
 
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from . import local_db
+from .tz import LOCAL_TZ
 
 LINE_DAYS = 15
 DONUT_COLORS = ["#9184d9", "#e3c47f", "#e59a9a", "#7fb8e3", "#8fd0a8", "#d99184"]
@@ -45,7 +46,7 @@ def get_line_chart(width: int = 600, height: int = 160, pad: int = 12) -> dict:
     # the x-axis always spans a fixed LINE_DAYS-wide range instead of collapsing to however many
     # days happen to have data - a single active day would otherwise render as one stray point.
     by_day = {r["day"]: r["n"] for r in rows}
-    today = datetime.now(timezone.utc).date()
+    today = datetime.now(LOCAL_TZ).date()
     dates = [(today - timedelta(days=LINE_DAYS - 1 - i)).isoformat() for i in range(LINE_DAYS)]
     values = [by_day.get(d, 0) for d in dates]
     lo, hi = min(values), max(values)

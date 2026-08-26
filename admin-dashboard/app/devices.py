@@ -11,6 +11,7 @@ from .push import (
     send_reboot,
     send_reboot_schedule,
 )
+from .tz import LOCAL_TZ
 
 STALE_AFTER_SECONDS = 12 * 60 * 60  # 12h - covers the 30min periodic worker plus a lot of slack
 SIGNED_URL_MINUTES = 30
@@ -21,7 +22,9 @@ APP_PACKAGES = {
 
 
 def _parse_iso(value: str | None) -> datetime | None:
-    return datetime.fromisoformat(value) if value else None
+    # Stored (and sorted/diffed elsewhere) as UTC - only the display timezone changes here, the
+    # underlying instant, and so every comparison/arithmetic done against it, is unaffected.
+    return datetime.fromisoformat(value).astimezone(LOCAL_TZ) if value else None
 
 
 def _with_computed_fields(row: dict) -> dict:

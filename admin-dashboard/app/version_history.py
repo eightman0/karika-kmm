@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from . import local_db
+from .tz import LOCAL_TZ
 
 
 def record_publish(
@@ -26,7 +27,10 @@ def get_history(app: str, limit: int = 10) -> list[dict]:
             "apkSha256": row["apk_sha256"],
             "mandatory": bool(row["mandatory"]),
             "publishedBy": row["published_by"],
-            "publishedAt": datetime.fromisoformat(row["published_at"]) if row["published_at"] else None,
+            "publishedAt": (
+                datetime.fromisoformat(row["published_at"]).astimezone(LOCAL_TZ)
+                if row["published_at"] else None
+            ),
         }
         for row in rows
     ]

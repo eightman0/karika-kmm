@@ -10,9 +10,12 @@ never actually part of the problem.
 
 import os
 import sqlite3
+from collections import Counter
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+from .tz import LOCAL_TZ
 
 DB_PATH = Path(os.environ.get("LOCAL_DB_PATH", "data/karika.db"))
 
@@ -346,31 +349,24 @@ def avg_events_per_device() -> float:
 
 
 def events_per_day(days: int) -> list[dict]:
+    # SQLite's strftime() only knows UTC (or a fixed hour offset, wrong half the year under DST),
+    # so bucketing by Sarajevo calendar day has to happen in Python instead of in the query.
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     with _connect() as conn:
-        rows = conn.execute(
-            """
-            SELECT strftime('%Y-%m-%d', ts) AS day, COUNT(*) AS n
-            FROM analytics_events
-            WHERE ts >= strftime('%Y-%m-%dT%H:%M:%S', 'now', ?)
-            GROUP BY day
-            ORDER BY day
-            """,
-            (f"-{days} days",),
-        ).fetchall()
-        return [dict(row) for row in rows]
+        rows = conn.execute("SELECT ts FROM analytics_events WHERE ts >= ?", (cutoff,)).fetchall()
+    counts = Counter(
+        datetime.fromisoformat(row["ts"]).astimezone(LOCAL_TZ).strftime("%Y-%m-%d") for row in rows
+    )
+    return [{"day": day, "n": n} for day, n in sorted(counts.items())]
 
 
 def events_per_hour() -> list[dict]:
     with _connect() as conn:
-        rows = conn.execute(
-            """
-            SELECT strftime('%H', ts) AS hour, COUNT(*) AS n
-            FROM analytics_events
-            GROUP BY hour
-            ORDER BY hour
-            """
-        ).fetchall()
-        return [dict(row) for row in rows]
+        rows = conn.execute("SELECT ts FROM analytics_events").fetchall()
+    counts = Counter(
+        datetime.fromisoformat(row["ts"]).astimezone(LOCAL_TZ).strftime("%H") for row in rows
+    )
+    return [{"hour": hour, "n": n} for hour, n in sorted(counts.items())]
 
 
 def top_screens(limit: int = 8) -> list[dict]:
