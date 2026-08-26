@@ -117,6 +117,15 @@ def init_db() -> None:
         )
         conn.execute(
             """
+            CREATE TABLE IF NOT EXISTS provisioning_extras (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                customer_id TEXT,
+                site_id TEXT
+            )
+            """
+        )
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS analytics_events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 device_id TEXT,
@@ -386,6 +395,27 @@ def top_clicks(limit: int = 8) -> list[dict]:
             (limit,),
         ).fetchall()
         return [dict(row) for row in rows]
+
+
+# --- provisioning extras --------------------------------------------------------
+
+def get_provisioning_extras() -> dict | None:
+    with _connect() as conn:
+        row = conn.execute("SELECT * FROM provisioning_extras WHERE id = 1").fetchone()
+        return dict(row) if row else None
+
+
+def set_provisioning_extras(customer_id: str | None, site_id: str | None) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO provisioning_extras (id, customer_id, site_id) VALUES (1, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                customer_id=excluded.customer_id,
+                site_id=excluded.site_id
+            """,
+            (customer_id, site_id),
+        )
 
 
 # --- kiosk version -------------------------------------------------------------

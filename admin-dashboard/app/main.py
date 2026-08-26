@@ -1,4 +1,3 @@
-import json
 from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, File, Form, Request, UploadFile
@@ -7,7 +6,17 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
-from . import analytics, apk_storage, auth, device_api, devices, local_db, version_config, version_history
+from . import (
+    analytics,
+    apk_storage,
+    auth,
+    device_api,
+    devices,
+    local_db,
+    provisioning,
+    version_config,
+    version_history,
+)
 
 local_db.init_db()
 
@@ -237,25 +246,33 @@ def publish_version(request: Request, apk_file: UploadFile = File(...)):
 
 
 @app.get("/provisioning", dependencies=[require_login])
-def provisioning_page(request: Request):
-    provisioning_json = json.dumps(
-        {
-            "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME":
-                "karika.distribucija.ba.launcher/karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver",
-            "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM":
-                "1r6zVerEdM0pyQzBBDHf_ToS8qliRsL0A_LcfLb2HlE",
-            "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION":
-                "https://firebasestorage.googleapis.com/v0/b/kiosklauncher-8c837.firebasestorage.app/o/"
-                "launcher-releases%2Flauncher-release.apk?alt=media&token=62de3834-b43b-4d38-adaa-4774984878c4",
-            "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": True,
-        },
-        indent=2,
-    )
+def provisioning_page(request: Request, generated: str | None = None):
+    saved = local_db.get_provisioning_extras() or {}
+    customer_id = saved.get("customer_id") or ""
+    site_id = saved.get("site_id") or ""
+    if not provisioning.QR_PATH.exists():
+        provisioning.generate_qr(customer_id or None, site_id or None)
     return templates.TemplateResponse(
         request,
         "provisioning.html",
-        {"provisioning_json": provisioning_json, "active_page": "provisioning"},
+        {
+            "provisioning_json": provisioning.build_json(customer_id or None, site_id or None),
+            "customer_id": customer_id,
+            "site_id": site_id,
+            "qr_version": int(provisioning.QR_PATH.stat().st_mtime),
+            "generated": bool(generated),
+            "active_page": "provisioning",
+        },
     )
+
+
+@app.post("/provisioning/generate", dependencies=[require_login])
+def generate_provisioning_qr(customer_id: str = Form(""), site_id: str = Form("")):
+    customer_id = customer_id.strip() or None
+    site_id = site_id.strip() or None
+    local_db.set_provisioning_extras(customer_id, site_id)
+    provisioning.generate_qr(customer_id, site_id)
+    return RedirectResponse("/provisioning?generated=1", status_code=303)
 
 
 @app.get("/analitika", dependencies=[require_login])

@@ -5,23 +5,26 @@
   <div><h1>QR kod za provisioning</h1></div>
 </div>
 
+{% if generated %}<div class="banner-success">Novi QR kod generisan.</div>{% endif %}
+
+<div class="card">
+  <h2>Kupac / lokacija za sljedeći tablet (opcionalno)</h2>
+  <p class="hint">Ako se popuni, ugrađuje se u QR kao PROVISIONING_ADMIN_EXTRAS_BUNDLE - launcher to pročita čim provisioning završi i sam javi dashboard-u, bez ručnog unosa poslije na detalj stranici uređaja. Prazno ostavi za generički QR bez unaprijed poznatog kupca.</p>
+  <form method="post" action="/provisioning/generate" class="toolbar">
+    <input class="search-input" type="text" name="customer_id" value="{{ customer_id }}" placeholder="customer_id">
+    <input class="search-input" type="text" name="site_id" value="{{ site_id }}" placeholder="site_id / lokacija">
+    <button type="submit" class="btn btn-primary">Generiši QR</button>
+  </form>
+</div>
+
 <div class="card">
   <h2>Skeniraj pri postavljanju tableta</h2>
   <p class="hint">Nakon factory reset-a, na ekranu dobrodošlice tapni 6 puta pa skeniraj ovaj kod - upisuje launcher kao Device Owner i skida ga sa Firebase Storage-a.</p>
-  <img src="/static/provisioning-qr.png" alt="Provisioning QR kod" style="max-width: 320px; width: 100%; display: block; margin: 16px 0;">
+  <img src="/static/provisioning-qr.png?v={{ qr_version }}" alt="Provisioning QR kod" style="max-width: 320px; width: 100%; display: block; margin: 16px 0;">
 </div>
 
 <div class="card">
   <h2>Sadržaj (za ručni unos ili provjeru)</h2>
   <pre style="white-space: pre-wrap; word-break: break-all; font-size: 13px;">{{ provisioning_json }}</pre>
-</div>
-
-<div class="card">
-  <h2>Kupac / lokacija na novom uređaju (opcionalno)</h2>
-  <p class="hint">Ako novi tablet ide direktno kod poznatog kupca, dodaj ovo polje u QR JSON (mora se ručno dodati u ovaj JSON i regenerisati QR - ova stranica to još ne radi automatski) da se customer_id/site_id popune sami čim se provisioning završi, umjesto da se poslije ručno unose na detalj stranici uređaja:</p>
-  <pre style="white-space: pre-wrap; word-break: break-all; font-size: 13px;">"android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
-  "customer_id": "npr. 123",
-  "site_id": "npr. sarajevo-centar"
-}</pre>
 </div>
 {% endblock %}
