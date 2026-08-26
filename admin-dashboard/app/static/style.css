@@ -372,7 +372,8 @@ p.hint.publish-form { max-width: 460px; }
 .kpi-card .kpi-delta.positive { color: var(--online); }
 .kpi-card .kpi-delta.negative { color: var(--never); }
 
-.charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+.charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-top: 16px; }
+.charts-grid + .card { margin-top: 16px; }
 .chart-card svg { display: block; width: 100%; height: auto; }
 .chart-axis-label { fill: var(--muted); font-size: 10px; }
 .chart-bar { fill: var(--accent); }
