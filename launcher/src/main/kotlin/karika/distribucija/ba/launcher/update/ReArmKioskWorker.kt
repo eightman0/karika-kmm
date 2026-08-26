@@ -32,5 +32,11 @@ class ReArmKioskWorker(context: Context, params: WorkerParameters) : CoroutineWo
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, request)
         }
+
+        /** Called from LauncherApp.onCreate() - KioskExitState is already cleared by then on a
+         * fresh process start, so the scheduled bring-to-front would just be redundant. */
+        fun cancel(context: Context) {
+            WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
+        }
     }
 }

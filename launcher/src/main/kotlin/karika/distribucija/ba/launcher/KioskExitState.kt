@@ -11,7 +11,11 @@ import android.content.Context
  *
  * Expires on its own (ExitKioskFlow also schedules ReArmKioskWorker for the same deadline) rather
  * than needing an explicit "re-lock" command, so a support session nobody remembers to close
- * doesn't leave a tablet unlocked in the field indefinitely.
+ * doesn't leave a tablet unlocked in the field indefinitely. Also explicitly cleared on every
+ * fresh process start (LauncherApp.onCreate()) - it is SharedPreferences-backed, so without that
+ * it would otherwise survive a reboot too, and rebooting the device is itself as strong a signal
+ * as any that whoever is standing in front of it wants lockdown back immediately, not whenever
+ * the original window happens to run out.
  */
 object KioskExitState {
     private const val PREFS = "kiosk_exit_state"
@@ -20,6 +24,12 @@ object KioskExitState {
     fun begin(context: Context, durationMs: Long) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putLong(KEY_UNTIL, System.currentTimeMillis() + durationMs)
+            .apply()
+    }
+
+    fun end(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+            .remove(KEY_UNTIL)
             .apply()
     }
 
