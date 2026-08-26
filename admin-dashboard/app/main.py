@@ -153,6 +153,15 @@ def exit_kiosk_device(device_id: str):
     return RedirectResponse(f"/devices/{device_id}?cmd_sent=exit_kiosk", status_code=303)
 
 
+@app.post("/devices/{device_id}/enter-kiosk", dependencies=[require_login])
+def enter_kiosk_device(device_id: str):
+    try:
+        devices.request_enter_kiosk(device_id)
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=enter_kiosk", status_code=303)
+
+
 @app.post("/devices/{device_id}/maintenance", dependencies=[require_login])
 def maintenance_device(device_id: str, enable: str = Form(...)):
     try:

@@ -4,6 +4,7 @@ import android.app.admin.DevicePolicyManager
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import karika.distribucija.ba.launcher.KioskExitState
 import karika.distribucija.ba.launcher.LauncherActivity
 import karika.distribucija.ba.launcher.RemoteMaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
@@ -64,6 +65,14 @@ class KioskMessagingService : FirebaseMessagingService() {
             CMD_EXIT_KIOSK -> runAcked(command, requestId) {
                 ExitKioskFlow.run(applicationContext)
             }
+            CMD_ENTER_KIOSK -> runAcked(command, requestId) {
+                // Same idea as CMD_MAINTENANCE_ON: ending the window alone only re-locks the next
+                // time LauncherActivity happens to resume, which could be indefinite if salesrep
+                // (or nothing at all, post soft-exit) is currently in front. Force it now.
+                KioskExitState.end(applicationContext)
+                ReArmKioskWorker.cancel(applicationContext)
+                LauncherActivity.bringToFront(applicationContext)
+            }
             CMD_SET_REBOOT_SCHEDULE -> runAcked(command, requestId) {
                 val hour = message.data["hour"]?.toIntOrNull()
                     ?: throw IllegalArgumentException("Missing/invalid hour")
@@ -105,6 +114,7 @@ class KioskMessagingService : FirebaseMessagingService() {
         private const val CMD_MAINTENANCE_ON = "maintenance_on"
         private const val CMD_MAINTENANCE_OFF = "maintenance_off"
         private const val CMD_EXIT_KIOSK = "exit_kiosk"
+        private const val CMD_ENTER_KIOSK = "enter_kiosk"
         private const val CMD_SET_REBOOT_SCHEDULE = "set_reboot_schedule"
         private const val CMD_VERSION_CHECK = "version_check"
 

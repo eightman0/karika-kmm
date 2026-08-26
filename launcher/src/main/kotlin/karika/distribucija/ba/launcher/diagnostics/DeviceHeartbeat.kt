@@ -4,6 +4,9 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
+import karika.distribucija.ba.launcher.KioskExitState
+import karika.distribucija.ba.launcher.MaintenanceState
+import karika.distribucija.ba.launcher.RemoteMaintenanceState
 import karika.distribucija.ba.launcher.update.DashboardApi
 import kotlinx.coroutines.tasks.await
 
@@ -27,7 +30,12 @@ object DeviceHeartbeat {
                 androidSdkInt = Build.VERSION.SDK_INT,
                 androidRelease = Build.VERSION.RELEASE,
                 deviceModel = Build.MODEL,
-                fcmToken = fcmToken
+                fcmToken = fcmToken,
+                // Same condition LauncherActivity.refreshMaintenanceState() uses to decide
+                // whether to show the banner - covers both the admin-triggered flag and the
+                // auto-expiring one UpdateWorker sets during an install.
+                maintenanceActive = MaintenanceState.isActive(context) || RemoteMaintenanceState.isActive(context),
+                kioskExitActive = KioskExitState.isActive(context)
             )
         } catch (e: Exception) {
             Log.w(TAG, "Heartbeat failed: ${e.message}")

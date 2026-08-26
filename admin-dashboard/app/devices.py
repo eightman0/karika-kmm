@@ -4,6 +4,7 @@ from . import local_db
 from .firebase import bucket
 from .push import (
     send_analytics_request_all,
+    send_enter_kiosk,
     send_exit_kiosk,
     send_factory_reset,
     send_log_request,
@@ -50,6 +51,11 @@ def _with_computed_fields(row: dict) -> dict:
         "lastLoginEmail": row["last_login_email"],
         "lastLoginAt": _parse_iso(row["last_login_at"]),
         "status": _status(_parse_iso(row["last_seen_at"])),
+        # None (not False) until a heartbeat from a launcher build new enough to report it comes
+        # in - showing "not in maintenance" for a device we simply have no answer from yet would
+        # be worse than showing nothing.
+        "maintenanceActive": bool(row["maintenance_active"]) if row["maintenance_active"] is not None else None,
+        "kioskExitActive": bool(row["kiosk_exit_active"]) if row["kiosk_exit_active"] is not None else None,
     }
 
 
@@ -122,6 +128,10 @@ def request_reboot(device_id: str) -> None:
 
 def request_exit_kiosk(device_id: str) -> None:
     send_exit_kiosk(_require_token(device_id))
+
+
+def request_enter_kiosk(device_id: str) -> None:
+    send_enter_kiosk(_require_token(device_id))
 
 
 def request_maintenance(device_id: str, enable: bool) -> None:

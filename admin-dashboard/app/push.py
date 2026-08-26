@@ -96,6 +96,10 @@ def send_exit_kiosk(fcm_token: str) -> str:
     return send_command_to_token(fcm_token, "exit_kiosk")
 
 
+def send_enter_kiosk(fcm_token: str) -> str:
+    return send_command_to_token(fcm_token, "enter_kiosk")
+
+
 def send_maintenance(fcm_token: str, enable: bool) -> str:
     return send_command_to_token(fcm_token, "maintenance_on" if enable else "maintenance_off")
 
