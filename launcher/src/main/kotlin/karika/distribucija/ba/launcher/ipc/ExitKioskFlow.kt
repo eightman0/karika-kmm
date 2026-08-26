@@ -6,7 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import karika.distribucija.ba.launcher.BuildConfig
+import karika.distribucija.ba.launcher.KioskExitState
 import karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver
+import karika.distribucija.ba.launcher.update.ReArmKioskWorker
 import karika.distribucija.ba.logging.KioskIpc
 import kotlinx.coroutines.delay
 
@@ -22,6 +24,11 @@ import kotlinx.coroutines.delay
  *    LauncherKiosk.enter() recomputes it from scratch every time.
  * 3. Last resort: reboot.
  *
+ * Without KioskExitState, none of the above would stick: LauncherActivity.onResume() re-arms
+ * lock task and relaunches salesrep unconditionally, and salesrep unlocking itself is exactly
+ * what brings the launcher back to the front - so the very next resume undid the exit before
+ * anyone could use the open device. KioskExitState suppresses both while its window is open.
+ *
  * Not yet verified end-to-end on a real device - in particular, whether
  * ActivityManager.lockTaskModeState queried from the launcher's own (backgrounded) process
  * reliably reflects the globally locked app's state rather than just the caller's own task.
@@ -30,10 +37,13 @@ object ExitKioskFlow {
     private const val TAG = "ExitKioskFlow"
     private const val SOFT_TIMEOUT_MS = 10_000L
     private const val POLL_INTERVAL_MS = 500L
+    private const val EXIT_WINDOW_MS = 15 * 60 * 1000L
     private const val SALESREP_RECEIVER = "karika.distribucija.ba.salesrep.KioskCommandReceiver"
 
     suspend fun run(context: Context) {
         val appContext = context.applicationContext
+        KioskExitState.begin(appContext, EXIT_WINDOW_MS)
+        ReArmKioskWorker.scheduleAt(appContext, EXIT_WINDOW_MS)
         sendSoftExitBroadcast(appContext)
 
         var waited = 0L

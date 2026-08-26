@@ -4,6 +4,7 @@ import android.app.admin.DevicePolicyManager
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import karika.distribucija.ba.launcher.LauncherActivity
 import karika.distribucija.ba.launcher.RemoteMaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 import karika.distribucija.ba.launcher.diagnostics.LogUploadManager
@@ -53,6 +54,9 @@ class KioskMessagingService : FirebaseMessagingService() {
             }
             CMD_MAINTENANCE_ON -> runAcked(command, requestId) {
                 RemoteMaintenanceState.begin(applicationContext)
+                // Setting the flag alone only shows up next time LauncherActivity resumes on its
+                // own - if salesrep is currently in front, that could be indefinite. Force it.
+                LauncherActivity.bringToFront(applicationContext)
             }
             CMD_MAINTENANCE_OFF -> runAcked(command, requestId) {
                 RemoteMaintenanceState.end(applicationContext)

@@ -11,6 +11,7 @@ import android.os.BatteryManager
 import android.os.UserManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import karika.distribucija.ba.launcher.KioskExitState
 import karika.distribucija.ba.launcher.KnownApps
 import karika.distribucija.ba.launcher.LauncherActivity
 
@@ -23,7 +24,7 @@ class LauncherKiosk(private val context: ComponentActivity) {
     fun isAdmin() = devicePolicyManager.isDeviceOwnerApp(context.packageName)
 
     fun enter() {
-        if (isAdmin()) {
+        if (isAdmin() && !KioskExitState.isActive(context)) {
             setKioskPolicies(true)
         }
     }
