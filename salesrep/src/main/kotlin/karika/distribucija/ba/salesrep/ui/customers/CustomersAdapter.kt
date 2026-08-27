@@ -23,8 +23,9 @@ private fun String?.initials(): String =
         ?.joinToString("") ?: "?"
 
 /** Mirrors SalesCustomersView.kt's CustomerCard: header (KLIJENT label + company/name + status
- * pill), then - for active partnerships only - a fading divider and a footer with the assigned
- * reps' avatars plus four actions (message/discount/history quiet buttons, "Naruči" primary). */
+ * pill), then - for active and pending partnerships - a fading divider and a footer with the
+ * assigned reps' avatars plus four actions (message/discount/history quiet buttons, "Naruči"
+ * primary). Pending partnerships show the same footer dimmed with every action disabled. */
 class CustomersAdapter(
     private val onClick: (OperationalCustomer) -> Unit,
     private val onOrderClick: (OperationalCustomer) -> Unit,
@@ -59,10 +60,18 @@ class CustomersAdapter(
                 binding.textBadge.setTextColor(context.getColor(R.color.karika_blue))
             }
 
-            binding.dividerFade.visibility = if (customer.isActive) View.VISIBLE else View.GONE
-            binding.footerContainer.visibility = if (customer.isActive) View.VISIBLE else View.GONE
-            if (customer.isActive) {
-                bindReps(customer)
+            val showFooter = customer.isActive || customer.partnershipStatus == "pending"
+            val actionsEnabled = customer.isActive
+
+            binding.dividerFade.visibility = if (showFooter) View.VISIBLE else View.GONE
+            binding.footerContainer.visibility = if (showFooter) View.VISIBLE else View.GONE
+            binding.footerContainer.alpha = if (actionsEnabled) 1f else 0.5f
+            if (showFooter) {
+                bindReps(customer, actionsEnabled)
+                binding.buttonOrder.isEnabled = actionsEnabled
+                binding.buttonMessage.isEnabled = actionsEnabled
+                binding.buttonDiscount.isEnabled = actionsEnabled
+                binding.buttonHistory.isEnabled = actionsEnabled
                 binding.buttonOrder.setOnClickListener { onOrderClick(customer) }
                 binding.buttonMessage.setOnClickListener { onMessageClick(customer) }
                 binding.buttonDiscount.setOnClickListener { onDiscountClick(customer) }
@@ -72,7 +81,7 @@ class CustomersAdapter(
             binding.root.setOnClickListener { onClick(customer) }
         }
 
-        private fun bindReps(customer: OperationalCustomer) {
+        private fun bindReps(customer: OperationalCustomer, enabled: Boolean) {
             val context = binding.root.context
             val reps = customer.assignedEmployees.take(3)
             binding.repsAvatarContainer.removeAllViews()
@@ -105,6 +114,7 @@ class CustomersAdapter(
                 }
                 binding.repsAvatarContainer.addView(avatar)
             }
+            binding.repsAvatarContainer.isEnabled = enabled
             binding.repsAvatarContainer.setOnClickListener { onShowReps(customer.assignedEmployees) }
         }
     }

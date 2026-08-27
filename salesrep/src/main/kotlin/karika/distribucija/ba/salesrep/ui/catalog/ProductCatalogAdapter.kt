@@ -17,7 +17,8 @@ import karika.distribucija.ba.salesrep.util.loadUrl
 class ProductCatalogAdapter(
     private val lifecycleOwner: LifecycleOwner,
     private val getQty: (OnBehalfProduct) -> Int,
-    private val onAdd: (OnBehalfProduct, Int) -> Unit
+    private val onAdd: (OnBehalfProduct, Int) -> Unit,
+    private val onQuickView: (OnBehalfProduct) -> Unit
 ) : ListAdapter<OnBehalfProduct, ProductCatalogAdapter.ViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ViewHolder {
@@ -45,6 +46,7 @@ class ProductCatalogAdapter(
 
             binding.imageProduct.loadUrl(product.imageUrl, lifecycleOwner)
             binding.badgeInCart.visibility = if (cartQty > 0) View.VISIBLE else View.GONE
+            binding.layoutProductInfo.setOnClickListener { onQuickView(product) }
 
             binding.textName.text = product.name
             val hasSku = product.sku.isNotBlank()

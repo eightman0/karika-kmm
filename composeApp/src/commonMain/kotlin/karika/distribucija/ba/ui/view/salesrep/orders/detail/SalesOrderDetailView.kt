@@ -30,6 +30,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -77,6 +78,7 @@ import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_down
 import karikav2.composeapp.generated.resources.ic_arrow_up
 import karikav2.composeapp.generated.resources.ic_location
+import karikav2.composeapp.generated.resources.ic_menu
 import karikav2.composeapp.generated.resources.ic_person
 import karikav2.composeapp.generated.resources.ic_phone
 import karikav2.composeapp.generated.resources.ic_print
@@ -96,11 +98,21 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
     var editingItem by component.editOrderItem.asState()
     var deliveryExpanded by remember { mutableStateOf(false) }
     var shippingCost by remember { mutableStateOf<Pair<Double?, Double?>?>(null) }
+    var showPrintMenu by remember { mutableStateOf(false) }
     val imeVisible = rememberImeVisible()
 
     val canEdit = vendorOrder.isPending() && !vendorOrder.locked()
 
-    val vpcTotal = vendorOrder.orderTotal?.toDoubleOrNull() ?: 0.0
+    // vendorOrder.orderTotal comes straight from the API and is the sum of undiscounted row
+    // totals (it ignores each product's discount_percent) - recompute from the line items
+    // instead, using the same discounted-row formula as ProductSpecificationTable below.
+    val vpcTotal = vendorOrder.products.sumOf { product ->
+        val price = product.price?.toDoubleOrNull() ?: 0.0
+        val discountPercent = product.rabat().toIntOrNull() ?: 0
+        val discountedPrice = price * (1.0 - discountPercent / 100.0)
+        val qty = product.qtyOrdered?.toIntOrNull() ?: 0
+        discountedPrice * qty
+    }
     val pdvTotal = (vpcTotal * 0.17)
     val grandTotal = vpcTotal + pdvTotal
     val commission = vendorOrder.shopCommissionFee?.toDoubleOrNull()
@@ -177,7 +189,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                                 modifier = Modifier.weight(1f)
                             )
                             FinancialCell(
-                                label = "PROVIZIJA",
+                                label = "KARIKA PROVIZIJA",
                                 value = if (commission != null) karikaPriceFormat(commission) + " KM" else "—",
                                 valueColor = KarikaColors.Blue,
                                 modifier = Modifier.weight(1f)
@@ -652,31 +664,67 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
         }
 
         // ── Print FAB ────────────────────────────────────────────────────────────
-        if (!imeVisible) {
+        // Rejected: nothing. Approved: single tap prints the order directly. Pending: tap
+        // opens a menu of all three print/estimate actions.
+        if (!imeVisible && !vendorOrder.isRejected()) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding()
                     .padding(20.dp)
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(KarikaColors.Blue)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) {}
             ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_print),
-                    contentDescription = "Printaj",
-                    tint = KarikaColors.White,
+                Box(
                     modifier = Modifier
-                        .size(24.dp)
-                        .align(Alignment.Center)
-                        .onClick {
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(KarikaColors.Blue)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            if (vendorOrder.isPending()) {
+                                showPrintMenu = true
+                            } else {
+                                component.printOrder()
+                            }
+                        }
+                ) {
+                    Icon(
+                        imageVector = vectorResource(
+                            if (vendorOrder.isPending()) Res.drawable.ic_menu else Res.drawable.ic_print
+                        ),
+                        contentDescription = "Printaj",
+                        tint = KarikaColors.White,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .align(Alignment.Center)
+                    )
+                }
+                DropdownMenu(
+                    expanded = showPrintMenu,
+                    onDismissRequest = { showPrintMenu = false },
+                    containerColor = KarikaColors.White,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        PrintMenuPillButton(label = "Printaj narudžbu", filled = false) {
+                            showPrintMenu = false
                             component.printOrder()
                         }
-                )
+                        PrintMenuPillButton(label = "Printaj predračun", filled = false) {
+                            showPrintMenu = false
+                            component.showMessage("Uskoro dostupno")
+                        }
+                        PrintMenuPillButton(label = "Pošalji predračun", filled = true) {
+                            showPrintMenu = false
+                            component.showMessage("Uskoro dostupno")
+                        }
+                    }
+                }
             }
         }
     }
@@ -689,6 +737,35 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
             onConfirm = { newQty, newDiscount ->
                 component.editOrderProduct(newQty, newDiscount)
             }
+        )
+    }
+}
+
+// ── Print menu pill button ──────────────────────────────────────────────────────
+
+@Composable
+private fun PrintMenuPillButton(label: String, filled: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .then(
+                if (filled) Modifier.background(KarikaColors.Blue)
+                else Modifier.border(1.dp, KarikaColors.Blue, RoundedCornerShape(50))
+            )
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onClick
+            )
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        KarikaText(
+            text = label,
+            color = if (filled) KarikaColors.White else KarikaColors.Blue,
+            textSize = 14.sp,
+            fontWeight = FontWeight.W700,
+            maxLines = 1
         )
     }
 }
@@ -734,7 +811,7 @@ private fun CommentBubble(comment: Comment) {
 // ── Specifikacija narudžbe (tabela) ─────────────────────────────────────────────
 
 private val PRODUCT_TABLE_COLUMN_WIDTHS =
-    listOf(140.dp, 80.dp, 100.dp, 90.dp, 110.dp, 130.dp, 110.dp, 100.dp, 90.dp)
+    listOf(140.dp, 80.dp, 100.dp, 90.dp, 110.dp, 130.dp, 150.dp, 100.dp, 90.dp)
 
 @Composable
 private fun ProductSpecificationTable(
@@ -744,7 +821,7 @@ private fun ProductSpecificationTable(
 ) {
     val headers = listOf(
         "ARTIKAL", "RABAT %", "CIJENA VPC", "KOLIČINA",
-        "UKUPNO VPC", "UKUPNO SA PDV", "PROVIZIJA %", "PROVIZIJA"
+        "UKUPNO VPC", "UKUPNO SA PDV", "KARIKA PROVIZIJA %", "PROVIZIJA"
     ) + if (canEdit) listOf("AKCIJE") else emptyList()
     val widths = if (canEdit) PRODUCT_TABLE_COLUMN_WIDTHS else PRODUCT_TABLE_COLUMN_WIDTHS.dropLast(1)
 

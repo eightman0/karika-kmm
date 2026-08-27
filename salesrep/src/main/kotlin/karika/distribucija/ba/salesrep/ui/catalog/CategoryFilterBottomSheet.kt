@@ -12,6 +12,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.BottomSheetCategoryFilterBinding
 import karika.distribucija.ba.salesrep.model.Category
+import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 /** Mirrors composeApp's SalesOrderCatalogView.kt CategorySheet: hierarchical drill-down through
  * up to 3 levels with a back button and breadcrumb-style title, plus a flat deep-search across
@@ -44,6 +45,7 @@ class CategoryFilterBottomSheet(
 
     override fun onStart() {
         super.onStart()
+        applyWhiteSheetBackground()
         val bottomSheet = (dialog as? BottomSheetDialog)
             ?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) ?: return
         bottomSheet.layoutParams.height = (resources.displayMetrics.heightPixels * 0.9).toInt()

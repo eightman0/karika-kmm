@@ -18,6 +18,7 @@ import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomerDetailBinding
 import karika.distribucija.ba.salesrep.model.DiscountRule
 import karika.distribucija.ba.salesrep.model.OperationalCustomer
+import karika.distribucija.ba.salesrep.session.CurrentUser
 
 /** Mirrors composeApp's ui/view/salesrep/customers/detail/SalesCustomerDetailView.kt. */
 class CustomerDetailFragment : Fragment() {
@@ -53,16 +54,21 @@ class CustomerDetailFragment : Fragment() {
         )
         assignedNames = args.getString("assignedNames").orEmpty()
 
-        (activity as? AppCompatActivity)?.supportActionBar?.title = customer.fullName
+        (activity as? AppCompatActivity)?.supportActionBar?.title =
+            customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName
         renderProfile()
 
+        val canCreateDiscountFor = CurrentUser.me?.capabilities?.canCreateDiscountFor ?: false
+
         adapter = DiscountsAdapter(
+            canEdit = canCreateDiscountFor,
             onEdit = ::openEditDiscount,
             onDelete = ::confirmDelete
         )
         binding.recyclerDiscounts.adapter = adapter
         binding.recyclerDiscounts.layoutManager = LinearLayoutManager(requireContext())
 
+        binding.buttonNewDiscount.visibility = if (canCreateDiscountFor) View.VISIBLE else View.GONE
         binding.buttonNewDiscount.setOnClickListener {
             AnalyticsTracker.trackClick("customer_detail", "new_discount")
             openNewDiscount()
@@ -97,7 +103,7 @@ class CustomerDetailFragment : Fragment() {
     }
 
     private fun renderProfile() {
-        binding.textProfileName.text = customer.fullName
+        binding.textProfileName.text = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName
         binding.textBadge.text = customer.detailBadgeLabel()
         val (badgeBgRes, badgeColorRes) = when (customer.partnershipStatus) {
             "active" -> R.drawable.bg_detail_badge_active to R.color.karika_green3

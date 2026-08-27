@@ -9,6 +9,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.BottomSheetEditCartItemBinding
 import karika.distribucija.ba.salesrep.model.VendorProduct
+import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 /** Mirrors composeApp's EditOrderItemModal in SalesOrderDetailView.kt - reuses the cart's edit
  * bottom sheet layout (same fields: item name, optional discount, qty, cancel/confirm) since the
@@ -30,6 +31,11 @@ class EditOrderItemBottomSheet(
     ): View {
         _binding = BottomSheetEditCartItemBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        applyWhiteSheetBackground()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

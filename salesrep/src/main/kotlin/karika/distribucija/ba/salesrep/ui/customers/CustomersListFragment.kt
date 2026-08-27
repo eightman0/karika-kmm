@@ -1,6 +1,8 @@
 package karika.distribucija.ba.salesrep.ui.customers
 
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,10 +28,11 @@ class CustomersListFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: CustomersViewModel by viewModels()
     private lateinit var adapter: CustomersAdapter
+    private var searchWatcher: TextWatcher? = null
 
     /** Kept alongside the ViewModel's own filter state so the chip label and empty-state
      * message can be rendered without re-querying the ViewModel for display text. */
-    private var selectedStatusValue: String? = null
+    private var selectedStatusValue: String? = "active"
 
     private val statusOptions = listOf(
         "active" to R.string.customers_filter_active,
@@ -73,7 +76,10 @@ class CustomersListFragment : Fragment() {
             }
         })
 
+        binding.rowCustomerTabs.visibility = if (viewModel.canSeeAllCustomers) View.VISIBLE else View.GONE
+
         updateTabSelection(CustomersViewModel.Tab.ALL)
+        updateStatusChip(selectedStatusValue)
         binding.tabAll.setOnClickListener {
             AnalyticsTracker.trackClick("customers", "tab_all")
             updateTabSelection(CustomersViewModel.Tab.ALL)
@@ -89,7 +95,7 @@ class CustomersListFragment : Fragment() {
 
         binding.swipeRefresh.setOnRefreshListener { viewModel.refresh() }
 
-        binding.editSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
+        searchWatcher = binding.editSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             val query = text?.toString().orEmpty()
             binding.iconClearSearch.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
             viewModel.setSearch(query)
@@ -149,6 +155,11 @@ class CustomersListFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.refresh()
+    }
+
     private fun updateTabSelection(tab: CustomersViewModel.Tab) {
         val allSelected = tab == CustomersViewModel.Tab.ALL
         binding.tabAll.setBackgroundResource(if (allSelected) R.drawable.bg_tab_pill_selected else 0)
@@ -157,10 +168,16 @@ class CustomersListFragment : Fragment() {
         binding.tabMine.setTextColor(requireContext().getColor(if (!allSelected) R.color.karika_blue else R.color.karika_gray6))
     }
 
+    /** ViewModel.selectTab() already resets its own search/status state and triggers the
+     * reload itself - this only needs to reset the displayed text, so the search TextWatcher
+     * is detached first to avoid it firing a redundant, debounced setSearch()/loadPage(). */
     private fun clearStatusFilterUi() {
-        selectedStatusValue = null
-        updateStatusChip(null)
+        selectedStatusValue = "active"
+        updateStatusChip("active")
+        searchWatcher?.let { binding.editSearch.removeTextChangedListener(it) }
         binding.editSearch.setText("")
+        binding.iconClearSearch.visibility = View.GONE
+        searchWatcher?.let { binding.editSearch.addTextChangedListener(it) }
     }
 
     private fun updateStatusChip(status: String?) {
@@ -170,6 +187,7 @@ class CustomersListFragment : Fragment() {
         )
         val color = requireContext().getColor(if (isFiltered) R.color.karika_white else R.color.karika_gray2)
         binding.textStatusFilter.setTextColor(color)
+        binding.iconStatusFilter.imageTintList = ColorStateList.valueOf(color)
         binding.textStatusFilter.text = status?.let { value ->
             statusOptions.firstOrNull { it.first == value }?.second?.let { getString(it) }
         } ?: getString(R.string.customers_status_all_sheet)
@@ -279,6 +297,7 @@ class CustomersListFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        searchWatcher = null
         _binding = null
     }
 }

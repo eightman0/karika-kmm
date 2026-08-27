@@ -31,6 +31,9 @@ data class VendorOrder(
     /** Mirrors composeApp's OnBehalfOrder.isPending() (Dashboard.kt) - only a still-pending,
      * unlocked order can have its shipping details or line items edited here. */
     fun isPending(): Boolean = realOrderStatus == "pending"
+
+    /** Mirrors composeApp's VendorOrder.isRejected() (Dashboard.kt). */
+    fun isRejected(): Boolean = realOrderStatus == "rejected"
 }
 
 @Serializable

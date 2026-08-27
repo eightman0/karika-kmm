@@ -45,9 +45,15 @@ class InternalMessagesFragment : Fragment() {
             findNavController().navigate(R.id.action_internal_messages_to_new_message)
         }
 
+        binding.swipeRefresh.setOnRefreshListener { viewModel.refresh() }
+
         viewModel.threads.observe(viewLifecycleOwner) { threads ->
             adapter.submitList(threads)
             binding.layoutEmpty.visibility = if (threads.isEmpty()) View.VISIBLE else View.GONE
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
+            binding.swipeRefresh.isRefreshing = loading
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->

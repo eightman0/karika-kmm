@@ -31,10 +31,8 @@ open class CustomerMessagesViewModel : ViewModel() {
     private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
 
-    init {
-        load()
-    }
-
+    // No init { load() } here - the fragment's onResume() already calls refresh() on first
+    // display (and on every return to this screen), so an init-time load would double the call.
     fun refresh() = load()
 
     fun setFilter(filter: Filter) {

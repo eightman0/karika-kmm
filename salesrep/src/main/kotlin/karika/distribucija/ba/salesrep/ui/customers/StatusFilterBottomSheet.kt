@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
+import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 /** Mirrors composeApp's SalesCustomersView.kt status ModalBottomSheet + StatusSheetItem. */
 class StatusFilterBottomSheet(
@@ -22,6 +23,11 @@ class StatusFilterBottomSheet(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.bottom_sheet_status_filter, container, false)
+
+    override fun onStart() {
+        super.onStart()
+        applyWhiteSheetBackground()
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

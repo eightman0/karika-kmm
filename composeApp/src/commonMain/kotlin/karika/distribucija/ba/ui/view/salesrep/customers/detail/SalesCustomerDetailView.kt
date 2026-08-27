@@ -157,7 +157,7 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
                             )
                             Spacer(Modifier.height(4.dp))
                             KarikaText(
-                                text = customer.company,
+                                text = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName,
                                 color = KarikaColors.Gray2,
                                 textSize = 20.sp,
                                 fontWeight = FontWeight.W700
@@ -262,30 +262,32 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
                         textSize = 18.sp,
                         fontWeight = FontWeight.W700
                     )
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(KarikaColors.Blue)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) { component.openNewDiscount() }
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_add_plus),
-                            contentDescription = "",
-                            tint = KarikaColors.White,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        KarikaText(
-                            text = "Novi popust",
-                            color = KarikaColors.White,
-                            textSize = 13.sp,
-                            fontWeight = FontWeight.W700
-                        )
+                    if (component.canCreateDiscountFor) {
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(KarikaColors.Blue)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) { component.openNewDiscount() }
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = vectorResource(Res.drawable.ic_add_plus),
+                                contentDescription = "",
+                                tint = KarikaColors.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            KarikaText(
+                                text = "Novi popust",
+                                color = KarikaColors.White,
+                                textSize = 13.sp,
+                                fontWeight = FontWeight.W700
+                            )
+                        }
                     }
                 }
             }
@@ -294,6 +296,7 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
             items(discounts, key = { it.ruleId ?: 0L }) { rule ->
                 DiscountCard(
                     rule = rule,
+                    canEdit = component.canCreateDiscountFor,
                     onEdit = { component.openEditDiscount(rule) },
                     onDelete = { confirmDeleteRule = rule },
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -405,7 +408,13 @@ private fun ProfileInfoRow(
 // ── Discount card ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun DiscountCard(rule: DiscountRule, onEdit: () -> Unit = {}, onDelete: () -> Unit = {}, modifier: Modifier = Modifier) {
+private fun DiscountCard(
+    rule: DiscountRule,
+    canEdit: Boolean = true,
+    onEdit: () -> Unit = {},
+    onDelete: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     val targetLabel = when {
         rule.productId != null  -> rule.productName ?: "Artikal #${rule.productId}"
         rule.categoryId != null -> rule.categoryName ?: "Kategorija #${rule.categoryId}"
@@ -530,40 +539,42 @@ private fun DiscountCard(rule: DiscountRule, onEdit: () -> Unit = {}, onDelete: 
                 )
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                KarikaText(
-                    text = "Izmijeni",
-                    color = KarikaColors.Blue,
-                    textSize = 13.sp,
-                    fontWeight = FontWeight.W700,
-                    modifier = Modifier.clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { onEdit() }
-                )
+            if (canEdit) {
                 Row(
-                    modifier = Modifier.clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { onDelete() },
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_delete),
-                        contentDescription = "",
-                        tint = KarikaColors.Error,
-                        modifier = Modifier.size(14.dp)
-                    )
                     KarikaText(
-                        text = "Obriši",
-                        color = KarikaColors.Error,
+                        text = "Izmijeni",
+                        color = KarikaColors.Blue,
                         textSize = 13.sp,
-                        fontWeight = FontWeight.W700
+                        fontWeight = FontWeight.W700,
+                        modifier = Modifier.clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { onEdit() }
                     )
+                    Row(
+                        modifier = Modifier.clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { onDelete() },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_delete),
+                            contentDescription = "",
+                            tint = KarikaColors.Error,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        KarikaText(
+                            text = "Obriši",
+                            color = KarikaColors.Error,
+                            textSize = 13.sp,
+                            fontWeight = FontWeight.W700
+                        )
+                    }
                 }
             }
         }

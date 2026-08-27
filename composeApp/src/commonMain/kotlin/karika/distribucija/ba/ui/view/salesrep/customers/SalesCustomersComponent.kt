@@ -38,7 +38,7 @@ class SalesCustomersComponent(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
 
-    private val _statusFilter = MutableStateFlow<String?>(null)
+    private val _statusFilter = MutableStateFlow<String?>("active")
     val statusFilter = _statusFilter.asStateFlow()
 
     val hasMore: Boolean
@@ -50,7 +50,7 @@ class SalesCustomersComponent(
         if (_selectedTab.value == tab) return
         _selectedTab.value = tab
         _searchQuery.value = ""
-        _statusFilter.value = null
+        _statusFilter.value = "active"
         loadPage(page = 1, replace = true)
     }
 
@@ -128,12 +128,15 @@ class SalesCustomersComponent(
 
     fun loadPage(page: Int, replace: Boolean) {
         scope.launch {
-            val flow = if (_selectedTab.value == CustomerTab.MY_CUSTOMERS) {
+            val canSeeAllCustomers =
+                stateHolder.salesSpecificHandler.me.value.capabilities.canSeeAllVendorCustomers
+            val flow = if (_selectedTab.value == CustomerTab.MY_CUSTOMERS || !canSeeAllCustomers) {
                 repository.getEmployeeCustomers(
                     employeeId = stateHolder.salesSpecificHandler.employeeId,
                     page = page,
                     pageSize = 10,
-                    search = _searchQuery.value.takeIf { it.isNotBlank() }
+                    search = _searchQuery.value.takeIf { it.isNotBlank() },
+                    status = _statusFilter.value
                 )
             } else {
                 repository.getCustomers(

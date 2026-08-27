@@ -9,6 +9,7 @@ import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.model.AssignedEmployeeSummary
+import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 /** "Ada Lovelace" -> "AL", "Ada" -> "A". Mirrors SalesCustomersView.kt's private initials(). */
 private fun String?.initials(): String =
@@ -26,6 +27,11 @@ class RepsBottomSheet(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.bottom_sheet_reps, container, false)
+
+    override fun onStart() {
+        super.onStart()
+        applyWhiteSheetBackground()
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

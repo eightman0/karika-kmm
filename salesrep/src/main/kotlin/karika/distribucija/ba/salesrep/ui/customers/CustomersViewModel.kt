@@ -37,21 +37,23 @@ class CustomersViewModel : ViewModel() {
     private var currentPage = 1
     private var totalCount = 0L
     private var searchQuery = ""
-    private var statusFilter: String? = null
+    private var statusFilter: String? = "active"
     private var searchJob: Job? = null
 
     val hasMore: Boolean
         get() = (_customers.value?.size ?: 0).toLong() < totalCount
 
-    init {
-        loadPage(page = 1, replace = true)
-    }
+    val canSeeAllCustomers: Boolean
+        get() = CurrentUser.me?.capabilities?.canSeeAllVendorCustomers ?: false
+
+    // No init { loadPage(...) } here - the fragment's onResume() already calls refresh() on
+    // first display (and on every return to this screen), so an init-time load would double the call.
 
     fun selectTab(tab: Tab) {
         if (_tab.value == tab) return
         _tab.value = tab
         searchQuery = ""
-        statusFilter = null
+        statusFilter = "active"
         loadPage(page = 1, replace = true)
     }
 
@@ -79,13 +81,15 @@ class CustomersViewModel : ViewModel() {
     }
 
     private fun loadPage(page: Int, replace: Boolean) {
+        if (replace) _customers.value = emptyList()
         viewModelScope.launch {
-            val flow = if (_tab.value == Tab.MINE) {
+            val flow = if (_tab.value == Tab.MINE || !canSeeAllCustomers) {
                 repository.getEmployeeCustomers(
                     employeeId = CurrentUser.employeeId ?: 0L,
                     page = page,
                     pageSize = 10,
-                    search = searchQuery.takeIf { it.isNotBlank() }
+                    search = searchQuery.takeIf { it.isNotBlank() },
+                    status = statusFilter
                 )
             } else {
                 repository.getCustomers(

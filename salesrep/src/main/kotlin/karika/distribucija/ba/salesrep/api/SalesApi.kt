@@ -156,16 +156,38 @@ internal class SalesApi {
         employeeId: Long,
         page: Int,
         pageSize: Int,
-        search: String? = null
+        search: String? = null,
+        status: String? = null
     ): Result<HttpResponse> = runCatching {
         HttpClientProvider.client.get(HttpClientProvider.url("vendor-operations/employees/$employeeId/customers")) {
             parameter("searchCriteria[current_page]", page)
             parameter("searchCriteria[page_size]", pageSize)
 
+            var groupIdx = 0
+
             if (!search.isNullOrBlank()) {
-                parameter("searchCriteria[filter_groups][0][filters][0][field]", "company")
-                parameter("searchCriteria[filter_groups][0][filters][0][value]", "%$search%")
-                parameter("searchCriteria[filter_groups][0][filters][0][condition_type]", "like")
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][field]", "company")
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][value]",
+                    "%$search%"
+                )
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]",
+                    "like"
+                )
+                groupIdx++
+            }
+
+            if (status != null) {
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][field]",
+                    "partnership_status"
+                )
+                parameter("searchCriteria[filter_groups][$groupIdx][filters][0][value]", status)
+                parameter(
+                    "searchCriteria[filter_groups][$groupIdx][filters][0][condition_type]",
+                    "eq"
+                )
             }
         }
     }
@@ -646,12 +668,14 @@ class SalesRepository internal constructor() {
         employeeId: Long,
         page: Int,
         pageSize: Int = 10,
-        search: String? = null
+        search: String? = null,
+        status: String? = null
     ): Flow<ResultState<OperationalCustomerSearchResults>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = SalesApi().getEmployeeCustomers(employeeId, page, pageSize, search)
-                .getOrNoInternet()
+            val response =
+                SalesApi().getEmployeeCustomers(employeeId, page, pageSize, search, status)
+                    .getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(response.body<OperationalCustomerSearchResults>()))
                 return@flow

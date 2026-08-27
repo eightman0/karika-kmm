@@ -9,6 +9,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.BottomSheetEditCartItemBinding
 import karika.distribucija.ba.salesrep.model.OnBehalfCartResponseItem
+import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 /** Mirrors composeApp's EditCartItemModal in SalesOrderReviewView.kt - qty is always editable,
  * discount is editable only if [canDiscount] (otherwise shown read-only if already set, matching
@@ -30,6 +31,11 @@ class EditCartItemBottomSheet(
     ): View {
         _binding = BottomSheetEditCartItemBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        applyWhiteSheetBackground()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

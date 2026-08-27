@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
+import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 class AddCustomerBottomSheet(
     private val onNewCustomer: () -> Unit,
@@ -17,6 +18,11 @@ class AddCustomerBottomSheet(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.bottom_sheet_add_customer, container, false)
+
+    override fun onStart() {
+        super.onStart()
+        applyWhiteSheetBackground()
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

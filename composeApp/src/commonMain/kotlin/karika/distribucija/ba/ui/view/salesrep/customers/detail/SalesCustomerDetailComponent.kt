@@ -23,6 +23,9 @@ class SalesCustomerDetailComponent(
     private val _discounts = MutableStateFlow<List<DiscountRule>>(emptyList())
     val discounts = _discounts.asStateFlow()
 
+    val canCreateDiscountFor: Boolean
+        get() = stateHolder.salesSpecificHandler.me.value.capabilities.canCreateDiscountFor
+
     init {
         loadDiscounts()
         scope.launch {

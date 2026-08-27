@@ -62,9 +62,15 @@ open class CustomerMessagesFragment : Fragment() {
             findNavController().navigate(newMessageActionId)
         }
 
+        binding.swipeRefresh.setOnRefreshListener { viewModel.refresh() }
+
         viewModel.filteredConversations.observe(viewLifecycleOwner) { conversations ->
             adapter.submitList(conversations)
             renderEmptyState()
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
+            binding.swipeRefresh.isRefreshing = loading
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->

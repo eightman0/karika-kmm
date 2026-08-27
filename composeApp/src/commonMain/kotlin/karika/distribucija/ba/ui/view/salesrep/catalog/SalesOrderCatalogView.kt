@@ -31,6 +31,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -118,6 +119,9 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
     var categorySheetInitialStack by remember { mutableStateOf<List<Category>>(emptyList()) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
+
+    var quickViewProduct by remember { mutableStateOf<OnBehalfProduct?>(null) }
+    val quickViewSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var fabOffsetY by remember { mutableFloatStateOf(0f) }
 
@@ -354,7 +358,8 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
                             ProductCard(
                                 product = product,
                                 cartQty = cart?.items?.find { it.sku == product.sku }?.qty ?: 0,
-                                onAdd = { qty -> component.changeQty(product, qty) }
+                                onAdd = { qty -> component.changeQty(product, qty) },
+                                onQuickView = { quickViewProduct = product }
                             )
                         }
                         if (isLoadingMore) {
@@ -458,6 +463,201 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
             )
         }
     }
+
+    // ── Product quick view bottom sheet ─────────────────────────────────────────
+    quickViewProduct?.let { product ->
+        ModalBottomSheet(
+            onDismissRequest = { quickViewProduct = null },
+            sheetState = quickViewSheetState,
+            containerColor = KarikaColors.White,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        ) {
+            ProductQuickViewSheet(
+                product = product,
+                onDismiss = {
+                    coroutineScope.launch { quickViewSheetState.hide() }.invokeOnCompletion {
+                        quickViewProduct = null
+                    }
+                }
+            )
+        }
+    }
+}
+
+// ── Product quick view sheet content ────────────────────────────────────────────
+
+@Composable
+private fun ProductQuickViewSheet(product: OnBehalfProduct, onDismiss: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KarikaText(
+                text = "Brzi pregled artikla",
+                color = KarikaColors.Gray2,
+                textSize = 16.sp,
+                fontWeight = FontWeight.W700
+            )
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(KarikaColors.Gray10)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onDismiss() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_cancel),
+                    contentDescription = "Zatvori",
+                    tint = KarikaColors.Gray2,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(KarikaColors.Gray20)
+                .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(12.dp))
+        ) {
+            KarikaImage(
+                model = product.imageUrl,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        Spacer(Modifier.height(14.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val (badgeBg, badgeColor, badgeText) = if (product.isInStock) {
+                Triple(KarikaColors.Green4, KarikaColors.Green3, "NA ZALIHI")
+            } else {
+                Triple(KarikaColors.Red2, KarikaColors.Error, "NIJE NA ZALIHI")
+            }
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(badgeBg)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                KarikaText(
+                    text = badgeText,
+                    color = badgeColor,
+                    textSize = 10.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            KarikaText(
+                text = "Dostupno: ${product.salableQty?.toInt() ?: 0}",
+                color = KarikaColors.Gray6,
+                textSize = 13.sp,
+                fontWeight = FontWeight.W700
+            )
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        KarikaText(
+            text = product.name,
+            color = KarikaColors.Gray2,
+            textSize = 20.sp,
+            fontWeight = FontWeight.W700
+        )
+
+        if (!product.categoryLabel.isNullOrBlank()) {
+            Spacer(Modifier.height(6.dp))
+            KarikaText(
+                text = "Kategorija: ${product.categoryLabel}",
+                color = KarikaColors.Gray6,
+                textSize = 13.sp
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(KarikaColors.Gray20)
+                    .padding(12.dp)
+            ) {
+                KarikaText(
+                    text = "SKU",
+                    color = KarikaColors.Gray6,
+                    textSize = 11.sp,
+                    fontWeight = FontWeight.W700
+                )
+                Spacer(Modifier.height(4.dp))
+                KarikaText(
+                    text = product.sku,
+                    color = KarikaColors.Gray2,
+                    textSize = 14.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(KarikaColors.Gray20)
+                    .padding(12.dp)
+            ) {
+                KarikaText(
+                    text = "CIJENA",
+                    color = KarikaColors.Gray6,
+                    textSize = 11.sp,
+                    fontWeight = FontWeight.W700
+                )
+                Spacer(Modifier.height(4.dp))
+                KarikaText(
+                    text = product.priceString(),
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider(color = KarikaColors.Gray9)
+        Spacer(Modifier.height(16.dp))
+
+        KarikaText(
+            text = "OPIS",
+            color = KarikaColors.Gray6,
+            textSize = 11.sp,
+            fontWeight = FontWeight.W700
+        )
+        Spacer(Modifier.height(6.dp))
+        KarikaText(
+            text = product.description?.takeIf { it.isNotBlank() } ?: "Opis nije dostupan.",
+            color = KarikaColors.Gray2,
+            textSize = 14.sp
+        )
+
+        Spacer(Modifier.height(8.dp))
+    }
 }
 
 // ── Catalog tab pill ──────────────────────────────────────────────────────────
@@ -501,7 +701,8 @@ private fun CatalogTabPill(
 private fun ProductCard(
     product: OnBehalfProduct,
     cartQty: Int,
-    onAdd: (Int) -> Unit
+    onAdd: (Int) -> Unit,
+    onQuickView: () -> Unit
 ) {
     var qty by remember(cartQty) {
         mutableIntStateOf(if (cartQty > 0) cartQty else product.minQty().coerceAtLeast(1))
@@ -518,6 +719,10 @@ private fun ProductCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) { onQuickView() }
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {

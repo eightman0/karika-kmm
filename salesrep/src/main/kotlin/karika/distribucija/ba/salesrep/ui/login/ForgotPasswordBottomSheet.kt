@@ -10,6 +10,7 @@ import androidx.core.widget.addTextChangedListener
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.BottomSheetForgotPasswordBinding
+import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 import karika.distribucija.ba.salesrep.util.isEmailFormatValid
 
 /** Mirrors composeApp's ForgotPasswordSheet.kt. The email field always starts blank (Compose
@@ -31,6 +32,11 @@ class ForgotPasswordBottomSheet(
     ): View {
         _binding = BottomSheetForgotPasswordBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        applyWhiteSheetBackground()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

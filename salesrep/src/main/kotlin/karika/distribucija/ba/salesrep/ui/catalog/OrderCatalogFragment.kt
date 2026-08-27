@@ -53,7 +53,11 @@ class OrderCatalogFragment : Fragment() {
         adapter = ProductCatalogAdapter(
             lifecycleOwner = viewLifecycleOwner,
             getQty = { product -> viewModel.getCartQty(product) },
-            onAdd = { product, qty -> viewModel.changeQty(product, qty) }
+            onAdd = { product, qty -> viewModel.changeQty(product, qty) },
+            onQuickView = { product ->
+                AnalyticsTracker.trackClick("catalog", "quick_view")
+                ProductQuickViewBottomSheet(product).show(parentFragmentManager, "product_quick_view")
+            }
         )
         binding.recyclerProducts.adapter = adapter
         binding.recyclerProducts.layoutManager = LinearLayoutManager(requireContext())
@@ -137,10 +141,11 @@ class OrderCatalogFragment : Fragment() {
         renderCategoryFilter()
     }
 
-    private fun openCategorySheet() {
+    private fun openCategorySheet(initialNavStack: List<Category> = emptyList()) {
         CategoryFilterBottomSheet(
             allCategories = viewModel.categories.value.orEmpty(),
             selectedCategory = viewModel.selectedCategory.value,
+            initialNavStack = initialNavStack,
             onSelect = { category -> viewModel.selectCategory(category) }
         ).show(parentFragmentManager, "category_filter")
     }
@@ -176,10 +181,15 @@ class OrderCatalogFragment : Fragment() {
                 setTextColor(requireContext().getColor(R.color.karika_blue))
                 textSize = 12f
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
+                if (!isLast) {
+                    isClickable = true
+                    isFocusable = true
+                    setOnClickListener { openCategorySheet(path.subList(0, index + 1).toList()) }
+                }
             })
             if (!isLast) {
                 container.addView(TextView(requireContext()).apply {
-                    text = "→"
+                    text = "->"
                     setTextColor(requireContext().getColor(R.color.karika_blue))
                     textSize = 12f
                     setTypeface(typeface, android.graphics.Typeface.BOLD)

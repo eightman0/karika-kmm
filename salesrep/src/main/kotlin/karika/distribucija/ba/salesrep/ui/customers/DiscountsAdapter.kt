@@ -1,6 +1,7 @@
 package karika.distribucija.ba.salesrep.ui.customers
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -10,6 +11,7 @@ import karika.distribucija.ba.salesrep.databinding.ItemDiscountBinding
 import karika.distribucija.ba.salesrep.model.DiscountRule
 
 class DiscountsAdapter(
+    private val canEdit: Boolean,
     private val onEdit: (DiscountRule) -> Unit,
     private val onDelete: (DiscountRule) -> Unit
 ) : ListAdapter<DiscountRule, DiscountsAdapter.ViewHolder>(DIFF) {
@@ -37,6 +39,8 @@ class DiscountsAdapter(
             binding.textMinQty.text = rule.minQty?.toInt()?.toString() ?: "—"
             binding.textPercent.text = "${rule.discountPercent.toInt()}%"
 
+            binding.buttonEdit.visibility = if (canEdit) View.VISIBLE else View.GONE
+            binding.buttonDelete.visibility = if (canEdit) View.VISIBLE else View.GONE
             binding.buttonEdit.setOnClickListener { onEdit(rule) }
             binding.buttonDelete.setOnClickListener { onDelete(rule) }
         }

@@ -40,6 +40,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.TextStyle
@@ -106,28 +107,31 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
     val isLoadingMore by component.isLoadingMore.collectAsState()
     val searchText by component.searchQuery.collectAsState()
     val selectedStatus by component.statusFilter.collectAsState()
+    val me by component.stateHolder.salesSpecificHandler.me.collectAsState()
 
     Column(
         modifier = Modifier
             .background(KarikaColors.Gray20)
             .fillMaxSize()
     ) {
-        // ── Tabs ───────────────────────────────────────────────────────────────
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
-            Row(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(KarikaColors.Gray9)
-                    .padding(4.dp)
-            ) {
-                TabPill(
-                    label = "Svi kupci",
-                    selected = selectedTab == SalesCustomersComponent.CustomerTab.ALL_CUSTOMERS
-                ) { component.selectTab(SalesCustomersComponent.CustomerTab.ALL_CUSTOMERS) }
-                TabPill(
-                    label = "Moji kupci",
-                    selected = selectedTab == SalesCustomersComponent.CustomerTab.MY_CUSTOMERS
-                ) { component.selectTab(SalesCustomersComponent.CustomerTab.MY_CUSTOMERS) }
+        // ── Tabs ── only for reps allowed to see the vendor's full customer list ────
+        if (me.capabilities.canSeeAllVendorCustomers) {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                Row(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(KarikaColors.Gray9)
+                        .padding(4.dp)
+                ) {
+                    TabPill(
+                        label = "Svi kupci",
+                        selected = selectedTab == SalesCustomersComponent.CustomerTab.ALL_CUSTOMERS
+                    ) { component.selectTab(SalesCustomersComponent.CustomerTab.ALL_CUSTOMERS) }
+                    TabPill(
+                        label = "Moji kupci",
+                        selected = selectedTab == SalesCustomersComponent.CustomerTab.MY_CUSTOMERS
+                    ) { component.selectTab(SalesCustomersComponent.CustomerTab.MY_CUSTOMERS) }
+                }
             }
         }
 
@@ -229,7 +233,7 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = vectorResource(Res.drawable.ic_menu),
+                    imageVector = vectorResource(Res.drawable.ic_add_plus),
                     contentDescription = "",
                     tint = KarikaColors.White,
                     modifier = Modifier.size(18.dp)
@@ -743,7 +747,10 @@ private fun CustomerCard(
             }
         }
 
-        if (customer.isActive) {
+        val isPending = customer.partnershipStatus == "pending"
+        if (customer.isActive || isPending) {
+            val actionsEnabled = customer.isActive
+
             // Fading divider between header and actions
             Box(
                 modifier = Modifier
@@ -764,6 +771,7 @@ private fun CustomerCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .alpha(if (actionsEnabled) 1f else 0.5f)
             ) {
                 // Komercijalisti chips using assigned_employees
                 val reps = customer.assignedEmployees.take(3)
@@ -779,6 +787,7 @@ private fun CustomerCard(
                                 .width(totalWidth.dp)
                                 .height(avatarSize.dp)
                                 .clickable(
+                                    enabled = actionsEnabled,
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
                                 ) { onShowReps(customer.assignedEmployees) }
@@ -830,16 +839,19 @@ private fun CustomerCard(
                         QuietActionButton(
                             icon = Res.drawable.ic_messages,
                             label = "Pošalji poruku",
+                            enabled = actionsEnabled,
                             onClick = onMessage
                         )
                         QuietActionButton(
                             icon = Res.drawable.ic_gift,
                             label = "Dodijeli rabat",
+                            enabled = actionsEnabled,
                             onClick = onDiscount
                         )
                         QuietActionButton(
                             icon = Res.drawable.ic_orders,
                             label = "Historija narudžbi",
+                            enabled = actionsEnabled,
                             onClick = onHistory
                         )
                     }
@@ -850,6 +862,7 @@ private fun CustomerCard(
                         modifier = Modifier
                             .weight(0.72f)
                             .fillMaxHeight(),
+                        enabled = actionsEnabled,
                         onClick = onOrder
                     )
                 }
@@ -865,6 +878,7 @@ private fun QuietActionButton(
     icon: DrawableResource,
     label: String,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Row(
@@ -874,6 +888,7 @@ private fun QuietActionButton(
             .background(KarikaColors.Blue.copy(alpha = 0.06f))
             .border(1.dp, KarikaColors.Blue.copy(alpha = 0.18f), RoundedCornerShape(10.dp))
             .clickable(
+                enabled = enabled,
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick
@@ -904,6 +919,7 @@ private fun OrderActionButton(
     icon: DrawableResource,
     label: String,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Column(
@@ -911,6 +927,7 @@ private fun OrderActionButton(
             .clip(RoundedCornerShape(10.dp))
             .background(KarikaColors.Blue)
             .clickable(
+                enabled = enabled,
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick

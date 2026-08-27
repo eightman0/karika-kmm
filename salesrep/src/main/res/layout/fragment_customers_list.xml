@@ -7,7 +7,8 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/row_customer_tabs"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="4dp"
@@ -17,12 +18,12 @@
 
         <TextView
             android:id="@+id/tab_all"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
+            android:paddingHorizontal="20dp"
             android:paddingVertical="8dp"
             android:text="@string/customers_tab_all"
             android:textSize="12sp"
@@ -30,12 +31,12 @@
 
         <TextView
             android:id="@+id/tab_mine"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
+            android:paddingHorizontal="20dp"
             android:paddingVertical="8dp"
             android:text="@string/customers_tab_mine"
             android:textSize="12sp"
@@ -98,6 +99,7 @@
             android:paddingVertical="8dp">
 
             <ImageView
+                android:id="@+id/icon_status_filter"
                 android:layout_width="14dp"
                 android:layout_height="14dp"
                 android:contentDescription="@null"
@@ -124,7 +126,7 @@
             android:contentDescription="@string/customers_add_new"
             android:focusable="true"
             android:padding="9dp"
-            android:src="@drawable/ic_menu"
+            android:src="@drawable/ic_add_plus"
             app:tint="@color/karika_white" />
     </LinearLayout>
 

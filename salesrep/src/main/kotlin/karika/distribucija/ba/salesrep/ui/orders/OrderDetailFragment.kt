@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -42,7 +43,7 @@ class OrderDetailFragment : Fragment() {
     private var shippingCostExpress: Double? = null
     private var shippingDefaultsApplied = false
 
-    private val specColumnWidthsDp = intArrayOf(140, 80, 100, 90, 110, 130, 110, 100, 90)
+    private val specColumnWidthsDp = intArrayOf(140, 80, 100, 90, 110, 130, 150, 100, 90)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,9 +71,13 @@ class OrderDetailFragment : Fragment() {
             binding.editComment.setText("")
         }
 
-        binding.buttonPrint.setOnClickListener {
+        binding.buttonPrint.setOnClickListener { anchor ->
             AnalyticsTracker.trackClick("order_detail", "print_order")
-            viewModel.printOrder()
+            if (viewModel.vendorOrder.value?.isPending() == true) {
+                showPrintMenu(anchor)
+            } else {
+                viewModel.printOrder()
+            }
         }
 
         binding.rowDeliveryHeader.setOnClickListener {
@@ -159,10 +164,22 @@ class OrderDetailFragment : Fragment() {
     private fun renderOrder(order: VendorOrder) {
         val dash = getString(R.string.order_detail_dash)
 
+        binding.buttonPrint.visibility = if (order.isRejected()) View.GONE else View.VISIBLE
+        binding.buttonPrint.setImageResource(if (order.isPending()) R.drawable.ic_menu else R.drawable.ic_print)
+
         binding.textOrderNumber.text = "#${order.orderId}"
         binding.textOrderDate.text = order.date()
 
-        val vpcTotal = order.orderTotal?.toDoubleOrNull() ?: 0.0
+        // order.orderTotal comes straight from the API and is the sum of undiscounted row
+        // totals (it ignores each product's discount_percent) - recompute from the line items
+        // instead, using the same discounted-row formula as the spec table below.
+        val vpcTotal = order.products.sumOf { product ->
+            val price = product.price?.toDoubleOrNull() ?: 0.0
+            val discountPercent = product.rabat().toIntOrNull() ?: 0
+            val discountedPrice = price * (1.0 - discountPercent / 100.0)
+            val qty = product.qtyOrdered?.toIntOrNull() ?: 0
+            discountedPrice * qty
+        }
         val pdvTotal = vpcTotal * 0.17
         val grandTotal = vpcTotal + pdvTotal
         val commission = order.shopCommissionFee?.toDoubleOrNull()
@@ -211,6 +228,39 @@ class OrderDetailFragment : Fragment() {
             selectedCarrierCode = order.code.orEmpty()
             renderProviderSelection()
         }
+    }
+
+    /** Mirrors composeApp's print FAB DropdownMenu - a white, rounded popup anchored to
+     * [anchor] with three pill-shaped actions, shown only while the order is pending. */
+    private fun showPrintMenu(anchor: View) {
+        val menuView = layoutInflater.inflate(R.layout.popup_order_print_menu, null)
+        val popup = PopupWindow(
+            menuView,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        ).apply {
+            isOutsideTouchable = true
+            elevation = 8f
+        }
+
+        menuView.findViewById<TextView>(R.id.action_print_order).setOnClickListener {
+            popup.dismiss()
+            viewModel.printOrder()
+        }
+        menuView.findViewById<TextView>(R.id.action_print_estimate).setOnClickListener {
+            popup.dismiss()
+            Toast.makeText(requireContext(), R.string.order_detail_coming_soon, Toast.LENGTH_SHORT).show()
+        }
+        menuView.findViewById<TextView>(R.id.action_send_estimate).setOnClickListener {
+            popup.dismiss()
+            Toast.makeText(requireContext(), R.string.order_detail_coming_soon, Toast.LENGTH_SHORT).show()
+        }
+
+        menuView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        val xOffset = anchor.width - menuView.measuredWidth
+        val yOffset = -(anchor.height + menuView.measuredHeight + dp(8))
+        popup.showAsDropDown(anchor, xOffset, yOffset)
     }
 
     private fun renderDeliveryExpanded() {
@@ -262,7 +312,7 @@ class OrderDetailFragment : Fragment() {
             getString(R.string.review_spec_header_qty),
             getString(R.string.review_spec_header_total_vpc),
             getString(R.string.review_spec_header_total_with_tax),
-            getString(R.string.order_detail_spec_header_commission_percent),
+            getString(R.string.review_spec_header_commission_percent),
             getString(R.string.review_spec_header_commission)
         ) + if (canEdit) listOf(getString(R.string.review_spec_header_actions)) else emptyList()
 

@@ -69,6 +69,11 @@ class OrdersListFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.refresh()
+    }
+
     private fun openOrder(order: OnBehalfOrder) {
         findNavController().navigate(
             R.id.action_orders_to_detail,

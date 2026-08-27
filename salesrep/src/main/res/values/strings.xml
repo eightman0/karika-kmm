@@ -89,7 +89,7 @@
     <string name="order_detail_label_date">DATUM</string>
     <string name="order_detail_label_total_vpc_upper">UKUPNO VPC</string>
     <string name="order_detail_label_with_pdv_upper">SA PDV</string>
-    <string name="order_detail_label_commission_upper">PROVIZIJA</string>
+    <string name="order_detail_label_commission_upper">KARIKA PROVIZIJA</string>
     <string name="order_detail_label_customer_name">NAZIV KUPCA</string>
     <string name="order_detail_customer_id_format">ID: %s</string>
     <string name="order_detail_label_shipping_address">ADRESA ZA ISPORUKU</string>
@@ -98,12 +98,11 @@
 
     <string name="order_detail_section_spec">Specifikacija narudžbe</string>
     <string name="order_detail_items_count_format">%d artikala</string>
-    <string name="order_detail_spec_header_commission_percent">PROVIZIJA %%</string>
 
     <string name="order_detail_price_vpc">Cijena VPC</string>
     <string name="order_detail_total_vpc">Ukupno VPC</string>
     <string name="order_detail_total_with_pdv">Ukupno sa PDV</string>
-    <string name="order_detail_total_pdv17">Ukupno PDV 17%%</string>
+    <string name="order_detail_total_pdv17">Ukupno PDV 17%</string>
     <string name="order_detail_karika_commission">Karika provizija</string>
 
     <string name="order_detail_save_shipping">Sačuvaj podatke o dostavi</string>
@@ -112,6 +111,10 @@
     <string name="order_detail_comment_hint">Napiši komentar kupcu...</string>
     <string name="order_detail_send_comment">Pošalji komentar</string>
     <string name="order_detail_print_cd">Printaj</string>
+    <string name="order_detail_print_order">Printaj narudžbu</string>
+    <string name="order_detail_print_estimate">Printaj predračun</string>
+    <string name="order_detail_send_estimate">Pošalji predračun</string>
+    <string name="order_detail_coming_soon">Uskoro dostupno</string>
 
     <string name="customers_title">Upravljanje kupcima</string>
     <string name="customers_tab_all">Svi kupci</string>
@@ -242,6 +245,16 @@
     <string name="catalog_increase_cd">+</string>
     <string name="catalog_category_filter_cd">Kategorije</string>
     <string name="catalog_category_remove_cd">Ukloni</string>
+
+    <string name="catalog_quick_view_title">Brzi pregled artikla</string>
+    <string name="catalog_quick_view_sku_label">SKU</string>
+    <string name="catalog_quick_view_price_label">CIJENA</string>
+    <string name="catalog_quick_view_description_label">OPIS</string>
+    <string name="catalog_quick_view_description_empty">Opis nije dostupan.</string>
+    <string name="catalog_quick_view_available_format">Dostupno: %d</string>
+    <string name="catalog_quick_view_category_format">Kategorija: %s</string>
+    <string name="catalog_stock_in">NA ZALIHI</string>
+    <string name="catalog_stock_out">NIJE NA ZALIHI</string>
 
     <string name="category_sheet_title_root">Katalog</string>
     <string name="category_sheet_search_title">Pretraga kategorija</string>

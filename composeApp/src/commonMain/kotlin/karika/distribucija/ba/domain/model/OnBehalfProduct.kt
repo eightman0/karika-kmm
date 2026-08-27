@@ -14,7 +14,8 @@ data class OnBehalfProduct(
     @SerialName("category_ids") val categoryIds: List<Long> = emptyList(),
     @SerialName("category_label") val categoryLabel: String? = null,
     @SerialName("is_in_stock") val isInStock: Boolean = true,
-    @SerialName("salable_qty") val salableQty: Double? = null
+    @SerialName("salable_qty") val salableQty: Double? = null,
+    @SerialName("description") val description: String? = null
 ) {
     /** Cart map key */
     val key: String get() = entityId.toString()

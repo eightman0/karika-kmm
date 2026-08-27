@@ -36,9 +36,8 @@ class OrdersViewModel : ViewModel() {
     private val hasMore: Boolean
         get() = (_orders.value?.size ?: 0).toLong() < totalCount
 
-    init {
-        loadPage(page = 1, replace = true)
-    }
+    // No init { loadPage(...) } here - the fragment's onResume() already calls refresh() on
+    // first display (and on every return to this screen), so an init-time load would double the call.
 
     fun setSearch(query: String) {
         searchQuery = query
@@ -64,6 +63,7 @@ class OrdersViewModel : ViewModel() {
     }
 
     private fun loadPage(page: Int, replace: Boolean) {
+        if (replace) _orders.value = emptyList()
         viewModelScope.launch {
             repository.getOrders(
                 page = page,

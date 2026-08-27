@@ -313,7 +313,8 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             onBack = { child.component.goBack() }
                         )
                         is SalesChild.CustomerDetail -> SalesDetailTopBar(
-                            title = child.component.customer.fullName,
+                            title = child.component.customer.company?.takeIf { it.isNotBlank() }
+                                ?: child.component.customer.fullName,
                             onBack = { child.component.goBack() }
                         )
 
@@ -376,12 +377,12 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         )
 
                         is SalesChild.OrderCatalog -> SalesDetailTopBar(
-                            title = "Naruči: ${child.component.customer.fullName}",
+                            title = "Naruči: ${child.component.customer.company}",
                             onBack = { child.component.goBack() }
                         )
 
                         is SalesChild.OrderCart -> SalesDetailTopBar(
-                            title = "Korpa: ${child.component.customer.fullName}",
+                            title = "Korpa: ${child.component.customer.company}",
                             onBack = { child.component.goBack() }
                         )
 
