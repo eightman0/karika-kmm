@@ -3,6 +3,7 @@
 .gradle
 **/build/
 /dist/
+/scripts/publish.env
 xcuserdata
 !src/**/build/
 local.properties
