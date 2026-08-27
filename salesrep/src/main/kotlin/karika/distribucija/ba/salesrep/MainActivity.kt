@@ -1,10 +1,7 @@
 package karika.distribucija.ba.salesrep
 
-import android.Manifest
 import android.app.ActivityManager
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.view.Menu
@@ -13,9 +10,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -55,9 +50,6 @@ class MainActivity : AppCompatActivity() {
 
     private var notificationsMenuItem: MenuItem? = null
 
-    private val notificationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
-
     override fun onResume() {
         super.onResume()
         activeInstance = this
@@ -94,7 +86,6 @@ class MainActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         applyEdgeToEdgeInsets()
-        askNotificationPermission()
 
         navRows = listOf(
             NavRow(findViewById(R.id.row_nav_orders), findViewById(R.id.icon_nav_orders), findViewById(R.id.text_nav_orders), R.id.ordersListFragment),
@@ -193,15 +184,6 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         handlePushRoute(intent)
-    }
-
-    private fun askNotificationPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_GRANTED
-        if (!granted && !shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
     }
 
     /** Resolves a tapped push notification's "route" extra (set by KarikaFcmService) into the
