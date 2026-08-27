@@ -98,6 +98,7 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
                 threadId?.let { _adminThreadPush.tryEmit(it) }
             } else {
                 refreshCustomerMessages()
+                refreshInternalMessages()
                 threadId?.let { _customerThreadPush.tryEmit(it) }
             }
         }

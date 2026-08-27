@@ -41,8 +41,11 @@ class SalesAdminConversationComponent(
     }
 
     private fun load() {
-        markAsReadMessage(conversation.id, admin = true)
         scope.launch {
+            messagesRepository.markAsRead(conversation.id)
+                .collect {
+                    if (it is ResultState.Success) stateHolder.refreshAdminMessages()
+                }
             messagesRepository.get(
                 threadId = conversation.id,
                 admin = true

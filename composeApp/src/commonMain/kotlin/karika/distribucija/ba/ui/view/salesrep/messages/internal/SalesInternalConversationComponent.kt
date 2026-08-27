@@ -23,6 +23,12 @@ class SalesInternalConversationComponent(
     val messages = _messages.asStateFlow()
 
     init {
+        scope.launch {
+            stateHolder.customerThreadPush.collect { threadId ->
+                load()
+            }
+        }
+
         load()
     }
 
@@ -54,7 +60,6 @@ class SalesInternalConversationComponent(
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
                         hideLoader()
-                        stateHolder.refreshInternalMessages()
                         load()
                     }
                     is ResultState.Error -> {
@@ -68,7 +73,9 @@ class SalesInternalConversationComponent(
 
     private fun markRead() {
         scope.launch {
-            salesRepository.markConversationRead(threadId).collect {}
+            salesRepository.markConversationRead(threadId).collect {
+                stateHolder.refreshInternalMessages()
+            }
         }
     }
 

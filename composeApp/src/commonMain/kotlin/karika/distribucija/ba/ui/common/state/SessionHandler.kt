@@ -26,22 +26,27 @@ open class SessionHandler : KoinComponent {
     }
 
     private fun rememberLogin(loginDto: LoginDto) {
+        val userType =
+            if (loginDto.userType == KarikaType.SALES_REP) KarikaType.VENDOR else loginDto.userType
+
         persistenceManager.save(
-            "user_username".plus(loginDto.userType.name),
+            "user_username".plus(userType.name),
             loginDto.username
         )
         persistenceManager.save(
-            "user_password".plus(loginDto.userType.name),
+            "user_password".plus(userType.name),
             loginDto.password
         )
         persistenceManager.save("user_type", loginDto.userType.name)
     }
 
-    fun getUserUsername(userType: KarikaType) =
-        persistenceManager.get("user_username".plus(userType.name))
+    fun getUserUsername(userType: KarikaType): String {
+        return persistenceManager.get("user_username".plus(userType.name))
+    }
 
-    fun getUserPassword(userType: KarikaType) =
-        persistenceManager.get("user_password".plus(userType.name))
+    fun getUserPassword(userType: KarikaType): String {
+        return persistenceManager.get("user_password".plus(userType.name))
+    }
 
 
     fun logout() {
@@ -58,7 +63,10 @@ open class SessionHandler : KoinComponent {
 
     fun hasJWT() = persistenceManager.get("JWT_TOKEN").isNotEmpty()
 
-    fun userType() = KarikaType.valueOf(persistenceManager.get("user_type").ifEmpty { KarikaType.SHOP.name }).toUserType()
+    fun userType() =
+        KarikaType.valueOf(persistenceManager.get("user_type").ifEmpty { KarikaType.SHOP.name })
+            .toUserType()
+
     fun mainConfig(): AppConfig {
         val type = persistenceManager.get("user_type")
         val jwt = persistenceManager.get("JWT_TOKEN")
