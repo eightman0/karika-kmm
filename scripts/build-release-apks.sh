@@ -77,9 +77,15 @@ for module in "${MODULES[@]}"; do
     echo "[$module] warning: apksigner not found, skipping signature verification" >&2
   fi
 
-  version_name="$(grep -m1 'versionName' "$REPO_ROOT/$module/build.gradle.kts" | sed -E 's/.*versionName = "([^"]*)".*/\1/')"
-  version_code="$(grep -m1 'versionCode' "$REPO_ROOT/$module/build.gradle.kts" | sed -E 's/[^0-9]*([0-9]+).*/\1/')"
-  dest="$DIST_DIR/${module}-release-v${version_code}-${version_name}.apk"
+  if [ "$module" = "launcher" ]; then
+    # Launcher is Device Owner and isn't versioned/published through the dashboard the way
+    # salesrep is - a version suffix here would just be noise.
+    dest="$DIST_DIR/${module}-release.apk"
+  else
+    version_name="$(grep -m1 'versionName' "$REPO_ROOT/$module/build.gradle.kts" | sed -E 's/.*versionName = "([^"]*)".*/\1/')"
+    version_code="$(grep -m1 'versionCode' "$REPO_ROOT/$module/build.gradle.kts" | sed -E 's/[^0-9]*([0-9]+).*/\1/')"
+    dest="$DIST_DIR/${module}-release-v${version_code}-${version_name}.apk"
+  fi
   cp "$apk" "$dest"
 
   echo "[$module] sha256: $(shasum -a 256 "$dest" | awk '{print $1}')"
