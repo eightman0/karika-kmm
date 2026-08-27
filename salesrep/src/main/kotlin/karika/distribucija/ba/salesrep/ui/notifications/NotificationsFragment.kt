@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentNotificationsBinding
+import karika.distribucija.ba.salesrep.notifications.NotificationDestination
 
 /** Mirrors composeApp's SalesNotificationsView.kt. */
 class NotificationsFragment : Fragment() {

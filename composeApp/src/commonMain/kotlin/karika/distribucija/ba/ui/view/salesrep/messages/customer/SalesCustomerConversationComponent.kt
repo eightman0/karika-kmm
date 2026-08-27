@@ -25,6 +25,11 @@ class SalesCustomerConversationComponent(
 
     init {
         load()
+        scope.launch {
+            stateHolder.customerThreadPush.collect { threadId ->
+                if (threadId == conversation.id) load()
+            }
+        }
         backHandler.register(BackCallback {
             if (stateHolder.imagePreview.value != null) {
                 stateHolder.imagePreview.value = null

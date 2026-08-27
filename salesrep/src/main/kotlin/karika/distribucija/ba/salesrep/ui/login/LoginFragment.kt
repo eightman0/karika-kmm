@@ -21,6 +21,7 @@ import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.SalesRepApp
 import karika.distribucija.ba.salesrep.databinding.FragmentLoginBinding
 import karika.distribucija.ba.salesrep.model.ResultState
+import karika.distribucija.ba.salesrep.notifications.PushTokenRegistrar
 import karika.distribucija.ba.salesrep.util.isEmailFormatValid
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -135,6 +136,7 @@ class LoginFragment : Fragment() {
                         sessionManager.clearRememberedCredentials()
                     }
                     sendLoginEventToLauncher(binding.editEmail.text?.toString()?.trim().orEmpty())
+                    PushTokenRegistrar.register()
                     findNavController().navigate(R.id.action_login_to_orders)
                 }
 

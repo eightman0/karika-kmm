@@ -10,6 +10,7 @@ import karika.distribucija.ba.salesrep.model.Message
 import karika.distribucija.ba.salesrep.model.OperationalCustomer
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.model.SendMessageRequest
+import karika.distribucija.ba.salesrep.notifications.MessagePushBus
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -68,6 +69,11 @@ class CustomerNewMessageViewModel(savedStateHandle: SavedStateHandle) : ViewMode
             )
         }
         loadCustomers(null)
+        viewModelScope.launch {
+            MessagePushBus.events.collect { event ->
+                if (!event.admin && event.threadId == _threadId.value) loadMessages(event.threadId)
+            }
+        }
     }
 
     fun setAttachment(filename: String, bytes: ByteArray) {

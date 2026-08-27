@@ -595,6 +595,13 @@ internal class SalesApi {
             parameter("notificationId", notificationId)
         }
     }
+
+    /** POST /V1/mobile/push/token - null token unregisters this device (mirrors composeApp's
+     * NotificationApi.save(), including sending the literal "null" query value on logout, since
+     * that's what tells the backend to clear the token). */
+    suspend fun savePushToken(token: String?, tokenId: String?): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.post(HttpClientProvider.url("mobile/push/token?token=$token&tokenId=$tokenId"))
+    }
 }
 
 class SalesRepository internal constructor() {
@@ -1298,6 +1305,23 @@ class SalesRepository internal constructor() {
             val response = SalesApi().markNotificationRead(notificationId).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 emit(ResultState.Success(Unit))
+                return@flow
+            }
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun savePushToken(token: String?, tokenId: String?): Flow<ResultState<Boolean>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().savePushToken(token, tokenId).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(true))
                 return@flow
             }
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))

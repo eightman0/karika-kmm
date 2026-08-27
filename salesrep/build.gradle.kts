@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinxSerialization)
+    alias(libs.plugins.gms)
 }
 
 android {
@@ -94,4 +95,7 @@ dependencies {
     implementation(libs.kotlinx.datetime)
 
     implementation(project(":core-logging"))
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging.ktx)
 }

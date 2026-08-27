@@ -29,6 +29,14 @@ class SalesAdminNewMessageComponent(
 
     val attachment = MutableStateFlow<Pair<String, ByteArray>?>(null)
 
+    init {
+        scope.launch {
+            stateHolder.adminThreadPush.collect { pushedThreadId ->
+                if (pushedThreadId == _threadId.value) loadMessages(pushedThreadId)
+            }
+        }
+    }
+
     fun setSubject(v: String) { _subject.value = v }
 
     fun send(text: String) {

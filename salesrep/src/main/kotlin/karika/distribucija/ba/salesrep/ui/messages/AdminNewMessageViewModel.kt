@@ -8,6 +8,7 @@ import karika.distribucija.ba.salesrep.api.SalesRepository
 import karika.distribucija.ba.salesrep.model.Message
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.model.SendMessageRequest
+import karika.distribucija.ba.salesrep.notifications.MessagePushBus
 import kotlinx.coroutines.launch
 
 /** Mirrors composeApp's SalesAdminNewMessageComponent.kt. Unlike Customer's new-message screen,
@@ -32,6 +33,14 @@ class AdminNewMessageViewModel : ViewModel() {
 
     private val _attachment = MutableLiveData<Pair<String, ByteArray>?>(null)
     val attachment: LiveData<Pair<String, ByteArray>?> = _attachment
+
+    init {
+        viewModelScope.launch {
+            MessagePushBus.events.collect { event ->
+                if (event.admin && event.threadId == _threadId.value) loadMessages(event.threadId)
+            }
+        }
+    }
 
     fun setSubject(value: String) {
         _subject.value = value

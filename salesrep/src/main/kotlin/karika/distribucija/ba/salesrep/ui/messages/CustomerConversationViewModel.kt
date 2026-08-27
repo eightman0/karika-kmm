@@ -9,6 +9,7 @@ import karika.distribucija.ba.salesrep.api.SalesRepository
 import karika.distribucija.ba.salesrep.model.Message
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.model.SendMessageRequest
+import karika.distribucija.ba.salesrep.notifications.MessagePushBus
 import kotlinx.coroutines.launch
 
 /** Mirrors composeApp's SalesCustomerConversationComponent.kt. Every message sent on an existing
@@ -36,6 +37,14 @@ open class CustomerConversationViewModel(savedStateHandle: SavedStateHandle) : V
     init {
         markRead()
         load()
+        viewModelScope.launch {
+            MessagePushBus.events.collect { event ->
+                if (event.admin == admin && event.threadId == threadId) {
+                    markRead()
+                    load()
+                }
+            }
+        }
     }
 
     fun setAttachment(filename: String, bytes: ByteArray) {

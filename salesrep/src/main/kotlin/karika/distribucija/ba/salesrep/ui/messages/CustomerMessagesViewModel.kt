@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import karika.distribucija.ba.salesrep.api.SalesRepository
 import karika.distribucija.ba.salesrep.model.Conversation
 import karika.distribucija.ba.salesrep.model.ResultState
+import karika.distribucija.ba.salesrep.notifications.MessagePushBus
 import kotlinx.coroutines.launch
 
 /** Mirrors composeApp's SalesCustomerMessagesComponent.kt. */
@@ -31,8 +32,17 @@ open class CustomerMessagesViewModel : ViewModel() {
     private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
 
-    // No init { load() } here - the fragment's onResume() already calls refresh() on first
+    // No init-time load() here - the fragment's onResume() already calls refresh() on first
     // display (and on every return to this screen), so an init-time load would double the call.
+    // The push subscription below only reacts to live events, it doesn't load anything itself.
+    init {
+        viewModelScope.launch {
+            MessagePushBus.events.collect { event ->
+                if (event.admin == admin) refresh()
+            }
+        }
+    }
+
     fun refresh() = load()
 
     fun setFilter(filter: Filter) {

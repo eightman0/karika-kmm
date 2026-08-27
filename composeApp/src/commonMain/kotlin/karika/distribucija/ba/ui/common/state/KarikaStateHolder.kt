@@ -49,6 +49,14 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
 
     fun refreshInternalMessages() { _refreshInternalMessages.tryEmit(Unit) }
 
+    /** Emits the threadId of a customer/admin conversation a push just landed a new message in,
+     * so an already-open conversation screen for that exact thread can reload live. */
+    private val _customerThreadPush = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val customerThreadPush = _customerThreadPush.asSharedFlow()
+
+    private val _adminThreadPush = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val adminThreadPush = _adminThreadPush.asSharedFlow()
+
     fun logout() {
         sessionHandler = SessionHandler()
         messageHandler = MessageHandler()
@@ -80,5 +88,18 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
         messageHandler.reloadThread()
 
         customerSpecificHandler.refreshOrders()
+
+        if (route?.startsWith("route/messages") == true) {
+            val params = Regex("""[?&]([^=]+)=([^&]*)""").findAll(route)
+                .associate { it.groupValues[1] to it.groupValues[2] }
+            val threadId = params["threadId"]
+            if (params["admin"] == "1") {
+                refreshAdminMessages()
+                threadId?.let { _adminThreadPush.tryEmit(it) }
+            } else {
+                refreshCustomerMessages()
+                threadId?.let { _customerThreadPush.tryEmit(it) }
+            }
+        }
     }
 }

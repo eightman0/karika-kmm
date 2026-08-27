@@ -51,6 +51,11 @@ class SalesCustomerNewMessageComponent(
     init {
         loadCustomers("")
         if (initialCustomer != null) selectCustomer(initialCustomer)
+        scope.launch {
+            stateHolder.customerThreadPush.collect { pushedThreadId ->
+                if (pushedThreadId == _threadId.value) loadMessages(pushedThreadId)
+            }
+        }
     }
 
     fun setSubject(v: String) { _subject.value = v }
