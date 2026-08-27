@@ -32,8 +32,8 @@ def new_request_id() -> str:
 def send_version_check_to_device(device_id: str, version_code: str) -> None:
     """Nudges one device (by its own topic, not the fleet-wide one) to check for an update now,
     instead of waiting out its next periodic poll. Topic rather than direct token, same as the
-    fleet broadcast this replaced - a delivery hiccup isn't fatal since the periodic check still
-    picks it up within ~30 min regardless."""
+    fleet broadcast below - a delivery hiccup isn't fatal since the periodic check still picks it
+    up within ~30 min regardless."""
     try:
         init_messaging()
         messaging.send(
@@ -44,6 +44,21 @@ def send_version_check_to_device(device_id: str, version_code: str) -> None:
         )
     except Exception:
         logger.exception("Failed to send FCM update-check ping to %s", device_id)
+
+
+def send_version_check_all(version_code: str) -> None:
+    """Used only once a staged build is promoted to stable ("Posalji svima") - every device would
+    reach the same build on its next periodic poll regardless, this just makes it immediate."""
+    try:
+        init_messaging()
+        messaging.send(
+            messaging.Message(
+                topic=BROADCAST_TOPIC,
+                data={"command": "version_check", "versionCode": str(version_code)},
+            )
+        )
+    except Exception:
+        logger.exception("Failed to send FCM update-check broadcast")
 
 
 def send_analytics_request_all() -> None:

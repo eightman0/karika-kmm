@@ -7,14 +7,14 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from . import analytics_ingest, local_db
-from .version_config import get_kiosk_version
+from .version_config import resolve_version_for_device
 
 router = APIRouter(prefix="/api")
 
 
 @router.get("/version")
-def get_version():
-    return get_kiosk_version()
+def get_version(device_id: str | None = None):
+    return resolve_version_for_device(device_id)
 
 
 class HeartbeatBody(BaseModel):

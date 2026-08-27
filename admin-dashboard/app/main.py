@@ -71,7 +71,7 @@ def devices_page(
 ):
     all_devices = devices.list_devices()
     filtered = devices.filter_devices(all_devices, q)
-    latest_salesrep_code = version_config.get_kiosk_version()["version_code"]
+    latest_salesrep_code = version_config.highest_known_version_code()
     return templates.TemplateResponse(
         request,
         "devices.html",
@@ -124,7 +124,7 @@ def device_detail_page(
             "cmd_error": cmd_error,
             "cmd_sent": cmd_sent,
             "command_log": devices.command_log(device_id),
-            "latest_salesrep_code": version_config.get_kiosk_version()["version_code"],
+            "latest_salesrep_code": version_config.highest_known_version_code(),
         },
     )
 
@@ -220,7 +220,12 @@ def download_analytics(device_id: str):
 
 
 @app.get("/versions", dependencies=[require_login])
-def versions_page(request: Request, error: str | None = None, published: str | None = None):
+def versions_page(
+    request: Request,
+    error: str | None = None,
+    published: str | None = None,
+    sent_all: str | None = None,
+):
     all_devices = devices.list_devices()
     history = version_history.get_history(APP)
     current = version_config.get_kiosk_version()
@@ -230,6 +235,8 @@ def versions_page(request: Request, error: str | None = None, published: str | N
         rollout_count = devices.count_on_version(
             all_devices, devices.APP_PACKAGES[APP], current["version_code"]
         )
+    staged = version_config.get_staged_version()
+    is_staged = version_config.is_staged()
 
     return templates.TemplateResponse(
         request,
@@ -240,8 +247,12 @@ def versions_page(request: Request, error: str | None = None, published: str | N
             "history": history,
             "rollout_count": rollout_count,
             "total_devices": len(all_devices),
+            "staged": staged,
+            "is_staged": is_staged,
+            "staged_target_count": version_config.staged_target_count() if is_staged else 0,
             "error": error,
             "published": bool(published),
+            "sent_all": bool(sent_all),
             "active_page": "versions",
         },
     )
@@ -254,7 +265,7 @@ def publish_version(request: Request, apk_file: UploadFile = File(...)):
 
         # Every publish is mandatory - there's no supported "optional update" UX on the device.
         is_mandatory = True
-        version_config.publish_kiosk_version(version_code, version_name, apk_url, apk_sha256, is_mandatory)
+        version_config.publish_staged_version(version_code, version_name, apk_url, apk_sha256, is_mandatory)
         version_history.record_publish(
             APP,
             version_code,
@@ -267,6 +278,12 @@ def publish_version(request: Request, apk_file: UploadFile = File(...)):
     except Exception as e:
         return RedirectResponse(f"/versions?error={quote(str(e))}", status_code=303)
     return RedirectResponse("/versions?published=1", status_code=303)
+
+
+@app.post("/versions/send-all", dependencies=[require_login])
+def send_version_to_all():
+    devices.request_update_all()
+    return RedirectResponse("/versions?sent_all=1", status_code=303)
 
 
 @app.get("/provisioning", dependencies=[require_login])

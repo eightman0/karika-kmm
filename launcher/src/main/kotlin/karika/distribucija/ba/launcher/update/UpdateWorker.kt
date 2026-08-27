@@ -14,6 +14,7 @@ import androidx.work.WorkerParameters
 import karika.distribucija.ba.launcher.KnownApps
 import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceHeartbeat
+import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 import java.io.File
 import java.security.MessageDigest
 
@@ -27,7 +28,7 @@ private data class InstalledInfo(val versionCode: Long, val versionName: String)
 class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result = try {
-        val latest = DashboardApi.fetchLatestVersion()
+        val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext))
         val targetPackage = KnownApps.PRIMARY.packageName
         val installed = installedInfo(targetPackage)
 

@@ -6,7 +6,8 @@
 </div>
 
 {% if error %}<div class="error-banner">Greška pri objavi: {{ error }}</div>{% endif %}
-{% if published %}<div class="banner-success">Verzija objavljena - stiže na sve upaljene uređaje odmah.</div>{% endif %}
+{% if published %}<div class="banner-success">Verzija objavljena kao verzija na čekanju - nijedan uređaj je neće dobiti dok ga ne izabereš na listi uređaja, ili pošalješ svima odavde.</div>{% endif %}
+{% if sent_all %}<div class="banner-success">Verzija na čekanju poslana svim uređajima i postala je trenutna verzija.</div>{% endif %}
 
 <div class="card">
   <h2>Objavi novu verziju</h2>
@@ -20,8 +21,25 @@
     <p class="hint">Version code, version name i SHA-256 se čitaju direktno iz APK-a i upload-uje se u Firebase Storage - ne moraš ništa ručno unositi.</p>
     <button type="submit" class="btn btn-primary">Objavi</button>
   </form>
-  <p class="hint publish-form">Svaki update je obavezan. Objava odmah šalje push (FCM) na sve upaljene uređaje da provjere odmah - a i bez push-a, svaki uređaj sam provjeri periodično najkasnije za 30 min.</p>
+  <p class="hint publish-form">Objava ne šalje ništa nikome - postaje "verzija na čekanju" ispod. Izaberi uređaje na listi uređaja (dugme "Ažuriraj izabrane"/"Ažuriraj sada") da im pošalješ baš ovu verziju, ili "Pošalji svima" ovdje kad budeš siguran.</p>
 </div>
+
+{% if is_staged %}
+<div class="card">
+  <h2>Verzija na čekanju</h2>
+  <table class="detail-table">
+    <tr><th>Version code</th><td>{{ staged.version_code }}</td></tr>
+    <tr><th>Version name</th><td>{{ staged.version_name or "-" }}</td></tr>
+    <tr><th>APK</th><td><a href="{{ staged.apk_url }}">{{ staged.apk_url }}</a></td></tr>
+    <tr><th>SHA-256</th><td class="mono-id">{{ staged.apk_sha256 or "-" }}</td></tr>
+  </table>
+  <p class="hint">Poslano do sada na {{ staged_target_count }} izabrana uređaja (sa liste uređaja). Ostali je neće dobiti dok ne klikneš ispod.</p>
+  <form method="post" action="/versions/send-all"
+        onsubmit="return confirm('Poslati ovu verziju svim uređajima odmah i postaviti je kao trenutnu verziju?')">
+    <button type="submit" class="btn btn-danger">Pošalji svima</button>
+  </form>
+</div>
+{% endif %}
 
 <div class="card">
   <h2>Trenutno objavljeno</h2>

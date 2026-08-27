@@ -122,6 +122,25 @@ def init_db() -> None:
         )
         conn.execute(
             """
+            CREATE TABLE IF NOT EXISTS staged_kiosk_version (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                version_code INTEGER,
+                version_name TEXT,
+                apk_url TEXT,
+                apk_sha256 TEXT,
+                mandatory INTEGER
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS staged_version_targets (
+                device_id TEXT PRIMARY KEY
+            )
+            """
+        )
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS provisioning_extras (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 customer_id TEXT,
@@ -448,6 +467,61 @@ def set_kiosk_version(
             """,
             (version_code, version_name, apk_url, apk_sha256, int(mandatory)),
         )
+
+
+# --- staged kiosk version (published but not yet sent to everyone) -------------
+
+def get_staged_kiosk_version_row() -> dict | None:
+    with _connect() as conn:
+        row = conn.execute("SELECT * FROM staged_kiosk_version WHERE id = 1").fetchone()
+        return dict(row) if row else None
+
+
+def set_staged_kiosk_version(
+    version_code: int, version_name: str, apk_url: str, apk_sha256: str, mandatory: bool
+) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO staged_kiosk_version (id, version_code, version_name, apk_url, apk_sha256, mandatory)
+            VALUES (1, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                version_code=excluded.version_code,
+                version_name=excluded.version_name,
+                apk_url=excluded.apk_url,
+                apk_sha256=excluded.apk_sha256,
+                mandatory=excluded.mandatory
+            """,
+            (version_code, version_name, apk_url, apk_sha256, int(mandatory)),
+        )
+        conn.execute("DELETE FROM staged_version_targets")
+
+
+def clear_staged_kiosk_version() -> None:
+    with _connect() as conn:
+        conn.execute("DELETE FROM staged_kiosk_version WHERE id = 1")
+        conn.execute("DELETE FROM staged_version_targets")
+
+
+def add_staged_target(device_id: str) -> None:
+    with _connect() as conn:
+        conn.execute(
+            "INSERT INTO staged_version_targets (device_id) VALUES (?) ON CONFLICT(device_id) DO NOTHING",
+            (device_id,),
+        )
+
+
+def is_staged_target(device_id: str) -> bool:
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM staged_version_targets WHERE device_id = ?", (device_id,)
+        ).fetchone()
+        return row is not None
+
+
+def count_staged_targets() -> int:
+    with _connect() as conn:
+        return conn.execute("SELECT COUNT(*) FROM staged_version_targets").fetchone()[0]
 
 
 # --- version history -----------------------------------------------------------

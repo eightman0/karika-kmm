@@ -5,6 +5,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 /**
@@ -22,8 +23,9 @@ object DashboardApi {
     private const val BASE_URL = "https://karika.car4hire.ba"
     private const val TIMEOUT_MS = 15_000
 
-    suspend fun fetchLatestVersion(): KioskVersion = withContext(Dispatchers.IO) {
-        val json = get("$BASE_URL/api/version")
+    suspend fun fetchLatestVersion(deviceId: String): KioskVersion = withContext(Dispatchers.IO) {
+        val encodedId = URLEncoder.encode(deviceId, "UTF-8")
+        val json = get("$BASE_URL/api/version?device_id=$encodedId")
         KioskVersion(
             versionCode = json.optString("version_code", "0").toLongOrNull() ?: 0L,
             versionName = json.optString("version_name", ""),
