@@ -181,7 +181,7 @@ main { padding: 28px; max-width: 1080px; margin: 0 auto; }
 table { width: 100%; border-collapse: collapse; margin-top: 4px; }
 th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
 .devices-table th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
-.select-all-label { display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer; }
+.devices-table th.select-all-col { min-width: 70px; white-space: nowrap; }
 .devices-table tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
 .detail-table th { color: var(--muted); font-weight: 500; width: 220px; vertical-align: top; }
 
