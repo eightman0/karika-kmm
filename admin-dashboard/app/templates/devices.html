@@ -16,6 +16,7 @@
     <form method="post" action="/devices/analytics-request">
       <button type="submit" class="btn btn-secondary">Povuci analitiku (svi)</button>
     </form>
+    <button type="button" class="btn btn-secondary" id="select-all-btn" onclick="toggleAllDevices()">Označi sve</button>
     <form method="post" action="/devices/update-selected" id="update-selected-form">
       <button type="submit" class="btn btn-secondary">Ažuriraj izabrane</button>
     </form>
@@ -48,7 +49,7 @@
     {% for d in devices %}
     <tr>
       <td data-label="">
-        <input type="checkbox" name="device_ids" value="{{ d.id }}" form="update-selected-form">
+        <input type="checkbox" class="device-select" name="device_ids" value="{{ d.id }}" form="update-selected-form">
       </td>
       <td data-label="Status">
         <span class="status status-{{ d.status }}"><span class="status-dot"></span>{{ {"online": "online", "stale": "stale", "never": "nikad"}[d.status] }}</span>
@@ -87,4 +88,13 @@
   </div>
 </div>
 {% endif %}
+
+<script>
+  function toggleAllDevices() {
+    var boxes = document.querySelectorAll('.device-select');
+    var allChecked = Array.prototype.every.call(boxes, function (b) { return b.checked; });
+    boxes.forEach(function (b) { b.checked = !allChecked; });
+    document.getElementById('select-all-btn').textContent = allChecked ? 'Označi sve' : 'Poništi sve';
+  }
+</script>
 {% endblock %}
