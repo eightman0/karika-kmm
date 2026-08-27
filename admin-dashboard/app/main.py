@@ -171,15 +171,6 @@ def maintenance_device(device_id: str, enable: str = Form(...)):
     return RedirectResponse(f"/devices/{device_id}?cmd_sent=maintenance_{enable}", status_code=303)
 
 
-@app.post("/devices/{device_id}/reboot-schedule", dependencies=[require_login])
-def set_reboot_schedule(device_id: str, hour: int = Form(...)):
-    try:
-        devices.request_reboot_schedule(device_id, hour)
-    except Exception as e:
-        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/devices/{device_id}?cmd_sent=reboot_schedule", status_code=303)
-
-
 @app.post("/devices/{device_id}/mapping", dependencies=[require_login])
 def set_device_mapping(device_id: str, customer_id: str = Form(""), site_id: str = Form("")):
     devices.set_device_mapping(device_id, customer_id.strip(), site_id.strip())

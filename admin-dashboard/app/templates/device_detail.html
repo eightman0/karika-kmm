@@ -142,11 +142,6 @@
         onsubmit="return confirm('Restartovati uređaj {{ device.id }} odmah?')">
     <button type="submit" class="btn btn-danger">Restartuj sad</button>
   </form>
-  <p class="hint" style="margin-top: 16px;">Dnevni automatski reboot (podrazumijevano 04h):</p>
-  <form method="post" action="/devices/{{ device.id }}/reboot-schedule" class="toolbar">
-    <input class="search-input" type="number" name="hour" min="0" max="23" value="4" style="max-width: 100px;">
-    <button type="submit" class="btn btn-secondary">Postavi raspored</button>
-  </form>
 </div>
 
 <div class="card">

@@ -104,5 +104,3 @@ def send_maintenance(fcm_token: str, enable: bool) -> str:
     return send_command_to_token(fcm_token, "maintenance_on" if enable else "maintenance_off")
 
 
-def send_reboot_schedule(fcm_token: str, hour: int) -> str:
-    return send_command_to_token(fcm_token, "set_reboot_schedule", {"hour": hour})

@@ -10,7 +10,6 @@ from .push import (
     send_log_request,
     send_maintenance,
     send_reboot,
-    send_reboot_schedule,
 )
 from .tz import LOCAL_TZ
 
@@ -136,10 +135,6 @@ def request_enter_kiosk(device_id: str) -> None:
 
 def request_maintenance(device_id: str, enable: bool) -> None:
     send_maintenance(_require_token(device_id), enable)
-
-
-def request_reboot_schedule(device_id: str, hour: int) -> None:
-    send_reboot_schedule(_require_token(device_id), hour)
 
 
 def request_analytics_all() -> None:

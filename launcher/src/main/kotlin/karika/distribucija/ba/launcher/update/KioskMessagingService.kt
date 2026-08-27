@@ -73,11 +73,6 @@ class KioskMessagingService : FirebaseMessagingService() {
                 ReArmKioskWorker.cancel(applicationContext)
                 LauncherActivity.bringToFront(applicationContext)
             }
-            CMD_SET_REBOOT_SCHEDULE -> runAcked(command, requestId) {
-                val hour = message.data["hour"]?.toIntOrNull()
-                    ?: throw IllegalArgumentException("Missing/invalid hour")
-                ScheduledRebootWorker.reschedule(applicationContext, hour)
-            }
             CMD_VERSION_CHECK, null -> UpdateScheduler.triggerImmediateCheck(applicationContext)
             else -> Log.w(TAG, "Unknown command: $command")
         }
@@ -115,7 +110,6 @@ class KioskMessagingService : FirebaseMessagingService() {
         private const val CMD_MAINTENANCE_OFF = "maintenance_off"
         private const val CMD_EXIT_KIOSK = "exit_kiosk"
         private const val CMD_ENTER_KIOSK = "enter_kiosk"
-        private const val CMD_SET_REBOOT_SCHEDULE = "set_reboot_schedule"
         private const val CMD_VERSION_CHECK = "version_check"
 
         fun deviceTopic(deviceId: String) = "device_$deviceId"
