@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import karika.distribucija.ba.launcher.update.DeviceMappingWorker
+import karika.distribucija.ba.logging.AppLogger
 
 /** customer_id/site_id read once from the QR provisioning payload's admin extras bundle and
  * persisted locally so later code (heartbeat, dashboard reports) doesn't need to re-parse
@@ -41,11 +42,20 @@ object DeviceMapping {
      */
     @Suppress("DEPRECATION")
     fun readFromProvisioningIntent(activity: Activity) {
+        val checkpoint = activity.javaClass.simpleName
+        val extraKeys = activity.intent.extras?.keySet()?.joinToString() ?: "(none)"
+        AppLogger.i(TAG, "readFromProvisioningIntent from $checkpoint, intent extras: $extraKeys")
+
         val extras = activity.intent.getParcelableExtra<PersistableBundle>(
             DevicePolicyManager.EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE
-        ) ?: return
+        )
+        if (extras == null) {
+            AppLogger.i(TAG, "$checkpoint: no admin extras bundle in this intent")
+            return
+        }
         val customerId = extras.getString("customer_id")
         val siteId = extras.getString("site_id")
+        AppLogger.i(TAG, "$checkpoint: admin extras bundle present, customer_id=$customerId site_id=$siteId")
         if (customerId == null && siteId == null) return
 
         save(activity, customerId, siteId)
@@ -59,5 +69,8 @@ object DeviceMapping {
                 )
                 .build()
         )
+        AppLogger.i(TAG, "$checkpoint: saved locally and enqueued DeviceMappingWorker")
     }
+
+    private const val TAG = "DeviceMapping"
 }
