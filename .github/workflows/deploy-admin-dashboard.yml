@@ -3,7 +3,7 @@ name: Deploy Admin Dashboard to Contabo VPS
 on:
   push:
     branches:
-      - claude/android-kiosk-silent-update-s7wn9q
+      - develop
     paths:
       - "admin-dashboard/**"
       - ".github/workflows/deploy-admin-dashboard.yml"
