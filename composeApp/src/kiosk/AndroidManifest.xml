@@ -13,8 +13,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.REQUEST_PASSWORD_COMPLEXITY" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="com.google.android.setupwizard.SETUP_COMPAT_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
@@ -26,7 +24,6 @@
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUTOFILL" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCALE" />
-    <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCATION" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_MOBILE_NETWORK" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_MODIFY_USERS" />
