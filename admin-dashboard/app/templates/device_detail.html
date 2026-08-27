@@ -18,7 +18,14 @@
   <div class="metric-card">
     <p class="metric-label">Verzija</p>
     <p class="metric-value">{{ device.installedVersionName or "-" }}</p>
-    <p class="metric-sub">code {{ device.installedVersionCode or "-" }}</p>
+    <p class="metric-sub">code {{ device.installedVersionCode or "-" }}
+      {% if latest_salesrep_code and device.installedPackage == "karika.distribucija.ba.salesrep" and (device.installedVersionCode | string) != (latest_salesrep_code | string) %}
+      <span class="tag tag-lagging">zaostaje</span>
+      {% endif %}
+    </p>
+    <form method="post" action="/devices/{{ device.id }}/update" style="margin-top: 8px;">
+      <button type="submit" class="btn btn-secondary btn-sm">Ažuriraj sada</button>
+    </form>
   </div>
   <div class="metric-card">
     <p class="metric-label">Paket</p>

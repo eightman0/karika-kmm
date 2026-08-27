@@ -10,8 +10,10 @@ from .push import (
     send_log_request,
     send_maintenance,
     send_reboot,
+    send_version_check_to_device,
 )
 from .tz import LOCAL_TZ
+from .version_config import get_kiosk_version
 
 STALE_AFTER_SECONDS = 12 * 60 * 60  # 12h - covers the 30min periodic worker plus a lot of slack
 SIGNED_URL_MINUTES = 30
@@ -135,6 +137,16 @@ def request_enter_kiosk(device_id: str) -> None:
 
 def request_maintenance(device_id: str, enable: bool) -> None:
     send_maintenance(_require_token(device_id), enable)
+
+
+def request_update_check(device_id: str) -> None:
+    send_version_check_to_device(device_id, get_kiosk_version()["version_code"])
+
+
+def request_update_check_bulk(device_ids: list[str]) -> None:
+    version_code = get_kiosk_version()["version_code"]
+    for device_id in device_ids:
+        send_version_check_to_device(device_id, version_code)
 
 
 def request_analytics_all() -> None:

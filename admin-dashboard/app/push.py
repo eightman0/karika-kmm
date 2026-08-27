@@ -29,19 +29,21 @@ def new_request_id() -> str:
     return str(uuid.uuid4())
 
 
-def send_version_check(version_code: str) -> None:
+def send_version_check_to_device(device_id: str, version_code: str) -> None:
+    """Nudges one device (by its own topic, not the fleet-wide one) to check for an update now,
+    instead of waiting out its next periodic poll. Topic rather than direct token, same as the
+    fleet broadcast this replaced - a delivery hiccup isn't fatal since the periodic check still
+    picks it up within ~30 min regardless."""
     try:
         init_messaging()
         messaging.send(
             messaging.Message(
-                topic=BROADCAST_TOPIC,
+                topic=_device_topic(device_id),
                 data={"command": "version_check", "versionCode": str(version_code)},
             )
         )
     except Exception:
-        # The periodic on-device check picks this up within ~30 min regardless, so a push
-        # failure (e.g. a transient FCM hiccup) shouldn't block the publish itself.
-        logger.exception("Failed to send FCM update-check ping")
+        logger.exception("Failed to send FCM update-check ping to %s", device_id)
 
 
 def send_analytics_request_all() -> None:

@@ -16,10 +16,14 @@
     <form method="post" action="/devices/analytics-request">
       <button type="submit" class="btn btn-secondary">Povuci analitiku (svi)</button>
     </form>
+    <form method="post" action="/devices/update-selected" id="update-selected-form">
+      <button type="submit" class="btn btn-secondary">Ažuriraj izabrane</button>
+    </form>
   </div>
 </div>
 
 {% if analytics_sent %}<div class="banner-success">Zahtjev za analitiku poslan svim uređajima - stiže čim se uređaj javi.</div>{% endif %}
+{% if update_sent %}<div class="banner-success">Zahtjev za update poslan na {{ update_sent }} izabrana uređaja.</div>{% endif %}
 
 <form method="get" action="/devices" class="toolbar">
   <input class="search-input" type="text" name="q" value="{{ q }}" placeholder="Pretraži po ID-u uređaja...">
@@ -30,6 +34,7 @@
 <table class="devices-table">
   <thead>
     <tr>
+      <th></th>
       <th>Status</th>
       <th>Uređaj</th>
       <th>Kupac / lokacija</th>
@@ -42,6 +47,9 @@
   <tbody>
     {% for d in devices %}
     <tr>
+      <td data-label="">
+        <input type="checkbox" name="device_ids" value="{{ d.id }}" form="update-selected-form">
+      </td>
       <td data-label="Status">
         <span class="status status-{{ d.status }}"><span class="status-dot"></span>{{ {"online": "online", "stale": "stale", "never": "nikad"}[d.status] }}</span>
       </td>

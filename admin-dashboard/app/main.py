@@ -63,7 +63,12 @@ def logout(request: Request):
 
 
 @app.get("/devices", dependencies=[require_login])
-def devices_page(request: Request, q: str = "", analytics_sent: str | None = None):
+def devices_page(
+    request: Request,
+    q: str = "",
+    analytics_sent: str | None = None,
+    update_sent: str | None = None,
+):
     all_devices = devices.list_devices()
     filtered = devices.filter_devices(all_devices, q)
     latest_salesrep_code = version_config.get_kiosk_version()["version_code"]
@@ -77,6 +82,7 @@ def devices_page(request: Request, q: str = "", analytics_sent: str | None = Non
             "latest_salesrep_code": latest_salesrep_code,
             "active_page": "devices",
             "analytics_sent": bool(analytics_sent),
+            "update_sent": update_sent,
         },
     )
 
@@ -85,6 +91,14 @@ def devices_page(request: Request, q: str = "", analytics_sent: str | None = Non
 def request_analytics_all():
     devices.request_analytics_all()
     return RedirectResponse("/devices?analytics_sent=1", status_code=303)
+
+
+@app.post("/devices/update-selected", dependencies=[require_login])
+def update_selected_devices(device_ids: list[str] = Form(default=[])):
+    if not device_ids:
+        return RedirectResponse("/devices", status_code=303)
+    devices.request_update_check_bulk(device_ids)
+    return RedirectResponse(f"/devices?update_sent={len(device_ids)}", status_code=303)
 
 
 @app.get("/devices/{device_id}", dependencies=[require_login])
@@ -110,6 +124,7 @@ def device_detail_page(
             "cmd_error": cmd_error,
             "cmd_sent": cmd_sent,
             "command_log": devices.command_log(device_id),
+            "latest_salesrep_code": version_config.get_kiosk_version()["version_code"],
         },
     )
 
@@ -133,6 +148,15 @@ def factory_reset_device(device_id: str):
     except Exception as e:
         return RedirectResponse(f"/devices/{device_id}?reset_error={quote(str(e))}", status_code=303)
     return RedirectResponse(f"/devices/{device_id}?reset_sent=1", status_code=303)
+
+
+@app.post("/devices/{device_id}/update", dependencies=[require_login])
+def update_device(device_id: str):
+    try:
+        devices.request_update_check(device_id)
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=update", status_code=303)
 
 
 @app.post("/devices/{device_id}/reboot", dependencies=[require_login])

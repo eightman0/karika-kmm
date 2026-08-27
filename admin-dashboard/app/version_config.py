@@ -1,12 +1,12 @@
 """
-Publishes the salesrep version info the launcher's silent-update pipeline reads, and sends an FCM
-data message so devices check for it right away instead of waiting out the next periodic poll.
+Publishes the salesrep version info the launcher's silent-update pipeline reads. Devices pick it
+up on their next periodic poll; an immediate nudge is a separate, per-device choice made from the
+devices list/detail pages (see devices.request_update_check()), not automatic on publish.
 
 Backed by local_db (SQLite), not Firestore - see local_db.py for why.
 """
 
 from . import local_db
-from .push import send_version_check
 
 
 def get_kiosk_version() -> dict:
@@ -24,4 +24,3 @@ def publish_kiosk_version(
     version_code: str, version_name: str, apk_url: str, apk_sha256: str, mandatory: bool
 ) -> None:
     local_db.set_kiosk_version(int(version_code), version_name, apk_url, apk_sha256, mandatory)
-    send_version_check(version_code)

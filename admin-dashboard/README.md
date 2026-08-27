@@ -24,15 +24,18 @@ VPS, see below).
 ## Features
 
 - **Devices** (`/devices`) - every device that has self-registered (via a heartbeat or a log
-  upload from the launcher app): installed `salesrep` version, last-seen status.
-- **Device detail** (`/devices/{id}`) - request a fresh log pull (records the request and sends an
-  FCM push targeted at that one device - see `app/push.py` - which the launcher picks up even from
-  a frozen/stopped process), download the last uploaded log via a server-generated signed Storage
-  URL - the log itself isn't publicly readable.
+  upload from the launcher app): installed `salesrep` version, last-seen status. Select devices via
+  their row checkbox and "Ažuriraj izabrane" to nudge just those to check for an update now - each
+  device has its own FCM topic (`device_<id>`), so this never touches unselected devices.
+- **Device detail** (`/devices/{id}`) - "Ažuriraj sada" nudges this one device the same way; request
+  a fresh log pull (records the request and sends an FCM push targeted at that one device - see
+  `app/push.py` - which the launcher picks up even from a frozen/stopped process), download the
+  last uploaded log via a server-generated signed Storage URL - the log itself isn't publicly
+  readable.
 - **Versions** (`/versions`) - view and publish the `salesrep` version the launcher's silent-update
-  pipeline reads over its own `/api/version` endpoint (`app/device_api.py`). Publishing also sends
-  an FCM data message so devices check right away instead of waiting for their next periodic poll
-  (at most ~30 min later).
+  pipeline reads over its own `/api/version` endpoint (`app/device_api.py`). Publishing only stores
+  the new version - devices pick it up on their next periodic poll (at most ~30 min later) unless
+  nudged sooner from the devices list/detail pages.
 - **Login** (`/login`) - session-cookie auth gates every other page. Defaults to `admin`/`admin`
   (see `ADMIN_USERNAME`/`ADMIN_PASSWORD` in `.env.example`) - change those before this is
   anything but a throwaway internal tool. Set `SESSION_SECRET` too, or every deploy (which
