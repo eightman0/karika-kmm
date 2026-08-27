@@ -6,6 +6,7 @@ import karika.distribucija.ba.domain.HttpClientProvider.profileImage
 import karika.distribucija.ba.domain.api.DashRepository
 import karika.distribucija.ba.domain.model.EventType
 import karika.distribucija.ba.domain.model.KarikaUnit
+import karika.distribucija.ba.domain.model.NotificationPreferences
 import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
@@ -88,6 +89,42 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
 
     val changePassSheet = mutableStateOf(false)
 
+    val emailNotifications = mutableStateOf(true)
+    val viberNotifications = mutableStateOf(true)
+    val pushNotifications = mutableStateOf(true)
+
+    init {
+        loadNotificationPreferences()
+    }
+
+    private fun loadNotificationPreferences() {
+        scope.launch {
+            userRepository.getNotificationPreferences().collect { result ->
+                if (result is ResultState.Success) {
+                    emailNotifications.value = result.data.email
+                    viberNotifications.value = result.data.viber
+                    pushNotifications.value = result.data.push
+                }
+            }
+        }
+    }
+
+    private fun saveNotificationPreferences() {
+        scope.launch {
+            userRepository.updateNotificationPreferences(
+                NotificationPreferences(
+                    email = emailNotifications.value,
+                    viber = viberNotifications.value,
+                    push = pushNotifications.value
+                )
+            ).collect { result ->
+                if (result is ResultState.Error) {
+                    showMessage(result.message)
+                }
+            }
+        }
+    }
+
     fun changePass(oldPass: String, newPass: String) {
         scope.launch {
             userRepository.changePass(oldPass, newPass)
@@ -118,6 +155,8 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
             showMessage("Broj računa mora imati 16 cifara.")
             return
         }
+
+        saveNotificationPreferences()
 
         scope.launch {
             DashRepository()

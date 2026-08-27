@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaPicker
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.PrimaryButton
@@ -108,12 +109,8 @@ private fun FormCard(component: CustomerRuleEditorComponent) {
     val discount = component.discountPercent.asState()
     val dropdownState = remember { mutableStateOf(false) }.asState()
     val itemDropdownState = remember { mutableStateOf(false) }.asState()
-    val customerTypeDropdownState = remember { mutableStateOf(false) }.asState()
-    val customerRegionDropdownState = remember { mutableStateOf(false) }.asState()
     val shops by component.shops.collectAsState()
     val searchResults by component.searchResults.collectAsState()
-    val filteredCustomerRegions by component.filteredCustomerRegions.collectAsState()
-    val filteredCustomerGroups by component.filteredCustomerGroups.collectAsState()
 
     Column(
         modifier = Modifier
@@ -135,18 +132,20 @@ private fun FormCard(component: CustomerRuleEditorComponent) {
                 shops = shops
             )
         } else if (component.ruleScope == RuleScope.CUSTOMER_TYPE) {
-            CustomerTypeDropdown(
-                component = component,
-                target = target,
-                dropdownState = customerTypeDropdownState,
-                groups = filteredCustomerGroups
+            KarikaPicker(
+                title = component.ruleScope.targetFieldTitle(),
+                placeholder = component.ruleScope.targetFieldPlaceholder(),
+                values = component.customerGroupLabels.asState(),
+                value = target,
+                onChange = { component.onCustomerGroupSelected(it) }
             )
         } else if (component.ruleScope == RuleScope.CUSTOMER_REGION) {
-            CustomerRegionDropdown(
-                component = component,
-                target = target,
-                dropdownState = customerRegionDropdownState,
-                regions = filteredCustomerRegions
+            KarikaPicker(
+                title = component.ruleScope.targetFieldTitle(),
+                placeholder = component.ruleScope.targetFieldPlaceholder(),
+                values = component.customerRegionLabels.asState(),
+                value = target,
+                onChange = { component.onCustomerRegionSelected(it) }
             )
         } else {
             KarikaTextField1(
@@ -297,139 +296,6 @@ private fun CustomerTargetDropdown(
                         }
                     )
                 }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CustomerTypeDropdown(
-    component: CustomerRuleEditorComponent,
-    target: androidx.compose.runtime.MutableState<String>,
-    dropdownState: androidx.compose.runtime.MutableState<Boolean>,
-    groups: List<karika.distribucija.ba.domain.model.KarikaUnit>
-) {
-    val focus = LocalFocusManager.current
-    ExposedDropdownMenuBox(
-        modifier = Modifier.fillMaxWidth(),
-        expanded = dropdownState.value,
-        onExpandedChange = { dropdownState.value = it }
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-        ) {
-            KarikaTextField1(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                title = component.ruleScope.targetFieldTitle(),
-                value = target,
-                placeholder = component.ruleScope.targetFieldPlaceholder(),
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next,
-                disabledTextColor = KarikaColors.Gray2,
-                onValueChange = {
-                    component.onTargetChanged(it)
-                    dropdownState.value = true
-                },
-                trailingIcons = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(
-                        expanded = dropdownState.value
-                    )
-                },
-                enabled = true
-            )
-        }
-
-        ExposedDropdownMenu(
-            modifier = Modifier.exposedDropdownSize(),
-            expanded = dropdownState.value,
-            onDismissRequest = { dropdownState.negate() },
-            containerColor = KarikaColors.White
-        ) {
-            groups.forEach { group ->
-                DropdownMenuItem(
-                    text = {
-                        KarikaText(
-                            text = group.label(),
-                            color = KarikaColors.Gray4,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                    },
-                    onClick = {
-                        component.onCustomerGroupSelected(group.label())
-                        dropdownState.negate()
-                        focus.clearFocus()
-                    }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CustomerRegionDropdown(
-    component: CustomerRuleEditorComponent,
-    target: androidx.compose.runtime.MutableState<String>,
-    dropdownState: androidx.compose.runtime.MutableState<Boolean>,
-    regions: List<karika.distribucija.ba.domain.model.KarikaUnit>
-) {
-    ExposedDropdownMenuBox(
-        modifier = Modifier.fillMaxWidth(),
-        expanded = dropdownState.value,
-        onExpandedChange = { dropdownState.value = it }
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-        ) {
-            KarikaTextField1(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                title = component.ruleScope.targetFieldTitle(),
-                value = target,
-                placeholder = component.ruleScope.targetFieldPlaceholder(),
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next,
-                onValueChange = {
-                    component.onTargetChanged(it)
-                    dropdownState.value = true
-                },
-                trailingIcons = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(
-                        expanded = dropdownState.value
-                    )
-                },
-                enabled = true
-            )
-        }
-
-        ExposedDropdownMenu(
-            modifier = Modifier.exposedDropdownSize(),
-            expanded = dropdownState.value,
-            onDismissRequest = { dropdownState.negate() },
-            containerColor = KarikaColors.White
-        ) {
-            regions.forEach { region ->
-                DropdownMenuItem(
-                    text = {
-                        KarikaText(
-                            text = region.label(),
-                            color = KarikaColors.Gray4,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                    },
-                    onClick = {
-                        component.onCustomerRegionSelected(region)
-                        dropdownState.negate()
-                    }
-                )
             }
         }
     }

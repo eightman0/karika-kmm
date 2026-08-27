@@ -38,6 +38,7 @@ import karika.distribucija.ba.ui.components.HorizontalSecondaryButtons
 import karika.distribucija.ba.ui.components.KarikaCheckboxSecondary
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
+import karika.distribucija.ba.ui.components.KarikaSwitch1
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.YSpacer24
@@ -356,6 +357,35 @@ private fun CompanyInfo(component: ProfileComponent) {
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Phone,
             imeAction = ImeAction.Next
+        )
+        KarikaText(
+            modifier = Modifier
+                .fillMaxWidth(),
+            text = "Obavijesti",
+            color = KarikaColors.Black,
+            textSize = 16.sp,
+            fontWeight = FontWeight.W700
+        )
+        KarikaSwitch1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Email obavijesti",
+            checked = component.emailNotifications.asState(),
+            onCheckedChange = { component.emailNotifications.value = it }
+        )
+        KarikaSwitch1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Viber obavijesti",
+            checked = component.viberNotifications.asState(),
+            onCheckedChange = { component.viberNotifications.value = it }
+        )
+        KarikaSwitch1(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "Push obavijesti",
+            checked = component.pushNotifications.asState(),
+            onCheckedChange = { component.pushNotifications.value = it }
         )
         KarikaText(
             modifier = Modifier

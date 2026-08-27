@@ -60,16 +60,10 @@ class CustomerRuleEditorComponent(
     private val _searchResults = MutableStateFlow<List<SearchItem>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
 
-    private val _filteredCustomerRegions =
-        MutableStateFlow(stateHolder.commonHandler.config.value.customerRegionList)
-    val filteredCustomerRegions = _filteredCustomerRegions.asStateFlow()
-
-    private val _filteredCustomerGroups =
-        MutableStateFlow(stateHolder.commonHandler.config.value.customerGroupList)
-    val filteredCustomerGroups = _filteredCustomerGroups.asStateFlow()
-
     val customerGroups = stateHolder.commonHandler.config.value.customerGroupList
     val customerRegions = stateHolder.commonHandler.config.value.customerRegionList
+    val customerGroupLabels = mutableStateOf(customerGroups.map { it.label() })
+    val customerRegionLabels = mutableStateOf(customerRegions.map { it.label() })
 
     private var searchJob: Job? = null
     private var itemSearchJob: Job? = null
@@ -107,14 +101,6 @@ class CustomerRuleEditorComponent(
                 delay(350)
                 loadShops(value)
             }
-        } else if (ruleScope == RuleScope.CUSTOMER_REGION) {
-            _filteredCustomerRegions.update {
-                customerRegions.filter { it.label().contains(value, ignoreCase = true) }
-            }
-        } else if (ruleScope == RuleScope.CUSTOMER_TYPE) {
-            _filteredCustomerGroups.update {
-                customerGroups.filter { it.label().contains(value, ignoreCase = true) }
-            }
         }
     }
 
@@ -126,13 +112,12 @@ class CustomerRuleEditorComponent(
 
     fun onCustomerGroupSelected(label: String) {
         target.value = label
-        _filteredCustomerGroups.update { customerGroups }
     }
 
-    fun onCustomerRegionSelected(region: KarikaUnit) {
+    fun onCustomerRegionSelected(label: String) {
+        val region = customerRegions.firstOrNull { it.label() == label } ?: return
         target.value = region.label()
         selectedCustomerRegion.value = region
-        _filteredCustomerRegions.update { customerRegions }
     }
 
     fun onItemOrCategoryChanged(value: String) {
