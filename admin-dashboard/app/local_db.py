@@ -576,6 +576,17 @@ def get_history_entry_by_id(entry_id: int) -> dict | None:
         return dict(row) if row else None
 
 
+def get_history_entry_by_version(app: str, version_code: int) -> dict | None:
+    """Most recent publish for this version_code - the version_code can legitimately have more
+    than one row (a reused code, or a corrected re-upload), in which case the latest one wins."""
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT * FROM version_history WHERE app = ? AND version_code = ? ORDER BY published_at DESC LIMIT 1",
+            (app, version_code),
+        ).fetchone()
+        return dict(row) if row else None
+
+
 def delete_history_entry(entry_id: int) -> None:
     with _connect() as conn:
         conn.execute("DELETE FROM version_history WHERE id = ?", (entry_id,))

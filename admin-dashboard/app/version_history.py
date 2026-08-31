@@ -39,3 +39,12 @@ def get_history(app: str, limit: int = 10) -> list[dict]:
 
 def delete_entry(entry_id: int) -> None:
     local_db.delete_history_entry(entry_id)
+
+
+def get_available_versions(app: str) -> list[dict]:
+    """One entry per version_code (the most recent publish of it, in case a code got reused),
+    newest first - for the "which version to send" picker on the devices pages."""
+    seen = {}
+    for h in get_history(app, limit=200):
+        seen.setdefault(h["versionCode"], h)
+    return sorted(seen.values(), key=lambda h: h["versionCode"], reverse=True)

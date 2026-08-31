@@ -80,6 +80,7 @@ def devices_page(
             "summary": devices.fleet_summary(all_devices),
             "q": q,
             "latest_salesrep_code": latest_salesrep_code,
+            "available_versions": version_history.get_available_versions(APP),
             "active_page": "devices",
             "analytics_sent": bool(analytics_sent),
             "update_sent": update_sent,
@@ -94,10 +95,14 @@ def request_analytics_all():
 
 
 @app.post("/devices/update-selected", dependencies=[require_login])
-def update_selected_devices(device_ids: list[str] = Form(default=[])):
+def update_selected_devices(
+    request: Request, device_ids: list[str] = Form(default=[]), version_code: str = Form("")
+):
     if not device_ids:
         return RedirectResponse("/devices", status_code=303)
-    devices.request_update_check_bulk(device_ids)
+    devices.request_update_check_bulk(
+        device_ids, version_code or None, request.session.get("username", "?")
+    )
     return RedirectResponse(f"/devices?update_sent={len(device_ids)}", status_code=303)
 
 
@@ -113,6 +118,10 @@ def device_detail_page(
     device = devices.get_device(device_id)
     if device is None:
         return RedirectResponse("/devices")
+    installed_code = device.get("installedVersionCode") or 0
+    available_versions = [
+        v for v in version_history.get_available_versions(APP) if v["versionCode"] > installed_code
+    ]
     return templates.TemplateResponse(
         request,
         "device_detail.html",
@@ -126,6 +135,7 @@ def device_detail_page(
             "command_log": devices.command_log(device_id),
             "last_ping_ack": devices.last_ping_ack(device_id),
             "latest_salesrep_code": version_config.highest_known_version_code(),
+            "available_versions": available_versions,
         },
     )
 
@@ -152,9 +162,11 @@ def factory_reset_device(device_id: str):
 
 
 @app.post("/devices/{device_id}/update", dependencies=[require_login])
-def update_device(device_id: str):
+def update_device(device_id: str, request: Request, version_code: str = Form("")):
     try:
-        devices.request_update_check(device_id)
+        devices.request_update_check(
+            device_id, version_code or None, request.session.get("username", "?")
+        )
     except Exception as e:
         return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
     return RedirectResponse(f"/devices/{device_id}?cmd_sent=update", status_code=303)

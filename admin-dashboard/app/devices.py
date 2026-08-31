@@ -17,6 +17,7 @@ from .tz import LOCAL_TZ
 from .version_config import (
     get_staged_version,
     promote_staged_to_stable,
+    stage_version_by_code,
     target_device_for_staged,
 )
 
@@ -145,16 +146,20 @@ def request_ping(device_id: str) -> None:
     send_ping(_require_token(device_id))
 
 
-def request_update_check(device_id: str) -> None:
+def request_update_check(device_id: str, version_code: str | None, published_by: str) -> None:
+    if version_code:
+        stage_version_by_code(version_code, published_by)
     target_device_for_staged(device_id)
     send_version_check_to_device(device_id, get_staged_version()["version_code"])
 
 
-def request_update_check_bulk(device_ids: list[str]) -> None:
-    version_code = get_staged_version()["version_code"]
+def request_update_check_bulk(device_ids: list[str], version_code: str | None, published_by: str) -> None:
+    if version_code:
+        stage_version_by_code(version_code, published_by)
+    resolved_version_code = get_staged_version()["version_code"]
     for device_id in device_ids:
         target_device_for_staged(device_id)
-        send_version_check_to_device(device_id, version_code)
+        send_version_check_to_device(device_id, resolved_version_code)
 
 
 def request_update_all(published_by: str) -> None:

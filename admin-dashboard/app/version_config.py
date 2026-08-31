@@ -79,6 +79,19 @@ def promote_staged_to_stable(published_by: str) -> str:
     return str(staged["version_code"])
 
 
+def stage_version_by_code(version_code: str, published_by: str) -> None:
+    """Used when an admin picks a specific historical build to send (see devices.request_update_
+    check()), rather than whatever happens to be staged already - restages that build's own
+    recorded apk_url/apk_sha256, same as rollback_to_history_entry() does for stable."""
+    entry = local_db.get_history_entry_by_version("salesrep", int(version_code))
+    if not entry:
+        raise ValueError(f"Nema objavljene verzije sa version code {version_code}")
+    local_db.set_staged_kiosk_version(
+        entry["version_code"], entry["version_name"], entry["apk_url"],
+        entry["apk_sha256"], bool(entry["mandatory"]), published_by,
+    )
+
+
 def rollback_to_history_entry(entry_id: int, published_by: str) -> str:
     """Makes a past publish (by its version_history row id) the stable version again, without
     re-uploading anything - reuses the apk_url/apk_sha256 already on record for it. Returns the

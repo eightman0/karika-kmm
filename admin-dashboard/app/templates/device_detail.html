@@ -23,7 +23,14 @@
       <span class="tag tag-lagging">zaostaje</span>
       {% endif %}
     </p>
-    <form method="post" action="/devices/{{ device.id }}/update" style="margin-top: 8px;">
+    <form method="post" action="/devices/{{ device.id }}/update" class="version-picker-form" style="margin-top: 8px;">
+      {% if available_versions %}
+      <select name="version_code" class="search-input">
+        {% for v in available_versions %}
+        <option value="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }})</option>
+        {% endfor %}
+      </select>
+      {% endif %}
       <button type="submit" class="btn btn-secondary btn-sm">Ažuriraj sada</button>
     </form>
   </div>

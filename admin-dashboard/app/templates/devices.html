@@ -16,7 +16,14 @@
     <form method="post" action="/devices/analytics-request">
       <button type="submit" class="btn btn-secondary">Povuci analitiku (svi)</button>
     </form>
-    <form method="post" action="/devices/update-selected" id="update-selected-form">
+    <form method="post" action="/devices/update-selected" id="update-selected-form" class="version-picker-form">
+      {% if available_versions %}
+      <select name="version_code" id="update-selected-version" class="search-input">
+        {% for v in available_versions %}
+        <option value="{{ v.versionCode }}" data-code="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }})</option>
+        {% endfor %}
+      </select>
+      {% endif %}
       <button type="submit" class="btn btn-secondary">Ažuriraj izabrane</button>
     </form>
   </div>
@@ -48,7 +55,8 @@
     {% for d in devices %}
     <tr>
       <td data-label="">
-        <input type="checkbox" class="device-select" name="device_ids" value="{{ d.id }}" form="update-selected-form">
+        <input type="checkbox" class="device-select" name="device_ids" value="{{ d.id }}" form="update-selected-form"
+               data-installed-code="{{ d.installedVersionCode or 0 }}" onchange="filterVersionPicker()">
       </td>
       <td data-label="Status">
         <span class="status status-{{ d.status }}"><span class="status-dot"></span>{{ {"online": "online", "stale": "neaktivan", "never": "nikad"}[d.status] }}</span>
@@ -122,6 +130,31 @@
 <script>
   function toggleAllDevices(source) {
     document.querySelectorAll('.device-select').forEach(function (b) { b.checked = source.checked; });
+    filterVersionPicker();
+  }
+
+  // Only offer versions newer than every currently-checked device's installed one, so picking
+  // one for a bulk send can't accidentally push an older/duplicate build to some of them.
+  function filterVersionPicker() {
+    var select = document.getElementById('update-selected-version');
+    if (!select) return;
+    var checked = Array.prototype.filter.call(
+      document.querySelectorAll('.device-select'), function (b) { return b.checked; }
+    );
+    var maxInstalled = checked.reduce(function (max, b) {
+      return Math.max(max, Number(b.dataset.installedCode) || 0);
+    }, 0);
+    var sawSelected = false;
+    Array.prototype.forEach.call(select.options, function (opt) {
+      var eligible = Number(opt.dataset.code) > maxInstalled;
+      opt.hidden = !eligible;
+      if (eligible && !sawSelected) {
+        opt.selected = true;
+        sawSelected = true;
+      } else if (!eligible) {
+        opt.selected = false;
+      }
+    });
   }
 
   function closeAllDropdowns() {
