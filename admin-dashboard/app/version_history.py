@@ -20,6 +20,7 @@ def get_history(app: str, limit: int = 10) -> list[dict]:
     rows = local_db.get_history(app, limit)
     return [
         {
+            "id": row["id"],
             "app": row["app"],
             "versionCode": row["version_code"],
             "versionName": row["version_name"],
@@ -34,3 +35,7 @@ def get_history(app: str, limit: int = 10) -> list[dict]:
         }
         for row in rows
     ]
+
+
+def delete_entry(entry_id: int) -> None:
+    local_db.delete_history_entry(entry_id)

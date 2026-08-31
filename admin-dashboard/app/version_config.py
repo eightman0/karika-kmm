@@ -8,7 +8,10 @@ default, immediately (broadcast push) or on its next periodic poll either way.
 Backed by local_db (SQLite), not Firestore - see local_db.py for why.
 """
 
+from datetime import datetime
+
 from . import local_db
+from .tz import LOCAL_TZ
 
 
 def _shape(row: dict | None) -> dict:
@@ -19,6 +22,11 @@ def _shape(row: dict | None) -> dict:
         "apk_url": row.get("apk_url") or "",
         "apk_sha256": row.get("apk_sha256") or "",
         "mandatory": "true" if row.get("mandatory", 1) else "false",
+        "published_by": row.get("published_by") or "",
+        "published_at": (
+            datetime.fromisoformat(row["published_at"]).astimezone(LOCAL_TZ)
+            if row.get("published_at") else None
+        ),
     }
 
 
@@ -46,24 +54,43 @@ def highest_known_version_code() -> str:
 
 
 def publish_staged_version(
-    version_code: str, version_name: str, apk_url: str, apk_sha256: str, mandatory: bool
+    version_code: str, version_name: str, apk_url: str, apk_sha256: str, mandatory: bool,
+    published_by: str,
 ) -> None:
-    local_db.set_staged_kiosk_version(int(version_code), version_name, apk_url, apk_sha256, mandatory)
+    local_db.set_staged_kiosk_version(
+        int(version_code), version_name, apk_url, apk_sha256, mandatory, published_by
+    )
 
 
-def promote_staged_to_stable() -> str:
+def promote_staged_to_stable(published_by: str) -> str:
     """Makes the staged build the one every device gets by default. Returns its version_code (for
     the caller to broadcast an immediate-check push), or the current stable version_code unchanged
-    if nothing was staged."""
+    if nothing was staged. published_by/published_at on the stable row records this promotion
+    moment, not whenever the build was originally staged - that's what "Trenutno objavljeno"
+    actually means."""
     staged = local_db.get_staged_kiosk_version_row()
     if not staged:
         return get_kiosk_version()["version_code"]
     local_db.set_kiosk_version(
         staged["version_code"], staged["version_name"], staged["apk_url"],
-        staged["apk_sha256"], bool(staged["mandatory"]),
+        staged["apk_sha256"], bool(staged["mandatory"]), published_by,
     )
     local_db.clear_staged_kiosk_version()
     return str(staged["version_code"])
+
+
+def rollback_to_history_entry(entry_id: int, published_by: str) -> str:
+    """Makes a past publish (by its version_history row id) the stable version again, without
+    re-uploading anything - reuses the apk_url/apk_sha256 already on record for it. Returns the
+    version_code that's now stable, or raises ValueError if that history row doesn't exist."""
+    entry = local_db.get_history_entry_by_id(entry_id)
+    if not entry:
+        raise ValueError(f"Nema publish zapisa sa id={entry_id}")
+    local_db.set_kiosk_version(
+        entry["version_code"], entry["version_name"], entry["apk_url"],
+        entry["apk_sha256"], bool(entry["mandatory"]), published_by,
+    )
+    return str(entry["version_code"])
 
 
 def resolve_version_for_device(device_id: str | None) -> dict:

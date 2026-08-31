@@ -226,6 +226,7 @@ def versions_page(
     error: str | None = None,
     published: str | None = None,
     sent_all: str | None = None,
+    rolled_back: str | None = None,
 ):
     all_devices = devices.list_devices()
     history = version_history.get_history(APP)
@@ -254,6 +255,7 @@ def versions_page(
             "error": error,
             "published": bool(published),
             "sent_all": bool(sent_all),
+            "rolled_back": bool(rolled_back),
             "active_page": "versions",
         },
     )
@@ -266,7 +268,10 @@ def publish_version(request: Request, apk_file: UploadFile = File(...)):
 
         # Every publish is mandatory - there's no supported "optional update" UX on the device.
         is_mandatory = True
-        version_config.publish_staged_version(version_code, version_name, apk_url, apk_sha256, is_mandatory)
+        username = request.session.get("username", "?")
+        version_config.publish_staged_version(
+            version_code, version_name, apk_url, apk_sha256, is_mandatory, username
+        )
         version_history.record_publish(
             APP,
             version_code,
@@ -274,7 +279,7 @@ def publish_version(request: Request, apk_file: UploadFile = File(...)):
             apk_url,
             apk_sha256,
             is_mandatory,
-            published_by=request.session.get("username", "?"),
+            published_by=username,
         )
     except Exception as e:
         return RedirectResponse(f"/versions?error={quote(str(e))}", status_code=303)
@@ -282,9 +287,24 @@ def publish_version(request: Request, apk_file: UploadFile = File(...)):
 
 
 @app.post("/versions/send-all", dependencies=[require_login])
-def send_version_to_all():
-    devices.request_update_all()
+def send_version_to_all(request: Request):
+    devices.request_update_all(request.session.get("username", "?"))
     return RedirectResponse("/versions?sent_all=1", status_code=303)
+
+
+@app.post("/versions/rollback/{entry_id}", dependencies=[require_login])
+def rollback_version(entry_id: int, request: Request):
+    try:
+        version_config.rollback_to_history_entry(entry_id, request.session.get("username", "?"))
+    except Exception as e:
+        return RedirectResponse(f"/versions?error={quote(str(e))}", status_code=303)
+    return RedirectResponse("/versions?rolled_back=1", status_code=303)
+
+
+@app.post("/versions/history/{entry_id}/delete", dependencies=[require_login])
+def delete_history_entry(entry_id: int):
+    version_history.delete_entry(entry_id)
+    return RedirectResponse("/versions", status_code=303)
 
 
 @app.get("/provisioning", dependencies=[require_login])

@@ -8,6 +8,7 @@
 {% if error %}<div class="error-banner">Greška pri objavi: {{ error }}</div>{% endif %}
 {% if published %}<div class="banner-success">Verzija objavljena kao verzija na čekanju - nijedan uređaj je neće dobiti dok ga ne izabereš na listi uređaja, ili pošalješ svima odavde.</div>{% endif %}
 {% if sent_all %}<div class="banner-success">Verzija na čekanju poslana svim uređajima i postala je trenutna verzija.</div>{% endif %}
+{% if rolled_back %}<div class="banner-success">Trenutna verzija je vraćena na stariju objavu.</div>{% endif %}
 
 <div class="card">
   <h2>Objavi novu verziju</h2>
@@ -34,6 +35,7 @@
     <tr><th>SHA-256</th><td class="mono-id">{{ staged.apk_sha256 or "-" }}</td></tr>
   </table>
   <p class="hint">Poslano do sada na {{ staged_target_count }} izabrana uređaja (sa liste uređaja). Ostali je neće dobiti dok ne klikneš ispod.</p>
+  {% if staged.published_by %}<p class="publish-meta">Objavio {{ staged.published_by }} &middot; {{ staged.published_at.strftime("%d.%m.%Y %H:%M") if staged.published_at else "" }}</p>{% endif %}
   <form method="post" action="/versions/send-all"
         onsubmit="return confirm('Poslati ovu verziju svim uređajima odmah i postaviti je kao trenutnu verziju?')">
     <button type="submit" class="btn btn-danger">Pošalji svima</button>
@@ -53,7 +55,7 @@
   </table>
   <div class="rollout-bar"><div class="rollout-bar-fill" style="width: {{ (rollout_count / total_devices * 100) if total_devices else 0 }}%"></div></div>
   <p class="rollout-caption">{{ rollout_count }}/{{ total_devices }} uređaja na ovoj verziji</p>
-  {% if history %}<p class="publish-meta">Objavio {{ history[0].publishedBy }} &middot; {{ history[0].publishedAt.strftime("%d.%m.%Y %H:%M") if history[0].publishedAt else "" }}</p>{% endif %}
+  {% if current.published_by %}<p class="publish-meta">Objavio {{ current.published_by }} &middot; {{ current.published_at.strftime("%d.%m.%Y %H:%M") if current.published_at else "" }}</p>{% endif %}
   {% else %}
   <p class="hint">Nema objavljene verzije.</p>
   {% endif %}
@@ -67,6 +69,16 @@
     <li class="history-item">
       <span class="history-version">{{ h.versionName }} ({{ h.versionCode }})</span>
       <span class="history-meta">{{ h.publishedBy }} &middot; {{ h.publishedAt.strftime("%d.%m.%Y %H:%M") if h.publishedAt else "" }}{% if h.mandatory %} &middot; obavezno{% endif %}</span>
+      <span class="history-actions">
+        <form method="post" action="/versions/rollback/{{ h.id }}"
+              onsubmit="return confirm('Vratiti {{ h.versionName }} ({{ h.versionCode }}) kao trenutnu verziju za sve uređaje?')">
+          <button type="submit" class="btn btn-secondary btn-sm">Aktiviraj</button>
+        </form>
+        <form method="post" action="/versions/history/{{ h.id }}/delete"
+              onsubmit="return confirm('Obrisati ovaj zapis iz historije objava? Ovo ne dira ništa što je trenutno instalirano.')">
+          <button type="submit" class="btn btn-danger btn-sm">Obriši</button>
+        </form>
+      </span>
     </li>
     {% endfor %}
   </ul>

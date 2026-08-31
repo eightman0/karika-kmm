@@ -120,6 +120,7 @@ def init_db() -> None:
             )
             """
         )
+        _ensure_columns(conn, "kiosk_version", {"published_by": "TEXT", "published_at": "TEXT"})
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS staged_kiosk_version (
@@ -132,6 +133,7 @@ def init_db() -> None:
             )
             """
         )
+        _ensure_columns(conn, "staged_kiosk_version", {"published_by": "TEXT", "published_at": "TEXT"})
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS staged_version_targets (
@@ -461,21 +463,25 @@ def get_kiosk_version_row() -> dict | None:
 
 
 def set_kiosk_version(
-    version_code: int, version_name: str, apk_url: str, apk_sha256: str, mandatory: bool
+    version_code: int, version_name: str, apk_url: str, apk_sha256: str, mandatory: bool,
+    published_by: str,
 ) -> None:
     with _connect() as conn:
         conn.execute(
             """
-            INSERT INTO kiosk_version (id, version_code, version_name, apk_url, apk_sha256, mandatory)
-            VALUES (1, ?, ?, ?, ?, ?)
+            INSERT INTO kiosk_version
+                (id, version_code, version_name, apk_url, apk_sha256, mandatory, published_by, published_at)
+            VALUES (1, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 version_code=excluded.version_code,
                 version_name=excluded.version_name,
                 apk_url=excluded.apk_url,
                 apk_sha256=excluded.apk_sha256,
-                mandatory=excluded.mandatory
+                mandatory=excluded.mandatory,
+                published_by=excluded.published_by,
+                published_at=excluded.published_at
             """,
-            (version_code, version_name, apk_url, apk_sha256, int(mandatory)),
+            (version_code, version_name, apk_url, apk_sha256, int(mandatory), published_by, now_iso()),
         )
 
 
@@ -488,21 +494,25 @@ def get_staged_kiosk_version_row() -> dict | None:
 
 
 def set_staged_kiosk_version(
-    version_code: int, version_name: str, apk_url: str, apk_sha256: str, mandatory: bool
+    version_code: int, version_name: str, apk_url: str, apk_sha256: str, mandatory: bool,
+    published_by: str,
 ) -> None:
     with _connect() as conn:
         conn.execute(
             """
-            INSERT INTO staged_kiosk_version (id, version_code, version_name, apk_url, apk_sha256, mandatory)
-            VALUES (1, ?, ?, ?, ?, ?)
+            INSERT INTO staged_kiosk_version
+                (id, version_code, version_name, apk_url, apk_sha256, mandatory, published_by, published_at)
+            VALUES (1, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 version_code=excluded.version_code,
                 version_name=excluded.version_name,
                 apk_url=excluded.apk_url,
                 apk_sha256=excluded.apk_sha256,
-                mandatory=excluded.mandatory
+                mandatory=excluded.mandatory,
+                published_by=excluded.published_by,
+                published_at=excluded.published_at
             """,
-            (version_code, version_name, apk_url, apk_sha256, int(mandatory)),
+            (version_code, version_name, apk_url, apk_sha256, int(mandatory), published_by, now_iso()),
         )
         conn.execute("DELETE FROM staged_version_targets")
 
@@ -558,3 +568,14 @@ def get_history(app: str, limit: int = 10) -> list[dict]:
             (app, limit),
         ).fetchall()
         return [dict(row) for row in rows]
+
+
+def get_history_entry_by_id(entry_id: int) -> dict | None:
+    with _connect() as conn:
+        row = conn.execute("SELECT * FROM version_history WHERE id = ?", (entry_id,)).fetchone()
+        return dict(row) if row else None
+
+
+def delete_history_entry(entry_id: int) -> None:
+    with _connect() as conn:
+        conn.execute("DELETE FROM version_history WHERE id = ?", (entry_id,))

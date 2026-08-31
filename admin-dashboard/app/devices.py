@@ -157,8 +157,8 @@ def request_update_check_bulk(device_ids: list[str]) -> None:
         send_version_check_to_device(device_id, version_code)
 
 
-def request_update_all() -> None:
-    version_code = promote_staged_to_stable()
+def request_update_all(published_by: str) -> None:
+    version_code = promote_staged_to_stable(published_by)
     send_version_check_all(version_code)
 
 

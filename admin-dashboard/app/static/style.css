@@ -312,6 +312,8 @@ th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--bo
 .history-item:last-child { border-bottom: none; }
 .history-item .history-version { font-weight: 600; }
 .history-item .history-meta { color: var(--muted); font-size: 13px; }
+.history-actions { display: flex; gap: 8px; }
+.history-actions form { margin: 0; }
 
 /* ---------- Forms ---------- */
 form.stacked-form { display: flex; flex-direction: column; gap: 14px; max-width: 460px; }
