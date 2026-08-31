@@ -185,6 +185,38 @@ th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--bo
 .devices-table tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
 .detail-table th { color: var(--muted); font-weight: 500; width: 220px; vertical-align: top; }
 
+/* ---------- Row actions dropdown ---------- */
+.dropdown { position: relative; display: inline-block; }
+.dropdown-toggle { font-size: 16px; line-height: 1; padding: 6px 10px; }
+.dropdown-menu {
+  display: none;
+  position: fixed;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 200px;
+  padding: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+.dropdown-menu.open { display: block; }
+.dropdown-menu form { margin: 0; }
+.dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.dropdown-item:hover { background: rgba(255, 255, 255, 0.06); }
+.dropdown-item-danger { color: var(--never); }
+
 /* ---------- Empty state ---------- */
 .empty-state {
   text-align: center;

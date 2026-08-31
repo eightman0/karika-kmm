@@ -7,7 +7,7 @@
     <p class="summary-line">
       <strong>{{ summary.total }}</strong> ukupno &middot;
       <strong>{{ summary.online }}</strong> online &middot;
-      <strong>{{ summary.stale }}</strong> stale &middot;
+      <strong>{{ summary.stale }}</strong> neaktivno &middot;
       <strong>{{ summary.never }}</strong> nikad javio
     </p>
   </div>
@@ -41,7 +41,7 @@
       <th>Instalirana verzija</th>
       <th>Zadnja aktivnost</th>
       <th>Zadnji log</th>
-      <th></th>
+      <th>Akcije</th>
     </tr>
   </thead>
   <tbody>
@@ -51,7 +51,7 @@
         <input type="checkbox" class="device-select" name="device_ids" value="{{ d.id }}" form="update-selected-form">
       </td>
       <td data-label="Status">
-        <span class="status status-{{ d.status }}"><span class="status-dot"></span>{{ {"online": "online", "stale": "stale", "never": "nikad"}[d.status] }}</span>
+        <span class="status status-{{ d.status }}"><span class="status-dot"></span>{{ {"online": "online", "stale": "neaktivan", "never": "nikad"}[d.status] }}</span>
       </td>
       <td data-label="Uređaj"><a class="mono-id" href="/devices/{{ d.id }}">{{ d.id }}</a></td>
       <td data-label="Kupac / lokacija">{{ d.customerId or "-" }}{% if d.siteId %} &middot; {{ d.siteId }}{% endif %}</td>
@@ -63,10 +63,41 @@
       </td>
       <td data-label="Zadnja aktivnost">{{ d.lastSeenAt.strftime("%d.%m. %H:%M") if d.lastSeenAt else "nikad" }}</td>
       <td data-label="Zadnji log">{{ d.lastLogUploadAt.strftime("%d.%m. %H:%M") if d.lastLogUploadAt else "-" }}</td>
-      <td data-label="">
-        <form method="post" action="/devices/{{ d.id }}/delete" onsubmit="return confirm('Obrisati uređaj {{ d.id }}?')">
-          <button type="submit" class="btn btn-danger btn-sm">Obriši</button>
-        </form>
+      <td data-label="Akcije">
+        <div class="dropdown">
+          <button type="button" class="btn btn-secondary btn-sm dropdown-toggle" onclick="toggleDropdown(event, 'menu-{{ loop.index }}')">&#8942;</button>
+          <div class="dropdown-menu" id="menu-{{ loop.index }}">
+            <form method="post" action="/devices/{{ d.id }}/update">
+              <button type="submit" class="dropdown-item">Ažuriraj sada</button>
+            </form>
+            <form method="post" action="/devices/{{ d.id }}/request-logs">
+              <button type="submit" class="dropdown-item">Zatraži nove logove</button>
+            </form>
+            <form method="post" action="/devices/{{ d.id }}/maintenance">
+              <input type="hidden" name="enable" value="on">
+              <button type="submit" class="dropdown-item">Uključi maintenance</button>
+            </form>
+            <form method="post" action="/devices/{{ d.id }}/maintenance">
+              <input type="hidden" name="enable" value="off">
+              <button type="submit" class="dropdown-item">Isključi maintenance</button>
+            </form>
+            <form method="post" action="/devices/{{ d.id }}/exit-kiosk" onsubmit="return confirm('Izbaci uređaj {{ d.id }} iz kiosk moda?')">
+              <button type="submit" class="dropdown-item">Izađi iz kioska</button>
+            </form>
+            <form method="post" action="/devices/{{ d.id }}/enter-kiosk" onsubmit="return confirm('Vrati uređaj {{ d.id }} u kiosk mode odmah?')">
+              <button type="submit" class="dropdown-item">Uđi u kiosk mode</button>
+            </form>
+            <form method="post" action="/devices/{{ d.id }}/reboot" onsubmit="return confirm('Restartovati uređaj {{ d.id }} odmah?')">
+              <button type="submit" class="dropdown-item">Restartuj sad</button>
+            </form>
+            <form method="post" action="/devices/{{ d.id }}/factory-reset" onsubmit="return confirm('Ovo će TRAJNO obrisati sve podatke na uređaju {{ d.id }} i vratiti ga na fabrička podešavanja. Ova akcija se ne može poništiti. Nastaviti?')">
+              <button type="submit" class="dropdown-item dropdown-item-danger">Pošalji factory reset</button>
+            </form>
+            <form method="post" action="/devices/{{ d.id }}/delete" onsubmit="return confirm('Obrisati uređaj {{ d.id }}?')">
+              <button type="submit" class="dropdown-item dropdown-item-danger">Obriši</button>
+            </form>
+          </div>
+        </div>
       </td>
     </tr>
     {% endfor %}
@@ -92,5 +123,25 @@
   function toggleAllDevices(source) {
     document.querySelectorAll('.device-select').forEach(function (b) { b.checked = source.checked; });
   }
+
+  function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown-menu.open').forEach(function (m) { m.classList.remove('open'); });
+  }
+
+  function toggleDropdown(event, id) {
+    event.stopPropagation();
+    var menu = document.getElementById(id);
+    var wasOpen = menu.classList.contains('open');
+    closeAllDropdowns();
+    if (wasOpen) return;
+    // position: fixed and placed here (not via CSS alone) so the menu can extend past
+    // .table-scroll's own box instead of being clipped by its overflow.
+    var rect = event.currentTarget.getBoundingClientRect();
+    menu.style.top = (rect.bottom + 4) + 'px';
+    menu.style.right = (window.innerWidth - rect.right) + 'px';
+    menu.classList.add('open');
+  }
+
+  document.addEventListener('click', closeAllDropdowns);
 </script>
 {% endblock %}
