@@ -10,7 +10,6 @@ import com.google.firebase.messaging.messaging
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 import karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver
 import karika.distribucija.ba.launcher.update.KioskMessagingService
-import karika.distribucija.ba.launcher.update.ReArmKioskWorker
 import karika.distribucija.ba.launcher.update.UpdateScheduler
 import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.logging.AppLogger
@@ -22,10 +21,6 @@ class LauncherApp : Application() {
         super.onCreate()
         AppLogger.init(this)
         AnalyticsTracker.init(this)
-        // A fresh process start (in particular a reboot) is as strong a signal as any that any
-        // in-progress exit-kiosk support window should end now rather than run out its own clock.
-        KioskExitState.end(this)
-        ReArmKioskWorker.cancel(this)
         Firebase.messaging.subscribeToTopic(KioskMessagingService.BROADCAST_TOPIC)
         Firebase.messaging.subscribeToTopic(KioskMessagingService.deviceTopic(DeviceIdentity.id(this)))
         UpdateScheduler.schedulePeriodic(this)

@@ -120,27 +120,30 @@
 </div>
 
 <div class="card">
-  <h2>Kiosk mode</h2>
-  <p class="hint">Izlazak pokušava meki izlazak (traži od salesrep app-a da sam napusti lock task); ako ne uspije za 10s, launcher forsira izlazak skidanjem sa allowlist-e. Ostaje otključano do 15 min, restarta uređaja, ili dok se ručno ne vrati u kiosk. Device Owner ostaje - nije potreban novi QR provisioning.</p>
+  <h2>Settings</h2>
+  <p class="hint">Otvara Android Settings preko uređaja - com.android.settings je već na kiosk allowlist-i, tako da se otvara preko onoga što je trenutno na ekranu bez izlaska iz zaključanog moda.</p>
+  <form method="post" action="/devices/{{ device.id }}/open-settings">
+    <button type="submit" class="btn btn-secondary">Otvori Settings</button>
+  </form>
+  <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (push preko FCM-a).</p>
+</div>
+
+<div class="card">
+  <h2>Ping</h2>
+  <p class="hint">Provjeri je li uređaj živ i dostupan upravo sada, umjesto da čekaš sljedeći periodični heartbeat.</p>
   <p>
-    {% if device.kioskExitActive is none %}
-    <span class="hint">Status nepoznat - uređaj još nije javio sa verzijom launcher-a koja ovo prijavljuje.</span>
-    {% elif device.kioskExitActive %}
-    <span class="status status-stale"><span class="status-dot"></span>Trenutno izvan kiosk moda</span>
+    {% if not device.pingRequestedAt %}
+    <span class="hint">Uređaj još nije ping-ovan.</span>
+    {% elif last_ping_ack and last_ping_ack.created_at and last_ping_ack.created_at > device.pingRequestedAt %}
+    <span class="status status-online"><span class="status-dot"></span>Odgovorio {{ last_ping_ack.created_at.strftime("%d.%m.%Y %H:%M:%S") }} - živ je</span>
     {% else %}
-    <span class="status status-online"><span class="status-dot"></span>Trenutno zaključan (kiosk mode)</span>
+    <span class="status status-stale"><span class="status-dot"></span>Čeka se odgovor od uređaja...</span>
     {% endif %}
   </p>
-  <div class="log-actions">
-    <form method="post" action="/devices/{{ device.id }}/exit-kiosk"
-          onsubmit="return confirm('Izbaci uređaj {{ device.id }} iz kiosk moda?')">
-      <button type="submit" class="btn btn-secondary">Izađi iz kioska</button>
-    </form>
-    <form method="post" action="/devices/{{ device.id }}/enter-kiosk"
-          onsubmit="return confirm('Vrati uređaj {{ device.id }} u kiosk mode odmah?')">
-      <button type="submit" class="btn btn-secondary">Uđi u kiosk mode</button>
-    </form>
-  </div>
+  <form method="post" action="/devices/{{ device.id }}/ping">
+    <button type="submit" class="btn btn-secondary">Pošalji ping</button>
+  </form>
+  <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (push preko FCM-a).</p>
 </div>
 
 <div class="card">

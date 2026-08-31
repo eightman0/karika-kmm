@@ -26,7 +26,6 @@ class HeartbeatBody(BaseModel):
     deviceModel: str
     fcmToken: str | None = None
     maintenanceActive: bool | None = None
-    kioskExitActive: bool | None = None
 
 
 @router.post("/devices/{device_id}/heartbeat")
@@ -41,7 +40,6 @@ def post_heartbeat(device_id: str, body: HeartbeatBody):
         body.deviceModel,
         body.fcmToken,
         body.maintenanceActive,
-        body.kioskExitActive,
     )
     return {"ok": True}
 

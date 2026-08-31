@@ -89,7 +89,7 @@ def init_db() -> None:
                 "last_login_email": "TEXT",
                 "last_login_at": "TEXT",
                 "maintenance_active": "INTEGER",
-                "kiosk_exit_active": "INTEGER",
+                "ping_requested_at": "TEXT",
             },
         )
         conn.execute(
@@ -194,7 +194,6 @@ def upsert_device_heartbeat(
     device_model: str,
     fcm_token: str | None,
     maintenance_active: bool | None = None,
-    kiosk_exit_active: bool | None = None,
 ) -> None:
     with _connect() as conn:
         conn.execute(
@@ -202,8 +201,8 @@ def upsert_device_heartbeat(
             INSERT INTO devices (
                 id, installed_package, installed_version_code, installed_version_name,
                 android_sdk_int, android_release, device_model, fcm_token, last_seen_at,
-                maintenance_active, kiosk_exit_active
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                maintenance_active
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 installed_package=excluded.installed_package,
                 installed_version_code=excluded.installed_version_code,
@@ -213,14 +212,12 @@ def upsert_device_heartbeat(
                 device_model=excluded.device_model,
                 fcm_token=COALESCE(excluded.fcm_token, devices.fcm_token),
                 last_seen_at=excluded.last_seen_at,
-                maintenance_active=excluded.maintenance_active,
-                kiosk_exit_active=excluded.kiosk_exit_active
+                maintenance_active=excluded.maintenance_active
             """,
             (
                 device_id, installed_package, installed_version_code, installed_version_name,
                 android_sdk_int, android_release, device_model, fcm_token, now_iso(),
                 int(maintenance_active) if maintenance_active is not None else None,
-                int(kiosk_exit_active) if kiosk_exit_active is not None else None,
             ),
         )
 
@@ -314,6 +311,19 @@ def request_log_pull(device_id: str) -> str:
             """
             INSERT INTO devices (id, log_requested_at) VALUES (?, ?)
             ON CONFLICT(id) DO UPDATE SET log_requested_at=excluded.log_requested_at
+            """,
+            (device_id, requested_at),
+        )
+    return requested_at
+
+
+def request_ping(device_id: str) -> str:
+    requested_at = now_iso()
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO devices (id, ping_requested_at) VALUES (?, ?)
+            ON CONFLICT(id) DO UPDATE SET ping_requested_at=excluded.ping_requested_at
             """,
             (device_id, requested_at),
         )

@@ -1,15 +1,15 @@
 package karika.distribucija.ba.launcher.update
 
 import android.app.admin.DevicePolicyManager
+import android.content.Intent
+import android.provider.Settings
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import karika.distribucija.ba.launcher.KioskExitState
 import karika.distribucija.ba.launcher.LauncherActivity
 import karika.distribucija.ba.launcher.RemoteMaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 import karika.distribucija.ba.launcher.diagnostics.LogUploadManager
-import karika.distribucija.ba.launcher.ipc.ExitKioskFlow
 import karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +17,8 @@ import kotlinx.coroutines.launch
 
 /**
  * Delivers pushes the admin dashboard sends: an update-check nudge on publish, or a device
- * command (log pull, analytics pull, factory reset, maintenance toggle, exit kiosk, reboot).
+ * command (log pull, analytics pull, factory reset, maintenance toggle, open settings, ping,
+ * reboot).
  * Data-only messages (no `notification` payload), so Play Services wakes this process to hand
  * them to onMessageReceived() even if the process was frozen or not running - the FCM connection
  * lives in Play Services, not in our own process, so it isn't subject to the same cached-app
@@ -62,16 +63,16 @@ class KioskMessagingService : FirebaseMessagingService() {
             CMD_MAINTENANCE_OFF -> runAcked(command, requestId) {
                 RemoteMaintenanceState.end(applicationContext)
             }
-            CMD_EXIT_KIOSK -> runAcked(command, requestId) {
-                ExitKioskFlow.run(applicationContext)
+            CMD_OPEN_SETTINGS -> runAcked(command, requestId) {
+                // com.android.settings is already on LauncherKiosk's lock task allowlist, so this
+                // opens on top of whatever's currently in front without needing to leave lock task
+                // mode at all - the device stays otherwise locked down the whole time.
+                val intent = Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                applicationContext.startActivity(intent)
             }
-            CMD_ENTER_KIOSK -> runAcked(command, requestId) {
-                // Same idea as CMD_MAINTENANCE_ON: ending the window alone only re-locks the next
-                // time LauncherActivity happens to resume, which could be indefinite if salesrep
-                // (or nothing at all, post soft-exit) is currently in front. Force it now.
-                KioskExitState.end(applicationContext)
-                ReArmKioskWorker.cancel(applicationContext)
-                LauncherActivity.bringToFront(applicationContext)
+            CMD_PING -> runAcked(command, requestId) {
+                // No actual work - a successful ack is the whole point, proof the device is alive
+                // and reachable right now rather than just "was seen at some point in the past".
             }
             CMD_VERSION_CHECK, null -> UpdateScheduler.triggerImmediateCheck(applicationContext)
             else -> Log.w(TAG, "Unknown command: $command")
@@ -108,8 +109,8 @@ class KioskMessagingService : FirebaseMessagingService() {
         private const val CMD_REBOOT = "reboot"
         private const val CMD_MAINTENANCE_ON = "maintenance_on"
         private const val CMD_MAINTENANCE_OFF = "maintenance_off"
-        private const val CMD_EXIT_KIOSK = "exit_kiosk"
-        private const val CMD_ENTER_KIOSK = "enter_kiosk"
+        private const val CMD_OPEN_SETTINGS = "open_settings"
+        private const val CMD_PING = "ping"
         private const val CMD_VERSION_CHECK = "version_check"
 
         fun deviceTopic(deviceId: String) = "device_$deviceId"

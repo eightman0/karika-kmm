@@ -1,9 +1,7 @@
 package karika.distribucija.ba.salesrep
 
-import android.app.ActivityManager
 import android.content.Intent
 import android.os.Bundle
-import android.os.Process
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -49,33 +47,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navRows: List<NavRow>
 
     private var notificationsMenuItem: MenuItem? = null
-
-    override fun onResume() {
-        super.onResume()
-        activeInstance = this
-    }
-
-    override fun onPause() {
-        if (activeInstance === this) activeInstance = null
-        super.onPause()
-    }
-
-    /** Called off the KioskCommandReceiver's onReceive() - only the resumed instance (the one
-     * actually holding the locked task, if any) can meaningfully leave it.
-     *
-     * Unlocking alone isn't enough: this activity would just sit there, still visible, still the
-     * foreground app. The command means "get out of the way entirely", so finish and kill the
-     * process too - same self-kill the crash recovery path already uses (SalesRepApp.kt), just
-     * triggered deliberately instead of by an uncaught exception. */
-    private fun exitLockTaskIfActive() {
-        val activityManager = getSystemService(ActivityManager::class.java)
-        if (activityManager.lockTaskModeState != ActivityManager.LOCK_TASK_MODE_NONE) {
-            stopLockTask()
-        }
-        AnalyticsTracker.trackClick("system", "exit_kiosk_command")
-        finishAndRemoveTask()
-        Process.killProcess(Process.myPid())
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -323,14 +294,6 @@ class MainActivity : AppCompatActivity() {
                         result.data.name ?: getString(R.string.drawer_role_label)
                 }
             }
-        }
-    }
-
-    companion object {
-        private var activeInstance: MainActivity? = null
-
-        fun requestExitLockTask() {
-            activeInstance?.exitLockTaskIfActive()
         }
     }
 }

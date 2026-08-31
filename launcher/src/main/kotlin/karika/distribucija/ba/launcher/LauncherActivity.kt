@@ -57,7 +57,7 @@ class LauncherActivity : AppCompatActivity() {
         maintenanceBanner.visibility = if (inMaintenance) View.VISIBLE else View.GONE
         appGrid.visibility = if (inMaintenance) View.GONE else View.VISIBLE
 
-        if (!inMaintenance && !KioskExitState.isActive(this)) {
+        if (!inMaintenance) {
             launchApp(KnownApps.PRIMARY.packageName, userInitiated = false)
         }
     }
@@ -77,9 +77,8 @@ class LauncherActivity : AppCompatActivity() {
     companion object {
         private const val SPAN_COUNT = 4
 
-        /** Used remotely (maintenance-on, kiosk re-arm after an exit-kiosk window) to pull the
-         * launcher back over whatever's currently on top, without waiting for it to resume
-         * naturally (e.g. salesrep crashing/finishing). */
+        /** Used remotely (maintenance-on) to pull the launcher back over whatever's currently on
+         * top, without waiting for it to resume naturally (e.g. salesrep crashing/finishing). */
         fun bringToFront(context: Context) {
             val intent = Intent(context, LauncherActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

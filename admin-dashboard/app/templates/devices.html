@@ -81,11 +81,11 @@
               <input type="hidden" name="enable" value="off">
               <button type="submit" class="dropdown-item">Isključi maintenance</button>
             </form>
-            <form method="post" action="/devices/{{ d.id }}/exit-kiosk" onsubmit="return confirm('Izbaci uređaj {{ d.id }} iz kiosk moda?')">
-              <button type="submit" class="dropdown-item">Izađi iz kioska</button>
+            <form method="post" action="/devices/{{ d.id }}/open-settings">
+              <button type="submit" class="dropdown-item">Otvori Settings</button>
             </form>
-            <form method="post" action="/devices/{{ d.id }}/enter-kiosk" onsubmit="return confirm('Vrati uređaj {{ d.id }} u kiosk mode odmah?')">
-              <button type="submit" class="dropdown-item">Uđi u kiosk mode</button>
+            <form method="post" action="/devices/{{ d.id }}/ping">
+              <button type="submit" class="dropdown-item">Pošalji ping</button>
             </form>
             <form method="post" action="/devices/{{ d.id }}/reboot" onsubmit="return confirm('Restartovati uređaj {{ d.id }} odmah?')">
               <button type="submit" class="dropdown-item">Restartuj sad</button>

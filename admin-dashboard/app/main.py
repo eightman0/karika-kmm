@@ -124,6 +124,7 @@ def device_detail_page(
             "cmd_error": cmd_error,
             "cmd_sent": cmd_sent,
             "command_log": devices.command_log(device_id),
+            "last_ping_ack": devices.last_ping_ack(device_id),
             "latest_salesrep_code": version_config.highest_known_version_code(),
         },
     )
@@ -168,22 +169,22 @@ def reboot_device(device_id: str):
     return RedirectResponse(f"/devices/{device_id}?cmd_sent=reboot", status_code=303)
 
 
-@app.post("/devices/{device_id}/exit-kiosk", dependencies=[require_login])
-def exit_kiosk_device(device_id: str):
+@app.post("/devices/{device_id}/open-settings", dependencies=[require_login])
+def open_settings_device(device_id: str):
     try:
-        devices.request_exit_kiosk(device_id)
+        devices.request_open_settings(device_id)
     except Exception as e:
         return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/devices/{device_id}?cmd_sent=exit_kiosk", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=open_settings", status_code=303)
 
 
-@app.post("/devices/{device_id}/enter-kiosk", dependencies=[require_login])
-def enter_kiosk_device(device_id: str):
+@app.post("/devices/{device_id}/ping", dependencies=[require_login])
+def ping_device(device_id: str):
     try:
-        devices.request_enter_kiosk(device_id)
+        devices.request_ping(device_id)
     except Exception as e:
         return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/devices/{device_id}?cmd_sent=enter_kiosk", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=ping", status_code=303)
 
 
 @app.post("/devices/{device_id}/maintenance", dependencies=[require_login])

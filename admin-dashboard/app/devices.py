@@ -4,11 +4,11 @@ from . import local_db
 from .firebase import bucket
 from .push import (
     send_analytics_request_all,
-    send_enter_kiosk,
-    send_exit_kiosk,
     send_factory_reset,
     send_log_request,
     send_maintenance,
+    send_open_settings,
+    send_ping,
     send_reboot,
     send_version_check_all,
     send_version_check_to_device,
@@ -61,7 +61,7 @@ def _with_computed_fields(row: dict) -> dict:
         # in - showing "not in maintenance" for a device we simply have no answer from yet would
         # be worse than showing nothing.
         "maintenanceActive": bool(row["maintenance_active"]) if row["maintenance_active"] is not None else None,
-        "kioskExitActive": bool(row["kiosk_exit_active"]) if row["kiosk_exit_active"] is not None else None,
+        "pingRequestedAt": _parse_iso(row["ping_requested_at"]),
     }
 
 
@@ -132,16 +132,17 @@ def request_reboot(device_id: str) -> None:
     send_reboot(_require_token(device_id))
 
 
-def request_exit_kiosk(device_id: str) -> None:
-    send_exit_kiosk(_require_token(device_id))
-
-
-def request_enter_kiosk(device_id: str) -> None:
-    send_enter_kiosk(_require_token(device_id))
-
-
 def request_maintenance(device_id: str, enable: bool) -> None:
     send_maintenance(_require_token(device_id), enable)
+
+
+def request_open_settings(device_id: str) -> None:
+    send_open_settings(_require_token(device_id))
+
+
+def request_ping(device_id: str) -> None:
+    local_db.request_ping(device_id)
+    send_ping(_require_token(device_id))
 
 
 def request_update_check(device_id: str) -> None:
@@ -171,6 +172,13 @@ def set_device_mapping(device_id: str, customer_id: str, site_id: str) -> None:
 
 def command_log(device_id: str, limit: int = 20) -> list[dict]:
     return local_db.get_command_log(device_id, limit)
+
+
+def last_ping_ack(device_id: str) -> dict | None:
+    for entry in local_db.get_command_log(device_id, limit=50):
+        if entry["command"] == "ping":
+            return {**entry, "created_at": _parse_iso(entry["created_at"])}
+    return None
 
 
 def signed_log_url(storage_path: str) -> str:

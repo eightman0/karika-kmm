@@ -37,11 +37,5 @@
             android:authorities="karika.distribucija.ba.salesrep.logs"
             android:exported="true"
             android:grantUriPermissions="false" />
-
-        <!-- Targeted by launcher via an explicit component (no intent-filter needed), see
-             KioskIpc.kt - exported because it's a cross-app, cross-signing-key broadcast. -->
-        <receiver
-            android:name=".KioskCommandReceiver"
-            android:exported="true" />
     </application>
 </manifest>

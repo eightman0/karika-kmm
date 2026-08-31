@@ -10,10 +10,6 @@ package karika.distribucija.ba.logging
  */
 object KioskIpc {
     const val LAUNCHER_PACKAGE = "karika.distribucija.ba.launcher"
-    const val SALESREP_PACKAGE = "karika.distribucija.ba.salesrep"
-
-    /** Launcher -> salesrep: ask the foreground activity to call stopLockTask() on itself. */
-    const val ACTION_EXIT_KIOSK = "karika.distribucija.ba.kiosk.action.EXIT_KIOSK"
 
     /** Salesrep -> launcher: a user just logged in. */
     const val ACTION_LOGIN_EVENT = "karika.distribucija.ba.kiosk.action.LOGIN_EVENT"
