@@ -229,7 +229,7 @@ def versions_page(
     rolled_back: str | None = None,
 ):
     all_devices = devices.list_devices()
-    history = version_history.get_history(APP)
+    history = version_history.get_history(APP, limit=50)
     current = version_config.get_kiosk_version()
     is_published = bool(current and current["version_code"] not in ("0", "", None))
     rollout_count = 0
