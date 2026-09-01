@@ -16,16 +16,28 @@
     <form method="post" action="/devices/analytics-request">
       <button type="submit" class="btn btn-secondary">Povuci analitiku (svi)</button>
     </form>
-    <form method="post" action="/devices/update-selected" id="update-selected-form" class="version-picker-form">
-      {% if available_versions %}
-      <select name="version_code" id="update-selected-version" class="search-input">
-        {% for v in available_versions %}
-        <option value="{{ v.versionCode }}" data-code="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }})</option>
-        {% endfor %}
-      </select>
-      {% endif %}
-      <button type="submit" class="btn btn-secondary">Ažuriraj izabrane</button>
-    </form>
+    <form method="post" action="/devices/update-selected" id="update-selected-form"></form>
+    {% if available_versions %}
+    <button type="button" class="btn btn-secondary" onclick="document.getElementById('update-selected-modal').showModal()">Ažuriraj izabrane</button>
+    <dialog id="update-selected-modal" class="modal">
+      <div class="modal-body">
+        <h2>Ažuriraj izabrane uređaje</h2>
+        <label>Verzija
+          <select name="version_code" id="update-selected-version" class="select-input" form="update-selected-form">
+            {% for v in available_versions %}
+            <option value="{{ v.versionCode }}" data-code="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }})</option>
+            {% endfor %}
+          </select>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Otkaži</button>
+          <button type="submit" class="btn btn-primary" form="update-selected-form">Pošalji</button>
+        </div>
+      </div>
+    </dialog>
+    {% else %}
+    <button type="submit" class="btn btn-secondary" form="update-selected-form">Ažuriraj izabrane</button>
+    {% endif %}
   </div>
 </div>
 

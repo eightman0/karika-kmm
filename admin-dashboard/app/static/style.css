@@ -118,6 +118,16 @@ main { padding: 28px; max-width: 1080px; margin: 0 auto; }
 }
 .search-input::placeholder { color: var(--muted); }
 
+.select-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+}
+
 /* ---------- Cards ---------- */
 .card {
   background: var(--surface);
@@ -252,9 +262,6 @@ th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--bo
 .log-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 14px 0; }
 .log-pending { color: var(--stale); font-size: 13px; font-weight: 600; }
 
-/* ---------- Version picker ---------- */
-.version-picker-form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.version-picker-form select { padding: 6px 10px; font-size: 13px; max-width: 220px; }
 .hint { color: var(--muted); font-size: 13px; }
 .error-banner {
   background: var(--never-dim);
@@ -318,6 +325,21 @@ th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--bo
 .history-item .history-meta { color: var(--muted); font-size: 13px; }
 .history-actions { display: flex; gap: 8px; }
 .history-actions form { margin: 0; }
+
+/* ---------- Modal ---------- */
+dialog.modal {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 90vw;
+  max-width: 420px;
+}
+dialog.modal::backdrop { background: rgba(0, 0, 0, 0.6); }
+dialog.modal h2 { margin: 0 0 16px; font-size: 18px; }
+.modal-body { display: flex; flex-direction: column; gap: 14px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
 
 /* ---------- Forms ---------- */
 form.stacked-form { display: flex; flex-direction: column; gap: 14px; max-width: 460px; }
