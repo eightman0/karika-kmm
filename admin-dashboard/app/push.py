@@ -29,21 +29,15 @@ def new_request_id() -> str:
     return str(uuid.uuid4())
 
 
-def send_version_check_to_device(device_id: str, version_code: str) -> None:
-    """Nudges one device (by its own topic, not the fleet-wide one) to check for an update now,
-    instead of waiting out its next periodic poll. Topic rather than direct token, same as the
-    fleet broadcast below - a delivery hiccup isn't fatal since the periodic check still picks it
-    up within ~30 min regardless."""
-    try:
-        init_messaging()
-        messaging.send(
-            messaging.Message(
-                topic=_device_topic(device_id),
-                data={"command": "version_check", "versionCode": str(version_code)},
-            )
-        )
-    except Exception:
-        logger.exception("Failed to send FCM update-check ping to %s", device_id)
+def send_version_check_to_device(fcm_token: str, version_code: str) -> str:
+    """Nudges one specific device to check for an update right now. Direct token, not its own
+    topic - unlike the fleet broadcast below, this is triggered by an admin explicitly picking a
+    device and a version and expecting it to actually happen, not a background nudge that can
+    shrug off a delivery hiccup. (Topic delivery was tried first and turned out to be unreliable
+    in practice - direct-token commands like maintenance/ping/reboot always got through, this one
+    silently didn't.) The periodic ~30 min poll still picks up the staged version regardless if
+    this send is ever missed."""
+    return send_command_to_token(fcm_token, "version_check", {"versionCode": version_code})
 
 
 def send_version_check_all(version_code: str) -> None:
