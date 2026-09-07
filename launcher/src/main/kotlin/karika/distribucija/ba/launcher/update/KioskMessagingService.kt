@@ -31,6 +31,10 @@ import kotlinx.coroutines.launch
 class KioskMessagingService : FirebaseMessagingService() {
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+    }
+    
     override fun onMessageReceived(message: RemoteMessage) {
         val command = message.data["command"] ?: message.data["type"]
         val requestId = message.data["requestId"]
