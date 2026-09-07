@@ -6,6 +6,9 @@
   <div>
     <h1 class="mono-id">{{ device.id }}</h1>
     <span class="status status-{{ device.status }}"><span class="status-dot"></span>{{ {"online": "online", "stale": "neaktivan", "never": "nikad javio"}[device.status] }}</span>
+    {% if device.maintenanceActive %}
+    <span class="tag tag-maintenance">maintenance</span>
+    {% endif %}
   </div>
 </div>
 
@@ -108,23 +111,13 @@
 </div>
 
 <div class="card">
-  <h2>Factory reset</h2>
-  <p class="hint">Briše sve podatke i vraća uređaj na fabrička podešavanja preko push-a - bez fizičkog pristupa uređaju. Ovo je trajno i ne može se poništiti.</p>
-  <form method="post" action="/devices/{{ device.id }}/factory-reset"
-        onsubmit="return confirm('Ovo će TRAJNO obrisati sve podatke na uređaju {{ device.id }} i vratiti ga na fabrička podešavanja. Ova akcija se ne može poništiti. Nastaviti?')">
-    <button type="submit" class="btn btn-danger">Pošalji factory reset</button>
-  </form>
-  <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (push preko FCM-a).</p>
-</div>
-
-<div class="card">
   <h2>Maintenance mod</h2>
   <p class="hint">Privremeno izbaci uređaj iz kioska (prikaže "u održavanju" poruku, bez punog reboot-a). Ostaje uključeno dok se ručno ne isključi.</p>
   <p>
     {% if device.maintenanceActive is none %}
     <span class="hint">Status nepoznat - uređaj još nije javio sa verzijom launcher-a koja ovo prijavljuje.</span>
     {% elif device.maintenanceActive %}
-    <span class="status status-stale"><span class="status-dot"></span>Trenutno u maintenance modu</span>
+    <span class="status status-maintenance"><span class="status-dot"></span>Trenutno u maintenance modu</span>
     {% else %}
     <span class="status status-online"><span class="status-dot"></span>Trenutno normalan rad</span>
     {% endif %}
@@ -168,12 +161,28 @@
   <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (push preko FCM-a).</p>
 </div>
 
-<div class="card">
-  <h2>Reboot</h2>
-  <form method="post" action="/devices/{{ device.id }}/reboot"
-        onsubmit="return confirm('Restartovati uređaj {{ device.id }} odmah?')">
-    <button type="submit" class="btn btn-danger">Restartuj sad</button>
-  </form>
+<div class="card card-danger">
+  <h2>Opasne akcije</h2>
+  <div class="danger-action">
+    <div>
+      <h3>Factory reset</h3>
+      <p class="hint">Briše sve podatke i vraća uređaj na fabrička podešavanja preko push-a - bez fizičkog pristupa uređaju. Ovo je trajno i ne može se poništiti.</p>
+    </div>
+    <form method="post" action="/devices/{{ device.id }}/factory-reset"
+          onsubmit="return confirm('Ovo će TRAJNO obrisati sve podatke na uređaju {{ device.id }} i vratiti ga na fabrička podešavanja. Ova akcija se ne može poništiti. Nastaviti?')">
+      <button type="submit" class="btn btn-danger">Pošalji factory reset</button>
+    </form>
+  </div>
+  <div class="danger-action">
+    <div>
+      <h3>Reboot</h3>
+      <p class="hint">Restartuje uređaj odmah preko push-a.</p>
+    </div>
+    <form method="post" action="/devices/{{ device.id }}/reboot"
+          onsubmit="return confirm('Restartovati uređaj {{ device.id }} odmah?')">
+      <button type="submit" class="btn btn-danger">Restartuj sad</button>
+    </form>
+  </div>
 </div>
 
 <div class="card">

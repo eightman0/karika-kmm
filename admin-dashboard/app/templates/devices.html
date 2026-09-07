@@ -72,6 +72,9 @@
       </td>
       <td data-label="Status">
         <span class="status status-{{ d.status }}"><span class="status-dot"></span>{{ {"online": "online", "stale": "neaktivan", "never": "nikad"}[d.status] }}</span>
+        {% if d.maintenanceActive %}
+        <span class="tag tag-maintenance">maintenance</span>
+        {% endif %}
       </td>
       <td data-label="Uređaj"><a class="mono-id" href="/devices/{{ d.id }}">{{ d.id }}</a></td>
       <td data-label="Kupac / lokacija">{{ d.customerId or "-" }}{% if d.siteId %} &middot; {{ d.siteId }}{% endif %}</td>

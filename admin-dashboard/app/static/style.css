@@ -13,6 +13,8 @@
   --stale-dim: rgba(227, 196, 127, 0.15);
   --never: #e59a9a;
   --never-dim: rgba(229, 154, 154, 0.15);
+  --maintenance: #7fb0e3;
+  --maintenance-dim: rgba(127, 176, 227, 0.15);
   --radius: 10px;
 }
 
@@ -169,6 +171,8 @@ main { padding: 28px; max-width: 1080px; margin: 0 auto; }
 .status-stale .status-dot { background: var(--stale); }
 .status-never { color: var(--never); }
 .status-never .status-dot { background: var(--never); }
+.status-maintenance { color: var(--maintenance); }
+.status-maintenance .status-dot { background: var(--maintenance); }
 
 .tag {
   display: inline-block;
@@ -183,6 +187,7 @@ main { padding: 28px; max-width: 1080px; margin: 0 auto; }
 }
 .tag-lagging { background: var(--never-dim); color: var(--never); }
 .tag-mandatory { background: var(--stale-dim); color: var(--stale); }
+.tag-maintenance { background: var(--maintenance-dim); color: var(--maintenance); }
 
 .mono-id { font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace; color: var(--accent); }
 
@@ -226,6 +231,23 @@ th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--bo
 }
 .dropdown-item:hover { background: rgba(255, 255, 255, 0.06); }
 .dropdown-item-danger { color: var(--never); }
+
+/* ---------- Danger zone ---------- */
+.card-danger { border-color: var(--never); }
+.card-danger h2 { color: var(--never); }
+.danger-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.danger-action:first-child { padding-top: 0; }
+.danger-action:last-child { padding-bottom: 0; border-bottom: none; }
+.danger-action h3 { margin: 0 0 4px; font-size: 14px; }
+.danger-action p.hint { margin: 0; max-width: 460px; }
 
 /* ---------- Empty state ---------- */
 .empty-state {
