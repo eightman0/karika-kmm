@@ -10,10 +10,13 @@ import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 /** Mirrors composeApp's "Dodaj prilog" ModalBottomSheet, duplicated 4 times (once per
  * Customer/Admin conversation/new-message screen) in the Compose source - consolidated here
- * into one reusable sheet since all 4 instances are visually and behaviorally identical. */
+ * into one reusable sheet since all 4 instances are visually and behaviorally identical.
+ * "Slikaj" (take a new photo) is first since a kiosk device is mainly used to photograph
+ * something on the spot, not browse existing files. */
 class AttachSheet(
-    private val onPickFile: () -> Unit,
-    private val onPickPhoto: () -> Unit
+    private val onTakePhoto: () -> Unit,
+    private val onPickPhoto: () -> Unit,
+    private val onPickFile: () -> Unit
 ) : BottomSheetDialogFragment() {
 
     private var _binding: BottomSheetAttachBinding? = null
@@ -36,13 +39,17 @@ class AttachSheet(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.rowAttachFile.setOnClickListener {
+        binding.rowAttachCamera.setOnClickListener {
             dismiss()
-            onPickFile()
+            onTakePhoto()
         }
         binding.rowAttachPhoto.setOnClickListener {
             dismiss()
             onPickPhoto()
+        }
+        binding.rowAttachFile.setOnClickListener {
+            dismiss()
+            onPickFile()
         }
     }
 

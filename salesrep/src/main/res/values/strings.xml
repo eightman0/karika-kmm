@@ -69,12 +69,19 @@
     <string name="admin_new_message_default_title">Nova poruka</string>
 
     <string name="attach_sheet_title">Dodaj prilog</string>
+    <string name="attach_sheet_camera_title">Slikaj</string>
+    <string name="attach_sheet_camera_subtitle">Napravi novu fotografiju</string>
     <string name="attach_sheet_file_title">Fajl</string>
     <string name="attach_sheet_file_subtitle">Dokument, PDF, tabela…</string>
     <string name="attach_sheet_photo_title">Slika</string>
-    <string name="attach_sheet_photo_subtitle">Fotografija iz galerije ili kamere</string>
+    <string name="attach_sheet_photo_subtitle">Fotografija iz galerije</string>
     <string name="message_attach_cd">Priloži</string>
     <string name="message_remove_attachment_cd">Ukloni prilog</string>
+    <string name="camera_close_cd">Zatvori kameru</string>
+    <string name="camera_shutter_cd">Slikaj</string>
+    <string name="camera_permission_denied">Dozvola za kameru je potrebna da bi se slikalo.</string>
+    <string name="camera_start_failed">Kamera se nije mogla pokrenuti.</string>
+    <string name="camera_capture_failed">Slikanje nije uspjelo, pokušaj ponovo.</string>
     <string name="message_attachment_pdf_cd">PDF prilog</string>
     <string name="message_attachment_image_cd">Slika u razgovoru</string>
     <string name="message_image_preview_close_cd">Zatvori</string>

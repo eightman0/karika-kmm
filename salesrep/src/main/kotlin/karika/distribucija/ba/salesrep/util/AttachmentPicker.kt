@@ -1,32 +1,56 @@
 package karika.distribucija.ba.salesrep.util
 
+import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import karika.distribucija.ba.salesrep.ui.camera.CameraCaptureActivity
+import java.io.File
 
 /**
- * Picks a file or photo via the permission-free system pickers - Storage Access Framework's
- * "open document" for files, the system Photo Picker for images. Mirrors composeApp's
- * KarikaHandler.pickFile()/pickPhoto() (Android impl in KarikaActivity.kt), which use the same
- * two pickers and, per composeApp's AndroidManifest.xml (only INTERNET declared), need no
- * runtime permissions either.
+ * Picks a file, an existing photo, or a freshly-taken one. File/photo go through the
+ * permission-free system pickers - Storage Access Framework's "open document" for files, the
+ * system Photo Picker for images - mirroring composeApp's KarikaHandler.pickFile()/pickPhoto()
+ * (Android impl in KarikaActivity.kt). Taking a photo goes through this app's own CameraX screen
+ * (see CameraCaptureActivity) rather than an external Camera app intent, since a kiosk provisioned
+ * with PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED=false may not have one installed to receive it.
  *
  * Must be constructed as a Fragment property (assigned before the fragment reaches STARTED,
  * e.g. as a class-body property initializer) - `registerForActivityResult` requires that timing.
  */
 class AttachmentPicker(
-    fragment: Fragment,
+    private val fragment: Fragment,
     private val onPicked: (filename: String, bytes: ByteArray) -> Unit
 ) {
     private val filePicker = fragment.registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let { readAndDeliver(fragment, it) }
+        uri?.let { readAndDeliver(it) }
     }
 
     private val photoPicker = fragment.registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        uri?.let { readAndDeliver(fragment, it) }
+        uri?.let { readAndDeliver(it) }
     }
+
+    private val cameraLauncher =
+        fragment.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+            val path = result.data?.getStringExtra(CameraCaptureActivity.EXTRA_RESULT_PATH) ?: return@registerForActivityResult
+            val file = File(path)
+            if (!file.exists()) return@registerForActivityResult
+            val bytes = file.readBytes()
+            file.delete()
+            onPicked(file.name, bytes)
+        }
+
+    private val cameraPermissionLauncher =
+        fragment.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) launchCamera()
+        }
 
     /** Restricted to PDF, matching composeApp's `pickFile(mediaTypes = arrayOf("application/pdf"))`
      * default - the only way it's ever called from a message screen's attach sheet. */
@@ -34,7 +58,21 @@ class AttachmentPicker(
 
     fun pickPhoto() = photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
 
-    private fun readAndDeliver(fragment: Fragment, uri: Uri) {
+    fun takePhoto() {
+        val context = fragment.context ?: return
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            launchCamera()
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    private fun launchCamera() {
+        val context = fragment.context ?: return
+        cameraLauncher.launch(Intent(context, CameraCaptureActivity::class.java))
+    }
+
+    private fun readAndDeliver(uri: Uri) {
         val context = fragment.context ?: return
         var name = "file"
         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->

@@ -15,7 +15,7 @@ android {
         applicationId = "karika.distribucija.ba.salesrep"
         minSdk = 30
         targetSdk = 37
-        versionCode = 55
+        versionCode = 56
         versionName = "1.1"
         // Shared with launcher (see its build.gradle.kts) - checked on both ends of the
         // launcher<->salesrep broadcasts instead of a signature-level permission, since the two
@@ -98,4 +98,12 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging.ktx)
+
+    // In-app photo capture (see ui/camera/CameraCaptureActivity.kt) - not an external Camera app
+    // intent, since a kiosk provisioned with PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED=false may
+    // not have one installed at all.
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
 }

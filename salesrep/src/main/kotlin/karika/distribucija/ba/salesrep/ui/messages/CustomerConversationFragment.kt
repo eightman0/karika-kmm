@@ -72,8 +72,9 @@ open class CustomerConversationFragment : Fragment() {
 
         binding.buttonAttach.setOnClickListener {
             AttachSheet(
-                onPickFile = { attachmentPicker.pickFile() },
-                onPickPhoto = { attachmentPicker.pickPhoto() }
+                onTakePhoto = { attachmentPicker.takePhoto() },
+                onPickPhoto = { attachmentPicker.pickPhoto() },
+                onPickFile = { attachmentPicker.pickFile() }
             ).show(childFragmentManager, "attach_sheet")
         }
 
