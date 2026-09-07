@@ -80,6 +80,11 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             if (!installed) return Result.retry()
 
             InstalledApkState.setLastInstalledSha256(applicationContext, latest.apkSha256)
+            // Cleared before reporting, not left to the finally block below - otherwise this
+            // heartbeat (sent to promptly reflect the new version, see comment below) would still
+            // read MaintenanceState as active and report a device that just finished updating as
+            // stuck "in maintenance". The finally block's end() becomes a harmless no-op here.
+            MaintenanceState.end(applicationContext)
             // Otherwise the dashboard keeps showing the pre-update version (and a stale
             // "lagging" tag) until whatever unrelated event triggers the next heartbeat -
             // there's no guarantee that happens soon after a real-time-triggered install.
