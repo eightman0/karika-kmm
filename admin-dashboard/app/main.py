@@ -1,7 +1,7 @@
 from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -133,7 +133,6 @@ def device_detail_page(
             "cmd_error": cmd_error,
             "cmd_sent": cmd_sent,
             "command_log": devices.command_log(device_id),
-            "last_ping_ack": devices.last_ping_ack(device_id),
             "latest_salesrep_code": version_config.highest_known_version_code(),
             "available_versions": available_versions,
         },
@@ -324,8 +323,6 @@ def provisioning_page(request: Request, generated: str | None = None):
     saved = local_db.get_provisioning_extras() or {}
     customer_id = saved.get("customer_id") or ""
     site_id = saved.get("site_id") or ""
-    if not provisioning.QR_PATH.exists():
-        provisioning.generate_qr(customer_id or None, site_id or None)
     return templates.TemplateResponse(
         request,
         "provisioning.html",
@@ -333,11 +330,17 @@ def provisioning_page(request: Request, generated: str | None = None):
             "provisioning_json": provisioning.build_json(customer_id or None, site_id or None),
             "customer_id": customer_id,
             "site_id": site_id,
-            "qr_version": int(provisioning.QR_PATH.stat().st_mtime),
             "generated": bool(generated),
             "active_page": "provisioning",
         },
     )
+
+
+@app.get("/provisioning/qr.png", dependencies=[require_login])
+def provisioning_qr():
+    saved = local_db.get_provisioning_extras() or {}
+    png = provisioning.qr_png_bytes(saved.get("customer_id") or None, saved.get("site_id") or None)
+    return Response(content=png, media_type="image/png", headers={"Cache-Control": "no-store"})
 
 
 @app.post("/provisioning/generate", dependencies=[require_login])
@@ -345,7 +348,6 @@ def generate_provisioning_qr(customer_id: str = Form(""), site_id: str = Form(""
     customer_id = customer_id.strip() or None
     site_id = site_id.strip() or None
     local_db.set_provisioning_extras(customer_id, site_id)
-    provisioning.generate_qr(customer_id, site_id)
     return RedirectResponse("/provisioning?generated=1", status_code=303)
 
 
