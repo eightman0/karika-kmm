@@ -34,7 +34,7 @@ class KioskMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
     }
-    
+
     override fun onMessageReceived(message: RemoteMessage) {
         val command = message.data["command"] ?: message.data["type"]
         val requestId = message.data["requestId"]
@@ -63,9 +63,13 @@ class KioskMessagingService : FirebaseMessagingService() {
                 // Setting the flag alone only shows up next time LauncherActivity resumes on its
                 // own - if salesrep is currently in front, that could be indefinite. Force it.
                 LauncherActivity.bringToFront(applicationContext)
+                // Otherwise the dashboard only learns about this on the next periodic tick (up to
+                // 30 min later) - an admin toggling this expects to see it reflected right away.
+                UpdateScheduler.triggerImmediateCheck(applicationContext)
             }
             CMD_MAINTENANCE_OFF -> runAcked(command, requestId) {
                 RemoteMaintenanceState.end(applicationContext)
+                UpdateScheduler.triggerImmediateCheck(applicationContext)
             }
             CMD_OPEN_SETTINGS -> runAcked(command, requestId) {
                 // com.android.settings is already on LauncherKiosk's lock task allowlist, so this
@@ -75,8 +79,10 @@ class KioskMessagingService : FirebaseMessagingService() {
                 applicationContext.startActivity(intent)
             }
             CMD_PING -> runAcked(command, requestId) {
-                // No actual work - a successful ack is the whole point, proof the device is alive
-                // and reachable right now rather than just "was seen at some point in the past".
+                // Forces a full heartbeat now instead of just acking - the admin gets back the
+                // device's actual current state (version, maintenance mode) right away, not just
+                // proof it's reachable.
+                UpdateScheduler.triggerImmediateCheck(applicationContext)
             }
             CMD_VERSION_CHECK, null -> UpdateScheduler.triggerImmediateCheck(applicationContext)
             else -> Log.w(TAG, "Unknown command: $command")

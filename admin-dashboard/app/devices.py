@@ -184,13 +184,6 @@ def command_log(device_id: str, limit: int = 20) -> list[dict]:
     return local_db.get_command_log(device_id, limit)
 
 
-def last_ping_ack(device_id: str) -> dict | None:
-    for entry in local_db.get_command_log(device_id, limit=50):
-        if entry["command"] == "ping":
-            return {**entry, "created_at": _parse_iso(entry["created_at"])}
-    return None
-
-
 def signed_log_url(storage_path: str) -> str:
     blob = bucket().blob(storage_path)
     return blob.generate_signed_url(expiration=timedelta(minutes=SIGNED_URL_MINUTES))

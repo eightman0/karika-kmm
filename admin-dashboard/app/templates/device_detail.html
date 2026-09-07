@@ -123,14 +123,17 @@
     {% endif %}
   </p>
   <div class="log-actions">
-    <form method="post" action="/devices/{{ device.id }}/maintenance">
-      <input type="hidden" name="enable" value="on">
-      <button type="submit" class="btn btn-secondary">Uključi maintenance</button>
-    </form>
+    {% if device.maintenanceActive %}
     <form method="post" action="/devices/{{ device.id }}/maintenance">
       <input type="hidden" name="enable" value="off">
       <button type="submit" class="btn btn-secondary">Isključi maintenance</button>
     </form>
+    {% else %}
+    <form method="post" action="/devices/{{ device.id }}/maintenance">
+      <input type="hidden" name="enable" value="on">
+      <button type="submit" class="btn btn-secondary">Uključi maintenance</button>
+    </form>
+    {% endif %}
   </div>
 </div>
 
@@ -144,19 +147,19 @@
 </div>
 
 <div class="card">
-  <h2>Ping</h2>
-  <p class="hint">Provjeri je li uređaj živ i dostupan upravo sada, umjesto da čekaš sljedeći periodični heartbeat.</p>
+  <h2>Status uređaja</h2>
+  <p class="hint">Natjera uređaj da odmah javi trenutno stanje (verziju, maintenance mod) umjesto da čekaš sljedeći periodični heartbeat (do 30 min).</p>
   <p>
     {% if not device.pingRequestedAt %}
-    <span class="hint">Uređaj još nije ping-ovan.</span>
-    {% elif last_ping_ack and last_ping_ack.created_at and last_ping_ack.created_at > device.pingRequestedAt %}
-    <span class="status status-online"><span class="status-dot"></span>Odgovorio {{ last_ping_ack.created_at.strftime("%d.%m.%Y %H:%M:%S") }} - živ je</span>
+    <span class="hint">Status još nije osvježavan na zahtjev.</span>
+    {% elif device.lastSeenAt and device.lastSeenAt > device.pingRequestedAt %}
+    <span class="status status-online"><span class="status-dot"></span>Osvježeno {{ device.lastSeenAt.strftime("%d.%m.%Y %H:%M:%S") }} - podaci gore su trenutni</span>
     {% else %}
     <span class="status status-stale"><span class="status-dot"></span>Čeka se odgovor od uređaja...</span>
     {% endif %}
   </p>
   <form method="post" action="/devices/{{ device.id }}/ping">
-    <button type="submit" class="btn btn-secondary">Pošalji ping</button>
+    <button type="submit" class="btn btn-secondary">Provjeri status</button>
   </form>
   <p class="hint">Uređaj mora biti upaljen i na internetu da bi primio zahtjev (push preko FCM-a).</p>
 </div>

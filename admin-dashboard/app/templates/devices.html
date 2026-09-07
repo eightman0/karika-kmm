@@ -96,19 +96,22 @@
             <form method="post" action="/devices/{{ d.id }}/request-logs">
               <button type="submit" class="dropdown-item">Zatraži nove logove</button>
             </form>
-            <form method="post" action="/devices/{{ d.id }}/maintenance">
-              <input type="hidden" name="enable" value="on">
-              <button type="submit" class="dropdown-item">Uključi maintenance</button>
-            </form>
+            {% if d.maintenanceActive %}
             <form method="post" action="/devices/{{ d.id }}/maintenance">
               <input type="hidden" name="enable" value="off">
               <button type="submit" class="dropdown-item">Isključi maintenance</button>
             </form>
+            {% else %}
+            <form method="post" action="/devices/{{ d.id }}/maintenance">
+              <input type="hidden" name="enable" value="on">
+              <button type="submit" class="dropdown-item">Uključi maintenance</button>
+            </form>
+            {% endif %}
             <form method="post" action="/devices/{{ d.id }}/open-settings">
               <button type="submit" class="dropdown-item">Otvori Settings</button>
             </form>
             <form method="post" action="/devices/{{ d.id }}/ping">
-              <button type="submit" class="dropdown-item">Pošalji ping</button>
+              <button type="submit" class="dropdown-item">Provjeri status</button>
             </form>
             <form method="post" action="/devices/{{ d.id }}/reboot" onsubmit="return confirm('Restartovati uređaj {{ d.id }} odmah?')">
               <button type="submit" class="dropdown-item">Restartuj sad</button>
