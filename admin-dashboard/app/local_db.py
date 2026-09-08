@@ -150,6 +150,11 @@ def init_db() -> None:
             )
             """
         )
+        _ensure_columns(
+            conn,
+            "provisioning_extras",
+            {"wifi_ssid": "TEXT", "wifi_password": "TEXT", "wifi_security_type": "TEXT"},
+        )
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS analytics_events (
@@ -441,16 +446,27 @@ def get_provisioning_extras() -> dict | None:
         return dict(row) if row else None
 
 
-def set_provisioning_extras(customer_id: str | None, site_id: str | None) -> None:
+def set_provisioning_extras(
+    customer_id: str | None,
+    site_id: str | None,
+    wifi_ssid: str | None = None,
+    wifi_password: str | None = None,
+    wifi_security_type: str | None = None,
+) -> None:
     with _connect() as conn:
         conn.execute(
             """
-            INSERT INTO provisioning_extras (id, customer_id, site_id) VALUES (1, ?, ?)
+            INSERT INTO provisioning_extras
+                (id, customer_id, site_id, wifi_ssid, wifi_password, wifi_security_type)
+            VALUES (1, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 customer_id=excluded.customer_id,
-                site_id=excluded.site_id
+                site_id=excluded.site_id,
+                wifi_ssid=excluded.wifi_ssid,
+                wifi_password=excluded.wifi_password,
+                wifi_security_type=excluded.wifi_security_type
             """,
-            (customer_id, site_id),
+            (customer_id, site_id, wifi_ssid, wifi_password, wifi_security_type),
         )
 
 

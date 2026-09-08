@@ -3,10 +3,13 @@ Builds the Device Owner QR provisioning payload and renders it as a scannable PN
 fresh on every request (see GET /provisioning/qr.png in main.py) rather than cached to disk, so a
 payload field change shows up immediately instead of needing someone to notice and regenerate it.
 The fixed fields (admin component, signature checksum, APK download location) never change;
-customer_id/site_id are optional and, when set, go in PROVISIONING_ADMIN_EXTRAS_BUNDLE - a nested
-JSON object under that one key, which Android's managed-provisioning QR parser turns into a
-PersistableBundle automatically and hands to the app during provisioning (see DeviceMapping.kt /
-ProvisioningSuccessActivity.kt on the launcher side).
+everything else comes from the saved provisioning extras (see local_db.get_provisioning_extras()):
+customer_id/site_id go in PROVISIONING_ADMIN_EXTRAS_BUNDLE - a nested JSON object under that one
+key, which Android's managed-provisioning QR parser turns into a PersistableBundle automatically
+and hands to the app during provisioning (see DeviceMapping.kt / ProvisioningSuccessActivity.kt on
+the launcher side); wifi_* go in Android's own top-level PROVISIONING_WIFI_* extras, which managed
+provisioning uses to join the network itself before it ever needs one (to download the launcher
+APK) - without this, whoever's provisioning a device has to join it to wifi by hand first.
 """
 
 import io
@@ -26,24 +29,35 @@ _FIXED_FIELDS = {
 }
 
 
-def build_payload(customer_id: str | None, site_id: str | None) -> dict:
+def build_payload(extras: dict | None) -> dict:
+    extras = extras or {}
     payload = dict(_FIXED_FIELDS)
-    extras = {}
-    if customer_id:
-        extras["customer_id"] = customer_id
-    if site_id:
-        extras["site_id"] = site_id
-    if extras:
-        payload["android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE"] = extras
+
+    admin_extras = {}
+    if extras.get("customer_id"):
+        admin_extras["customer_id"] = extras["customer_id"]
+    if extras.get("site_id"):
+        admin_extras["site_id"] = extras["site_id"]
+    if admin_extras:
+        payload["android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE"] = admin_extras
+
+    ssid = extras.get("wifi_ssid")
+    if ssid:
+        payload["android.app.extra.PROVISIONING_WIFI_SSID"] = ssid
+        security_type = extras.get("wifi_security_type") or "NONE"
+        payload["android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE"] = security_type
+        if security_type != "NONE" and extras.get("wifi_password"):
+            payload["android.app.extra.PROVISIONING_WIFI_PASSWORD"] = extras["wifi_password"]
+
     return payload
 
 
-def build_json(customer_id: str | None, site_id: str | None) -> str:
-    return json.dumps(build_payload(customer_id, site_id), indent=2)
+def build_json(extras: dict | None) -> str:
+    return json.dumps(build_payload(extras), indent=2)
 
 
-def qr_png_bytes(customer_id: str | None, site_id: str | None) -> bytes:
-    payload_json = json.dumps(build_payload(customer_id, site_id))
+def qr_png_bytes(extras: dict | None) -> bytes:
+    payload_json = json.dumps(build_payload(extras))
     img = qrcode.make(payload_json, box_size=8, border=2)
     buf = io.BytesIO()
     img.save(buf, format="PNG")

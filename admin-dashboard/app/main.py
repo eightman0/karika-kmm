@@ -321,15 +321,16 @@ def delete_history_entry(entry_id: int):
 @app.get("/provisioning", dependencies=[require_login])
 def provisioning_page(request: Request, generated: str | None = None):
     saved = local_db.get_provisioning_extras() or {}
-    customer_id = saved.get("customer_id") or ""
-    site_id = saved.get("site_id") or ""
     return templates.TemplateResponse(
         request,
         "provisioning.html",
         {
-            "provisioning_json": provisioning.build_json(customer_id or None, site_id or None),
-            "customer_id": customer_id,
-            "site_id": site_id,
+            "provisioning_json": provisioning.build_json(saved),
+            "customer_id": saved.get("customer_id") or "",
+            "site_id": saved.get("site_id") or "",
+            "wifi_ssid": saved.get("wifi_ssid") or "",
+            "wifi_password": saved.get("wifi_password") or "",
+            "wifi_security_type": saved.get("wifi_security_type") or "WPA",
             "generated": bool(generated),
             "active_page": "provisioning",
         },
@@ -339,15 +340,26 @@ def provisioning_page(request: Request, generated: str | None = None):
 @app.get("/provisioning/qr.png", dependencies=[require_login])
 def provisioning_qr():
     saved = local_db.get_provisioning_extras() or {}
-    png = provisioning.qr_png_bytes(saved.get("customer_id") or None, saved.get("site_id") or None)
+    png = provisioning.qr_png_bytes(saved)
     return Response(content=png, media_type="image/png", headers={"Cache-Control": "no-store"})
 
 
 @app.post("/provisioning/generate", dependencies=[require_login])
-def generate_provisioning_qr(customer_id: str = Form(""), site_id: str = Form("")):
-    customer_id = customer_id.strip() or None
-    site_id = site_id.strip() or None
-    local_db.set_provisioning_extras(customer_id, site_id)
+def generate_provisioning_qr(
+    customer_id: str = Form(""),
+    site_id: str = Form(""),
+    wifi_ssid: str = Form(""),
+    wifi_password: str = Form(""),
+    wifi_security_type: str = Form("WPA"),
+):
+    ssid = wifi_ssid.strip() or None
+    local_db.set_provisioning_extras(
+        customer_id.strip() or None,
+        site_id.strip() or None,
+        ssid,
+        wifi_password if ssid else None,
+        wifi_security_type if ssid else None,
+    )
     return RedirectResponse("/provisioning?generated=1", status_code=303)
 
 

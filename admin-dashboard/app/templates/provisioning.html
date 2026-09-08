@@ -7,14 +7,30 @@
 
 {% if generated %}<div class="banner-success">Novi QR kod generisan.</div>{% endif %}
 
+<form method="post" action="/provisioning/generate" id="provisioning-form"></form>
+
 <div class="card">
   <h2>Kupac / lokacija za sljedeći tablet (opcionalno)</h2>
   <p class="hint">Ako se popuni, ugrađuje se u QR kao PROVISIONING_ADMIN_EXTRAS_BUNDLE - launcher to pročita čim provisioning završi i sam javi dashboard-u, bez ručnog unosa poslije na detalj stranici uređaja. Prazno ostavi za generički QR bez unaprijed poznatog kupca.</p>
-  <form method="post" action="/provisioning/generate" class="toolbar">
-    <input class="search-input" type="text" name="customer_id" value="{{ customer_id }}" placeholder="customer_id">
-    <input class="search-input" type="text" name="site_id" value="{{ site_id }}" placeholder="site_id / lokacija">
-    <button type="submit" class="btn btn-primary">Generiši QR</button>
-  </form>
+  <div class="toolbar">
+    <input class="search-input" type="text" name="customer_id" form="provisioning-form" value="{{ customer_id }}" placeholder="customer_id">
+    <input class="search-input" type="text" name="site_id" form="provisioning-form" value="{{ site_id }}" placeholder="site_id / lokacija">
+  </div>
+</div>
+
+<div class="card">
+  <h2>WiFi za sljedeći tablet (opcionalno)</h2>
+  <p class="hint">Ako se popuni, uređaj se automatski poveže na ovu mrežu tokom provisioning-a - prije nego što uopšte zatreba internet da skine launcher. Prazno ostavi da tablet ručno povežeš na WiFi.</p>
+  <div class="toolbar">
+    <input class="search-input" type="text" name="wifi_ssid" form="provisioning-form" value="{{ wifi_ssid }}" placeholder="Naziv mreže (SSID)">
+    <select class="select-input" name="wifi_security_type" form="provisioning-form" style="flex: 1 1 180px;">
+      <option value="WPA" {% if wifi_security_type == "WPA" %}selected{% endif %}>WPA/WPA2/WPA3</option>
+      <option value="WEP" {% if wifi_security_type == "WEP" %}selected{% endif %}>WEP</option>
+      <option value="NONE" {% if wifi_security_type == "NONE" %}selected{% endif %}>Otvorena (bez lozinke)</option>
+    </select>
+    <input class="search-input" type="password" name="wifi_password" form="provisioning-form" value="{{ wifi_password }}" placeholder="Lozinka" autocomplete="new-password">
+  </div>
+  <button type="submit" class="btn btn-primary" form="provisioning-form" style="margin-top: 14px;">Generiši QR</button>
 </div>
 
 <div class="card">
