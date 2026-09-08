@@ -58,8 +58,14 @@ for module in "${MODULES[@]}"; do
   GRADLE_TASKS+=(":${module}:assembleRelease")
 done
 
-echo "Running: ./gradlew ${GRADLE_TASKS[*]}"
-./gradlew "${GRADLE_TASKS[@]}" --console=plain
+# --rerun-tasks forces every task to actually execute instead of being skipped as UP-TO-DATE;
+# --no-build-cache/--no-configuration-cache stop it reusing outputs from a previous invocation
+# (both are on by default project-wide, see gradle.properties) - a release build should never
+# ship something that wasn't compiled/packaged/signed fresh, this run, from what's on disk now.
+GRADLE_NO_CACHE_FLAGS=(--rerun-tasks --no-build-cache --no-configuration-cache)
+
+echo "Running: ./gradlew ${GRADLE_TASKS[*]} ${GRADLE_NO_CACHE_FLAGS[*]}"
+./gradlew "${GRADLE_TASKS[@]}" "${GRADLE_NO_CACHE_FLAGS[@]}" --console=plain
 
 # Locate apksigner (from the SDK local.properties already points Gradle at) to confirm each APK
 # actually got signed, rather than trusting the build succeeded silently with no signingConfig.
