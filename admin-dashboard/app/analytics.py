@@ -3,6 +3,10 @@ Real fleet + usage analytics, computed from local_db - version rollout comes fro
 table (already tracked for every heartbeat), and the click/screen numbers come from
 analytics_events, populated by analytics_ingest.py whenever a device uploads the file its
 AnalyticsTracker wrote (see the "Povuci analitiku" button on the devices page).
+
+Every function takes an optional device_ids filter - None/empty means fleet-wide (the original,
+still-default behavior); a customer's device id list scopes every number/chart to just their
+devices (see /analitika's customer_id picker in main.py).
 """
 
 from collections import Counter
@@ -15,8 +19,11 @@ LINE_DAYS = 15
 DONUT_COLORS = ["#9184d9", "#e3c47f", "#e59a9a", "#7fb8e3", "#8fd0a8", "#d99184"]
 
 
-def get_kpis() -> dict:
+def get_kpis(device_ids: list[str] | None = None) -> dict:
     all_devices = local_db.list_devices()
+    if device_ids is not None:
+        wanted = set(device_ids)
+        all_devices = [d for d in all_devices if d["id"] in wanted]
     total_devices = len(all_devices)
     latest = local_db.get_kiosk_version_row() or {}
     latest_code = str(latest.get("version_code") or "")
@@ -31,14 +38,14 @@ def get_kpis() -> dict:
         "total_devices": total_devices,
         "latest_pct": round(on_latest / total_devices * 100) if total_devices else 0,
         "latest_fraction": f"{on_latest} od {total_devices}",
-        "devices_with_events": local_db.count_devices_with_events(),
-        "events_total": local_db.count_analytics_events(),
-        "avg_clicks_per_device": local_db.avg_events_per_device(),
+        "devices_with_events": local_db.count_devices_with_events(device_ids),
+        "events_total": local_db.count_analytics_events(device_ids),
+        "avg_clicks_per_device": local_db.avg_events_per_device(device_ids),
     }
 
 
-def get_line_chart(width: int = 600, height: int = 160, pad: int = 12) -> dict:
-    rows = local_db.events_per_day(LINE_DAYS)
+def get_line_chart(device_ids: list[str] | None = None, width: int = 600, height: int = 160, pad: int = 12) -> dict:
+    rows = local_db.events_per_day(LINE_DAYS, device_ids)
     if not rows:
         return {"empty": True, "width": width, "height": height}
 
@@ -75,8 +82,8 @@ def get_line_chart(width: int = 600, height: int = 160, pad: int = 12) -> dict:
     }
 
 
-def get_bar_chart(width: int = 600, height: int = 160, pad: int = 12) -> dict:
-    rows = {r["hour"]: r["n"] for r in local_db.events_per_hour()}
+def get_bar_chart(device_ids: list[str] | None = None, width: int = 600, height: int = 160, pad: int = 12) -> dict:
+    rows = {r["hour"]: r["n"] for r in local_db.events_per_hour(device_ids)}
     hours = [f"{h:02d}" for h in range(24)]
     values = [rows.get(h, 0) for h in hours]
     if not any(values):
@@ -98,8 +105,11 @@ def get_bar_chart(width: int = 600, height: int = 160, pad: int = 12) -> dict:
     return {"empty": False, "width": width, "height": height, "bars": bars}
 
 
-def get_donut(size: int = 160, stroke: int = 22) -> dict:
+def get_donut(device_ids: list[str] | None = None, size: int = 160, stroke: int = 22) -> dict:
     all_devices = local_db.list_devices()
+    if device_ids is not None:
+        wanted = set(device_ids)
+        all_devices = [d for d in all_devices if d["id"] in wanted]
     counts = Counter(
         d["installed_version_name"] or "?"
         for d in all_devices
@@ -132,9 +142,9 @@ def get_donut(size: int = 160, stroke: int = 22) -> dict:
     return {"empty": False, "size": size, "radius": radius, "stroke": stroke, "segments": segments, "total": total}
 
 
-def get_top_screens(limit: int = 8) -> list[dict]:
-    return local_db.top_screens(limit)
+def get_top_screens(device_ids: list[str] | None = None, limit: int = 8) -> list[dict]:
+    return local_db.top_screens(limit, device_ids)
 
 
-def get_top_clicks(limit: int = 8) -> list[dict]:
-    return local_db.top_clicks(limit)
+def get_top_clicks(device_ids: list[str] | None = None, limit: int = 8) -> list[dict]:
+    return local_db.top_clicks(limit, device_ids)

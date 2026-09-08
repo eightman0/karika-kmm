@@ -2,8 +2,18 @@
 {% block title %}Analitika - Karika Ops{% endblock %}
 {% block content %}
 <div class="page-header">
-  <h1>Analitika</h1>
-  <p class="summary-line">Klikovi i pregledani ekrani iz salesrep app-a &middot; {{ kpis.events_total }} eventa sa {{ kpis.devices_with_events }} uređaja.</p>
+  <div>
+    <h1>Analitika</h1>
+    <p class="summary-line">Klikovi i pregledani ekrani iz salesrep app-a &middot; {{ kpis.events_total }} eventa sa {{ kpis.devices_with_events }} uređaja.</p>
+  </div>
+  <form method="get" action="/analitika" class="toolbar">
+    <select class="select-input" name="customer_id" onchange="this.form.submit()" style="min-width: 220px;">
+      <option value="" {% if not selected_customer %}selected{% endif %}>Svi kupci</option>
+      {% for c in customers %}
+      <option value="{{ c }}" {% if c == selected_customer %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </form>
 </div>
 
 <div class="kpi-grid">

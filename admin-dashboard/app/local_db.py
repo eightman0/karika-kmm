@@ -354,7 +354,34 @@ def delete_device(device_id: str) -> None:
         conn.execute("DELETE FROM devices WHERE id = ?", (device_id,))
 
 
+def list_customer_ids() -> list[str]:
+    with _connect() as conn:
+        rows = conn.execute(
+            "SELECT DISTINCT customer_id FROM devices"
+            " WHERE customer_id IS NOT NULL AND customer_id != '' ORDER BY customer_id"
+        ).fetchall()
+        return [row["customer_id"] for row in rows]
+
+
+def device_ids_for_customer(customer_id: str) -> list[str]:
+    with _connect() as conn:
+        rows = conn.execute("SELECT id FROM devices WHERE customer_id = ?", (customer_id,)).fetchall()
+        return [row["id"] for row in rows]
+
+
 # --- analytics events -----------------------------------------------------------
+
+def _device_id_filter(device_ids: list[str] | None) -> tuple[str, list[str]]:
+    """SQL snippet + params to scope an analytics_events query to a customer's devices. None
+    means fleet-wide, matching every call site's existing (pre-customer-filter) behavior; an
+    empty list means a customer with zero matching devices, which should match zero rows, not
+    silently fall back to fleet-wide."""
+    if device_ids is None:
+        return "", []
+    if not device_ids:
+        return " AND 1=0", []
+    return f" AND device_id IN ({','.join('?' for _ in device_ids)})", list(device_ids)
+
 
 def insert_analytics_events(device_id: str, events: list[dict]) -> None:
     if not events:
@@ -375,65 +402,78 @@ def insert_analytics_events(device_id: str, events: list[dict]) -> None:
         )
 
 
-def count_analytics_events() -> int:
+def count_analytics_events(device_ids: list[str] | None = None) -> int:
+    clause, params = _device_id_filter(device_ids)
     with _connect() as conn:
-        return conn.execute("SELECT COUNT(*) FROM analytics_events").fetchone()[0]
+        return conn.execute(f"SELECT COUNT(*) FROM analytics_events WHERE 1=1{clause}", params).fetchone()[0]
 
 
-def count_devices_with_events() -> int:
+def count_devices_with_events(device_ids: list[str] | None = None) -> int:
+    clause, params = _device_id_filter(device_ids)
     with _connect() as conn:
-        return conn.execute("SELECT COUNT(DISTINCT device_id) FROM analytics_events").fetchone()[0]
+        return conn.execute(
+            f"SELECT COUNT(DISTINCT device_id) FROM analytics_events WHERE 1=1{clause}", params
+        ).fetchone()[0]
 
 
-def avg_events_per_device() -> float:
+def avg_events_per_device(device_ids: list[str] | None = None) -> float:
+    clause, params = _device_id_filter(device_ids)
     with _connect() as conn:
         row = conn.execute(
-            "SELECT COUNT(*) AS n, COUNT(DISTINCT device_id) AS d FROM analytics_events WHERE type = 'click'"
+            f"SELECT COUNT(*) AS n, COUNT(DISTINCT device_id) AS d FROM analytics_events"
+            f" WHERE type = 'click'{clause}",
+            params,
         ).fetchone()
     return round(row["n"] / row["d"], 1) if row["d"] else 0.0
 
 
-def events_per_day(days: int) -> list[dict]:
+def events_per_day(days: int, device_ids: list[str] | None = None) -> list[dict]:
     # SQLite's strftime() only knows UTC (or a fixed hour offset, wrong half the year under DST),
     # so bucketing by Sarajevo calendar day has to happen in Python instead of in the query.
     cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    clause, params = _device_id_filter(device_ids)
     with _connect() as conn:
-        rows = conn.execute("SELECT ts FROM analytics_events WHERE ts >= ?", (cutoff,)).fetchall()
+        rows = conn.execute(
+            f"SELECT ts FROM analytics_events WHERE ts >= ?{clause}", (cutoff, *params)
+        ).fetchall()
     counts = Counter(
         datetime.fromisoformat(row["ts"]).astimezone(LOCAL_TZ).strftime("%Y-%m-%d") for row in rows
     )
     return [{"day": day, "n": n} for day, n in sorted(counts.items())]
 
 
-def events_per_hour() -> list[dict]:
+def events_per_hour(device_ids: list[str] | None = None) -> list[dict]:
+    clause, params = _device_id_filter(device_ids)
     with _connect() as conn:
-        rows = conn.execute("SELECT ts FROM analytics_events").fetchall()
+        rows = conn.execute(f"SELECT ts FROM analytics_events WHERE 1=1{clause}", params).fetchall()
     counts = Counter(
         datetime.fromisoformat(row["ts"]).astimezone(LOCAL_TZ).strftime("%H") for row in rows
     )
     return [{"hour": hour, "n": n} for hour, n in sorted(counts.items())]
 
 
-def top_screens(limit: int = 8) -> list[dict]:
+def top_screens(limit: int = 8, device_ids: list[str] | None = None) -> list[dict]:
+    clause, params = _device_id_filter(device_ids)
     with _connect() as conn:
         rows = conn.execute(
-            """
+            f"""
             SELECT screen, COUNT(*) AS n FROM analytics_events
-            WHERE type = 'screen' GROUP BY screen ORDER BY n DESC LIMIT ?
+            WHERE type = 'screen'{clause} GROUP BY screen ORDER BY n DESC LIMIT ?
             """,
-            (limit,),
+            (*params, limit),
         ).fetchall()
         return [dict(row) for row in rows]
 
 
-def top_clicks(limit: int = 8) -> list[dict]:
+def top_clicks(limit: int = 8, device_ids: list[str] | None = None) -> list[dict]:
+    clause, params = _device_id_filter(device_ids)
     with _connect() as conn:
         rows = conn.execute(
-            """
+            f"""
             SELECT screen, element, COUNT(*) AS n FROM analytics_events
-            WHERE type = 'click' GROUP BY screen, element ORDER BY n DESC LIMIT ?
+            WHERE type = 'click'{clause} GROUP BY screen, element ORDER BY n DESC LIMIT ?
             """,
-            (limit,),
+            (*params, limit),
         ).fetchall()
         return [dict(row) for row in rows]
 

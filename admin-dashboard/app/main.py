@@ -364,17 +364,20 @@ def generate_provisioning_qr(
 
 
 @app.get("/analitika", dependencies=[require_login])
-def analytics_page(request: Request):
+def analytics_page(request: Request, customer_id: str = ""):
+    device_ids = local_db.device_ids_for_customer(customer_id) if customer_id else None
     return templates.TemplateResponse(
         request,
         "analytics.html",
         {
-            "kpis": analytics.get_kpis(),
-            "line": analytics.get_line_chart(),
-            "bars": analytics.get_bar_chart(),
-            "donut": analytics.get_donut(),
-            "top_screens": analytics.get_top_screens(),
-            "top_clicks": analytics.get_top_clicks(),
+            "kpis": analytics.get_kpis(device_ids),
+            "line": analytics.get_line_chart(device_ids),
+            "bars": analytics.get_bar_chart(device_ids),
+            "donut": analytics.get_donut(device_ids),
+            "top_screens": analytics.get_top_screens(device_ids),
+            "top_clicks": analytics.get_top_clicks(device_ids),
+            "customers": local_db.list_customer_ids(),
+            "selected_customer": customer_id,
             "active_page": "analitika",
         },
     )
