@@ -118,10 +118,10 @@ def device_detail_page(
     device = devices.get_device(device_id)
     if device is None:
         return RedirectResponse("/devices")
-    installed_code = device.get("installedVersionCode") or 0
-    available_versions = [
-        v for v in version_history.get_available_versions(APP) if v["versionCode"] > installed_code
-    ]
+    # Unfiltered (not just versions newer than installed) - a device already on the only
+    # published version still needs something explicit to pick, otherwise "Ažuriraj sada" falls
+    # back to sending whatever's currently staged, which can be nothing at all.
+    available_versions = version_history.get_available_versions(APP)
     return templates.TemplateResponse(
         request,
         "device_detail.html",

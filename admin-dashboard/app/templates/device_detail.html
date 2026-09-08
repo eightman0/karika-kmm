@@ -27,7 +27,6 @@
       {% endif %}
     </p>
     <div style="margin-top: 8px;">
-      {% if available_versions %}
       <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('update-modal').showModal()">Ažuriraj sada</button>
       <dialog id="update-modal" class="modal">
         <form method="post" action="/devices/{{ device.id }}/update" class="stacked-form">
@@ -35,7 +34,7 @@
           <label>Verzija
             <select name="version_code" class="select-input">
               {% for v in available_versions %}
-              <option value="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }})</option>
+              <option value="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }}){% if v.versionCode == device.installedVersionCode %} - trenutna{% endif %}</option>
               {% endfor %}
             </select>
           </label>
@@ -45,11 +44,6 @@
           </div>
         </form>
       </dialog>
-      {% else %}
-      <form method="post" action="/devices/{{ device.id }}/update">
-        <button type="submit" class="btn btn-secondary btn-sm">Ažuriraj sada</button>
-      </form>
-      {% endif %}
     </div>
   </div>
   <div class="metric-card">
