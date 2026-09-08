@@ -47,13 +47,20 @@ class KioskMessagingService : FirebaseMessagingService() {
             CMD_ANALYTICS_REQUEST -> runAcked(command, requestId) {
                 LogUploadManager.uploadAnalyticsNow(applicationContext)
             }
-            CMD_FACTORY_RESET -> runAcked(command, requestId) {
-                // The device is about to erase itself, so the ack that follows is moot in
-                // practice - kept anyway since runAcked() is the uniform path for every command.
+            CMD_FACTORY_RESET -> scope.launch {
+                // Acked before wiping, not after - same reasoning as CMD_REBOOT below, wipeData()
+                // can bring the device down before an ack sent afterward would ever complete.
+                ack(command, requestId, "ok", null)
                 val devicePolicyManager = getSystemService(DevicePolicyManager::class.java)
                 devicePolicyManager.wipeData(0)
             }
-            CMD_REBOOT -> runAcked(command, requestId) {
+            CMD_REBOOT -> scope.launch {
+                // Acked before rebooting, not after like every other command - unlike factory
+                // reset (which wipes this device_id's history along with everything else),
+                // reboot leaves the same device_id behind expecting to see this in its history,
+                // but devicePolicyManager.reboot() can bring the device down before an ack sent
+                // afterward would ever finish its network round trip.
+                ack(command, requestId, "ok", null)
                 val devicePolicyManager = getSystemService(DevicePolicyManager::class.java)
                 val admin = LauncherDeviceAdminReceiver.getReceiverComponentName(applicationContext)
                 devicePolicyManager.reboot(admin)
@@ -84,16 +91,26 @@ class KioskMessagingService : FirebaseMessagingService() {
                 // proof it's reachable.
                 UpdateScheduler.triggerImmediateCheck(applicationContext)
             }
-            CMD_VERSION_CHECK, null -> UpdateScheduler.triggerImmediateCheck(applicationContext)
+            CMD_VERSION_CHECK -> runAcked(command, requestId, message.data["versionCode"]?.let { "verzija $it" }) {
+                UpdateScheduler.triggerImmediateCheck(applicationContext)
+            }
+            // No "command" field at all - the old Remote Config real-time-listener push, kept for
+            // any straggler still wired to it. Nothing to ack: there's no requestId to match up.
+            null -> UpdateScheduler.triggerImmediateCheck(applicationContext)
             else -> Log.w(TAG, "Unknown command: $command")
         }
     }
 
-    private fun runAcked(command: String, requestId: String?, block: suspend () -> Unit) {
+    private fun runAcked(
+        command: String,
+        requestId: String?,
+        okMessage: String? = null,
+        block: suspend () -> Unit
+    ) {
         scope.launch {
             try {
                 block()
-                ack(command, requestId, "ok", null)
+                ack(command, requestId, "ok", okMessage)
             } catch (e: Exception) {
                 Log.e(TAG, "Command failed: $command", e)
                 ack(command, requestId, "error", e.message)
