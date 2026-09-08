@@ -59,6 +59,17 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Without ACTION_MAIN paired with CATEGORY_HOME, this activity can't statically
+                 resolve as Home at all - the two filters above never combine that action with
+                 that category. Its Home role would then depend entirely on the runtime
+                 addPersistentPreferredActivity() call in LauncherKiosk.setAsHomeApp(), which only
+                 (re)runs once LauncherActivity itself has already resumed - no help on a boot
+                 where it hasn't started yet. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -106,12 +117,15 @@
             <intent-filter>
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
                 <action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE" />
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.app.action.PROFILE_OWNER_CHANGED" />
                 <action android:name="android.app.action.DEVICE_OWNER_CHANGED" />
             </intent-filter>
         </receiver>
 
+        <!-- DeviceAdminReceiver.onReceive() only dispatches the device-admin lifecycle actions it
+             recognizes to their callbacks - BOOT_COMPLETED isn't one of them, so a BOOT_COMPLETED
+             entry on the filter above would silently no-op. The real boot-relaunch handling lives
+             here instead - see BootBroadcastReceiver's own doc comment. -->
         <receiver
             android:name=".provision.BootBroadcastReceiver"
             android:directBootAware="true"
@@ -119,6 +133,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
