@@ -35,12 +35,14 @@
             <select name="version_code" class="select-input">
               {% for v in available_versions %}
               <option value="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }}){% if v.versionCode == device.installedVersionCode %} - trenutna{% endif %}</option>
+              {% else %}
+              <option value="" disabled selected>Nema verzije za update</option>
               {% endfor %}
             </select>
           </label>
           <div class="modal-actions">
             <button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Otkaži</button>
-            <button type="submit" class="btn btn-primary">Pošalji</button>
+            <button type="submit" class="btn btn-primary" {% if not available_versions %}disabled{% endif %}>Pošalji</button>
           </div>
         </form>
       </dialog>

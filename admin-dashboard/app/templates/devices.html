@@ -17,7 +17,6 @@
       <button type="submit" class="btn btn-secondary">Povuci analitiku (svi)</button>
     </form>
     <form method="post" action="/devices/update-selected" id="update-selected-form"></form>
-    {% if available_versions %}
     <button type="button" class="btn btn-secondary" onclick="document.getElementById('update-selected-modal').showModal()">Ažuriraj izabrane</button>
     <dialog id="update-selected-modal" class="modal">
       <div class="modal-body">
@@ -26,18 +25,37 @@
           <select name="version_code" id="update-selected-version" class="select-input" form="update-selected-form">
             {% for v in available_versions %}
             <option value="{{ v.versionCode }}" data-code="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }})</option>
+            {% else %}
+            <option value="" disabled selected>Nema verzije za update</option>
             {% endfor %}
           </select>
         </label>
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Otkaži</button>
-          <button type="submit" class="btn btn-primary" form="update-selected-form">Pošalji</button>
+          <button type="submit" class="btn btn-primary" form="update-selected-form" {% if not available_versions %}disabled{% endif %}>Pošalji</button>
         </div>
       </div>
     </dialog>
-    {% else %}
-    <button type="submit" class="btn btn-secondary" form="update-selected-form">Ažuriraj izabrane</button>
-    {% endif %}
+
+    <form method="post" id="update-single-form"></form>
+    <dialog id="update-single-modal" class="modal">
+      <div class="modal-body">
+        <h2 id="update-single-title">Ažuriraj uređaj</h2>
+        <label>Verzija
+          <select name="version_code" id="update-single-version" class="select-input" form="update-single-form">
+            {% for v in available_versions %}
+            <option value="{{ v.versionCode }}" data-code="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }})</option>
+            {% else %}
+            <option value="" disabled selected>Nema verzije za update</option>
+            {% endfor %}
+          </select>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Otkaži</button>
+          <button type="submit" class="btn btn-primary" form="update-single-form" {% if not available_versions %}disabled{% endif %}>Pošalji</button>
+        </div>
+      </div>
+    </dialog>
   </div>
 </div>
 
@@ -90,9 +108,7 @@
         <div class="dropdown">
           <button type="button" class="btn btn-secondary btn-sm dropdown-toggle" onclick="toggleDropdown(event, 'menu-{{ loop.index }}')">&#8942;</button>
           <div class="dropdown-menu" id="menu-{{ loop.index }}">
-            <form method="post" action="/devices/{{ d.id }}/update">
-              <button type="submit" class="dropdown-item">Ažuriraj sada</button>
-            </form>
+            <button type="button" class="dropdown-item" onclick="openUpdateSingleModal('{{ d.id }}', {{ d.installedVersionCode or 0 }})">Ažuriraj sada</button>
             <form method="post" action="/devices/{{ d.id }}/request-logs">
               <button type="submit" class="dropdown-item">Zatraži nove logove</button>
             </form>
@@ -173,6 +189,20 @@
         opt.selected = false;
       }
     });
+  }
+
+  function openUpdateSingleModal(deviceId, installedCode) {
+    closeAllDropdowns();
+    document.getElementById('update-single-form').action = '/devices/' + deviceId + '/update';
+    document.getElementById('update-single-title').textContent = 'Ažuriraj ' + deviceId;
+    var installed = Number(installedCode) || 0;
+    var select = document.getElementById('update-single-version');
+    Array.prototype.forEach.call(select.options, function (opt) {
+      var base = opt.textContent.replace(/ - trenutna$/, '');
+      var isCurrent = opt.dataset.code !== undefined && Number(opt.dataset.code) === installed;
+      opt.textContent = base + (isCurrent ? ' - trenutna' : '');
+    });
+    document.getElementById('update-single-modal').showModal();
   }
 
   function closeAllDropdowns() {
