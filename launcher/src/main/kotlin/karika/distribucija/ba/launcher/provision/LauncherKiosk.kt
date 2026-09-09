@@ -43,11 +43,18 @@ class LauncherKiosk(private val context: ComponentActivity) {
         grantPermission(Manifest.permission.REQUEST_INSTALL_PACKAGES, context.packageName)
         // Silently granted to salesrep, not this app - LocationSampleWorker runs there now (moved
         // out of this Device Owner process after it started causing ANRs on real devices). Only
-        // the foreground pair, deliberately not ACCESS_BACKGROUND_LOCATION - silently granting
-        // that one to a package other than the launcher itself crashed Permission Controller on a
-        // real device (which then froze the lock-task-pinned launcher's input, showing up there
-        // as an ANR). LocationSampleWorker runs as a brief foreground service instead, which
-        // Android treats as foreground for location access, so it never needs the background grant.
+        // the foreground pair, deliberately not ACCESS_BACKGROUND_LOCATION - it's a "dangerous"
+        // runtime permission, and granting any of those through Device Owner makes the OS try to
+        // notify the user "your admin granted you X" - on this device (Android 12/API 31) that
+        // notifier itself is broken (PermissionController: IllegalArgumentException, missing
+        // FLAG_IMMUTABLE/FLAG_MUTABLE on a PendingIntent - an OS/OEM bug, not ours) and crashes,
+        // which then froze the lock-task-pinned launcher's input, showing up there as an ANR. The
+        // grant itself still lands fine despite the crash (confirmed via dumpsys: granted=true,
+        // POLICY_FIXED) - grantPermission() below only calls the DPM API once, the first time a
+        // permission isn't granted yet, specifically to avoid re-triggering that broken notifier
+        // on every single onResume() the way calling it unconditionally did. LocationSampleWorker
+        // runs as a brief foreground service, which Android treats as foreground for location
+        // access, so it never needs the background grant at all.
         grantPermission(Manifest.permission.ACCESS_FINE_LOCATION, KnownApps.PRIMARY.packageName)
         grantPermission(Manifest.permission.ACCESS_COARSE_LOCATION, KnownApps.PRIMARY.packageName)
         // Also silent, and for the same underlying reason as the location grants above: a normal
@@ -58,7 +65,13 @@ class LauncherKiosk(private val context: ComponentActivity) {
         setLockTask(enable)
     }
 
+    /** Only calls into DPM when the permission isn't already granted - see the long comment above
+     * on why calling this unconditionally on every onResume() is actively harmful, not just
+     * wasted work: it keeps re-triggering a broken OS notifier on some devices. */
     private fun grantPermission(permission: String, targetPackage: String) {
+        val alreadyGranted = context.packageManager.checkPermission(permission, targetPackage) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (alreadyGranted) return
         devicePolicyManager.setPermissionGrantState(
             adminComponentName,
             targetPackage,
