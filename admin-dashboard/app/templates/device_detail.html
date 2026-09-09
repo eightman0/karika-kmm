@@ -122,13 +122,20 @@
 
   {% if day_locations %}
   <div id="location-map" class="location-map"></div>
-  <p class="hint">{{ day_locations|length }} tačaka za {{ selected_date }}.</p>
+  <p class="hint">
+    {{ day_locations|length }} tačaka za {{ selected_date }}.
+    <a href="{{ day_route_maps_url }}" target="_blank" rel="noopener">Otvori sve tačke u Google Maps &#8599;</a>
+  </p>
   <script>
     (function () {
       var points = {{ day_locations_json | safe }};
-      var map = L.map("location-map");
+      // maxZoom above OSM's own native tile level (19) still works - Leaflet just scales up the
+      // last real tile instead of fetching a sharper one, which is enough to tell close-together
+      // points apart without needing a paid tile provider.
+      var map = L.map("location-map", { maxZoom: 21 });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
+        maxZoom: 21,
+        maxNativeZoom: 19,
         attribution: "&copy; OpenStreetMap contributors"
       }).addTo(map);
       var latLngs = points.map(function (p) { return [p.lat, p.lon]; });

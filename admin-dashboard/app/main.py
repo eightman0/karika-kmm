@@ -159,6 +159,7 @@ def device_detail_page(
             "latest_location": devices.latest_location(device_id),
             "selected_date": selected_date,
             "day_locations": day_locations,
+            "day_route_maps_url": devices.google_maps_route_url(day_locations),
             "day_locations_json": json.dumps(
                 [
                     {

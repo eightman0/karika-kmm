@@ -251,6 +251,16 @@ def locations_for_day(device_id: str, date_str: str | None) -> tuple[str, list[d
     return day.isoformat(), points
 
 
+def google_maps_route_url(points: list[dict]) -> str | None:
+    """A directions URL with every point as a stop, in order - lets the admin open the whole
+    day's route in the actual Google Maps app/site (native pinch-zoom, satellite, street view)
+    instead of only the embedded OpenStreetMap preview, which is capped at OSM's own tile zoom."""
+    if not points:
+        return None
+    stops = "/".join(f"{p['lat']},{p['lon']}" for p in points)
+    return f"https://www.google.com/maps/dir/{stops}"
+
+
 def signed_log_url(storage_path: str) -> str:
     blob = bucket().blob(storage_path)
     return blob.generate_signed_url(expiration=timedelta(minutes=SIGNED_URL_MINUTES))
