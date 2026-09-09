@@ -70,6 +70,7 @@
 
 <div class="card">
   <h2>Historija objava</h2>
+  <p class="hint">"Postavi kao default" mijenja trenutnu verziju za cijeli park - i za već postojeće uređaje, i za svaki novi uređaj koji se prvi put javi (dobija je automatski, bez posebnog targetiranja).</p>
   {% if history %}
   <form method="post" action="/versions/history/delete-selected" id="history-bulk-delete-form"
         onsubmit="return confirm('Obrisati sve izabrane zapise iz historije objava? Ovo ne dira ništa što je trenutno instalirano.')">
@@ -89,8 +90,8 @@
       </span>
       <span class="history-actions">
         <form method="post" action="/versions/rollback/{{ h.id }}"
-              onsubmit="return confirm('Vratiti {{ h.versionName }} ({{ h.versionCode }}) kao trenutnu verziju za sve uređaje?')">
-          <button type="submit" class="btn btn-secondary btn-sm">Aktiviraj</button>
+              onsubmit="return confirm('Postaviti {{ h.versionName }} ({{ h.versionCode }}) kao default verziju za sve uređaje - uključujući svaki novi uređaj koji se tek priključi?')">
+          <button type="submit" class="btn btn-secondary btn-sm">Postavi kao default</button>
         </form>
         <form method="post" action="/versions/history/{{ h.id }}/delete"
               onsubmit="return confirm('Obrisati ovaj zapis iz historije objava? Ovo ne dira ništa što je trenutno instalirano.')">
