@@ -21,10 +21,6 @@ logger = logging.getLogger(__name__)
 BROADCAST_TOPIC = "kiosk-updates"
 
 
-def _device_topic(device_id: str) -> str:
-    return f"device_{device_id}"
-
-
 def new_request_id() -> str:
     return str(uuid.uuid4())
 
@@ -68,19 +64,12 @@ def send_analytics_request_all() -> None:
         logger.exception("Failed to send FCM analytics-request broadcast")
 
 
-def send_log_request(device_id: str, requested_at: str) -> str:
-    request_id = new_request_id()
-    try:
-        init_messaging()
-        messaging.send(
-            messaging.Message(
-                topic=_device_topic(device_id),
-                data={"command": "log_request", "requestId": request_id, "requestedAt": requested_at},
-            )
-        )
-    except Exception:
-        logger.exception("Failed to send FCM log-request ping for %s", device_id)
-    return request_id
+def send_log_request(fcm_token: str, requested_at: str) -> str:
+    """Nudges one specific device to pull and upload its log now. Direct token, not its own topic -
+    per-device topic delivery was already found unreliable for version_check (see
+    send_version_check_to_device's history) and never got the same fix applied here: pushes never
+    reached the device, silently, since the failure was only ever logged server-side."""
+    return send_command_to_token(fcm_token, "log_request", {"requestedAt": requested_at})
 
 
 def send_command_to_token(fcm_token: str, command: str, extra: dict | None = None) -> str:

@@ -117,7 +117,7 @@ def request_logs(device_id: str) -> None:
     # The device pulls the actual log content itself once it wakes up - this is only the "please
     # do that now" nudge, same push channel the silent-update check already uses instead of a
     # Firestore listener.
-    send_log_request(device_id, requested_at)
+    send_log_request(_require_token(device_id), requested_at)
 
 
 def _require_token(device_id: str) -> str:

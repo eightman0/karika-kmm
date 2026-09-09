@@ -176,8 +176,11 @@ def device_detail_page(
 
 @app.post("/devices/{device_id}/request-logs", dependencies=[require_login])
 def request_logs(device_id: str):
-    devices.request_logs(device_id)
-    return RedirectResponse(f"/devices/{device_id}", status_code=303)
+    try:
+        devices.request_logs(device_id)
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=log_request", status_code=303)
 
 
 @app.post("/devices/{device_id}/delete", dependencies=[require_login])
