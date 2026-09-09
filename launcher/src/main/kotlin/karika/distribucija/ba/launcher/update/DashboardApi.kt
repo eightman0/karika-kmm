@@ -44,7 +44,9 @@ object DashboardApi {
         androidRelease: String,
         deviceModel: String,
         fcmToken: String?,
-        maintenanceActive: Boolean
+        maintenanceActive: Boolean,
+        batteryLevel: Int?,
+        batteryCharging: Boolean?
     ) = withContext(Dispatchers.IO) {
         val body = JSONObject()
             .put("installedPackage", installedPackage)
@@ -55,6 +57,8 @@ object DashboardApi {
             .put("deviceModel", deviceModel)
             .put("fcmToken", fcmToken)
             .put("maintenanceActive", maintenanceActive)
+            .put("batteryLevel", batteryLevel)
+            .put("batteryCharging", batteryCharging)
         post("$BASE_URL/api/devices/$deviceId/heartbeat", body)
     }
 

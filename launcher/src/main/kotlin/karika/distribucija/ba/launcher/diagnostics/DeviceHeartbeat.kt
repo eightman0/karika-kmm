@@ -1,6 +1,7 @@
 package karika.distribucija.ba.launcher.diagnostics
 
 import android.content.Context
+import android.os.BatteryManager
 import android.os.Build
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
@@ -21,6 +22,12 @@ object DeviceHeartbeat {
         try {
             val deviceId = DeviceIdentity.id(context)
             val fcmToken = runCatching { FirebaseMessaging.getInstance().token.await() }.getOrNull()
+            val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
+            // -1 (property unsupported/unavailable) is BatteryManager's own sentinel for "no
+            // reading" - reported as null rather than a misleading 0% or -1%.
+            val batteryLevel = batteryManager
+                ?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                ?.takeIf { it in 0..100 }
             DashboardApi.reportHeartbeat(
                 deviceId = deviceId,
                 installedPackage = packageName,
@@ -33,7 +40,9 @@ object DeviceHeartbeat {
                 // Same condition LauncherActivity.refreshMaintenanceState() uses to decide
                 // whether to show the banner - covers both the admin-triggered flag and the
                 // auto-expiring one UpdateWorker sets during an install.
-                maintenanceActive = MaintenanceState.isActive(context) || RemoteMaintenanceState.isActive(context)
+                maintenanceActive = MaintenanceState.isActive(context) || RemoteMaintenanceState.isActive(context),
+                batteryLevel = batteryLevel,
+                batteryCharging = batteryManager?.isCharging
             )
         } catch (e: Exception) {
             Log.w(TAG, "Heartbeat failed: ${e.message}")

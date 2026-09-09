@@ -61,6 +61,18 @@
     <p class="metric-value">{{ device.androidRelease or "?" }} (SDK {{ device.androidSdkInt or "?" }})</p>
     <p class="metric-sub">{{ device.deviceModel or "-" }}</p>
   </div>
+  <div class="metric-card">
+    <p class="metric-label">Baterija</p>
+    <p class="metric-value">
+      {{ device.batteryLevel ~ "%" if device.batteryLevel is not none else "-" }}
+      {% if device.batteryLevel is not none and device.batteryLevel < 20 and not device.batteryCharging %}
+      <span class="tag tag-lagging">nisko</span>
+      {% endif %}
+    </p>
+    {% if device.batteryCharging %}
+    <p class="metric-sub">Puni se</p>
+    {% endif %}
+  </div>
 </div>
 
 <div class="card">

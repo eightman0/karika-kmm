@@ -73,6 +73,7 @@
     <tr>
       <th class="select-all-col"><label class="checkbox"><input type="checkbox" id="select-all-checkbox" onchange="toggleAllDevices(this)"> Svi</label></th>
       <th>Status</th>
+      <th>Baterija</th>
       <th>Uređaj</th>
       <th>Kupac / lokacija</th>
       <th>Instalirana verzija</th>
@@ -92,6 +93,16 @@
         <span class="status status-{{ d.status }}"><span class="status-dot"></span>{{ {"online": "online", "stale": "neaktivan", "never": "nikad"}[d.status] }}</span>
         {% if d.maintenanceActive %}
         <span class="tag tag-maintenance">maintenance</span>
+        {% endif %}
+      </td>
+      <td data-label="Baterija">
+        {% if d.batteryLevel is not none %}
+        {{ d.batteryLevel }}%{% if d.batteryCharging %} (puni se){% endif %}
+        {% if d.batteryLevel < 20 and not d.batteryCharging %}
+        <span class="tag tag-lagging">nisko</span>
+        {% endif %}
+        {% else %}
+        -
         {% endif %}
       </td>
       <td data-label="Uređaj"><a class="mono-id" href="/devices/{{ d.id }}">{{ d.id }}</a></td>

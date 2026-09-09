@@ -26,6 +26,8 @@ class HeartbeatBody(BaseModel):
     deviceModel: str
     fcmToken: str | None = None
     maintenanceActive: bool | None = None
+    batteryLevel: int | None = None
+    batteryCharging: bool | None = None
 
 
 @router.post("/devices/{device_id}/heartbeat")
@@ -40,6 +42,8 @@ def post_heartbeat(device_id: str, body: HeartbeatBody):
         body.deviceModel,
         body.fcmToken,
         body.maintenanceActive,
+        body.batteryLevel,
+        body.batteryCharging,
     )
     return {"ok": True}
 

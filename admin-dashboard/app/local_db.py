@@ -90,6 +90,8 @@ def init_db() -> None:
                 "last_login_at": "TEXT",
                 "maintenance_active": "INTEGER",
                 "ping_requested_at": "TEXT",
+                "battery_level": "INTEGER",
+                "battery_charging": "INTEGER",
             },
         )
         conn.execute(
@@ -201,6 +203,8 @@ def upsert_device_heartbeat(
     device_model: str,
     fcm_token: str | None,
     maintenance_active: bool | None = None,
+    battery_level: int | None = None,
+    battery_charging: bool | None = None,
 ) -> None:
     with _connect() as conn:
         conn.execute(
@@ -208,8 +212,8 @@ def upsert_device_heartbeat(
             INSERT INTO devices (
                 id, installed_package, installed_version_code, installed_version_name,
                 android_sdk_int, android_release, device_model, fcm_token, last_seen_at,
-                maintenance_active
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                maintenance_active, battery_level, battery_charging
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 installed_package=excluded.installed_package,
                 installed_version_code=excluded.installed_version_code,
@@ -219,12 +223,16 @@ def upsert_device_heartbeat(
                 device_model=excluded.device_model,
                 fcm_token=COALESCE(excluded.fcm_token, devices.fcm_token),
                 last_seen_at=excluded.last_seen_at,
-                maintenance_active=excluded.maintenance_active
+                maintenance_active=excluded.maintenance_active,
+                battery_level=excluded.battery_level,
+                battery_charging=excluded.battery_charging
             """,
             (
                 device_id, installed_package, installed_version_code, installed_version_name,
                 android_sdk_int, android_release, device_model, fcm_token, now_iso(),
                 int(maintenance_active) if maintenance_active is not None else None,
+                battery_level,
+                int(battery_charging) if battery_charging is not None else None,
             ),
         )
 

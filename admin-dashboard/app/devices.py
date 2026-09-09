@@ -63,6 +63,8 @@ def _with_computed_fields(row: dict) -> dict:
         # be worse than showing nothing.
         "maintenanceActive": bool(row["maintenance_active"]) if row["maintenance_active"] is not None else None,
         "pingRequestedAt": _parse_iso(row["ping_requested_at"]),
+        "batteryLevel": row["battery_level"],
+        "batteryCharging": bool(row["battery_charging"]) if row["battery_charging"] is not None else None,
     }
 
 
