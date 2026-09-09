@@ -491,6 +491,16 @@ def get_latest_location(device_id: str) -> dict | None:
         return dict(row) if row else None
 
 
+def get_locations_between(device_id: str, start_iso: str, end_iso: str) -> list[dict]:
+    with _connect() as conn:
+        rows = conn.execute(
+            "SELECT lat, lon, ts FROM device_locations WHERE device_id = ? AND ts >= ? AND ts < ? "
+            "ORDER BY ts ASC",
+            (device_id, start_iso, end_iso),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
 def get_recent_locations(device_id: str, limit: int = 200) -> list[dict]:
     with _connect() as conn:
         rows = conn.execute(

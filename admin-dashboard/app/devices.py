@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 from . import launcher_version_config, local_db
 from .firebase import bucket
@@ -228,6 +228,27 @@ def latest_location(device_id: str) -> dict | None:
     if not row:
         return None
     return {"lat": row["lat"], "lon": row["lon"], "ts": _parse_iso(row["ts"])}
+
+
+def locations_for_day(device_id: str, date_str: str | None) -> tuple[str, list[dict]]:
+    """Resolves date_str (a "?date=" query param, possibly missing/invalid) to a calendar day and
+    returns that day's GPS points in chronological order. Day boundaries are computed in
+    Sarajevo-local time, not UTC (a device's "today" shouldn't shift with the UTC offset) - see
+    the same reasoning in local_db.events_per_day for why this can't just be a SQL date() bucket.
+    """
+    try:
+        day = date.fromisoformat(date_str) if date_str else datetime.now(LOCAL_TZ).date()
+    except ValueError:
+        day = datetime.now(LOCAL_TZ).date()
+    start_local = datetime.combine(day, time.min, tzinfo=LOCAL_TZ)
+    end_local = start_local + timedelta(days=1)
+    rows = local_db.get_locations_between(
+        device_id,
+        start_local.astimezone(timezone.utc).isoformat(),
+        end_local.astimezone(timezone.utc).isoformat(),
+    )
+    points = [{"lat": r["lat"], "lon": r["lon"], "ts": _parse_iso(r["ts"])} for r in rows]
+    return day.isoformat(), points
 
 
 def signed_log_url(storage_path: str) -> str:

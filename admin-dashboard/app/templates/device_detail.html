@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 {% block title %}{{ device.id }} - Karika Ops{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+{% endblock %}
 {% block content %}
 <p><a href="/devices">&larr; Nazad na listu</a></p>
 <div class="page-header">
@@ -107,6 +113,37 @@
   </p>
   {% else %}
   <p class="hint">Još nema zabilježene lokacije za ovaj uređaj.</p>
+  {% endif %}
+
+  <form method="get" class="toolbar">
+    <input class="search-input" type="date" name="date" value="{{ selected_date }}">
+    <button type="submit" class="btn btn-secondary">Prikaži kretanje</button>
+  </form>
+
+  {% if day_locations %}
+  <div id="location-map" class="location-map"></div>
+  <p class="hint">{{ day_locations|length }} tačaka za {{ selected_date }}.</p>
+  <script>
+    (function () {
+      var points = {{ day_locations_json | safe }};
+      var map = L.map("location-map");
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(map);
+      var latLngs = points.map(function (p) { return [p.lat, p.lon]; });
+      L.polyline(latLngs, { color: "#7fb8e3" }).addTo(map);
+      points.forEach(function (p, i) {
+        var label = i === 0 ? "Početak" : (i === points.length - 1 ? "Kraj" : p.ts);
+        L.circleMarker([p.lat, p.lon], { radius: 5, color: "#5b4fc7" })
+          .addTo(map)
+          .bindTooltip(p.ts + (label !== p.ts ? " (" + label + ")" : ""));
+      });
+      map.fitBounds(latLngs, { padding: [24, 24] });
+    })();
+  </script>
+  {% else %}
+  <p class="hint">Nema zabilježenih lokacija za {{ selected_date }}.</p>
   {% endif %}
 </div>
 

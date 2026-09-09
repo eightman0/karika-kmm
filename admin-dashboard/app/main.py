@@ -1,3 +1,4 @@
+import json
 from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, File, Form, Request, UploadFile
@@ -130,6 +131,7 @@ def device_detail_page(
     reset_sent: str | None = None,
     cmd_error: str | None = None,
     cmd_sent: str | None = None,
+    date: str | None = None,
 ):
     device = devices.get_device(device_id)
     if device is None:
@@ -138,6 +140,7 @@ def device_detail_page(
     # published version still needs something explicit to pick, otherwise "Ažuriraj sada" falls
     # back to sending whatever's currently staged, which can be nothing at all.
     available_versions = version_history.get_available_versions(APP)
+    selected_date, day_locations = devices.locations_for_day(device_id, date)
     return templates.TemplateResponse(
         request,
         "device_detail.html",
@@ -154,6 +157,18 @@ def device_detail_page(
             "available_launcher_versions": version_history.get_available_versions("launcher"),
             "latest_launcher_code": launcher_version_config.highest_known_launcher_version_code(),
             "latest_location": devices.latest_location(device_id),
+            "selected_date": selected_date,
+            "day_locations": day_locations,
+            "day_locations_json": json.dumps(
+                [
+                    {
+                        "lat": p["lat"],
+                        "lon": p["lon"],
+                        "ts": p["ts"].strftime("%H:%M:%S") if p["ts"] else "",
+                    }
+                    for p in day_locations
+                ]
+            ),
         },
     )
 

@@ -139,6 +139,7 @@ main { padding: 28px; max-width: 1080px; margin: 0 auto; }
 }
 .card + .card { margin-top: 16px; }
 .card h2 { margin: 0 0 14px; font-size: 16px; }
+.location-map { height: 360px; border-radius: var(--radius); margin-top: 12px; }
 
 .metrics-grid {
   display: grid;
