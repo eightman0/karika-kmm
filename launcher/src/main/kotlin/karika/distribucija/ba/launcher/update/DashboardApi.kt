@@ -2,6 +2,7 @@ package karika.distribucija.ba.launcher.update
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -46,7 +47,8 @@ object DashboardApi {
         fcmToken: String?,
         maintenanceActive: Boolean,
         batteryLevel: Int?,
-        batteryCharging: Boolean?
+        batteryCharging: Boolean?,
+        locations: JSONArray
     ) = withContext(Dispatchers.IO) {
         val body = JSONObject()
             .put("installedPackage", installedPackage)
@@ -59,6 +61,7 @@ object DashboardApi {
             .put("maintenanceActive", maintenanceActive)
             .put("batteryLevel", batteryLevel)
             .put("batteryCharging", batteryCharging)
+            .put("locations", locations)
         post("$BASE_URL/api/devices/$deviceId/heartbeat", body)
     }
 

@@ -186,6 +186,13 @@ def command_log(device_id: str, limit: int = 20) -> list[dict]:
     return local_db.get_command_log(device_id, limit)
 
 
+def latest_location(device_id: str) -> dict | None:
+    row = local_db.get_latest_location(device_id)
+    if not row:
+        return None
+    return {"lat": row["lat"], "lon": row["lon"], "ts": _parse_iso(row["ts"])}
+
+
 def signed_log_url(storage_path: str) -> str:
     blob = bucket().blob(storage_path)
     return blob.generate_signed_url(expiration=timedelta(minutes=SIGNED_URL_MINUTES))

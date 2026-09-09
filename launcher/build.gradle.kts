@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.firebase.storage)
 
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.play.services.location)
 
     implementation(project(":core-logging"))
 }

@@ -86,6 +86,21 @@
 </div>
 
 <div class="card">
+  <h2>GPS lokacija</h2>
+  <p class="hint">Uzorkuje se na uređaju otprilike svakih 15 min, šalje se sa sljedećim heartbeat-om.</p>
+  {% if latest_location %}
+  <p>
+    <a href="https://www.google.com/maps?q={{ latest_location.lat }},{{ latest_location.lon }}" target="_blank" rel="noopener">
+      {{ "%.5f"|format(latest_location.lat) }}, {{ "%.5f"|format(latest_location.lon) }}
+    </a>
+    <span class="hint">&middot; {{ latest_location.ts.strftime("%d.%m.%Y %H:%M:%S") if latest_location.ts else "" }}</span>
+  </p>
+  {% else %}
+  <p class="hint">Još nema zabilježene lokacije za ovaj uređaj.</p>
+  {% endif %}
+</div>
+
+<div class="card">
   <h2>Logovi</h2>
   <div class="log-actions">
     <form method="post" action="/devices/{{ device.id }}/request-logs">

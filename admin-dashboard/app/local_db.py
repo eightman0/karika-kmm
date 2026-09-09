@@ -176,6 +176,20 @@ def init_db() -> None:
         )
         conn.execute(
             """
+            CREATE TABLE IF NOT EXISTS device_locations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id TEXT,
+                lat REAL,
+                lon REAL,
+                ts TEXT
+            )
+            """
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_device_locations_device ON device_locations(device_id, ts)"
+        )
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS version_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 app TEXT,
@@ -408,6 +422,34 @@ def insert_analytics_events(device_id: str, events: list[dict]) -> None:
                 for e in events
             ],
         )
+
+
+def insert_device_locations(device_id: str, points: list[dict]) -> None:
+    if not points:
+        return
+    with _connect() as conn:
+        conn.executemany(
+            "INSERT INTO device_locations (device_id, lat, lon, ts) VALUES (?, ?, ?, ?)",
+            [(device_id, p.get("lat"), p.get("lon"), p.get("ts")) for p in points],
+        )
+
+
+def get_latest_location(device_id: str) -> dict | None:
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT lat, lon, ts FROM device_locations WHERE device_id = ? ORDER BY ts DESC LIMIT 1",
+            (device_id,),
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def get_recent_locations(device_id: str, limit: int = 200) -> list[dict]:
+    with _connect() as conn:
+        rows = conn.execute(
+            "SELECT lat, lon, ts FROM device_locations WHERE device_id = ? ORDER BY ts DESC LIMIT ?",
+            (device_id, limit),
+        ).fetchall()
+        return [dict(row) for row in rows]
 
 
 def count_analytics_events(device_ids: list[str] | None = None) -> int:

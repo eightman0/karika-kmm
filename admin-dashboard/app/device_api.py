@@ -17,6 +17,12 @@ def get_version(device_id: str | None = None):
     return resolve_version_for_device(device_id)
 
 
+class LocationPoint(BaseModel):
+    lat: float
+    lon: float
+    ts: str
+
+
 class HeartbeatBody(BaseModel):
     installedPackage: str
     installedVersionCode: int
@@ -28,6 +34,7 @@ class HeartbeatBody(BaseModel):
     maintenanceActive: bool | None = None
     batteryLevel: int | None = None
     batteryCharging: bool | None = None
+    locations: list[LocationPoint] = []
 
 
 @router.post("/devices/{device_id}/heartbeat")
@@ -45,6 +52,8 @@ def post_heartbeat(device_id: str, body: HeartbeatBody):
         body.batteryLevel,
         body.batteryCharging,
     )
+    if body.locations:
+        local_db.insert_device_locations(device_id, [p.model_dump() for p in body.locations])
     return {"ok": True}
 
 

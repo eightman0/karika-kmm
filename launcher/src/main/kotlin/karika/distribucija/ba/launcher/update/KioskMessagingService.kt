@@ -40,6 +40,11 @@ class KioskMessagingService : FirebaseMessagingService() {
         val requestId = message.data["requestId"]
         Log.i(TAG, "Command received: $command requestId=$requestId")
 
+        // Every push is also a chance to report current status (version, maintenance, battery,
+        // any queued GPS fixes) - cheap since it's just a WorkManager enqueue, deduped against
+        // any other pending trigger via ExistingWorkPolicy.REPLACE, so this can't pile up.
+        UpdateScheduler.triggerImmediateCheck(applicationContext)
+
         when (command) {
             CMD_LOG_REQUEST -> runAcked(command, requestId) {
                 LogUploadManager.uploadNow(applicationContext, message.data["requestedAt"])
@@ -70,13 +75,9 @@ class KioskMessagingService : FirebaseMessagingService() {
                 // Setting the flag alone only shows up next time LauncherActivity resumes on its
                 // own - if salesrep is currently in front, that could be indefinite. Force it.
                 LauncherActivity.bringToFront(applicationContext)
-                // Otherwise the dashboard only learns about this on the next periodic tick (up to
-                // 30 min later) - an admin toggling this expects to see it reflected right away.
-                UpdateScheduler.triggerImmediateCheck(applicationContext)
             }
             CMD_MAINTENANCE_OFF -> runAcked(command, requestId) {
                 RemoteMaintenanceState.end(applicationContext)
-                UpdateScheduler.triggerImmediateCheck(applicationContext)
             }
             CMD_OPEN_SETTINGS -> runAcked(command, requestId) {
                 // com.android.settings is already on LauncherKiosk's lock task allowlist, so this
@@ -85,18 +86,14 @@ class KioskMessagingService : FirebaseMessagingService() {
                 val intent = Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 applicationContext.startActivity(intent)
             }
-            CMD_PING -> runAcked(command, requestId) {
-                // Forces a full heartbeat now instead of just acking - the admin gets back the
-                // device's actual current state (version, maintenance mode) right away, not just
-                // proof it's reachable.
-                UpdateScheduler.triggerImmediateCheck(applicationContext)
-            }
-            CMD_VERSION_CHECK -> runAcked(command, requestId, message.data["versionCode"]?.let { "verzija $it" }) {
-                UpdateScheduler.triggerImmediateCheck(applicationContext)
-            }
+            // The immediate heartbeat triggered above is the whole point of both of these - the
+            // ack just confirms the push itself was received (and, for version_check, which
+            // version was targeted).
+            CMD_PING -> runAcked(command, requestId) {}
+            CMD_VERSION_CHECK -> runAcked(command, requestId, message.data["versionCode"]?.let { "verzija $it" }) {}
             // No "command" field at all - the old Remote Config real-time-listener push, kept for
-            // any straggler still wired to it. Nothing to ack: there's no requestId to match up.
-            null -> UpdateScheduler.triggerImmediateCheck(applicationContext)
+            // any straggler still wired to it. Nothing further to do: the trigger above already ran.
+            null -> {}
             else -> Log.w(TAG, "Unknown command: $command")
         }
     }

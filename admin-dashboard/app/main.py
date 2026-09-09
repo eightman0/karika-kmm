@@ -135,6 +135,7 @@ def device_detail_page(
             "command_log": devices.command_log(device_id),
             "latest_salesrep_code": version_config.highest_known_version_code(),
             "available_versions": available_versions,
+            "latest_location": devices.latest_location(device_id),
         },
     )
 

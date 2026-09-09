@@ -11,9 +11,10 @@ import karika.distribucija.ba.launcher.update.DashboardApi
 import kotlinx.coroutines.tasks.await
 
 /**
- * Reports what's installed so the admin dashboard's device list has something to show - without
- * this, a device only shows up once someone requests a log pull. Called from UpdateWorker on
- * every check (periodic + push-triggered), so freshness matches that cadence.
+ * Reports what's installed, battery state, and any GPS fixes queued since the last successful
+ * report, so the admin dashboard's device list has something to show - without this, a device
+ * only shows up once someone requests a log pull. Called from UpdateWorker on every check
+ * (periodic + push-triggered), so freshness matches that cadence.
  */
 object DeviceHeartbeat {
     private const val TAG = "DeviceHeartbeat"
@@ -28,6 +29,7 @@ object DeviceHeartbeat {
             val batteryLevel = batteryManager
                 ?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
                 ?.takeIf { it in 0..100 }
+            val locations = LocationHistoryStore.readAll(context)
             DashboardApi.reportHeartbeat(
                 deviceId = deviceId,
                 installedPackage = packageName,
@@ -42,8 +44,12 @@ object DeviceHeartbeat {
                 // auto-expiring one UpdateWorker sets during an install.
                 maintenanceActive = MaintenanceState.isActive(context) || RemoteMaintenanceState.isActive(context),
                 batteryLevel = batteryLevel,
-                batteryCharging = batteryManager?.isCharging
+                batteryCharging = batteryManager?.isCharging,
+                locations = locations
             )
+            // Only cleared once the send above actually succeeds - if it throws, this line never
+            // runs and the queued points survive to go out with the next heartbeat attempt.
+            LocationHistoryStore.clear(context)
         } catch (e: Exception) {
             Log.w(TAG, "Heartbeat failed: ${e.message}")
         }

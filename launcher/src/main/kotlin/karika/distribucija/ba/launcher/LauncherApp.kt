@@ -24,6 +24,7 @@ class LauncherApp : Application() {
         Firebase.messaging.subscribeToTopic(KioskMessagingService.BROADCAST_TOPIC)
         Firebase.messaging.subscribeToTopic(KioskMessagingService.deviceTopic(DeviceIdentity.id(this)))
         UpdateScheduler.schedulePeriodic(this)
+        UpdateScheduler.scheduleLocationSampling(this)
         installCrashRecovery()
     }
 
