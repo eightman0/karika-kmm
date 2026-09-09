@@ -92,6 +92,8 @@ def init_db() -> None:
                 "ping_requested_at": "TEXT",
                 "battery_level": "INTEGER",
                 "battery_charging": "INTEGER",
+                "launcher_version_code": "INTEGER",
+                "launcher_version_name": "TEXT",
             },
         )
         conn.execute(
@@ -139,6 +141,45 @@ def init_db() -> None:
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS staged_version_targets (
+                device_id TEXT PRIMARY KEY
+            )
+            """
+        )
+        # Separate singleton tables for the launcher, not a shared/generalized schema - the
+        # existing kiosk_version/staged_kiosk_version tables are load-bearing for the live fleet's
+        # salesrep updates (id=1 CHECK constraint makes them true singletons with no `app` column),
+        # so a second app gets its own parallel pair instead of risking a migration of those.
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS launcher_version (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                version_code INTEGER,
+                version_name TEXT,
+                apk_url TEXT,
+                apk_sha256 TEXT,
+                mandatory INTEGER,
+                published_by TEXT,
+                published_at TEXT
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS staged_launcher_version (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                version_code INTEGER,
+                version_name TEXT,
+                apk_url TEXT,
+                apk_sha256 TEXT,
+                mandatory INTEGER,
+                published_by TEXT,
+                published_at TEXT
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS staged_launcher_version_targets (
                 device_id TEXT PRIMARY KEY
             )
             """
@@ -219,6 +260,8 @@ def upsert_device_heartbeat(
     maintenance_active: bool | None = None,
     battery_level: int | None = None,
     battery_charging: bool | None = None,
+    launcher_version_code: int | None = None,
+    launcher_version_name: str | None = None,
 ) -> None:
     with _connect() as conn:
         conn.execute(
@@ -226,8 +269,9 @@ def upsert_device_heartbeat(
             INSERT INTO devices (
                 id, installed_package, installed_version_code, installed_version_name,
                 android_sdk_int, android_release, device_model, fcm_token, last_seen_at,
-                maintenance_active, battery_level, battery_charging
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                maintenance_active, battery_level, battery_charging,
+                launcher_version_code, launcher_version_name
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 installed_package=excluded.installed_package,
                 installed_version_code=excluded.installed_version_code,
@@ -239,7 +283,9 @@ def upsert_device_heartbeat(
                 last_seen_at=excluded.last_seen_at,
                 maintenance_active=excluded.maintenance_active,
                 battery_level=excluded.battery_level,
-                battery_charging=excluded.battery_charging
+                battery_charging=excluded.battery_charging,
+                launcher_version_code=excluded.launcher_version_code,
+                launcher_version_name=excluded.launcher_version_name
             """,
             (
                 device_id, installed_package, installed_version_code, installed_version_name,
@@ -247,6 +293,8 @@ def upsert_device_heartbeat(
                 int(maintenance_active) if maintenance_active is not None else None,
                 battery_level,
                 int(battery_charging) if battery_charging is not None else None,
+                launcher_version_code,
+                launcher_version_name,
             ),
         )
 
@@ -648,6 +696,94 @@ def is_staged_target(device_id: str) -> bool:
 def count_staged_targets() -> int:
     with _connect() as conn:
         return conn.execute("SELECT COUNT(*) FROM staged_version_targets").fetchone()[0]
+
+
+# --- launcher version (parallel to kiosk_version above, see the schema comment) -
+
+def get_launcher_version_row() -> dict | None:
+    with _connect() as conn:
+        row = conn.execute("SELECT * FROM launcher_version WHERE id = 1").fetchone()
+        return dict(row) if row else None
+
+
+def set_launcher_version(
+    version_code: int, version_name: str, apk_url: str, apk_sha256: str, mandatory: bool,
+    published_by: str,
+) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO launcher_version
+                (id, version_code, version_name, apk_url, apk_sha256, mandatory, published_by, published_at)
+            VALUES (1, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                version_code=excluded.version_code,
+                version_name=excluded.version_name,
+                apk_url=excluded.apk_url,
+                apk_sha256=excluded.apk_sha256,
+                mandatory=excluded.mandatory,
+                published_by=excluded.published_by,
+                published_at=excluded.published_at
+            """,
+            (version_code, version_name, apk_url, apk_sha256, int(mandatory), published_by, now_iso()),
+        )
+
+
+def get_staged_launcher_version_row() -> dict | None:
+    with _connect() as conn:
+        row = conn.execute("SELECT * FROM staged_launcher_version WHERE id = 1").fetchone()
+        return dict(row) if row else None
+
+
+def set_staged_launcher_version(
+    version_code: int, version_name: str, apk_url: str, apk_sha256: str, mandatory: bool,
+    published_by: str,
+) -> None:
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO staged_launcher_version
+                (id, version_code, version_name, apk_url, apk_sha256, mandatory, published_by, published_at)
+            VALUES (1, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                version_code=excluded.version_code,
+                version_name=excluded.version_name,
+                apk_url=excluded.apk_url,
+                apk_sha256=excluded.apk_sha256,
+                mandatory=excluded.mandatory,
+                published_by=excluded.published_by,
+                published_at=excluded.published_at
+            """,
+            (version_code, version_name, apk_url, apk_sha256, int(mandatory), published_by, now_iso()),
+        )
+        conn.execute("DELETE FROM staged_launcher_version_targets")
+
+
+def clear_staged_launcher_version() -> None:
+    with _connect() as conn:
+        conn.execute("DELETE FROM staged_launcher_version WHERE id = 1")
+        conn.execute("DELETE FROM staged_launcher_version_targets")
+
+
+def add_staged_launcher_target(device_id: str) -> None:
+    with _connect() as conn:
+        conn.execute(
+            "INSERT INTO staged_launcher_version_targets (device_id) VALUES (?) ON CONFLICT(device_id) DO NOTHING",
+            (device_id,),
+        )
+
+
+def is_staged_launcher_target(device_id: str) -> bool:
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM staged_launcher_version_targets WHERE device_id = ?", (device_id,)
+        ).fetchone()
+        return row is not None
+
+
+def count_staged_launcher_targets() -> int:
+    with _connect() as conn:
+        return conn.execute("SELECT COUNT(*) FROM staged_launcher_version_targets").fetchone()[0]
 
 
 # --- version history -----------------------------------------------------------

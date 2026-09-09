@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 /**
  * Delivers pushes the admin dashboard sends: an update-check nudge on publish, or a device
  * command (log pull, analytics pull, factory reset, maintenance toggle, open settings, ping,
- * reboot).
+ * reboot, launcher self-update).
  * Data-only messages (no `notification` payload), so Play Services wakes this process to hand
  * them to onMessageReceived() even if the process was frozen or not running - the FCM connection
  * lives in Play Services, not in our own process, so it isn't subject to the same cached-app
@@ -86,6 +86,13 @@ class KioskMessagingService : FirebaseMessagingService() {
                 val intent = Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 applicationContext.startActivity(intent)
             }
+            CMD_UPDATE_LAUNCHER -> scope.launch {
+                // Acked before installing, not after - same reasoning as CMD_REBOOT above:
+                // installing an update to this process's own package gets it killed and replaced
+                // by the system before an ack sent afterward would reliably go out.
+                ack(command, requestId, "ok", null)
+                UpdateScheduler.triggerLauncherSelfUpdate(applicationContext)
+            }
             // The immediate heartbeat triggered above is the whole point of both of these - the
             // ack just confirms the push itself was received (and, for version_check, which
             // version was targeted).
@@ -136,6 +143,7 @@ class KioskMessagingService : FirebaseMessagingService() {
         private const val CMD_OPEN_SETTINGS = "open_settings"
         private const val CMD_PING = "ping"
         private const val CMD_VERSION_CHECK = "version_check"
+        private const val CMD_UPDATE_LAUNCHER = "update_launcher"
 
         fun deviceTopic(deviceId: String) = "device_$deviceId"
     }

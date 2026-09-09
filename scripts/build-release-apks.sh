@@ -4,16 +4,20 @@
 # config Gradle already picks up automatically, just invoked headlessly instead of through Android
 # Studio's "Generate Signed Bundle/APK" wizard.
 #
-# Building salesrep also stages the APK on the admin dashboard (POST /versions/publish) unless
-# --no-publish is given - same as uploading it by hand on the /versions page, just scripted. This
-# only stages it (see version_config.py) - no device installs anything until it's explicitly sent
-# to chosen devices or to everyone, so it's safe to run on every build. Needs
-# KARIKA_DASHBOARD_URL/KARIKA_ADMIN_USERNAME/KARIKA_ADMIN_PASSWORD - either exported already or
-# defined in scripts/publish.env (gitignored, see scripts/publish.env.example).
+# Building either module also stages the APK on the admin dashboard (POST /versions/publish, with
+# an app=launcher|salesrep form field) unless --no-publish is given - same as uploading it by hand
+# on the /versions page's matching tab, just scripted. This only stages it (see version_config.py/
+# launcher_version_config.py) - no device installs anything until it's explicitly sent to chosen
+# devices or to everyone, so it's safe to run on every build. Needs KARIKA_DASHBOARD_URL/
+# KARIKA_ADMIN_USERNAME/KARIKA_ADMIN_PASSWORD - either exported already or defined in
+# scripts/publish.env (gitignored, see scripts/publish.env.example).
 #
-# Launcher isn't wired into that flow - it's Device Owner, updated only by re-provisioning with a
-# fresh QR scan, and downloaded during provisioning straight from a fixed Firebase Storage path
-# (see admin-dashboard/app/provisioning.py) that has to be updated by hand.
+# The launcher is still Device Owner, provisioned by factory-reset+QR-scan same as always - but it
+# can now ALSO self-update remotely (see the dashboard's "Ažuriraj launcher" action), which is what
+# actually reads whatever gets published here. Reusing a versionCode across two different launcher
+# publishes would overwrite the older one's Storage blob at launcher-releases/{versionCode}.apk -
+# the exact corruption class hit twice already for salesrep - so bump build.gradle.kts's
+# versionCode for the launcher on every real change, same discipline as salesrep already has.
 #
 # Usage: scripts/build-release-apks.sh [launcher|salesrep|all] [--no-publish]
 # Defaults to "all". Output APKs are copied to dist/ at the repo root.
@@ -81,8 +85,9 @@ fi
 
 mkdir -p "$DIST_DIR"
 
-publish_salesrep() {
-  local apk="$1"
+publish_apk() {
+  local module="$1"
+  local apk="$2"
 
   if [ -f "$REPO_ROOT/scripts/publish.env" ]; then
     # shellcheck disable=SC1091
@@ -92,8 +97,8 @@ publish_salesrep() {
   local user="${KARIKA_ADMIN_USERNAME:-}"
   local pass="${KARIKA_ADMIN_PASSWORD:-}"
   if [ -z "$url" ] || [ -z "$user" ] || [ -z "$pass" ]; then
-    echo "[salesrep] skipping dashboard publish: KARIKA_DASHBOARD_URL/KARIKA_ADMIN_USERNAME/KARIKA_ADMIN_PASSWORD" >&2
-    echo "[salesrep] not set - export them, or copy scripts/publish.env.example to scripts/publish.env" >&2
+    echo "[$module] skipping dashboard publish: KARIKA_DASHBOARD_URL/KARIKA_ADMIN_USERNAME/KARIKA_ADMIN_PASSWORD" >&2
+    echo "[$module] not set - export them, or copy scripts/publish.env.example to scripts/publish.env" >&2
     return 0
   fi
 
@@ -109,7 +114,7 @@ publish_salesrep() {
   case "$login_redirect" in
     */devices) ;;
     *)
-      echo "[salesrep] dashboard login failed (redirected to: $login_redirect) - check credentials" >&2
+      echo "[$module] dashboard login failed (redirected to: $login_redirect) - check credentials" >&2
       return 1
       ;;
   esac
@@ -117,15 +122,16 @@ publish_salesrep() {
   local publish_redirect
   publish_redirect="$(curl -fsS -o /dev/null -w '%{redirect_url}' -b "$cookie_jar" \
     -F "apk_file=@${apk};type=application/vnd.android.package-archive" \
+    -F "app=${module}" \
     "$url/versions/publish")"
   case "$publish_redirect" in
     *error=*)
-      echo "[salesrep] dashboard publish failed: $publish_redirect" >&2
+      echo "[$module] dashboard publish failed: $publish_redirect" >&2
       return 1
       ;;
   esac
-  echo "[salesrep] staged on dashboard as the pending version - use the devices list or"
-  echo "[salesrep] \"Posalji svima\" on $url/versions to actually send it to devices"
+  echo "[$module] staged on dashboard as the pending version - use the devices list or"
+  echo "[$module] \"Posalji svima\" on $url/versions?app=$module to actually send it to devices"
 }
 
 for module in "${MODULES[@]}"; do
@@ -145,22 +151,16 @@ for module in "${MODULES[@]}"; do
     echo "[$module] warning: apksigner not found, skipping signature verification" >&2
   fi
 
-  if [ "$module" = "launcher" ]; then
-    # Launcher is Device Owner and isn't versioned/published through the dashboard the way
-    # salesrep is - a version suffix here would just be noise.
-    dest="$DIST_DIR/${module}-release.apk"
-  else
-    version_name="$(grep -m1 'versionName' "$REPO_ROOT/$module/build.gradle.kts" | sed -E 's/.*versionName = "([^"]*)".*/\1/')"
-    version_code="$(grep -m1 'versionCode' "$REPO_ROOT/$module/build.gradle.kts" | sed -E 's/[^0-9]*([0-9]+).*/\1/')"
-    dest="$DIST_DIR/${module}-release-v${version_code}-${version_name}.apk"
-  fi
+  version_name="$(grep -m1 'versionName' "$REPO_ROOT/$module/build.gradle.kts" | sed -E 's/.*versionName = "([^"]*)".*/\1/')"
+  version_code="$(grep -m1 'versionCode' "$REPO_ROOT/$module/build.gradle.kts" | sed -E 's/[^0-9]*([0-9]+).*/\1/')"
+  dest="$DIST_DIR/${module}-release-v${version_code}-${version_name}.apk"
   cp "$apk" "$dest"
 
   echo "[$module] sha256: $(shasum -a 256 "$dest" | awk '{print $1}')"
   echo "[$module] -> $dest"
 
-  if [ "$module" = "salesrep" ] && [ "$DO_PUBLISH" = "1" ]; then
-    publish_salesrep "$dest"
+  if [ "$DO_PUBLISH" = "1" ]; then
+    publish_apk "$module" "$dest"
   fi
 done
 

@@ -12,6 +12,7 @@ from . import (
     auth,
     device_api,
     devices,
+    launcher_version_config,
     local_db,
     provisioning,
     version_config,
@@ -28,8 +29,8 @@ templates = Jinja2Templates(directory="app/templates")
 
 require_login = Depends(auth.require_login)
 
-APP = "salesrep"  # the only app published through this dashboard - launcher is Device Owner,
-# changes rarely, and is deliberately not self-updated this way
+APP = "salesrep"  # the payload app - launcher is versioned/published the same way now too (see
+# launcher_version_config.py), just through separate parallel tables/routes, not this constant
 
 
 @app.get("/")
@@ -68,6 +69,7 @@ def devices_page(
     q: str = "",
     analytics_sent: str | None = None,
     update_sent: str | None = None,
+    update_launcher_sent: str | None = None,
 ):
     all_devices = devices.list_devices()
     filtered = devices.filter_devices(all_devices, q)
@@ -81,9 +83,11 @@ def devices_page(
             "q": q,
             "latest_salesrep_code": latest_salesrep_code,
             "available_versions": version_history.get_available_versions(APP),
+            "available_launcher_versions": version_history.get_available_versions("launcher"),
             "active_page": "devices",
             "analytics_sent": bool(analytics_sent),
             "update_sent": update_sent,
+            "update_launcher_sent": update_launcher_sent,
         },
     )
 
@@ -104,6 +108,18 @@ def update_selected_devices(
         device_ids, version_code or None, request.session.get("username", "?")
     )
     return RedirectResponse(f"/devices?update_sent={len(device_ids)}", status_code=303)
+
+
+@app.post("/devices/update-launcher-selected", dependencies=[require_login])
+def update_launcher_selected_devices(
+    request: Request, device_ids: list[str] = Form(default=[]), version_code: str = Form("")
+):
+    if not device_ids:
+        return RedirectResponse("/devices", status_code=303)
+    devices.request_update_launcher_bulk(
+        device_ids, version_code or None, request.session.get("username", "?")
+    )
+    return RedirectResponse(f"/devices?update_launcher_sent={len(device_ids)}", status_code=303)
 
 
 @app.get("/devices/{device_id}", dependencies=[require_login])
@@ -135,6 +151,8 @@ def device_detail_page(
             "command_log": devices.command_log(device_id),
             "latest_salesrep_code": version_config.highest_known_version_code(),
             "available_versions": available_versions,
+            "available_launcher_versions": version_history.get_available_versions("launcher"),
+            "latest_launcher_code": launcher_version_config.highest_known_launcher_version_code(),
             "latest_location": devices.latest_location(device_id),
         },
     )
@@ -190,6 +208,17 @@ def open_settings_device(device_id: str):
     return RedirectResponse(f"/devices/{device_id}?cmd_sent=open_settings", status_code=303)
 
 
+@app.post("/devices/{device_id}/update-launcher", dependencies=[require_login])
+def update_launcher_device(device_id: str, request: Request, version_code: str = Form("")):
+    try:
+        devices.request_update_launcher(
+            device_id, version_code or None, request.session.get("username", "?")
+        )
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=update_launcher", status_code=303)
+
+
 @app.post("/devices/{device_id}/ping", dependencies=[require_login])
 def ping_device(device_id: str):
     try:
@@ -235,27 +264,37 @@ def download_analytics(device_id: str):
 @app.get("/versions", dependencies=[require_login])
 def versions_page(
     request: Request,
+    app: str = "salesrep",
     error: str | None = None,
     published: str | None = None,
     sent_all: str | None = None,
     rolled_back: str | None = None,
 ):
+    app = app if app in ("salesrep", "launcher") else "salesrep"
     all_devices = devices.list_devices()
-    history = version_history.get_history(APP, limit=50)
-    current = version_config.get_kiosk_version()
+    history = version_history.get_history(app, limit=50)
+    if app == "launcher":
+        current = launcher_version_config.get_launcher_version()
+        staged = launcher_version_config.get_staged_launcher_version()
+        is_staged = launcher_version_config.is_launcher_staged()
+        staged_target_count = launcher_version_config.staged_launcher_target_count() if is_staged else 0
+    else:
+        current = version_config.get_kiosk_version()
+        staged = version_config.get_staged_version()
+        is_staged = version_config.is_staged()
+        staged_target_count = version_config.staged_target_count() if is_staged else 0
     is_published = bool(current and current["version_code"] not in ("0", "", None))
     rollout_count = 0
     if is_published:
         rollout_count = devices.count_on_version(
-            all_devices, devices.APP_PACKAGES[APP], current["version_code"]
+            all_devices, devices.APP_PACKAGES[app], current["version_code"]
         )
-    staged = version_config.get_staged_version()
-    is_staged = version_config.is_staged()
 
     return templates.TemplateResponse(
         request,
         "versions.html",
         {
+            "active_app": app,
             "current": current,
             "is_published": is_published,
             "history": history,
@@ -263,7 +302,7 @@ def versions_page(
             "total_devices": len(all_devices),
             "staged": staged,
             "is_staged": is_staged,
-            "staged_target_count": version_config.staged_target_count() if is_staged else 0,
+            "staged_target_count": staged_target_count,
             "error": error,
             "published": bool(published),
             "sent_all": bool(sent_all),
@@ -274,18 +313,24 @@ def versions_page(
 
 
 @app.post("/versions/publish", dependencies=[require_login])
-def publish_version(request: Request, apk_file: UploadFile = File(...)):
+def publish_version(request: Request, apk_file: UploadFile = File(...), app: str = Form("salesrep")):
+    app = app if app in ("salesrep", "launcher") else "salesrep"
     try:
-        apk_url, apk_sha256, version_code, version_name = apk_storage.upload_apk(apk_file)
+        apk_url, apk_sha256, version_code, version_name = apk_storage.upload_apk(apk_file, app)
 
         # Every publish is mandatory - there's no supported "optional update" UX on the device.
         is_mandatory = True
         username = request.session.get("username", "?")
-        version_config.publish_staged_version(
-            version_code, version_name, apk_url, apk_sha256, is_mandatory, username
-        )
+        if app == "launcher":
+            launcher_version_config.publish_staged_launcher_version(
+                version_code, version_name, apk_url, apk_sha256, is_mandatory, username
+            )
+        else:
+            version_config.publish_staged_version(
+                version_code, version_name, apk_url, apk_sha256, is_mandatory, username
+            )
         version_history.record_publish(
-            APP,
+            app,
             version_code,
             version_name,
             apk_url,
@@ -294,29 +339,42 @@ def publish_version(request: Request, apk_file: UploadFile = File(...)):
             published_by=username,
         )
     except Exception as e:
-        return RedirectResponse(f"/versions?error={quote(str(e))}", status_code=303)
-    return RedirectResponse("/versions?published=1", status_code=303)
+        return RedirectResponse(f"/versions?app={app}&error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/versions?app={app}&published=1", status_code=303)
 
 
 @app.post("/versions/send-all", dependencies=[require_login])
-def send_version_to_all(request: Request):
-    devices.request_update_all(request.session.get("username", "?"))
-    return RedirectResponse("/versions?sent_all=1", status_code=303)
+def send_version_to_all(request: Request, app: str = Form("salesrep")):
+    app = app if app in ("salesrep", "launcher") else "salesrep"
+    username = request.session.get("username", "?")
+    if app == "launcher":
+        devices.request_update_launcher_all(username)
+    else:
+        devices.request_update_all(username)
+    return RedirectResponse(f"/versions?app={app}&sent_all=1", status_code=303)
 
 
 @app.post("/versions/rollback/{entry_id}", dependencies=[require_login])
 def rollback_version(entry_id: int, request: Request):
+    entry = local_db.get_history_entry_by_id(entry_id)
+    app = entry["app"] if entry and entry.get("app") == "launcher" else "salesrep"
     try:
-        version_config.rollback_to_history_entry(entry_id, request.session.get("username", "?"))
+        username = request.session.get("username", "?")
+        if app == "launcher":
+            launcher_version_config.rollback_launcher_to_history_entry(entry_id, username)
+        else:
+            version_config.rollback_to_history_entry(entry_id, username)
     except Exception as e:
-        return RedirectResponse(f"/versions?error={quote(str(e))}", status_code=303)
-    return RedirectResponse("/versions?rolled_back=1", status_code=303)
+        return RedirectResponse(f"/versions?app={app}&error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/versions?app={app}&rolled_back=1", status_code=303)
 
 
 @app.post("/versions/history/{entry_id}/delete", dependencies=[require_login])
 def delete_history_entry(entry_id: int):
+    entry = local_db.get_history_entry_by_id(entry_id)
+    app = entry["app"] if entry and entry.get("app") == "launcher" else "salesrep"
     version_history.delete_entry(entry_id)
-    return RedirectResponse("/versions", status_code=303)
+    return RedirectResponse(f"/versions?app={app}", status_code=303)
 
 
 @app.get("/provisioning", dependencies=[require_login])

@@ -21,6 +21,8 @@ object UpdateScheduler {
     // WorkManager's own floor for periodic work - can't schedule anything more frequent than this.
     private const val LOCATION_INTERVAL_MINUTES = 15L
 
+    private const val LAUNCHER_SELF_UPDATE_WORK_NAME = "launcher_self_update"
+
     private val networkConstraints = Constraints.Builder()
         .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()
@@ -64,6 +66,18 @@ object UpdateScheduler {
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             LOCATION_PERIODIC_WORK_NAME,
             ExistingPeriodicWorkPolicy.REPLACE,
+            request
+        )
+    }
+
+    /** Fired on CMD_UPDATE_LAUNCHER - see LauncherSelfUpdateWorker. */
+    fun triggerLauncherSelfUpdate(context: Context) {
+        val request = OneTimeWorkRequestBuilder<LauncherSelfUpdateWorker>()
+            .setConstraints(networkConstraints)
+            .build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            LAUNCHER_SELF_UPDATE_WORK_NAME,
+            ExistingWorkPolicy.REPLACE,
             request
         )
     }

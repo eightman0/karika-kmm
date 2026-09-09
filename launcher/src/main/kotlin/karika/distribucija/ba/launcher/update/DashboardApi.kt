@@ -24,9 +24,9 @@ object DashboardApi {
     private const val BASE_URL = "https://karika.car4hire.ba"
     private const val TIMEOUT_MS = 15_000
 
-    suspend fun fetchLatestVersion(deviceId: String): KioskVersion = withContext(Dispatchers.IO) {
+    suspend fun fetchLatestVersion(deviceId: String, app: String = "salesrep"): KioskVersion = withContext(Dispatchers.IO) {
         val encodedId = URLEncoder.encode(deviceId, "UTF-8")
-        val json = get("$BASE_URL/api/version?device_id=$encodedId")
+        val json = get("$BASE_URL/api/version?device_id=$encodedId&app=$app")
         KioskVersion(
             versionCode = json.optString("version_code", "0").toLongOrNull() ?: 0L,
             versionName = json.optString("version_name", ""),
@@ -48,7 +48,9 @@ object DashboardApi {
         maintenanceActive: Boolean,
         batteryLevel: Int?,
         batteryCharging: Boolean?,
-        locations: JSONArray
+        locations: JSONArray,
+        launcherVersionCode: Long,
+        launcherVersionName: String
     ) = withContext(Dispatchers.IO) {
         val body = JSONObject()
             .put("installedPackage", installedPackage)
@@ -62,6 +64,8 @@ object DashboardApi {
             .put("batteryLevel", batteryLevel)
             .put("batteryCharging", batteryCharging)
             .put("locations", locations)
+            .put("launcherVersionCode", launcherVersionCode)
+            .put("launcherVersionName", launcherVersionName)
         post("$BASE_URL/api/devices/$deviceId/heartbeat", body)
     }
 

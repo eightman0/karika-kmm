@@ -56,11 +56,55 @@
         </div>
       </div>
     </dialog>
+
+    <form method="post" action="/devices/update-launcher-selected" id="update-launcher-selected-form"
+          onsubmit="return confirm('Ažurirati launcher na svim izabranim uređajima? Uređaji će se na trenutak restartovati.')"></form>
+    <button type="button" class="btn btn-secondary" onclick="openUpdateLauncherSelectedModal()">Ažuriraj launcher (izabrane)</button>
+    <dialog id="update-launcher-selected-modal" class="modal">
+      <div class="modal-body">
+        <h2>Ažuriraj launcher na izabranim uređajima</h2>
+        <label>Verzija
+          <select name="version_code" id="update-launcher-selected-version" class="select-input" form="update-launcher-selected-form">
+            {% for v in available_launcher_versions %}
+            <option value="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }})</option>
+            {% else %}
+            <option value="" disabled selected>Nema verzije za update</option>
+            {% endfor %}
+          </select>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Otkaži</button>
+          <button type="submit" class="btn btn-primary" form="update-launcher-selected-form" {% if not available_launcher_versions %}disabled{% endif %}>Pošalji</button>
+        </div>
+      </div>
+    </dialog>
+
+    <form method="post" id="update-launcher-single-form"
+          onsubmit="return confirm('Ažurirati launcher na ovom uređaju? Uređaj će se na trenutak restartovati.')"></form>
+    <dialog id="update-launcher-single-modal" class="modal">
+      <div class="modal-body">
+        <h2 id="update-launcher-single-title">Ažuriraj launcher</h2>
+        <label>Verzija
+          <select name="version_code" id="update-launcher-single-version" class="select-input" form="update-launcher-single-form">
+            {% for v in available_launcher_versions %}
+            <option value="{{ v.versionCode }}" data-code="{{ v.versionCode }}">{{ v.versionName }} ({{ v.versionCode }})</option>
+            {% else %}
+            <option value="" disabled selected>Nema verzije za update</option>
+            {% endfor %}
+          </select>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Otkaži</button>
+          <button type="submit" class="btn btn-primary" form="update-launcher-single-form" {% if not available_launcher_versions %}disabled{% endif %}>Pošalji</button>
+        </div>
+      </div>
+    </dialog>
   </div>
 </div>
 
 {% if analytics_sent %}<div class="banner-success">Zahtjev za analitiku poslan svim uređajima - stiže čim se uređaj javi.</div>{% endif %}
 {% if update_sent %}<div class="banner-success">Zahtjev za update poslan na {{ update_sent }} izabrana uređaja.</div>{% endif %}
+{% if update_launcher_sent %}<div class="banner-success">Zahtjev za update launcher-a poslan na {{ update_launcher_sent }} izabrana uređaja.</div>{% endif %}
 
 <form method="get" action="/devices" class="toolbar">
   <input class="search-input" type="text" name="q" value="{{ q }}" placeholder="Pretraži po ID-u uređaja...">
@@ -143,6 +187,7 @@
             <form method="post" action="/devices/{{ d.id }}/reboot" onsubmit="return confirm('Restartovati uređaj {{ d.id }} odmah?')">
               <button type="submit" class="dropdown-item">Restartuj sad</button>
             </form>
+            <button type="button" class="dropdown-item" onclick="openUpdateLauncherSingleModal('{{ d.id }}', {{ d.launcherVersionCode or 0 }})">Ažuriraj launcher</button>
             <form method="post" action="/devices/{{ d.id }}/factory-reset" onsubmit="return confirm('Ovo će TRAJNO obrisati sve podatke na uređaju {{ d.id }} i vratiti ga na fabrička podešavanja. Ova akcija se ne može poništiti. Nastaviti?')">
               <button type="submit" class="dropdown-item dropdown-item-danger">Pošalji factory reset</button>
             </form>
@@ -214,6 +259,34 @@
       opt.textContent = base + (isCurrent ? ' - trenutna' : '');
     });
     document.getElementById('update-single-modal').showModal();
+  }
+
+  function openUpdateLauncherSelectedModal() {
+    var form = document.getElementById('update-launcher-selected-form');
+    form.querySelectorAll('input[name="device_ids"]').forEach(function (el) { el.remove(); });
+    Array.prototype.forEach.call(document.querySelectorAll('.device-select'), function (b) {
+      if (!b.checked) return;
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'device_ids';
+      input.value = b.value;
+      form.appendChild(input);
+    });
+    document.getElementById('update-launcher-selected-modal').showModal();
+  }
+
+  function openUpdateLauncherSingleModal(deviceId, installedCode) {
+    closeAllDropdowns();
+    document.getElementById('update-launcher-single-form').action = '/devices/' + deviceId + '/update-launcher';
+    document.getElementById('update-launcher-single-title').textContent = 'Ažuriraj launcher - ' + deviceId;
+    var installed = Number(installedCode) || 0;
+    var select = document.getElementById('update-launcher-single-version');
+    Array.prototype.forEach.call(select.options, function (opt) {
+      var base = opt.textContent.replace(/ - trenutna$/, '');
+      var isCurrent = opt.dataset.code !== undefined && Number(opt.dataset.code) === installed;
+      opt.textContent = base + (isCurrent ? ' - trenutna' : '');
+    });
+    document.getElementById('update-launcher-single-modal').showModal();
   }
 
   function closeAllDropdowns() {

@@ -1,6 +1,7 @@
 package karika.distribucija.ba.launcher.diagnostics
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.BatteryManager
 import android.os.Build
 import android.util.Log
@@ -30,6 +31,7 @@ object DeviceHeartbeat {
                 ?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
                 ?.takeIf { it in 0..100 }
             val locations = LocationHistoryStore.readAll(context)
+            val (launcherVersionCode, launcherVersionName) = launcherOwnVersion(context)
             DashboardApi.reportHeartbeat(
                 deviceId = deviceId,
                 installedPackage = packageName,
@@ -45,7 +47,9 @@ object DeviceHeartbeat {
                 maintenanceActive = MaintenanceState.isActive(context) || RemoteMaintenanceState.isActive(context),
                 batteryLevel = batteryLevel,
                 batteryCharging = batteryManager?.isCharging,
-                locations = locations
+                locations = locations,
+                launcherVersionCode = launcherVersionCode,
+                launcherVersionName = launcherVersionName
             )
             // Only cleared once the send above actually succeeds - if it throws, this line never
             // runs and the queued points survive to go out with the next heartbeat attempt.
@@ -53,5 +57,17 @@ object DeviceHeartbeat {
         } catch (e: Exception) {
             Log.w(TAG, "Heartbeat failed: ${e.message}")
         }
+    }
+
+    /** The launcher's own installed version - always this app's own packageName, so unlike
+     * `packageName`/`versionCode`/`versionName` above (the payload app, passed in by the caller),
+     * this needs no argument. */
+    private fun launcherOwnVersion(context: Context): Pair<Long, String> = try {
+        val info = context.packageManager.getPackageInfo(context.packageName, 0)
+        val versionCode =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.longVersionCode else @Suppress("DEPRECATION") info.versionCode.toLong()
+        versionCode to info.versionName.orEmpty()
+    } catch (e: PackageManager.NameNotFoundException) {
+        0L to ""
     }
 }

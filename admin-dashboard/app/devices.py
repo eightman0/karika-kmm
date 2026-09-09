@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from . import local_db
+from . import launcher_version_config, local_db
 from .firebase import bucket
 from .push import (
     send_analytics_request_all,
@@ -10,6 +10,7 @@ from .push import (
     send_open_settings,
     send_ping,
     send_reboot,
+    send_update_launcher_to_device,
     send_version_check_all,
     send_version_check_to_device,
 )
@@ -26,6 +27,7 @@ SIGNED_URL_MINUTES = 30
 
 APP_PACKAGES = {
     "salesrep": "karika.distribucija.ba.salesrep",
+    "launcher": "karika.distribucija.ba.launcher",
 }
 
 
@@ -65,6 +67,8 @@ def _with_computed_fields(row: dict) -> dict:
         "pingRequestedAt": _parse_iso(row["ping_requested_at"]),
         "batteryLevel": row["battery_level"],
         "batteryCharging": bool(row["battery_charging"]) if row["battery_charging"] is not None else None,
+        "launcherVersionCode": row["launcher_version_code"],
+        "launcherVersionName": row["launcher_version_name"],
     }
 
 
@@ -141,6 +145,39 @@ def request_maintenance(device_id: str, enable: bool) -> None:
 
 def request_open_settings(device_id: str) -> None:
     send_open_settings(_require_token(device_id))
+
+
+def request_update_launcher(device_id: str, version_code: str | None, published_by: str) -> None:
+    if version_code:
+        launcher_version_config.stage_launcher_version_by_code(version_code, published_by)
+    launcher_version_config.target_device_for_staged_launcher(device_id)
+    send_update_launcher_to_device(
+        _require_token(device_id), launcher_version_config.get_staged_launcher_version()["version_code"]
+    )
+
+
+def request_update_launcher_bulk(device_ids: list[str], version_code: str | None, published_by: str) -> None:
+    if version_code:
+        launcher_version_config.stage_launcher_version_by_code(version_code, published_by)
+    resolved_version_code = launcher_version_config.get_staged_launcher_version()["version_code"]
+    for device_id in device_ids:
+        launcher_version_config.target_device_for_staged_launcher(device_id)
+        row = local_db.get_device(device_id)
+        token = row.get("fcm_token") if row else None
+        if token:
+            send_update_launcher_to_device(token, resolved_version_code)
+
+
+def request_update_launcher_all(published_by: str) -> None:
+    # Token-based to every known device, not a topic broadcast like salesrep's send_version_
+    # check_all - the launcher has no periodic self-check to fall back on if a topic message is
+    # missed (see KioskMessagingService: it only ever self-updates on an explicit push), so a
+    # missed broadcast would strand that device on the old build indefinitely.
+    version_code = launcher_version_config.promote_staged_launcher_to_stable(published_by)
+    for row in local_db.list_devices():
+        token = row.get("fcm_token")
+        if token:
+            send_update_launcher_to_device(token, version_code)
 
 
 def request_ping(device_id: str) -> None:

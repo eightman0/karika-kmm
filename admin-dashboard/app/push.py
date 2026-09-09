@@ -114,3 +114,13 @@ def send_open_settings(fcm_token: str) -> str:
 def send_ping(fcm_token: str) -> str:
     return send_command_to_token(fcm_token, "ping")
 
+
+def send_update_launcher_to_device(fcm_token: str, version_code: str) -> str:
+    """Tells the launcher (Device Owner, published/staged through launcher_version_config.py -
+    a parallel track to salesrep's, see local_db.py's schema comment for why) to fetch its own
+    resolved version from /api/version?app=launcher and silently reinstall itself - the only
+    alternative being a full factory reset and QR re-scan, or a developer plugged in over USB.
+    versionCode is informational only (shown in command history) - the device always re-resolves
+    the actual version to install itself, same as version_check does for salesrep."""
+    return send_command_to_token(fcm_token, "update_launcher", {"versionCode": version_code})
+

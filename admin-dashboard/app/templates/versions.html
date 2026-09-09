@@ -5,14 +5,20 @@
   <h1>Verzije</h1>
 </div>
 
+<div class="tabs">
+  <a class="tab {{ 'active' if active_app == 'salesrep' }}" href="/versions?app=salesrep">Salesrep</a>
+  <a class="tab {{ 'active' if active_app == 'launcher' }}" href="/versions?app=launcher">Launcher</a>
+</div>
+
 {% if error %}<div class="error-banner">Greška pri objavi: {{ error }}</div>{% endif %}
 {% if published %}<div class="banner-success">Verzija objavljena kao verzija na čekanju - nijedan uređaj je neće dobiti dok ga ne izabereš na listi uređaja, ili pošalješ svima odavde.</div>{% endif %}
 {% if sent_all %}<div class="banner-success">Verzija na čekanju poslana svim uređajima i postala je trenutna verzija.</div>{% endif %}
 {% if rolled_back %}<div class="banner-success">Trenutna verzija je vraćena na stariju objavu.</div>{% endif %}
 
 <div class="card">
-  <h2>Objavi novu verziju</h2>
+  <h2>Objavi novu verziju{% if active_app == 'launcher' %} launcher-a{% endif %}</h2>
   <form method="post" action="/versions/publish" enctype="multipart/form-data" class="stacked-form publish-form">
+    <input type="hidden" name="app" value="{{ active_app }}">
     <label>APK fajl
       <label class="dropzone" for="apk_file">
         <span>Prevuci APK ovdje ili klikni da izabereš fajl</span>
@@ -38,6 +44,7 @@
   {% if staged.published_by %}<p class="publish-meta">Objavio {{ staged.published_by }} &middot; {{ staged.published_at.strftime("%d.%m.%Y %H:%M") if staged.published_at else "" }}</p>{% endif %}
   <form method="post" action="/versions/send-all"
         onsubmit="return confirm('Poslati ovu verziju svim uređajima odmah i postaviti je kao trenutnu verziju?')">
+    <input type="hidden" name="app" value="{{ active_app }}">
     <button type="submit" class="btn btn-danger">Pošalji svima</button>
   </form>
 </div>

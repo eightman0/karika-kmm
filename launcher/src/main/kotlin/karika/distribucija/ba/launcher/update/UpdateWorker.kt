@@ -15,8 +15,6 @@ import karika.distribucija.ba.launcher.KnownApps
 import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceHeartbeat
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
-import java.io.File
-import java.security.MessageDigest
 
 private data class InstalledInfo(val versionCode: Long, val versionName: String)
 
@@ -28,7 +26,7 @@ private data class InstalledInfo(val versionCode: Long, val versionName: String)
 class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result = try {
-        val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext))
+        val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext), app = "salesrep")
         val targetPackage = KnownApps.PRIMARY.packageName
         val installed = installedInfo(targetPackage)
 
@@ -69,7 +67,7 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         try {
             val apkFile = ApkDownloader.download(applicationContext, latest.apkUrl) ?: return Result.retry()
 
-            if (!verifyChecksum(apkFile, latest.apkSha256)) {
+            if (!ApkChecksum.verifySha256(apkFile, latest.apkSha256)) {
                 Log.e(TAG, "Checksum mismatch for downloaded APK (${latest.versionName}), discarding")
                 apkFile.delete()
                 return Result.retry()
@@ -116,26 +114,8 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         }
     }
 
-    private fun verifyChecksum(file: File, expectedSha256: String): Boolean {
-        if (expectedSha256.isBlank()) {
-            Log.w(TAG, "No apkSha256 published for this version, skipping integrity check")
-            return true
-        }
-        val digest = MessageDigest.getInstance("SHA-256")
-        file.inputStream().use { input ->
-            val buffer = ByteArray(DIGEST_BUFFER_SIZE)
-            var read: Int
-            while (input.read(buffer).also { read = it } != -1) {
-                digest.update(buffer, 0, read)
-            }
-        }
-        val actual = digest.digest().joinToString("") { "%02x".format(it) }
-        return actual.equals(expectedSha256, ignoreCase = true)
-    }
-
     companion object {
         private const val TAG = "UpdateWorker"
-        private const val DIGEST_BUFFER_SIZE = 8192
         private const val NOTIFICATION_CHANNEL_ID = "update_in_progress"
         private const val NOTIFICATION_ID = 1
     }

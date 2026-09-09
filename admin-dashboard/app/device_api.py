@@ -7,13 +7,16 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from . import analytics_ingest, local_db
+from .launcher_version_config import resolve_launcher_version_for_device
 from .version_config import resolve_version_for_device
 
 router = APIRouter(prefix="/api")
 
 
 @router.get("/version")
-def get_version(device_id: str | None = None):
+def get_version(device_id: str | None = None, app: str = "salesrep"):
+    if app == "launcher":
+        return resolve_launcher_version_for_device(device_id)
     return resolve_version_for_device(device_id)
 
 
@@ -35,6 +38,8 @@ class HeartbeatBody(BaseModel):
     batteryLevel: int | None = None
     batteryCharging: bool | None = None
     locations: list[LocationPoint] = []
+    launcherVersionCode: int | None = None
+    launcherVersionName: str | None = None
 
 
 @router.post("/devices/{device_id}/heartbeat")
@@ -51,6 +56,8 @@ def post_heartbeat(device_id: str, body: HeartbeatBody):
         body.maintenanceActive,
         body.batteryLevel,
         body.batteryCharging,
+        body.launcherVersionCode,
+        body.launcherVersionName,
     )
     if body.locations:
         local_db.insert_device_locations(device_id, [p.model_dump() for p in body.locations])
