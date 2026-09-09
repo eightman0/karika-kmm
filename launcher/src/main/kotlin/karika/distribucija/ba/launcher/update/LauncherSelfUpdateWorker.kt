@@ -3,6 +3,7 @@ package karika.distribucija.ba.launcher.update
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
@@ -26,6 +27,15 @@ import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
  * always reports the launcher's own version too, see DeviceHeartbeat), not by anything this
  * worker does afterward. The ack for the command that triggered this is sent up front too, see
  * KioskMessagingService.
+ *
+ * The installedVersionCode() check below is not just an optimization: because the process dies
+ * mid-install as described above, doWork() never gets the chance to hand WorkManager a Result at
+ * all for a successful update - WorkManager sees that as interrupted work, not completed work,
+ * and retries this exact same unique job once the relaunched process comes back up (see
+ * BootBroadcastReceiver's MY_PACKAGE_REPLACED handling). Without this check, that retry would
+ * re-download and reinstall the same already-current build, kill the process again, and repeat
+ * forever - which is exactly what was observed on a real device. With it, the retry's first move
+ * is noticing the target version is no longer newer than what is already running, and stopping.
  */
 class LauncherSelfUpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
@@ -33,6 +43,12 @@ class LauncherSelfUpdateWorker(context: Context, params: WorkerParameters) : Cor
         val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext), app = "launcher")
         if (!latest.isPublished) {
             Log.i(TAG, "No launcher version published yet, nothing to install")
+            return Result.success()
+        }
+
+        val installedVersionCode = installedVersionCode()
+        if (latest.versionCode <= installedVersionCode) {
+            Log.i(TAG, "Launcher already on version code $installedVersionCode, nothing to install")
             return Result.success()
         }
 
@@ -51,6 +67,13 @@ class LauncherSelfUpdateWorker(context: Context, params: WorkerParameters) : Cor
         val installed = ApkInstaller.install(applicationContext, apkFile)
         apkFile.delete()
         return if (installed) Result.success() else Result.retry()
+    }
+
+    private fun installedVersionCode(): Long = try {
+        val info = applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.longVersionCode else @Suppress("DEPRECATION") info.versionCode.toLong()
+    } catch (e: PackageManager.NameNotFoundException) {
+        0L
     }
 
     private fun createForegroundInfo(): ForegroundInfo {
