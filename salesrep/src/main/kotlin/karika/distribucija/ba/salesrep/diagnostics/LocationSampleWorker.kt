@@ -1,4 +1,4 @@
-package karika.distribucija.ba.launcher.update
+package karika.distribucija.ba.salesrep.diagnostics
 
 import android.Manifest
 import android.content.Context
@@ -10,7 +10,6 @@ import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
-import karika.distribucija.ba.launcher.diagnostics.LocationHistoryStore
 import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -18,8 +17,10 @@ import java.time.temporal.ChronoUnit
 
 /**
  * Samples one GPS fix roughly every 15 min (WorkManager's own floor for periodic work) and
- * appends it to LocationHistoryStore - never touches the network itself, DeviceHeartbeat flushes
- * the accumulated queue on every heartbeat instead.
+ * appends it to LocationHistoryStore. Runs here (moved from the launcher) because sampling from
+ * that Device Owner background process was hitting ANRs on real devices - this app is normally
+ * the one actually in the foreground. Never touches the network itself - the launcher's heartbeat
+ * pulls the accumulated file on its own schedule, through the same content-URI bridge as logs.
  */
 class LocationSampleWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
@@ -27,8 +28,8 @@ class LocationSampleWorker(context: Context, params: WorkerParameters) : Corouti
         if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            // Not granted yet - e.g. this fires before LauncherActivity's first onResume has had
-            // a chance to apply kiosk policies. Try again next cycle rather than erroring loudly.
+            // Not granted yet - e.g. this fires before the launcher's Device Owner policies have
+            // had a chance to apply. Try again next cycle rather than erroring loudly.
             return Result.success()
         }
 
@@ -41,7 +42,7 @@ class LocationSampleWorker(context: Context, params: WorkerParameters) : Corouti
         }.getOrNull() ?: return Result.success()
 
         val timestamp = DateTimeFormatter.ISO_INSTANT.format(Instant.now().truncatedTo(ChronoUnit.MILLIS))
-        LocationHistoryStore.add(applicationContext, location.latitude, location.longitude, timestamp)
+        LocationHistoryStore.add(location.latitude, location.longitude, timestamp)
         return Result.success()
     }
 }

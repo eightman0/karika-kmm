@@ -5,6 +5,14 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
+    <!-- Silently granted by the launcher's Device Owner policies (it has no UI of its own to ask
+         for these, and background location needs the "Allow all the time" flow a plain runtime
+         request can't trigger) - see LauncherKiosk.setKioskPolicies(). Sampled by
+         diagnostics/LocationSampleWorker, moved here from the launcher after it caused ANRs
+         running from that Device Owner background process. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
         android:name=".SalesRepApp"

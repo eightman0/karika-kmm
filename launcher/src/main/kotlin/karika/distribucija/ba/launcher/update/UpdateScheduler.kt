@@ -17,10 +17,6 @@ object UpdateScheduler {
     private const val IMMEDIATE_WORK_NAME = "payload_update_check_immediate"
     private const val PERIODIC_INTERVAL_MINUTES = 30L
 
-    private const val LOCATION_PERIODIC_WORK_NAME = "location_sample_periodic"
-    // WorkManager's own floor for periodic work - can't schedule anything more frequent than this.
-    private const val LOCATION_INTERVAL_MINUTES = 15L
-
     private const val LAUNCHER_SELF_UPDATE_WORK_NAME = "launcher_self_update"
 
     private val networkConstraints = Constraints.Builder()
@@ -53,19 +49,6 @@ object UpdateScheduler {
         WorkManager.getInstance(context).enqueueUniqueWork(
             IMMEDIATE_WORK_NAME,
             ExistingWorkPolicy.REPLACE,
-            request
-        )
-    }
-
-    /** Call once from Application.onCreate(), same as schedulePeriodic() - no network constraint,
-     * since sampling itself never touches the network (DeviceHeartbeat flushes the queue later,
-     * whenever a heartbeat next succeeds). */
-    fun scheduleLocationSampling(context: Context) {
-        val request = PeriodicWorkRequestBuilder<LocationSampleWorker>(LOCATION_INTERVAL_MINUTES, TimeUnit.MINUTES)
-            .build()
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            LOCATION_PERIODIC_WORK_NAME,
-            ExistingPeriodicWorkPolicy.REPLACE,
             request
         )
     }

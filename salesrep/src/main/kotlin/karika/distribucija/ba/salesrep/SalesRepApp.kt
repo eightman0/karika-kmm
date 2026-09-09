@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Process
 import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.logging.AppLogger
+import karika.distribucija.ba.salesrep.diagnostics.LocationHistoryStore
+import karika.distribucija.ba.salesrep.diagnostics.LocationScheduler
 import karika.distribucija.ba.salesrep.session.SessionManager
 import kotlin.system.exitProcess
 
@@ -15,6 +17,8 @@ class SalesRepApp : Application() {
         super.onCreate()
         AppLogger.init(this)
         AnalyticsTracker.init(this)
+        LocationHistoryStore.init(this)
+        LocationScheduler.schedulePeriodic(this)
         sessionManager = SessionManager(this)
         sessionManager.restoreTokenIfPresent()
         installCrashRecovery()

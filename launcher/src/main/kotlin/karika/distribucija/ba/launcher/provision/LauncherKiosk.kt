@@ -40,20 +40,21 @@ class LauncherKiosk(private val context: ComponentActivity) {
         setUpdatePolicy(enable)
         setAsHomeApp(enable)
         setKeyGuardEnabled(enable)
-        grantPermission(Manifest.permission.REQUEST_INSTALL_PACKAGES)
-        // Silently granted (no runtime prompt, including the separate "Allow all the time"
-        // background-location dialog a normal app would need) - LocationSampleWorker runs
-        // periodically regardless of whether the app is in the foreground.
-        grantPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-        grantPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-        grantPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        grantPermission(Manifest.permission.REQUEST_INSTALL_PACKAGES, context.packageName)
+        // Silently granted to salesrep, not this app - LocationSampleWorker runs there now (moved
+        // out of this Device Owner process after it started causing ANRs on real devices), and
+        // only Device Owner can grant this without a runtime prompt, including the separate
+        // "Allow all the time" background-location dialog a normal app would otherwise need.
+        grantPermission(Manifest.permission.ACCESS_FINE_LOCATION, KnownApps.PRIMARY.packageName)
+        grantPermission(Manifest.permission.ACCESS_COARSE_LOCATION, KnownApps.PRIMARY.packageName)
+        grantPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION, KnownApps.PRIMARY.packageName)
         setLockTask(enable)
     }
 
-    private fun grantPermission(permission: String) {
+    private fun grantPermission(permission: String, targetPackage: String) {
         devicePolicyManager.setPermissionGrantState(
             adminComponentName,
-            context.packageName,
+            targetPackage,
             permission,
             DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
         )

@@ -30,7 +30,7 @@ object DeviceHeartbeat {
             val batteryLevel = batteryManager
                 ?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
                 ?.takeIf { it in 0..100 }
-            val locations = LocationHistoryStore.readAll(context)
+            val locations = LocationHistoryReader.readNewPoints(context)
             val (launcherVersionCode, launcherVersionName) = launcherOwnVersion(context)
             DashboardApi.reportHeartbeat(
                 deviceId = deviceId,
@@ -51,9 +51,9 @@ object DeviceHeartbeat {
                 launcherVersionCode = launcherVersionCode,
                 launcherVersionName = launcherVersionName
             )
-            // Only cleared once the send above actually succeeds - if it throws, this line never
-            // runs and the queued points survive to go out with the next heartbeat attempt.
-            LocationHistoryStore.clear(context)
+            // Only recorded once the send above actually succeeds - if it throws, this line never
+            // runs and the same points are still "new" on the next heartbeat attempt.
+            LocationHistoryReader.markSent(context, locations)
         } catch (e: Exception) {
             Log.w(TAG, "Heartbeat failed: ${e.message}")
         }

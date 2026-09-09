@@ -9,11 +9,13 @@ import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.logging.AppLogger
+import karika.distribucija.ba.salesrep.diagnostics.LocationHistoryStore
 import java.io.File
 import java.io.FileNotFoundException
 
 /**
- * Read-only bridge that lets the launcher pull this app's local log files for support requests.
+ * Read-only bridge that lets the launcher pull this app's local log files for support requests,
+ * and its queued GPS fixes (see LocationHistoryStore) for every heartbeat.
  * Access is checked by calling package here rather than through a manifest-declared custom
  * permission - the launcher is never reinstalled after its one-time provisioning, and Android does
  * not reliably back-fill a normal permission grant to an already-installed app once this app (the
@@ -69,6 +71,7 @@ class LogProvider : ContentProvider() {
         "backup" -> AppLogger.backupLogFile()
         "analytics_current" -> AnalyticsTracker.currentFile()
         "analytics_backup" -> AnalyticsTracker.currentBackupFile()
+        "locations" -> LocationHistoryStore.currentFile()
         else -> null
     }
 }

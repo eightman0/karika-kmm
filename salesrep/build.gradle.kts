@@ -15,7 +15,7 @@ android {
         applicationId = "karika.distribucija.ba.salesrep"
         minSdk = 30
         targetSdk = 37
-        versionCode = 56
+        versionCode = 57
         versionName = "1.1"
         // Shared with launcher (see its build.gradle.kts) - checked on both ends of the
         // launcher<->salesrep broadcasts instead of a signature-level permission, since the two
@@ -92,7 +92,11 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.kotlinx.datetime)
+
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.play.services.location)
 
     implementation(project(":core-logging"))
 
