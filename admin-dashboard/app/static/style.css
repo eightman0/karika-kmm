@@ -344,6 +344,7 @@ th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--bo
   border-bottom: 1px solid var(--border);
 }
 .history-item:last-child { border-bottom: none; }
+.history-info { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .history-item .history-version { font-weight: 600; }
 .history-item .history-meta { color: var(--muted); font-size: 13px; }
 .history-actions { display: flex; gap: 8px; }

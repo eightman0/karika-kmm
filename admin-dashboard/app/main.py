@@ -393,6 +393,13 @@ def delete_history_entry(entry_id: int):
     return RedirectResponse(f"/versions?app={app}", status_code=303)
 
 
+@app.post("/versions/history/delete-selected", dependencies=[require_login])
+def delete_selected_history_entries(app: str = Form("salesrep"), entry_ids: list[int] = Form(default=[])):
+    for entry_id in entry_ids:
+        version_history.delete_entry(entry_id)
+    return RedirectResponse(f"/versions?app={app}", status_code=303)
+
+
 @app.get("/provisioning", dependencies=[require_login])
 def provisioning_page(request: Request, generated: str | None = None):
     saved = local_db.get_provisioning_extras() or {}

@@ -71,11 +71,22 @@
 <div class="card">
   <h2>Historija objava</h2>
   {% if history %}
+  <form method="post" action="/versions/history/delete-selected" id="history-bulk-delete-form"
+        onsubmit="return confirm('Obrisati sve izabrane zapise iz historije objava? Ovo ne dira ništa što je trenutno instalirano.')">
+    <input type="hidden" name="app" value="{{ active_app }}">
+  </form>
+  <div class="toolbar">
+    <label class="checkbox"><input type="checkbox" id="history-select-all" onchange="toggleAllHistory(this)"> Izaberi sve</label>
+    <button type="submit" form="history-bulk-delete-form" class="btn btn-danger btn-sm">Obriši izabrane</button>
+  </div>
   <ul class="history-list">
     {% for h in history %}
     <li class="history-item">
-      <span class="history-version">{{ h.versionName }} ({{ h.versionCode }})</span>
-      <span class="history-meta">{{ h.publishedBy }} &middot; {{ h.publishedAt.strftime("%d.%m.%Y %H:%M") if h.publishedAt else "" }}{% if h.mandatory %} &middot; obavezno{% endif %}</span>
+      <span class="history-info">
+        <input type="checkbox" class="history-select" name="entry_ids" value="{{ h.id }}" form="history-bulk-delete-form">
+        <span class="history-version">{{ h.versionName }} ({{ h.versionCode }})</span>
+        <span class="history-meta">{{ h.publishedBy }} &middot; {{ h.publishedAt.strftime("%d.%m.%Y %H:%M") if h.publishedAt else "" }}{% if h.mandatory %} &middot; obavezno{% endif %}</span>
+      </span>
       <span class="history-actions">
         <form method="post" action="/versions/rollback/{{ h.id }}"
               onsubmit="return confirm('Vratiti {{ h.versionName }} ({{ h.versionCode }}) kao trenutnu verziju za sve uređaje?')">
@@ -89,6 +100,11 @@
     </li>
     {% endfor %}
   </ul>
+  <script>
+    function toggleAllHistory(source) {
+      document.querySelectorAll('.history-select').forEach(function (b) { b.checked = source.checked; });
+    }
+  </script>
   {% else %}
   <p class="hint">Još nema objavljenih verzija.</p>
   {% endif %}
