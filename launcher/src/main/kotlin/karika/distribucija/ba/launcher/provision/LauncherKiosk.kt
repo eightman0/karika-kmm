@@ -42,12 +42,19 @@ class LauncherKiosk(private val context: ComponentActivity) {
         setKeyGuardEnabled(enable)
         grantPermission(Manifest.permission.REQUEST_INSTALL_PACKAGES, context.packageName)
         // Silently granted to salesrep, not this app - LocationSampleWorker runs there now (moved
-        // out of this Device Owner process after it started causing ANRs on real devices), and
-        // only Device Owner can grant this without a runtime prompt, including the separate
-        // "Allow all the time" background-location dialog a normal app would otherwise need.
+        // out of this Device Owner process after it started causing ANRs on real devices). Only
+        // the foreground pair, deliberately not ACCESS_BACKGROUND_LOCATION - silently granting
+        // that one to a package other than the launcher itself crashed Permission Controller on a
+        // real device (which then froze the lock-task-pinned launcher's input, showing up there
+        // as an ANR). LocationSampleWorker runs as a brief foreground service instead, which
+        // Android treats as foreground for location access, so it never needs the background grant.
         grantPermission(Manifest.permission.ACCESS_FINE_LOCATION, KnownApps.PRIMARY.packageName)
         grantPermission(Manifest.permission.ACCESS_COARSE_LOCATION, KnownApps.PRIMARY.packageName)
-        grantPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION, KnownApps.PRIMARY.packageName)
+        // Also silent, and for the same underlying reason as the location grants above: a normal
+        // runtime request for this crashed Permission Controller instead of showing its dialog,
+        // since it can't present itself over a lock-task-pinned kiosk activity. Salesrep no longer
+        // asks for it at all (see AttachmentPicker.takePhoto()) - it just expects to already have it.
+        grantPermission(Manifest.permission.CAMERA, KnownApps.PRIMARY.packageName)
         setLockTask(enable)
     }
 

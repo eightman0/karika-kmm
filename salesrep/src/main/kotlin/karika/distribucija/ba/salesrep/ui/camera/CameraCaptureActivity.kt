@@ -40,8 +40,10 @@ class CameraCaptureActivity : AppCompatActivity() {
         binding.buttonClose.setOnClickListener { finish() }
         binding.buttonShutter.setOnClickListener { capture() }
 
-        // AttachmentPicker already requests this before launching us - re-checked here in case it
-        // was revoked in the gap between that check and this activity actually starting.
+        // Silently granted by the launcher's Device Owner policies (see
+        // LauncherKiosk.setKioskPolicies()) - AttachmentPicker no longer requests this itself, a
+        // runtime request crashed Permission Controller on a real device. Re-checked here only as
+        // a safety net in case that grant hasn't landed yet (e.g. very first launch).
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera()
         } else {
