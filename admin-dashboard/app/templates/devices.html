@@ -57,8 +57,7 @@
       </div>
     </dialog>
 
-    <form method="post" action="/devices/update-launcher-selected" id="update-launcher-selected-form"
-          onsubmit="return confirm('Ažurirati launcher na svim izabranim uređajima? Uređaji će se na trenutak restartovati.')"></form>
+    <form method="post" action="/devices/update-launcher-selected" id="update-launcher-selected-form"></form>
     <button type="button" class="btn btn-secondary" onclick="openUpdateLauncherSelectedModal()">Ažuriraj launcher (izabrane)</button>
     <dialog id="update-launcher-selected-modal" class="modal">
       <div class="modal-body">
@@ -79,8 +78,7 @@
       </div>
     </dialog>
 
-    <form method="post" id="update-launcher-single-form"
-          onsubmit="return confirm('Ažurirati launcher na ovom uređaju? Uređaj će se na trenutak restartovati.')"></form>
+    <form method="post" id="update-launcher-single-form"></form>
     <dialog id="update-launcher-single-modal" class="modal">
       <div class="modal-body">
         <h2 id="update-launcher-single-title">Ažuriraj launcher</h2>
@@ -184,14 +182,14 @@
             <form method="post" action="/devices/{{ d.id }}/ping">
               <button type="submit" class="dropdown-item">Provjeri status</button>
             </form>
-            <form method="post" action="/devices/{{ d.id }}/reboot" onsubmit="return confirm('Restartovati uređaj {{ d.id }} odmah?')">
+            <form method="post" action="/devices/{{ d.id }}/reboot" onsubmit="return confirmSubmit(this, 'Restartovati uređaj {{ d.id }} odmah?')">
               <button type="submit" class="dropdown-item">Restartuj sad</button>
             </form>
             <button type="button" class="dropdown-item" onclick="openUpdateLauncherSingleModal('{{ d.id }}', {{ d.launcherVersionCode or 0 }})">Ažuriraj launcher</button>
-            <form method="post" action="/devices/{{ d.id }}/factory-reset" onsubmit="return confirm('Ovo će TRAJNO obrisati sve podatke na uređaju {{ d.id }} i vratiti ga na fabrička podešavanja. Ova akcija se ne može poništiti. Nastaviti?')">
+            <form method="post" action="/devices/{{ d.id }}/factory-reset" onsubmit="return confirmSubmit(this, 'Ovo će TRAJNO obrisati sve podatke na uređaju {{ d.id }} i vratiti ga na fabrička podešavanja. Ova akcija se ne može poništiti. Nastaviti?', true)">
               <button type="submit" class="dropdown-item dropdown-item-danger">Pošalji factory reset</button>
             </form>
-            <form method="post" action="/devices/{{ d.id }}/delete" onsubmit="return confirm('Obrisati uređaj {{ d.id }}?')">
+            <form method="post" action="/devices/{{ d.id }}/delete" onsubmit="return confirmSubmit(this, 'Obrisati uređaj {{ d.id }}?', true)">
               <button type="submit" class="dropdown-item dropdown-item-danger">Obriši</button>
             </form>
           </div>

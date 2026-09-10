@@ -264,7 +264,7 @@
       <p class="hint">Briše sve podatke i vraća uređaj na fabrička podešavanja preko push-a - bez fizičkog pristupa uređaju. Ovo je trajno i ne može se poništiti.</p>
     </div>
     <form method="post" action="/devices/{{ device.id }}/factory-reset"
-          onsubmit="return confirm('Ovo će TRAJNO obrisati sve podatke na uređaju {{ device.id }} i vratiti ga na fabrička podešavanja. Ova akcija se ne može poništiti. Nastaviti?')">
+          onsubmit="return confirmSubmit(this, 'Ovo će TRAJNO obrisati sve podatke na uređaju {{ device.id }} i vratiti ga na fabrička podešavanja. Ova akcija se ne može poništiti. Nastaviti?', true)">
       <button type="submit" class="btn btn-danger">Pošalji factory reset</button>
     </form>
   </div>
@@ -274,7 +274,7 @@
       <p class="hint">Restartuje uređaj odmah preko push-a.</p>
     </div>
     <form method="post" action="/devices/{{ device.id }}/reboot"
-          onsubmit="return confirm('Restartovati uređaj {{ device.id }} odmah?')">
+          onsubmit="return confirmSubmit(this, 'Restartovati uređaj {{ device.id }} odmah?', true)">
       <button type="submit" class="btn btn-danger">Restartuj sad</button>
     </form>
   </div>
@@ -285,8 +285,7 @@
     </div>
     <button type="button" class="btn btn-danger" onclick="document.getElementById('update-launcher-modal').showModal()">Ažuriraj launcher</button>
     <dialog id="update-launcher-modal" class="modal">
-      <form method="post" action="/devices/{{ device.id }}/update-launcher" class="stacked-form"
-            onsubmit="return confirm('Ažurirati launcher na uređaju {{ device.id }} sada? Uređaj će se na trenutak restartovati.')">
+      <form method="post" action="/devices/{{ device.id }}/update-launcher" class="stacked-form">
         <h2>Ažuriraj launcher - {{ device.id }}</h2>
         <label>Verzija
           <select name="version_code" class="select-input">

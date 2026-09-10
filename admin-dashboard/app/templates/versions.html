@@ -43,7 +43,7 @@
   <p class="hint">Poslano do sada na {{ staged_target_count }} izabrana uređaja (sa liste uređaja). Ostali je neće dobiti dok ne klikneš ispod.</p>
   {% if staged.published_by %}<p class="publish-meta">Objavio {{ staged.published_by }} &middot; {{ staged.published_at.strftime("%d.%m.%Y %H:%M") if staged.published_at else "" }}</p>{% endif %}
   <form method="post" action="/versions/send-all"
-        onsubmit="return confirm('Poslati ovu verziju svim uređajima odmah i postaviti je kao trenutnu verziju?')">
+        onsubmit="return confirmSubmit(this, 'Poslati ovu verziju svim uređajima odmah i postaviti je kao trenutnu verziju?', true)">
     <input type="hidden" name="app" value="{{ active_app }}">
     <button type="submit" class="btn btn-danger">Pošalji svima</button>
   </form>
@@ -73,7 +73,7 @@
   <p class="hint">"Postavi kao default" mijenja trenutnu verziju za cijeli park - i za već postojeće uređaje, i za svaki novi uređaj koji se prvi put javi (dobija je automatski, bez posebnog targetiranja).</p>
   {% if history %}
   <form method="post" action="/versions/history/delete-selected" id="history-bulk-delete-form"
-        onsubmit="return confirm('Obrisati sve izabrane zapise iz historije objava? Ovo ne dira ništa što je trenutno instalirano.')">
+        onsubmit="return confirmSubmit(this, 'Obrisati sve izabrane zapise iz historije objava? Ovo ne dira ništa što je trenutno instalirano.', true)">
     <input type="hidden" name="app" value="{{ active_app }}">
   </form>
   <div class="toolbar">
@@ -90,11 +90,11 @@
       </span>
       <span class="history-actions">
         <form method="post" action="/versions/rollback/{{ h.id }}"
-              onsubmit="return confirm('Postaviti {{ h.versionName }} ({{ h.versionCode }}) kao default verziju za sve uređaje - uključujući svaki novi uređaj koji se tek priključi?')">
+              onsubmit="return confirmSubmit(this, 'Postaviti {{ h.versionName }} ({{ h.versionCode }}) kao default verziju za sve uređaje - uključujući svaki novi uređaj koji se tek priključi?')">
           <button type="submit" class="btn btn-secondary btn-sm">Postavi kao default</button>
         </form>
         <form method="post" action="/versions/history/{{ h.id }}/delete"
-              onsubmit="return confirm('Obrisati ovaj zapis iz historije objava? Ovo ne dira ništa što je trenutno instalirano.')">
+              onsubmit="return confirmSubmit(this, 'Obrisati ovaj zapis iz historije objava? Ovo ne dira ništa što je trenutno instalirano.', true)">
           <button type="submit" class="btn btn-danger btn-sm">Obriši</button>
         </form>
       </span>

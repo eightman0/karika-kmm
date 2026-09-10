@@ -29,5 +29,40 @@
   <main class="{{ 'login-shell' if active_page == 'login' else '' }}">
     {% block content %}{% endblock %}
   </main>
+
+  <!-- Shared confirmation modal - replaces the native confirm() every dangerous/notable form
+       submit on this site used to show. Any <form onsubmit="return confirmSubmit(this, '...')">
+       reuses this single dialog instead of each page building its own. -->
+  <dialog id="confirm-modal" class="modal">
+    <div class="modal-body">
+      <h2>Potvrda</h2>
+      <p id="confirm-modal-message"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('confirm-modal').close()">Otkaži</button>
+        <button type="button" id="confirm-modal-confirm" class="btn btn-primary">Potvrdi</button>
+      </div>
+    </div>
+  </dialog>
+  <script>
+    // Drop-in replacement for onsubmit="return confirm('...')": shows the shared dialog above
+    // instead of a native confirm() popup, then re-submits the same form if confirmed. `danger`
+    // (optional) styles the confirm button red for destructive actions (factory reset, delete).
+    function confirmSubmit(form, message, danger) {
+      if (form.dataset.confirmed === 'true') {
+        delete form.dataset.confirmed;
+        return true;
+      }
+      document.getElementById('confirm-modal-message').textContent = message;
+      var confirmBtn = document.getElementById('confirm-modal-confirm');
+      confirmBtn.className = 'btn ' + (danger ? 'btn-danger' : 'btn-primary');
+      confirmBtn.onclick = function () {
+        document.getElementById('confirm-modal').close();
+        form.dataset.confirmed = 'true';
+        if (form.requestSubmit) form.requestSubmit(); else form.submit();
+      };
+      document.getElementById('confirm-modal').showModal();
+      return false;
+    }
+  </script>
 </body>
 </html>
