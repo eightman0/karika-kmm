@@ -7,6 +7,7 @@ import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import karika.distribucija.ba.launcher.LauncherActivity
+import karika.distribucija.ba.launcher.RemoteDebugUnlock
 import karika.distribucija.ba.launcher.RemoteMaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 import karika.distribucija.ba.launcher.diagnostics.LogUploadManager
@@ -18,7 +19,7 @@ import kotlinx.coroutines.launch
 /**
  * Delivers pushes the admin dashboard sends: an update-check nudge on publish, or a device
  * command (log pull, analytics pull, factory reset, maintenance toggle, open settings, ping,
- * reboot, launcher self-update).
+ * reboot, launcher self-update, temporary debug unlock).
  * Data-only messages (no `notification` payload), so Play Services wakes this process to hand
  * them to onMessageReceived() even if the process was frozen or not running - the FCM connection
  * lives in Play Services, not in our own process, so it isn't subject to the same cached-app
@@ -93,6 +94,20 @@ class KioskMessagingService : FirebaseMessagingService() {
                 ack(command, requestId, "ok", null)
                 UpdateScheduler.triggerLauncherSelfUpdate(applicationContext)
             }
+            CMD_DEBUG_UNLOCK -> runAcked(command, requestId) {
+                RemoteDebugUnlock.begin(applicationContext)
+                // Setting the flag alone only takes effect the next time LauncherActivity resumes
+                // on its own - could be indefinite with salesrep sitting in front. Force lock task
+                // off immediately: removing the current package from the allowlist is documented
+                // to stop lock task mode right away, regardless of which activity holds the pin.
+                val devicePolicyManager = getSystemService(DevicePolicyManager::class.java)
+                val admin = LauncherDeviceAdminReceiver.getReceiverComponentName(applicationContext)
+                devicePolicyManager.setLockTaskPackages(admin, arrayOf())
+            }
+            CMD_DEBUG_LOCK -> runAcked(command, requestId) {
+                RemoteDebugUnlock.end(applicationContext)
+                LauncherActivity.bringToFront(applicationContext)
+            }
             // The immediate heartbeat triggered above is the whole point of both of these - the
             // ack just confirms the push itself was received (and, for version_check, which
             // version was targeted).
@@ -144,6 +159,8 @@ class KioskMessagingService : FirebaseMessagingService() {
         private const val CMD_PING = "ping"
         private const val CMD_VERSION_CHECK = "version_check"
         private const val CMD_UPDATE_LAUNCHER = "update_launcher"
+        private const val CMD_DEBUG_UNLOCK = "debug_unlock"
+        private const val CMD_DEBUG_LOCK = "debug_lock"
 
         fun deviceTopic(deviceId: String) = "device_$deviceId"
     }

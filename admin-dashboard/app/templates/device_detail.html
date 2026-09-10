@@ -215,6 +215,21 @@
 </div>
 
 <div class="card">
+  <h2>ADB debug pristup</h2>
+  <p class="hint">Neki uređaji ne prikazuju dijalog za potvrdu ADB debagovanja dok je lock task (kiosk) aktivan. Ovo privremeno skida lock task da bi se dijalog mogao prikazati i potvrditi - uređaj se sam vraća u zaključan mod nakon 15 min, čak i ako se ne isključi ručno.</p>
+  <div class="log-actions">
+    <form method="post" action="/devices/{{ device.id }}/debug-unlock">
+      <input type="hidden" name="enable" value="on">
+      <button type="submit" class="btn btn-secondary">Otključaj privremeno (15 min)</button>
+    </form>
+    <form method="post" action="/devices/{{ device.id }}/debug-unlock">
+      <input type="hidden" name="enable" value="off">
+      <button type="submit" class="btn btn-secondary">Zaključaj sad</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
   <h2>Settings</h2>
   <p class="hint">Otvara Android Settings preko uređaja - com.android.settings je već na kiosk allowlist-i, tako da se otvara preko onoga što je trenutno na ekranu bez izlaska iz zaključanog moda.</p>
   <form method="post" action="/devices/{{ device.id }}/open-settings">

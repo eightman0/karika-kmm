@@ -4,6 +4,7 @@ from . import launcher_version_config, local_db
 from .firebase import bucket
 from .push import (
     send_analytics_request_all,
+    send_debug_unlock,
     send_factory_reset,
     send_log_request,
     send_maintenance,
@@ -141,6 +142,10 @@ def request_reboot(device_id: str) -> None:
 
 def request_maintenance(device_id: str, enable: bool) -> None:
     send_maintenance(_require_token(device_id), enable)
+
+
+def request_debug_unlock(device_id: str, enable: bool) -> None:
+    send_debug_unlock(_require_token(device_id), enable)
 
 
 def request_open_settings(device_id: str) -> None:

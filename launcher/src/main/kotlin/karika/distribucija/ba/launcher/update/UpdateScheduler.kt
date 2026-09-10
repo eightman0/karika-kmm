@@ -18,6 +18,7 @@ object UpdateScheduler {
     private const val PERIODIC_INTERVAL_MINUTES = 30L
 
     private const val LAUNCHER_SELF_UPDATE_WORK_NAME = "launcher_self_update"
+    private const val RELOCK_WORK_NAME = "debug_unlock_auto_relock"
 
     private val networkConstraints = Constraints.Builder()
         .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -63,5 +64,24 @@ object UpdateScheduler {
             ExistingWorkPolicy.REPLACE,
             request
         )
+    }
+
+    /** Fired on CMD_DEBUG_UNLOCK - see RemoteDebugUnlock/RelockWorker. No network constraint,
+     * this never touches the network, just an activity restart. */
+    fun scheduleAutoRelock(context: Context, delayMinutes: Long) {
+        val request = OneTimeWorkRequestBuilder<RelockWorker>()
+            .setInitialDelay(delayMinutes, TimeUnit.MINUTES)
+            .build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            RELOCK_WORK_NAME,
+            ExistingWorkPolicy.REPLACE,
+            request
+        )
+    }
+
+    /** Fired on CMD_DEBUG_LOCK, so a manual re-lock before the timer elapses does not leave a
+     * stale relock still pending (harmless if it fires anyway, but no reason to leave it around). */
+    fun cancelAutoRelock(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork(RELOCK_WORK_NAME)
     }
 }

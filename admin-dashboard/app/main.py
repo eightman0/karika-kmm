@@ -253,6 +253,15 @@ def maintenance_device(device_id: str, enable: str = Form(...)):
     return RedirectResponse(f"/devices/{device_id}?cmd_sent=maintenance_{enable}", status_code=303)
 
 
+@app.post("/devices/{device_id}/debug-unlock", dependencies=[require_login])
+def debug_unlock_device(device_id: str, enable: str = Form(...)):
+    try:
+        devices.request_debug_unlock(device_id, enable == "on")
+    except Exception as e:
+        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
+    return RedirectResponse(f"/devices/{device_id}?cmd_sent=debug_unlock_{enable}", status_code=303)
+
+
 @app.post("/devices/{device_id}/mapping", dependencies=[require_login])
 def set_device_mapping(device_id: str, customer_id: str = Form(""), site_id: str = Form("")):
     devices.set_device_mapping(device_id, customer_id.strip(), site_id.strip())

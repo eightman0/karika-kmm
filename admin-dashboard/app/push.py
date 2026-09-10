@@ -107,6 +107,13 @@ def send_maintenance(fcm_token: str, enable: bool) -> str:
     return send_command_to_token(fcm_token, "maintenance_on" if enable else "maintenance_off")
 
 
+def send_debug_unlock(fcm_token: str, enable: bool) -> str:
+    """Temporarily drops lock task (enable=True) so a technician can get through the one-time ADB
+    authorization dialog some OEM builds refuse to draw over a pinned kiosk activity - the device
+    re-locks itself after RemoteDebugUnlock.DURATION_MINUTES even without the explicit disable."""
+    return send_command_to_token(fcm_token, "debug_unlock" if enable else "debug_lock")
+
+
 def send_open_settings(fcm_token: str) -> str:
     return send_command_to_token(fcm_token, "open_settings")
 
