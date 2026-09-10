@@ -425,8 +425,14 @@ def get_device(device_id: str) -> dict | None:
 
 
 def delete_device(device_id: str) -> None:
+    """Deletes the device row plus everything else keyed on its id - analytics_events,
+    device_locations, command_log all otherwise survive the device forever, orphaned with no way
+    back to it once the row they reference is gone (no foreign key/cascade in sqlite here)."""
     with _connect() as conn:
         conn.execute("DELETE FROM devices WHERE id = ?", (device_id,))
+        conn.execute("DELETE FROM analytics_events WHERE device_id = ?", (device_id,))
+        conn.execute("DELETE FROM device_locations WHERE device_id = ?", (device_id,))
+        conn.execute("DELETE FROM command_log WHERE device_id = ?", (device_id,))
 
 
 def list_customer_ids() -> list[str]:
