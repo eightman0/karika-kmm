@@ -41,28 +41,25 @@ class LauncherKiosk(private val context: ComponentActivity) {
         setUpdatePolicy(enable)
         setAsHomeApp(enable)
         setKeyGuardEnabled(enable)
+        // Only this one, targeting this app's own package - it is not a "dangerous" runtime
+        // permission, so unlike ACCESS_FINE_LOCATION/CAMERA (see below for why those are no
+        // longer granted this way at all) it never touched the broken notifier code path.
         grantPermission(Manifest.permission.REQUEST_INSTALL_PACKAGES, context.packageName)
-        // Silently granted to salesrep, not this app - LocationSampleWorker runs there now (moved
-        // out of this Device Owner process after it started causing ANRs on real devices). Only
-        // the foreground pair, deliberately not ACCESS_BACKGROUND_LOCATION - it's a "dangerous"
-        // runtime permission, and granting any of those through Device Owner makes the OS try to
-        // notify the user "your admin granted you X" - on this device (Android 12/API 31) that
-        // notifier itself is broken (PermissionController: IllegalArgumentException, missing
-        // FLAG_IMMUTABLE/FLAG_MUTABLE on a PendingIntent - an OS/OEM bug, not ours) and crashes,
-        // which then froze the lock-task-pinned launcher's input, showing up there as an ANR. The
-        // grant itself still lands fine despite the crash (confirmed via dumpsys: granted=true,
-        // POLICY_FIXED) - grantPermission() below only calls the DPM API once, the first time a
-        // permission isn't granted yet, specifically to avoid re-triggering that broken notifier
-        // on every single onResume() the way calling it unconditionally did. LocationSampleWorker
-        // runs as a brief foreground service, which Android treats as foreground for location
-        // access, so it never needs the background grant at all.
-        grantPermission(Manifest.permission.ACCESS_FINE_LOCATION, KnownApps.PRIMARY.packageName)
-        grantPermission(Manifest.permission.ACCESS_COARSE_LOCATION, KnownApps.PRIMARY.packageName)
-        // Also silent, and for the same underlying reason as the location grants above: a normal
-        // runtime request for this crashed Permission Controller instead of showing its dialog,
-        // since it can't present itself over a lock-task-pinned kiosk activity. Salesrep no longer
-        // asks for it at all (see AttachmentPicker.takePhoto()) - it just expects to already have it.
-        grantPermission(Manifest.permission.CAMERA, KnownApps.PRIMARY.packageName)
+        // ACCESS_FINE_LOCATION/ACCESS_COARSE_LOCATION/CAMERA used to be silently granted to
+        // salesrep here via DevicePolicyManager.setPermissionGrantState() - that specific DPM call
+        // is what invokes PermissionController's AutoGrantPermissionsNotifier, and on this device
+        // (Android 12/API 31) that notifier itself is broken (IllegalArgumentException, missing
+        // FLAG_IMMUTABLE/FLAG_MUTABLE on a PendingIntent - an OS/OEM bug, not ours, confirmed
+        // against AOSP source and with no in-app workaround: install-time grants require a
+        // signature|installer permission a normal Device Owner app cannot hold either). Confirmed
+        // by direct observation too - a build from before these three grants existed did not
+        // crash, only builds that called setPermissionGrantState() for a dangerous permission did.
+        // Salesrep now requests these three itself, as a normal runtime permission dialog (see
+        // SalesRepApp/AttachmentPicker) - that goes through a completely different PermissionController
+        // code path than the DPM-driven one that crashes, and does not need any lock-task
+        // workaround either, since salesrep is always the current lock-task-allowed foreground app
+        // when it asks (unlike the ADB-authorization or battery-optimization dialogs, which needed
+        // a DIFFERENT app's system UI to draw over the launcher's own pinned activity).
         // A technician plugging in ADB via CMD_DEBUG_UNLOCK needs lock task actually OFF, not just
         // skipped once - every onResume() (screen touch, app switch, anything) calls back in here,
         // so without this check the very next resume would silently re-pin it before they get a

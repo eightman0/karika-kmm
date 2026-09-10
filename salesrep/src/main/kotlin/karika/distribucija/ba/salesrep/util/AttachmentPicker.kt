@@ -1,11 +1,14 @@
 package karika.distribucija.ba.salesrep.util
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import karika.distribucija.ba.salesrep.ui.camera.CameraCaptureActivity
 import java.io.File
@@ -44,19 +47,32 @@ class AttachmentPicker(
             onPicked(file.name, bytes)
         }
 
+    private val cameraPermissionLauncher =
+        fragment.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) launchCamera()
+        }
+
     /** Restricted to PDF, matching composeApp's `pickFile(mediaTypes = arrayOf("application/pdf"))`
      * default - the only way it's ever called from a message screen's attach sheet. */
     fun pickFile() = filePicker.launch(arrayOf("application/pdf"))
 
     fun pickPhoto() = photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
 
-    /** No runtime permission check/request here - a normal request crashed Permission Controller
-     * on a real device (it can't present its dialog over a lock-task-pinned kiosk activity), which
-     * then froze the launcher's input, showing up there as an ANR. CAMERA is silently granted by
-     * the launcher's Device Owner policies instead (see LauncherKiosk.setKioskPolicies()) - this
-     * app is never meant to ask for it. CameraCaptureActivity still re-checks on its own before
-     * actually opening the camera, as a safety net in case that grant hasn't landed yet. */
-    fun takePhoto() = launchCamera()
+    /** A plain runtime permission request - this app is always the current lock-task-allowed
+     * foreground app when it asks, so unlike a cross-app system dialog (ADB authorization,
+     * battery-optimization) this one has nothing to draw over and needs no special handling. Was
+     * briefly replaced with a silent Device-Owner grant instead, after mistakenly attributing a
+     * real-device Permission Controller crash to this call - the actual cause turned out to be a
+     * broken OS notifier specific to DevicePolicyManager.setPermissionGrantState() (see
+     * LauncherKiosk's own comment), unrelated to this normal request. */
+    fun takePhoto() {
+        val context = fragment.context ?: return
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            launchCamera()
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
 
     private fun launchCamera() {
         val context = fragment.context ?: return
