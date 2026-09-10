@@ -13,7 +13,6 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import karika.distribucija.ba.launcher.KnownApps
 import karika.distribucija.ba.launcher.LauncherActivity
-import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.RemoteDebugUnlock
 
 class LauncherKiosk(private val context: ComponentActivity) {
@@ -65,11 +64,8 @@ class LauncherKiosk(private val context: ComponentActivity) {
         // skipped once - every onResume() (screen touch, app switch, anything) calls back in here,
         // so without this check the very next resume would silently re-pin it before they get a
         // chance to authorize the debugger. See RemoteDebugUnlock's own doc comment for why this
-        // is time-bound rather than a plain toggle. MaintenanceState is checked for the same
-        // underlying reason: LauncherActivity's one-time salesrep battery-optimization request
-        // (see its own comment) enters maintenance for exactly as long as that system dialog is
-        // open - a cross-app dialog like that one cannot draw over a pinned kiosk activity either.
-        setLockTask(enable && !RemoteDebugUnlock.isActive(context) && !MaintenanceState.isActive(context))
+        // is time-bound rather than a plain toggle.
+        setLockTask(enable && !RemoteDebugUnlock.isActive(context))
     }
 
     /** Only calls into DPM when the permission isn't already granted - see the long comment above
