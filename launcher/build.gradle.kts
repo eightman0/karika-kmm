@@ -14,8 +14,8 @@ android {
         applicationId = "karika.distribucija.ba.launcher"
         minSdk = 30
         targetSdk = 37
-        versionCode = 14
-        versionName = "2.2"
+        versionCode = 15
+        versionName = "2.3"
         // Shared with salesrep (see its build.gradle.kts) - launcher and salesrep are signed with
         // different keys, so a signature-level permission can't gate the broadcasts between them.
         // This token is checked in code instead, the same way LogProvider now checks the calling

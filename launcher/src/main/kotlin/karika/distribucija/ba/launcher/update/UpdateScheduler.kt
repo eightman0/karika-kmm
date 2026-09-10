@@ -74,8 +74,7 @@ object UpdateScheduler {
     }
 
     /** A generic "force LauncherActivity to resume in N minutes so it re-evaluates lock task"
-     * mechanism - fired on CMD_DEBUG_UNLOCK (see RemoteDebugUnlock/RelockWorker) and reused by
-     * BatteryOptimizationPrompt's own grace period, for the same reason in both cases: something
+     * mechanism - fired on CMD_DEBUG_UNLOCK (see RemoteDebugUnlock/RelockWorker): something
      * intentionally left lock task off for a bounded window, and this is the backstop that
      * re-engages it even if nothing else happens to resume the launcher once that window is up.
      * No network constraint, this never touches the network, just an activity restart. */
