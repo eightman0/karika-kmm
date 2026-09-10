@@ -63,12 +63,16 @@ class LauncherKiosk(private val context: ComponentActivity) {
         // since it can't present itself over a lock-task-pinned kiosk activity. Salesrep no longer
         // asks for it at all (see AttachmentPicker.takePhoto()) - it just expects to already have it.
         grantPermission(Manifest.permission.CAMERA, KnownApps.PRIMARY.packageName)
+        // Also has to fire before lock task engages, same reasoning as the grants above - see
+        // BatteryOptimizationPrompt's own doc comment. Only true on the one resume where it
+        // actually shows a dialog; every resume after that it is a no-op returning false.
+        val askingBatteryPrompt = enable && BatteryOptimizationPrompt.askOnceIfNeeded(context)
         // A technician plugging in ADB via CMD_DEBUG_UNLOCK needs lock task actually OFF, not just
         // skipped once - every onResume() (screen touch, app switch, anything) calls back in here,
         // so without this check the very next resume would silently re-pin it before they get a
         // chance to authorize the debugger. See RemoteDebugUnlock's own doc comment for why this
         // is time-bound rather than a plain toggle.
-        setLockTask(enable && !RemoteDebugUnlock.isActive(context))
+        setLockTask(enable && !RemoteDebugUnlock.isActive(context) && !askingBatteryPrompt)
     }
 
     /** Only calls into DPM when the permission isn't already granted - see the long comment above

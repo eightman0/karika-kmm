@@ -8,7 +8,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import karika.distribucija.ba.launcher.provision.BatteryOptimizationPrompt
 import karika.distribucija.ba.launcher.provision.LauncherKiosk
 
 class LauncherActivity : AppCompatActivity() {
@@ -37,7 +36,6 @@ class LauncherActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         kiosk.enter()
-        BatteryOptimizationPrompt.askOnceIfNeeded(this)
         MaintenanceState.addChangeListener(this, maintenanceListener)
         RemoteMaintenanceState.addChangeListener(this, maintenanceListener)
         refreshMaintenanceState()
