@@ -37,7 +37,7 @@ class LauncherKiosk(private val context: ComponentActivity) {
     private fun setKioskPolicies(enable: Boolean) {
         setRestrictions(enable)
         enableStayOnWhilePluggedIn(enable)
-        disableScreenTimeout(enable)
+        setScreenTimeout(enable)
         setUpdatePolicy(enable)
         setAsHomeApp(enable)
         setKeyGuardEnabled(enable)
@@ -150,15 +150,17 @@ class LauncherKiosk(private val context: ComponentActivity) {
         }
     }
 
-    /** STAY_ON_WHILE_PLUGGED_IN only helps while charging - an unattended kiosk that's briefly
-     * off power (or on a device the emulator doesn't report as "plugged in" at all) would
-     * otherwise still hit the normal screen-off timeout and go dark with nothing to wake it,
-     * which looks indistinguishable from a dead/hung device to whoever's standing in front of it. */
-    private fun disableScreenTimeout(enable: Boolean) {
+    /** 5 min while active, not indefinite - long enough that a customer/employee glancing at it
+     * mid-use never sees it go dark (STAY_ON_WHILE_PLUGGED_IN only helps while actually charging),
+     * short enough that a genuinely idle kiosk still lets its screen sleep (helps with OLED
+     * burn-in over a long deployment). Doze can kick in sooner once the screen does sleep, but
+     * both apps are now exempted from it (see BatteryOptimizationPrompt), so that no longer risks
+     * the freeze a non-exempted, always-on kiosk hit before. */
+    private fun setScreenTimeout(enable: Boolean) {
         devicePolicyManager.setSystemSetting(
             adminComponentName,
             Settings.System.SCREEN_OFF_TIMEOUT,
-            if (enable) Int.MAX_VALUE.toString() else DEFAULT_SCREEN_OFF_TIMEOUT_MS.toString()
+            if (enable) KIOSK_SCREEN_OFF_TIMEOUT_MS.toString() else DEFAULT_SCREEN_OFF_TIMEOUT_MS.toString()
         )
     }
 
@@ -196,8 +198,10 @@ class LauncherKiosk(private val context: ComponentActivity) {
     }
 
     private companion object {
+        const val KIOSK_SCREEN_OFF_TIMEOUT_MS = 5 * 60_000
+
         // Android's own out-of-the-box default, restored on exit() so leaving kiosk mode doesn't
-        // leave the screen timeout disabled forever.
+        // leave the screen timeout stuck at the kiosk value forever.
         const val DEFAULT_SCREEN_OFF_TIMEOUT_MS = 30_000
     }
 }
