@@ -422,7 +422,8 @@ def provisioning_page(request: Request, generated: str | None = None):
             "wifi_ssid": saved.get("wifi_ssid") or "",
             "wifi_password": saved.get("wifi_password") or "",
             "wifi_security_type": saved.get("wifi_security_type") or "WPA",
-            "apk_download_url": saved.get("apk_download_url") or provisioning.DEFAULT_APK_DOWNLOAD_URL,
+            "apk_download_url": saved.get("apk_download_url") or "",
+            "resolved_apk_download_url": provisioning.resolve_apk_download_url(saved),
             "generated": bool(generated),
             "active_page": "provisioning",
         },
@@ -453,7 +454,7 @@ def generate_provisioning_qr(
         ssid,
         wifi_password if ssid else None,
         wifi_security_type if ssid else None,
-        url if url and url != provisioning.DEFAULT_APK_DOWNLOAD_URL else None,
+        url or None,
     )
     return RedirectResponse("/provisioning?generated=1", status_code=303)
 

@@ -17,11 +17,13 @@ import json
 
 import qrcode
 
-# Points at a fixed, manually-maintained Storage blob - separate from the versioned
-# launcher-releases/{version_code}.apk path the self-update/publish flow uses, so it drifts out of
-# sync unless kept up to date by hand. That drift is exactly what left a real device re-enrolling
-# onto a stale launcher build after every factory reset - this is now just the fallback default,
-# overridable per apk_download_url below so a stuck default doesn't need a code change to fix.
+from . import launcher_version_config
+
+# Bootstrap-only fallback, for the (normally never-hit) case where no launcher version has ever
+# been published yet - resolve_apk_download_url() below prefers whatever IS currently published
+# instead, specifically so this never has to be kept in sync by hand again. That manual-sync gap
+# is exactly what left a real device re-enrolling onto a stale launcher build after every factory
+# reset, since QR provisioning previously had nothing to do with what was actually published.
 DEFAULT_APK_DOWNLOAD_URL = (
     "https://firebasestorage.googleapis.com/v0/b/kiosklauncher-8c837.firebasestorage.app/o/"
     "launcher-releases%2Flauncher-release.apk?alt=media&token=62de3834-b43b-4d38-adaa-4774984878c4"
@@ -36,11 +38,25 @@ _FIXED_FIELDS = {
 }
 
 
+def resolve_apk_download_url(extras: dict) -> str:
+    """An explicit override (someone typed a URL in on the provisioning page) always wins - useful
+    for provisioning a one-off build without promoting it as the fleet's current version. Absent
+    that, follow whatever is currently published/activated for the launcher (same version
+    "Ažuriraj launcher"/self-update already sends everyone else), so provisioning can never drift
+    from it again. Only falls back to the hardcoded bootstrap URL if nothing has ever been
+    published at all."""
+    override = extras.get("apk_download_url")
+    if override:
+        return override
+    published_url = launcher_version_config.get_launcher_version()["apk_url"]
+    return published_url or DEFAULT_APK_DOWNLOAD_URL
+
+
 def build_payload(extras: dict | None) -> dict:
     extras = extras or {}
     payload = dict(_FIXED_FIELDS)
     payload["android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION"] = (
-        extras.get("apk_download_url") or DEFAULT_APK_DOWNLOAD_URL
+        resolve_apk_download_url(extras)
     )
 
     admin_extras = {}
