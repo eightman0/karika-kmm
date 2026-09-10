@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from . import local_db
+from . import apk_storage, launcher_version_config, local_db, version_config
 from .tz import LOCAL_TZ
 
 
@@ -38,7 +38,32 @@ def get_history(app: str, limit: int = 10) -> list[dict]:
 
 
 def delete_entry(entry_id: int) -> None:
+    """Deletes the history row, then the Storage blob it published too - but only once nothing
+    else still needs that exact app+version_code blob: another history row for the same reused
+    version_code (see get_history_entry_by_version's own comment on why that can happen), or the
+    live/staged pointer either app currently serves to devices. Deleting a blob still referenced by
+    one of those would 404 every device that fetches it next, including new ones being provisioned
+    right now."""
+    entry = local_db.get_history_entry_by_id(entry_id)
+    if not entry:
+        return
     local_db.delete_history_entry(entry_id)
+    if _blob_still_needed(entry["app"], entry["version_code"]):
+        return
+    apk_storage.delete_apk(entry["app"], str(entry["version_code"]))
+
+
+def _blob_still_needed(app: str, version_code: int) -> bool:
+    if local_db.get_history_entry_by_version(app, version_code):
+        return True
+    version_code_str = str(version_code)
+    if app == "launcher":
+        live = launcher_version_config.get_launcher_version()
+        staged = launcher_version_config.get_staged_launcher_version()
+    else:
+        live = version_config.get_kiosk_version()
+        staged = version_config.get_staged_version()
+    return version_code_str in (live["version_code"], staged["version_code"])
 
 
 def get_available_versions(app: str) -> list[dict]:

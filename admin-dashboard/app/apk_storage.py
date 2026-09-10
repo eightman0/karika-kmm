@@ -4,6 +4,7 @@ from urllib.parse import quote
 
 from androguard.core.apk import APK
 from fastapi import UploadFile
+from google.cloud.exceptions import NotFound
 from loguru import logger
 
 from .firebase import bucket
@@ -65,3 +66,15 @@ def upload_apk(apk_file: UploadFile, app: str = "salesrep") -> tuple[str, str, s
     )
 
     return download_url, sha256, str(version_code), version_name or ""
+
+
+def delete_apk(app: str, version_code: str) -> None:
+    """Removes the blob a publish uploaded to - see upload_apk's own comment for the path scheme.
+    Caller (version_history.delete_entry) is responsible for checking nothing else still points at
+    this exact version_code before calling this - the blob is shared by every history row and by
+    the live/staged pointer for the same app+version_code, not owned by any single row."""
+    path = f"{app}-releases/{version_code}.apk"
+    try:
+        bucket().blob(path).delete()
+    except NotFound:
+        pass
