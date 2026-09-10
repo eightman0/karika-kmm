@@ -146,12 +146,18 @@ class LauncherKiosk(private val context: ComponentActivity) {
     /** 5 min while active, not indefinite - long enough that a customer/employee glancing at it
      * mid-use never sees it go dark (STAY_ON_WHILE_PLUGGED_IN only helps while actually charging),
      * short enough that a genuinely idle kiosk still lets its screen sleep (helps with OLED
-     * burn-in over a long deployment). Doze can kick in sooner once the screen does sleep - the
-     * launcher's own AlarmManager heartbeat (UpdateScheduler.scheduleHeartbeatAlarm) bypasses that
-     * regardless, but salesrep has no such backstop and is not Doze-whitelisted (see git history
-     * for why the interactive battery-optimization prompt this used to rely on was dropped) -
-     * `adb shell dumpsys deviceidle whitelist +karika.distribucija.ba.salesrep` during
-     * provisioning is the only way to cover that gap for now. */
+     * burn-in over a long deployment). Doze can kick in sooner once the screen does sleep - and on
+     * this OEM's build, NEITHER app ends up on the Doze/battery-optimization whitelist on its own,
+     * Device Owner or not (confirmed via `adb shell dumpsys deviceidle whitelist` coming back
+     * without either package listed at all, on a real device - the "Device Owner apps are
+     * automatically exempt" claim in AOSP docs does not hold here). That is what was actually
+     * behind a real device going an hour with no heartbeat and no push getting through - not just
+     * salesrep's gap this comment used to call out alone. Neither app has a working in-app way to
+     * self-exempt without either the interactive Settings dialog (dropped for salesrep - see git
+     * history for the PermissionController/crash history, unrelated to this specific dialog but
+     * still not brought back by choice) or a manual step during provisioning:
+     * `adb shell dumpsys deviceidle whitelist +karika.distribucija.ba.launcher` and the same for
+     * `...salesrep`, is the only way to cover this gap for now, for both packages. */
     private fun setScreenTimeout(enable: Boolean) {
         devicePolicyManager.setSystemSetting(
             adminComponentName,
