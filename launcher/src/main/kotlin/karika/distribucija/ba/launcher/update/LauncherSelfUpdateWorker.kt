@@ -12,6 +12,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
+import karika.distribucija.ba.logging.AppLogger
 
 /**
  * Downloads and silently installs the launcher's own latest resolved version - published/staged
@@ -40,6 +41,7 @@ import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 class LauncherSelfUpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        AppLogger.i(TAG, "doWork start")
         val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext), app = "launcher")
         if (!latest.isPublished) {
             Log.i(TAG, "No launcher version published yet, nothing to install")
@@ -49,23 +51,34 @@ class LauncherSelfUpdateWorker(context: Context, params: WorkerParameters) : Cor
         val installedVersionCode = installedVersionCode()
         if (latest.versionCode <= installedVersionCode) {
             Log.i(TAG, "Launcher already on version code $installedVersionCode, nothing to install")
+            AppLogger.i(TAG, "Already on version code $installedVersionCode, target was ${latest.versionCode} - nothing to install")
             return Result.success()
         }
+        AppLogger.i(TAG, "Installing launcher ${latest.versionName} (${latest.versionCode}), currently $installedVersionCode")
 
         // Same reasoning as UpdateWorker's own setForeground() call - without it, this process
         // (not visibly in front while salesrep is) is eligible for the cached-app freezer mid-
         // download.
         setForeground(createForegroundInfo())
 
-        val apkFile = ApkDownloader.download(applicationContext, latest.apkUrl) ?: return Result.retry()
+        val apkFile = ApkDownloader.download(applicationContext, latest.apkUrl) ?: run {
+            AppLogger.e(TAG, "Download failed for launcher ${latest.versionName}")
+            return Result.retry()
+        }
         if (!ApkChecksum.verifySha256(apkFile, latest.apkSha256)) {
             Log.e(TAG, "Checksum mismatch for downloaded launcher APK (${latest.versionName}), discarding")
+            AppLogger.e(TAG, "Checksum mismatch for downloaded launcher APK (${latest.versionName}), discarding")
             apkFile.delete()
             return Result.retry()
         }
 
+        AppLogger.i(TAG, "Committing install session for launcher ${latest.versionName} - process will be killed shortly if this succeeds")
         val installed = ApkInstaller.install(applicationContext, apkFile)
         apkFile.delete()
+        // If installed is true, this line logging is racing the system killing this process to
+        // apply the update - it may or may not make it to disk before that happens. See
+        // BootBroadcastReceiver's MY_PACKAGE_REPLACED handling for what runs after the kill.
+        AppLogger.i(TAG, "ApkInstaller.install returned $installed")
         return if (installed) Result.success() else Result.retry()
     }
 
@@ -100,6 +113,9 @@ class LauncherSelfUpdateWorker(context: Context, params: WorkerParameters) : Cor
     companion object {
         private const val TAG = "LauncherSelfUpdate"
         private const val NOTIFICATION_CHANNEL_ID = "launcher_update_in_progress"
-        private const val NOTIFICATION_ID = 2
+
+        /** Also read by BootBroadcastReceiver, to cancel this if it's still showing once the
+         * updated process comes back up - see that class's own comment. */
+        const val NOTIFICATION_ID = 2
     }
 }

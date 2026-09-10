@@ -9,6 +9,7 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import karika.distribucija.ba.logging.AppLogger
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
 import java.io.FileInputStream
@@ -38,6 +39,7 @@ object ApkInstaller {
             sessionId = packageInstaller.createSession(params)
         } catch (e: Exception) {
             Log.e(TAG, "Could not create install session", e)
+            AppLogger.e(TAG, "Could not create install session", e)
             cont.resumeWith(Result.success(false))
             return@suspendCancellableCoroutine
         }
@@ -50,8 +52,10 @@ object ApkInstaller {
                 val message = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
                 if (status == PackageInstaller.STATUS_SUCCESS) {
                     Log.i(TAG, "Install succeeded")
+                    AppLogger.i(TAG, "Install succeeded for session $sessionId")
                 } else {
                     Log.e(TAG, "Install failed: ${statusName(status)} ($status), message=$message")
+                    AppLogger.e(TAG, "Install failed: ${statusName(status)} ($status), message=$message")
                 }
                 if (cont.isActive) cont.resumeWith(Result.success(status == PackageInstaller.STATUS_SUCCESS))
             }
@@ -84,6 +88,7 @@ object ApkInstaller {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Install session failed", e)
+            AppLogger.e(TAG, "Install session failed", e)
             runCatching { context.unregisterReceiver(receiver) }
             runCatching { packageInstaller.abandonSession(sessionId) }
             if (cont.isActive) cont.resumeWith(Result.success(false))

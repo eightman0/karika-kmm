@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import karika.distribucija.ba.launcher.provision.LauncherKiosk
+import karika.distribucija.ba.logging.AppLogger
 
 class LauncherActivity : AppCompatActivity() {
     private lateinit var kiosk: LauncherKiosk
@@ -35,6 +36,7 @@ class LauncherActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        AppLogger.i(TAG, "onResume")
         kiosk.enter()
         MaintenanceState.addChangeListener(this, maintenanceListener)
         RemoteMaintenanceState.addChangeListener(this, maintenanceListener)
@@ -75,11 +77,13 @@ class LauncherActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val TAG = "LauncherActivity"
         private const val SPAN_COUNT = 4
 
         /** Used remotely (maintenance-on) to pull the launcher back over whatever's currently on
          * top, without waiting for it to resume naturally (e.g. salesrep crashing/finishing). */
         fun bringToFront(context: Context) {
+            AppLogger.i(TAG, "bringToFront")
             val intent = Intent(context, LauncherActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
