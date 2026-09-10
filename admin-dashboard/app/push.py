@@ -20,6 +20,16 @@ logger = logging.getLogger(__name__)
 
 BROADCAST_TOPIC = "kiosk-updates"
 
+# Every message here is a data-only payload (no `notification` block), which FCM defaults to
+# "normal" priority - Doze/App Standby then holds it until the device's next maintenance window,
+# which spaces out further the longer a device sits idle (30 min, then increasingly longer gaps).
+# A real device was seen going quiet for exactly that reason: its own AlarmManager heartbeat kept
+# reporting fine (outbound, never depends on FCM), but inbound commands (ping, reboot...) stopped
+# arriving after a while. "high" priority is FCM/Doze's own supported exemption for exactly this -
+# time-sensitive commands that need to wake the device now, not at the next window - not an OEM
+# workaround like the battery-optimization/autostart fights elsewhere in this codebase.
+_HIGH_PRIORITY = messaging.AndroidConfig(priority="high")
+
 
 def _device_topic(device_id: str) -> str:
     return f"device_{device_id}"
@@ -49,6 +59,7 @@ def send_version_check_all(version_code: str) -> None:
             messaging.Message(
                 topic=BROADCAST_TOPIC,
                 data={"command": "version_check", "versionCode": str(version_code)},
+                android=_HIGH_PRIORITY,
             )
         )
     except Exception:
@@ -62,7 +73,9 @@ def send_analytics_request_all() -> None:
     try:
         init_messaging()
         messaging.send(
-            messaging.Message(topic=BROADCAST_TOPIC, data={"command": "analytics_request"})
+            messaging.Message(
+                topic=BROADCAST_TOPIC, data={"command": "analytics_request"}, android=_HIGH_PRIORITY
+            )
         )
     except Exception:
         logger.exception("Failed to send FCM analytics-request broadcast")
@@ -76,6 +89,7 @@ def send_log_request(device_id: str, requested_at: str) -> str:
             messaging.Message(
                 topic=_device_topic(device_id),
                 data={"command": "log_request", "requestId": request_id, "requestedAt": requested_at},
+                android=_HIGH_PRIORITY,
             )
         )
     except Exception:
@@ -91,7 +105,7 @@ def send_command_to_token(fcm_token: str, command: str, extra: dict | None = Non
     data = {"command": command, "requestId": request_id}
     if extra:
         data.update({k: str(v) for k, v in extra.items()})
-    messaging.send(messaging.Message(token=fcm_token, data=data))
+    messaging.send(messaging.Message(token=fcm_token, data=data, android=_HIGH_PRIORITY))
     return request_id
 
 
