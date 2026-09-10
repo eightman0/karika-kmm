@@ -13,6 +13,7 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import karika.distribucija.ba.launcher.KnownApps
 import karika.distribucija.ba.launcher.LauncherActivity
+import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.RemoteDebugUnlock
 
 class LauncherKiosk(private val context: ComponentActivity) {
@@ -64,8 +65,12 @@ class LauncherKiosk(private val context: ComponentActivity) {
         // skipped once - every onResume() (screen touch, app switch, anything) calls back in here,
         // so without this check the very next resume would silently re-pin it before they get a
         // chance to authorize the debugger. See RemoteDebugUnlock's own doc comment for why this
-        // is time-bound rather than a plain toggle.
-        setLockTask(enable && !RemoteDebugUnlock.isActive(context))
+        // is time-bound rather than a plain toggle. MaintenanceState is checked for the same
+        // underlying reason: LauncherActivity's one-time battery-optimization request for this
+        // app's own package (see its own comment) enters maintenance for exactly as long as that
+        // system dialog is open - a cross-app dialog like that cannot draw over a pinned kiosk
+        // activity either.
+        setLockTask(enable && !RemoteDebugUnlock.isActive(context) && !MaintenanceState.isActive(context))
     }
 
     /** Only calls into DPM when the permission isn't already granted - see the long comment above
@@ -151,13 +156,13 @@ class LauncherKiosk(private val context: ComponentActivity) {
      * Device Owner or not (confirmed via `adb shell dumpsys deviceidle whitelist` coming back
      * without either package listed at all, on a real device - the "Device Owner apps are
      * automatically exempt" claim in AOSP docs does not hold here). That is what was actually
-     * behind a real device going an hour with no heartbeat and no push getting through - not just
-     * salesrep's gap this comment used to call out alone. Neither app has a working in-app way to
-     * self-exempt without either the interactive Settings dialog (dropped for salesrep - see git
-     * history for the PermissionController/crash history, unrelated to this specific dialog but
-     * still not brought back by choice) or a manual step during provisioning:
-     * `adb shell dumpsys deviceidle whitelist +karika.distribucija.ba.launcher` and the same for
-     * `...salesrep`, is the only way to cover this gap for now, for both packages. */
+     * behind a real device going an hour with no heartbeat and no push getting through. This app
+     * now self-exempts via LauncherActivity's own interactive Settings dialog (see its own
+     * comment) - salesrep still has no such path (dropped it entirely, see git history for the
+     * PermissionController/crash episode that prompted that, unrelated to this specific dialog but
+     * still not brought back by choice), so `adb shell dumpsys deviceidle whitelist
+     * +karika.distribucija.ba.salesrep` during provisioning remains the only way to cover that
+     * half of the gap. */
     private fun setScreenTimeout(enable: Boolean) {
         devicePolicyManager.setSystemSetting(
             adminComponentName,

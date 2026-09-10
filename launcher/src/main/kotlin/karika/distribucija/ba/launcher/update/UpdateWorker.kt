@@ -11,6 +11,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import karika.distribucija.ba.launcher.KnownApps
+import karika.distribucija.ba.launcher.LauncherBatteryOptimization
 import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceHeartbeat
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
@@ -23,6 +24,14 @@ import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result = try {
+        // Waits for the launcher's own one-time battery-optimization dialog (see LauncherActivity)
+        // to be resolved before ever installing salesrep for the first time - otherwise this could
+        // start (and MaintenanceState.begin()) while that dialog is still open, racing the same
+        // maintenance-state flag it uses. WorkManager's linear backoff retries this within seconds,
+        // not minutes, so a technician still looking at the dialog barely notices the delay.
+        if (!LauncherBatteryOptimization.isResolved(applicationContext)) {
+            return Result.retry()
+        }
         val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext), app = "salesrep")
         val targetPackage = KnownApps.PRIMARY.packageName
         val (installedVersionCode, installedVersionName) = DeviceHeartbeat.installedVersion(applicationContext, targetPackage)

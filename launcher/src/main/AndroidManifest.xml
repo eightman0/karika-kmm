@@ -26,6 +26,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Lets LauncherActivity fire ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS for this app's own
+         package - a normal permission, no runtime prompt needed to hold it, separate from the
+         system dialog the intent itself shows. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!-- For HeartbeatAlarmReceiver's setExactAndAllowWhileIdle() - AlarmManager, not JobScheduler,
          deliberately: a real device was found with JobScheduler's own thermal-status restriction
          stuck, silently blocking every WorkManager-based path (including the heartbeat) for over

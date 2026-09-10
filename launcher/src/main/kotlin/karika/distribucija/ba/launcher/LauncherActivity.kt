@@ -3,8 +3,12 @@ package karika.distribucija.ba.launcher
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +24,20 @@ class LauncherActivity : AppCompatActivity() {
      * showing "maintenance" if it ended while this Activity was already resumed and on screen. */
     private val maintenanceListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> refreshMaintenanceState() }
+
+    /** One-time, for THIS app's own package only - not salesrep's, see git history for why that
+     * one was dropped entirely. Fires as early as the very first onResume() after provisioning,
+     * with no dependency on salesrep being installed yet (unlike the old salesrep version), and
+     * gates UpdateWorker's first-ever salesrep install (see LauncherBatteryOptimization) so that
+     * install does not start while the technician is still looking at this dialog. The result
+     * callback fires once they return from Settings (Allow or Deny, does not matter which) - that
+     * is what marks it resolved and ends maintenance, not a timer. */
+    private val batteryOptimizationLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            LauncherBatteryOptimization.markResolved(this)
+            MaintenanceState.end(this)
+            refreshMaintenanceState()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +55,11 @@ class LauncherActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         AppLogger.i(TAG, "onResume")
+        // Must run before kiosk.enter(): when it does begin maintenance, that has to happen
+        // before kiosk.enter() re-engages lock task below, in this same pass, or the Settings
+        // dialog can't draw over the pinned kiosk activity. Retried on every onResume() (not just
+        // once in onCreate()) so a resume that lands before it's resolved does not skip it.
+        maybeRequestOwnBatteryExemption()
         kiosk.enter()
         MaintenanceState.addChangeListener(this, maintenanceListener)
         RemoteMaintenanceState.addChangeListener(this, maintenanceListener)
@@ -62,6 +85,30 @@ class LauncherActivity : AppCompatActivity() {
         if (!inMaintenance) {
             launchApp(KnownApps.PRIMARY.packageName, userInitiated = false)
         }
+    }
+
+    /** See batteryOptimizationLauncher's own doc comment. Guarded by LauncherBatteryOptimization's
+     * resolved flag (one-shot) and by MaintenanceState.isActive() - the latter so a second
+     * onResume() landing before the technician has responded (screen touch, etc.) does not launch
+     * a second copy of the same system dialog on top of the first. */
+    private fun maybeRequestOwnBatteryExemption() {
+        if (LauncherBatteryOptimization.isResolved(this)) return
+        if (MaintenanceState.isActive(this)) return
+        val powerManager = getSystemService(PowerManager::class.java)
+        if (powerManager?.isIgnoringBatteryOptimizations(packageName) == true) {
+            LauncherBatteryOptimization.markResolved(this)
+            return
+        }
+
+        MaintenanceState.begin(this)
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+            data = Uri.parse("package:$packageName")
+        }
+        runCatching { batteryOptimizationLauncher.launch(intent) }
+            .onFailure {
+                LauncherBatteryOptimization.markResolved(this)
+                MaintenanceState.end(this)
+            }
     }
 
     @Suppress("DEPRECATION")
