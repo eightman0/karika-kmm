@@ -3,8 +3,12 @@ package karika.distribucija.ba.launcher
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +24,26 @@ class LauncherActivity : AppCompatActivity() {
     private val maintenanceListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> refreshMaintenanceState() }
 
+    /** One-time (per install), on launcher startup: asks for salesrep's battery-optimization
+     * exemption (see LocationSampleWorker/BatteryOptimizationPrompt's old removed comment for why
+     * salesrep needs it and this app does not) as a normal Settings dialog, not a silent Device
+     * Owner grant - that specific DPM call is what crashes Permission Controller on a real device
+     * (see LauncherKiosk's own comment).
+     *
+     * Wrapped in maintenance mode instead of a guessed grace period: entering it hides the kiosk
+     * grid and skips auto-launching salesrep (see refreshMaintenanceState()), and LauncherKiosk
+     * skips re-engaging lock task for as long as it stays active, so the dialog gets the screen
+     * for exactly as long as it is actually open - no race with a relaunch landing mid-interaction
+     * the way a fixed timer had. The result callback fires once the technician returns from
+     * Settings (Allow or Deny, does not matter which), and that is what ends maintenance - not a
+     * timer.
+     */
+    private val batteryOptimizationLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            MaintenanceState.end(this)
+            refreshMaintenanceState()
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         kiosk = LauncherKiosk(this)
@@ -31,6 +55,7 @@ class LauncherActivity : AppCompatActivity() {
         appGrid.adapter = AppTileAdapter(KnownApps.ALL, packageManager) { app ->
             launchApp(app.packageName, userInitiated = true)
         }
+        maybeRequestSalesrepBatteryExemption()
     }
 
     override fun onResume() {
@@ -62,6 +87,26 @@ class LauncherActivity : AppCompatActivity() {
         }
     }
 
+    /** See batteryOptimizationLauncher's own doc comment for the full reasoning. Guarded by a
+     * persisted flag so this only ever fires once per install, and by isIgnoringBatteryOptimizations
+     * so it does nothing at all once salesrep already has the exemption (e.g. granted manually via
+     * `adb shell dumpsys deviceidle whitelist`) - no dialog shown, no maintenance entered. */
+    private fun maybeRequestSalesrepBatteryExemption() {
+        val prefs = getSharedPreferences(BATTERY_PROMPT_PREFS, MODE_PRIVATE)
+        if (prefs.getBoolean(BATTERY_PROMPT_KEY_ASKED, false)) return
+        val targetPackage = KnownApps.PRIMARY.packageName
+        val powerManager = getSystemService(PowerManager::class.java)
+        if (powerManager?.isIgnoringBatteryOptimizations(targetPackage) == true) return
+        prefs.edit().putBoolean(BATTERY_PROMPT_KEY_ASKED, true).apply()
+
+        MaintenanceState.begin(this)
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+            data = Uri.parse("package:$targetPackage")
+        }
+        runCatching { batteryOptimizationLauncher.launch(intent) }
+            .onFailure { MaintenanceState.end(this) }
+    }
+
     @Suppress("DEPRECATION")
     private fun launchApp(packageName: String, userInitiated: Boolean) {
         val launchIntent = packageManager.getLaunchIntentForPackage(packageName) ?: return
@@ -76,6 +121,8 @@ class LauncherActivity : AppCompatActivity() {
 
     companion object {
         private const val SPAN_COUNT = 4
+        private const val BATTERY_PROMPT_PREFS = "battery_optimization_prompt"
+        private const val BATTERY_PROMPT_KEY_ASKED = "asked"
 
         /** Used remotely (maintenance-on) to pull the launcher back over whatever's currently on
          * top, without waiting for it to resume naturally (e.g. salesrep crashing/finishing). */
