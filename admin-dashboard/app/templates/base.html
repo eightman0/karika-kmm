@@ -8,6 +8,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css?v={{ asset_version }}">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="icon" href="/static/icons/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#161826">
+  <!-- iOS ignores manifest.webmanifest for "Add to Home Screen" - these are what actually make it
+       open standalone (no Safari chrome) instead of just bookmarking the page. -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Karika Ops">
   {% block head %}{% endblock %}
 </head>
 <body>
@@ -87,6 +96,13 @@
       };
       document.getElementById('confirm-modal').showModal();
       return false;
+    }
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js');
+      });
     }
   </script>
 </body>

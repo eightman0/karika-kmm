@@ -3,7 +3,7 @@ import time
 from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -60,6 +60,14 @@ def _device_action_redirect(
 @app.get("/")
 def root():
     return RedirectResponse("/devices")
+
+
+@app.get("/sw.js")
+def service_worker():
+    # Served from the root, not /static/sw.js - a service worker's default scope is capped at its
+    # own directory, and the manifest's start_url (/devices) needs to fall under that scope for
+    # Chrome/Android to consider this site installable at all.
+    return FileResponse("app/static/sw.js", media_type="application/javascript")
 
 
 @app.get("/login")

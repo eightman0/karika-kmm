@@ -1,0 +1,16 @@
+{
+  "name": "Karika Ops",
+  "short_name": "Karika Ops",
+  "description": "Flota, verzije i logovi kiosk uređaja",
+  "start_url": "/devices",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#161826",
+  "theme_color": "#161826",
+  "icons": [
+    { "src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/static/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
