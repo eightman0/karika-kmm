@@ -34,6 +34,24 @@ APP = "salesrep"  # the payload app - launcher is versioned/published the same w
 # launcher_version_config.py), just through separate parallel tables/routes, not this constant
 
 
+def _device_action_redirect(
+    device_id: str, origin: str, q: str, toast: str, detail_qs: str = ""
+) -> RedirectResponse:
+    """Where a per-device action route sends the admin back to. Triggered from the devices list
+    (a hidden origin=list field on that row's form, see devices.html) it stays on the list with a
+    snackbar (base.html reads the `toast` query param) instead of navigating into the device's own
+    page - the whole point of this being separate from the "detail" case below, which keeps its
+    existing query-string banner (`detail_qs`, e.g. "cmd_sent=reboot") unchanged."""
+    if origin == "list":
+        params = [f"q={quote(q)}"] if q else []
+        params.append(f"toast={quote(toast)}")
+        return RedirectResponse(f"/devices?{'&'.join(params)}", status_code=303)
+    url = f"/devices/{device_id}"
+    if detail_qs:
+        url += f"?{detail_qs}"
+    return RedirectResponse(url, status_code=303)
+
+
 @app.get("/")
 def root():
     return RedirectResponse("/devices")
@@ -65,13 +83,7 @@ def logout(request: Request):
 
 
 @app.get("/devices", dependencies=[require_login])
-def devices_page(
-    request: Request,
-    q: str = "",
-    analytics_sent: str | None = None,
-    update_sent: str | None = None,
-    update_launcher_sent: str | None = None,
-):
+def devices_page(request: Request, q: str = ""):
     all_devices = devices.list_devices()
     filtered = devices.filter_devices(all_devices, q)
     latest_salesrep_code = version_config.highest_known_version_code()
@@ -86,41 +98,44 @@ def devices_page(
             "available_versions": version_history.get_available_versions(APP),
             "available_launcher_versions": version_history.get_available_versions("launcher"),
             "active_page": "devices",
-            "analytics_sent": bool(analytics_sent),
-            "update_sent": update_sent,
-            "update_launcher_sent": update_launcher_sent,
         },
     )
 
 
 @app.post("/devices/analytics-request", dependencies=[require_login])
-def request_analytics_all():
+def request_analytics_all(q: str = Form("")):
     devices.request_analytics_all()
-    return RedirectResponse("/devices?analytics_sent=1", status_code=303)
+    return _device_action_redirect("", "list", q, "Zahtjev za analitiku poslan svim uređajima.")
 
 
 @app.post("/devices/update-selected", dependencies=[require_login])
 def update_selected_devices(
-    request: Request, device_ids: list[str] = Form(default=[]), version_code: str = Form("")
+    request: Request, device_ids: list[str] = Form(default=[]), version_code: str = Form(""),
+    q: str = Form(""),
 ):
     if not device_ids:
         return RedirectResponse("/devices", status_code=303)
     devices.request_update_check_bulk(
         device_ids, version_code or None, request.session.get("username", "?")
     )
-    return RedirectResponse(f"/devices?update_sent={len(device_ids)}", status_code=303)
+    return _device_action_redirect(
+        "", "list", q, f"Zahtjev za update poslan na {len(device_ids)} izabrana uređaja."
+    )
 
 
 @app.post("/devices/update-launcher-selected", dependencies=[require_login])
 def update_launcher_selected_devices(
-    request: Request, device_ids: list[str] = Form(default=[]), version_code: str = Form("")
+    request: Request, device_ids: list[str] = Form(default=[]), version_code: str = Form(""),
+    q: str = Form(""),
 ):
     if not device_ids:
         return RedirectResponse("/devices", status_code=303)
     devices.request_update_launcher_bulk(
         device_ids, version_code or None, request.session.get("username", "?")
     )
-    return RedirectResponse(f"/devices?update_launcher_sent={len(device_ids)}", status_code=303)
+    return _device_action_redirect(
+        "", "list", q, f"Zahtjev za update launcher-a poslan na {len(device_ids)} izabrana uređaja."
+    )
 
 
 @app.get("/devices/{device_id}", dependencies=[require_login])
@@ -175,82 +190,93 @@ def device_detail_page(
 
 
 @app.post("/devices/{device_id}/request-logs", dependencies=[require_login])
-def request_logs(device_id: str):
+def request_logs(device_id: str, origin: str = Form("detail"), q: str = Form("")):
     devices.request_logs(device_id)
-    return RedirectResponse(f"/devices/{device_id}", status_code=303)
+    return _device_action_redirect(device_id, origin, q, "Zahtjev za nove logove poslan.")
 
 
 @app.post("/devices/{device_id}/delete", dependencies=[require_login])
-def delete_device(device_id: str):
+def delete_device(device_id: str, q: str = Form("")):
     devices.delete_device(device_id)
-    return RedirectResponse("/devices", status_code=303)
+    return _device_action_redirect(device_id, "list", q, f"Uređaj {device_id} obrisan.")
 
 
 @app.post("/devices/{device_id}/factory-reset", dependencies=[require_login])
-def factory_reset_device(device_id: str):
+def factory_reset_device(device_id: str, origin: str = Form("detail"), q: str = Form("")):
     try:
         devices.request_factory_reset(device_id)
     except Exception as e:
-        return RedirectResponse(f"/devices/{device_id}?reset_error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/devices/{device_id}?reset_sent=1", status_code=303)
+        return _device_action_redirect(device_id, origin, q, f"Greška: {e}", f"reset_error={quote(str(e))}")
+    return _device_action_redirect(device_id, origin, q, "Zahtjev za factory reset poslan.", "reset_sent=1")
 
 
 @app.post("/devices/{device_id}/update", dependencies=[require_login])
-def update_device(device_id: str, request: Request, version_code: str = Form("")):
+def update_device(
+    device_id: str, request: Request, version_code: str = Form(""),
+    origin: str = Form("detail"), q: str = Form(""),
+):
     try:
         devices.request_update_check(
             device_id, version_code or None, request.session.get("username", "?")
         )
     except Exception as e:
-        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/devices/{device_id}?cmd_sent=update", status_code=303)
+        return _device_action_redirect(device_id, origin, q, f"Greška: {e}", f"cmd_error={quote(str(e))}")
+    return _device_action_redirect(device_id, origin, q, "Zahtjev za update poslan.", "cmd_sent=update")
 
 
 @app.post("/devices/{device_id}/reboot", dependencies=[require_login])
-def reboot_device(device_id: str):
+def reboot_device(device_id: str, origin: str = Form("detail"), q: str = Form("")):
     try:
         devices.request_reboot(device_id)
     except Exception as e:
-        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/devices/{device_id}?cmd_sent=reboot", status_code=303)
+        return _device_action_redirect(device_id, origin, q, f"Greška: {e}", f"cmd_error={quote(str(e))}")
+    return _device_action_redirect(device_id, origin, q, "Restart poslan.", "cmd_sent=reboot")
 
 
 @app.post("/devices/{device_id}/open-settings", dependencies=[require_login])
-def open_settings_device(device_id: str):
+def open_settings_device(device_id: str, origin: str = Form("detail"), q: str = Form("")):
     try:
         devices.request_open_settings(device_id)
     except Exception as e:
-        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/devices/{device_id}?cmd_sent=open_settings", status_code=303)
+        return _device_action_redirect(device_id, origin, q, f"Greška: {e}", f"cmd_error={quote(str(e))}")
+    return _device_action_redirect(device_id, origin, q, "Komanda za Settings poslana.", "cmd_sent=open_settings")
 
 
 @app.post("/devices/{device_id}/update-launcher", dependencies=[require_login])
-def update_launcher_device(device_id: str, request: Request, version_code: str = Form("")):
+def update_launcher_device(
+    device_id: str, request: Request, version_code: str = Form(""),
+    origin: str = Form("detail"), q: str = Form(""),
+):
     try:
         devices.request_update_launcher(
             device_id, version_code or None, request.session.get("username", "?")
         )
     except Exception as e:
-        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/devices/{device_id}?cmd_sent=update_launcher", status_code=303)
+        return _device_action_redirect(device_id, origin, q, f"Greška: {e}", f"cmd_error={quote(str(e))}")
+    return _device_action_redirect(
+        device_id, origin, q, "Zahtjev za update launcher-a poslan.", "cmd_sent=update_launcher"
+    )
 
 
 @app.post("/devices/{device_id}/ping", dependencies=[require_login])
-def ping_device(device_id: str):
+def ping_device(device_id: str, origin: str = Form("detail"), q: str = Form("")):
     try:
         devices.request_ping(device_id)
     except Exception as e:
-        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/devices/{device_id}?cmd_sent=ping", status_code=303)
+        return _device_action_redirect(device_id, origin, q, f"Greška: {e}", f"cmd_error={quote(str(e))}")
+    return _device_action_redirect(device_id, origin, q, "Provjera statusa poslana.", "cmd_sent=ping")
 
 
 @app.post("/devices/{device_id}/maintenance", dependencies=[require_login])
-def maintenance_device(device_id: str, enable: str = Form(...)):
+def maintenance_device(
+    device_id: str, enable: str = Form(...), origin: str = Form("detail"), q: str = Form(""),
+):
     try:
         devices.request_maintenance(device_id, enable == "on")
     except Exception as e:
-        return RedirectResponse(f"/devices/{device_id}?cmd_error={quote(str(e))}", status_code=303)
-    return RedirectResponse(f"/devices/{device_id}?cmd_sent=maintenance_{enable}", status_code=303)
+        return _device_action_redirect(device_id, origin, q, f"Greška: {e}", f"cmd_error={quote(str(e))}")
+    toast = "Maintenance uključen." if enable == "on" else "Maintenance isključen."
+    return _device_action_redirect(device_id, origin, q, toast, f"cmd_sent=maintenance_{enable}")
 
 
 @app.post("/devices/{device_id}/debug-unlock", dependencies=[require_login])

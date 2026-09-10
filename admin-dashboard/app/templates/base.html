@@ -30,6 +30,31 @@
     {% block content %}{% endblock %}
   </main>
 
+  <!-- Transient confirmation toast for actions that should not navigate away from the current
+       page (e.g. a per-row action triggered from the devices list) - a `?toast=...` query param
+       on any redirect back to the same page shows this, then gets stripped from the URL so a
+       refresh doesn't re-show it. -->
+  <div id="snackbar" class="snackbar" role="status" aria-live="polite"></div>
+  <script>
+    function showSnackbar(message) {
+      var el = document.getElementById('snackbar');
+      if (!el || !message) return;
+      el.textContent = message;
+      el.classList.add('visible');
+      clearTimeout(el._hideTimer);
+      el._hideTimer = setTimeout(function () { el.classList.remove('visible'); }, 3500);
+    }
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var toast = params.get('toast');
+      if (!toast) return;
+      showSnackbar(toast);
+      params.delete('toast');
+      var qs = params.toString();
+      window.history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash);
+    })();
+  </script>
+
   <!-- Shared confirmation modal - replaces the native confirm() every dangerous/notable form
        submit on this site used to show. Any <form onsubmit="return confirmSubmit(this, '...')">
        reuses this single dialog instead of each page building its own. -->

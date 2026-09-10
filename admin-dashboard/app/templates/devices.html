@@ -14,9 +14,12 @@
   <div class="header-actions">
     <a href="/devices?q={{ q|urlencode }}" class="btn btn-secondary">Osvježi</a>
     <form method="post" action="/devices/analytics-request">
+      <input type="hidden" name="q" value="{{ q }}">
       <button type="submit" class="btn btn-secondary">Povuci analitiku (svi)</button>
     </form>
-    <form method="post" action="/devices/update-selected" id="update-selected-form"></form>
+    <form method="post" action="/devices/update-selected" id="update-selected-form">
+      <input type="hidden" name="q" value="{{ q }}">
+    </form>
     <button type="button" class="btn btn-secondary" onclick="document.getElementById('update-selected-modal').showModal()">Ažuriraj izabrane</button>
     <dialog id="update-selected-modal" class="modal">
       <div class="modal-body">
@@ -37,7 +40,10 @@
       </div>
     </dialog>
 
-    <form method="post" id="update-single-form"></form>
+    <form method="post" id="update-single-form">
+      <input type="hidden" name="origin" value="list">
+      <input type="hidden" name="q" value="{{ q }}">
+    </form>
     <dialog id="update-single-modal" class="modal">
       <div class="modal-body">
         <h2 id="update-single-title">Ažuriraj uređaj</h2>
@@ -57,7 +63,9 @@
       </div>
     </dialog>
 
-    <form method="post" action="/devices/update-launcher-selected" id="update-launcher-selected-form"></form>
+    <form method="post" action="/devices/update-launcher-selected" id="update-launcher-selected-form">
+      <input type="hidden" name="q" value="{{ q }}">
+    </form>
     <button type="button" class="btn btn-secondary" onclick="openUpdateLauncherSelectedModal()">Ažuriraj launcher (izabrane)</button>
     <dialog id="update-launcher-selected-modal" class="modal">
       <div class="modal-body">
@@ -78,7 +86,10 @@
       </div>
     </dialog>
 
-    <form method="post" id="update-launcher-single-form"></form>
+    <form method="post" id="update-launcher-single-form">
+      <input type="hidden" name="origin" value="list">
+      <input type="hidden" name="q" value="{{ q }}">
+    </form>
     <dialog id="update-launcher-single-modal" class="modal">
       <div class="modal-body">
         <h2 id="update-launcher-single-title">Ažuriraj launcher</h2>
@@ -100,10 +111,6 @@
   </div>
 </div>
 
-{% if analytics_sent %}<div class="banner-success">Zahtjev za analitiku poslan svim uređajima - stiže čim se uređaj javi.</div>{% endif %}
-{% if update_sent %}<div class="banner-success">Zahtjev za update poslan na {{ update_sent }} izabrana uređaja.</div>{% endif %}
-{% if update_launcher_sent %}<div class="banner-success">Zahtjev za update launcher-a poslan na {{ update_launcher_sent }} izabrana uređaja.</div>{% endif %}
-
 <form method="get" action="/devices" class="toolbar">
   <input class="search-input" type="text" name="q" value="{{ q }}" placeholder="Pretraži po ID-u uređaja...">
 </form>
@@ -120,7 +127,6 @@
       <th>Kupac / lokacija</th>
       <th>Instalirana verzija</th>
       <th>Zadnja aktivnost</th>
-      <th>Zadnji log</th>
       <th>Akcije</th>
     </tr>
   </thead>
@@ -156,40 +162,54 @@
         {% endif %}
       </td>
       <td data-label="Zadnja aktivnost">{{ d.lastSeenAt.strftime("%d.%m. %H:%M") if d.lastSeenAt else "nikad" }}</td>
-      <td data-label="Zadnji log">{{ d.lastLogUploadAt.strftime("%d.%m. %H:%M") if d.lastLogUploadAt else "-" }}</td>
       <td data-label="Akcije">
         <div class="dropdown">
           <button type="button" class="btn btn-secondary btn-sm dropdown-toggle" onclick="toggleDropdown(event, 'menu-{{ loop.index }}')">&#8942;</button>
           <div class="dropdown-menu" id="menu-{{ loop.index }}">
             <button type="button" class="dropdown-item" onclick="openUpdateSingleModal('{{ d.id }}', {{ d.installedVersionCode or 0 }})">Ažuriraj sada</button>
             <form method="post" action="/devices/{{ d.id }}/request-logs">
+              <input type="hidden" name="origin" value="list">
+              <input type="hidden" name="q" value="{{ q }}">
               <button type="submit" class="dropdown-item">Zatraži nove logove</button>
             </form>
             {% if d.maintenanceActive %}
             <form method="post" action="/devices/{{ d.id }}/maintenance">
               <input type="hidden" name="enable" value="off">
+              <input type="hidden" name="origin" value="list">
+              <input type="hidden" name="q" value="{{ q }}">
               <button type="submit" class="dropdown-item">Isključi maintenance</button>
             </form>
             {% else %}
             <form method="post" action="/devices/{{ d.id }}/maintenance">
               <input type="hidden" name="enable" value="on">
+              <input type="hidden" name="origin" value="list">
+              <input type="hidden" name="q" value="{{ q }}">
               <button type="submit" class="dropdown-item">Uključi maintenance</button>
             </form>
             {% endif %}
             <form method="post" action="/devices/{{ d.id }}/open-settings">
+              <input type="hidden" name="origin" value="list">
+              <input type="hidden" name="q" value="{{ q }}">
               <button type="submit" class="dropdown-item">Otvori Settings</button>
             </form>
             <form method="post" action="/devices/{{ d.id }}/ping">
+              <input type="hidden" name="origin" value="list">
+              <input type="hidden" name="q" value="{{ q }}">
               <button type="submit" class="dropdown-item">Provjeri status</button>
             </form>
             <form method="post" action="/devices/{{ d.id }}/reboot" onsubmit="return confirmSubmit(this, 'Restartovati uređaj {{ d.id }} odmah?')">
+              <input type="hidden" name="origin" value="list">
+              <input type="hidden" name="q" value="{{ q }}">
               <button type="submit" class="dropdown-item">Restartuj sad</button>
             </form>
             <button type="button" class="dropdown-item" onclick="openUpdateLauncherSingleModal('{{ d.id }}', {{ d.launcherVersionCode or 0 }})">Ažuriraj launcher</button>
             <form method="post" action="/devices/{{ d.id }}/factory-reset" onsubmit="return confirmSubmit(this, 'Ovo će TRAJNO obrisati sve podatke na uređaju {{ d.id }} i vratiti ga na fabrička podešavanja. Ova akcija se ne može poništiti. Nastaviti?', true)">
+              <input type="hidden" name="origin" value="list">
+              <input type="hidden" name="q" value="{{ q }}">
               <button type="submit" class="dropdown-item dropdown-item-danger">Pošalji factory reset</button>
             </form>
             <form method="post" action="/devices/{{ d.id }}/delete" onsubmit="return confirmSubmit(this, 'Obrisati uređaj {{ d.id }}?', true)">
+              <input type="hidden" name="q" value="{{ q }}">
               <button type="submit" class="dropdown-item dropdown-item-danger">Obriši</button>
             </form>
           </div>

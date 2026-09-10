@@ -365,6 +365,29 @@ dialog.modal h2 { margin: 0 0 16px; font-size: 18px; }
 .modal-body { display: flex; flex-direction: column; gap: 14px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
 
+.snackbar {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translate(-50%, 16px);
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 100;
+  max-width: min(90vw, 480px);
+}
+.snackbar.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 /* ---------- Forms ---------- */
 form.stacked-form { display: flex; flex-direction: column; gap: 14px; max-width: 460px; }
 label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
