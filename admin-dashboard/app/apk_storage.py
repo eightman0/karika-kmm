@@ -1,4 +1,6 @@
 import hashlib
+import uuid
+from urllib.parse import quote
 
 from androguard.core.apk import APK
 from fastapi import UploadFile
@@ -17,13 +19,22 @@ _APP_PACKAGE_NAMES = {
 
 
 def upload_apk(apk_file: UploadFile, app: str = "salesrep") -> tuple[str, str, str, str]:
-    """Uploads the APK to Storage and makes it publicly readable - both salesrep's DownloadManager
-    and the launcher's own self-update fetch it with a plain HTTPS GET, no auth support there.
+    """Uploads the APK to Storage and returns a Firebase-style download URL (?alt=media&token=...)
+    - both salesrep's DownloadManager and the launcher's own self-update fetch it with a plain
+    HTTPS GET, no auth support there. Deliberately not blob.make_public() + blob.public_url: that
+    depends on this project's Storage security rules allowing public reads for the given path,
+    which turned out to only be configured for salesrep-releases/** - launcher-releases/** APKs
+    silently 403'd on real devices despite make_public() reporting success, since GCS ACLs and
+    Firebase Storage security rules are separate systems and rules win. Setting a per-object
+    download token bypasses security rules entirely (the same mechanism the provisioning page's
+    original hardcoded APK URL already relied on), so it does not matter whether a rule exists for
+    this path - works uniformly for every app, no rules changes needed.
+
     version_code and version_name are read straight from the APK's own manifest instead of typed
     by hand in the publish form, so what gets published always matches what is actually inside the
     file (typed metadata drifting from the real APK caused a silent update to be skipped once
     already). The package name is checked too, so an APK for the wrong app can't get uploaded
-    under the wrong tab by mistake. Returns (public_url, sha256_hex, version_code, version_name)."""
+    under the wrong tab by mistake. Returns (download_url, sha256_hex, version_code, version_name)."""
     content = apk_file.file.read()
     sha256 = hashlib.sha256(content).hexdigest()
 
@@ -41,8 +52,16 @@ def upload_apk(apk_file: UploadFile, app: str = "salesrep") -> tuple[str, str, s
         )
 
     path = f"{app}-releases/{version_code}.apk"
-    blob = bucket().blob(path)
+    bucket_ref = bucket()
+    blob = bucket_ref.blob(path)
     blob.upload_from_string(content, content_type="application/vnd.android.package-archive")
-    blob.make_public()
 
-    return blob.public_url, sha256, str(version_code), version_name or ""
+    token = str(uuid.uuid4())
+    blob.metadata = {"firebaseStorageDownloadTokens": token}
+    blob.patch()
+    download_url = (
+        f"https://firebasestorage.googleapis.com/v0/b/{bucket_ref.name}/o/"
+        f"{quote(path, safe='')}?alt=media&token={token}"
+    )
+
+    return download_url, sha256, str(version_code), version_name or ""
