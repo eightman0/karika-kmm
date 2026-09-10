@@ -367,25 +367,26 @@ dialog.modal h2 { margin: 0 0 16px; font-size: 18px; }
 
 .snackbar {
   position: fixed;
-  left: 50%;
-  bottom: 28px;
-  transform: translate(-50%, 16px);
+  top: 20px;
+  right: 20px;
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
   border-radius: var(--radius);
-  padding: 12px 20px;
+  padding: 14px 20px;
   font-size: 14px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
   opacity: 0;
   pointer-events: none;
+  transform: translateY(-12px);
   transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 100;
-  max-width: min(90vw, 480px);
+  z-index: 1000;
+  max-width: min(90vw, 380px);
 }
 .snackbar.visible {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 
 /* ---------- Forms ---------- */

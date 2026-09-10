@@ -1,4 +1,5 @@
 import json
+import time
 from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, File, Form, Request, UploadFile
@@ -27,6 +28,10 @@ app.add_middleware(SessionMiddleware, secret_key=auth.SESSION_SECRET, same_site=
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.include_router(device_api.router)
 templates = Jinja2Templates(directory="app/templates")
+# Busts browser/proxy caching of /static/* on every deploy (this process restarts then) - a plain
+# unversioned <link href="/static/style.css"> was still serving a stale copy of it after a CSS-only
+# change, since nothing about the URL itself changes between deploys otherwise.
+templates.env.globals["asset_version"] = str(int(time.time()))
 
 require_login = Depends(auth.require_login)
 
