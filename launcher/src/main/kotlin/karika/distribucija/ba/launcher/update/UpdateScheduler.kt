@@ -1,6 +1,10 @@
 package karika.distribucija.ba.launcher.update
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.os.SystemClock
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -19,6 +23,9 @@ object UpdateScheduler {
 
     private const val LAUNCHER_SELF_UPDATE_WORK_NAME = "launcher_self_update"
     private const val RELOCK_WORK_NAME = "debug_unlock_auto_relock"
+
+    private const val HEARTBEAT_ALARM_INTERVAL_MINUTES = 30L
+    private const val HEARTBEAT_ALARM_REQUEST_CODE = 1001
 
     private val networkConstraints = Constraints.Builder()
         .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -83,5 +90,21 @@ object UpdateScheduler {
      * stale relock still pending (harmless if it fires anyway, but no reason to leave it around). */
     fun cancelAutoRelock(context: Context) {
         WorkManager.getInstance(context).cancelUniqueWork(RELOCK_WORK_NAME)
+    }
+
+    /** AlarmManager backstop for the heartbeat - see HeartbeatAlarmReceiver's own doc comment for
+     * why this exists as a separate path from schedulePeriodic()'s WorkManager-based one. Call
+     * once from Application.onCreate(); the receiver re-arms the next fire itself, so this never
+     * needs to run on a fixed repeating schedule the way a plain PeriodicWorkRequest would. */
+    fun scheduleHeartbeatAlarm(context: Context) {
+        val alarmManager = context.getSystemService(AlarmManager::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            HEARTBEAT_ALARM_REQUEST_CODE,
+            Intent(context, HeartbeatAlarmReceiver::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val triggerAt = SystemClock.elapsedRealtime() + TimeUnit.MINUTES.toMillis(HEARTBEAT_ALARM_INTERVAL_MINUTES)
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pendingIntent)
     }
 }

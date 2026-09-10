@@ -31,7 +31,7 @@ object DeviceHeartbeat {
                 ?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
                 ?.takeIf { it in 0..100 }
             val locations = LocationHistoryReader.readNewPoints(context)
-            val (launcherVersionCode, launcherVersionName) = launcherOwnVersion(context)
+            val (launcherVersionCode, launcherVersionName) = installedVersion(context, context.packageName)
             DashboardApi.reportHeartbeat(
                 deviceId = deviceId,
                 installedPackage = packageName,
@@ -59,11 +59,11 @@ object DeviceHeartbeat {
         }
     }
 
-    /** The launcher's own installed version - always this app's own packageName, so unlike
-     * `packageName`/`versionCode`/`versionName` above (the payload app, passed in by the caller),
-     * this needs no argument. */
-    private fun launcherOwnVersion(context: Context): Pair<Long, String> = try {
-        val info = context.packageManager.getPackageInfo(context.packageName, 0)
+    /** Shared by UpdateWorker (the payload app's version) and HeartbeatAlarmReceiver (also the
+     * payload app's version, via the AlarmManager-triggered fallback path) - a plain PackageInfo
+     * lookup, so it works for any installed package, not just this app's own. */
+    fun installedVersion(context: Context, packageName: String): Pair<Long, String> = try {
+        val info = context.packageManager.getPackageInfo(packageName, 0)
         val versionCode =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.longVersionCode else @Suppress("DEPRECATION") info.versionCode.toLong()
         versionCode to info.versionName.orEmpty()

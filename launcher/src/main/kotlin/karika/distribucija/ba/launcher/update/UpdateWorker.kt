@@ -3,7 +3,6 @@ package karika.distribucija.ba.launcher.update
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
@@ -16,8 +15,6 @@ import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceHeartbeat
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 
-private data class InstalledInfo(val versionCode: Long, val versionName: String)
-
 /** Keeps KnownApps.PRIMARY (salesrep) up to date - not the launcher itself. Whether to install is
  * decided by comparing the published APK's sha256 against the one this device last installed,
  * not by version numbers - a publish only has to contain a new APK, nothing has to be typed or
@@ -28,9 +25,9 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
     override suspend fun doWork(): Result = try {
         val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext), app = "salesrep")
         val targetPackage = KnownApps.PRIMARY.packageName
-        val installed = installedInfo(targetPackage)
+        val (installedVersionCode, installedVersionName) = DeviceHeartbeat.installedVersion(applicationContext, targetPackage)
 
-        DeviceHeartbeat.report(applicationContext, targetPackage, installed.versionCode, installed.versionName)
+        DeviceHeartbeat.report(applicationContext, targetPackage, installedVersionCode, installedVersionName)
 
         val alreadyInstalled = latest.apkSha256.isNotBlank() &&
             latest.apkSha256.equals(InstalledApkState.lastInstalledSha256(applicationContext), ignoreCase = true)
@@ -45,15 +42,6 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         Log.e(TAG, "Update check failed", e)
         MaintenanceState.end(applicationContext)
         Result.retry()
-    }
-
-    private fun installedInfo(packageName: String): InstalledInfo = try {
-        val info = applicationContext.packageManager.getPackageInfo(packageName, 0)
-        val versionCode =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.longVersionCode else @Suppress("DEPRECATION") info.versionCode.toLong()
-        InstalledInfo(versionCode, info.versionName.orEmpty())
-    } catch (e: PackageManager.NameNotFoundException) {
-        InstalledInfo(0L, "")
     }
 
     private suspend fun runUpdate(latest: KioskVersion): Result {
