@@ -422,6 +422,7 @@ def provisioning_page(request: Request, generated: str | None = None):
             "wifi_ssid": saved.get("wifi_ssid") or "",
             "wifi_password": saved.get("wifi_password") or "",
             "wifi_security_type": saved.get("wifi_security_type") or "WPA",
+            "apk_download_url": saved.get("apk_download_url") or provisioning.DEFAULT_APK_DOWNLOAD_URL,
             "generated": bool(generated),
             "active_page": "provisioning",
         },
@@ -442,14 +443,17 @@ def generate_provisioning_qr(
     wifi_ssid: str = Form(""),
     wifi_password: str = Form(""),
     wifi_security_type: str = Form("WPA"),
+    apk_download_url: str = Form(""),
 ):
     ssid = wifi_ssid.strip() or None
+    url = apk_download_url.strip()
     local_db.set_provisioning_extras(
         customer_id.strip() or None,
         site_id.strip() or None,
         ssid,
         wifi_password if ssid else None,
         wifi_security_type if ssid else None,
+        url if url and url != provisioning.DEFAULT_APK_DOWNLOAD_URL else None,
     )
     return RedirectResponse("/provisioning?generated=1", status_code=303)
 

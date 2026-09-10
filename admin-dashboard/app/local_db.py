@@ -196,7 +196,12 @@ def init_db() -> None:
         _ensure_columns(
             conn,
             "provisioning_extras",
-            {"wifi_ssid": "TEXT", "wifi_password": "TEXT", "wifi_security_type": "TEXT"},
+            {
+                "wifi_ssid": "TEXT",
+                "wifi_password": "TEXT",
+                "wifi_security_type": "TEXT",
+                "apk_download_url": "TEXT",
+            },
         )
         conn.execute(
             """
@@ -600,21 +605,23 @@ def set_provisioning_extras(
     wifi_ssid: str | None = None,
     wifi_password: str | None = None,
     wifi_security_type: str | None = None,
+    apk_download_url: str | None = None,
 ) -> None:
     with _connect() as conn:
         conn.execute(
             """
             INSERT INTO provisioning_extras
-                (id, customer_id, site_id, wifi_ssid, wifi_password, wifi_security_type)
-            VALUES (1, ?, ?, ?, ?, ?)
+                (id, customer_id, site_id, wifi_ssid, wifi_password, wifi_security_type, apk_download_url)
+            VALUES (1, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 customer_id=excluded.customer_id,
                 site_id=excluded.site_id,
                 wifi_ssid=excluded.wifi_ssid,
                 wifi_password=excluded.wifi_password,
-                wifi_security_type=excluded.wifi_security_type
+                wifi_security_type=excluded.wifi_security_type,
+                apk_download_url=excluded.apk_download_url
             """,
-            (customer_id, site_id, wifi_ssid, wifi_password, wifi_security_type),
+            (customer_id, site_id, wifi_ssid, wifi_password, wifi_security_type, apk_download_url),
         )
 
 

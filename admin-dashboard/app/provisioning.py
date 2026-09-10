@@ -17,14 +17,21 @@ import json
 
 import qrcode
 
+# Points at a fixed, manually-maintained Storage blob - separate from the versioned
+# launcher-releases/{version_code}.apk path the self-update/publish flow uses, so it drifts out of
+# sync unless kept up to date by hand. That drift is exactly what left a real device re-enrolling
+# onto a stale launcher build after every factory reset - this is now just the fallback default,
+# overridable per apk_download_url below so a stuck default doesn't need a code change to fix.
+DEFAULT_APK_DOWNLOAD_URL = (
+    "https://firebasestorage.googleapis.com/v0/b/kiosklauncher-8c837.firebasestorage.app/o/"
+    "launcher-releases%2Flauncher-release.apk?alt=media&token=62de3834-b43b-4d38-adaa-4774984878c4"
+)
+
 _FIXED_FIELDS = {
     "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME":
         "karika.distribucija.ba.launcher/karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver",
     "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM":
         "1r6zVerEdM0pyQzBBDHf_ToS8qliRsL0A_LcfLb2HlE",
-    "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION":
-        "https://firebasestorage.googleapis.com/v0/b/kiosklauncher-8c837.firebasestorage.app/o/"
-        "launcher-releases%2Flauncher-release.apk?alt=media&token=62de3834-b43b-4d38-adaa-4774984878c4",
     "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": False,
 }
 
@@ -32,6 +39,9 @@ _FIXED_FIELDS = {
 def build_payload(extras: dict | None) -> dict:
     extras = extras or {}
     payload = dict(_FIXED_FIELDS)
+    payload["android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION"] = (
+        extras.get("apk_download_url") or DEFAULT_APK_DOWNLOAD_URL
+    )
 
     admin_extras = {}
     if extras.get("customer_id"):

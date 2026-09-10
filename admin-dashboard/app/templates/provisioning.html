@@ -34,6 +34,14 @@
 </div>
 
 <div class="card">
+  <h2>APK za download tokom provisioning-a (napredno)</h2>
+  <p class="hint">Ovo je fiksan link na Storage odakle Android skida launcher tokom samog provisioning-a - odvojeno od verzija koje se objavljuju na tabu "Verzije" i šalju kasnije preko "Ažuriraj launcher". Ako ovaj link zaostane za stvarno objavljenom verzijom, svaki novi/re-provisioniran uređaj dobija tu stariju verziju bez obzira šta je trenutno objavljeno. Prazno ostavi za default.</p>
+  <div class="toolbar">
+    <input class="search-input" type="text" name="apk_download_url" form="provisioning-form" value="{{ apk_download_url }}" placeholder="https://..." style="flex: 1 1 100%;">
+  </div>
+</div>
+
+<div class="card">
   <h2>Skeniraj pri postavljanju tableta</h2>
   <p class="hint">Nakon factory reset-a, na ekranu dobrodošlice tapni 6 puta pa skeniraj ovaj kod - upisuje launcher kao Device Owner i skida ga sa Firebase Storage-a.</p>
   <img src="/provisioning/qr.png" alt="Provisioning QR kod" style="max-width: 320px; width: 100%; display: block; margin: 16px 0;">
