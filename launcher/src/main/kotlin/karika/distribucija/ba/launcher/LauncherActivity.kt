@@ -24,7 +24,8 @@ class LauncherActivity : AppCompatActivity() {
     private val maintenanceListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> refreshMaintenanceState() }
 
-    /** One-time (per install), on launcher startup: asks for salesrep's battery-optimization
+    /** One-time (per install), retried on every resume until it succeeds: asks for salesrep's
+     * battery-optimization
      * exemption (see LocationSampleWorker/BatteryOptimizationPrompt's old removed comment for why
      * salesrep needs it and this app does not) as a normal Settings dialog, not a silent Device
      * Owner grant - that specific DPM call is what crashes Permission Controller on a real device
@@ -55,11 +56,16 @@ class LauncherActivity : AppCompatActivity() {
         appGrid.adapter = AppTileAdapter(KnownApps.ALL, packageManager) { app ->
             launchApp(app.packageName, userInitiated = true)
         }
-        maybeRequestSalesrepBatteryExemption()
     }
 
     override fun onResume() {
         super.onResume()
+        // Must run before kiosk.enter(): on a fresh provisioning, salesrep is not installed yet
+        // (UpdateWorker installs it later, asynchronously) - see maybeRequestSalesrepBatteryExemption's
+        // own comment for why this call is retried on every onResume() instead of once in onCreate().
+        // When it does begin maintenance, it needs to do so before kiosk.enter() runs below, in this
+        // same pass, or lock task gets pinned first and the Settings dialog can't draw over it.
+        maybeRequestSalesrepBatteryExemption()
         kiosk.enter()
         MaintenanceState.addChangeListener(this, maintenanceListener)
         RemoteMaintenanceState.addChangeListener(this, maintenanceListener)
@@ -90,11 +96,18 @@ class LauncherActivity : AppCompatActivity() {
     /** See batteryOptimizationLauncher's own doc comment for the full reasoning. Guarded by a
      * persisted flag so this only ever fires once per install, and by isIgnoringBatteryOptimizations
      * so it does nothing at all once salesrep already has the exemption (e.g. granted manually via
-     * `adb shell dumpsys deviceidle whitelist`) - no dialog shown, no maintenance entered. */
+     * `adb shell dumpsys deviceidle whitelist`) - no dialog shown, no maintenance entered.
+     *
+     * Also guarded by salesrep actually being installed: on a fresh provisioning this runs long
+     * before UpdateWorker has downloaded and installed it, and the Settings dialog silently does
+     * nothing for a package that doesn't exist yet - it must NOT mark the "asked" flag in that
+     * case, or this would burn its one shot before salesrep even exists and never ask again once it
+     * does. Not installed simply means try again next onResume(), no state changed here. */
     private fun maybeRequestSalesrepBatteryExemption() {
         val prefs = getSharedPreferences(BATTERY_PROMPT_PREFS, MODE_PRIVATE)
         if (prefs.getBoolean(BATTERY_PROMPT_KEY_ASKED, false)) return
         val targetPackage = KnownApps.PRIMARY.packageName
+        if (!isPackageInstalled(targetPackage)) return
         val powerManager = getSystemService(PowerManager::class.java)
         if (powerManager?.isIgnoringBatteryOptimizations(targetPackage) == true) return
         prefs.edit().putBoolean(BATTERY_PROMPT_KEY_ASKED, true).apply()
@@ -106,6 +119,9 @@ class LauncherActivity : AppCompatActivity() {
         runCatching { batteryOptimizationLauncher.launch(intent) }
             .onFailure { MaintenanceState.end(this) }
     }
+
+    private fun isPackageInstalled(packageName: String): Boolean =
+        runCatching { packageManager.getPackageInfo(packageName, 0) }.isSuccess
 
     @Suppress("DEPRECATION")
     private fun launchApp(packageName: String, userInitiated: Boolean) {
