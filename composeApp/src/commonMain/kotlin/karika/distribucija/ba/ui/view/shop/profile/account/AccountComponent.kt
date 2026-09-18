@@ -13,6 +13,19 @@ import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.distributer.products.details.toInt
 import kotlinx.coroutines.launch
 
+private val NOTIFICATION_ATTRIBUTE_CODES = setOf(
+    "notification_email_enabled",
+    "notification_viber_enabled",
+    "notification_push_enabled"
+)
+
+private val CONTACT_ATTRIBUTE_CODES = NOTIFICATION_ATTRIBUTE_CODES + setOf(
+    "b2b_velicina_objekta",
+    "b2b_tip_objekta",
+    "b2b_broj_zaposlenih",
+    "viber_messages_phone_number"
+)
+
 class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
     CommonComponent(componentContext, stateHolder) {
 
@@ -60,32 +73,23 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                                     }
                                 },
                             customAttributes = stateHolder.customerSpecificHandler.userDetails.value.customAttributes
-                                .filter {
-                                    it.attributeCode != "notification_email_enabled" ||
-                                            it.attributeCode != "notification_viber_enabled" ||
-                                            it.attributeCode != "notification_push_enabled"
-                                }
-                                .toMutableList()
-                                .apply {
-                                    add(
+                                .filter { it.attributeCode !in NOTIFICATION_ATTRIBUTE_CODES }
+                                .plus(
+                                    listOf(
                                         Attributes(
                                             "notification_email_enabled",
                                             emailNotifications.value.toInt()
-                                        )
-                                    )
-                                    add(
+                                        ),
                                         Attributes(
                                             "notification_viber_enabled",
                                             viberNotifications.value.toInt()
-                                        )
-                                    )
-                                    add(
+                                        ),
                                         Attributes(
                                             "notification_push_enabled",
                                             pushNotifications.value.toInt()
                                         )
                                     )
-                                }
+                                )
                         )
                 )
             ).collect { result ->
@@ -114,41 +118,27 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                     customer = stateHolder.customerSpecificHandler.userDetails.value
                         .copy(
                             customAttributes = stateHolder.customerSpecificHandler.userDetails.value.customAttributes
-                                .filter {
-                                    it.attributeCode != "notification_email_enabled" ||
-                                            it.attributeCode != "notification_viber_enabled" ||
-                                            it.attributeCode != "notification_push_enabled"
-                                }
-                                .toMutableList()
-                                .apply {
-                                    add(
+                                .filter { it.attributeCode !in CONTACT_ATTRIBUTE_CODES }
+                                .plus(
+                                    listOf(
                                         Attributes(
                                             "notification_email_enabled",
                                             emailNotifications.value.toInt()
-                                        )
-                                    )
-                                    add(
+                                        ),
                                         Attributes(
                                             "notification_viber_enabled",
                                             viberNotifications.value.toInt()
-                                        )
-                                    )
-                                    add(
+                                        ),
                                         Attributes(
                                             "notification_push_enabled",
                                             pushNotifications.value.toInt()
-                                        )
+                                        ),
+                                        Attributes("b2b_velicina_objekta", objectSize.value),
+                                        Attributes("b2b_tip_objekta", objectType.value),
+                                        Attributes("b2b_broj_zaposlenih", employeeCount.value),
+                                        Attributes("viber_messages_phone_number", viberPhoneNumber.value.ifEmpty { " " }),
                                     )
-                                }
-                                .map {
-                                    when (it.attributeCode) {
-                                        "b2b_velicina_objekta" -> it.copy(value = objectSize.value)
-                                        "b2b_tip_objekta" -> it.copy(value = objectType.value)
-                                        "b2b_broj_zaposlenih" -> it.copy(value = employeeCount.value)
-                                        "viber_messages_phone_number" -> it.copy(value = viberPhoneNumber.value)
-                                        else -> it
-                                    }
-                                }
+                                )
                         )
                 )
             ).collect { result ->
@@ -201,19 +191,19 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
 
     fun edit(it: Address?, value: String, edit: Boolean = true) {
         if (value == "Informacije profila") {
-            objectSize.value = stateHolder.customerSpecificHandler.userDetails.value.objectSize()
-            objectType.value = stateHolder.customerSpecificHandler.userDetails.value.objectType()
-            employeeCount.value =
-                stateHolder.customerSpecificHandler.userDetails.value.employeeCount()
+            val attrs = stateHolder.customerSpecificHandler.userDetails.value.customAttributes
+            objectSize.value = attrs.find { attr -> attr.attributeCode == "b2b_velicina_objekta" }?.value ?: ""
+            objectType.value = attrs.find { attr -> attr.attributeCode == "b2b_tip_objekta" }?.value ?: ""
+            employeeCount.value = attrs.find { attr -> attr.attributeCode == "b2b_broj_zaposlenih" }?.value ?: ""
             viberPhoneNumber.value =
-                stateHolder.customerSpecificHandler.userDetails.value.viberPhoneNumber()
+                attrs.find { attr -> attr.attributeCode == "viber_messages_phone_number" }?.value ?: ""
 
             emailNotifications.value =
-                stateHolder.customerSpecificHandler.userDetails.value.customAttributes.find { it.attributeCode == "notification_email_enabled" }?.value == "1"
+                attrs.find { attr -> attr.attributeCode == "notification_email_enabled" }?.value == "1"
             viberNotifications.value =
-                stateHolder.customerSpecificHandler.userDetails.value.customAttributes.find { it.attributeCode == "notification_viber_enabled" }?.value == "1"
+                attrs.find { attr -> attr.attributeCode == "notification_viber_enabled" }?.value == "1"
             pushNotifications.value =
-                stateHolder.customerSpecificHandler.userDetails.value.customAttributes.find { it.attributeCode == "notification_push_enabled" }?.value == "1"
+                attrs.find { attr -> attr.attributeCode == "notification_push_enabled" }?.value == "1"
 
             editContact.value = true
             return
