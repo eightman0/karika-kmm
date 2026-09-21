@@ -1,23 +1,13 @@
 package karika.distribucija.ba.domain.api
 
 import io.ktor.client.call.body
-import io.ktor.client.request.forms.MultiPartFormDataContent
-import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.PartData
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.HttpClientProvider.url
-import karika.distribucija.ba.domain.model.Conversation
-import karika.distribucija.ba.domain.model.MessagesCount
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.SendMessageRequest
-import karika.distribucija.ba.domain.model.SendMessageResponse
 import karika.distribucija.ba.domain.model.Shop
 import karika.distribucija.ba.domain.model.Vendor
 import kotlinx.coroutines.Dispatchers
@@ -28,35 +18,6 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 internal class MessagesApi {
-    suspend fun messages(
-        admin: Boolean = true,
-    ): Result<HttpResponse> = runCatching {
-        return@runCatching HttpClientProvider.client.get(
-            url("mobile/message/list?pageSize=1000&curPage=1&admin=$admin")
-        )
-    }
-
-    suspend fun get(
-        threadId: String?,
-        admin: Boolean = true,
-    ): Result<HttpResponse> = runCatching {
-        return@runCatching HttpClientProvider.client.get(
-            url("mobile/message/thread?threadId=$threadId&admin=$admin")
-        )
-    }
-
-    suspend fun getMessageUnread(): Result<HttpResponse> = runCatching {
-        return@runCatching HttpClientProvider.client.get(
-            url("mobile/message/count")
-        )
-    }
-
-    suspend fun markAsRead(threadId: String?): Result<HttpResponse> = runCatching {
-        return@runCatching HttpClientProvider.client.post(
-            url("mobile/message/markAsRead?threadId=$threadId")
-        )
-    }
-
     suspend fun vendors(
         searchText: String = "",
         pageSize: Int = 10000,
@@ -98,89 +59,9 @@ internal class MessagesApi {
             }
         )
     }
-
-    suspend fun send(
-        message: SendMessageRequest
-    ): Result<HttpResponse> = runCatching {
-        return@runCatching HttpClientProvider.client.post(
-            url("mobile/message/send")
-        ) {
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append("send_to_admin", message.sendToAdmin)
-                        append("message", message.message)
-                        append("subject", message.subject ?: "")
-                        message.receiverId?.let {
-                            append("receiver_id", it)
-                        }
-                        message.threadId?.let {
-                            append("thread_id", it)
-                        }
-                        message.file?.let {
-                            append("files[]", it.second ?: return@let, Headers.build {
-                                append(
-                                    HttpHeaders.ContentType,
-                                    if (it.first?.endsWith(".pdf") == true) "application/pdf" else "image/png"
-                                )
-                                append(
-                                    HttpHeaders.ContentDisposition,
-                                    "filename=\"${it.first}\""
-                                )
-                            })
-                        }
-                    }.withLog(),
-                    boundary = "WebAppBoundary"
-                )
-            )
-        }
-    }
 }
 
 class MessagesRepository internal constructor() {
-    fun messages(
-        admin: Boolean = true,
-    ): Flow<ResultState<List<Conversation>>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = MessagesApi()
-                .messages(admin).getOrNoInternet()
-
-            if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<List<Conversation>>()))
-                return@flow
-            }
-
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
-        }
-    }.flowOn(Dispatchers.Default)
-
-    fun get(
-        threadId: String?,
-        admin: Boolean = true,
-    ): Flow<ResultState<List<Conversation>>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = MessagesApi()
-                .get(threadId, admin).getOrNoInternet()
-
-            if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<List<Conversation>>()))
-                return@flow
-            }
-
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
-        }
-    }.flowOn(Dispatchers.Default)
-
     fun vendors(
         searchText: String = "",
         pageSize: Int = 10000,
@@ -228,63 +109,6 @@ class MessagesRepository internal constructor() {
             emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
         } catch (e: kotlin.coroutines.cancellation.CancellationException) {
             throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
-        }
-    }.flowOn(Dispatchers.Default)
-
-    fun send(
-        message: SendMessageRequest
-    ): Flow<ResultState<SendMessageResponse>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = MessagesApi()
-                .send(message).getOrNoInternet()
-
-            if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<SendMessageResponse>()))
-                return@flow
-            }
-
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
-        }
-    }.flowOn(Dispatchers.Default)
-
-    fun messageUnreadCount(): Flow<ResultState<MessagesCount>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = MessagesApi()
-                .getMessageUnread().getOrNoInternet()
-
-            if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<MessagesCount>()))
-                return@flow
-            }
-
-            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message))
-        }
-    }.flowOn(Dispatchers.Default)
-
-    fun markAsRead(id: String?): Flow<ResultState<String>> = flow {
-        emit(ResultState.Loading)
-        try {
-            val response = MessagesApi()
-                .markAsRead(id).getOrNoInternet()
-
-            if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(""))
-                return@flow
-            }
-
-            emit(ResultState.Error(""))
         } catch (e: Exception) {
             emit(ResultState.Error(e.message))
         }

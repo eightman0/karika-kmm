@@ -1,9 +1,9 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.internal
 
 import com.arkivanov.decompose.ComponentContext
-import karika.distribucija.ba.domain.api.SalesRepository
+import karika.distribucija.ba.domain.model.ChatAxis
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.StaffThread
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig
@@ -16,10 +16,8 @@ class SalesInternalMessagesComponent(
     stateHolder: KarikaStateHolder
 ) : CommonComponent(componentContext, stateHolder) {
 
-    private val salesRepository = SalesRepository()
-
-    private val _threads = MutableStateFlow<List<StaffThread>>(emptyList())
-    val threads = _threads.asStateFlow()
+    private val _conversations = MutableStateFlow<List<ChatConversation>>(emptyList())
+    val conversations = _conversations.asStateFlow()
 
     init {
         load()
@@ -28,13 +26,8 @@ class SalesInternalMessagesComponent(
         }
     }
 
-    fun openConversation(thread: StaffThread) {
-        salesRepPush(
-            SalesRepConfig.InternalConversation(
-                threadId = thread.threadId,
-                counterpartName = thread.counterpartName
-            )
-        )
+    fun openConversation(conversation: ChatConversation) {
+        salesRepPush(SalesRepConfig.InternalConversation(conversation))
     }
 
     fun openNewMessage() {
@@ -45,19 +38,18 @@ class SalesInternalMessagesComponent(
 
     private fun load() {
         scope.launch {
-            salesRepository.listConversations().collect { result ->
-                when (result) {
-                    is ResultState.Loading -> showLoader()
-                    is ResultState.Success -> {
-                        hideLoader()
-                        _threads.value = result.data.items
-                    }
-                    is ResultState.Error -> {
-                        hideLoader()
-                        showErrorMessage(result.message)
+            chatRepository.getConversations(axis = ChatAxis.STAFF, pageSize = 100)
+                .collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> Unit
+                        is ResultState.Success -> {
+                            _conversations.value = result.data.items
+                        }
+                        is ResultState.Error -> showErrorMessage(result.message)
                     }
                 }
-            }
         }
     }
+
+    fun goBack() = salesRepBack()
 }

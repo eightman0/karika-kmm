@@ -48,9 +48,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.HttpClientProvider.chatImage
-import karika.distribucija.ba.domain.model.FileData
-import karika.distribucija.ba.domain.model.Message
+import karika.distribucija.ba.domain.HttpClientProvider.chatAttachment
+import karika.distribucija.ba.domain.model.ChatAttachment
+import karika.distribucija.ba.domain.model.ChatMessage
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
@@ -62,17 +62,9 @@ import karikav2.composeapp.generated.resources.ic_cancel_circle
 import karikav2.composeapp.generated.resources.ic_pdf
 import karikav2.composeapp.generated.resources.ic_photo
 import karikav2.composeapp.generated.resources.ic_send_receipt
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.vectorResource
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
-
-private fun String?.formatTime(): String {
-    if (this == null) return ""
-    val timePart = this.split(" ").getOrNull(1) ?: return ""
-    val parts = timePart.split(":")
-    return if (parts.size >= 2) "${parts[0]}:${parts[1]}" else timePart
-}
 
 private fun String.isImageFile() = lowercase().let {
     it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".png") ||
@@ -113,8 +105,7 @@ fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
             items(messages) { message ->
                 MessageBubble(
                     message = message,
-                    vendorName = component.conversation.senderName(),
-                    component
+                    component = component
                 )
             }
         }
@@ -385,54 +376,48 @@ fun SalesAdminConversationView(component: SalesAdminConversationComponent) {
 // ── Attachment renderer ────────────────────────────────────────────────────────
 
 @Composable
-private fun MessageAttachment(
-    images: String?,
-    bubbleColor: Color,
+private fun MessageAttachments(
+    attachments: List<ChatAttachment>,
     component: SalesAdminConversationComponent
 ) {
-    val filename = images
-        ?.takeIf { it.isNotEmpty() }
-        ?.let { runCatching { Json.decodeFromString<FileData>(it) }.getOrNull() }
-        ?.filename
-        ?.firstOrNull()
-        ?.takeIf { it.isNotEmpty() }
-        ?: return
-
-    if (filename.endsWith("pdf", ignoreCase = true)) {
-        Row(
-            modifier = Modifier
-                .onClick {
-                    component.downloadReceipt(filename)
-                }
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_pdf),
-                contentDescription = null,
-                tint = KarikaColors.White,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            KarikaText(
-                text = filename,
-                color = KarikaColors.White,
-                textSize = 12.sp,
-                fontWeight = FontWeight.W500
+    attachments.forEach { attachment ->
+        val relpath = attachment.relpath ?: return@forEach
+        if (attachment.isPdf()) {
+            Row(
+                modifier = Modifier
+                    .onClick {
+                        component.downloadChatAttachment(relpath)
+                    }
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_pdf),
+                    contentDescription = null,
+                    tint = KarikaColors.White,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                KarikaText(
+                    text = attachment.filename ?: "",
+                    color = KarikaColors.White,
+                    textSize = 12.sp,
+                    fontWeight = FontWeight.W500
+                )
+            }
+        } else {
+            KarikaImage(
+                modifier = Modifier
+                    .onClick {
+                        component.showImagePreview(chatAttachment(relpath))
+                    }
+                    .widthIn(max = 220.dp)
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                model = chatAttachment(relpath),
+                contentScale = ContentScale.Inside
             )
         }
-    } else {
-        KarikaImage(
-            modifier = Modifier
-                .onClick {
-                    component.showImagePreview(chatImage(filename))
-                }
-                .widthIn(max = 220.dp)
-                .padding(8.dp)
-                .clip(RoundedCornerShape(12.dp)),
-            model = chatImage(filename),
-            contentScale = ContentScale.Inside
-        )
     }
 }
 
@@ -440,11 +425,10 @@ private fun MessageAttachment(
 
 @Composable
 private fun MessageBubble(
-    message: Message,
-    vendorName: String,
+    message: ChatMessage,
     component: SalesAdminConversationComponent
 ) {
-    val isVendor = message.isVendorMessage()
+    val isVendor = message.isFromVendor()
 
     if (isVendor) {
         Column(
@@ -469,12 +453,11 @@ private fun MessageBubble(
                     )
                     .background(KarikaColors.Blue)
             ) {
-                MessageAttachment(
-                    images = message.images,
-                    bubbleColor = KarikaColors.Blue,
-                    component
+                MessageAttachments(
+                    attachments = message.attachments,
+                    component = component
                 )
-                if (!message.message.isNullOrEmpty()) {
+                if (!message.body.isNullOrEmpty()) {
                     HtmlTextWithStyles(
                         html = message.message(),
                         textColor = KarikaColors.White,
@@ -483,7 +466,7 @@ private fun MessageBubble(
                 }
             }
             KarikaText(
-                text = message.date(),
+                text = message.createdAt ?: "",
                 color = KarikaColors.Gray7,
                 textSize = 10.sp,
                 fontWeight = FontWeight.W400,
@@ -513,12 +496,11 @@ private fun MessageBubble(
                     )
                     .background(KarikaColors.Primary)
             ) {
-                MessageAttachment(
-                    images = message.images,
-                    bubbleColor = KarikaColors.Primary,
+                MessageAttachments(
+                    attachments = message.attachments,
                     component = component
                 )
-                if (!message.message.isNullOrEmpty()) {
+                if (!message.body.isNullOrEmpty()) {
                     HtmlTextWithStyles(
                         html = message.message(),
                         textColor = KarikaColors.White,
@@ -527,7 +509,7 @@ private fun MessageBubble(
                 }
             }
             KarikaText(
-                text = message.date(),
+                text = message.createdAt ?: "",
                 color = KarikaColors.Gray7,
                 textSize = 10.sp,
                 fontWeight = FontWeight.W400,

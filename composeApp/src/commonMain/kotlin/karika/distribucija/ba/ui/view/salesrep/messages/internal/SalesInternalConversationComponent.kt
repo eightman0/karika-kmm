@@ -1,9 +1,10 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.internal
 
 import com.arkivanov.decompose.ComponentContext
-import karika.distribucija.ba.domain.api.SalesRepository
+import karika.distribucija.ba.domain.model.ChatConversation
+import karika.distribucija.ba.domain.model.ChatMessage
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.StaffThreadMessage
+import karika.distribucija.ba.domain.model.VendorOperationsMe
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,18 +14,15 @@ import kotlinx.coroutines.launch
 class SalesInternalConversationComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
-    val threadId: Long,
-    val counterpartName: String
+    val conversation: ChatConversation
 ) : CommonComponent(componentContext, stateHolder) {
 
-    private val salesRepository = SalesRepository()
-
-    private val _messages = MutableStateFlow<List<StaffThreadMessage>>(emptyList())
+    private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages = _messages.asStateFlow()
 
     init {
         scope.launch {
-            stateHolder.customerThreadPush.collect { threadId ->
+            stateHolder.customerThreadPush.collect {
                 load()
             }
         }
@@ -34,8 +32,9 @@ class SalesInternalConversationComponent(
 
     private fun load() {
         markRead()
+        val conversationId = conversation.conversationId ?: return
         scope.launch {
-            salesRepository.getConversationMessages(threadId).collect { result ->
+            chatRepository.getMessages(conversationId).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
@@ -52,10 +51,11 @@ class SalesInternalConversationComponent(
     }
 
     fun sendMessage(text: String) {
+        val conversationId = conversation.conversationId ?: return
         val msg = text.trim()
         if (msg.isBlank()) return
         scope.launch {
-            salesRepository.sendConversationMessage(threadId, msg).collect { result ->
+            chatRepository.sendMessage(conversationId, msg).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
@@ -72,11 +72,18 @@ class SalesInternalConversationComponent(
     }
 
     private fun markRead() {
+        val conversationId = conversation.conversationId ?: return
         scope.launch {
-            salesRepository.markConversationRead(threadId).collect {
+            chatRepository.markRead(conversationId).collect {
                 stateHolder.refreshInternalMessages()
+                stateHolder.vendorNotificationHandler.reloadChatMessageCount()
             }
         }
+    }
+
+    fun isMine(message: ChatMessage, me: VendorOperationsMe): Boolean {
+        val myRefId = if (me.isVendorOwner) me.vendorId ?: 0L else me.employeeId ?: 0L
+        return message.senderRefId == myRefId
     }
 
     fun goBack() = salesRepBack()

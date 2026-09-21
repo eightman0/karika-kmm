@@ -22,7 +22,6 @@ import karika.distribucija.ba.domain.model.AddToCart
 import karika.distribucija.ba.domain.model.CartItem
 import karika.distribucija.ba.domain.model.ChatAxis
 import karika.distribucija.ba.domain.model.ChatConversation
-import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.EventType
 import karika.distribucija.ba.domain.model.Filters
 import karika.distribucija.ba.domain.model.KarikaTracking

@@ -83,6 +83,13 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
         if (route?.startsWith("route/chat") == true) {
             messageHandler.reloadAdminMessages()
             messageHandler.reloadVendorMessages()
+            refreshAdminMessages()
+            refreshCustomerMessages()
+            refreshInternalMessages()
+            Regex("""conversationId=(\d+)""").find(route)?.groupValues?.get(1)?.let {
+                _adminThreadPush.tryEmit(it)
+                _customerThreadPush.tryEmit(it)
+            }
         } else if (route?.contains("admin=1") == true) {
             messageHandler.reloadAdminMessages()
         } else {

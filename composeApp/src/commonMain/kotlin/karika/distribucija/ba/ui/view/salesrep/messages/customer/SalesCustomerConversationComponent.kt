@@ -2,10 +2,10 @@ package karika.distribucija.ba.ui.view.salesrep.messages.customer
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.backhandler.BackCallback
-import karika.distribucija.ba.domain.model.Conversation
-import karika.distribucija.ba.domain.model.Message
+import karika.distribucija.ba.domain.api.chatFileFrom
+import karika.distribucija.ba.domain.model.ChatConversation
+import karika.distribucija.ba.domain.model.ChatMessage
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.SendMessageRequest
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,10 +15,10 @@ import kotlinx.coroutines.launch
 class SalesCustomerConversationComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
-    val conversation: Conversation
+    val conversation: ChatConversation
 ) : CommonComponent(componentContext, stateHolder) {
 
-    private val _messages = MutableStateFlow<List<Message>>(emptyList())
+    private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages = _messages.asStateFlow()
 
     val attachment = MutableStateFlow<Pair<String, ByteArray>?>(null)
@@ -26,8 +26,8 @@ class SalesCustomerConversationComponent(
     init {
         load()
         scope.launch {
-            stateHolder.customerThreadPush.collect { threadId ->
-                if (threadId == conversation.id) load()
+            stateHolder.customerThreadPush.collect { conversationId ->
+                if (conversationId == conversation.conversationId?.toString()) load()
             }
         }
         backHandler.register(BackCallback {
@@ -41,22 +41,22 @@ class SalesCustomerConversationComponent(
     }
 
     private fun load() {
+        val conversationId = conversation.conversationId ?: return
         scope.launch {
-            messagesRepository.markAsRead(conversation.id)
+            chatRepository.markRead(conversationId)
                 .collect {
-                    if (it is ResultState.Success) stateHolder.refreshCustomerMessages()
+                    if (it is ResultState.Success) {
+                        stateHolder.refreshCustomerMessages()
+                        stateHolder.vendorNotificationHandler.reloadChatMessageCount()
+                    }
                 }
 
-            messagesRepository.get(
-                threadId = conversation.id,
-                admin = false
-            ).collect { result ->
+            chatRepository.getMessages(conversationId).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
                         hideLoader()
-                        _messages.value = result.data.firstOrNull()?.messages?.firstOrNull()
-                            ?: emptyList()
+                        _messages.value = result.data.items
                     }
 
                     is ResultState.Error -> {
@@ -69,18 +69,13 @@ class SalesCustomerConversationComponent(
     }
 
     fun sendMessage(text: String) {
+        val conversationId = conversation.conversationId ?: return
         if (text.isBlank() && attachment.value == null) return
+        val files = attachment.value?.let { (name, bytes) -> listOf(chatFileFrom(name, bytes)) }
+            ?: emptyList()
+
         scope.launch {
-            messagesRepository.send(
-                SendMessageRequest(
-                    sendToAdmin = false,
-                    message = text,
-                    subject = conversation.subject ?: "",
-                    receiverId = conversation.receiverId(),
-                    threadId = conversation.id?.toIntOrNull(),
-                    file = attachment.value
-                )
-            ).collect { result ->
+            chatRepository.sendMessage(conversationId, text, files).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {

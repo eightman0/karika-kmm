@@ -1,10 +1,11 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.internal
 
 import com.arkivanov.decompose.ComponentContext
-import karika.distribucija.ba.domain.api.SalesRepository
+import karika.distribucija.ba.domain.model.ChatAxis
+import karika.distribucija.ba.domain.model.ChatMessage
+import karika.distribucija.ba.domain.model.ChatRecipient
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.StaffRecipient
-import karika.distribucija.ba.domain.model.StaffThreadMessage
+import karika.distribucija.ba.domain.model.VendorOperationsMe
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,61 +17,54 @@ class SalesInternalNewMessageComponent(
     stateHolder: KarikaStateHolder
 ) : CommonComponent(componentContext, stateHolder) {
 
-    private val salesRepository = SalesRepository()
-
-    private val _subject = MutableStateFlow("")
-    val subject = _subject.asStateFlow()
-
     private val _recipientSearch = MutableStateFlow("")
     val recipientSearch = _recipientSearch.asStateFlow()
 
-    private val _allRecipients = MutableStateFlow<List<StaffRecipient>>(emptyList())
+    private var allRecipients: List<ChatRecipient> = emptyList()
 
-    private val _filteredRecipients = MutableStateFlow<List<StaffRecipient>>(emptyList())
+    private val _filteredRecipients = MutableStateFlow<List<ChatRecipient>>(emptyList())
     val filteredRecipients = _filteredRecipients.asStateFlow()
 
-    private val _selectedRecipient = MutableStateFlow<StaffRecipient?>(null)
+    private val _selectedRecipient = MutableStateFlow<ChatRecipient?>(null)
     val selectedRecipient = _selectedRecipient.asStateFlow()
 
-    private val _threadId = MutableStateFlow<Long?>(null)
-    val threadId = _threadId.asStateFlow()
+    private val _conversationId = MutableStateFlow<Long?>(null)
+    val conversationId = _conversationId.asStateFlow()
 
-    private val _messages = MutableStateFlow<List<StaffThreadMessage>>(emptyList())
+    private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages = _messages.asStateFlow()
 
     init {
         loadRecipients()
     }
 
-    fun setSubject(v: String) { _subject.value = v }
-
     fun setRecipientSearch(text: String) {
         _recipientSearch.value = text
         _selectedRecipient.value = null
-        val query = text.lowercase()
-        _filteredRecipients.value = if (query.isBlank()) _allRecipients.value
-        else _allRecipients.value.filter { it.name.lowercase().contains(query) }
+        val query = text.trim().lowercase()
+        _filteredRecipients.value = if (query.isBlank()) allRecipients
+        else allRecipients.filter { it.name?.lowercase()?.contains(query) == true }
     }
 
-    fun selectRecipient(recipient: StaffRecipient) {
+    fun selectRecipient(recipient: ChatRecipient) {
         _selectedRecipient.value = recipient
-        _recipientSearch.value = recipient.name
+        _recipientSearch.value = recipient.name ?: ""
         _filteredRecipients.value = emptyList()
     }
 
     fun clearRecipient() {
         _selectedRecipient.value = null
         _recipientSearch.value = ""
-        _filteredRecipients.value = _allRecipients.value
+        _filteredRecipients.value = allRecipients
     }
 
     private fun loadRecipients() {
         scope.launch {
-            salesRepository.getConversationRecipients().collect { result ->
+            chatRepository.getRecipients(ChatAxis.STAFF).collect { result ->
                 when (result) {
                     is ResultState.Loading -> Unit
                     is ResultState.Success -> {
-                        _allRecipients.value = result.data
+                        allRecipients = result.data
                         _filteredRecipients.value = result.data
                     }
                     is ResultState.Error -> showErrorMessage(result.message)
@@ -82,24 +76,46 @@ class SalesInternalNewMessageComponent(
     fun send(text: String) {
         val msg = text.trim()
         if (msg.isBlank()) return
-        val recipient = _selectedRecipient.value ?: return
 
-        val currentThread = _threadId.value
-        if (currentThread != null) {
-            doSend(currentThread, msg)
+        val currentId = _conversationId.value
+        if (currentId != null) {
+            doSend(currentId, msg)
             return
         }
 
+        val recipient = _selectedRecipient.value ?: return
         scope.launch {
-            salesRepository.startConversation(recipient.employeeId).collect { result ->
+            chatRepository.startConversation(ChatAxis.STAFF, recipient.counterpartId)
+                .collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            val newId = result.data.conversationId
+                            if (newId != null) {
+                                _conversationId.value = newId
+                                stateHolder.refreshInternalMessages()
+                                doSend(newId, msg)
+                            } else {
+                                hideLoader()
+                            }
+                        }
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showErrorMessage(result.message)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun doSend(conversationId: Long, msg: String) {
+        scope.launch {
+            chatRepository.sendMessage(conversationId, msg).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
                         hideLoader()
-                        val newThreadId = result.data.threadId
-                        _threadId.value = newThreadId
-                        stateHolder.refreshInternalMessages()
-                        doSend(newThreadId, msg)
+                        loadMessages(conversationId)
                     }
                     is ResultState.Error -> {
                         hideLoader()
@@ -110,27 +126,9 @@ class SalesInternalNewMessageComponent(
         }
     }
 
-    private fun doSend(tid: Long, msg: String) {
+    private fun loadMessages(conversationId: Long) {
         scope.launch {
-            salesRepository.sendConversationMessage(tid, msg).collect { result ->
-                when (result) {
-                    is ResultState.Loading -> showLoader()
-                    is ResultState.Success -> {
-                        hideLoader()
-                        loadMessages(tid)
-                    }
-                    is ResultState.Error -> {
-                        hideLoader()
-                        showErrorMessage(result.message)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun loadMessages(tid: Long) {
-        scope.launch {
-            salesRepository.getConversationMessages(tid).collect { result ->
+            chatRepository.getMessages(conversationId).collect { result ->
                 when (result) {
                     is ResultState.Loading -> Unit
                     is ResultState.Success -> _messages.value = result.data.items
@@ -138,6 +136,11 @@ class SalesInternalNewMessageComponent(
                 }
             }
         }
+    }
+
+    fun isMine(message: ChatMessage, me: VendorOperationsMe): Boolean {
+        val myRefId = if (me.isVendorOwner) me.vendorId ?: 0L else me.employeeId ?: 0L
+        return message.senderRefId == myRefId
     }
 
     fun goBack() = salesRepBack()

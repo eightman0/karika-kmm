@@ -1,7 +1,8 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.customer
 
 import com.arkivanov.decompose.ComponentContext
-import karika.distribucija.ba.domain.model.Conversation
+import karika.distribucija.ba.domain.model.ChatAxis
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
@@ -15,12 +16,8 @@ class SalesCustomerMessagesComponent(
     stateHolder: KarikaStateHolder
 ) : CommonComponent(componentContext, stateHolder) {
 
-    private val _conversations = MutableStateFlow<List<Conversation>>(emptyList())
+    private val _conversations = MutableStateFlow<List<ChatConversation>>(emptyList())
     val conversations = _conversations.asStateFlow()
-
-    /** "all" | "sent" | "received" */
-    private val _filter = MutableStateFlow("all")
-    val filter = _filter.asStateFlow()
 
     init {
         load()
@@ -29,12 +26,8 @@ class SalesCustomerMessagesComponent(
         }
     }
 
-    fun setFilter(f: String) {
-        _filter.value = f
-    }
-
-    fun openConversation(conversation: Conversation) {
-        salesRepPush(SalesRepConfig.CustomerConversation(conversation.copy(admin = false)))
+    fun openConversation(conversation: ChatConversation) {
+        salesRepPush(SalesRepConfig.CustomerConversation(conversation))
     }
 
     fun openNewMessage() {
@@ -47,19 +40,20 @@ class SalesCustomerMessagesComponent(
 
     private fun load() {
         scope.launch {
-            messagesRepository.messages(admin = false).collect { result ->
-                when (result) {
-                    is ResultState.Loading -> showLoader()
-                    is ResultState.Success -> {
-                        hideLoader()
-                        _conversations.value = result.data.map { it.copy(admin = false) }
-                    }
-                    is ResultState.Error -> {
-                        hideLoader()
-                        showErrorMessage(result.message)
+            chatRepository.getConversations(axis = ChatAxis.VENDOR_CUSTOMER, pageSize = 100)
+                .collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            hideLoader()
+                            _conversations.value = result.data.items
+                        }
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showErrorMessage(result.message)
+                        }
                     }
                 }
-            }
         }
     }
 }

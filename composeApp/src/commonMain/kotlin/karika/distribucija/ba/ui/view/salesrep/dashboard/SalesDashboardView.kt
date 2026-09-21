@@ -51,6 +51,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaLogo
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderCartView
@@ -94,6 +95,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
     val navState = component.stack.subscribeAsState()
     val salesManager by component.stateHolder.salesSpecificHandler.me.collectAsState()
     val notificationBadge by component.stateHolder.vendorNotificationHandler.notificationCount.collectAsState()
+    val messageState by component.stateHolder.vendorNotificationHandler.chatUnreadCount.asState()
 
     BoxWithConstraints(
         modifier = Modifier
@@ -179,7 +181,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             icon = vectorResource(Res.drawable.ic_messages),
                             text = "Poruke kupaca",
                             selected = navState.value.active.instance is SalesChild.CustomerMessages,
-                            badge = 0, // TODO: wire to unread count
+                            badge = messageState.vendorCustomer,
                             onClick = {
                                 component.salesRepNavigate(
                                     SalesRepConfig.CustomerMessages,
@@ -192,6 +194,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             icon = vectorResource(Res.drawable.ic_email),
                             text = "Poruke admina",
                             selected = navState.value.active.instance is SalesChild.AdminMessages,
+                            badge = messageState.vendorAdmin,
                             onClick = {
                                 component.salesRepNavigate(
                                     SalesRepConfig.AdminMessages,
@@ -204,6 +207,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             icon = vectorResource(Res.drawable.ic_messages),
                             text = "Interne poruke",
                             selected = navState.value.active.instance is SalesChild.InternalMessages,
+                            badge = messageState.staff,
                             onClick = {
                                 component.salesRepNavigate(
                                     SalesRepConfig.InternalMessages,
@@ -339,35 +343,30 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         )
 
                         is SalesChild.AdminConversation -> SalesDetailTopBar(
-                            title = child.component.conversation.subject ?: "Poruka",
+                            title = child.component.conversation.counterpartName ?: "Poruka",
                             onBack = { child.component.goBack() }
                         )
 
-                        is SalesChild.AdminNewMessage -> {
-                            val threadId by child.component.threadId.collectAsState()
-                            val subject by child.component.subject.collectAsState()
-                            SalesDetailTopBar(
-                                title = if (threadId != null && subject.isNotBlank()) subject else "Nova poruka",
-                                onBack = { child.component.goBack() }
-                            )
-                        }
+                        is SalesChild.AdminNewMessage -> SalesDetailTopBar(
+                            title = "Nova poruka",
+                            onBack = { child.component.goBack() }
+                        )
 
                         is SalesChild.CustomerNewMessage -> {
-                            val threadId by child.component.threadId.collectAsState()
-                            val subject by child.component.subject.collectAsState()
+                            val selectedCustomer by child.component.selectedCustomer.collectAsState()
                             SalesDetailTopBar(
-                                title = if (threadId != null && subject.isNotBlank()) subject else "Nova poruka",
+                                title = selectedCustomer?.name ?: "Nova poruka",
                                 onBack = { child.component.goBack() }
                             )
                         }
 
                         is SalesChild.CustomerConversation -> SalesDetailTopBar(
-                            title = child.component.conversation.customerName(),
+                            title = child.component.conversation.counterpartName ?: "-",
                             onBack = { child.component.goBack() }
                         )
 
                         is SalesChild.InternalConversation -> SalesDetailTopBar(
-                            title = child.component.counterpartName,
+                            title = child.component.conversation.counterpartName ?: "-",
                             onBack = { child.component.goBack() }
                         )
 

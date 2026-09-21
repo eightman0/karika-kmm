@@ -41,8 +41,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.StaffRecipient
-import karika.distribucija.ba.domain.model.StaffThreadMessage
+import karika.distribucija.ba.domain.model.ChatMessage
+import karika.distribucija.ba.domain.model.ChatRecipient
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karikav2.composeapp.generated.resources.Res
@@ -50,14 +50,21 @@ import karikav2.composeapp.generated.resources.ic_cancel_circle
 import karikav2.composeapp.generated.resources.ic_send_receipt
 import org.jetbrains.compose.resources.vectorResource
 
+private fun String?.formatTime(): String {
+    if (this == null) return ""
+    val timePart = this.split(" ").getOrNull(1) ?: return ""
+    val parts = timePart.split(":")
+    return if (parts.size >= 2) "${parts[0]}:${parts[1]}" else timePart
+}
+
 @Composable
 fun SalesInternalNewMessageView(component: SalesInternalNewMessageComponent) {
-    val subject by component.subject.collectAsState()
     val recipientSearch by component.recipientSearch.collectAsState()
     val filteredRecipients by component.filteredRecipients.collectAsState()
     val selectedRecipient by component.selectedRecipient.collectAsState()
-    val threadId by component.threadId.collectAsState()
+    val conversationId by component.conversationId.collectAsState()
     val messages by component.messages.collectAsState()
+    val me by component.stateHolder.salesSpecificHandler.me.collectAsState()
     val listState = rememberLazyListState()
     val keyboard = LocalSoftwareKeyboardController.current
 
@@ -76,7 +83,7 @@ fun SalesInternalNewMessageView(component: SalesInternalNewMessageComponent) {
             .background(KarikaColors.Gray20)
     ) {
         // ── Compose header (shown only before first send) ──────────────────────
-        if (threadId == null) {
+        if (conversationId == null) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -84,50 +91,6 @@ fun SalesInternalNewMessageView(component: SalesInternalNewMessageComponent) {
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Subject field
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(14.dp))
-                        .background(KarikaColors.Gray20)
-                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    KarikaText(
-                        text = "Predmet:",
-                        color = KarikaColors.Gray6,
-                        textSize = 13.sp,
-                        fontWeight = FontWeight.W600,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        if (subject.isEmpty()) {
-                            KarikaText(
-                                text = "Unesite predmet poruke...",
-                                color = KarikaColors.Gray7,
-                                textSize = 13.sp,
-                                fontWeight = FontWeight.W400
-                            )
-                        }
-                        BasicTextField(
-                            value = subject,
-                            onValueChange = { component.setSubject(it) },
-                            modifier = Modifier.fillMaxWidth(),
-                            textStyle = TextStyle(
-                                color = KarikaColors.Gray2,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.W500
-                            ),
-                            cursorBrush = SolidColor(KarikaColors.Blue),
-                            singleLine = true
-                        )
-                    }
-                }
-
                 // Recipient search/select field
                 Column {
                     Row(
@@ -252,9 +215,10 @@ fun SalesInternalNewMessageView(component: SalesInternalNewMessageComponent) {
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(messages, key = { it.messageId }) { message ->
+            items(messages, key = { it.messageId ?: 0L }) { message ->
                 InternalNewMessageBubble(
                     message = message,
+                    isMine = component.isMine(message, me),
                     counterpartName = selectedRecipient?.name ?: ""
                 )
             }
@@ -336,7 +300,7 @@ fun SalesInternalNewMessageView(component: SalesInternalNewMessageComponent) {
 }
 
 @Composable
-private fun RecipientDropdownRow(recipient: StaffRecipient, onClick: () -> Unit) {
+private fun RecipientDropdownRow(recipient: ChatRecipient, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -348,26 +312,18 @@ private fun RecipientDropdownRow(recipient: StaffRecipient, onClick: () -> Unit)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
-            KarikaText(
-                text = recipient.name,
-                color = KarikaColors.Gray2,
-                textSize = 13.sp,
-                fontWeight = FontWeight.W500
-            )
-            KarikaText(
-                text = recipient.displayRole(),
-                color = KarikaColors.Gray6,
-                textSize = 11.sp,
-                fontWeight = FontWeight.W400
-            )
-        }
+        KarikaText(
+            text = recipient.name ?: "-",
+            color = KarikaColors.Gray2,
+            textSize = 13.sp,
+            fontWeight = FontWeight.W500
+        )
     }
 }
 
 @Composable
-private fun InternalNewMessageBubble(message: StaffThreadMessage, counterpartName: String) {
-    if (message.isMine) {
+private fun InternalNewMessageBubble(message: ChatMessage, isMine: Boolean, counterpartName: String) {
+    if (isMine) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.End
@@ -387,14 +343,14 @@ private fun InternalNewMessageBubble(message: StaffThreadMessage, counterpartNam
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 KarikaText(
-                    text = message.message,
+                    text = message.body ?: "",
                     color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400
                 )
             }
             KarikaText(
-                text = message.formattedTime(),
+                text = message.createdAt.formatTime(),
                 color = KarikaColors.Gray7,
                 textSize = 10.sp,
                 fontWeight = FontWeight.W400,
@@ -421,14 +377,14 @@ private fun InternalNewMessageBubble(message: StaffThreadMessage, counterpartNam
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 KarikaText(
-                    text = message.message,
+                    text = message.body ?: "",
                     color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400
                 )
             }
             KarikaText(
-                text = message.formattedTime(),
+                text = message.createdAt.formatTime(),
                 color = KarikaColors.Gray7,
                 textSize = 10.sp,
                 fontWeight = FontWeight.W400,

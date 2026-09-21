@@ -33,7 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.StaffThread
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karikav2.composeapp.generated.resources.Res
@@ -42,16 +42,15 @@ import karikav2.composeapp.generated.resources.ic_arrow_right
 import karikav2.composeapp.generated.resources.ic_messages
 import org.jetbrains.compose.resources.vectorResource
 
-private fun String?.formatDate(): String {
-    if (this == null) return ""
-    val datePart = (this.split("T").firstOrNull() ?: this.split(" ").firstOrNull() ?: this)
-    val parts = datePart.split("-")
-    return if (parts.size == 3) "${parts[2]}.${parts[1]}.${parts[0]}." else this
+private fun displayRole(counterpartType: String?): String = when (counterpartType) {
+    "vendor_owner" -> "Vlasnik"
+    "vendor_employee" -> "Zaposlenik"
+    else -> counterpartType ?: ""
 }
 
 @Composable
 fun SalesInternalMessagesView(component: SalesInternalMessagesComponent) {
-    val threads by component.threads.collectAsState()
+    val threads by component.conversations.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize().background(KarikaColors.Gray20)) {
 
@@ -100,7 +99,7 @@ fun SalesInternalMessagesView(component: SalesInternalMessagesComponent) {
                     }
                 }
             } else {
-                items(threads, key = { it.threadId }) { thread ->
+                items(threads, key = { it.conversationId ?: 0L }) { thread ->
                     InternalThreadCard(
                         thread = thread,
                         onClick = { component.openConversation(thread) }
@@ -145,8 +144,8 @@ fun SalesInternalMessagesView(component: SalesInternalMessagesComponent) {
 }
 
 @Composable
-private fun InternalThreadCard(thread: StaffThread, onClick: () -> Unit) {
-    val isUnread = thread.hasUnread()
+private fun InternalThreadCard(thread: ChatConversation, onClick: () -> Unit) {
+    val isUnread = thread.isUnread()
 
     Row(
         modifier = Modifier
@@ -190,7 +189,7 @@ private fun InternalThreadCard(thread: StaffThread, onClick: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 KarikaText(
-                    text = thread.counterpartName,
+                    text = thread.counterpartName ?: "-",
                     color = if (isUnread) KarikaColors.Gray2 else KarikaColors.Gray6,
                     textSize = if (isUnread) 15.sp else 14.sp,
                     fontWeight = if (isUnread) FontWeight.W700 else FontWeight.W500,
@@ -200,7 +199,7 @@ private fun InternalThreadCard(thread: StaffThread, onClick: () -> Unit) {
                 )
                 Spacer(Modifier.width(8.dp))
                 KarikaText(
-                    text = (thread.lastMessageAt ?: thread.updatedAt).formatDate(),
+                    text = thread.dateTimeLabel() ?: "",
                     color = if (isUnread) KarikaColors.Blue else KarikaColors.Gray7,
                     textSize = 11.sp,
                     fontWeight = if (isUnread) FontWeight.W700 else FontWeight.W400
@@ -210,16 +209,16 @@ private fun InternalThreadCard(thread: StaffThread, onClick: () -> Unit) {
             Spacer(Modifier.height(2.dp))
 
             KarikaText(
-                text = thread.displayRole(),
+                text = displayRole(thread.counterpartType),
                 color = KarikaColors.Gray7,
                 textSize = 11.sp,
                 fontWeight = FontWeight.W400
             )
 
-            if (!thread.lastMessage.isNullOrEmpty()) {
+            if (!thread.lastMessagePreview.isNullOrEmpty()) {
                 Spacer(Modifier.height(3.dp))
                 KarikaText(
-                    text = thread.lastMessage,
+                    text = thread.lastMessagePreview,
                     color = KarikaColors.Gray2,
                     textSize = if (isUnread) 14.sp else 13.sp,
                     fontWeight = if (isUnread) FontWeight.W700 else FontWeight.W400,

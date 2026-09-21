@@ -5,7 +5,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackCallback
-import karika.distribucija.ba.domain.model.Conversation
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.domain.model.DiscountRule
 import karika.distribucija.ba.domain.model.OnBehalfOrder
 import karika.distribucija.ba.domain.model.OperationalCustomer
@@ -131,8 +131,7 @@ class SalesDashboardComponent(
                 SalesInternalConversationComponent(
                     componentContext,
                     stateHolder,
-                    config.threadId,
-                    config.counterpartName
+                    config.conversation
                 )
             )
 
@@ -189,15 +188,15 @@ sealed class SalesRepConfig {
     @Serializable
     data object NewCustomer : SalesRepConfig()
     @Serializable
-    data class AdminConversation(val conversation: Conversation) : SalesRepConfig()
+    data class AdminConversation(val conversation: ChatConversation) : SalesRepConfig()
     @Serializable
-    data class CustomerConversation(val conversation: Conversation) : SalesRepConfig()
+    data class CustomerConversation(val conversation: ChatConversation) : SalesRepConfig()
     @Serializable
     data object AdminNewMessage : SalesRepConfig()
     @Serializable
     data class CustomerNewMessage(val initialCustomer: OperationalCustomer? = null) : SalesRepConfig()
     @Serializable
-    data class InternalConversation(val threadId: Long, val counterpartName: String) : SalesRepConfig()
+    data class InternalConversation(val conversation: ChatConversation) : SalesRepConfig()
     @Serializable
     data object InternalNewMessage : SalesRepConfig()
     @Serializable

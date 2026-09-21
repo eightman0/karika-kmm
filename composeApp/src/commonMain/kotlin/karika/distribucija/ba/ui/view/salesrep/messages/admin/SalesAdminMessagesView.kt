@@ -3,7 +3,6 @@ package karika.distribucija.ba.ui.view.salesrep.messages.admin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -35,7 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.Conversation
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karikav2.composeapp.generated.resources.Res
@@ -44,69 +42,13 @@ import karikav2.composeapp.generated.resources.ic_arrow_right
 import karikav2.composeapp.generated.resources.ic_email
 import org.jetbrains.compose.resources.vectorResource
 
-// ── Date formatter ─────────────────────────────────────────────────────────────
-// Converts "YYYY-MM-DD" or "YYYY-MM-DD HH:mm:ss" → "DD.MM.YYYY."
-private fun String?.formatDate(): String {
-    if (this == null) return ""
-    val datePart = this.split(" ").firstOrNull() ?: this
-    val parts = datePart.split("-")
-    return if (parts.size == 3) "${parts[2]}.${parts[1]}.${parts[0]}." else this
-}
-
-// ── Filter options ─────────────────────────────────────────────────────────────
-private val filters = listOf(
-    "all"      to "Sve",
-    "sent"     to "Poslano",
-    "received" to "Primljeno"
-)
-
 @Composable
 fun SalesAdminMessagesView(component: SalesAdminMessagesComponent) {
     val conversations by component.conversations.collectAsState()
-    val filter by component.filter.collectAsState()
-
-    val filtered = remember(conversations, filter) {
-        when (filter) {
-            "sent"     -> conversations.filter { it.receiverId == "0" }
-            "received" -> conversations.filter { it.receiverId != "0" }
-            else       -> conversations
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize().background(KarikaColors.Gray20)) {
 
         Column(modifier = Modifier.fillMaxSize()) {
-
-            // ── Filter chips ───────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                filters.forEach { (key, label) ->
-                    val isSelected = filter == key
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(if (isSelected) KarikaColors.Blue else KarikaColors.Gray10)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) { component.setFilter(key) }
-                            .padding(horizontal = 20.dp, vertical = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        KarikaText(
-                            text = label,
-                            color = if (isSelected) KarikaColors.White else KarikaColors.Gray2,
-                            textSize = 12.sp,
-                            fontWeight = FontWeight.W700
-                        )
-                    }
-                }
-            }
 
             // ── Conversation list ──────────────────────────────────────────────
             LazyColumn(
@@ -119,7 +61,7 @@ fun SalesAdminMessagesView(component: SalesAdminMessagesComponent) {
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                if (filtered.isEmpty()) {
+                if (conversations.isEmpty()) {
                     item {
                         Column(
                             modifier = Modifier
@@ -143,11 +85,7 @@ fun SalesAdminMessagesView(component: SalesAdminMessagesComponent) {
                                 )
                             }
                             KarikaText(
-                                text = when (filter) {
-                                    "sent"     -> "Nema poslanih poruka"
-                                    "received" -> "Nema primljenih poruka"
-                                    else       -> "Nema poruka"
-                                },
+                                text = "Nema poruka",
                                 color = KarikaColors.Gray2,
                                 textSize = 15.sp,
                                 fontWeight = FontWeight.W600
@@ -161,7 +99,7 @@ fun SalesAdminMessagesView(component: SalesAdminMessagesComponent) {
                         }
                     }
                 } else {
-                    items(filtered, key = { it.id ?: "" }) { conversation ->
+                    items(conversations, key = { it.conversationId ?: 0L }) { conversation ->
                         ConversationCard(
                             conversation = conversation,
                             onClick = { component.openConversation(conversation) }
@@ -210,8 +148,8 @@ fun SalesAdminMessagesView(component: SalesAdminMessagesComponent) {
 // ── Conversation card ──────────────────────────────────────────────────────────
 
 @Composable
-private fun ConversationCard(conversation: Conversation, onClick: () -> Unit) {
-    val isUnread = !conversation.isRead()
+private fun ConversationCard(conversation: ChatConversation, onClick: () -> Unit) {
+    val isUnread = conversation.isUnread()
 
     Row(
         modifier = Modifier
@@ -266,7 +204,7 @@ private fun ConversationCard(conversation: Conversation, onClick: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 KarikaText(
-                    text = conversation.senderName(),
+                    text = conversation.counterpartName ?: "-",
                     color = if (isUnread) KarikaColors.Gray2 else KarikaColors.Gray6,
                     textSize = if (isUnread) 15.sp else 14.sp,
                     fontWeight = if (isUnread) FontWeight.W700 else FontWeight.W500,
@@ -276,7 +214,7 @@ private fun ConversationCard(conversation: Conversation, onClick: () -> Unit) {
                 )
                 Spacer(Modifier.width(8.dp))
                 KarikaText(
-                    text = conversation.date().formatDate(),
+                    text = conversation.dateTimeLabel() ?: "",
                     color = if (isUnread) KarikaColors.Blue else KarikaColors.Gray7,
                     textSize = 11.sp,
                     fontWeight = if (isUnread) FontWeight.W700 else FontWeight.W400
@@ -285,9 +223,9 @@ private fun ConversationCard(conversation: Conversation, onClick: () -> Unit) {
 
             Spacer(Modifier.height(3.dp))
 
-            // Subject
+            // Last message preview
             KarikaText(
-                text = conversation.subject ?: "—",
+                text = conversation.lastMessagePreview ?: "—",
                 color = KarikaColors.Gray2,
                 textSize = if (isUnread) 14.sp else 13.sp,
                 fontWeight = if (isUnread) FontWeight.W700 else FontWeight.W400,

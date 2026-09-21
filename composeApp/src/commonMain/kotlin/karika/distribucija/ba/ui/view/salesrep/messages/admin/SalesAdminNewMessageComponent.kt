@@ -1,9 +1,10 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.admin
 
 import com.arkivanov.decompose.ComponentContext
-import karika.distribucija.ba.domain.model.Message
+import karika.distribucija.ba.domain.api.chatFileFrom
+import karika.distribucija.ba.domain.model.ChatAxis
+import karika.distribucija.ba.domain.model.ChatMessage
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.SendMessageRequest
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,64 +16,53 @@ class SalesAdminNewMessageComponent(
     stateHolder: KarikaStateHolder
 ) : CommonComponent(componentContext, stateHolder) {
 
-    // ── Compose form state ─────────────────────────────────────────────────────
-    private val _subject = MutableStateFlow("")
-    val subject = _subject.asStateFlow()
-
     // ── Conversation state (after first send) ──────────────────────────────────
     /** null = new message mode; non-null = conversation mode */
-    private val _threadId = MutableStateFlow<String?>(null)
-    val threadId = _threadId.asStateFlow()
+    private val _conversationId = MutableStateFlow<Long?>(null)
+    val conversationId = _conversationId.asStateFlow()
 
-    private val _messages = MutableStateFlow<List<Message>>(emptyList())
+    private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages = _messages.asStateFlow()
 
     val attachment = MutableStateFlow<Pair<String, ByteArray>?>(null)
 
     init {
         scope.launch {
-            stateHolder.adminThreadPush.collect { pushedThreadId ->
-                if (pushedThreadId == _threadId.value) loadMessages(pushedThreadId)
+            stateHolder.adminThreadPush.collect { pushedId ->
+                if (pushedId == _conversationId.value?.toString()) loadMessages(pushedId.toLong())
             }
         }
     }
 
-    fun setSubject(v: String) { _subject.value = v }
-
     fun send(text: String) {
-        val currentThread = _threadId.value
-        val subj = _subject.value.trim()
         val msg = text.trim()
         if (msg.isBlank() && attachment.value == null) return
+        val currentId = _conversationId.value
 
+        if (currentId == null) {
+            startAndSend(msg)
+            return
+        }
+
+        doSend(currentId, msg)
+    }
+
+    private fun startAndSend(msg: String) {
         scope.launch {
-            messagesRepository.send(
-                SendMessageRequest(
-                    sendToAdmin = true,
-                    message = msg,
-                    subject = if (currentThread == null) subj else null,
-                    receiverId = 0,
-                    threadId = currentThread?.toIntOrNull(),
-                    file = attachment.value
-                )
-            ).collect { result ->
+            chatRepository.startConversation(ChatAxis.VENDOR_ADMIN).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
-                        hideLoader()
-                        attachment.value = null
-                        // On first send, grab threadId from response and switch to conversation mode
-                        if (currentThread == null) {
-                            val newThreadId = result.data.threadId
-                            if (newThreadId != null) {
-                                _threadId.value = newThreadId
-                                loadMessages(newThreadId)
-                                stateHolder.refreshAdminMessages()
-                            }
+                        val newId = result.data.conversationId
+                        if (newId != null) {
+                            _conversationId.value = newId
+                            stateHolder.refreshAdminMessages()
+                            doSend(newId, msg)
                         } else {
-                            loadMessages(currentThread)
+                            hideLoader()
                         }
                     }
+
                     is ResultState.Error -> {
                         hideLoader()
                         showErrorMessage(result.message)
@@ -82,15 +72,38 @@ class SalesAdminNewMessageComponent(
         }
     }
 
-    private fun loadMessages(threadId: String) {
+    private fun doSend(conversationId: Long, msg: String) {
+        val files = attachment.value?.let { (name, bytes) -> listOf(chatFileFrom(name, bytes)) }
+            ?: emptyList()
+
         scope.launch {
-            messagesRepository.get(threadId = threadId, admin = true).collect { result ->
+            chatRepository.sendMessage(conversationId, msg, files).collect { result ->
                 when (result) {
-                    is ResultState.Loading -> Unit // don't show full-screen loader during reload
+                    is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
-                        _messages.value = result.data.firstOrNull()?.messages?.firstOrNull()
-                            ?: emptyList()
+                        hideLoader()
+                        attachment.value = null
+                        loadMessages(conversationId)
                     }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showErrorMessage(result.message)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadMessages(conversationId: Long) {
+        scope.launch {
+            chatRepository.getMessages(conversationId).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> Unit
+                    is ResultState.Success -> {
+                        _messages.value = result.data.items
+                    }
+
                     is ResultState.Error -> showErrorMessage(result.message)
                 }
             }

@@ -1,15 +1,14 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.customer
 
 import com.arkivanov.decompose.ComponentContext
-import karika.distribucija.ba.domain.api.SalesRepository
-import karika.distribucija.ba.domain.model.Message
+import karika.distribucija.ba.domain.api.chatFileFrom
+import karika.distribucija.ba.domain.model.ChatAxis
+import karika.distribucija.ba.domain.model.ChatMessage
+import karika.distribucija.ba.domain.model.ChatRecipient
 import karika.distribucija.ba.domain.model.OperationalCustomer
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.SendMessageRequest
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -22,113 +21,133 @@ class SalesCustomerNewMessageComponent(
 
     val customerLocked = initialCustomer != null
 
-    private val salesRepository = SalesRepository()
-
     // ── Form state ─────────────────────────────────────────────────────────────
-    private val _subject = MutableStateFlow("")
-    val subject = _subject.asStateFlow()
-
     private val _customerSearch = MutableStateFlow("")
     val customerSearch = _customerSearch.asStateFlow()
 
-    private val _customers = MutableStateFlow<List<OperationalCustomer>>(emptyList())
+    private var allRecipients: List<ChatRecipient> = emptyList()
+
+    private val _customers = MutableStateFlow<List<ChatRecipient>>(emptyList())
     val customers = _customers.asStateFlow()
 
-    private val _selectedCustomer = MutableStateFlow<OperationalCustomer?>(null)
+    private val _selectedCustomer = MutableStateFlow<ChatRecipient?>(null)
     val selectedCustomer = _selectedCustomer.asStateFlow()
 
     // ── Conversation state (after first send) ──────────────────────────────────
-    private val _threadId = MutableStateFlow<String?>(null)
-    val threadId = _threadId.asStateFlow()
+    private val _conversationId = MutableStateFlow<Long?>(null)
+    val conversationId = _conversationId.asStateFlow()
 
-    private val _messages = MutableStateFlow<List<Message>>(emptyList())
+    private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages = _messages.asStateFlow()
 
     val attachment = MutableStateFlow<Pair<String, ByteArray>?>(null)
 
-    private var searchJob: Job? = null
-
     init {
-        loadCustomers("")
-        if (initialCustomer != null) selectCustomer(initialCustomer)
+        loadRecipients()
+        if (initialCustomer != null) {
+            val name = initialCustomer.company?.takeIf { it.isNotBlank() } ?: initialCustomer.fullName
+            _selectedCustomer.value = ChatRecipient(
+                axis = ChatAxis.VENDOR_CUSTOMER,
+                counterpartId = initialCustomer.customerId,
+                counterpartType = "customer",
+                name = name
+            )
+            _customerSearch.value = name
+        }
         scope.launch {
-            stateHolder.customerThreadPush.collect { pushedThreadId ->
-                if (pushedThreadId == _threadId.value) loadMessages(pushedThreadId)
+            stateHolder.customerThreadPush.collect { pushedId ->
+                if (pushedId == _conversationId.value?.toString()) loadMessages(pushedId.toLong())
             }
         }
     }
 
-    fun setSubject(v: String) { _subject.value = v }
-
     fun setCustomerSearch(text: String) {
         _customerSearch.value = text
         _selectedCustomer.value = null
-        searchJob?.cancel()
-        searchJob = scope.launch {
-            delay(400)
-            loadCustomers(text)
+        val query = text.trim().lowercase()
+        _customers.value = if (query.isBlank()) {
+            allRecipients
+        } else {
+            allRecipients.filter { it.name?.lowercase()?.contains(query) == true }
         }
     }
 
-    fun selectCustomer(customer: OperationalCustomer) {
+    fun selectCustomer(customer: ChatRecipient) {
         _selectedCustomer.value = customer
-        _customerSearch.value = customer.company ?: customer.fullName
+        _customerSearch.value = customer.name ?: ""
     }
 
     fun clearCustomer() {
         _selectedCustomer.value = null
         _customerSearch.value = ""
-        loadCustomers("")
+        _customers.value = allRecipients
     }
 
-    private fun loadCustomers(search: String) {
+    private fun loadRecipients() {
         scope.launch {
-            salesRepository.getCustomers(
-                page = 1,
-                pageSize = 20,
-                search = search.takeIf { it.isNotBlank() }
-            ).collect { result ->
-                when (result) {
-                    is ResultState.Loading -> Unit
-                    is ResultState.Success -> _customers.value = result.data.items
-                    is ResultState.Error -> Unit
+            chatRepository.getRecipients(ChatAxis.VENDOR_CUSTOMER).collect { result ->
+                if (result is ResultState.Success) {
+                    allRecipients = result.data
+                    _customers.value = result.data
                 }
             }
         }
     }
 
     fun send(text: String) {
-        val currentThread = _threadId.value
         val msg = text.trim()
         if (msg.isBlank() && attachment.value == null) return
+        val currentId = _conversationId.value
+
+        if (currentId == null) {
+            val counterpartId = _selectedCustomer.value?.counterpartId ?: return
+            startAndSend(counterpartId, msg)
+            return
+        }
+
+        doSend(currentId, msg)
+    }
+
+    private fun startAndSend(counterpartId: Long, msg: String) {
+        scope.launch {
+            chatRepository.startConversation(ChatAxis.VENDOR_CUSTOMER, counterpartId)
+                .collect { result ->
+                    when (result) {
+                        is ResultState.Loading -> showLoader()
+                        is ResultState.Success -> {
+                            val newId = result.data.conversationId
+                            if (newId != null) {
+                                _conversationId.value = newId
+                                stateHolder.refreshCustomerMessages()
+                                doSend(newId, msg)
+                            } else {
+                                hideLoader()
+                            }
+                        }
+
+                        is ResultState.Error -> {
+                            hideLoader()
+                            showErrorMessage(result.message)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun doSend(conversationId: Long, msg: String) {
+        val files = attachment.value?.let { (name, bytes) -> listOf(chatFileFrom(name, bytes)) }
+            ?: emptyList()
 
         scope.launch {
-            messagesRepository.send(
-                SendMessageRequest(
-                    sendToAdmin = false,
-                    message = msg,
-                    subject = if (currentThread == null) _subject.value.trim() else null,
-                    receiverId = _selectedCustomer.value?.customerId?.toInt(),
-                    threadId = currentThread?.toIntOrNull(),
-                    file = attachment.value
-                )
-            ).collect { result ->
+            chatRepository.sendMessage(conversationId, msg, files).collect { result ->
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
                         hideLoader()
                         attachment.value = null
-                        if (currentThread == null) {
-                            val newThreadId = result.data.threadId
-                            if (newThreadId != null) {
-                                _threadId.value = newThreadId
-                                loadMessages(newThreadId)
-                                stateHolder.refreshCustomerMessages()
-                            }
-                        } else {
-                            loadMessages(currentThread)
-                        }
+                        loadMessages(conversationId)
                     }
+
                     is ResultState.Error -> {
                         hideLoader()
                         showErrorMessage(result.message)
@@ -138,14 +157,13 @@ class SalesCustomerNewMessageComponent(
         }
     }
 
-    private fun loadMessages(threadId: String) {
+    private fun loadMessages(conversationId: Long) {
         scope.launch {
-            messagesRepository.get(threadId = threadId, admin = false).collect { result ->
+            chatRepository.getMessages(conversationId).collect { result ->
                 when (result) {
                     is ResultState.Loading -> Unit
                     is ResultState.Success -> {
-                        _messages.value = result.data.firstOrNull()?.messages?.firstOrNull()
-                            ?: emptyList()
+                        _messages.value = result.data.items
                     }
                     is ResultState.Error -> showErrorMessage(result.message)
                 }

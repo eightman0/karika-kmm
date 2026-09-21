@@ -39,16 +39,25 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.StaffThreadMessage
+import karika.distribucija.ba.domain.model.ChatMessage
+import karika.distribucija.ba.domain.model.VendorOperationsMe
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_send_receipt
 import org.jetbrains.compose.resources.vectorResource
 
+private fun String?.formatTime(): String {
+    if (this == null) return ""
+    val timePart = this.split(" ").getOrNull(1) ?: return ""
+    val parts = timePart.split(":")
+    return if (parts.size >= 2) "${parts[0]}:${parts[1]}" else timePart
+}
+
 @Composable
 fun SalesInternalConversationView(component: SalesInternalConversationComponent) {
     val messages by component.messages.collectAsState()
+    val me by component.stateHolder.salesSpecificHandler.me.collectAsState()
     val listState = rememberLazyListState()
     val keyboard = LocalSoftwareKeyboardController.current
 
@@ -71,10 +80,11 @@ fun SalesInternalConversationView(component: SalesInternalConversationComponent)
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(messages, key = { it.messageId }) { message ->
+            items(messages, key = { it.messageId ?: 0L }) { message ->
                 InternalMessageBubble(
                     message = message,
-                    counterpartName = component.counterpartName
+                    isMine = component.isMine(message, me),
+                    counterpartName = component.conversation.counterpartName ?: "-"
                 )
             }
         }
@@ -153,8 +163,8 @@ fun SalesInternalConversationView(component: SalesInternalConversationComponent)
 }
 
 @Composable
-private fun InternalMessageBubble(message: StaffThreadMessage, counterpartName: String) {
-    if (message.isMine) {
+private fun InternalMessageBubble(message: ChatMessage, isMine: Boolean, counterpartName: String) {
+    if (isMine) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.End
@@ -174,14 +184,14 @@ private fun InternalMessageBubble(message: StaffThreadMessage, counterpartName: 
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 KarikaText(
-                    text = message.message,
+                    text = message.body ?: "",
                     color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400
                 )
             }
             KarikaText(
-                text = message.formattedTime(),
+                text = message.createdAt.formatTime(),
                 color = KarikaColors.Gray7,
                 textSize = 10.sp,
                 fontWeight = FontWeight.W400,
@@ -208,14 +218,14 @@ private fun InternalMessageBubble(message: StaffThreadMessage, counterpartName: 
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 KarikaText(
-                    text = message.message,
+                    text = message.body ?: "",
                     color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400
                 )
             }
             KarikaText(
-                text = message.formattedTime(),
+                text = message.createdAt.formatTime(),
                 color = KarikaColors.Gray7,
                 textSize = 10.sp,
                 fontWeight = FontWeight.W400,
