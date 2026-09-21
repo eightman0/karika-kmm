@@ -49,6 +49,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
@@ -1436,6 +1437,21 @@ private fun EnterComment(component: OrderDetailsComponent) {
     val order by component.order.collectAsState()
     val comment = component.newComment.asState()
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    if (order.commentsArchived()) {
+        KarikaText(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            text = "Komentari narudžbe su arhivirani",
+            color = KarikaColors.Gray6,
+            textSize = 14.sp,
+            fontWeight = FontWeight.W500,
+            textAlign = TextAlign.Center
+        )
+        return
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
