@@ -1,8 +1,10 @@
 package karika.distribucija.ba.ui.view.salesrep.notifications
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.Notification
+import karika.distribucija.ba.domain.model.VendorNotification
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.YSpacer16
@@ -30,12 +32,29 @@ import karika.distribucija.ba.ui.components.onClick
 @Composable
 fun SalesNotificationsView(component: SalesNotificationsComponent) {
     val notifications by component.notifications.collectAsState()
+    val hasUnread = notifications.any { !it.isRead }
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
+            if (hasUnread) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        KarikaText(
+                            modifier = Modifier.onClick { component.markAllAsRead() },
+                            color = KarikaColors.Blue,
+                            fontWeight = FontWeight.W700,
+                            textSize = 13.sp,
+                            text = "Označi sve kao pročitano"
+                        )
+                    }
+                }
+            }
             items(items = notifications) {
                 SalesNotificationItem(it, component)
             }
@@ -59,14 +78,14 @@ fun SalesNotificationsView(component: SalesNotificationsComponent) {
 }
 
 @Composable
-private fun SalesNotificationItem(item: Notification, component: SalesNotificationsComponent) {
+private fun SalesNotificationItem(item: VendorNotification, component: SalesNotificationsComponent) {
     Box(
         modifier = Modifier
             .onClick { component.markAsRead(item) }
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        if (item.isRead == "false") {
+        if (!item.isRead) {
             Box(
                 modifier = Modifier
                     .background(color = KarikaColors.Red2)

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,6 +54,7 @@ fun TopBarWithBack(
     title: String,
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
     color: Color = KarikaColors.Primary,
+    actions: @Composable RowScope.() -> Unit = {},
     back: () -> Unit
 ) {
     TopAppBar(
@@ -60,8 +62,7 @@ fun TopBarWithBack(
             .fillMaxWidth(),
         title = {
             KarikaText(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier,
                 text = title,
                 color = KarikaColors.White,
                 textSize = 20.sp,
@@ -81,9 +82,7 @@ fun TopBarWithBack(
                 tint = KarikaColors.White
             )
         },
-        actions = {
-
-        },
+        actions = actions,
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = color
         ),

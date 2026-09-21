@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,6 +52,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaLogo
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.ReadFilterDropdown
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
@@ -314,7 +316,15 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         is SalesChild.Operations -> SalesRootTopBar("Operacije", notificationBadge, onNotifications) { menuClick() }
                         is SalesChild.Notifications -> SalesDetailTopBar(
                             title = "Obavijesti",
-                            onBack = { child.component.goBack() }
+                            onBack = { child.component.goBack() },
+                            actions = {
+                                val readFilter by child.component.readFilter.collectAsState()
+                                ReadFilterDropdown(
+                                    selected = readFilter,
+                                    onSelect = { child.component.setReadFilter(it) }
+                                )
+                                Spacer(Modifier.width(12.dp))
+                            }
                         )
                         is SalesChild.CustomerDetail -> SalesDetailTopBar(
                             title = child.component.customer.company?.takeIf { it.isNotBlank() }
@@ -515,7 +525,11 @@ private fun SalesRootTopBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SalesDetailTopBar(title: String, onBack: () -> Unit) {
+fun SalesDetailTopBar(
+    title: String,
+    onBack: () -> Unit,
+    actions: @Composable RowScope.() -> Unit = {}
+) {
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         colors = TopAppBarDefaults.topAppBarColors(containerColor = KarikaColors.White),
@@ -536,7 +550,8 @@ fun SalesDetailTopBar(title: String, onBack: () -> Unit) {
                 contentDescription = "Nazad",
                 tint = KarikaColors.Blue
             )
-        }
+        },
+        actions = actions
     )
 }
 

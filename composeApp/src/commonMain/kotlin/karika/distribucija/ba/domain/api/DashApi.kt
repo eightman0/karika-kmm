@@ -26,8 +26,8 @@ import karika.distribucija.ba.domain.model.DiscountRule
 import karika.distribucija.ba.domain.model.DiscountRuleSearchResults
 import karika.distribucija.ba.domain.model.DashboardData
 import karika.distribucija.ba.domain.model.MediaGallery
-import karika.distribucija.ba.domain.model.Notification
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.VendorNotificationSearchResults
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.domain.model.VendorDeliveryServiceData
 import karika.distribucija.ba.domain.model.VendorOrder
@@ -463,9 +463,32 @@ internal class DashApi {
         )
     }
 
-    suspend fun notifications(): Result<HttpResponse> = runCatching {
+    /** `/V1/vendor-operations/notifications` (Chat V2 mobile spec). [isRead] filters
+     * via a Magento `filter_groups` clause on `is_read` (null = no filter, all statuses). */
+    suspend fun getVendorNotifications(
+        page: Int,
+        pageSize: Int,
+        isRead: Boolean? = null
+    ): Result<HttpResponse> = runCatching {
+        val filterParams = if (isRead != null) {
+            "&searchCriteria[filter_groups][0][filters][0][field]=is_read" +
+                "&searchCriteria[filter_groups][0][filters][0][value]=${if (isRead) 1 else 0}" +
+                "&searchCriteria[filter_groups][0][filters][0][condition_type]=eq"
+        } else ""
         return@runCatching HttpClientProvider.client.get(
-            url("mobile/vendor/notifications")
+            url("vendor-operations/notifications?searchCriteria[current_page]=$page&searchCriteria[page_size]=$pageSize$filterParams")
+        )
+    }
+
+    suspend fun markVendorNotificationRead(notificationId: String): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.post(
+            url("vendor-operations/notifications/$notificationId/mark-read")
+        )
+    }
+
+    suspend fun markAllVendorNotificationsRead(): Result<HttpResponse> = runCatching {
+        return@runCatching HttpClientProvider.client.post(
+            url("vendor-operations/notifications/mark-all-read")
         )
     }
 
@@ -500,15 +523,6 @@ internal class DashApi {
                     )
                 )
             }
-        }
-
-    suspend fun markAsRead(
-        entityId: String,
-    ): Result<HttpResponse> =
-        runCatching {
-            return@runCatching HttpClientProvider.client.post(
-                url("mobile/vendor/notification/mark_read?notificationId=$entityId")
-            )
         }
 
     suspend fun getBytesFromImage(url: String): Result<HttpResponse> = runCatching {
@@ -914,14 +928,56 @@ class DashRepository internal constructor() {
         }
     }.flowOn(Dispatchers.Default)
 
-    fun notifications(): Flow<ResultState<List<Notification>>> = flow {
+    fun vendorNotifications(
+        page: Int = 1,
+        pageSize: Int = 50,
+        isRead: Boolean? = null
+    ): Flow<ResultState<VendorNotificationSearchResults>> = flow {
         emit(ResultState.Loading)
         try {
-            val response = DashApi().notifications()
+            val response = DashApi().getVendorNotifications(page, pageSize, isRead)
                 .getOrNoInternet()
 
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<List<Notification>>()))
+                emit(ResultState.Success(response.body<VendorNotificationSearchResults>()))
+                return@flow
+            }
+
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun markVendorNotificationRead(notificationId: String): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = DashApi().markVendorNotificationRead(notificationId)
+                .getOrNoInternet()
+
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(""))
+                return@flow
+            }
+
+            emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    fun markAllVendorNotificationsRead(): Flow<ResultState<String>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = DashApi().markAllVendorNotificationsRead()
+                .getOrNoInternet()
+
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(""))
                 return@flow
             }
 
@@ -941,28 +997,6 @@ class DashRepository internal constructor() {
             emit(ResultState.Loading)
             try {
                 val response = DashApi().updateOrder(orderId, items)
-                    .getOrNoInternet()
-
-                if (response.status == HttpStatusCode.OK) {
-                    emit(ResultState.Success(""))
-                    return@flow
-                }
-
-                emit(ResultState.Error("Došlo je do greške. Pokušajte ponovo!"))
-            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                emit(ResultState.Error(e.message))
-            }
-        }.flowOn(Dispatchers.Default)
-
-    fun markAsRead(
-        id: String,
-    ): Flow<ResultState<String>> =
-        flow {
-            emit(ResultState.Loading)
-            try {
-                val response = DashApi().markAsRead(id)
                     .getOrNoInternet()
 
                 if (response.status == HttpStatusCode.OK) {

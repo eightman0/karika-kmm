@@ -17,11 +17,12 @@ class VendorNotificationHandler {
     fun notificationReceived() {
         reloadChatMessageCount()
         CoroutineScope(Dispatchers.Main).launch {
+            // page_size=1: only total_count is needed for the badge.
             DashRepository()
-                .notifications()
+                .vendorNotifications(isRead = false, pageSize = 1)
                 .collect {
                     if (it is ResultState.Success) {
-                        notificationCount.value = it.data.count { it1 -> it1.isRead == "0" }
+                        notificationCount.value = it.data.totalCount.toInt()
                     }
                 }
         }

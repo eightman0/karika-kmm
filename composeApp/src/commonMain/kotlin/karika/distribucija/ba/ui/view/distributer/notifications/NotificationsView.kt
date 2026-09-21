@@ -1,11 +1,12 @@
 package karika.distribucija.ba.ui.view.distributer.notifications
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,26 +22,49 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.Notification
+import karika.distribucija.ba.domain.model.VendorNotification
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.ReadFilterDropdown
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.onClick
 
+/** Distributer's dashboard shares one top bar across every screen (no per-screen title/back/
+ * actions slot - see TopBarDashboard in ui/components/TopBar.kt), so the read filter lives
+ * inline here instead of in a top bar, unlike the sales rep equivalent. */
 @Composable
 fun NotificationsView(component: NotificationsComponent) {
     val notifications by component.notifications.collectAsState()
+    val readFilter by component.readFilter.collectAsState()
+    val hasUnread = notifications.any { !it.isRead }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ReadFilterDropdown(
+                        selected = readFilter,
+                        onSelect = { component.setReadFilter(it) }
+                    )
+                    if (hasUnread) {
+                        KarikaText(
+                            modifier = Modifier.onClick { component.markAllAsRead() },
+                            color = KarikaColors.Blue,
+                            fontWeight = FontWeight.W700,
+                            textSize = 13.sp,
+                            text = "Označi sve kao pročitano"
+                        )
+                    }
+                }
+            }
             items(items = notifications) {
                 NotificationItem(it, component)
             }
@@ -65,7 +89,7 @@ fun NotificationsView(component: NotificationsComponent) {
 }
 
 @Composable
-private fun NotificationItem(item: Notification, component: NotificationsComponent) {
+private fun NotificationItem(item: VendorNotification, component: NotificationsComponent) {
     Box(
         modifier = Modifier
             .onClick {
@@ -74,10 +98,10 @@ private fun NotificationItem(item: Notification, component: NotificationsCompone
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        if (item.isRead == "false") {
+        if (!item.isRead) {
             Box(
                 modifier = Modifier
-                    .background(color = KarikaColors.Red2)
+                  //  .background(color = KarikaColors.Red2)
                     .fillMaxSize(),
                 contentAlignment = Alignment.CenterEnd
             ) {
@@ -122,4 +146,3 @@ private fun NotificationItem(item: Notification, component: NotificationsCompone
         }
     }
 }
-

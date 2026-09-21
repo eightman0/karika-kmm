@@ -1,9 +1,11 @@
 package karika.distribucija.ba.ui.view.shop.profile.notifications
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,10 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.Notification
+import karika.distribucija.ba.domain.model.VendorNotification
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.ReadFilterDropdown
 import karika.distribucija.ba.ui.components.TopBarWithBack
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
@@ -38,7 +41,20 @@ fun NotificationsView(component: NotificationsComponent) {
         containerColor = KarikaColors.White,
         contentWindowInsets = WindowInsets.systemBars,
         topBar = {
-            TopBarWithBack("Notifikacije") {
+            TopBarWithBack(
+                title = "Notifikacije",
+                actions = {
+                    val readFilter by component.readFilter.collectAsState()
+                    ReadFilterDropdown(
+                        selected = readFilter,
+                        borderColor = KarikaColors.White,
+                        textColor = KarikaColors.White,
+                        iconColor = KarikaColors.White,
+                        selectedTextColor = KarikaColors.Primary,
+                        onSelect = { component.setReadFilter(it) }
+                    )
+                }
+            ) {
                 component.appBack()
             }
         },
@@ -51,6 +67,7 @@ fun NotificationsView(component: NotificationsComponent) {
 @Composable
 private fun Notifications(padding: PaddingValues, component: NotificationsComponent) {
     val notifications by component.notifications.collectAsState()
+    val hasUnread = notifications.any { !it.isRead }
 
     Box(
         modifier = Modifier
@@ -62,6 +79,22 @@ private fun Notifications(padding: PaddingValues, component: NotificationsCompon
             modifier = Modifier
                 .fillMaxSize()
         ) {
+            if (hasUnread) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        KarikaText(
+                            modifier = Modifier.onClick { component.markAllAsRead() },
+                            color = KarikaColors.Primary,
+                            fontWeight = FontWeight.W700,
+                            textSize = 13.sp,
+                            text = "Označi sve kao pročitano"
+                        )
+                    }
+                }
+            }
             items(items = notifications) {
                 NotificationItem(it, component)
             }
@@ -82,7 +115,7 @@ private fun Notifications(padding: PaddingValues, component: NotificationsCompon
 }
 
 @Composable
-private fun NotificationItem(item: Notification, component: NotificationsComponent) {
+private fun NotificationItem(item: VendorNotification, component: NotificationsComponent) {
     Box(
         modifier = Modifier
             .onClick {
@@ -92,7 +125,7 @@ private fun NotificationItem(item: Notification, component: NotificationsCompone
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        if (item.isRead == "false") {
+        if (!item.isRead) {
             Box(
                 modifier = Modifier
                     .background(color = KarikaColors.Red2)
