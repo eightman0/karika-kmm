@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -29,6 +30,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +41,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -59,10 +64,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.model.Comment
+import karika.distribucija.ba.domain.model.File
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField1
 import karika.distribucija.ba.ui.components.KarikaTextField2
@@ -72,13 +80,16 @@ import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rememberImeVisible
+import karika.distribucija.ba.ui.view.distributer.orders.details.component.AttachBillModal
 import karika.distribucija.ba.util.KarikaConstants
 import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_down
 import karikav2.composeapp.generated.resources.ic_arrow_up
+import karikav2.composeapp.generated.resources.ic_email
 import karikav2.composeapp.generated.resources.ic_location
 import karikav2.composeapp.generated.resources.ic_menu
+import karikav2.composeapp.generated.resources.ic_pdf
 import karikav2.composeapp.generated.resources.ic_person
 import karikav2.composeapp.generated.resources.ic_phone
 import karikav2.composeapp.generated.resources.ic_print
@@ -92,6 +103,7 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
     val vendorOrder by component.vendorOrder.collectAsState()
+    val isOrderLoaded by component.isOrderLoaded.collectAsState()
     val comments by component.comments.collectAsState()
     val isSendingComment by component.isSendingComment.collectAsState()
     var commentText by remember { mutableStateOf("") }
@@ -99,20 +111,28 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
     var deliveryExpanded by remember { mutableStateOf(false) }
     var shippingCost by remember { mutableStateOf<Pair<Double?, Double?>?>(null) }
     var showPrintMenu by remember { mutableStateOf(false) }
+    var showAttachBillModal by remember { mutableStateOf(false) }
     val imeVisible = rememberImeVisible()
 
     val canEdit = vendorOrder.isPending() && !vendorOrder.locked()
+    // The screen shows a full-screen loader until getOrder() responds (see below), so this
+    // only needs to account for a locked order once real data is on screen.
+    val blurInfoFields = vendorOrder.locked()
 
-    // vendorOrder.orderTotal comes straight from the API and is the sum of undiscounted row
-    // totals (it ignores each product's discount_percent) - recompute from the line items
-    // instead, using the same discounted-row formula as ProductSpecificationTable below.
-    val vpcTotal = vendorOrder.products.sumOf { product ->
-        val price = product.price?.toDoubleOrNull() ?: 0.0
-        val discountPercent = product.rabat().toIntOrNull() ?: 0
-        val discountedPrice = price * (1.0 - discountPercent / 100.0)
-        val qty = product.qtyOrdered?.toIntOrNull() ?: 0
-        discountedPrice * qty
+    // Auto-calculate the shipping price whenever the order already carries a saved package
+    // size/weight (loaded into these fields by refreshOrder()) - the rep shouldn't have to
+    // press "Izračunaj cijenu" again just to see a price that was already computed before.
+    LaunchedEffect(vendorOrder) {
+        val width = component.packageWidth.value
+        val height = component.packageHeight.value
+        val depth = component.packageDepth.value
+        val weight = component.packageWeight.value
+        if (width.isNotBlank() && height.isNotBlank() && depth.isNotBlank() && weight.isNotBlank()) {
+            shippingCost = component.calculateShipping(width, height, depth, weight)
+        }
     }
+
+    val vpcTotal = vendorOrder.orderTotal?.toDoubleOrNull() ?: 0.0
     val pdvTotal = (vpcTotal * 0.17)
     val grandTotal = vpcTotal + pdvTotal
     val commission = vendorOrder.shopCommissionFee?.toDoubleOrNull()
@@ -130,6 +150,13 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
             .fillMaxSize()
             .background(KarikaColors.Gray20)
     ) {
+        if (!isOrderLoaded) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = KarikaColors.Blue)
+            }
+            return@Box
+        }
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 96.dp)
@@ -186,13 +213,15 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                                 label = "SA PDV",
                                 value = karikaPriceFormat(grandTotal) + " KM",
                                 valueColor = KarikaColors.Gray2,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                blurred = blurInfoFields
                             )
                             FinancialCell(
                                 label = "KARIKA PROVIZIJA",
                                 value = if (commission != null) karikaPriceFormat(commission) + " KM" else "—",
                                 valueColor = KarikaColors.Blue,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                blurred = blurInfoFields
                             )
                         }
 
@@ -203,21 +232,57 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                         // Customer rows
                         CustomerInfoRow(
                             icon = Res.drawable.ic_person,
-                            label = "NAZIV KUPCA",
+                            label = "NAZIV PRAVNOG LICA",
                             line1 = vendorOrder.b2bPravnoLice ?: "Kupac #${vendorOrder.customerId}",
-                            line2 = "ID: ${vendorOrder.customerId}"
+                            blurred = blurInfoFields
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            InfoCell(
+                                label = "PDV BROJ",
+                                value = vendorOrder.pdvNumber ?: "-",
+                                valueColor = KarikaColors.Gray2,
+                                modifier = Modifier.weight(1f),
+                                blurred = blurInfoFields
+                            )
+                            InfoCell(
+                                label = "ID BROJ",
+                                value = vendorOrder.idNumber ?: "-",
+                                valueColor = KarikaColors.Gray2,
+                                modifier = Modifier.weight(1f),
+                                blurred = blurInfoFields
+                            )
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        CustomerInfoRow(
+                            icon = Res.drawable.ic_person,
+                            label = "IME KONTAKT OSOBE",
+                            line1 = vendorOrder.billingName ?: "-",
+                            blurred = blurInfoFields
                         )
                         Spacer(Modifier.height(16.dp))
                         CustomerInfoRow(
-                            icon = Res.drawable.ic_location,
-                            label = "ADRESA ZA ISPORUKU",
-                            line1 = address
+                            icon = Res.drawable.ic_email,
+                            label = "KONTAKT EMAIL",
+                            line1 = vendorOrder.email(),
+                            blurred = blurInfoFields
                         )
                         Spacer(Modifier.height(16.dp))
                         CustomerInfoRow(
                             icon = Res.drawable.ic_phone,
                             label = "KONTAKT TELEFON",
-                            line1 = phone
+                            line1 = phone,
+                            blurred = blurInfoFields
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        CustomerInfoRow(
+                            icon = Res.drawable.ic_location,
+                            label = "ADRESA ZA ISPORUKU",
+                            line1 = address,
+                            blurred = blurInfoFields
                         )
                     }
                 }
@@ -481,82 +546,99 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
             // ── Specifikacija narudžbe ───────────────────────────────────────────
             item {
                 val products = vendorOrder.products
-                Column(
+                Box(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(KarikaColors.White)
-                        .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(16.dp))
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .blur(radius = if (vendorOrder.locked()) 5.dp else 0.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(KarikaColors.White)
+                            .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(16.dp))
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            KarikaText(
+                                text = "Specifikacija narudžbe",
+                                color = KarikaColors.Gray2,
+                                textSize = 16.sp,
+                                fontWeight = FontWeight.W700
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(KarikaColors.Gray9)
+                                    .padding(horizontal = 10.dp, vertical = 3.dp)
+                            ) {
+                                KarikaText(
+                                    text = "${products.size} artikala",
+                                    color = KarikaColors.Gray6,
+                                    textSize = 11.sp,
+                                    fontWeight = FontWeight.W600
+                                )
+                            }
+                        }
+
+                        HorizontalDivider(color = KarikaColors.Gray9, thickness = 1.dp)
+
+                        if (products.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                KarikaText(
+                                    text = "—",
+                                    color = KarikaColors.Gray6,
+                                    textSize = 15.sp,
+                                    fontWeight = FontWeight.W500
+                                )
+                            }
+                        } else {
+                            ProductSpecificationTable(
+                                products = products,
+                                canEdit = canEdit,
+                                onEditClick = { editingItem = it }
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            StatCard(modifier = Modifier.weight(1f), label = "Ukupno VPC", value = karikaPriceFormat(vpcTotal) + " KM")
+                            StatCard(modifier = Modifier.weight(1f), label = "Ukupno PDV 17%", value = karikaPriceFormat(pdvTotal) + " KM")
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            StatCard(modifier = Modifier.weight(1f), label = "Ukupno sa PDV", value = karikaPriceFormat(grandTotal) + " KM")
+                            StatCard(
+                                modifier = Modifier.weight(1f),
+                                label = "Karika provizija",
+                                value = if (commission != null) karikaPriceFormat(commission) + " KM" else "—"
+                            )
+                        }
+                    }
+                    if (vendorOrder.locked()) {
                         KarikaText(
-                            text = "Specifikacija narudžbe",
-                            color = KarikaColors.Gray2,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W700
-                        )
-                        Box(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(KarikaColors.Gray9)
-                                .padding(horizontal = 10.dp, vertical = 3.dp)
-                        ) {
-                            KarikaText(
-                                text = "${products.size} artikala",
-                                color = KarikaColors.Gray6,
-                                textSize = 11.sp,
-                                fontWeight = FontWeight.W600
-                            )
-                        }
-                    }
-
-                    HorizontalDivider(color = KarikaColors.Gray9, thickness = 1.dp)
-
-                    if (products.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            KarikaText(
-                                text = "—",
-                                color = KarikaColors.Gray6,
-                                textSize = 15.sp,
-                                fontWeight = FontWeight.W500
-                            )
-                        }
-                    } else {
-                        ProductSpecificationTable(
-                            products = products,
-                            canEdit = canEdit,
-                            onEditClick = { editingItem = it }
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        StatCard(modifier = Modifier.weight(1f), label = "Ukupno VPC", value = karikaPriceFormat(vpcTotal) + " KM")
-                        StatCard(modifier = Modifier.weight(1f), label = "Ukupno PDV 17%", value = karikaPriceFormat(pdvTotal) + " KM")
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        StatCard(modifier = Modifier.weight(1f), label = "Ukupno sa PDV", value = karikaPriceFormat(grandTotal) + " KM")
-                        StatCard(
-                            modifier = Modifier.weight(1f),
-                            label = "Karika provizija",
-                            value = if (commission != null) karikaPriceFormat(commission) + " KM" else "—"
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            text = "Za prikaz detalja narudžbe, molimo Vas da zaključite prethodne narudžbe tako što ćete ih označiti kao odobrene ili odbijene!",
+                            color = KarikaColors.Primary,
+                            textSize = 14.sp,
+                            fontWeight = FontWeight.W700,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -581,81 +663,92 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                         if (comments.isNotEmpty()) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 comments.forEach { comment ->
-                                    CommentBubble(comment = comment)
+                                    CommentBubble(comment = comment, component = component)
                                 }
                             }
                             HorizontalDivider(color = KarikaColors.Gray9)
                         }
 
-                        // Textarea
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(KarikaColors.Gray10)
-                                .padding(12.dp)
-                        ) {
-                            if (commentText.isEmpty()) {
-                                KarikaText(
-                                    text = "Napiši komentar kupcu...",
-                                    color = KarikaColors.Gray8,
-                                    textSize = 14.sp,
-                                    fontWeight = FontWeight.W400
-                                )
-                            }
-                            BasicTextField(
-                                value = commentText,
-                                onValueChange = { commentText = it },
-                                textStyle = TextStyle(
-                                    color = KarikaColors.Gray2,
-                                    fontSize = 14.sp,
-                                    fontFamily = karikaFonts()
-                                ),
+                        if (vendorOrder.commentsArchived()) {
+                            KarikaText(
+                                text = "Komentari narudžbe su arhivirani",
+                                color = KarikaColors.Gray6,
+                                textSize = 14.sp,
+                                fontWeight = FontWeight.W500,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else {
+                            // Textarea
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                            )
-                        }
-
-                        // Send button
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(
-                                    if (isSendingComment) KarikaColors.Gray9 else KarikaColors.Blue
-                                )
-                                .clickable(
-                                    enabled = !isSendingComment,
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() }
-                                ) {
-                                    component.sendComment(commentText)
-                                    commentText = ""
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(KarikaColors.Gray10)
+                                    .padding(12.dp)
+                            ) {
+                                if (commentText.isEmpty()) {
+                                    KarikaText(
+                                        text = "Napiši komentar kupcu...",
+                                        color = KarikaColors.Gray8,
+                                        textSize = 14.sp,
+                                        fontWeight = FontWeight.W400
+                                    )
                                 }
-                                .padding(vertical = 14.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (isSendingComment) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(18.dp),
-                                    color = KarikaColors.Gray6,
-                                    strokeWidth = 2.dp
+                                BasicTextField(
+                                    value = commentText,
+                                    onValueChange = { commentText = it },
+                                    textStyle = TextStyle(
+                                        color = KarikaColors.Gray2,
+                                        fontSize = 14.sp,
+                                        fontFamily = karikaFonts()
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
                                 )
-                            } else {
-                                Icon(
-                                    imageVector = vectorResource(Res.drawable.ic_send_receipt),
-                                    contentDescription = "",
-                                    tint = KarikaColors.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                KarikaText(
-                                    text = "Pošalji komentar",
-                                    color = KarikaColors.White,
-                                    textSize = 15.sp,
-                                    fontWeight = FontWeight.W700
-                                )
+                            }
+
+                            // Send button
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(
+                                        if (isSendingComment) KarikaColors.Gray9 else KarikaColors.Blue
+                                    )
+                                    .clickable(
+                                        enabled = !isSendingComment,
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) {
+                                        component.sendComment(commentText)
+                                        commentText = ""
+                                    }
+                                    .padding(vertical = 14.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (isSendingComment) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        color = KarikaColors.Gray6,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = vectorResource(Res.drawable.ic_send_receipt),
+                                        contentDescription = "",
+                                        tint = KarikaColors.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    KarikaText(
+                                        text = "Pošalji komentar",
+                                        color = KarikaColors.White,
+                                        textSize = 15.sp,
+                                        fontWeight = FontWeight.W700
+                                    )
+                                }
                             }
                         }
                     }
@@ -717,11 +810,11 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                         }
                         PrintMenuPillButton(label = "Printaj predračun", filled = false) {
                             showPrintMenu = false
-                            component.showMessage("Uskoro dostupno")
+                            component.printEstimate()
                         }
                         PrintMenuPillButton(label = "Pošalji predračun", filled = true) {
                             showPrintMenu = false
-                            component.showMessage("Uskoro dostupno")
+                            showAttachBillModal = true
                         }
                     }
                 }
@@ -737,6 +830,17 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
             onConfirm = { newQty, newDiscount ->
                 component.editOrderProduct(newQty, newDiscount)
             }
+        )
+    }
+
+    if (showAttachBillModal) {
+        AttachBillModal(
+            component = component,
+            onSubmit = { message, file ->
+                component.sendEstimate(message, file.second, file.first)
+                showAttachBillModal = false
+            },
+            onCancel = { showAttachBillModal = false }
         )
     }
 }
@@ -772,14 +876,19 @@ private fun PrintMenuPillButton(label: String, filled: Boolean, onClick: () -> U
 
 // ── Comment bubble ────────────────────────────────────────────────────────────
 
+private fun String.isImageFile() = lowercase().let {
+    it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".png") ||
+        it.endsWith(".gif") || it.endsWith(".webp")
+}
+
 @Composable
-private fun CommentBubble(comment: Comment) {
+private fun CommentBubble(comment: Comment, component: SalesOrderDetailComponent) {
     val isMine = comment.isMine()
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = if (isMine) Alignment.End else Alignment.Start
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth(0.82f)
                 .clip(
@@ -791,12 +900,17 @@ private fun CommentBubble(comment: Comment) {
                     )
                 )
                 .background(if (isMine) KarikaColors.Blue else KarikaColors.Gray10)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            HtmlTextWithStyles(
-                html = comment.message(),
-                textColor = if (isMine) KarikaColors.White else KarikaColors.Gray2,
-            )
+            if (comment.message().isNotBlank()) {
+                HtmlTextWithStyles(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    html = comment.message(),
+                    textColor = if (isMine) KarikaColors.White else KarikaColors.Gray2,
+                )
+            }
+            comment.files?.forEach { file ->
+                CommentFileAttachment(file = file, isMine = isMine, component = component)
+            }
         }
         Spacer(Modifier.height(2.dp))
         KarikaText(
@@ -805,6 +919,43 @@ private fun CommentBubble(comment: Comment) {
             textSize = 10.sp,
             fontWeight = FontWeight.W400
         )
+    }
+}
+
+@Composable
+private fun CommentFileAttachment(file: File, isMine: Boolean, component: SalesOrderDetailComponent) {
+    val url = file.url ?: return
+    if ((file.name ?: url).isImageFile()) {
+        KarikaImage(
+            modifier = Modifier
+                .padding(8.dp)
+                .widthIn(max = 200.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .onClick { component.showImagePreview(imageUrl(url)) },
+            model = imageUrl(url),
+            contentScale = ContentScale.Inside
+        )
+    } else {
+        Row(
+            modifier = Modifier
+                .onClick { component.downloadReceipt(file) }
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_pdf),
+                contentDescription = null,
+                tint = if (isMine) KarikaColors.White else KarikaColors.Blue,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            KarikaText(
+                text = file.name ?: "",
+                color = if (isMine) KarikaColors.White else KarikaColors.Blue,
+                textSize = 12.sp,
+                fontWeight = FontWeight.W600
+            )
+        }
     }
 }
 
@@ -855,6 +1006,8 @@ private fun ProductSpecificationTable(
             val qty = product.qtyOrdered?.toIntOrNull() ?: 0
             val rowTotalVpc = discountedPrice * qty
             val rowTotalWithPdv = rowTotalVpc * 1.17
+            // Rabat also eats into Karika's commission on this row - e.g. a 50% rabat halves it.
+            val commissionAmount = (product.commission?.toDoubleOrNull() ?: 0.0) * (1.0 - discountPercent / 100.0)
 
             Row(
                 modifier = Modifier.height(IntrinsicSize.Min),
@@ -874,7 +1027,7 @@ private fun ProductSpecificationTable(
                 VerticalDivider(color = KarikaColors.Gray9, thickness = 1.dp, modifier = Modifier.fillMaxHeight())
                 TableCell(product.commissionPercent(), width = widths[6])
                 VerticalDivider(color = KarikaColors.Gray9, thickness = 1.dp, modifier = Modifier.fillMaxHeight())
-                TableCell(product.commission(), width = widths[7])
+                TableCell(karikaPriceFormat(commissionAmount) + " KM", width = widths[7])
                 if (canEdit) {
                     VerticalDivider(color = KarikaColors.Gray9, thickness = 1.dp, modifier = Modifier.fillMaxHeight())
                     TableActionCell(width = widths[8]) { onEditClick(product) }
@@ -1169,6 +1322,7 @@ private fun ShippingProviderRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(if (selected) KarikaColors.Blue.copy(alpha = 0.08f) else Color.Transparent)
             .border(
@@ -1180,13 +1334,22 @@ private fun ShippingProviderRow(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             ) { onSelect() }
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Checkbox(
+                checked = selected,
+                onCheckedChange = { onSelect() },
+                colors = CheckboxDefaults.colors(
+                    uncheckedColor = KarikaColors.Gray4,
+                    checkedColor = KarikaColors.Blue,
+                    checkmarkColor = KarikaColors.White
+                )
+            )
             Image(
                 modifier = Modifier.width(93.dp),
                 contentScale = ContentScale.FillWidth,
@@ -1239,7 +1402,8 @@ private fun InfoCell(
     label: String,
     value: String,
     valueColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    blurred: Boolean = false
 ) {
     Column(modifier = modifier) {
         KarikaText(
@@ -1250,6 +1414,7 @@ private fun InfoCell(
         )
         Spacer(Modifier.height(2.dp))
         KarikaText(
+            modifier = Modifier.blur(radius = if (blurred) 5.dp else 0.dp),
             text = value,
             color = valueColor,
             textSize = 15.sp,
@@ -1263,7 +1428,8 @@ private fun FinancialCell(
     label: String,
     value: String,
     valueColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    blurred: Boolean = false
 ) {
     Column(
         modifier = modifier
@@ -1279,6 +1445,7 @@ private fun FinancialCell(
         )
         Spacer(Modifier.height(4.dp))
         KarikaText(
+            modifier = Modifier.blur(radius = if (blurred) 5.dp else 0.dp),
             text = value,
             color = valueColor,
             textSize = 15.sp,
@@ -1292,9 +1459,10 @@ private fun CustomerInfoRow(
     icon: DrawableResource,
     label: String,
     line1: String,
-    line2: String? = null
+    line2: String? = null,
+    blurred: Boolean = false
 ) {
-    Row(verticalAlignment = Alignment.Top) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -1319,6 +1487,7 @@ private fun CustomerInfoRow(
             )
             Spacer(Modifier.height(2.dp))
             KarikaText(
+                modifier = Modifier.blur(radius = if (blurred) 5.dp else 0.dp),
                 text = line1,
                 color = KarikaColors.Gray2,
                 textSize = 14.sp,
@@ -1328,6 +1497,7 @@ private fun CustomerInfoRow(
             )
             if (line2 != null) {
                 KarikaText(
+                    modifier = Modifier.blur(radius = if (blurred) 5.dp else 0.dp),
                     text = line2,
                     color = KarikaColors.Gray6,
                     textSize = 12.sp,

@@ -296,7 +296,7 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
             items(discounts, key = { it.ruleId ?: 0L }) { rule ->
                 DiscountCard(
                     rule = rule,
-                    canEdit = component.canCreateDiscountFor,
+                    canEdit = component.canCreateDiscountFor && !rule.createdByAdmin(),
                     onEdit = { component.openEditDiscount(rule) },
                     onDelete = { confirmDeleteRule = rule },
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -532,7 +532,7 @@ private fun DiscountCard(
                     modifier = Modifier.size(16.dp)
                 )
                 KarikaText(
-                    text = "Administrator",
+                    text = rule.createdByEmployeeName ?: "Administrator",
                     color = KarikaColors.Gray6,
                     textSize = 12.sp,
                     fontWeight = FontWeight.W500

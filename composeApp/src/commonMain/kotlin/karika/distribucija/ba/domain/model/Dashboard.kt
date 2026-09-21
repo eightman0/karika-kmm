@@ -100,8 +100,11 @@ data class VendorOrder(
     @SerialName("shipping_details") var shippingDetails: ShippingDetails? = null,
     @SerialName("has_changes") var hasChanges: String? = null,
     @SerialName("is_locked") var locked: Boolean? = null,
+    @SerialName("is_archived") var isArchived: Boolean? = false,
 ) {
     fun locked() = locked ?: false
+
+    fun commentsArchived() = isArchived == true
     fun totalAmount(): String {
         return karikaPriceFormat(orderTotal?.toDouble() ?: 0.00)
     }
@@ -370,6 +373,7 @@ data class MediaGallery(
 
 @Serializable
 data class ShippingDetails(
+    @SerialName("shipping_company") var shippingCompany: String? = null,
     @SerialName("contact_name") var name: String? = null,
     @SerialName("email") var email: String? = null,
     @SerialName("telephone") var telephone: String? = null,

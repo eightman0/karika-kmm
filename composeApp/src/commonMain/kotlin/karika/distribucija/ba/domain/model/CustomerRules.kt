@@ -76,10 +76,16 @@ data class DiscountRule(
     val updatedAt: String? = null,
     @SerialName("created_by_employee_id")
     val createdByEmployeeId: Long? = null,
+    /** Null when an administrator created the rule (not a sales rep) - such rules can't be
+     * edited or deleted from the sales rep app. */
+    @SerialName("created_by_employee_name")
+    val createdByEmployeeName: String? = null,
     /** "approved" | "pending" | "rejected" */
     @SerialName("approval_status")
     val approvalStatus: String? = null
-)
+) {
+    fun createdByAdmin(): Boolean = createdByEmployeeName.isNullOrBlank()
+}
 
 @Serializable
 data class DiscountRuleSearchResults(
