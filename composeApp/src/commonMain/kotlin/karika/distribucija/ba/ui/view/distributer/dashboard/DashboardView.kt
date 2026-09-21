@@ -48,6 +48,7 @@ import karika.distribucija.ba.ui.view.distributer.customers.editor.CustomerRuleE
 import karika.distribucija.ba.ui.view.distributer.messages.admin.AdminMessagesView
 import karika.distribucija.ba.ui.view.distributer.messages.customer.CustomerMessagesView
 import karika.distribucija.ba.ui.view.distributer.messages.details.MessagesOverviewView
+import karika.distribucija.ba.ui.view.distributer.messages.internal.InternalMessagesView
 import karika.distribucija.ba.ui.view.distributer.notifications.NotificationsView
 import karika.distribucija.ba.ui.view.distributer.orders.OrdersView
 import karika.distribucija.ba.ui.view.distributer.orders.details.OrderDetailsView
@@ -71,7 +72,7 @@ fun DashboardView(component: DashboardComponent) {
     val scope = rememberCoroutineScope()
     val profile = component.stateHolder.vendorSpecificHandler.vendorDetails.collectAsState()
     val navState = component.stack.subscribeAsState()
-    val messageState = component.stateHolder.vendorNotificationHandler.messageUnreadCount.asState()
+    val messageState = component.stateHolder.vendorNotificationHandler.chatUnreadCount.asState()
 
     BoxWithConstraints(
         modifier = Modifier
@@ -251,7 +252,7 @@ fun DashboardView(component: DashboardComponent) {
                                 fontWeight = FontWeight.W600,
                                 text = "Poruke kupaca",
                                 textAlign = TextAlign.Start,
-                                badge = messageState.value.user()
+                                badge = messageState.value.vendorCustomer
                             )
                         },
                         selected = navState.value.active.instance is DashChild.CustomerMessages,
@@ -279,12 +280,40 @@ fun DashboardView(component: DashboardComponent) {
                                 fontWeight = FontWeight.W600,
                                 text = "Poruke admina",
                                 textAlign = TextAlign.Start,
-                                badge = messageState.value.admin()
+                                badge = messageState.value.vendorAdmin
                             )
                         },
                         selected = navState.value.active.instance is DashChild.AdminMessages,
                         onClick = {
                             component.dashNavigate(DashConfig.AdminMessages, true)
+                            scope.launch {
+                                drawerState.close()
+                            }
+                        }
+                    )
+                    NavigationDrawerItem(
+                        modifier = Modifier,
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = KarikaColors.White,
+                            selectedContainerColor = KarikaColors.Blue
+                        ),
+                        shape = RectangleShape,
+                        label = {
+                            IconTextItem(
+                                modifier = Modifier,
+                                icon = vectorResource(Res.drawable.ic_messages),
+                                iconColor = if (navState.value.active.instance is DashChild.InternalMessages) KarikaColors.White else KarikaColors.Gray2,
+                                textColor = if (navState.value.active.instance is DashChild.InternalMessages) KarikaColors.White else KarikaColors.Gray2,
+                                textSize = 16.sp,
+                                fontWeight = FontWeight.W600,
+                                text = "Interne poruke",
+                                textAlign = TextAlign.Start,
+                                badge = messageState.value.staff
+                            )
+                        },
+                        selected = navState.value.active.instance is DashChild.InternalMessages,
+                        onClick = {
+                            component.dashNavigate(DashConfig.InternalMessages, true)
                             scope.launch {
                                 drawerState.close()
                             }
@@ -394,6 +423,7 @@ fun DashboardView(component: DashboardComponent) {
 
                         is DashChild.CustomerMessages -> CustomerMessagesView(child.component)
                         is DashChild.AdminMessages -> AdminMessagesView(child.component)
+                        is DashChild.InternalMessages -> InternalMessagesView(child.component)
                         is DashChild.MessageDetails -> MessagesOverviewView(child.component)
 
                         is DashChild.Profile -> ProfileView(child.component)

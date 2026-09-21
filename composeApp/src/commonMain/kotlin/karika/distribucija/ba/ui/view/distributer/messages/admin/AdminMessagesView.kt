@@ -21,7 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.Conversation
+import karika.distribucija.ba.domain.model.ChatAxis
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
@@ -93,10 +94,10 @@ fun AdminMessagesView(component: AdminMessagesComponent) {
             textSize = 18.sp
         ) {
             component.navigateToMessagesOverview(
-                Conversation(
-                    receiverId = "0",
-                    receiverName = "Karika Distribucija",
-                    admin = true
+                ChatConversation(
+                    conversationId = null,
+                    axis = ChatAxis.VENDOR_ADMIN,
+                    counterpartName = "Karika Distribucija"
                 )
             )
         }
@@ -104,7 +105,7 @@ fun AdminMessagesView(component: AdminMessagesComponent) {
 }
 
 @Composable
-private fun MessageItem(item: Conversation, component: AdminMessagesComponent) {
+private fun MessageItem(item: ChatConversation, component: AdminMessagesComponent) {
     Column(
         modifier = Modifier
             .onClick {
@@ -124,16 +125,16 @@ private fun MessageItem(item: Conversation, component: AdminMessagesComponent) {
                 modifier = Modifier
                     .weight(1f),
                 color = KarikaColors.Gray2,
-                fontWeight = if (item.isRead()) FontWeight.W400 else FontWeight.W700,
+                fontWeight = if (item.isUnread()) FontWeight.W900 else FontWeight.W700,
                 textSize = 16.sp,
-                text = item.senderName()
+                text = item.counterpartName ?: "-"
             )
             KarikaText(
                 modifier = Modifier,
                 color = KarikaColors.Gray2,
-                fontWeight = if (item.isRead()) FontWeight.W400 else FontWeight.W700,
+                fontWeight = if (item.isUnread()) FontWeight.W700 else FontWeight.W400,
                 textSize = 12.sp,
-                text = item.createdAt
+                text = item.dateTimeLabel() ?: ""
             )
         }
         KarikaText(
@@ -142,7 +143,7 @@ private fun MessageItem(item: Conversation, component: AdminMessagesComponent) {
             color = KarikaColors.Gray2,
             fontWeight = FontWeight.W400,
             textSize = 14.sp,
-            text = item.subject
+            text = item.lastMessagePreview ?: ""
         )
     }
 }

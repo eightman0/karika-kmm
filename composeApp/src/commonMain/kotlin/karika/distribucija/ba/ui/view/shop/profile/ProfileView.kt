@@ -162,7 +162,7 @@ private fun Actions(component: ProfileComponent) {
                 title = "Poruke admina",
                 icon = Res.drawable.ic_messages,
                 color = KarikaColors.Gray2,
-                badge = adminCount.value.admin(),
+                badge = adminCount.value.customerAdmin,
                 contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.AdminMessages)
@@ -174,7 +174,7 @@ private fun Actions(component: ProfileComponent) {
                 title = "Poruke dobavljača",
                 icon = Res.drawable.ic_navigation_profile,
                 color = KarikaColors.Gray2,
-                badge = adminCount.value.user(),
+                badge = adminCount.value.vendorCustomer,
                 contentPadding = PaddingValues(4.dp)
             ) {
                 component.appNavigate(AppConfig.VendorMessages)

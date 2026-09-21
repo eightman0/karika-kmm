@@ -5,7 +5,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackCallback
-import karika.distribucija.ba.domain.model.Conversation
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.CommonComponent
@@ -18,6 +18,7 @@ import karika.distribucija.ba.ui.view.distributer.customers.editor.CustomerRuleE
 import karika.distribucija.ba.ui.view.distributer.messages.admin.AdminMessagesComponent
 import karika.distribucija.ba.ui.view.distributer.messages.customer.CustomerMessagesComponent
 import karika.distribucija.ba.ui.view.distributer.messages.details.MessagesOverviewComponent
+import karika.distribucija.ba.ui.view.distributer.messages.internal.InternalMessagesComponent
 import karika.distribucija.ba.ui.view.distributer.notifications.NotificationsComponent
 import karika.distribucija.ba.ui.view.distributer.orders.OrdersComponent
 import karika.distribucija.ba.ui.view.distributer.orders.details.OrderDetailsComponent
@@ -44,6 +45,7 @@ class DashboardComponent(componentContext: ComponentContext, stateHolder: Karika
 
         stateHolder.vendorSpecificHandler.getVendorDetails()
         stateHolder.vendorNotificationHandler.notificationReceived()
+        stateHolder.salesSpecificHandler.getMe()
     }
 
     val stack: Value<ChildStack<*, DashChild>> =
@@ -118,6 +120,13 @@ class DashboardComponent(componentContext: ComponentContext, stateHolder: Karika
                 )
             )
 
+            is DashConfig.InternalMessages -> DashChild.InternalMessages(
+                InternalMessagesComponent(
+                    componentContext,
+                    stateHolder
+                )
+            )
+
             is DashConfig.MessageOverview -> DashChild.MessageDetails(
                 MessagesOverviewComponent(
                     componentContext,
@@ -175,7 +184,10 @@ sealed class DashConfig {
     data object AdminMessages : DashConfig()
 
     @Serializable
-    data class MessageOverview(val conversation: Conversation) : DashConfig()
+    data object InternalMessages : DashConfig()
+
+    @Serializable
+    data class MessageOverview(val conversation: ChatConversation) : DashConfig()
 
     @Serializable
     data object Profile : DashConfig()
@@ -194,6 +206,7 @@ sealed class DashChild {
     data class CustomerRuleEditor(val component: CustomerRuleEditorComponent) : DashChild()
     data class CustomerMessages(val component: CustomerMessagesComponent) : DashChild()
     data class AdminMessages(val component: AdminMessagesComponent) : DashChild()
+    data class InternalMessages(val component: InternalMessagesComponent) : DashChild()
     data class MessageDetails(val component: MessagesOverviewComponent) : DashChild()
     data class Profile(val component: ProfileComponent) : DashChild()
     data class Notifications(val component: NotificationsComponent) : DashChild()

@@ -1,4 +1,4 @@
-package karika.distribucija.ba.ui.view.distributer.messages.customer
+package karika.distribucija.ba.ui.view.distributer.messages.internal
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +29,7 @@ import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.onClick
 
 @Composable
-fun CustomerMessagesView(component: CustomerMessagesComponent) {
+fun InternalMessagesView(component: InternalMessagesComponent) {
     val state = rememberLazyListState()
     val messages = component.messages.collectAsState()
 
@@ -44,7 +44,7 @@ fun CustomerMessagesView(component: CustomerMessagesComponent) {
             KarikaText(
                 modifier = Modifier
                     .fillMaxWidth(),
-                text = "Poruke kupca",
+                text = "Interne poruke",
                 color = KarikaColors.Gray2,
                 textSize = 18.sp,
                 fontWeight = FontWeight.W700
@@ -72,7 +72,7 @@ fun CustomerMessagesView(component: CustomerMessagesComponent) {
             component.navigateToMessagesOverview(
                 ChatConversation(
                     conversationId = null,
-                    axis = ChatAxis.VENDOR_CUSTOMER,
+                    axis = ChatAxis.STAFF,
                     counterpartName = "Nova poruka"
                 )
             )
@@ -81,7 +81,7 @@ fun CustomerMessagesView(component: CustomerMessagesComponent) {
 }
 
 @Composable
-private fun MessageItem(item: ChatConversation, component: CustomerMessagesComponent) {
+private fun MessageItem(item: ChatConversation, component: InternalMessagesComponent) {
     Column(
         modifier = Modifier
             .onClick {

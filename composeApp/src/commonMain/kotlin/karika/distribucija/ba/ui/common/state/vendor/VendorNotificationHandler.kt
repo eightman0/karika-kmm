@@ -1,8 +1,10 @@
 package karika.distribucija.ba.ui.common.state.vendor
 
 import androidx.compose.runtime.mutableStateOf
+import karika.distribucija.ba.domain.api.ChatRepository
 import karika.distribucija.ba.domain.api.DashRepository
 import karika.distribucija.ba.domain.api.MessagesRepository
+import karika.distribucija.ba.domain.model.ChatUnreadCount
 import karika.distribucija.ba.domain.model.MessagesCount
 import karika.distribucija.ba.domain.model.ResultState
 import kotlinx.coroutines.CoroutineScope
@@ -12,10 +14,12 @@ import kotlinx.coroutines.launch
 
 class VendorNotificationHandler {
     val messageUnreadCount = mutableStateOf(MessagesCount("0", "0"))
+    val chatUnreadCount = mutableStateOf(ChatUnreadCount())
     val notificationCount = MutableStateFlow(0)
 
     fun notificationReceived() {
         reloadMessageCount()
+        reloadChatMessageCount()
         CoroutineScope(Dispatchers.Main).launch {
             DashRepository()
                 .notifications()
@@ -34,6 +38,18 @@ class VendorNotificationHandler {
                 .collect {
                     if (it is ResultState.Success) {
                         messageUnreadCount.value = it.data
+                    }
+                }
+        }
+    }
+
+    fun reloadChatMessageCount() {
+        CoroutineScope(Dispatchers.Main).launch {
+            ChatRepository()
+                .getUnreadCount()
+                .collect {
+                    if (it is ResultState.Success) {
+                        chatUnreadCount.value = it.data
                     }
                 }
         }

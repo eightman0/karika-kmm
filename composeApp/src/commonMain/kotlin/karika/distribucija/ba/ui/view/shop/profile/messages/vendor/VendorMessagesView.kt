@@ -11,7 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.Conversation
+import karika.distribucija.ba.domain.model.ChatAxis
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.PrimaryButtonFilled
@@ -37,10 +38,10 @@ fun VendorMessagesView(component: VendorMessagesComponent) {
                 textSize = 18.sp
             ) {
                 component.navigateToMessagesOverview(
-                    Conversation(
-                        receiverName = "Nova poruka",
-                        senderName = "Nova poruka",
-                        admin = false
+                    ChatConversation(
+                        conversationId = null,
+                        axis = ChatAxis.VENDOR_CUSTOMER,
+                        counterpartName = "Nova poruka"
                     )
                 )
             }

@@ -3,6 +3,7 @@ package karika.distribucija.ba.util
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
+import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
@@ -22,8 +23,8 @@ object PushHandler {
                 handleOrderCommentPush(route, component)
             }
 
-            route.startsWith("route/messages") -> {
-                handleNewMessagePush(route, component)
+            route.startsWith("route/chat") -> {
+                handleNewChatMessagePush(route, component)
             }
 
             route.startsWith("route/orderStatusChange") -> {
@@ -42,8 +43,8 @@ object PushHandler {
                 handleOrderCommentPushVendor(route, component)
             }
 
-            route.startsWith("route/messages") -> {
-                handleNewMessagePushVendor(route, component)
+            route.startsWith("route/chat") -> {
+                handleNewChatMessagePushVendor(route, component)
             }
 
             route.startsWith("route/orderStatusChange") -> {
@@ -76,32 +77,14 @@ object PushHandler {
         }
     }
 
-    private fun handleNewMessagePushVendor(route: String, component: CommonComponent) {
-        val regex = """[?&]([^=]+)=([^&]*)""".toRegex()
-        val params = regex.findAll(route)
-            .map { it.groupValues[1] to it.groupValues[2] }.toMap()
+    private fun handleNewChatMessagePushVendor(route: String, component: CommonComponent) {
+        val conversationId = Regex("""conversationId=(\d+)""").find(route)
+            ?.groupValues?.get(1)?.toLongOrNull() ?: return
 
-        if (
-            params.containsKey("threadId") &&
-            params.containsKey("receiverName") &&
-            params.containsKey("vendorId") &&
-            params.containsKey("admin") &&
-            params.containsKey("subject")
-        ) {
-            CoroutineScope(Dispatchers.Main).launch {
-                //delay(300)
-
-                component.messagesRepository.get(
-                    threadId = params["threadId"] ?: return@launch,
-                    admin = params["admin"] == "1"
-                ).collect {
-                    if (it is karika.distribucija.ba.domain.model.ResultState.Success) {
-                        val conversation = (it.data.firstOrNull() ?: return@collect).copy(
-                            admin = params["admin"] == "1"
-                        )
-
-                        component.dashNavigate(DashConfig.MessageOverview(conversation))
-                    }
+        CoroutineScope(Dispatchers.Main).launch {
+            component.chatRepository.getConversation(conversationId).collect {
+                if (it is ResultState.Success) {
+                    component.dashNavigate(DashConfig.MessageOverview(it.data))
                 }
             }
         }
@@ -148,29 +131,14 @@ object PushHandler {
         }
     }
 
-    private fun handleNewMessagePush(route: String, component: CommonComponent) {
-        val regex = """[?&]([^=]+)=([^&]*)""".toRegex()
-        val params = regex.findAll(route)
-            .map { it.groupValues[1] to it.groupValues[2] }.toMap()
+    private fun handleNewChatMessagePush(route: String, component: CommonComponent) {
+        val conversationId = Regex("""conversationId=(\d+)""").find(route)
+            ?.groupValues?.get(1)?.toLongOrNull() ?: return
 
-        if (
-            params.containsKey("threadId") &&
-            params.containsKey("receiverName") &&
-            params.containsKey("vendorId") &&
-            params.containsKey("admin") &&
-            params.containsKey("subject")
-        ) {
-            CoroutineScope(Dispatchers.Main).launch {
-                component.messagesRepository.get(
-                    threadId = params["threadId"] ?: return@launch,
-                    admin = params["admin"] == "1"
-                ).collect {
-                    if (it is karika.distribucija.ba.domain.model.ResultState.Success) {
-                        val conversation = (it.data.firstOrNull() ?: return@collect).copy(
-                            admin = params["admin"] == "1"
-                        )
-                        component.navigateToMessagesOverview(conversation)
-                    }
+        CoroutineScope(Dispatchers.Main).launch {
+            component.chatRepository.getConversation(conversationId).collect {
+                if (it is ResultState.Success) {
+                    component.navigateToMessagesOverview(it.data)
                 }
             }
         }

@@ -60,6 +60,10 @@ object HttpClientProvider {
         return "$HOST/media/csmessaging/chat_images/$name"
     }
 
+    fun chatAttachment(relpath: String): String {
+        return "$HOST/media/$relpath"
+    }
+
     fun commentAttachment(name: String?): String {
         return "$HOST/$name"
     }

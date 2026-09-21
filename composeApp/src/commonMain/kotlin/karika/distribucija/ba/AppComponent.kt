@@ -8,7 +8,7 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import karika.distribucija.ba.domain.api.MandatoryUpdateRepository
-import karika.distribucija.ba.domain.model.Conversation
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.Product
@@ -81,7 +81,7 @@ sealed class AppConfig {
     data object VendorMessages : AppConfig()
 
     @Serializable
-    data class MessagesOverview(val conversation: Conversation) : AppConfig()
+    data class MessagesOverview(val conversation: ChatConversation) : AppConfig()
 
     @Serializable
     data object Points : AppConfig()

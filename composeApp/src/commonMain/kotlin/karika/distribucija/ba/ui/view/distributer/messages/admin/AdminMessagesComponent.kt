@@ -3,8 +3,8 @@ package karika.distribucija.ba.ui.view.distributer.messages.admin
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.doOnDestroy
-import karika.distribucija.ba.domain.api.MessagesRepository
-import karika.distribucija.ba.domain.model.Conversation
+import karika.distribucija.ba.domain.model.ChatAxis
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
@@ -19,7 +19,7 @@ class AdminMessagesComponent(componentContext: ComponentContext, stateHolder: Ka
 
     val searchText = mutableStateOf("")
 
-    private val _messages = MutableStateFlow<List<Conversation>>(emptyList())
+    private val _messages = MutableStateFlow<List<ChatConversation>>(emptyList())
     val messages = _messages.asStateFlow()
 
     init {
@@ -40,14 +40,13 @@ class AdminMessagesComponent(componentContext: ComponentContext, stateHolder: Ka
 
     override fun loadNextPage(reset: Boolean) {
         scope.launch {
-            MessagesRepository()
-                .messages(true)
+            chatRepository.getConversations(axis = ChatAxis.VENDOR_ADMIN, pageSize = 100)
                 .collect { result ->
                     when (result) {
                         is ResultState.Loading -> showLoader()
                         is ResultState.Success -> {
                             hideLoader()
-                            _messages.update { result.data.map { it.copy(admin = true) } }
+                            _messages.update { result.data.items }
                         }
 
                         is ResultState.Error -> {
@@ -59,7 +58,7 @@ class AdminMessagesComponent(componentContext: ComponentContext, stateHolder: Ka
         }
     }
 
-    override fun navigateToMessagesOverview(item: Conversation) {
-        dashNavigate(DashConfig.MessageOverview(item.copy(admin = true)))
+    override fun navigateToMessagesOverview(item: ChatConversation) {
+        dashNavigate(DashConfig.MessageOverview(item))
     }
 }

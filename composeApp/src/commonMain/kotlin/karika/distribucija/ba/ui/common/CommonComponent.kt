@@ -7,9 +7,11 @@ import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.HttpClientProvider
+import karika.distribucija.ba.domain.HttpClientProvider.chatAttachment
 import karika.distribucija.ba.domain.HttpClientProvider.chatImage
 import karika.distribucija.ba.domain.api.AnalyticsRepository
 import karika.distribucija.ba.domain.api.CartRepository
+import karika.distribucija.ba.domain.api.ChatRepository
 import karika.distribucija.ba.domain.api.MessagesRepository
 import karika.distribucija.ba.domain.api.NotificationRepository
 import karika.distribucija.ba.domain.api.OrdersRepository
@@ -18,6 +20,8 @@ import karika.distribucija.ba.domain.api.UserRepository
 import karika.distribucija.ba.domain.api.VendorRepository
 import karika.distribucija.ba.domain.model.AddToCart
 import karika.distribucija.ba.domain.model.CartItem
+import karika.distribucija.ba.domain.model.ChatAxis
+import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.domain.model.Conversation
 import karika.distribucija.ba.domain.model.EventType
 import karika.distribucija.ba.domain.model.Filters
@@ -61,6 +65,7 @@ open class CommonComponent(
     val userRepository = UserRepository()
     val orderRepository = OrdersRepository()
     val messagesRepository = MessagesRepository()
+    val chatRepository = ChatRepository()
     val vendorRepository = VendorRepository()
     val productRepository = ProductRepository()
     private val notificationRepository = NotificationRepository()
@@ -372,13 +377,25 @@ open class CommonComponent(
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
             return
         }
-        navigateToMessagesOverview(
-            Conversation(
-                vendorId = product.vendorId,
-                receiverName = product.vendorName,
-                subject = product.name
-            )
-        )
+        scope.launch {
+            chatRepository.startConversation(
+                axis = ChatAxis.VENDOR_CUSTOMER,
+                counterpartId = product.vendorId?.toLongOrNull()
+            ).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> showLoader()
+                    is ResultState.Success -> {
+                        hideLoader()
+                        navigateToMessagesOverview(result.data)
+                    }
+
+                    is ResultState.Error -> {
+                        hideLoader()
+                        showMessage(result.message)
+                    }
+                }
+            }
+        }
     }
 
     fun showHome() {
@@ -476,7 +493,7 @@ open class CommonComponent(
         }
     }
 
-    open fun navigateToMessagesOverview(item: Conversation) {
+    open fun navigateToMessagesOverview(item: ChatConversation) {
         appNavigate(AppConfig.MessagesOverview(item))
     }
 
@@ -693,33 +710,29 @@ open class CommonComponent(
         }
     }
 
-    fun markAsReadMessage(threadId: String?, admin: Boolean) {
+    fun markChatRead(conversationId: Long?) {
+        if (conversationId == null) return
         scope.launch {
-            messagesRepository.markAsRead(threadId)
+            chatRepository.markRead(conversationId)
                 .collect {
                     if (it is ResultState.Success) {
-                        if (admin) {
-                            stateHolder.messageHandler.reloadAdminMessages()
-                        } else {
-                            stateHolder.messageHandler.reloadVendorMessages()
-                        }
+                        stateHolder.messageHandler.reloadAdminMessages()
+                        stateHolder.messageHandler.reloadVendorMessages()
                         stateHolder.customerNotificationHandler.reloadMessageCount()
                     }
                 }
         }
     }
 
-    fun markAsReadMessageVendor(threadId: String?, admin: Boolean) {
+    fun markChatReadVendor(conversationId: Long?) {
+        if (conversationId == null) return
         scope.launch {
-            messagesRepository.markAsRead(threadId)
+            chatRepository.markRead(conversationId)
                 .collect {
                     if (it is ResultState.Success) {
-                        if (admin) {
-                            stateHolder.messageHandler.reloadAdminMessages()
-                        } else {
-                            stateHolder.messageHandler.reloadVendorMessages()
-                        }
-                        stateHolder.vendorNotificationHandler.reloadMessageCount()
+                        stateHolder.messageHandler.reloadAdminMessages()
+                        stateHolder.messageHandler.reloadVendorMessages()
+                        stateHolder.vendorNotificationHandler.reloadChatMessageCount()
                     }
                 }
         }
@@ -727,5 +740,9 @@ open class CommonComponent(
 
     fun downloadReceipt(it: String) {
         openPdf(chatImage("/$it"))
+    }
+
+    fun downloadChatAttachment(relpath: String) {
+        openPdf(chatAttachment(relpath))
     }
 }

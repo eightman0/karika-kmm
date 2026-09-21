@@ -49,9 +49,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.HttpClientProvider.chatImage
-import karika.distribucija.ba.domain.model.FileData
-import karika.distribucija.ba.domain.model.Message
+import karika.distribucija.ba.domain.HttpClientProvider.chatAttachment
+import karika.distribucija.ba.domain.model.ChatAxis
+import karika.distribucija.ba.domain.model.ChatMessage
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
 import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.KarikaColors
@@ -74,7 +74,6 @@ import karikav2.composeapp.generated.resources.ic_pdf
 import karikav2.composeapp.generated.resources.ic_photo
 import karikav2.composeapp.generated.resources.ic_tertiary
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -87,7 +86,7 @@ fun MessagesOverviewView(component: MessagesOverviewComponent) {
         containerColor = KarikaColors.White,
         contentWindowInsets = WindowInsets.systemBars,
         topBar = {
-            TopBarWithBack(conversation.senderName()) {
+            TopBarWithBack(conversation.counterpartName ?: "-") {
                 component.appBack()
             }
         },
@@ -104,8 +103,7 @@ fun MessagesOverviewView(component: MessagesOverviewComponent) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             YSpacer8()
-            SearchForVendor(component)
-            Subject(component)
+            SearchForRecipient(component)
             LazyColumn(
                 state = state,
                 modifier = Modifier
@@ -133,36 +131,27 @@ fun MessagesOverviewView(component: MessagesOverviewComponent) {
     }
 }
 
-@Composable
-private fun Subject(component: MessagesOverviewComponent) {
-    val subject = component.subject.asState()
-    val conversation = component.conversationState.asState()
-    Box(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-    ) {
-        KarikaTextField1(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = "Naslov",
-            value = subject,
-            placeholder = "Unesite naslov",
-            imeAction = ImeAction.Next,
-            enabled = conversation.value.subject == null,
-            disabledTextColor = KarikaColors.Gray2
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SearchForVendor(component: MessagesOverviewComponent) {
+private fun SearchForRecipient(component: MessagesOverviewComponent) {
     val conversation = component.conversationState.asState()
-    if (conversation.value.id != null || conversation.value.admin || conversation.value.vendorId != null) {
+    if (conversation.value.conversationId != null ||
+        conversation.value.axis != ChatAxis.VENDOR_CUSTOMER ||
+        conversation.value.counterpartId != null
+    ) {
         return
     }
     val searchText = mutableStateOf("").asState()
-    val vendors by component.vendors.collectAsState()
+    val recipients by component.recipients.collectAsState()
+    val filteredRecipients by remember(searchText.value, recipients) {
+        derivedStateOf {
+            if (searchText.value.isBlank()) {
+                recipients
+            } else {
+                recipients.filter { it.name?.contains(searchText.value, ignoreCase = true) == true }
+            }
+        }
+    }
     val expand = mutableStateOf(false).asState()
     SearchBar(
         modifier = Modifier
@@ -173,7 +162,6 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                     .onFocusChanged {
                         if (it.isFocused) {
                             expand.value = true
-                            component.vendors(searchText.value, loadImmediately = true)
                         }
                     }
                     .fillMaxWidth(),
@@ -183,12 +171,9 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                 imeAction = ImeAction.Search,
                 maxLines = 1,
                 onValueChange = {
-                    if (searchText.value.length > 2) {
-                        expand.value = true
-                        component.vendors(searchText.value)
-                    }
+                    expand.value = true
                 },
-                enabled = conversation.value.id == null,
+                enabled = conversation.value.conversationId == null,
                 trailingIcons = {
                     if (searchText.value.isNotEmpty()) {
                         Icon(
@@ -196,8 +181,6 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                                 .onClick {
                                     searchText.value = ""
                                     expand.value = true
-                                    component.clear()
-                                    component.vendors(searchText.value, loadImmediately = true)
                                 }
                                 .size(32.dp),
                             imageVector = vectorResource(Res.drawable.ic_tertiary),
@@ -207,10 +190,7 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                     }
                 },
                 doneAction = {
-                    if (searchText.value.length > 2) {
-                        expand.value = true
-                        component.vendors(searchText.value)
-                    }
+                    expand.value = true
                 }
             )
         },
@@ -225,7 +205,7 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
         shape = RoundedCornerShape(0.dp),
         windowInsets = WindowInsets(0.dp)
     ) {
-        if (vendors.isEmpty()) {
+        if (filteredRecipients.isEmpty()) {
             KarikaText(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -241,17 +221,13 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
             ) {
-                vendors.forEach {
+                filteredRecipients.forEach {
                     Box(
                         modifier = Modifier
                             .onClick {
                                 expand.negate()
-                                searchText.value = it.name()
-                                conversation.value = conversation.value.copy(
-                                    vendorId = it.entityId.toString(),
-                                    receiverName = it.name(),
-                                    senderName = it.name()
-                                )
+                                searchText.value = it.name ?: ""
+                                component.selectRecipient(it)
                             }
                             .background(color = KarikaColors.Gray12)
                             .fillMaxWidth()
@@ -259,7 +235,7 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                         KarikaText(
                             modifier = Modifier
                                 .padding(8.dp),
-                            text = it.name(),
+                            text = it.name ?: "-",
                             color = KarikaColors.Black,
                             textSize = 14.sp,
                             textAlign = TextAlign.Center,
@@ -278,15 +254,12 @@ private fun EnterComment(component: MessagesOverviewComponent) {
     val comment = component.newMessage.asState()
     val keyboardController = LocalSoftwareKeyboardController.current
     val conversation = component.conversationState.asState()
-    val subject = component.subject.asState()
     val attachment = component.attachment.asState()
 
-    val enableButton = remember(comment, conversation, subject) {
+    val enableButton = remember(comment, conversation, attachment) {
         derivedStateOf {
             (comment.value.isNotEmpty() || attachment.value != null) &&
-                    (conversation.value.vendorId != null || conversation.value.receiverId == "0" || conversation.value.senderId == "0") &&
-                    subject.value.isNotEmpty()
-
+                    conversation.value.conversationId != null
         }
     }
     val pickAttachment = component.showAttachmentSheet.asState()
@@ -427,17 +400,17 @@ private fun EnterComment(component: MessagesOverviewComponent) {
             }
         }
 
+        AttachmentModal(
+            showAttachmentModal = pickAttachment,
+            onPickFile = component::pickFile,
+            onPickPhoto = component::pickPhoto
+        )
     }
-    AttachmentModal(
-        showAttachmentModal = pickAttachment,
-        onPickFile = component::pickFile,
-        onPickPhoto = component::pickPhoto
-    )
 }
 
 @Composable
-fun MessageItem(message: Message, component: MessagesOverviewComponent) {
-    if (message.isVendorMessage()) {
+fun MessageItem(message: ChatMessage, component: MessagesOverviewComponent) {
+    if (message.isFromCustomer()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -456,47 +429,8 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                     ),
                 horizontalAlignment = Alignment.End
             ) {
-                message.images
-                    ?.takeIf { image -> image.isNotEmpty() }
-                    ?.let {
-                        Json.decodeFromString<FileData>(it).filename?.firstOrNull()?.let { image ->
-                            if (image.endsWith("pdf")) {
-                                Row(
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .clickable {
-                                            component.downloadReceipt(image)
-                                        },
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = vectorResource(Res.drawable.ic_pdf),
-                                        tint = KarikaColors.White,
-                                        contentDescription = null
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    KarikaText(
-                                        text = image,
-                                        fontWeight = FontWeight.Bold,
-                                        textSize = 12.sp,
-                                        color = KarikaColors.White
-                                    )
-                                }
-                            } else {
-                                KarikaImage(
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .width(150.dp)
-                                        .onClick {
-                                            component.showImagePreview(chatImage(image))
-                                        },
-                                    model = chatImage(image),
-                                    contentScale = ContentScale.Inside
-                                )
-                            }
-                        }
-                    }
-                if (!message.message.isNullOrEmpty()) {
+                MessageAttachments(message, component)
+                if (!message.body.isNullOrEmpty()) {
                     HtmlTextWithStyles(
                         modifier = Modifier
                             .padding(16.dp),
@@ -507,7 +441,7 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                 KarikaText(
                     modifier = Modifier
                         .padding(horizontal = 16.dp),
-                    text = message.date(),
+                    text = message.createdAt ?: "",
                     color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400
@@ -537,52 +471,13 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                 KarikaText(
                     modifier = Modifier
                         .padding(top = 16.dp, start = 16.dp, end = 16.dp),
-                    text = component.getVendorName(),
+                    text = message.senderDisplayName ?: "",
                     color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W700
                 )
-                message.images
-                    ?.takeIf { image -> image.isNotEmpty() }
-                    ?.let {
-                        Json.decodeFromString<FileData>(it).filename?.firstOrNull()?.let { image ->
-                            if (image.endsWith("pdf")) {
-                                Row(
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .clickable {
-                                            component.downloadReceipt(image)
-                                        },
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = vectorResource(Res.drawable.ic_pdf),
-                                        tint = KarikaColors.White,
-                                        contentDescription = null
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    KarikaText(
-                                        text = image,
-                                        fontWeight = FontWeight.Bold,
-                                        textSize = 12.sp,
-                                        color = KarikaColors.White
-                                    )
-                                }
-                            } else {
-                                KarikaImage(
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .width(150.dp)
-                                        .onClick {
-                                            component.showImagePreview(chatImage(image))
-                                        },
-                                    model = chatImage(image),
-                                    contentScale = ContentScale.Inside
-                                )
-                            }
-                        }
-                    }
-                if (!message.message.isNullOrEmpty()) {
+                MessageAttachments(message, component)
+                if (!message.body.isNullOrEmpty()) {
                     HtmlTextWithStyles(
                         modifier = Modifier
                             .padding(16.dp),
@@ -593,13 +488,54 @@ fun MessageItem(message: Message, component: MessagesOverviewComponent) {
                 KarikaText(
                     modifier = Modifier
                         .padding(horizontal = 16.dp),
-                    text = message.date(),
+                    text = message.createdAt ?: "",
                     color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400
                 )
                 YSpacer16()
             }
+        }
+    }
+}
+
+@Composable
+private fun MessageAttachments(message: ChatMessage, component: MessagesOverviewComponent) {
+    message.attachments.forEach { attachment ->
+        val relpath = attachment.relpath ?: return@forEach
+        if (attachment.isPdf()) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable {
+                        component.downloadChatAttachment(relpath)
+                    },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = vectorResource(Res.drawable.ic_pdf),
+                    tint = KarikaColors.White,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                KarikaText(
+                    text = attachment.filename ?: "",
+                    fontWeight = FontWeight.Bold,
+                    textSize = 12.sp,
+                    color = KarikaColors.White
+                )
+            }
+        } else {
+            KarikaImage(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .width(150.dp)
+                    .onClick {
+                        component.showImagePreview(chatAttachment(relpath))
+                    },
+                model = chatAttachment(relpath),
+                contentScale = ContentScale.Inside
+            )
         }
     }
 }

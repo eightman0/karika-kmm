@@ -80,7 +80,10 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
             vendorNotificationHandler.notificationReceived()
         }
 
-        if (route?.contains("admin=1") == true) {
+        if (route?.startsWith("route/chat") == true) {
+            messageHandler.reloadAdminMessages()
+            messageHandler.reloadVendorMessages()
+        } else if (route?.contains("admin=1") == true) {
             messageHandler.reloadAdminMessages()
         } else {
             messageHandler.reloadVendorMessages()
