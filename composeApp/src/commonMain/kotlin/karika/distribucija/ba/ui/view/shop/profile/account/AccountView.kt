@@ -150,6 +150,7 @@ private fun ContactInfo(
             )
             KarikaText(
                 modifier = Modifier
+                    .testTag(AccountTestTags.EDIT_PROFILE)
                     .onClick { component.edit(null, "Informacije profila") }
                     .padding(16.dp),
                 text = "Uredi",
@@ -464,6 +465,7 @@ private fun BillingAddress(
             )
             KarikaText(
                 modifier = Modifier
+                    .testTag(AccountTestTags.EDIT_BILLING)
                     .onClick {
                         component.edit(
                             profile.billingAddress(),
@@ -658,6 +660,7 @@ private fun ShippingAddress(
             )
             KarikaText(
                 modifier = Modifier
+                    .testTag(AccountTestTags.EDIT_SHIPPING)
                     .onClick { component.edit(profile.shippingAddress(), "Adresa za dostavu") }
                     .padding(16.dp),
                 text = "Uredi",
@@ -1027,7 +1030,8 @@ private fun AllShippingAddress(
                         Spacer(modifier = Modifier.weight(1f))
                         SecondaryButton(
                             modifier = Modifier
-                                .height(40.dp),
+                                .height(40.dp)
+                                .testTag(AccountTestTags.deleteAddress(shippingAddress.id)),
                             title = "Obriši",
                             color = KarikaColors.Primary,
                         ) {
@@ -1035,7 +1039,8 @@ private fun AllShippingAddress(
                         }
                         PrimaryButton(
                             modifier = Modifier
-                                .height(40.dp),
+                                .height(40.dp)
+                                .testTag(AccountTestTags.editAddress(shippingAddress.id)),
                             title = "Uredi",
                             color = KarikaColors.Primary
                         ) {
@@ -1090,7 +1095,8 @@ private fun UpdateAddress(component: AccountComponent) {
             placeholder = "Ime",
             allowedChars = KarikaConstants.lettersSpace,
             imeAction = ImeAction.Next,
-            disabledTextColor = KarikaColors.Gray2
+            disabledTextColor = KarikaColors.Gray2,
+            testTag = AccountTestTags.FORM_FIRSTNAME
         )
         KarikaTextField1(
             modifier = Modifier
@@ -1100,7 +1106,8 @@ private fun UpdateAddress(component: AccountComponent) {
             placeholder = "Prezime",
             allowedChars = KarikaConstants.lettersSpace,
             imeAction = ImeAction.Next,
-            disabledTextColor = KarikaColors.Gray2
+            disabledTextColor = KarikaColors.Gray2,
+            testTag = AccountTestTags.FORM_LASTNAME
         )
         KarikaTextField1(
             modifier = Modifier
@@ -1110,7 +1117,8 @@ private fun UpdateAddress(component: AccountComponent) {
             placeholder = "Broj telefona",
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Phone,
-            imeAction = ImeAction.Done
+            imeAction = ImeAction.Done,
+            testTag = AccountTestTags.FORM_PHONE
         )
         KarikaTextField1(
             modifier = Modifier
@@ -1120,7 +1128,8 @@ private fun UpdateAddress(component: AccountComponent) {
             placeholder = "Adresa i broj ulice",
             allowedChars = KarikaConstants.numbersAndLettersSpace,
             imeAction = ImeAction.Next,
-            disabledTextColor = KarikaColors.Gray2
+            disabledTextColor = KarikaColors.Gray2,
+            testTag = AccountTestTags.FORM_STREET
         )
         KarikaTextField1(
             modifier = Modifier
@@ -1136,7 +1145,7 @@ private fun UpdateAddress(component: AccountComponent) {
             title = "Grad*",
             placeholder = "Grad",
             value = component.city.asState(),
-            values = mutableStateOf(KarikaConstants.cities()).asState()
+            values = mutableStateOf(KarikaConstants.cities()).asState(),
         )
         KarikaTextField1(
             modifier = Modifier
@@ -1147,7 +1156,8 @@ private fun UpdateAddress(component: AccountComponent) {
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Next,
-            disabledTextColor = KarikaColors.Gray2
+            disabledTextColor = KarikaColors.Gray2,
+            testTag = AccountTestTags.FORM_POSTAL
         )
 
         HorizontalButtons(
