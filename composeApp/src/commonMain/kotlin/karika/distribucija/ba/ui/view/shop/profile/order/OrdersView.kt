@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -304,6 +305,9 @@ private fun OrderItem(order: OrdersResponse, component: OrdersComponent) {
     }
 }
 
+/** Test tag of one vendor's part of an order in the list. */
+fun orderVendorTag(order: Order) = "order_vendor_${order.orderId}_${order.vendorId}"
+
 @Composable
 private fun VendorItem(order: Order, component: OrdersComponent) {
     val cancelModal = remember { mutableStateOf<Order?>(null) }
@@ -311,6 +315,7 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
     val showAdditionalOptions = mutableStateOf(false).asState()
     Column(
         modifier = Modifier
+            .testTag(orderVendorTag(order))
             .padding(horizontal = 16.dp)
             .roundedWithBorder(
                 color = KarikaColors.White,
@@ -446,7 +451,7 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
                     if (!showAdditionalOptions.value) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up
                 ),
                 tint = KarikaColors.Black1,
-                contentDescription = ""
+                contentDescription = if (showAdditionalOptions.value) "Sakrij opcije" else "Prikaži opcije"
             )
         }
         if (showAdditionalOptions.value) {

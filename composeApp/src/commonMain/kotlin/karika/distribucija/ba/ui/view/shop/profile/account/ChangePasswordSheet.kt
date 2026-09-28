@@ -96,6 +96,7 @@ fun ChangePasswordSheet(onCancel: () -> Unit, onChange: (String, String) -> Unit
                     value = pass,
                     placeholder = "Stara lozinku",
                     imeAction = ImeAction.Next,
+                    testTag = AccountTestTags.OLD_PASSWORD,
                     onValueChange = {
                         enabled.value = pass.value.isNotEmpty() &&
                                 newPass.value.length >= 8 &&
@@ -117,6 +118,7 @@ fun ChangePasswordSheet(onCancel: () -> Unit, onChange: (String, String) -> Unit
                         .fillMaxWidth(),
                     value = newPass,
                     placeholder = "Nova lozinku",
+                    testTag = AccountTestTags.NEW_PASSWORD,
                     imeAction = ImeAction.Done,
                     error = error,
                     onValueChange = {
