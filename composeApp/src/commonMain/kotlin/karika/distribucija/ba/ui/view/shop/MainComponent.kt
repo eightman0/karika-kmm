@@ -11,12 +11,15 @@ import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.shop.cart.CartComponent
+import karika.distribucija.ba.ui.view.shop.cart.DefaultCartComponent
 import karika.distribucija.ba.ui.view.shop.cart.nextstep.ShippingDetailsComponent
 import karika.distribucija.ba.ui.view.shop.cart.success.CartSuccessComponent
 import karika.distribucija.ba.ui.view.shop.home.DefaultHomeComponent
 import karika.distribucija.ba.ui.view.shop.home.HomeComponent
 import karika.distribucija.ba.ui.view.shop.menu.MenuComponent
 import karika.distribucija.ba.ui.view.shop.menu.categories.CategoriesComponent
+import karika.distribucija.ba.ui.view.shop.menu.categories.DefaultCategoriesComponent
+import karika.distribucija.ba.ui.view.shop.menu.categories.products.DefaultProductByCategoryComponent
 import karika.distribucija.ba.ui.view.shop.menu.categories.products.ProductByCategoryComponent
 import karika.distribucija.ba.ui.view.shop.product.DefaultProductComponent
 import karika.distribucija.ba.ui.view.shop.product.ProductComponent
@@ -142,7 +145,7 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
             )
 
             is MainConfig.Cart -> MainChild.Cart(
-                CartComponent(componentContext, stateHolder)
+                DefaultCartComponent(componentContext, stateHolder)
             )
 
             is MainConfig.CartShippingDetails -> MainChild.CartShippingDetails(
@@ -170,11 +173,11 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
             )
 
             is MainConfig.Categories -> MainChild.Categories(
-                CategoriesComponent(componentContext, stateHolder)
+                DefaultCategoriesComponent(componentContext, stateHolder)
             )
 
             is MainConfig.CategoryProducts -> MainChild.CategoryProducts(
-                ProductByCategoryComponent(componentContext, stateHolder, config.category)
+                DefaultProductByCategoryComponent(componentContext, stateHolder, config.category)
             )
         }
 

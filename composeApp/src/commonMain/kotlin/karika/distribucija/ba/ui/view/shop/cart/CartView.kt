@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.Vendor
-import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
@@ -51,7 +50,6 @@ import karika.distribucija.ba.ui.view.shop.home.DiscountView
 import karika.distribucija.ba.ui.view.shop.product.ProductQtyAction
 import karika.distribucija.ba.ui.view.shop.product.VendorName
 import karika.distribucija.ba.ui.view.shop.profile.account.ConfirmationModal
-import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_check_circle_filled
 import karikav2.composeapp.generated.resources.ic_delete
@@ -60,7 +58,7 @@ import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun CartView(component: CartComponent) {
-    val items = component.stateHolder.cartHandler.cart.collectAsState()
+    val items = component.cart.collectAsState()
     val clearCartModal = mutableStateOf(false).asState()
     val imeVisible = rememberImeVisible()
     val focusManager = LocalFocusManager.current
@@ -183,7 +181,7 @@ fun CartView(component: CartComponent) {
 
 @Composable
 private fun PinnedFooter(component: CartComponent) {
-    val cart by component.stateHolder.cartHandler.cart.collectAsState()
+    val cart by component.cart.collectAsState()
 
     HorizontalDivider(
         modifier = Modifier.fillMaxWidth(),
@@ -232,7 +230,7 @@ private fun PinnedFooter(component: CartComponent) {
 @Composable
 private fun CartItem(
     item: Map.Entry<Vendor, List<Pair<Product, Int>>>,
-    component: CommonComponent
+    component: CartComponent
 ) {
     Column(
         modifier = Modifier
@@ -370,7 +368,7 @@ private fun MinOrderAmount(item: Map.Entry<Vendor, List<Pair<Product, Int>>>) {
 }
 
 @Composable
-private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
+private fun ProductItem(item: Pair<Product, Int>, component: CartComponent) {
     Row(
         modifier = Modifier
             .height(150.dp)
@@ -438,7 +436,7 @@ private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
                             },
                         imageVector = vectorResource(Res.drawable.ic_delete),
                         tint = KarikaColors.Black1,
-                        contentDescription = ""
+                        contentDescription = "Ukloni iz korpe"
                     )
                     KarikaText(
                         modifier = Modifier,
@@ -519,48 +517,3 @@ fun ProductBonus(product: Product, qty: Int) {
     }
 }
 
-private fun Map<Vendor, List<Pair<Product, Int>>>.calculateTotal(): String {
-    val total = values
-        .flatten()
-        .sumOf { (product, quantity) -> product.currentPrice() * quantity }
-
-    return karikaPriceFormat(total * 1.17) + " KM"
-}
-
-private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.minAmountRestValue(): String {
-    return "${
-        ((key.minOrderAmount()
-            ?.toDoubleOrNull() ?: 0.0) - (value.sumOf { it.first.currentPrice() * it.second } * 1.17)).coerceAtLeast(
-            0.0
-        )
-    }"
-}
-
-private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.minAmountRest(): String {
-    return karikaPriceFormat(
-        ((key.minOrderAmount()
-            ?.toDoubleOrNull()
-            ?: 0.0) - (value.sumOf { it.first.currentPrice() * it.second } * 1.17)).coerceAtLeast(
-            0.0
-        )
-    )
-}
-
-private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.progress(): Pair<Float, Float> {
-    val min = key.minOrderAmount()?.toDoubleOrNull() ?: 0.0
-    val current = (value.sumOf { it.first.currentPrice() * it.second } * 1.17).coerceAtLeast(0.0)
-    if (current == 0.0) {
-        return Pair(1f, 0f)
-    }
-
-    return Pair(
-        (current / min).toFloat(),
-        1f - (current / min).toFloat()
-    )
-}
-
-private fun Map<Vendor, List<Pair<Product, Int>>>.orderValid(): Boolean {
-    return all {
-        it.minAmountRestValue().toDouble() == 0.0
-    }
-}

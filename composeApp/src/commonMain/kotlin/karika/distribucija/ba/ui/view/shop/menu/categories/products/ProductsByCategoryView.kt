@@ -135,7 +135,7 @@ private fun Products(component: ProductByCategoryComponent) {
 
     LaunchedEffect(state.canScrollForward) {
         if (!state.canScrollForward) {
-            component.loadNextPage()
+            component.loadNextPage(reset = false)
         }
     }
 }
@@ -507,7 +507,7 @@ private fun FeaturedProductItem(
 @Composable
 private fun EmptyState(component: ProductByCategoryComponent) {
     val products by component.products.collectAsState()
-    val loader by component.stateHolder.loaderHandler.loader.collectAsState()
+    val loader by component.loader.collectAsState()
     if (products.isEmpty() && !loader) {
         Box(
             modifier = Modifier

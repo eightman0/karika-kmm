@@ -5,22 +5,41 @@ import karika.distribucija.ba.domain.api.CategoryRepository
 import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.ScreenComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.shop.MainConfig
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CategoriesComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
-    CommonComponent(componentContext, stateHolder) {
+interface CategoriesComponent : ScreenComponent {
+    /** The top-level categories, with "SVI PROIZVODI" first. */
+    val categories: StateFlow<List<Category>>
+
+    /** The top-level category whose subcategories are shown, or null for the top level. */
+    val subCategory: StateFlow<Category?>
+
+    fun onSelectCategory(category: Category?)
+
+    fun showProducts(category: Category?)
+
+    /** Back from the subcategories to the top level. */
+    fun reset()
+
+    fun mainBack()
+}
+
+class DefaultCategoriesComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
+    CommonComponent(componentContext, stateHolder), CategoriesComponent {
 
     private val categoryRepository = CategoryRepository()
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
-    val categories = _categories.asStateFlow()
+    override val categories = _categories.asStateFlow()
 
     private val _subCategory = MutableStateFlow<Category?>(null)
-    val subCategory = _subCategory.asStateFlow()
+    override val subCategory = _subCategory.asStateFlow()
 
     init {
         get()
@@ -55,15 +74,15 @@ class CategoriesComponent(componentContext: ComponentContext, stateHolder: Karik
         }
     }
 
-    fun onSelectCategory(category: Category? = null) {
+    override fun onSelectCategory(category: Category?) {
         _subCategory.update { category }
     }
 
-    fun showProducts(category: Category?) {
+    override fun showProducts(category: Category?) {
         mainNavigate(MainConfig.CategoryProducts(category ?: return))
     }
 
-    fun reset() {
+    override fun reset() {
         _subCategory.value = null
     }
 }

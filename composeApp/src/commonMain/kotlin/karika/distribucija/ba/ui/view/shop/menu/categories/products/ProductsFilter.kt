@@ -61,7 +61,7 @@ fun ProductsFilterSheet(
     val vendors by component.vendors.collectAsState()
     val selectedVendor = component.selectedVendor.asState()
     val checkedElements = component.selectedRegion.asState()
-    val config by component.stateHolder.commonHandler.config.collectAsState()
+    val config by component.config.collectAsState()
     val isInStock = component.isInStock.asState()
 
     if (showState.value) {
@@ -282,11 +282,11 @@ fun ProductsFilterSheet(
                             .clickable(
                                 interactionSource = null, indication = null
                             ) {
-                                if (checkedElements.value.size == component.stateHolder.commonHandler.config.value.customerRegionList.size) {
+                                if (checkedElements.value.size == component.config.value.customerRegionList.size) {
                                     checkedElements.value = listOf()
                                 } else {
                                     checkedElements.value =
-                                        component.stateHolder.commonHandler.config.value.customerRegionList
+                                        component.config.value.customerRegionList
                                 }
                             },
                         verticalAlignment = Alignment.CenterVertically,
@@ -296,13 +296,13 @@ fun ProductsFilterSheet(
                             modifier = Modifier
                                 .height(24.dp)
                                 .padding(vertical = 0.dp),
-                            checked = checkedElements.value.size == component.stateHolder.commonHandler.config.value.customerRegionList.size,
+                            checked = checkedElements.value.size == component.config.value.customerRegionList.size,
                             onCheckedChange = { _ ->
-                                if (checkedElements.value.size == component.stateHolder.commonHandler.config.value.customerRegionList.size) {
+                                if (checkedElements.value.size == component.config.value.customerRegionList.size) {
                                     checkedElements.value = listOf()
                                 } else {
                                     checkedElements.value =
-                                        component.stateHolder.commonHandler.config.value.customerRegionList
+                                        component.config.value.customerRegionList
                                 }
                             },
                             colors = CheckboxDefaults.colors(
