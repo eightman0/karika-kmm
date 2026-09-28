@@ -3,6 +3,7 @@ package karika.distribucija.ba.ui.view.shop.cart
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.util.karikaPriceFormat
+import kotlin.math.round
 
 /*
  * The cart's money rules, on the cart as CartHandler groups it: products (with their
@@ -18,25 +19,25 @@ fun Map<Vendor, List<Pair<Product, Int>>>.calculateTotal(): String {
     return karikaPriceFormat(total * 1.17) + " KM"
 }
 
+/**
+ * How much (with PDV) is still missing to the vendor's minimum order, in whole cents: a
+ * total of 99,9999 KM against a 100 KM minimum is shown as 0,00 KM missing, so it must not
+ * block the order either.
+ */
+private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.missingToMinimum(): Double {
+    val minimum = key.minOrderAmount()?.toDoubleOrNull() ?: 0.0
+    val current = value.sumOf { it.first.currentPrice() * it.second } * 1.17
+    return (round((minimum - current) * 100) / 100).coerceAtLeast(0.0)
+}
+
 /** How much (with PDV) is still missing to the vendor's minimum order, unformatted. */
 fun Map.Entry<Vendor, List<Pair<Product, Int>>>.minAmountRestValue(): String {
-    return "${
-        ((key.minOrderAmount()
-            ?.toDoubleOrNull() ?: 0.0) - (value.sumOf { it.first.currentPrice() * it.second } * 1.17)).coerceAtLeast(
-            0.0
-        )
-    }"
+    return "${missingToMinimum()}"
 }
 
 /** How much (with PDV) is still missing to the vendor's minimum order, formatted. */
 fun Map.Entry<Vendor, List<Pair<Product, Int>>>.minAmountRest(): String {
-    return karikaPriceFormat(
-        ((key.minOrderAmount()
-            ?.toDoubleOrNull()
-            ?: 0.0) - (value.sumOf { it.first.currentPrice() * it.second } * 1.17)).coerceAtLeast(
-            0.0
-        )
-    )
+    return karikaPriceFormat(missingToMinimum())
 }
 
 /** The filled and the missing share of the vendor's minimum order, for the progress bar. */
