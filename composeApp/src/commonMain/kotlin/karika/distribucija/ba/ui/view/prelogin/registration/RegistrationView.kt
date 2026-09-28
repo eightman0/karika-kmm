@@ -48,6 +48,7 @@ import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.gridColumnCount
+import karika.distribucija.ba.ui.view.prelogin.PreLoginTestTags
 import karika.distribucija.ba.util.KarikaConstants
 
 
@@ -138,7 +139,8 @@ private fun CompanyInfo(component: RegistrationComponent) {
         placeholder = "Naziv pravnog lica",
         allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
         keyboardType = KeyboardType.Text,
-        imeAction = ImeAction.Next
+        imeAction = ImeAction.Next,
+        testTag = PreLoginTestTags.REGISTRATION_COMPANY_NAME
     )
     KarikaTextField1(
         modifier = Modifier
@@ -148,7 +150,8 @@ private fun CompanyInfo(component: RegistrationComponent) {
         placeholder = "ID broj",
         keyboardType = KeyboardType.Number,
         allowedChars = KarikaConstants.numbers,
-        imeAction = ImeAction.Next
+        imeAction = ImeAction.Next,
+        testTag = PreLoginTestTags.REGISTRATION_COMPANY_ID
     )
     KarikaTextField1(
         modifier = Modifier
@@ -158,7 +161,8 @@ private fun CompanyInfo(component: RegistrationComponent) {
         placeholder = "PDV broj",
         allowedChars = KarikaConstants.numbers,
         keyboardType = KeyboardType.Number,
-        imeAction = ImeAction.Next
+        imeAction = ImeAction.Next,
+        testTag = PreLoginTestTags.REGISTRATION_COMPANY_PDV
     )
     CompanyAddress(component)
     if (component.userType.isShop()) {
@@ -182,7 +186,8 @@ private fun CompanyInfo(component: RegistrationComponent) {
             placeholder = "Broj zaposlenih",
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Next
+            imeAction = ImeAction.Next,
+            testTag = PreLoginTestTags.REGISTRATION_EMPLOYEES
         )
     } else {
         KarikaText(
@@ -297,7 +302,8 @@ private fun ContactInfo(component: RegistrationComponent) {
         value = component.contactFirstname.asState(),
         placeholder = "Ime",
         allowedChars = KarikaConstants.lettersSpace,
-        imeAction = ImeAction.Next
+        imeAction = ImeAction.Next,
+        testTag = PreLoginTestTags.REGISTRATION_FIRSTNAME
     )
     KarikaTextField1(
         modifier = Modifier
@@ -306,7 +312,8 @@ private fun ContactInfo(component: RegistrationComponent) {
         value = component.contactLastname.asState(),
         placeholder = "Prezime",
         allowedChars = KarikaConstants.lettersSpace,
-        imeAction = ImeAction.Next
+        imeAction = ImeAction.Next,
+        testTag = PreLoginTestTags.REGISTRATION_LASTNAME
     )
     if (component.userType.isShop()) {
         KarikaTextField1(
@@ -316,7 +323,8 @@ private fun ContactInfo(component: RegistrationComponent) {
             value = component.contactAddress.asState(),
             placeholder = "Adresa i broj ulice",
             allowedChars = KarikaConstants.numbersAndLettersSpace,
-            imeAction = ImeAction.Next
+            imeAction = ImeAction.Next,
+            testTag = PreLoginTestTags.REGISTRATION_ADDRESS
         )
         KarikaTextField1(
             modifier = Modifier
@@ -326,7 +334,8 @@ private fun ContactInfo(component: RegistrationComponent) {
             placeholder = "Poštanski broj",
             allowedChars = KarikaConstants.numbers,
             keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Next
+            imeAction = ImeAction.Next,
+            testTag = PreLoginTestTags.REGISTRATION_POSTAL
         )
     }
     KarikaTextField1(
@@ -338,7 +347,8 @@ private fun ContactInfo(component: RegistrationComponent) {
         allowedChars = KarikaConstants.numbers.plus("+"),
         keyboardType = KeyboardType.Phone,
         maxLength = 14,
-        imeAction = ImeAction.Next
+        imeAction = ImeAction.Next,
+        testTag = PreLoginTestTags.REGISTRATION_PHONE
     )
 }
 
@@ -361,7 +371,8 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
         placeholder = "Email adresa",
         keyboardType = KeyboardType.Email,
         allowedChars = KarikaConstants.numbersAndLetters.plus("@").plus(".").plus("_"),
-        imeAction = ImeAction.Next
+        imeAction = ImeAction.Next,
+        testTag = PreLoginTestTags.REGISTRATION_EMAIL
     )
     KarikaPasswordTextField(
         modifier = Modifier
@@ -369,7 +380,8 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
         title = "Šifra*",
         value = viewModel.password.asState(),
         placeholder = "Šifra",
-        imeAction = ImeAction.Next
+        imeAction = ImeAction.Next,
+        testTag = PreLoginTestTags.REGISTRATION_PASSWORD
     )
     KarikaPasswordTextField(
         modifier = Modifier
@@ -377,7 +389,8 @@ private fun LoginInfo(viewModel: RegistrationComponent) {
         title = "Potvrdi šifru*",
         value = viewModel.confirmPassword.asState(),
         placeholder = "Potvrdi šifru",
-        imeAction = ImeAction.Done
+        imeAction = ImeAction.Done,
+        testTag = PreLoginTestTags.REGISTRATION_CONFIRM_PASSWORD
     )
     if (viewModel.userType.isShop()) {
         KarikaCheckbox(

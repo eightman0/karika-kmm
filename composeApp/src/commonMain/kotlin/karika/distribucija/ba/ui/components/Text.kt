@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -372,7 +373,8 @@ fun KarikaTextField1(
     trailingIcons: @Composable (() -> Unit)? = null,
     allowedChars: List<String> = emptyList(),
     error: MutableState<String> = mutableStateOf(""),
-    leadingZero: Boolean = true
+    leadingZero: Boolean = true,
+    testTag: String = ""
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
@@ -397,7 +399,8 @@ fun KarikaTextField1(
                 .background(
                     color = KarikaColors.White,
                     shape = RoundedCornerShape(4.dp)
-                ),
+                )
+                .testTagIfNotEmpty(testTag),
             placeholder = {
                 KarikaText(
                     text = placeholder,
@@ -894,7 +897,8 @@ fun KarikaPasswordTextField(
     enabled: Boolean = true,
     imeAction: ImeAction = ImeAction.Done,
     doneAction: (() -> Unit)? = null,
-    error: MutableState<String> = mutableStateOf("")
+    error: MutableState<String> = mutableStateOf(""),
+    testTag: String = ""
 ) {
     var passwordVisibility by remember { mutableStateOf(false) }
     val text = remember { value }
@@ -919,7 +923,8 @@ fun KarikaPasswordTextField(
                 .background(
                     color = KarikaColors.White,
                     shape = RoundedCornerShape(4.dp)
-                ),
+                )
+                .testTagIfNotEmpty(testTag),
             placeholder = {
                 KarikaText(
                     text = placeholder,
@@ -1119,3 +1124,7 @@ fun karikaFonts() = FontFamily(
     Font(Res.font.gotham_light, FontWeight.Light),
     Font(Res.font.gotham_medium, FontWeight.Medium)
 )
+
+/** Tags only the input itself, so a UI test finds exactly one node per field. */
+private fun Modifier.testTagIfNotEmpty(tag: String): Modifier =
+    if (tag.isEmpty()) this else this.testTag(tag)

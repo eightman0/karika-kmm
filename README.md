@@ -14,3 +14,10 @@ adb shell dpm remove-active-admin karika.distribucija.ba.kiosk/karika.distribuci
 }
 ```
 ![qr-code-json.png](qr-code-json.png)
+
+### Tests
+Pre-login UI tests (landing, login, forgot password, registration) run on the JVM through Robolectric, no emulator needed:
+```
+./gradlew :composeApp:testUatDebugUnitTest
+```
+The views are driven by fake components (`src/androidUnitTest/.../prelogin/FakeComponents.kt`); `PreLoginNavigationTest` checks the real components navigate between each other. The registration rules have plain unit tests in `src/commonTest`.

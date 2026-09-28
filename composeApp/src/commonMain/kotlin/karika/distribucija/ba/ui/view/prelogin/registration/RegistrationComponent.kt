@@ -123,25 +123,6 @@ class DefaultRegistrationComponent(
         registerVendor()
     }
 
-    fun input() = RegistrationInput(
-        companyName = companyName.value,
-        companyId = companyId.value,
-        companyEntity = companyEntity.value,
-        companyCanton = companyCanton.value,
-        companyCity = companyCity.value,
-        companySize = companySize.value,
-        companyType = companyType.value,
-        contactFirstname = contactFirstname.value,
-        contactLastname = contactLastname.value,
-        contactAddress = contactAddress.value,
-        contactPostal = contactPostal.value,
-        contactPhone = contactPhone.value,
-        email = email.value,
-        password = password.value,
-        confirmPassword = confirmPassword.value,
-        agree = agree.value,
-    )
-
     override fun navigateBack() {
         stateHolder.preLoginNavigation.replaceAll(PreLoginConfig.Login(userType))
     }

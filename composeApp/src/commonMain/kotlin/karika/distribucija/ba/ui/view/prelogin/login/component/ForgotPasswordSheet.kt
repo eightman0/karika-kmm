@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -32,6 +33,7 @@ import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.components.negate
+import karika.distribucija.ba.ui.view.prelogin.PreLoginTestTags
 import karika.distribucija.ba.ui.view.prelogin.login.LoginComponent
 
 
@@ -96,7 +98,8 @@ fun ForgotPasswordSheet(
                 KarikaTextField2(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .testTag(PreLoginTestTags.FORGOT_PASSWORD_EMAIL),
                     value = email,
                     placeholder = "Unesite email",
                     imeAction = ImeAction.Done,

@@ -26,6 +26,10 @@ kotlinx-datetime = "0.8.0"
 material3 = "1.9.0"
 materialIconsExtended = "1.7.3"
 richeditorCompose = "1.0.0-rc14"
+junit = "4.13.2"
+robolectric = "4.17"
+# Jetpack Compose version that composeMultiplatform 1.11.0 resolves to on Android
+androidx-compose-ui-test = "1.11.1"
 runtime = "1.11.0"
 ui = "1.11.0"
 uiToolingPreview = "1.11.0"
@@ -69,6 +73,13 @@ richeditor-compose = { module = "com.mohamedrejeb.richeditor:richeditor-compose"
 runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "runtime" }
 ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "ui" }
 ui-backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "composeMultiplatform" }
+
+#testing
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+junit = { module = "junit:junit", version.ref = "junit" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+compose-ui-test-junit4 = { module = "org.jetbrains.compose.ui:ui-test-junit4", version.ref = "composeMultiplatform" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-compose-ui-test" }
 
 #ktor
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }

@@ -48,6 +48,7 @@ import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.view.prelogin.PreLoginTestTags
 import karika.distribucija.ba.ui.view.prelogin.login.component.ForgotPasswordSheet
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_back
@@ -100,6 +101,7 @@ fun LoginView(component: LoginComponent) {
                         value = component.email.asState(),
                         placeholder = "Email Adresa",
                         error = emailValid,
+                        testTag = PreLoginTestTags.LOGIN_EMAIL,
                         onValueChange = {
                             emailValid.value = if (component.email.value.isEmailFormat()) {
                                 formValid.value = component.pass.value.isNotEmpty()
@@ -121,7 +123,8 @@ fun LoginView(component: LoginComponent) {
                                 component.pass.value.isNotEmpty() && component.email.value.isEmailFormat()
                         },
                         imeAction = ImeAction.Done,
-                        doneAction = { component.login() }
+                        doneAction = { component.login() },
+                        testTag = PreLoginTestTags.LOGIN_PASSWORD
                     )
                     Row(
                         modifier = Modifier
@@ -207,7 +210,7 @@ fun LoginView(component: LoginComponent) {
                         .padding(16.dp),
                     imageVector = vectorResource(Res.drawable.ic_arrow_back),
                     tint = KarikaColors.Primary,
-                    contentDescription = ""
+                    contentDescription = "Nazad"
                 )
             } else {
                 Box(

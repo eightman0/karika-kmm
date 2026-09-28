@@ -77,7 +77,7 @@ fun TopBarWithBack(
                     }
                     .padding(horizontal = 4.dp),
                 imageVector = vectorResource(Res.drawable.ic_arrow_back),
-                contentDescription = "",
+                contentDescription = "Nazad",
                 tint = KarikaColors.White
             )
         },

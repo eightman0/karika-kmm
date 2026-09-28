@@ -94,6 +94,16 @@ kotlin {
             implementation(libs.richeditor.compose)
         }
 
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.junit)
+            implementation(libs.robolectric)
+            implementation(libs.compose.ui.test.junit4)
+        }
+
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
             implementation(libs.material.icons.extended)
@@ -168,6 +178,12 @@ android {
     lint {
         disable.add("NullSafeMutableLiveData")
     }
+    testOptions {
+        unitTests {
+            // Robolectric needs the merged assets, where the compose resources live
+            isIncludeAndroidResources = true
+        }
+    }
     sourceSets {
         getByName("kioskTest") {
             setRoot("src/kiosk")
@@ -176,6 +192,11 @@ android {
             setRoot("src/kiosk")
         }
     }
+}
+
+dependencies {
+    // Registers the empty activity that compose UI tests host their content in
+    debugImplementation(libs.compose.ui.test.manifest)
 }
 
 compose.resources {
