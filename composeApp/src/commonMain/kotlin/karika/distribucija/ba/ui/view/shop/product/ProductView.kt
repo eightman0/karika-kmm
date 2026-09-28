@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
+import karika.distribucija.ba.ui.common.ProductActions
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
@@ -148,7 +149,7 @@ fun ProductView(component: ProductComponent) {
 }
 
 @Composable
-fun VendorName(product: Product, component: CommonComponent) {
+fun VendorName(product: Product, component: ProductActions) {
     if (component.isGuest()) {
         return
     }

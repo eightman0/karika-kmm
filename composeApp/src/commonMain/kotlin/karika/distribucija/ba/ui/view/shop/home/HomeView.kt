@@ -27,9 +27,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.Product
-import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.ProductActions
 import karika.distribucija.ba.ui.components.CarouselBanners
 import karika.distribucija.ba.ui.components.CarouselLogos
 import karika.distribucija.ba.ui.components.KarikaColors
@@ -39,9 +38,7 @@ import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.toGrid
-import karika.distribucija.ba.ui.view.shop.MainConfig
 import karika.distribucija.ba.ui.view.shop.product.VendorName
-import karika.distribucija.ba.util.KarikaConfig
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_cart_add
 import karikav2.composeapp.generated.resources.ic_gift
@@ -50,6 +47,7 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun HomeView(component: HomeComponent) {
     val state = rememberLazyListState()
+    val promotedVendors by component.promotedVendors.collectAsState()
     val promotedLogos by component.promotedLogos.collectAsState()
     Box(
         modifier = Modifier
@@ -65,7 +63,9 @@ fun HomeView(component: HomeComponent) {
             state = state
         ) {
             item {
-                CarouselBanners(component)
+                CarouselBanners(promotedVendors) {
+                    component.showVendor(it.toVendor())
+                }
                 YSpacer8()
             }
             item {
@@ -82,7 +82,9 @@ fun HomeView(component: HomeComponent) {
                         fontWeight = FontWeight.W700
                     )
                     YSpacer8()
-                    CarouselLogos(component)
+                    CarouselLogos(promotedLogos) {
+                        component.showVendor(it.toVendor())
+                    }
                 }
             }
         }
@@ -97,7 +99,7 @@ fun HomeView(component: HomeComponent) {
 @Composable
 fun ProductItem(
     product: Product,
-    component: CommonComponent,
+    component: ProductActions,
     hideVendor: Boolean = false,
     showMinQty: Boolean = false
 ) {
@@ -187,14 +189,7 @@ private fun KarikaProducts(component: HomeComponent) {
             KarikaText(
                 modifier = Modifier
                     .onClick {
-                        component.mainNavigate(
-                            MainConfig.CategoryProducts(
-                                Category(
-                                    id = KarikaConfig.getKarikaProductsId(),
-                                    name = "Karika preporučuje"
-                                )
-                            )
-                        )
+                        component.openRecommended()
                     },
                 color = KarikaColors.Black,
                 text = "Vidi sve",
@@ -264,7 +259,7 @@ fun BonusView(product: Product) {
 }
 
 @Composable
-private fun AddToCartButton(product: Product, component: CommonComponent) {
+private fun AddToCartButton(product: Product, component: ProductActions) {
     if (product.hasOnStock()) {
         Box(
             modifier = Modifier
@@ -284,7 +279,7 @@ private fun AddToCartButton(product: Product, component: CommonComponent) {
                 Icon(
                     imageVector = vectorResource(Res.drawable.ic_cart_add),
                     tint = KarikaColors.White,
-                    contentDescription = ""
+                    contentDescription = "Dodaj u korpu"
                 )
             }
         }

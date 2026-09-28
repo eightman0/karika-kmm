@@ -38,6 +38,16 @@ import kotlinx.coroutines.delay
 fun CarouselBanners(component: CommonComponent) {
     val promotedVendors by component.promotedVendors.collectAsState()
 
+    CarouselBanners(promotedVendors) {
+        component.showVendor(it.toVendor())
+    }
+}
+
+@Composable
+fun CarouselBanners(
+    promotedVendors: List<PromotedVendor>,
+    onClick: (PromotedVendor) -> Unit
+) {
     if (promotedVendors.isNotEmpty()) {
         BoxWithConstraints(
             modifier = Modifier
@@ -57,7 +67,7 @@ fun CarouselBanners(component: CommonComponent) {
                             .width(cardWidth),
                         promotedVendor = it
                     ) {
-                        component.showVendor(it.toVendor())
+                        onClick(it)
                     }
                 }
             }

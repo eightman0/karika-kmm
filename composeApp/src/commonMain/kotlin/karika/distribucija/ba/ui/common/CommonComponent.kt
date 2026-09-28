@@ -52,7 +52,7 @@ import kotlin.uuid.Uuid
 open class CommonComponent(
     componentContext: ComponentContext,
     val stateHolder: KarikaStateHolder,
-) : KoinComponent, ScreenComponent, ComponentContext by componentContext {
+) : KoinComponent, ScreenComponent, ProductActions, ComponentContext by componentContext {
     @OptIn(ExperimentalUuidApi::class)
     private val sessionId = Uuid.random().toString()
     open val title: String = ""
@@ -118,7 +118,7 @@ open class CommonComponent(
         stateHolder.logout()
     }
 
-    open fun showVendor(vendor: Vendor) {
+    override fun showVendor(vendor: Vendor) {
         if (isGuest()) {
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za pristup dobavljačima")
             return
@@ -128,13 +128,13 @@ open class CommonComponent(
         }
     }
 
-    open fun navigateToProduct(product: Product) {
+    override fun navigateToProduct(product: Product) {
         scope.launch {
             stateHolder.mainNavigation.bringToFront(MainConfig.ProductDetails(product))
         }
     }
 
-    fun addToCart(product: Product, qty: Int = 1, showSnack: Boolean = true) {
+    override fun addToCart(product: Product, qty: Int, showSnack: Boolean) {
         if (isGuest()) {
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
             return
@@ -592,11 +592,11 @@ open class CommonComponent(
         }
     }
 
-    fun getUnit(unit: String): String {
+    override fun getUnit(unit: String): String {
         return stateHolder.commonHandler.getUnit(unit)
     }
 
-    fun isGuest() = HttpClientProvider.token == getEnvJwt()
+    override fun isGuest() = HttpClientProvider.token == getEnvJwt()
 
     fun logEvent(
         eventType: EventType,

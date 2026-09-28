@@ -13,6 +13,7 @@ import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.shop.cart.CartComponent
 import karika.distribucija.ba.ui.view.shop.cart.nextstep.ShippingDetailsComponent
 import karika.distribucija.ba.ui.view.shop.cart.success.CartSuccessComponent
+import karika.distribucija.ba.ui.view.shop.home.DefaultHomeComponent
 import karika.distribucija.ba.ui.view.shop.home.HomeComponent
 import karika.distribucija.ba.ui.view.shop.menu.MenuComponent
 import karika.distribucija.ba.ui.view.shop.menu.categories.CategoriesComponent
@@ -127,7 +128,7 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
     private fun child(config: MainConfig, componentContext: ComponentContext): MainChild =
         when (config) {
             is MainConfig.Home -> MainChild.Home(
-                HomeComponent(componentContext, stateHolder)
+                DefaultHomeComponent(componentContext, stateHolder)
             )
 
             is MainConfig.Vendor -> MainChild.Vendor(
