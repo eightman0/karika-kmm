@@ -57,10 +57,10 @@ abstract class LiveShopTest : KarikaUiTest() {
         }
         stateHolder = KarikaStateHolder(FakeKarikaHandler())
         subscriptions += stateHolder.mainNavigation.subscribe { event ->
-            openedInShop = event.transformer(listOf(MainConfig.Home)).last()
+            event.transformer(listOf(MainConfig.Home)).lastOrNull()?.let { openedInShop = it }
         }
         subscriptions += stateHolder.appNavigation.subscribe { event ->
-            openedInApp = event.transformer(listOf(AppConfig.Main)).last()
+            event.transformer(listOf(AppConfig.Main)).lastOrNull()?.let { openedInApp = it }
         }
         LiveTestAccounts.logInCustomer()
     }

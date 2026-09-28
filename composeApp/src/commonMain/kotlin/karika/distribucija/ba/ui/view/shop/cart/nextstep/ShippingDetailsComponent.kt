@@ -20,6 +20,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** Whether a new shipping address is complete enough to be saved: everything filled, a 5-digit postal code. */
+fun isNewAddressValid(
+    firstname: String,
+    lastname: String,
+    street: String,
+    city: String,
+    postal: String,
+    telephone: String,
+) = firstname.isNotEmpty() &&
+        lastname.isNotEmpty() &&
+        street.isNotEmpty() &&
+        city.isNotEmpty() &&
+        postal.isNotEmpty() &&
+        postal.isPostalCodeValid() &&
+        telephone.isNotEmpty()
+
 interface ShippingDetailsComponent : ScreenComponent {
     val cart: StateFlow<CartData>
 
@@ -171,14 +187,13 @@ class DefaultShippingDetailsComponent(
         }
     }
 
-    override fun validateNewAddress(): Boolean {
-        return firstname.value.isNotEmpty() &&
-                lastname.value.isNotEmpty() &&
-                address.value.isNotEmpty() &&
-                city.value.isNotEmpty() &&
-                postal.value.isNotEmpty() &&
-                postal.value.isPostalCodeValid() &&
-                telephone.value.isNotEmpty()
-    }
+    override fun validateNewAddress() = isNewAddressValid(
+        firstname = firstname.value,
+        lastname = lastname.value,
+        street = address.value,
+        city = city.value,
+        postal = postal.value,
+        telephone = telephone.value,
+    )
 
 }

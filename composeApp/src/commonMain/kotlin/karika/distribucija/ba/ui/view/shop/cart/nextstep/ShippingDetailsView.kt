@@ -19,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -84,7 +85,8 @@ private fun Cart(modifier: Modifier, component: ShippingDetailsComponent) {
             title = "Napomena za dobavljača",
             value = component.vendorNote.asState(),
             placeholder = "Napomena za dobavljaca (opcionalno)",
-            imeAction = ImeAction.Done
+            imeAction = ImeAction.Done,
+            testTag = ShippingTestTags.VENDOR_NOTE
         )
         KarikaText(
             modifier = Modifier,
@@ -184,6 +186,7 @@ private fun AddressBox(component: ShippingDetailsComponent) {
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
+                .testTag(ShippingTestTags.address(it.id))
                 .onClick {
                     selectedAddress.value = it.id?.toString() ?: ""
                     newAddress.value = false
@@ -249,7 +252,8 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         value = component.firstname.asState(),
                         placeholder = "Ime",
                         allowedChars = KarikaConstants.lettersSpace,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Next,
+                        testTag = ShippingTestTags.FIRSTNAME
                     )
                     KarikaTextField1(
                         modifier = Modifier
@@ -258,7 +262,8 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         value = component.lastname.asState(),
                         placeholder = "Prezime",
                         allowedChars = KarikaConstants.lettersSpace,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Next,
+                        testTag = ShippingTestTags.LASTNAME
                     )
                     KarikaTextField1(
                         modifier = Modifier
@@ -270,7 +275,8 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         keyboardType = KeyboardType.Text,
                         enabled = false,
                         imeAction = ImeAction.Next,
-                        disabledTextColor = KarikaColors.Gray2
+                        disabledTextColor = KarikaColors.Gray2,
+                        testTag = ShippingTestTags.COMPANY
                     )
                     KarikaTextField1(
                         modifier = Modifier
@@ -279,7 +285,8 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         value = component.city.asState(),
                         placeholder = "Grad",
                         allowedChars = KarikaConstants.numbersAndLetters.plus(" ").plus("."),
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Next,
+                        testTag = ShippingTestTags.CITY
                     )
                     KarikaTextField1(
                         modifier = Modifier
@@ -288,7 +295,8 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         value = component.address.asState(),
                         placeholder = "Adresa i broj ulice",
                         allowedChars = KarikaConstants.numbersAndLettersSpace,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Next,
+                        testTag = ShippingTestTags.STREET
                     )
                     KarikaTextField1(
                         modifier = Modifier
@@ -299,7 +307,8 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         allowedChars = KarikaConstants.numbers,
                         keyboardType = KeyboardType.Number,
                         maxLength = 5,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Next,
+                        testTag = ShippingTestTags.POSTAL
                     )
                     KarikaTextField1(
                         modifier = Modifier
@@ -309,7 +318,8 @@ private fun AddressBox(component: ShippingDetailsComponent) {
                         placeholder = "Broj telefona",
                         allowedChars = KarikaConstants.numbers,
                         keyboardType = KeyboardType.Phone,
-                        imeAction = ImeAction.Done
+                        imeAction = ImeAction.Done,
+                        testTag = ShippingTestTags.PHONE
                     )
                     YSpacer16()
                 }
