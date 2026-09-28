@@ -40,6 +40,7 @@ import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.ProductActions
 import karika.distribucija.ba.ui.components.IconTextItem
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
@@ -146,7 +147,7 @@ private fun Vendors(component: VendorComponent) {
 }
 
 @Composable
-fun VendorItem(vendor: Vendor, component: CommonComponent) {
+fun VendorItem(vendor: Vendor, component: ProductActions) {
     Column(
         modifier = Modifier
             .fillMaxWidth(),

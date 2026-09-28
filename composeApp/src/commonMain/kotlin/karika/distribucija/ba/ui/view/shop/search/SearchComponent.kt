@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.shop.search
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.model.EventType
@@ -8,25 +9,39 @@ import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.ProductActions
+import karika.distribucija.ba.ui.common.ScreenComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
-class SearchComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
-    CommonComponent(componentContext, stateHolder) {
+interface SearchComponent : ScreenComponent, ProductActions {
+    val searchText: MutableState<String>
+    val products: StateFlow<List<Product>>
+    val vendors: StateFlow<List<Vendor>>
 
-    val searchText = mutableStateOf("")
+    /** Searches for [searchText]; [reset] starts over from the first page. */
+    fun search(reset: Boolean)
+
+    fun mainBack()
+}
+
+class DefaultSearchComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
+    CommonComponent(componentContext, stateHolder), SearchComponent {
+
+    override val searchText = mutableStateOf("")
     private val _products = MutableStateFlow<List<Product>>(emptyList())
-    val products = _products.asStateFlow()
+    override val products = _products.asStateFlow()
 
     private val _vendors = MutableStateFlow<List<Vendor>>(emptyList())
-    val vendors = _vendors.asStateFlow()
-    fun search(reset: Boolean = false) {
+    override val vendors = _vendors.asStateFlow()
+    override fun search(reset: Boolean) {
         if (reset) {
             hasNextPage = true
             currentPage = 1

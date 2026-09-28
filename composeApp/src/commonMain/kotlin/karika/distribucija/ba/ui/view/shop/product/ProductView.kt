@@ -42,7 +42,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Product
-import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
 import karika.distribucija.ba.ui.common.ProductActions
 import karika.distribucija.ba.ui.components.IconTextItem
@@ -421,7 +420,7 @@ fun ProductPriceTablet(component: ProductComponent) {
                     icon = Res.drawable.ic_navigation_cart,
                     enabled = product.hasOnStock()
                 ) {
-                    component.addToCartWithPut(product, productQty.value)
+                    component.addToCartWithPut(product, productQty.value, true)
                 }
             }
 
@@ -584,7 +583,7 @@ fun ProductButtons(component: ProductComponent) {
             icon = Res.drawable.ic_navigation_cart,
             enabled = product.hasOnStock()
         ) {
-            component.addToCartWithPut(product, productQty)
+            component.addToCartWithPut(product, productQty, true)
         }
     }
 
@@ -645,7 +644,7 @@ private fun VendorProducts(viewModel: ProductComponent) {
 fun ProductQtyAction(
     product: Product,
     qty: MutableState<Int>,
-    component: CommonComponent,
+    component: ProductActions,
     disableUpdate: Boolean = true,
     autoUpdate: Boolean = false
 ) {

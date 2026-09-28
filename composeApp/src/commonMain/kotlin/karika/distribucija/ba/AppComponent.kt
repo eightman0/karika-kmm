@@ -28,6 +28,7 @@ import karika.distribucija.ba.ui.view.shop.MainComponent
 import karika.distribucija.ba.ui.view.shop.menu.blog.BlogsComponent
 import karika.distribucija.ba.ui.view.shop.menu.blog.overview.BlogOverviewComponent
 import karika.distribucija.ba.ui.view.shop.menu.faq.FaqComponent
+import karika.distribucija.ba.ui.view.shop.product.DefaultProductComponent
 import karika.distribucija.ba.ui.view.shop.product.ProductComponent
 import karika.distribucija.ba.ui.view.shop.profile.account.AccountComponent
 import karika.distribucija.ba.ui.view.shop.profile.messages.admin.AdminMessagesComponent
@@ -194,7 +195,7 @@ class AppComponent(
             )
 
             is AppConfig.ProductDetails -> Child.ProductDetails(
-                ProductComponent(componentContext, stateHolder, appConfig.product, false)
+                DefaultProductComponent(componentContext, stateHolder, appConfig.product, false)
             )
 
             is AppConfig.VendorDetails -> Child.VendorDetails(

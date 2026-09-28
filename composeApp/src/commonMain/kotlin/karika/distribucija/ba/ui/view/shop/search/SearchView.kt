@@ -123,7 +123,7 @@ fun SearchView(component: SearchComponent) {
 
         LaunchedEffect(state.canScrollForward) {
             if (!state.canScrollForward) {
-                component.search(false)
+                component.search(reset = false)
             }
         }
     }
@@ -133,7 +133,7 @@ fun SearchView(component: SearchComponent) {
 private fun EmptyState(component: SearchComponent) {
     val vendors by component.vendors.collectAsState()
     val products by component.products.collectAsState()
-    val loader by component.stateHolder.loaderHandler.loader.collectAsState()
+    val loader by component.loader.collectAsState()
     if (vendors.isEmpty() && products.isEmpty() && !loader) {
         Box(
             modifier = Modifier

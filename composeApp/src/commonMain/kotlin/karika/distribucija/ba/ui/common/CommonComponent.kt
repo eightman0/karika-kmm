@@ -270,7 +270,7 @@ open class CommonComponent(
         }
     }
 
-    fun updateCart(product: Product, qty: Int = 1, errorCallback: () -> Unit = {}) {
+    override fun updateCart(product: Product, qty: Int, errorCallback: () -> Unit) {
         if (isGuest()) {
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
             return

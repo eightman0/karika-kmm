@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.shop.product
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.ProductRepository
@@ -8,26 +9,48 @@ import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.RefType
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.ProductActions
+import karika.distribucija.ba.ui.common.ScreenComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ProductComponent(
+interface ProductComponent : ScreenComponent, ProductActions {
+    /** The product, first as it was tapped, then as the details request returns it. */
+    val product: StateFlow<Product>
+
+    /** Other products of the same vendor. */
+    val products: StateFlow<List<Product>>
+
+    /** The quantity the "Dodaj u Korpu" button adds, in steps of the minimum quantity. */
+    val productQty: MutableState<Int>
+
+    fun back()
+
+    fun addToCartWithPut(product: Product, qty: Int, showSnack: Boolean)
+
+    fun sendMessageToVendor(product: Product)
+
+    fun showImagesPreview(images: List<Any?>, startIndex: Int)
+}
+
+class DefaultProductComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
     product: Product,
     val fromMain: Boolean = true
-) : CommonComponent(componentContext, stateHolder) {
+) : CommonComponent(componentContext, stateHolder), ProductComponent {
 
     private val repository = ProductRepository()
     override val title: String = product.name()
     private val _product = MutableStateFlow(product)
-    val product = _product.asStateFlow()
+    override val product = _product.asStateFlow()
     private val _products = MutableStateFlow<List<Product>>(emptyList())
-    val products = _products.asStateFlow()
-    val productQty = mutableStateOf(product.minQty())
+    override val products = _products.asStateFlow()
+    override val productQty = mutableStateOf(product.minQty())
 
     init {
         loadProducts()
@@ -82,7 +105,7 @@ class ProductComponent(
         }
     }
 
-    fun back() {
+    override fun back() {
         if (fromMain) {
             mainBack()
         } else {

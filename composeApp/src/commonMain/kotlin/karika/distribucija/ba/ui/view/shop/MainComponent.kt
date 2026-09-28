@@ -18,8 +18,10 @@ import karika.distribucija.ba.ui.view.shop.home.HomeComponent
 import karika.distribucija.ba.ui.view.shop.menu.MenuComponent
 import karika.distribucija.ba.ui.view.shop.menu.categories.CategoriesComponent
 import karika.distribucija.ba.ui.view.shop.menu.categories.products.ProductByCategoryComponent
+import karika.distribucija.ba.ui.view.shop.product.DefaultProductComponent
 import karika.distribucija.ba.ui.view.shop.product.ProductComponent
 import karika.distribucija.ba.ui.view.shop.profile.ProfileComponent
+import karika.distribucija.ba.ui.view.shop.search.DefaultSearchComponent
 import karika.distribucija.ba.ui.view.shop.search.SearchComponent
 import karika.distribucija.ba.ui.view.shop.vendor.VendorComponent
 import karika.distribucija.ba.ui.view.shop.vendor.details.VendorDetailsComponent
@@ -160,11 +162,11 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
             )
 
             is MainConfig.ProductDetails -> MainChild.ProductDetails(
-                ProductComponent(componentContext, stateHolder, config.product)
+                DefaultProductComponent(componentContext, stateHolder, config.product)
             )
 
             is MainConfig.Search -> MainChild.Search(
-                SearchComponent(componentContext, stateHolder)
+                DefaultSearchComponent(componentContext, stateHolder)
             )
 
             is MainConfig.Categories -> MainChild.Categories(
