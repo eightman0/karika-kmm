@@ -60,18 +60,24 @@ class ShippingDetailsComponent(
             selectedAddress.value = "-100"
             newAddress.value = false
         } else {
+            // No default shipping address, or it is the billing one (left out of the list)
+            val address = addresses.value.firstOrNull { it.id?.toString() == selectedAddress.value }
+            if (address == null) {
+                showMessage("Odaberite adresu za dostavu.")
+                return
+            }
             scope.launch {
                 repository.setAddress(
                     SetShippingAddressRequest(
                         addressInformation = ShippingAddress(
-                            shippingAddress = addresses.value.first { it.id?.toString() == selectedAddress.value }
+                            shippingAddress = address
                                 .copy(
                                     id = null,
                                     defaultShipping = null,
                                     defaultBilling = null,
                                     save = if (selectedAddress.value == "-100") 1 else 0
                                 ),
-                            billingAddress = addresses.value.first { it.id?.toString() == selectedAddress.value }
+                            billingAddress = address
                                 .copy(
                                     id = null,
                                     defaultShipping = null,
