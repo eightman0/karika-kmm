@@ -247,11 +247,15 @@ open class CommonComponent(
                 when (result) {
                     is ResultState.Loading -> showLoader()
                     is ResultState.Success -> {
-                        updateCart(product.copy(itemId = result.data.itemId), qty) {
-                            if (showSnack) {
-                                showMessage("Proizvod dodan u korpu!")
+                        updateCart(
+                            product.copy(itemId = result.data.itemId),
+                            qty,
+                            onSuccess = {
+                                if (showSnack) {
+                                    showMessage("Proizvod dodan u korpu!")
+                                }
                             }
-                        }
+                        )
                     }
 
                     is ResultState.Error -> {
@@ -270,7 +274,12 @@ open class CommonComponent(
         }
     }
 
-    override fun updateCart(product: Product, qty: Int, errorCallback: () -> Unit) {
+    override fun updateCart(
+        product: Product,
+        qty: Int,
+        onSuccess: () -> Unit,
+        errorCallback: () -> Unit
+    ) {
         if (isGuest()) {
             stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za dodavanje u korpu")
             return
@@ -296,6 +305,7 @@ open class CommonComponent(
                     is ResultState.Success -> {
                         hideLoader()
                         reloadCart()
+                        onSuccess.invoke()
                     }
 
                     is ResultState.Error -> {

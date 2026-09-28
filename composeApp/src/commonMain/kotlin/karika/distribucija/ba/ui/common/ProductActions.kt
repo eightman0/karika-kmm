@@ -13,7 +13,12 @@ interface ProductActions {
     fun addToCart(product: Product, qty: Int = 1, showSnack: Boolean = true)
 
     /** Sets the product's quantity in the cart (adds it when it is not there yet). */
-    fun updateCart(product: Product, qty: Int = 1, errorCallback: () -> Unit = {})
+    fun updateCart(
+        product: Product,
+        qty: Int = 1,
+        onSuccess: () -> Unit = {},
+        errorCallback: () -> Unit = {}
+    )
 
     fun showVendor(vendor: Vendor)
 
