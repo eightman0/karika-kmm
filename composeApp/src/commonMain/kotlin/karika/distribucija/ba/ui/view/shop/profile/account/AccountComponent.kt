@@ -60,32 +60,11 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                                     }
                                 },
                             customAttributes = stateHolder.customerSpecificHandler.userDetails.value.customAttributes
-                                .filter {
-                                    it.attributeCode != "notification_email_enabled" ||
-                                            it.attributeCode != "notification_viber_enabled" ||
-                                            it.attributeCode != "notification_push_enabled"
-                                }
-                                .toMutableList()
-                                .apply {
-                                    add(
-                                        Attributes(
-                                            "notification_email_enabled",
-                                            emailNotifications.value.toInt()
-                                        )
-                                    )
-                                    add(
-                                        Attributes(
-                                            "notification_viber_enabled",
-                                            viberNotifications.value.toInt()
-                                        )
-                                    )
-                                    add(
-                                        Attributes(
-                                            "notification_push_enabled",
-                                            pushNotifications.value.toInt()
-                                        )
-                                    )
-                                }
+                                .withNotificationSettings(
+                                    email = emailNotifications.value,
+                                    viber = viberNotifications.value,
+                                    push = pushNotifications.value
+                                )
                         )
                 )
             ).collect { result ->
@@ -114,32 +93,11 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                     customer = stateHolder.customerSpecificHandler.userDetails.value
                         .copy(
                             customAttributes = stateHolder.customerSpecificHandler.userDetails.value.customAttributes
-                                .filter {
-                                    it.attributeCode != "notification_email_enabled" ||
-                                            it.attributeCode != "notification_viber_enabled" ||
-                                            it.attributeCode != "notification_push_enabled"
-                                }
-                                .toMutableList()
-                                .apply {
-                                    add(
-                                        Attributes(
-                                            "notification_email_enabled",
-                                            emailNotifications.value.toInt()
-                                        )
-                                    )
-                                    add(
-                                        Attributes(
-                                            "notification_viber_enabled",
-                                            viberNotifications.value.toInt()
-                                        )
-                                    )
-                                    add(
-                                        Attributes(
-                                            "notification_push_enabled",
-                                            pushNotifications.value.toInt()
-                                        )
-                                    )
-                                }
+                                .withNotificationSettings(
+                                    email = emailNotifications.value,
+                                    viber = viberNotifications.value,
+                                    push = pushNotifications.value
+                                )
                                 .map {
                                     when (it.attributeCode) {
                                         "b2b_velicina_objekta" -> it.copy(value = objectSize.value)
@@ -299,3 +257,20 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
         }
     }
 }
+
+private val notificationSettingCodes = setOf(
+    "notification_email_enabled",
+    "notification_viber_enabled",
+    "notification_push_enabled",
+)
+
+/**
+ * The customer's attributes with the three notification settings replaced by the given ones
+ * ("1" on, "0" off), each exactly once.
+ */
+fun List<Attributes>.withNotificationSettings(email: Boolean, viber: Boolean, push: Boolean): List<Attributes> =
+    filter { it.attributeCode !in notificationSettingCodes } + listOf(
+        Attributes("notification_email_enabled", email.toInt()),
+        Attributes("notification_viber_enabled", viber.toInt()),
+        Attributes("notification_push_enabled", push.toInt()),
+    )
