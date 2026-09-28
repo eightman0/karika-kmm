@@ -12,8 +12,10 @@ import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.shop.cart.CartComponent
 import karika.distribucija.ba.ui.view.shop.cart.DefaultCartComponent
+import karika.distribucija.ba.ui.view.shop.cart.nextstep.DefaultShippingDetailsComponent
 import karika.distribucija.ba.ui.view.shop.cart.nextstep.ShippingDetailsComponent
 import karika.distribucija.ba.ui.view.shop.cart.success.CartSuccessComponent
+import karika.distribucija.ba.ui.view.shop.cart.success.DefaultCartSuccessComponent
 import karika.distribucija.ba.ui.view.shop.home.DefaultHomeComponent
 import karika.distribucija.ba.ui.view.shop.home.HomeComponent
 import karika.distribucija.ba.ui.view.shop.menu.MenuComponent
@@ -149,11 +151,11 @@ class MainComponent(componentContext: ComponentContext, stateHolder: KarikaState
             )
 
             is MainConfig.CartShippingDetails -> MainChild.CartShippingDetails(
-                ShippingDetailsComponent(componentContext, stateHolder)
+                DefaultShippingDetailsComponent(componentContext, stateHolder)
             )
 
             is MainConfig.CartSuccess -> MainChild.CartSuccess(
-                CartSuccessComponent(componentContext, stateHolder, config.orderId)
+                DefaultCartSuccessComponent(componentContext, stateHolder, config.orderId)
             )
 
             is MainConfig.Profile -> MainChild.Profile(

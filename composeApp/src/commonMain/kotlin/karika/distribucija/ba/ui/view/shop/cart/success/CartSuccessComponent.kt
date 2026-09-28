@@ -4,17 +4,25 @@ import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class CartSuccessComponent(
+interface CartSuccessComponent {
+    val orderId: StateFlow<String>
+
+    /** "Nastavi kupovati": back past the cart and the shipping details, to the home screen. */
+    fun finish()
+}
+
+class DefaultCartSuccessComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
     orderId: String
-) : CommonComponent(componentContext, stateHolder) {
+) : CommonComponent(componentContext, stateHolder), CartSuccessComponent {
     private val _orderId = MutableStateFlow(orderId)
-    val orderId = _orderId.asStateFlow()
+    override val orderId = _orderId.asStateFlow()
 
-    fun finish() {
+    override fun finish() {
         mainBack()
         mainBack()
         mainBack()

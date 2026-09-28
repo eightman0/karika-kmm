@@ -71,7 +71,7 @@ fun ShippingDetailsView(component: ShippingDetailsComponent) {
 
 @Composable
 private fun Cart(modifier: Modifier, component: ShippingDetailsComponent) {
-    val cart = component.stateHolder.cartHandler.cart.collectAsState()
+    val cart = component.cart.collectAsState()
     Column(
         modifier = modifier
             .padding(horizontal = 16.dp)
@@ -174,7 +174,7 @@ private fun VendorItem(entry: Map.Entry<Vendor, List<Pair<Product, Int>>>) {
 
 @Composable
 private fun AddressBox(component: ShippingDetailsComponent) {
-    val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
+    val profile by component.userDetails.collectAsState()
     val newAddress = component.newAddress.asState()
     val addresses = component.addresses.collectAsState()
     val selectedAddress = component.selectedAddress.asState()
