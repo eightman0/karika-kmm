@@ -21,3 +21,16 @@ Pre-login UI tests (landing, login, forgot password, registration) run on the JV
 ./gradlew :composeApp:testUatDebugUnitTest
 ```
 The views are driven by fake components (`src/androidUnitTest/.../prelogin/FakeComponents.kt`); `PreLoginNavigationTest` checks the real components navigate between each other. The registration rules have plain unit tests in `src/commonTest`.
+
+`LiveLoginApiTest` logs in against the real backend of the flavor (uat → `test.karika.ba`) with an existing, approved test account, and requests a password reset for it (a real email). Give it the account through environment variables or `~/.gradle/gradle.properties`, never the repo:
+```
+KARIKA_TEST_SHOP_EMAIL=...
+KARIKA_TEST_SHOP_PASSWORD=...
+# optional
+KARIKA_TEST_VENDOR_EMAIL=...
+KARIKA_TEST_VENDOR_PASSWORD=...
+```
+Without them those tests are reported as skipped. To run only them:
+```
+./gradlew :composeApp:testUatDebugUnitTest --tests '*LiveLoginApiTest'
+```

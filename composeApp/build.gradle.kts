@@ -10,6 +10,13 @@ plugins {
     alias(libs.plugins.crashlytics)
 }
 
+val liveTestAccountKeys = listOf(
+    "KARIKA_TEST_SHOP_EMAIL",
+    "KARIKA_TEST_SHOP_PASSWORD",
+    "KARIKA_TEST_VENDOR_EMAIL",
+    "KARIKA_TEST_VENDOR_PASSWORD",
+)
+
 kotlin {
     targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
         binaries.all {
@@ -182,6 +189,15 @@ android {
         unitTests {
             // Robolectric needs the merged assets, where the compose resources live
             isIncludeAndroidResources = true
+            // Test accounts for LiveLoginApiTest, from the environment or ~/.gradle/gradle.properties
+            all { test ->
+                liveTestAccountKeys.forEach { key ->
+                    providers.environmentVariable(key)
+                        .orElse(providers.gradleProperty(key))
+                        .orNull
+                        ?.let { test.environment(key, it) }
+                }
+            }
         }
     }
     sourceSets {
