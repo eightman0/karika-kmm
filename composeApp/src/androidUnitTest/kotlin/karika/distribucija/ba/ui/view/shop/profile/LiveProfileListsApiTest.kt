@@ -1,7 +1,9 @@
 package karika.distribucija.ba.ui.view.shop.profile
 
+import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.testutil.LiveShopTest
 import karika.distribucija.ba.ui.view.shop.profile.messages.admin.AdminMessagesComponent
@@ -116,5 +118,19 @@ class LiveProfileListsApiTest : LiveShopTest() {
         if (component.requests.value.isEmpty()) {
             compose.onNodeWithText("Trenutno nemate zahtjeva za partnerstvo.").assertExists()
         }
+    }
+
+    @Test
+    fun pointsLoadTheNextPageOfTransactionsAtTheEnd() {
+        val component = PointsComponent(componentContext(), stateHolder)
+        compose.setContent { PointsView(component) }
+        waitForLoaded()
+        val firstPage = component.transactions.value.size
+        assumeTrue("the test account has at most one page of transactions", firstPage >= component.pageSize)
+
+        compose.onNode(hasScrollToIndexAction()).performScrollToIndex(firstPage)
+        waitForLoaded()
+
+        assertTrue(component.transactions.value.size > firstPage, "no second page of transactions")
     }
 }

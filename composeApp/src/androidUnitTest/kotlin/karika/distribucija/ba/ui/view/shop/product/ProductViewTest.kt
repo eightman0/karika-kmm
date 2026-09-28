@@ -8,6 +8,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import karika.distribucija.ba.domain.model.MediaGalleryItem
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.testutil.KarikaUiTest
 import karika.distribucija.ba.testutil.testProduct
@@ -204,5 +207,33 @@ class ProductViewTest : KarikaUiTest() {
         show(voda)
 
         compose.onNodeWithText("Proizvodi istog dobavljača:").assertDoesNotExist()
+    }
+
+    private val withTwoImages = voda.copy(
+        mediaGallery = arrayListOf(
+            MediaGalleryItem(file = "/v/o/voda-1.jpg", position = 1),
+            MediaGalleryItem(file = "/v/o/voda-2.jpg", position = 2),
+        )
+    )
+
+    @Test
+    fun tappingTheImageOpensThePreviewAtIt() {
+        val component = show(withTwoImages)
+
+        compose.onNodeWithTag(PRODUCT_IMAGES_TAG).performScrollTo().performClick()
+
+        assertEquals(listOf(0), component.imagePreviews)
+        assertEquals(emptyList(), component.openedProducts)
+    }
+
+    @Test
+    fun swipingMovesToTheNextImage() {
+        val component = show(withTwoImages)
+
+        compose.onNodeWithTag(PRODUCT_IMAGES_TAG).performScrollTo().performTouchInput { swipeLeft() }
+        compose.waitForIdle()
+        compose.onNodeWithTag(PRODUCT_IMAGES_TAG).performClick()
+
+        assertEquals(listOf(1), component.imagePreviews)
     }
 }

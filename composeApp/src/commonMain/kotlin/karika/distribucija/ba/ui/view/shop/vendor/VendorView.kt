@@ -237,7 +237,7 @@ private fun Filter(component: VendorComponent) {
                 modifier = Modifier
                     .size(24.dp),
                 imageVector = vectorResource(Res.drawable.ic_filter_alt),
-                contentDescription = "",
+                contentDescription = "Filteri",
                 tint = KarikaColors.Black1
             )
         }

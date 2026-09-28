@@ -17,10 +17,13 @@ class InMemoryPersistenceManager : PersistenceManager {
     }
 }
 
-class FakeKarikaHandler : KarikaHandler {
+/** A platform handler without a platform; [photo] is what "picking" a photo returns, if set. */
+class FakeKarikaHandler(var photo: Pair<String, ByteArray>? = null) : KarikaHandler {
     override fun pickFile(mediaTypes: Array<String>, callback: (String, ByteArray) -> Unit) {}
 
-    override fun pickPhoto(callback: (String, ByteArray) -> Unit) {}
+    override fun pickPhoto(callback: (String, ByteArray) -> Unit) {
+        photo?.let { (name, data) -> callback(name, data) }
+    }
 
     override fun downloadFile(fileName: String, fileType: String, fileUrl: String) {}
 

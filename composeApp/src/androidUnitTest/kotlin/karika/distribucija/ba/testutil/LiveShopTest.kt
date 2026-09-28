@@ -44,6 +44,7 @@ import org.robolectric.Shadows.shadowOf
 abstract class LiveShopTest : KarikaUiTest() {
 
     protected val persistence = InMemoryPersistenceManager()
+    protected val handler = FakeKarikaHandler()
     protected lateinit var stateHolder: KarikaStateHolder
     private val subscriptions = mutableListOf<Cancellation>()
 
@@ -61,7 +62,7 @@ abstract class LiveShopTest : KarikaUiTest() {
         startKoin {
             modules(module { single<PersistenceManager> { persistence } })
         }
-        stateHolder = KarikaStateHolder(FakeKarikaHandler())
+        stateHolder = KarikaStateHolder(handler)
         subscriptions += stateHolder.mainNavigation.subscribe { event ->
             event.transformer(listOf(MainConfig.Home)).lastOrNull()?.let { openedInShop = it }
         }

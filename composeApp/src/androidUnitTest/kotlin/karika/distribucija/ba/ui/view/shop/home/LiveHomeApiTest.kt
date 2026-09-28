@@ -11,6 +11,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.testutil.LiveShopTest
+import karika.distribucija.ba.ui.components.bannerTag
+import karika.distribucija.ba.ui.components.logoTag
 import karika.distribucija.ba.ui.view.shop.MainConfig
 import karika.distribucija.ba.util.KarikaConfig
 import kotlin.test.assertEquals
@@ -99,4 +101,34 @@ class LiveHomeApiTest : LiveShopTest() {
         item.itemId?.let { cartItemsToRemove += it }
         assertEquals(product.minQty(), item.qty)
     }
+    @Test
+    fun aBannerOpensItsVendor() {
+        val component = DefaultHomeComponent(componentContext(), stateHolder)
+        compose.setContent { HomeView(component) }
+        waitForServer { component.promotedVendors.value.isNotEmpty() || component.newArrivals.value.isNotEmpty() }
+        val promoted = component.promotedVendors.value.firstOrNull()
+        assumeTrue("the backend promotes no vendor with a banner", promoted != null)
+
+        compose.onNodeWithTag(bannerTag(promoted!!)).performClick()
+        waitForServer { openedInShop != null }
+
+        assertEquals(promoted.entityId?.toIntOrNull(), assertIs<MainConfig.VendorDetails>(openedInShop).vendor.entityId)
+    }
+
+    @Test
+    fun aLogoOpensItsVendor() {
+        val component = DefaultHomeComponent(componentContext(), stateHolder)
+        compose.setContent { HomeView(component) }
+        waitForServer { component.promotedLogos.value.isNotEmpty() || component.newArrivals.value.isNotEmpty() }
+        waitForLoaded()
+        val promoted = component.promotedLogos.value.firstOrNull()
+        assumeTrue("the backend promotes no vendor with a logo", promoted != null)
+
+        compose.onNodeWithText("Dobavljači").performScrollTo()
+        compose.onNodeWithTag(logoTag(promoted!!)).performScrollTo().performClick()
+        waitForServer { openedInShop != null }
+
+        assertEquals(promoted.entityId?.toIntOrNull(), assertIs<MainConfig.VendorDetails>(openedInShop).vendor.entityId)
+    }
+
 }

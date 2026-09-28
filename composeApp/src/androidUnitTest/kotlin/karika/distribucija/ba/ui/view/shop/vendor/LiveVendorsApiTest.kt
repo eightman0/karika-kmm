@@ -3,6 +3,7 @@ package karika.distribucija.ba.ui.view.shop.vendor
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -17,6 +18,7 @@ import karika.distribucija.ba.ui.view.shop.vendor.details.VendorDetailsView
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 
 /**
@@ -123,6 +125,77 @@ class LiveVendorsApiTest : LiveShopTest() {
         waitForServer { openedInApp != null }
 
         assertEquals(vendor.entityId.toString(), assertIs<AppConfig.MessagesOverview>(openedInApp).conversation.vendorId)
+    }
+
+    /** Loads the app config (the region list), as the app does on start. */
+    private fun loadConfig() {
+        stateHolder.commonHandler.init()
+        waitForServer { stateHolder.commonHandler.config.value.customerRegionList.isNotEmpty() }
+    }
+
+    @Test
+    fun featuredVendorsGetTheirRow() {
+        showVendors()
+        waitForServer { list.promotedVendors.value.isNotEmpty() || !list.loader.value }
+        assumeTrue("the backend promotes no vendors", list.promotedVendors.value.isNotEmpty())
+
+        compose.onNodeWithText("ISTAKNUTI DOBAVLJAČI").assertExists()
+    }
+
+    @Test
+    fun regionFilterIsAppliedAndCanBeRemoved() {
+        loadConfig()
+        val region = stateHolder.commonHandler.config.value.customerRegionList.first()
+        showVendors()
+
+        compose.onNodeWithContentDescription("Filteri").performClick()
+        compose.onNodeWithText("FILTERI").assertExists()
+        compose.onNodeWithText(region.label()).performScrollTo().performClick()
+        compose.onNodeWithText("Filtriraj").performClick()
+        waitForLoaded()
+
+        assertEquals(listOf(region), list.selectedRegion.value)
+        compose.onNodeWithText("Uključeni filter: ").assertExists()
+
+        compose.onNodeWithText(region.label()).performClick()
+        waitForLoaded()
+
+        assertEquals(emptyList(), list.selectedRegion.value)
+        compose.onNodeWithText("Uključeni filter: ").assertDoesNotExist()
+    }
+
+    @Test
+    fun vendorPageLeavesSoldOutProductsOutUntilAsked() {
+        val vendor = vendorWithProducts()
+        val component = showVendor(vendor)
+
+        val soldOut = component.products.value.filterNot { it.hasOnStock() }.map { it.name() }
+        assertTrue(soldOut.isEmpty(), "sold out products listed without \"Prikaži rasprodate\": $soldOut")
+
+        compose.onNodeWithText("Prikaži rasprodate").performClick()
+        waitForLoaded()
+
+        assertEquals("1", component.isInStock.value)
+        assertTrue(component.products.value.isNotEmpty(), "no products with the sold out ones included")
+    }
+
+    @Test
+    fun vendorPageCategoryChipFiltersAndClears() {
+        val vendor = vendorWithProducts()
+        val component = showVendor(vendor)
+        waitForServer { component.vendorCategories.value.isNotEmpty() || !component.loader.value }
+        val category = component.vendorCategories.value.firstOrNull()
+        assumeTrue("the vendor has no categories", category != null)
+
+        compose.onNodeWithText(category!!.name).performScrollTo().performClick()
+        waitForLoaded()
+        assertEquals(listOf(category), component.selectedCategories.value)
+        val others = component.products.value.filter { it.vendorId() != vendor.entityId.toString() }
+        assertTrue(others.isEmpty(), "other vendors' products in a category: ${others.map { it.vendorName() }}")
+
+        compose.onNodeWithText(category.name).performClick()
+        waitForLoaded()
+        assertEquals(emptyList(), component.selectedCategories.value)
     }
 
     private companion object {

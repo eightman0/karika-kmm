@@ -40,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -149,7 +150,8 @@ private fun Subject(component: MessagesOverviewComponent) {
             placeholder = "Unesite naslov",
             imeAction = ImeAction.Next,
             enabled = conversation.value.subject == null,
-            disabledTextColor = KarikaColors.Gray2
+            disabledTextColor = KarikaColors.Gray2,
+            testTag = MessagesTestTags.SUBJECT
         )
     }
 }
@@ -211,7 +213,8 @@ private fun SearchForVendor(component: MessagesOverviewComponent) {
                         expand.value = true
                         component.vendors(searchText.value)
                     }
-                }
+                },
+                testTag = MessagesTestTags.VENDOR_SEARCH
             )
         },
         expanded = expand.value,
@@ -320,7 +323,8 @@ private fun EnterComment(component: MessagesOverviewComponent) {
             ) {
                 KarikaTextFieldWithoutBorder(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .testTag(MessagesTestTags.MESSAGE),
                     value = comment,
                     placeholder = "Napiši komentar",
                     keyboardType = KeyboardType.Text,
@@ -334,7 +338,7 @@ private fun EnterComment(component: MessagesOverviewComponent) {
                                     },
                                 imageVector = vectorResource(Res.drawable.ic_camera),
                                 tint = KarikaColors.Gray2,
-                                contentDescription = ""
+                                contentDescription = "Dodaj prilog"
                             )
                         } else {
                             Icon(
@@ -344,7 +348,7 @@ private fun EnterComment(component: MessagesOverviewComponent) {
                                     },
                                 imageVector = vectorResource(Res.drawable.ic_attachment),
                                 tint = KarikaColors.Gray2,
-                                contentDescription = ""
+                                contentDescription = "Dodaj prilog"
                             )
                         }
                     }

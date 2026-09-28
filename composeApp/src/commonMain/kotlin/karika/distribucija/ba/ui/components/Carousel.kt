@@ -26,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -64,6 +65,7 @@ fun CarouselBanners(
                 items(items = promotedVendors) {
                     CarouselBannerItem(
                         modifier = Modifier
+                            .testTag(bannerTag(it))
                             .width(cardWidth),
                         promotedVendor = it
                     ) {
@@ -211,6 +213,10 @@ private fun CarouselBannerItem(
     }
 }
 
+/** Test tags of a promoted vendor's banner (top carousel) and logo (vendor carousel). */
+fun bannerTag(vendor: PromotedVendor) = "banner_${vendor.entityId}"
+fun logoTag(vendor: PromotedVendor) = "logo_${vendor.entityId}"
+
 @Composable
 fun CarouselLogos(component: CommonComponent) {
     val promotedLogos by component.promotedLogos.collectAsState()
@@ -233,7 +239,8 @@ fun CarouselLogos(
         ) {
             items(items = promotedLogos) {
                 CarouselLogoItem(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .testTag(logoTag(it)),
                     promotedVendor = it
                 ) {
                     onClick(it)

@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -185,6 +186,9 @@ fun ProductName(viewModel: ProductComponent) {
     )
 }
 
+/** Test tag of the swipeable product images on the details screen. */
+const val PRODUCT_IMAGES_TAG = "product_images"
+
 @Composable
 fun ProductImage(component: ProductComponent) {
     val product by component.product.collectAsState()
@@ -247,6 +251,7 @@ private fun ProductImageContent(product: Product, component: ProductComponent) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
+                .testTag(PRODUCT_IMAGES_TAG)
                 .fillMaxSize()
         ) { page ->
             KarikaImage(
