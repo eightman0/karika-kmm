@@ -218,7 +218,7 @@ fun TopBarSearch(component: SearchComponent) {
                         component.mainBack()
                     },
                 imageVector = vectorResource(Res.drawable.ic_arrow_back),
-                contentDescription = "",
+                contentDescription = "Nazad",
                 tint = KarikaColors.White
             )
         },

@@ -14,6 +14,8 @@ fun testProduct(
     isNew: Boolean = false,
     minQty: Int = 1,
     vendorName: String = "Test dobavljač",
+    mpc: Double? = null,
+    description: String? = null,
 ) = Product(
     entityId = id,
     createdAt = "2024-01-01 00:00:00",
@@ -28,4 +30,7 @@ fun testProduct(
     newsToDate = if (isNew) "2100-01-01 00:00:00" else null,
     vendorName = vendorName,
     vendorId = "7",
+    mpc = mpc,
+    description = description,
+    shortDescription = description,
 )

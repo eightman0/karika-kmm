@@ -30,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -146,6 +147,9 @@ private fun Vendors(component: VendorComponent) {
     }
 }
 
+/** Test tag of the tappable logo of a [VendorItem]; its name is not tappable. */
+fun vendorCardTag(vendor: Vendor) = "vendor_card_${vendor.entityId}"
+
 @Composable
 fun VendorItem(vendor: Vendor, component: ProductActions) {
     Column(
@@ -155,6 +159,7 @@ fun VendorItem(vendor: Vendor, component: ProductActions) {
     ) {
         Box(
             modifier = Modifier
+                .testTag(vendorCardTag(vendor))
                 .onClick {
                     component.showVendor(vendor)
                 }
