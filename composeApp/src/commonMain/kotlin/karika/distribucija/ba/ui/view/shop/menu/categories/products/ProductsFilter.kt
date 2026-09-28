@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -122,14 +123,16 @@ fun ProductsFilterSheet(
                     ) {
                         KarikaAmountField(
                             modifier = Modifier
-                                .weight(1f),
+                                .weight(1f)
+                                .testTag(CategoryProductsTestTags.PRICE_FROM),
                             value = startPrice,
                             placeholder = "OD",
                             imeAction = ImeAction.Next
                         )
                         KarikaAmountField(
                             modifier = Modifier
-                                .weight(1f),
+                                .weight(1f)
+                                .testTag(CategoryProductsTestTags.PRICE_TO),
                             value = endPrice,
                             placeholder = "DO",
                             imeAction = ImeAction.Next
@@ -192,7 +195,8 @@ fun ProductsFilterSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
-                            .height(50.dp),
+                            .height(50.dp)
+                            .testTag(CategoryProductsTestTags.VENDOR_SEARCH),
                         onValueChange = {
                             searchText.value = it
                         },

@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -367,10 +368,14 @@ private fun MinOrderAmount(item: Map.Entry<Vendor, List<Pair<Product, Int>>>) {
     }
 }
 
+/** Test tag of a product's row in the cart, holding its quantity and remove controls. */
+fun cartItemTag(product: Product) = "cart_item_${product.sku}"
+
 @Composable
 private fun ProductItem(item: Pair<Product, Int>, component: CartComponent) {
     Row(
         modifier = Modifier
+            .testTag(cartItemTag(item.first))
             .height(150.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.Top,

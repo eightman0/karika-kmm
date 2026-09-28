@@ -16,13 +16,13 @@ adb shell dpm remove-active-admin karika.distribucija.ba.kiosk/karika.distribuci
 ![qr-code-json.png](qr-code-json.png)
 
 ### Tests
-UI tests (landing, login, forgot password, registration, home, search, product details) run on the JVM through Robolectric, no emulator needed:
+UI tests (landing, login, forgot password, registration, home, search, product details, categories, cart) run on the JVM through Robolectric, no emulator needed:
 ```
 ./gradlew :composeApp:testUatDebugUnitTest
 ```
-The views are driven by fake components (`FakeComponents.kt`, `Fake*Component.kt`); `PreLoginNavigationTest` checks the real components navigate between each other. The registration rules have plain unit tests in `src/commonTest`.
+The views are driven by fake components (`FakeComponents.kt`, `Fake*Component.kt`); `PreLoginNavigationTest` checks the real components navigate between each other. The registration rules and the cart's money rules have plain unit tests in `src/commonTest`.
 
-The `Live*ApiTest` classes run against the real backend of the flavor (uat → `test.karika.ba`) with an existing, approved test account. `LiveLoginApiTest` logs in and requests a password reset (a real email); `LiveHomeApiTest`, `LiveSearchApiTest` and `LiveProductApiTest` log that customer in and drive the home, search and product details screens; the cart tests add one product and remove it again afterwards. Give it the account through environment variables or `~/.gradle/gradle.properties`, never the repo:
+The `Live*ApiTest` classes run against the real backend of the flavor (uat → `test.karika.ba`) with an existing, approved test account. `LiveLoginApiTest` logs in and requests a password reset (a real email); The other `Live*ApiTest` classes log that customer in and drive the home, search, product details, categories, category products and cart screens. Tests that touch the cart put one product in and take it out again afterwards; the one that empties the cart only runs when the account's cart was empty to begin with. Give it the account through environment variables or `~/.gradle/gradle.properties`, never the repo:
 ```
 KARIKA_TEST_SHOP_EMAIL=...
 KARIKA_TEST_SHOP_PASSWORD=...
