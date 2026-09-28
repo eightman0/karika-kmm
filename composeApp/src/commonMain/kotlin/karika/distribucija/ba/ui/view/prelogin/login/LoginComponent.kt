@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.prelogin.login
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.bringToFront
@@ -12,23 +13,50 @@ import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaType
+import karika.distribucija.ba.ui.common.ScreenComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import kotlinx.coroutines.launch
 
-class LoginComponent(
+interface LoginComponent : ScreenComponent {
+    val forgotPassSheet: MutableState<Boolean>
+    val email: MutableState<String>
+    val pass: MutableState<String>
+    val rememberMe: MutableState<Boolean>
+    val formValid: MutableState<Boolean>
+
+    fun login(emailToken: String = "", token: String = "", callback: () -> Unit = {})
+
+    fun forgotPassword(email: String)
+
+    fun forgotPassword()
+
+    fun navigateRegistration()
+
+    fun navigateLanding()
+
+    fun title(): String
+
+    fun wifi()
+
+    fun isShop(): Boolean
+
+    fun exitKiosk()
+}
+
+class DefaultLoginComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
     private var userType: KarikaType,
-) : CommonComponent(componentContext, stateHolder) {
+) : CommonComponent(componentContext, stateHolder), LoginComponent {
 
-    val forgotPassSheet = mutableStateOf(false)
-    val email = mutableStateOf(stateHolder.sessionHandler.getUserUsername(userType))
-    val pass = mutableStateOf(stateHolder.sessionHandler.getUserPassword(userType))
-    val rememberMe =
+    override val forgotPassSheet = mutableStateOf(false)
+    override val email = mutableStateOf(stateHolder.sessionHandler.getUserUsername(userType))
+    override val pass = mutableStateOf(stateHolder.sessionHandler.getUserPassword(userType))
+    override val rememberMe =
         mutableStateOf(stateHolder.sessionHandler.getUserPassword(userType).isNotEmpty())
-    val formValid =
+    override val formValid =
         mutableStateOf(stateHolder.sessionHandler.getUserPassword(userType).isNotEmpty())
     private val repository = LoginRepository()
 
@@ -53,7 +81,7 @@ class LoginComponent(
     }
 
 
-    fun login(emailToken: String = "", token: String = "", callback: () -> Unit = {}) {
+    override fun login(emailToken: String, token: String, callback: () -> Unit) {
         showLoader()
         scope.launch {
             repository.login(
@@ -118,7 +146,7 @@ class LoginComponent(
         }
     }
 
-    fun forgotPassword(email: String) {
+    override fun forgotPassword(email: String) {
         scope.launch {
             userRepository.forgotPass(email)
                 .collect { result ->
@@ -138,15 +166,15 @@ class LoginComponent(
         }
     }
 
-    fun forgotPassword() {
+    override fun forgotPassword() {
         forgotPassSheet.negate()
     }
 
-    fun navigateRegistration() {
+    override fun navigateRegistration() {
         stateHolder.preLoginNavigation.bringToFront(PreLoginConfig.Registration(userType))
     }
 
-    fun navigateLanding() {
+    override fun navigateLanding() {
         stateHolder.preLoginNavigation.replaceAll(PreLoginConfig.Landing)
     }
 
@@ -162,18 +190,18 @@ class LoginComponent(
         }
     }
 
-    fun title(): String {
+    override fun title(): String {
         return if (userType.isShop()) "Prijava kupac" else "Prijava dobavljač"
     }
 
-    fun wifi() {
+    override fun wifi() {
         stateHolder.handler.openWifi()
     }
 
-    fun isShop() = userType == KarikaType.SHOP
+    override fun isShop() = userType == KarikaType.SHOP
 
     private var exitCount = 0
-    fun exitKiosk() {
+    override fun exitKiosk() {
         exitCount++
         if (exitCount == 10) {
             stateHolder.handler.exitKiosk()

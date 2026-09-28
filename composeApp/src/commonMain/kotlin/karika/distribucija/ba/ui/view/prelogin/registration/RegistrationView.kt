@@ -30,7 +30,6 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.ui.common.getEnvPrefix
 import karika.distribucija.ba.ui.common.openPdf
 import karika.distribucija.ba.ui.components.KarikaBox
@@ -49,7 +48,6 @@ import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.gridColumnCount
-import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import karika.distribucija.ba.util.KarikaConstants
 
 
@@ -72,9 +70,7 @@ fun RegistrationView(component: RegistrationComponent) {
             contentWindowInsets = WindowInsets.systemBars,
             topBar = {
                 TopBarWithBack(component.title, color = component.getColor()) {
-                    component.stateHolder.preLoginNavigation.replaceAll(
-                        PreLoginConfig.Login(component.userType)
-                    )
+                    component.navigateBack()
                 }
             },
             component = component
@@ -197,7 +193,7 @@ private fun CompanyInfo(component: RegistrationComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.commonHandler.config.value.customerGroupList
+        component.customerGroupOptions
             .chunked(gridColumnCount)
             .forEach {
                 Row(
@@ -244,7 +240,7 @@ private fun CompanyInfo(component: RegistrationComponent) {
             textSize = 16.sp,
             fontWeight = FontWeight.W400
         )
-        component.stateHolder.commonHandler.config.value.customerRegionList.chunked(gridColumnCount)
+        component.customerRegionOptions.chunked(gridColumnCount)
             .forEach {
                 Row(
                     modifier = Modifier

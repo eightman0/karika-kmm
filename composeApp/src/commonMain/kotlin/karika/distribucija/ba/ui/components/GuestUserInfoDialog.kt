@@ -43,7 +43,7 @@ import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
-import karika.distribucija.ba.ui.view.prelogin.login.LoginComponent
+import karika.distribucija.ba.ui.view.prelogin.login.DefaultLoginComponent
 import karika.distribucija.ba.ui.view.prelogin.login.component.ForgotPasswordSheet
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_back
@@ -72,7 +72,7 @@ fun GuestUserInfoDialog(
                 contentAlignment = Alignment.Center
             ) {
                 InternalLoginView(
-                    LoginComponent(
+                    DefaultLoginComponent(
                         componentContext = component,
                         stateHolder = component.stateHolder,
                         userType = KarikaType.SHOP
@@ -85,7 +85,7 @@ fun GuestUserInfoDialog(
 }
 
 @Composable
-private fun InternalLoginView(component: LoginComponent, showState: MutableState<String?>) {
+private fun InternalLoginView(component: DefaultLoginComponent, showState: MutableState<String?>) {
     val emailValid = remember { mutableStateOf("") }
     val formValid = component.formValid.asState()
     Box(

@@ -7,8 +7,11 @@ import com.arkivanov.decompose.value.Value
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.view.prelogin.landing.DefaultLandingComponent
 import karika.distribucija.ba.ui.view.prelogin.landing.LandingComponent
+import karika.distribucija.ba.ui.view.prelogin.login.DefaultLoginComponent
 import karika.distribucija.ba.ui.view.prelogin.login.LoginComponent
+import karika.distribucija.ba.ui.view.prelogin.registration.DefaultRegistrationComponent
 import karika.distribucija.ba.ui.view.prelogin.registration.RegistrationComponent
 import kotlinx.serialization.Serializable
 
@@ -47,15 +50,15 @@ class PreLoginComponent(
     private fun child(config: PreLoginConfig, componentContext: ComponentContext): PreLoginChild =
         when (config) {
             is PreLoginConfig.Landing -> PreLoginChild.Landing(
-                LandingComponent(componentContext, stateHolder)
+                DefaultLandingComponent(componentContext, stateHolder)
             )
 
             is PreLoginConfig.Login -> PreLoginChild.Login(
-                LoginComponent(componentContext, stateHolder, config.userType)
+                DefaultLoginComponent(componentContext, stateHolder, config.userType)
             )
 
             is PreLoginConfig.Registration -> PreLoginChild.Registration(
-                RegistrationComponent(componentContext, stateHolder, config.userType)
+                DefaultRegistrationComponent(componentContext, stateHolder, config.userType)
             )
         }
 }

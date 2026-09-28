@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.common
 
+import androidx.compose.material3.SnackbarHostState
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.pop
@@ -38,6 +39,7 @@ import karika.distribucija.ba.ui.view.shop.MainConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
@@ -50,11 +52,11 @@ import kotlin.uuid.Uuid
 open class CommonComponent(
     componentContext: ComponentContext,
     val stateHolder: KarikaStateHolder,
-) : KoinComponent, ComponentContext by componentContext {
+) : KoinComponent, ScreenComponent, ComponentContext by componentContext {
     @OptIn(ExperimentalUuidApi::class)
     private val sessionId = Uuid.random().toString()
     open val title: String = ""
-    val snackbarHostState = stateHolder.hostState
+    override val snackbarHostState: SnackbarHostState = stateHolder.hostState
     val scope = CoroutineScope(Dispatchers.Main)
     val iOScope = CoroutineScope(Dispatchers.Default)
     private val cartRepository = CartRepository()
@@ -70,7 +72,7 @@ open class CommonComponent(
     val promotedVendors = _promotedVendors.asStateFlow()
     private val _promotedLogos = MutableStateFlow<List<PromotedVendor>>(emptyList())
     val promotedLogos = _promotedLogos.asStateFlow()
-    val loader = stateHolder.loaderHandler.loader
+    override val loader: StateFlow<Boolean> = stateHolder.loaderHandler.loader
 
     fun showMessage(message: String?) {
         scope.launch {

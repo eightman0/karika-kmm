@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.ScreenComponent
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_cancel_circle
 import karikav2.composeapp.generated.resources.ic_checked_circle
@@ -38,7 +38,7 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun KarikaScaffold(
     modifier: Modifier = Modifier,
-    component: CommonComponent,
+    component: ScreenComponent,
     containerColor: Color = KarikaColors.Primary,
     contentWindowInsets: WindowInsets = WindowInsets(0.dp),
     topBar: @Composable () -> Unit = {},

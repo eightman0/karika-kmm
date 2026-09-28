@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import karika.distribucija.ba.ui.common.CommonComponent
+import karika.distribucija.ba.ui.common.ScreenComponent
 
 @Composable
 fun LoadingView1(commonComponent: CommonComponent) {
@@ -47,7 +48,7 @@ fun LoadingView1(commonComponent: CommonComponent) {
 }
 
 @Composable
-fun LoadingView2(commonComponent: CommonComponent) {
+fun LoadingView2(commonComponent: ScreenComponent) {
     val state = commonComponent.loader.collectAsState()
     if (state.value) {
         Box(

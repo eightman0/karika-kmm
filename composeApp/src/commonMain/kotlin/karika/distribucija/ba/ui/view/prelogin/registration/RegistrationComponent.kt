@@ -1,157 +1,119 @@
 package karika.distribucija.ba.ui.view.prelogin.registration
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.stack.replaceAll
 import karika.distribucija.ba.domain.api.RegistrationRepository
 import karika.distribucija.ba.domain.model.Addresses
 import karika.distribucija.ba.domain.model.ConfirmRegistration
 import karika.distribucija.ba.domain.model.CustomAttributes
 import karika.distribucija.ba.domain.model.Customer
+import karika.distribucija.ba.domain.model.KarikaUnit
 import karika.distribucija.ba.domain.model.RegisterDto
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorRegisterRequest
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.KarikaType
+import karika.distribucija.ba.ui.common.ScreenComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.isEmailFormat
-import karika.distribucija.ba.ui.components.isPhoneFormat
-import karika.distribucija.ba.ui.components.isPostalCodeValid
-import karika.distribucija.ba.ui.view.shop.profile.account.isPassComplex
+import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
 
-class RegistrationComponent(
+interface RegistrationComponent : ScreenComponent {
+    val title: String
+    val userType: KarikaType
+
+    val companyName: MutableState<String>
+    val companyId: MutableState<String>
+    val companyPdv: MutableState<String>
+    val companyEntity: MutableState<String>
+    val companyCanton: MutableState<String>
+    val companyCity: MutableState<String>
+    val companySize: MutableState<String>
+    val companyType: MutableState<String>
+    val companyEmployees: MutableState<String>
+
+    val contactFirstname: MutableState<String>
+    val contactLastname: MutableState<String>
+    val contactAddress: MutableState<String>
+    val contactPostal: MutableState<String>
+    val contactPhone: MutableState<String>
+
+    val email: MutableState<String>
+    val password: MutableState<String>
+    val confirmPassword: MutableState<String>
+    val agree: MutableState<Boolean>
+
+    val entities: MutableState<List<String>>
+    val canton: MutableState<List<String>>
+    val city: MutableState<List<String>>
+
+    /** Every customer group / region a vendor can target. */
+    val customerGroupOptions: List<KarikaUnit>
+    val customerRegionOptions: List<KarikaUnit>
+
+    /** The customer groups / regions the vendor has currently selected. */
+    val customerGroups: MutableState<List<KarikaUnit>>
+    val customerRegions: MutableState<List<KarikaUnit>>
+
+    fun register()
+
+    fun navigateBack()
+
+    fun getColor(): Color
+}
+
+class DefaultRegistrationComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
-    val userType: KarikaType,
-) : CommonComponent(componentContext, stateHolder) {
+    override val userType: KarikaType,
+) : CommonComponent(componentContext, stateHolder), RegistrationComponent {
     private val repository = RegistrationRepository()
 
     override val title: String
         get() = if (userType.isShop()) "Registracija kupca" else "Registracija dobavljača"
 
-    val companyName = mutableStateOf("")
-    val companyId = mutableStateOf("")
-    val companyPdv = mutableStateOf("")
-    val companyEntity = mutableStateOf("")
-    val companyCanton = mutableStateOf("")
-    val companyCity = mutableStateOf("")
-    val companySize = mutableStateOf("")
-    val companyType = mutableStateOf("")
-    val companyEmployees = mutableStateOf("")
+    override val companyName = mutableStateOf("")
+    override val companyId = mutableStateOf("")
+    override val companyPdv = mutableStateOf("")
+    override val companyEntity = mutableStateOf("")
+    override val companyCanton = mutableStateOf("")
+    override val companyCity = mutableStateOf("")
+    override val companySize = mutableStateOf("")
+    override val companyType = mutableStateOf("")
+    override val companyEmployees = mutableStateOf("")
 
-    val contactFirstname = mutableStateOf("")
-    val contactLastname = mutableStateOf("")
-    val contactAddress = mutableStateOf("")
-    val contactPostal = mutableStateOf("")
-    val contactPhone = mutableStateOf("")
+    override val contactFirstname = mutableStateOf("")
+    override val contactLastname = mutableStateOf("")
+    override val contactAddress = mutableStateOf("")
+    override val contactPostal = mutableStateOf("")
+    override val contactPhone = mutableStateOf("")
 
-    val email = mutableStateOf("")
-    val password = mutableStateOf("")
-    val confirmPassword = mutableStateOf("")
-    val agree = mutableStateOf(false)
+    override val email = mutableStateOf("")
+    override val password = mutableStateOf("")
+    override val confirmPassword = mutableStateOf("")
+    override val agree = mutableStateOf(false)
 
-    val entities = mutableStateOf(KarikaConstants.entries.map { it.name })
-    val canton = mutableStateOf<List<String>>(emptyList())
-    val city = mutableStateOf<List<String>>(emptyList())
-    val customerRegions = mutableStateOf(stateHolder.commonHandler.config.value.customerRegionList)
-    val customerGroups = mutableStateOf(stateHolder.commonHandler.config.value.customerGroupList)
+    override val entities = mutableStateOf(KarikaConstants.entries.map { it.name })
+    override val canton = mutableStateOf<List<String>>(emptyList())
+    override val city = mutableStateOf<List<String>>(emptyList())
+    override val customerGroupOptions: List<KarikaUnit>
+        get() = stateHolder.commonHandler.config.value.customerGroupList
+    override val customerRegionOptions: List<KarikaUnit>
+        get() = stateHolder.commonHandler.config.value.customerRegionList
+    override val customerRegions = mutableStateOf(customerRegionOptions)
+    override val customerGroups = mutableStateOf(customerGroupOptions)
 
-    fun register() {
-        if (companyName.value.isEmpty()) {
-            showMessage("Naziv pravnog lica je obavezno polje!")
-            return
-        }
-        if (companyId.value.isEmpty()) {
-            showMessage("ID broj je obavezno polje!")
-            return
-        }
-        if (companyEntity.value.isEmpty()) {
-            showMessage("Entitet je obavezno polje!")
-            return
-        } else {
-            if (companyEntity.value == "Federacija") {
-                if (companyCanton.value.isEmpty()) {
-                    showMessage("Kanton je obavezno polje!")
-                    return
-                }
-            }
-
-            if (companyCity.value.isEmpty()) {
-                showMessage("Grad je obavezno polje!")
-                return
-            }
-        }
-
-        if (userType.isShop()) {
-            if (companySize.value.isEmpty()) {
-                showMessage("Veličina objekta je obavezno polje!")
-                return
-            }
-            if (companyType.value.isEmpty()) {
-                showMessage("Tip objekta je obavezno polje!")
-                return
-            }
-        }
-        if (contactFirstname.value.isEmpty()) {
-            showMessage("Ime je obavezno polje!")
-            return
-        }
-        if (contactLastname.value.isEmpty()) {
-            showMessage("Prezime je obavezno polje!")
-            return
-        }
-        if (userType.isShop()) {
-            if (contactAddress.value.isEmpty()) {
-                showMessage("Adresa je obavezno polje!")
-                return
-            }
-            if (contactPostal.value.isEmpty()) {
-                showMessage("Poštanski broj je obavezno polje!")
-                return
-            }
-            if (!contactPostal.value.isPostalCodeValid()) {
-                showMessage("Poštanski broj nije u odgovarajućem formatu!")
-                return
-            }
-        }
-        if (contactPhone.value.isEmpty()) {
-            showMessage("Broj telefona je obavezno polje!")
-            return
-        }
-        if (!contactPhone.value.isPhoneFormat()) {
-            showMessage("Broj telefona nije u odgovarajućem formatu!")
-            return
-        }
-        if (email.value.isEmpty()) {
-            showMessage("Email adresa je obavezno polje!")
-            return
-        }
-        if (!email.value.isEmailFormat()) {
-            showMessage("Email nije u odgovarajućem formatu!")
-            return
-        }
-        if (password.value.isEmpty()) {
-            showMessage("Lozinka je obavezno polje!")
-            return
-        }
-        if (password.value.length < 8) {
-            showMessage("Lozinka mora imati najmanje 8 karaktera.")
-            return
-        }
-        if (!password.value.isPassComplex()) {
-            showMessage("Lozinka mora sadržavati najmanje jedno veliko slovo i jedan broj.")
-            return
-        }
-        if (password.value != confirmPassword.value) {
-            showMessage("Lozinke se ne podudaraju.")
-            return
-        }
-        if (!agree.value) {
-            showMessage("Morate prihvatiti uslove korištenja!")
+    override fun register() {
+        val error = input().validationError(userType.isShop())
+        if (error != null) {
+            showMessage(error)
             return
         }
         if (userType.isShop()) {
@@ -159,6 +121,29 @@ class RegistrationComponent(
             return
         }
         registerVendor()
+    }
+
+    fun input() = RegistrationInput(
+        companyName = companyName.value,
+        companyId = companyId.value,
+        companyEntity = companyEntity.value,
+        companyCanton = companyCanton.value,
+        companyCity = companyCity.value,
+        companySize = companySize.value,
+        companyType = companyType.value,
+        contactFirstname = contactFirstname.value,
+        contactLastname = contactLastname.value,
+        contactAddress = contactAddress.value,
+        contactPostal = contactPostal.value,
+        contactPhone = contactPhone.value,
+        email = email.value,
+        password = password.value,
+        confirmPassword = confirmPassword.value,
+        agree = agree.value,
+    )
+
+    override fun navigateBack() {
+        stateHolder.preLoginNavigation.replaceAll(PreLoginConfig.Login(userType))
     }
 
     private fun registerShop() {
@@ -326,5 +311,5 @@ class RegistrationComponent(
         }
     }
 
-    fun getColor() = if (userType.isShop()) KarikaColors.Primary else KarikaColors.Blue
+    override fun getColor() = if (userType.isShop()) KarikaColors.Primary else KarikaColors.Blue
 }

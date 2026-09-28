@@ -205,6 +205,16 @@ private fun CarouselBannerItem(
 fun CarouselLogos(component: CommonComponent) {
     val promotedLogos by component.promotedLogos.collectAsState()
 
+    CarouselLogos(promotedLogos) {
+        component.showVendor(it.toVendor())
+    }
+}
+
+@Composable
+fun CarouselLogos(
+    promotedLogos: List<PromotedVendor>,
+    onClick: (PromotedVendor) -> Unit
+) {
     if (promotedLogos.isNotEmpty()) {
         LazyRow(
             modifier = Modifier
@@ -216,7 +226,7 @@ fun CarouselLogos(component: CommonComponent) {
                     modifier = Modifier,
                     promotedVendor = it
                 ) {
-                    component.showVendor(it.toVendor())
+                    onClick(it)
                 }
             }
         }

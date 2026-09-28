@@ -25,7 +25,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.components.CarouselLogos
 import karika.distribucija.ba.ui.components.IconTextItem
@@ -186,7 +185,7 @@ fun LandingView(component: LandingComponent) {
                         modifier = Modifier
                             .padding(8.dp)
                             .onClick {
-                                component.appNavigate(AppConfig.Main)
+                                component.continueAsGuest()
                             },
                         text = "Nastavi kao gost",
                         color = KarikaColors.Black,
@@ -212,7 +211,7 @@ fun LandingView(component: LandingComponent) {
                                     textSize = 20.sp,
                                     fontWeight = FontWeight.W700
                                 )
-                                CarouselLogos(component)
+                                CarouselLogos(promotedLogos) {}
                             }
                         }
                         LoadingView2(component)
