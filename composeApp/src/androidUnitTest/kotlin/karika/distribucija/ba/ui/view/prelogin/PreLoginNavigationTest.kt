@@ -6,11 +6,16 @@ import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
 import karika.distribucija.ba.di.PersistenceManager
-import karika.distribucija.ba.ui.common.KarikaHandler
+import karika.distribucija.ba.testutil.FakeKarikaHandler
+import karika.distribucija.ba.testutil.InMemoryPersistenceManager
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
 import karika.distribucija.ba.ui.view.prelogin.login.LoginComponent
 import karika.distribucija.ba.ui.view.prelogin.registration.RegistrationComponent
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -21,10 +26,6 @@ import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertIs
-import kotlin.test.assertTrue
 
 /**
  * Drives the real pre-login components (no UI) through the Decompose stack, to check the
@@ -170,28 +171,4 @@ class PreLoginNavigationTest {
             stateHolder.hostState.currentSnackbarData?.visuals?.message
         )
     }
-}
-
-class InMemoryPersistenceManager : PersistenceManager {
-    private val values = mutableMapOf<String, String>()
-
-    override fun save(key: String, value: String) {
-        values[key] = value
-    }
-
-    override fun get(key: String): String = values[key] ?: ""
-
-    override fun clear() {
-        values.clear()
-    }
-}
-
-class FakeKarikaHandler : KarikaHandler {
-    override fun pickFile(mediaTypes: Array<String>, callback: (String, ByteArray) -> Unit) {}
-
-    override fun pickPhoto(callback: (String, ByteArray) -> Unit) {}
-
-    override fun downloadFile(fileName: String, fileType: String, fileUrl: String) {}
-
-    override fun getPushHandle(callback: (String, String) -> Unit) {}
 }

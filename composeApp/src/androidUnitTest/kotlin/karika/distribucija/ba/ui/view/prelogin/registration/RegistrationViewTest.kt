@@ -11,16 +11,16 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import karika.distribucija.ba.domain.model.KarikaUnit
+import karika.distribucija.ba.testutil.KarikaUiTest
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.view.prelogin.FakeRegistrationComponent
 import karika.distribucija.ba.ui.view.prelogin.PreLoginTestTags
-import karika.distribucija.ba.ui.view.prelogin.PreLoginUiTest
-import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.junit.Test
 
-class RegistrationViewTest : PreLoginUiTest() {
+class RegistrationViewTest : KarikaUiTest() {
 
     private fun show(component: FakeRegistrationComponent = FakeRegistrationComponent()): FakeRegistrationComponent {
         compose.setContent { RegistrationView(component) }

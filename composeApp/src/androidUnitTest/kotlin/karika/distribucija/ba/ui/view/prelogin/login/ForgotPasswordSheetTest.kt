@@ -7,15 +7,15 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import karika.distribucija.ba.testutil.KarikaUiTest
 import karika.distribucija.ba.ui.view.prelogin.FakeLoginComponent
 import karika.distribucija.ba.ui.view.prelogin.PreLoginTestTags
-import karika.distribucija.ba.ui.view.prelogin.PreLoginUiTest
-import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.junit.Test
 
-class ForgotPasswordSheetTest : PreLoginUiTest() {
+class ForgotPasswordSheetTest : KarikaUiTest() {
 
     private val component = FakeLoginComponent()
 

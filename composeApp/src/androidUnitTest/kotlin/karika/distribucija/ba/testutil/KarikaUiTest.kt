@@ -1,4 +1,4 @@
-package karika.distribucija.ba.ui.view.prelogin
+package karika.distribucija.ba.testutil
 
 import android.app.Application
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -12,12 +12,12 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 /**
- * Base for the pre-login screen tests. They run on the JVM through Robolectric, with a plain
+ * Base for the screen tests. They run on the JVM through Robolectric, with a plain
  * Application instead of KarikaApp so Koin is not started, and a phone-sized screen.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = Application::class, qualifiers = "w411dp-h891dp")
-abstract class PreLoginUiTest {
+abstract class KarikaUiTest {
     @get:Rule
     val compose = createComposeRule()
 

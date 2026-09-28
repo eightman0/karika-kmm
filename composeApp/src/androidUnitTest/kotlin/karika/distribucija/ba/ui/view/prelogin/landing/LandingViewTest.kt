@@ -4,13 +4,13 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import karika.distribucija.ba.testutil.KarikaUiTest
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.view.prelogin.FakeLandingComponent
-import karika.distribucija.ba.ui.view.prelogin.PreLoginUiTest
-import org.junit.Test
 import kotlin.test.assertEquals
+import org.junit.Test
 
-class LandingViewTest : PreLoginUiTest() {
+class LandingViewTest : KarikaUiTest() {
 
     private val component = FakeLandingComponent()
 

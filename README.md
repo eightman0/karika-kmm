@@ -16,13 +16,13 @@ adb shell dpm remove-active-admin karika.distribucija.ba.kiosk/karika.distribuci
 ![qr-code-json.png](qr-code-json.png)
 
 ### Tests
-Pre-login UI tests (landing, login, forgot password, registration) run on the JVM through Robolectric, no emulator needed:
+UI tests (landing, login, forgot password, registration, home) run on the JVM through Robolectric, no emulator needed:
 ```
 ./gradlew :composeApp:testUatDebugUnitTest
 ```
-The views are driven by fake components (`src/androidUnitTest/.../prelogin/FakeComponents.kt`); `PreLoginNavigationTest` checks the real components navigate between each other. The registration rules have plain unit tests in `src/commonTest`.
+The views are driven by fake components (`FakeComponents.kt`, `FakeHomeComponent.kt`); `PreLoginNavigationTest` checks the real components navigate between each other. The registration rules have plain unit tests in `src/commonTest`.
 
-`LiveLoginApiTest` logs in against the real backend of the flavor (uat → `test.karika.ba`) with an existing, approved test account, and requests a password reset for it (a real email). Give it the account through environment variables or `~/.gradle/gradle.properties`, never the repo:
+The `Live*ApiTest` classes run against the real backend of the flavor (uat → `test.karika.ba`) with an existing, approved test account. `LiveLoginApiTest` logs in and requests a password reset (a real email); `LiveHomeApiTest` loads the home screen as that customer, opens a product and "Vidi sve", and adds one product to the cart and removes it again. Give it the account through environment variables or `~/.gradle/gradle.properties`, never the repo:
 ```
 KARIKA_TEST_SHOP_EMAIL=...
 KARIKA_TEST_SHOP_PASSWORD=...
@@ -32,5 +32,5 @@ KARIKA_TEST_VENDOR_PASSWORD=...
 ```
 Without them those tests are reported as skipped. To run only them:
 ```
-./gradlew :composeApp:testUatDebugUnitTest --tests '*LiveLoginApiTest'
+./gradlew :composeApp:testUatDebugUnitTest --tests '*Live*ApiTest'
 ```

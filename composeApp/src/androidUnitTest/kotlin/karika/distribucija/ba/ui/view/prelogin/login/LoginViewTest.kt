@@ -10,16 +10,16 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import karika.distribucija.ba.testutil.KarikaUiTest
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.view.prelogin.FakeLoginComponent
 import karika.distribucija.ba.ui.view.prelogin.PreLoginTestTags
-import karika.distribucija.ba.ui.view.prelogin.PreLoginUiTest
-import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.junit.Test
 
-class LoginViewTest : PreLoginUiTest() {
+class LoginViewTest : KarikaUiTest() {
 
     private fun show(component: FakeLoginComponent = FakeLoginComponent()): FakeLoginComponent {
         compose.setContent { LoginView(component) }

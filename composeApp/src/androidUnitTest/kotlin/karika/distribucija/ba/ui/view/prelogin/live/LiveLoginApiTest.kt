@@ -14,13 +14,14 @@ import karika.distribucija.ba.di.PersistenceManager
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.api.UserRepository
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.testutil.FakeKarikaHandler
+import karika.distribucija.ba.testutil.InMemoryPersistenceManager
+import karika.distribucija.ba.testutil.KarikaUiTest
+import karika.distribucija.ba.testutil.LiveTestAccounts
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.common.getEnvJwt
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
-import karika.distribucija.ba.ui.view.prelogin.FakeKarikaHandler
-import karika.distribucija.ba.ui.view.prelogin.InMemoryPersistenceManager
 import karika.distribucija.ba.ui.view.prelogin.PreLoginTestTags
-import karika.distribucija.ba.ui.view.prelogin.PreLoginUiTest
 import karika.distribucija.ba.ui.view.prelogin.login.DefaultLoginComponent
 import karika.distribucija.ba.ui.view.prelogin.login.LoginView
 import kotlin.test.assertEquals
@@ -31,7 +32,6 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.koin.core.context.startKoin
@@ -42,13 +42,10 @@ import org.koin.dsl.module
  * Logs in against the real backend of the flavor under test (uat -> test.karika.ba), through
  * the real LoginView and DefaultLoginComponent.
  *
- * Needs an existing, approved test account, passed as environment variables or Gradle
- * properties (never commit them):
- *  - KARIKA_TEST_SHOP_EMAIL / KARIKA_TEST_SHOP_PASSWORD: a customer account
- *  - KARIKA_TEST_VENDOR_EMAIL / KARIKA_TEST_VENDOR_PASSWORD: optional, a vendor account
- * A test whose account is not configured is reported as skipped.
+ * Needs an existing, approved customer test account, and optionally a vendor one; see
+ * [LiveTestAccounts].
  */
-class LiveLoginApiTest : PreLoginUiTest() {
+class LiveLoginApiTest : KarikaUiTest() {
 
     private val persistence = InMemoryPersistenceManager()
     private lateinit var stateHolder: KarikaStateHolder
@@ -56,11 +53,6 @@ class LiveLoginApiTest : PreLoginUiTest() {
 
     /** The app stack the login screen asked for, once it navigates away. */
     private var appStack: List<AppConfig>? = null
-
-    private val shopEmail = System.getenv("KARIKA_TEST_SHOP_EMAIL")
-    private val shopPassword = System.getenv("KARIKA_TEST_SHOP_PASSWORD")
-    private val vendorEmail = System.getenv("KARIKA_TEST_VENDOR_EMAIL")
-    private val vendorPassword = System.getenv("KARIKA_TEST_VENDOR_PASSWORD")
 
     @Before
     fun setUp() {
@@ -79,20 +71,6 @@ class LiveLoginApiTest : PreLoginUiTest() {
         // The token lives in a process-wide object; put the guest token back for the next test
         HttpClientProvider.token = getEnvJwt()
         stopKoin()
-    }
-
-    private fun requireShopAccount() {
-        assumeTrue(
-            "KARIKA_TEST_SHOP_EMAIL / KARIKA_TEST_SHOP_PASSWORD not set",
-            !shopEmail.isNullOrEmpty() && !shopPassword.isNullOrEmpty()
-        )
-    }
-
-    private fun requireVendorAccount() {
-        assumeTrue(
-            "KARIKA_TEST_VENDOR_EMAIL / KARIKA_TEST_VENDOR_PASSWORD not set",
-            !vendorEmail.isNullOrEmpty() && !vendorPassword.isNullOrEmpty()
-        )
     }
 
     private fun loginScreen(userType: KarikaType): DefaultLoginComponent {
@@ -117,7 +95,7 @@ class LiveLoginApiTest : PreLoginUiTest() {
 
     @Test
     fun customerLogsInAndLandsOnShop() {
-        requireShopAccount()
+        val (shopEmail, shopPassword) = LiveTestAccounts.requireShop()
         val component = loginScreen(KarikaType.SHOP)
         component.rememberMe.value = true
 
@@ -133,7 +111,7 @@ class LiveLoginApiTest : PreLoginUiTest() {
 
     @Test
     fun wrongPasswordIsRejected() {
-        requireShopAccount()
+        val (shopEmail, shopPassword) = LiveTestAccounts.requireShop()
         loginScreen(KarikaType.SHOP)
 
         logIn(shopEmail, shopPassword + "-wrong")
@@ -150,7 +128,7 @@ class LiveLoginApiTest : PreLoginUiTest() {
 
     @Test
     fun customerAccountIsSentToCustomerLogin() {
-        requireShopAccount()
+        val (shopEmail, shopPassword) = LiveTestAccounts.requireShop()
         loginScreen(KarikaType.VENDOR)
 
         logIn(shopEmail, shopPassword)
@@ -165,7 +143,7 @@ class LiveLoginApiTest : PreLoginUiTest() {
 
     @Test
     fun vendorLogsInAndLandsOnDashboard() {
-        requireVendorAccount()
+        val (vendorEmail, vendorPassword) = LiveTestAccounts.requireVendor()
         loginScreen(KarikaType.VENDOR)
 
         logIn(vendorEmail, vendorPassword)
@@ -182,7 +160,7 @@ class LiveLoginApiTest : PreLoginUiTest() {
 
     @Test
     fun forgotPasswordIsAcceptedForExistingAccount() {
-        requireShopAccount()
+        val (shopEmail, _) = LiveTestAccounts.requireShop()
 
         // Sends a real reset email to the test account
         val result = runBlocking { UserRepository().forgotPass(shopEmail).last() }
