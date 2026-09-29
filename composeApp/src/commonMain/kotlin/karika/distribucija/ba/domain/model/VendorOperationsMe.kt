@@ -87,6 +87,12 @@ data class MeCapabilities(
     @SerialName("can_see_dashboard")
     val canSeeDashboard: Boolean = false,
 
+    @SerialName("can_see_own_analytics")
+    val canSeeOwnAnalytics: Boolean = false,
+
+    @SerialName("can_manage_sales_targets")
+    val canManageSalesTargets: Boolean = false,
+
     @SerialName("is_scoped_manager")
     val isScopedManager: Boolean = false,
 

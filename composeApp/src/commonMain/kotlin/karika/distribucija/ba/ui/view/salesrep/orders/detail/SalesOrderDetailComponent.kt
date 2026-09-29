@@ -74,7 +74,9 @@ class SalesOrderDetailComponent(
         scope.launch {
             repository.getOrder(vendorOrder.value.orderId ?: "").collect { result ->
                 when (result) {
-                    is ResultState.Loading -> showLoader()
+                    // On the first load the view already shows its own full-screen loader
+                    // (isOrderLoaded == false), so the global one would just stack on top.
+                    is ResultState.Loading -> if (_isOrderLoaded.value) showLoader()
                     is ResultState.Success -> {
                         hideLoader()
                         _vendorOrder.value = result.data

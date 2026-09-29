@@ -88,7 +88,7 @@ private fun SalesNotificationItem(item: VendorNotification, component: SalesNoti
         if (!item.isRead) {
             Box(
                 modifier = Modifier
-                    .background(color = KarikaColors.Red2)
+                    //.background(color = KarikaColors.Red2)
                     .fillMaxSize(),
                 contentAlignment = Alignment.CenterEnd
             ) {

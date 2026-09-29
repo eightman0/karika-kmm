@@ -49,9 +49,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -1466,7 +1466,7 @@ private fun EnterComment(component: OrderDetailsComponent) {
             placeholder = "Napiši komentar",
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Done,
-            enabled = !order.locked() && !order.isCancelled() && !order.isRejected(),
+            enabled = !order.locked() && !order.isCancelled(),
             trailingIcons = {
                 // Icon(
                 //     modifier = Modifier
@@ -1483,7 +1483,7 @@ private fun EnterComment(component: OrderDetailsComponent) {
             modifier = Modifier
                 .height(50.dp),
             title = "Pošalji",
-            enabled = comment.value.isNotEmpty() && !order.locked() && !order.isCancelled() && !order.isRejected()
+            enabled = comment.value.isNotEmpty() && !order.locked() && !order.isCancelled()
         ) {
             keyboardController?.hide()
             component.sendComment()

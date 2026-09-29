@@ -11,6 +11,7 @@ composeMultiplatform = "1.11.0"
 firebaseBom = "34.13.0"
 foundation = "1.11.0"
 kotlin = "2.3.21"
+vico = "3.2.3"
 gms = "4.4.4"
 crashlytics = "3.0.7"
 koin-android = "4.2.1"
@@ -115,6 +116,8 @@ androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "androidx-swiperefreshlayout" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle-views" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle-views" }
+androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidx-lifecycle-views" }
+vico-views = { module = "com.patrykandpatrick.vico:views", version.ref = "vico" }
 androidx-drawerlayout = { module = "androidx.drawerlayout:drawerlayout", version.ref = "androidx-drawerlayout" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }

@@ -1,6 +1,7 @@
 package karika.distribucija.ba.salesrep.util
 
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -44,3 +45,22 @@ fun String.toDateTime(): String {
         .toInstant(TimeZone.UTC)
     return instant.toEpochMilliseconds().toDateTime()
 }
+
+private val apiDateFormat = LocalDate.Format {
+    year(); char('-'); monthNumber(); char('-'); day()
+}
+private val displayDateFormat = LocalDate.Format {
+    day(); char('.'); monthNumber(); char('.'); year(); char('.')
+}
+
+/** Analytics filters send `dateFrom`/`dateTo` as plain `Y-m-d` (Magento's expected format). */
+fun Long.toApiDate(): String =
+    Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.UTC).date.format(apiDateFormat)
+
+/** Filter-screen display format, e.g. "01.09.2026." */
+fun Long.toDisplayDate(): String =
+    Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.UTC).date.format(displayDateFormat)
+
+/** For analytics payloads like `last_order_at` ("yyyy-MM-dd HH:mm:ss") shown as a plain date. */
+fun String.toDisplayDate(): String =
+    LocalDateTime.parse(replace(" ", "T")).date.format(displayDateFormat)

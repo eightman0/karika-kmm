@@ -16,6 +16,41 @@
     </fragment>
 
     <fragment
+        android:id="@+id/analyticsOverviewFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.analytics.AnalyticsOverviewFragment"
+        android:label="@string/analytics_overview_title" />
+
+    <fragment
+        android:id="@+id/analyticsTrendsFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.analytics.AnalyticsTrendsFragment"
+        android:label="@string/analytics_trends_title" />
+
+    <fragment
+        android:id="@+id/analyticsRepsFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.analytics.AnalyticsRepsFragment"
+        android:label="@string/analytics_reps_title" />
+
+    <fragment
+        android:id="@+id/analyticsCustomersFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.analytics.AnalyticsCustomersFragment"
+        android:label="@string/analytics_customers_title" />
+
+    <fragment
+        android:id="@+id/analyticsAtRiskFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.analytics.AnalyticsAtRiskFragment"
+        android:label="@string/analytics_at_risk_title" />
+
+    <fragment
+        android:id="@+id/analyticsProductsFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.analytics.AnalyticsProductsFragment"
+        android:label="@string/analytics_products_title" />
+
+    <fragment
+        android:id="@+id/analyticsFiltersFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.analytics.AnalyticsFiltersFragment"
+        android:label="@string/analytics_filters_title" />
+
+    <fragment
         android:id="@+id/ordersListFragment"
         android:name="karika.distribucija.ba.salesrep.ui.orders.OrdersListFragment"
         android:label="@string/orders_title">

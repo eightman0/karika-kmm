@@ -82,9 +82,149 @@
             android:paddingHorizontal="8dp">
 
             <LinearLayout
+                android:id="@+id/row_nav_analytics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_drawer_item_unselected"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="14dp">
+
+                <ImageView
+                    android:id="@+id/icon_nav_analytics"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_analytics"
+                    app:tint="@color/karika_gray6" />
+
+                <TextView
+                    android:id="@+id/text_nav_analytics"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:text="@string/drawer_analytics"
+                    android:textColor="@color/karika_gray6"
+                    android:textSize="15sp" />
+
+                <ImageView
+                    android:id="@+id/icon_nav_analytics_chevron"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_arrow_down"
+                    app:tint="@color/karika_gray6" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/group_nav_analytics_sub"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/row_nav_analytics_overview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingStart="46dp"
+                    android:paddingEnd="16dp"
+                    android:paddingVertical="12dp"
+                    android:text="@string/analytics_overview_title"
+                    android:textColor="@color/karika_gray6"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/row_nav_analytics_trends"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingStart="46dp"
+                    android:paddingEnd="16dp"
+                    android:paddingVertical="12dp"
+                    android:text="@string/analytics_trends_title"
+                    android:textColor="@color/karika_gray6"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/row_nav_analytics_reps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingStart="46dp"
+                    android:paddingEnd="16dp"
+                    android:paddingVertical="12dp"
+                    android:text="@string/analytics_reps_title"
+                    android:textColor="@color/karika_gray6"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/row_nav_analytics_customers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingStart="46dp"
+                    android:paddingEnd="16dp"
+                    android:paddingVertical="12dp"
+                    android:text="@string/analytics_customers_title"
+                    android:textColor="@color/karika_gray6"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/row_nav_analytics_at_risk"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingStart="46dp"
+                    android:paddingEnd="16dp"
+                    android:paddingVertical="12dp"
+                    android:text="@string/analytics_at_risk_title"
+                    android:textColor="@color/karika_gray6"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/row_nav_analytics_products"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingStart="46dp"
+                    android:paddingEnd="16dp"
+                    android:paddingVertical="12dp"
+                    android:text="@string/analytics_products_title"
+                    android:textColor="@color/karika_gray6"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/row_nav_orders"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:background="@drawable/bg_drawer_item_unselected"
                 android:clickable="true"
                 android:focusable="true"

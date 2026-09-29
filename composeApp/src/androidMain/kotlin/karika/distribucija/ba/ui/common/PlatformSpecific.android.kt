@@ -1,14 +1,77 @@
 package karika.distribucija.ba.ui.common
 
+import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.pm.PackageManager
 import android.util.Patterns
 import androidx.compose.ui.text.input.PlatformImeOptions
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import karika.distribucija.ba.BuildConfig
+import karika.distribucija.ba.KarikaActivity
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import org.koin.mp.KoinPlatform
+import java.lang.ref.WeakReference
+
+/** Bridges the suspend location-permission request in [requestLocationPermission] across to
+ * whichever [KarikaActivity] is currently on screen (the app is single-Activity). */
+internal object LocationPermissionBridge {
+    var activityRef: WeakReference<KarikaActivity>? = null
+    var pending: CompletableDeferred<Boolean>? = null
+}
+
+private fun hasLocationPermission(context: Context): Boolean {
+    return ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+}
+
+actual suspend fun requestLocationPermission(): Boolean {
+    val context: Context = KoinPlatform.getKoin().get()
+    if (hasLocationPermission(context)) return true
+
+    val activity = LocationPermissionBridge.activityRef?.get() ?: return false
+    val deferred = CompletableDeferred<Boolean>()
+    LocationPermissionBridge.pending = deferred
+    withContext(Dispatchers.Main) {
+        activity.launchLocationPermissionRequest()
+    }
+    return deferred.await()
+}
+
+actual suspend fun currentDeviceLocation(): DeviceLocationFix? {
+    val context: Context = KoinPlatform.getKoin().get()
+    if (!hasLocationPermission(context)) return null
+
+    return try {
+        val client = LocationServices.getFusedLocationProviderClient(context)
+        val location = client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, null)
+            .await() ?: return null
+        DeviceLocationFix(
+            latitude = location.latitude,
+            longitude = location.longitude,
+            accuracy = if (location.hasAccuracy()) location.accuracy.toDouble() else null,
+            altitude = if (location.hasAltitude()) location.altitude else null,
+            speed = if (location.hasSpeed()) location.speed.toDouble() else null,
+            heading = if (location.hasBearing()) location.bearing.toDouble() else null,
+        )
+    } catch (e: SecurityException) {
+        null
+    }
+}
 
 actual fun openPdf(url: String) {
     val context: Context = KoinPlatform.getKoin().get()

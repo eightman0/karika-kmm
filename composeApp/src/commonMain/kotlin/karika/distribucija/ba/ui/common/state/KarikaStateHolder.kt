@@ -10,6 +10,7 @@ import karika.distribucija.ba.ui.common.state.customer.CustomerSpecificHandler
 import karika.distribucija.ba.ui.common.state.salesrep.SalesSpecificHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorNotificationHandler
 import karika.distribucija.ba.ui.common.state.vendor.VendorSpecificHandler
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsFilterState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
@@ -26,6 +27,7 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
     var vendorNotificationHandler = VendorNotificationHandler()
     var customerNotificationHandler = CustomerNotificationHandler()
     var cartHandler = CartHandler(commonHandler)
+    var analyticsFilterState = AnalyticsFilterState()
 
     val imagePreview = mutableStateOf<ImagePreviewState?>(null)
 
@@ -66,6 +68,7 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
         vendorNotificationHandler = VendorNotificationHandler()
         customerNotificationHandler = CustomerNotificationHandler()
         cartHandler = CartHandler(commonHandler)
+        analyticsFilterState = AnalyticsFilterState()
 
         imagePreview.value = null
 

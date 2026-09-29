@@ -2,9 +2,24 @@ package karika.distribucija.ba.ui.common
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.text.input.PlatformImeOptions
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
+import kotlinx.coroutines.suspendCancellableCoroutine
+import platform.CoreLocation.CLAuthorizationStatus
+import platform.CoreLocation.CLLocation
+import platform.CoreLocation.CLLocationManager
+import platform.CoreLocation.CLLocationManagerDelegateProtocol
+import platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
+import platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse
+import platform.CoreLocation.kCLAuthorizationStatusDenied
+import platform.CoreLocation.kCLAuthorizationStatusNotDetermined
+import platform.CoreLocation.kCLAuthorizationStatusRestricted
 import platform.Foundation.NSBundle
+import platform.Foundation.NSError
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
+import platform.darwin.NSObject
+import kotlin.coroutines.resume
 
 actual fun openPdf(url: String) {
     val nsUrl = NSURL.URLWithString(url.replace("\\", "")) ?: return
@@ -84,6 +99,83 @@ actual fun appUrl(): String {
 
 actual fun userAgent(): String {
     return "os:iOS;version:${appVersionName()}"
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private class LocationDelegate(
+    private val onAuthChange: (CLAuthorizationStatus) -> Unit,
+    private val onLocation: (CLLocation?) -> Unit,
+) : NSObject(), CLLocationManagerDelegateProtocol {
+
+    override fun locationManagerDidChangeAuthorization(manager: CLLocationManager) {
+        onAuthChange(manager.authorizationStatus)
+    }
+
+    override fun locationManager(manager: CLLocationManager, didUpdateLocations: List<*>) {
+        onLocation(didUpdateLocations.lastOrNull() as? CLLocation)
+    }
+
+    override fun locationManager(manager: CLLocationManager, didFailWithError: NSError) {
+        onLocation(null)
+    }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private val locationManager: CLLocationManager by lazy { CLLocationManager() }
+
+@OptIn(ExperimentalForeignApi::class)
+private fun isAuthorized(status: CLAuthorizationStatus): Boolean =
+    status == kCLAuthorizationStatusAuthorizedAlways || status == kCLAuthorizationStatusAuthorizedWhenInUse
+
+@OptIn(ExperimentalForeignApi::class)
+actual suspend fun requestLocationPermission(): Boolean {
+    val status = locationManager.authorizationStatus
+    if (isAuthorized(status)) return true
+    if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted) return false
+
+    return suspendCancellableCoroutine { continuation ->
+        val delegate = LocationDelegate(
+            onAuthChange = { newStatus ->
+                if (newStatus != kCLAuthorizationStatusNotDetermined && continuation.isActive) {
+                    continuation.resume(isAuthorized(newStatus))
+                }
+            },
+            onLocation = {}
+        )
+        locationManager.delegate = delegate
+        locationManager.requestWhenInUseAuthorization()
+    }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+actual suspend fun currentDeviceLocation(): DeviceLocationFix? {
+    if (!isAuthorized(locationManager.authorizationStatus)) return null
+
+    return suspendCancellableCoroutine { continuation ->
+        val delegate = LocationDelegate(
+            onAuthChange = {},
+            onLocation = { location ->
+                if (continuation.isActive) {
+                    continuation.resume(location?.toFix())
+                }
+            }
+        )
+        locationManager.delegate = delegate
+        locationManager.requestLocation()
+    }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private fun CLLocation.toFix(): DeviceLocationFix {
+    val (lat, lon) = coordinate.useContents { latitude to longitude }
+    return DeviceLocationFix(
+        latitude = lat,
+        longitude = lon,
+        accuracy = horizontalAccuracy.takeIf { it >= 0 },
+        altitude = altitude,
+        speed = speed.takeIf { it >= 0 },
+        heading = course.takeIf { it >= 0 },
+    )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

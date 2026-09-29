@@ -36,7 +36,9 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +58,11 @@ import karika.distribucija.ba.ui.components.ReadFilterDropdown
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsFiltersView
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsTab
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsView
+import karika.distribucija.ba.ui.view.distributer.analytics.atrisk.AnalyticsAtRiskView
+import karika.distribucija.ba.ui.view.distributer.analytics.products.AnalyticsProductsView
 import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderCartView
 import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderReviewView
 import karika.distribucija.ba.ui.view.salesrep.catalog.SalesOrderCatalogView
@@ -78,9 +85,11 @@ import karika.distribucija.ba.ui.view.salesrep.operations.SalesOperationsView
 import karika.distribucija.ba.ui.view.salesrep.orders.SalesOrdersView
 import karika.distribucija.ba.ui.view.salesrep.orders.detail.SalesOrderDetailView
 import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_analytics
 import karikav2.composeapp.generated.resources.ic_arrow_back
+import karikav2.composeapp.generated.resources.ic_arrow_down
+import karikav2.composeapp.generated.resources.ic_arrow_up
 import karikav2.composeapp.generated.resources.ic_customers
-import karikav2.composeapp.generated.resources.ic_email
 import karikav2.composeapp.generated.resources.ic_logout
 import karikav2.composeapp.generated.resources.ic_menu
 import karikav2.composeapp.generated.resources.ic_messages
@@ -98,6 +107,20 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
     val salesManager by component.stateHolder.salesSpecificHandler.me.collectAsState()
     val notificationBadge by component.stateHolder.vendorNotificationHandler.notificationCount.collectAsState()
     val messageState by component.stateHolder.vendorNotificationHandler.chatUnreadCount.asState()
+    val activeInstance = navState.value.active.instance
+    val isAnalyticsActive = activeInstance is SalesChild.Analytics ||
+        activeInstance is SalesChild.AnalyticsProducts ||
+        activeInstance is SalesChild.AnalyticsAtRisk
+    var analyticsExpanded by remember { mutableStateOf(false) }
+    val activeAnalyticsTab = if (activeInstance is SalesChild.Analytics) {
+        activeInstance.component.selectedTab.collectAsState().value
+    } else {
+        null
+    }
+    val isMessagesActive = activeInstance is SalesChild.CustomerMessages ||
+        activeInstance is SalesChild.AdminMessages ||
+        activeInstance is SalesChild.InternalMessages
+    var messagesExpanded by remember { mutableStateOf(false) }
 
     BoxWithConstraints(
         modifier = Modifier
@@ -161,6 +184,65 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
+                        SalesExpandableNavItem(
+                            icon = vectorResource(Res.drawable.ic_analytics),
+                            text = "Analitika",
+                            expanded = analyticsExpanded,
+                            selected = isAnalyticsActive,
+                            onClick = { analyticsExpanded = !analyticsExpanded }
+                        )
+                        if (analyticsExpanded) {
+                            SalesSubNavItem(
+                                text = "Pregled",
+                                selected = activeAnalyticsTab == AnalyticsTab.Overview,
+                                onClick = {
+                                    component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Overview), true)
+                                    coroutineScope.launch { drawerState.close() }
+                                }
+                            )
+                            SalesSubNavItem(
+                                text = "Trendovi prodaje",
+                                selected = activeAnalyticsTab == AnalyticsTab.Trends,
+                                onClick = {
+                                    component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Trends), true)
+                                    coroutineScope.launch { drawerState.close() }
+                                }
+                            )
+                            if (salesManager.capabilities.canSeeDashboard) {
+                                SalesSubNavItem(
+                                    text = "Komercijalisti",
+                                    selected = activeAnalyticsTab == AnalyticsTab.Reps,
+                                    onClick = {
+                                        component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Reps), true)
+                                        coroutineScope.launch { drawerState.close() }
+                                    }
+                                )
+                            }
+                            SalesSubNavItem(
+                                text = "Analitika kupaca",
+                                selected = activeAnalyticsTab == AnalyticsTab.Customers,
+                                onClick = {
+                                    component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Customers), true)
+                                    coroutineScope.launch { drawerState.close() }
+                                }
+                            )
+                            SalesSubNavItem(
+                                text = "Kupci koji zahtijevaju pažnju",
+                                selected = navState.value.active.instance is SalesChild.AnalyticsAtRisk,
+                                onClick = {
+                                    component.salesRepNavigate(SalesRepConfig.AnalyticsAtRisk, true)
+                                    coroutineScope.launch { drawerState.close() }
+                                }
+                            )
+                            SalesSubNavItem(
+                                text = "Proizvodi i kategorije",
+                                selected = navState.value.active.instance is SalesChild.AnalyticsProducts,
+                                onClick = {
+                                    component.salesRepNavigate(SalesRepConfig.AnalyticsProducts, true)
+                                    coroutineScope.launch { drawerState.close() }
+                                }
+                            )
+                        }
                         SalesNavItem(
                             icon = vectorResource(Res.drawable.ic_orders),
                             text = "Upravljanje narudžbama",
@@ -179,45 +261,43 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                                 coroutineScope.launch { drawerState.close() }
                             }
                         )
-                        SalesNavItem(
+                        SalesExpandableNavItem(
                             icon = vectorResource(Res.drawable.ic_messages),
-                            text = "Poruke kupaca",
-                            selected = navState.value.active.instance is SalesChild.CustomerMessages,
-                            badge = messageState.vendorCustomer,
-                            onClick = {
-                                component.salesRepNavigate(
-                                    SalesRepConfig.CustomerMessages,
-                                    replace = true
-                                )
-                                coroutineScope.launch { drawerState.close() }
-                            }
+                            text = "Poruke",
+                            expanded = messagesExpanded,
+                            selected = isMessagesActive,
+                            badge = messageState.staff + messageState.vendorAdmin + messageState.vendorCustomer,
+                            onClick = { messagesExpanded = !messagesExpanded }
                         )
-                        SalesNavItem(
-                            icon = vectorResource(Res.drawable.ic_email),
-                            text = "Poruke admina",
-                            selected = navState.value.active.instance is SalesChild.AdminMessages,
-                            badge = messageState.vendorAdmin,
-                            onClick = {
-                                component.salesRepNavigate(
-                                    SalesRepConfig.AdminMessages,
-                                    replace = true
-                                )
-                                coroutineScope.launch { drawerState.close() }
-                            }
-                        )
-                        SalesNavItem(
-                            icon = vectorResource(Res.drawable.ic_messages),
-                            text = "Interne poruke",
-                            selected = navState.value.active.instance is SalesChild.InternalMessages,
-                            badge = messageState.staff,
-                            onClick = {
-                                component.salesRepNavigate(
-                                    SalesRepConfig.InternalMessages,
-                                    replace = true
-                                )
-                                coroutineScope.launch { drawerState.close() }
-                            }
-                        )
+                        if (messagesExpanded) {
+                            SalesSubNavItem(
+                                text = "Interne poruke",
+                                selected = navState.value.active.instance is SalesChild.InternalMessages,
+                                badge = messageState.staff,
+                                onClick = {
+                                    component.salesRepNavigate(SalesRepConfig.InternalMessages, replace = true)
+                                    coroutineScope.launch { drawerState.close() }
+                                }
+                            )
+                            SalesSubNavItem(
+                                text = "Poruke admina",
+                                selected = navState.value.active.instance is SalesChild.AdminMessages,
+                                badge = messageState.vendorAdmin,
+                                onClick = {
+                                    component.salesRepNavigate(SalesRepConfig.AdminMessages, replace = true)
+                                    coroutineScope.launch { drawerState.close() }
+                                }
+                            )
+                            SalesSubNavItem(
+                                text = "Poruke kupaca",
+                                selected = navState.value.active.instance is SalesChild.CustomerMessages,
+                                badge = messageState.vendorCustomer,
+                                onClick = {
+                                    component.salesRepNavigate(SalesRepConfig.CustomerMessages, replace = true)
+                                    coroutineScope.launch { drawerState.close() }
+                                }
+                            )
+                        }
                         //SalesNavItem(
                         //    icon = vectorResource(Res.drawable.ic_action),
                         //    text = "Operacije",
@@ -308,6 +388,10 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                     val menuClick = { coroutineScope.launch { drawerState.open() } }
                     val onNotifications = { component.salesRepNavigate(SalesRepConfig.Notifications) }
                     when (val child = navState.value.active.instance) {
+                        is SalesChild.Analytics -> SalesRootTopBar("Analitika", notificationBadge, onNotifications) { menuClick() }
+                        is SalesChild.AnalyticsProducts -> SalesRootTopBar("Analitika", notificationBadge, onNotifications) { menuClick() }
+                        is SalesChild.AnalyticsAtRisk -> SalesRootTopBar("Analitika", notificationBadge, onNotifications) { menuClick() }
+                        is SalesChild.AnalyticsFilters -> {}
                         is SalesChild.Orders -> SalesRootTopBar("Upravljanje narudžbama", notificationBadge, onNotifications) { menuClick() }
                         is SalesChild.Customers -> SalesRootTopBar("Upravljanje kupcima", notificationBadge, onNotifications) { menuClick() }
                         is SalesChild.CustomerMessages -> SalesRootTopBar("Poruke kupaca", notificationBadge, onNotifications) { menuClick() }
@@ -405,6 +489,10 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
             ) {
                 Children(stack = component.stack) {
                     when (val child = it.instance) {
+                        is SalesChild.Analytics -> AnalyticsView(child.component)
+                        is SalesChild.AnalyticsProducts -> AnalyticsProductsView(child.component)
+                        is SalesChild.AnalyticsAtRisk -> AnalyticsAtRiskView(child.component)
+                        is SalesChild.AnalyticsFilters -> AnalyticsFiltersView(child.component)
                         is SalesChild.Orders -> SalesOrdersView(child.component)
                         is SalesChild.Customers -> SalesCustomersView(child.component)
                         is SalesChild.CustomerMessages -> SalesCustomerMessagesView(child.component)
@@ -553,6 +641,113 @@ fun SalesDetailTopBar(
         },
         actions = actions
     )
+}
+
+@Composable
+private fun SalesExpandableNavItem(
+    icon: ImageVector,
+    text: String,
+    expanded: Boolean,
+    selected: Boolean,
+    badge: Int = 0,
+    onClick: () -> Unit
+) {
+    val bgColor = if (selected) KarikaColors.Blue else KarikaColors.Transparent
+    val contentColor = if (selected) KarikaColors.White else KarikaColors.Gray6
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(color = bgColor)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onClick
+            )
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = "",
+            tint = contentColor,
+            modifier = Modifier.size(22.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = text,
+            color = contentColor,
+            textSize = 15.sp,
+            fontWeight = if (selected) FontWeight.W700 else FontWeight.W500,
+            textAlign = TextAlign.Start
+        )
+        if (badge > 0) {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(if (selected) KarikaColors.White else KarikaColors.Blue),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    text = "$badge",
+                    color = if (selected) KarikaColors.Blue else KarikaColors.White,
+                    textSize = 10.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+        }
+        Icon(
+            imageVector = vectorResource(if (expanded) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
+            contentDescription = "",
+            tint = contentColor,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+@Composable
+private fun SalesSubNavItem(text: String, selected: Boolean, badge: Int = 0, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onClick(callback = onClick)
+            .padding(start = 28.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(width = 2.dp, height = 16.dp)
+                .background(if (selected) KarikaColors.Blue else KarikaColors.Transparent)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = text,
+            color = if (selected) KarikaColors.Blue else KarikaColors.Gray6,
+            textSize = 14.sp,
+            fontWeight = if (selected) FontWeight.W700 else FontWeight.W500
+        )
+        if (badge > 0) {
+            Box(
+                modifier = Modifier
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .background(KarikaColors.Blue),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    text = "$badge",
+                    color = KarikaColors.White,
+                    textSize = 10.sp,
+                    fontWeight = FontWeight.W700
+                )
+            }
+        }
+    }
 }
 
 @Composable

@@ -57,6 +57,9 @@ kotlin {
 
             implementation(libs.app.update)
             implementation(libs.app.update.ktx)
+
+            implementation(libs.play.services.location)
+            implementation(libs.kotlinx.coroutines.play.services)
         }
 
         commonMain.dependencies {

@@ -19,6 +19,8 @@
 	</array>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Karika koristi vašu lokaciju kako bi bilježila poziciju komercijaliste tokom rada.</string>
 	<key>NSApplicationCrashOnExceptions</key>
 	<true/>
 	<key>UIBackgroundModes</key>

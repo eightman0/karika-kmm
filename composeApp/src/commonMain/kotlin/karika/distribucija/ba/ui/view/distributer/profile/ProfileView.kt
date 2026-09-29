@@ -103,7 +103,7 @@ private fun ButtonsBox(component: ProfileComponent) {
             secondaryTitle = "Nazad"
         ) {
             if (it == "Nazad") {
-                component.dashNavigate(DashConfig.ControlBoard, true)
+                component.dashNavigate(DashConfig.Analytics(), true)
                 return@HorizontalSecondaryButtons
             }
 

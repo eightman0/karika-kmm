@@ -16,6 +16,7 @@
     <string name="forgot_password_close">Zatvori</string>
     <string name="forgot_password_confirm">Potvrdi</string>
 
+    <string name="drawer_analytics">Analitika</string>
     <string name="drawer_orders">Upravljanje narudžbama</string>
     <string name="drawer_customers">Upravljanje kupcima</string>
     <string name="drawer_customer_messages">Poruke kupaca</string>
@@ -365,4 +366,90 @@
     <string name="review_edit_item_qty_label">Količina</string>
     <string name="review_edit_item_cancel">Odustani</string>
     <string name="review_edit_item_confirm">Izmijeni</string>
+
+    <!-- Analitika (mirrors composeApp's distributer/salesrep analytics screens) -->
+    <string name="analytics_overview_title">Pregled</string>
+    <string name="analytics_trends_title">Trendovi prodaje</string>
+    <string name="analytics_reps_title">Komercijalisti</string>
+    <string name="analytics_customers_title">Analitika kupaca</string>
+    <string name="analytics_at_risk_title">Kupci koji zahtijevaju pažnju</string>
+    <string name="analytics_products_title">Proizvodi i kategorije</string>
+    <string name="analytics_filters_title">Filteri</string>
+    <string name="analytics_empty_state">Nema rezultata za odabrane filtere.</string>
+    <string name="analytics_vs_previous_period">vs prethodni period</string>
+
+    <string name="analytics_total_revenue">Ukupan prihod:</string>
+    <string name="analytics_total_orders">Ukupan broj narudžbi:</string>
+    <string name="analytics_avg_order_value">Prosječna vrijednost narudžbe:</string>
+    <string name="analytics_customers_in_period">Kupci u periodu</string>
+    <string name="analytics_active_customers">Aktivni kupci</string>
+    <string name="analytics_new_customers">Novi kupci</string>
+    <string name="analytics_distinct_products">Različiti proizvodi</string>
+    <string name="analytics_revenue_growth">Rast prihoda</string>
+    <string name="analytics_goal_achievement">Ostvarenje cilja:</string>
+    <string name="analytics_at_risk_customers">Kupci u riziku:</string>
+    <string name="analytics_at_risk_customers_subtitle">30+ dana bez narudžbe</string>
+
+    <string name="analytics_revenue_chart_title">Prihod</string>
+    <string name="analytics_revenue_chart_subtitle">po danu</string>
+    <string name="analytics_total_label">Ukupno</string>
+    <string name="analytics_peak_label">Vrh</string>
+    <string name="analytics_growth_label">Rast</string>
+    <string name="analytics_orders_chart_title">Narudžbe</string>
+
+    <string name="analytics_reps_header">Učinak komercijalista</string>
+    <string name="analytics_unassigned">Nedodijeljeno</string>
+    <string name="analytics_unassigned_subtitle">Prihod kupaca bez aktivne dodjele</string>
+    <string name="analytics_unassigned_note">Prihod prati trenutnu dodjelu kupca. Promjena dodjele prenosi cijelu historiju narudžbi na novog komercijalistu.</string>
+    <string name="analytics_orders_label">Narudžbe</string>
+    <string name="analytics_aov_label">AOV</string>
+    <string name="analytics_customers_label">Kupci</string>
+    <string name="analytics_goal_label_format">cilj %1$s%%</string>
+    <string name="analytics_suspended">Suspendovan</string>
+
+    <string name="analytics_in_period">U PERIODU</string>
+    <string name="analytics_assigned_customers">Dodijeljeni kupci</string>
+    <string name="analytics_repeat_customers">Ponavljajući kupci</string>
+    <string name="analytics_repeat_purchase_rate">Stopa ponovljene kupovine:</string>
+    <string name="analytics_revenue_per_customer">Prihod po kupcu</string>
+    <string name="analytics_avg_orders_per_customer">Prosječan broj narudžbi po kupcu</string>
+    <string name="analytics_overlap_note">Kupac može biti dodijeljen više komercijalista, pa se portfelji mogu preklapati.</string>
+    <string name="analytics_total_caps">UKUPNO</string>
+    <string name="analytics_customers_2plus">Kupci sa 2+ narudžbe</string>
+    <string name="analytics_customers_none">Kupci bez narudžbe</string>
+
+    <string name="analytics_at_risk_subtitle">Neaktivnost se mjeri od danas, ne od odabranog perioda.</string>
+    <string name="analytics_bucket_30_59_format">30–59 dana: %1$d</string>
+    <string name="analytics_bucket_60_89_format">60–89 dana: %1$d</string>
+    <string name="analytics_bucket_90_plus_format">90+ dana: %1$d</string>
+    <string name="analytics_filter_all">30+ dana</string>
+    <string name="analytics_filter_approaching">Približava se riziku</string>
+    <string name="analytics_filter_at_risk">U riziku</string>
+    <string name="analytics_filter_overdue">Ozbiljno kašnjenje</string>
+    <string name="analytics_filter_never_ordered">Nikad naručio</string>
+    <string name="analytics_stat_inactive">Neaktivan</string>
+    <string name="analytics_stat_last_order">Zadnja</string>
+    <string name="analytics_stat_avg_value">Prosj. vrij.</string>
+    <string name="analytics_stat_turnover">Promet</string>
+
+    <string name="analytics_products_tab">Proizvodi</string>
+    <string name="analytics_categories_tab">Kategorije</string>
+    <string name="analytics_search_products_hint">Pretraži proizvode</string>
+    <string name="analytics_category_note">Proizvod može pripadati više kategorija, pa zbroj prihoda po kategorijama nije jednak ukupnom prihodu.</string>
+
+    <string name="analytics_filters_back">Nazad na analitiku</string>
+    <string name="analytics_filters_period">Period</string>
+    <string name="analytics_filters_from">OD</string>
+    <string name="analytics_filters_to">DO</string>
+    <string name="analytics_filters_grouping">Grupisanje</string>
+    <string name="analytics_filters_comparison">Poređenje</string>
+    <string name="analytics_filters_rep">Komercijalista</string>
+    <string name="analytics_filters_search_reps">Pretraži komercijaliste</string>
+    <string name="analytics_filters_customer">Kupac</string>
+    <string name="analytics_filters_search_customers">Pretraži kupce</string>
+    <string name="analytics_filters_product">Proizvod</string>
+    <string name="analytics_filters_search_products">Pretraži proizvode</string>
+    <string name="analytics_filters_category">Kategorija</string>
+    <string name="analytics_filters_search_categories">Pretraži kategorije</string>
+    <string name="analytics_filters_apply">Primijeni</string>
 </resources>

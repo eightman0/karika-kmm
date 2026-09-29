@@ -5,12 +5,21 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackCallback
+import com.arkivanov.essenty.lifecycle.doOnDestroy
+import karika.distribucija.ba.domain.api.DeviceIdentifier
+import karika.distribucija.ba.domain.api.EmployeeLocationRepository
 import karika.distribucija.ba.domain.model.ChatConversation
+import karika.distribucija.ba.domain.model.EmployeeLocationSubmit
 import karika.distribucija.ba.domain.model.DiscountRule
 import karika.distribucija.ba.domain.model.OnBehalfOrder
 import karika.distribucija.ba.domain.model.OperationalCustomer
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsComponent
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsFiltersComponent
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsTab
+import karika.distribucija.ba.ui.view.distributer.analytics.atrisk.AnalyticsAtRiskComponent
+import karika.distribucija.ba.ui.view.distributer.analytics.products.AnalyticsProductsComponent
 import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderCartComponent
 import karika.distribucija.ba.ui.view.salesrep.cart.SalesOrderReviewComponent
 import karika.distribucija.ba.ui.view.salesrep.catalog.SalesOrderCatalogComponent
@@ -29,15 +38,24 @@ import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalCo
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalMessagesComponent
 import karika.distribucija.ba.ui.view.salesrep.messages.internal.SalesInternalNewMessageComponent
 import karika.distribucija.ba.ui.view.salesrep.notifications.SalesNotificationsComponent
+import karika.distribucija.ba.ui.common.currentDeviceLocation
+import karika.distribucija.ba.ui.common.requestLocationPermission
 import karika.distribucija.ba.ui.view.salesrep.operations.SalesOperationsComponent
 import karika.distribucija.ba.ui.view.salesrep.orders.SalesOrdersComponent
 import karika.distribucija.ba.ui.view.salesrep.orders.detail.SalesOrderDetailComponent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.ExperimentalTime
 
 class SalesDashboardComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder
 ) : CommonComponent(componentContext, stateHolder) {
+
+    private val locationRepository = EmployeeLocationRepository()
 
     init {
         backHandler.register(BackCallback {
@@ -49,6 +67,38 @@ class SalesDashboardComponent(
 
         stateHolder.salesSpecificHandler.getMe()
         stateHolder.vendorNotificationHandler.notificationReceived()
+
+        val locationJob = scope.launch {
+            while (true) {
+                try {
+                    submitCurrentLocation()
+                } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    // Best-effort background telemetry - never let a GPS/network hiccup kill the hourly loop.
+                }
+                delay(1.hours)
+            }
+        }
+        lifecycle.doOnDestroy { locationJob.cancel() }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private suspend fun submitCurrentLocation() {
+        if (!requestLocationPermission()) return
+        val fix = currentDeviceLocation() ?: return
+        locationRepository.submit(
+            EmployeeLocationSubmit(
+                deviceId = DeviceIdentifier.deviceId(),
+                latitude = fix.latitude,
+                longitude = fix.longitude,
+                accuracy = fix.accuracy,
+                altitude = fix.altitude,
+                speed = fix.speed,
+                heading = fix.heading,
+                timestamp = Clock.System.now().toString(),
+            )
+        ).collect { }
     }
 
     val stack: Value<ChildStack<*, SalesChild>> =
@@ -62,6 +112,32 @@ class SalesDashboardComponent(
 
     private fun child(config: SalesRepConfig, componentContext: ComponentContext): SalesChild =
         when (config) {
+            is SalesRepConfig.Analytics -> SalesChild.Analytics(
+                AnalyticsComponent(
+                    componentContext,
+                    stateHolder,
+                    config.tab,
+                    onOpenFilters = { salesRepNavigate(SalesRepConfig.AnalyticsFilters) },
+                    onOpenAtRiskCustomers = { salesRepNavigate(SalesRepConfig.AnalyticsAtRisk, true) },
+                )
+            )
+
+            is SalesRepConfig.AnalyticsProducts -> SalesChild.AnalyticsProducts(
+                AnalyticsProductsComponent(componentContext, stateHolder)
+            )
+
+            is SalesRepConfig.AnalyticsAtRisk -> SalesChild.AnalyticsAtRisk(
+                AnalyticsAtRiskComponent(componentContext, stateHolder)
+            )
+
+            is SalesRepConfig.AnalyticsFilters -> SalesChild.AnalyticsFilters(
+                AnalyticsFiltersComponent(
+                    componentContext,
+                    stateHolder,
+                    onBack = { salesRepBack() },
+                )
+            )
+
             is SalesRepConfig.Orders -> SalesChild.Orders(
                 SalesOrdersComponent(componentContext, stateHolder)
             )
@@ -164,6 +240,14 @@ class SalesDashboardComponent(
 @Serializable
 sealed class SalesRepConfig {
     @Serializable
+    data class Analytics(val tab: AnalyticsTab = AnalyticsTab.Overview) : SalesRepConfig()
+    @Serializable
+    data object AnalyticsProducts : SalesRepConfig()
+    @Serializable
+    data object AnalyticsAtRisk : SalesRepConfig()
+    @Serializable
+    data object AnalyticsFilters : SalesRepConfig()
+    @Serializable
     data object Orders : SalesRepConfig()
     @Serializable
     data object Customers : SalesRepConfig()
@@ -212,6 +296,10 @@ sealed class SalesRepConfig {
 }
 
 sealed class SalesChild {
+    data class Analytics(val component: AnalyticsComponent) : SalesChild()
+    data class AnalyticsProducts(val component: AnalyticsProductsComponent) : SalesChild()
+    data class AnalyticsAtRisk(val component: AnalyticsAtRiskComponent) : SalesChild()
+    data class AnalyticsFilters(val component: AnalyticsFiltersComponent) : SalesChild()
     data class Orders(val component: SalesOrdersComponent) : SalesChild()
     data class Customers(val component: SalesCustomersComponent) : SalesChild()
     data class CustomerMessages(val component: SalesCustomerMessagesComponent) : SalesChild()

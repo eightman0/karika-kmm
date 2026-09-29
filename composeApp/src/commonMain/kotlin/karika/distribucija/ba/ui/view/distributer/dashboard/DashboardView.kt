@@ -2,9 +2,11 @@ package karika.distribucija.ba.ui.view.distributer.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +26,12 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
@@ -42,7 +49,11 @@ import karika.distribucija.ba.ui.components.TopBarDashboard
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.onClick
-import karika.distribucija.ba.ui.view.distributer.board.BoardView
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsFiltersView
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsTab
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsView
+import karika.distribucija.ba.ui.view.distributer.analytics.atrisk.AnalyticsAtRiskView
+import karika.distribucija.ba.ui.view.distributer.analytics.products.AnalyticsProductsView
 import karika.distribucija.ba.ui.view.distributer.customers.CustomersView
 import karika.distribucija.ba.ui.view.distributer.customers.editor.CustomerRuleEditorView
 import karika.distribucija.ba.ui.view.distributer.messages.admin.AdminMessagesView
@@ -57,6 +68,8 @@ import karika.distribucija.ba.ui.view.distributer.products.details.ProductDetail
 import karika.distribucija.ba.ui.view.distributer.profile.ProfileView
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_analytics
+import karikav2.composeapp.generated.resources.ic_arrow_down
+import karikav2.composeapp.generated.resources.ic_arrow_up
 import karikav2.composeapp.generated.resources.ic_customers
 import karikav2.composeapp.generated.resources.ic_logout
 import karikav2.composeapp.generated.resources.ic_messages
@@ -71,8 +84,20 @@ fun DashboardView(component: DashboardComponent) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val profile = component.stateHolder.vendorSpecificHandler.vendorDetails.collectAsState()
+    val me by component.stateHolder.salesSpecificHandler.me.collectAsState()
+    val canSeeDashboard = me.capabilities.canSeeDashboard
     val navState = component.stack.subscribeAsState()
     val messageState = component.stateHolder.vendorNotificationHandler.chatUnreadCount.asState()
+    val activeInstance = navState.value.active.instance
+    val isAnalyticsActive = activeInstance is DashChild.Analytics ||
+        activeInstance is DashChild.AnalyticsProducts ||
+        activeInstance is DashChild.AnalyticsAtRisk
+    var analyticsExpanded by remember { mutableStateOf(false) }
+    val activeAnalyticsTab = if (activeInstance is DashChild.Analytics) {
+        activeInstance.component.selectedTab.collectAsState().value
+    } else {
+        null
+    }
 
     BoxWithConstraints(
         modifier = Modifier
@@ -135,25 +160,87 @@ fun DashboardView(component: DashboardComponent) {
                         ),
                         shape = RectangleShape,
                         label = {
-                            IconTextItem(
-                                modifier = Modifier,
-                                icon = vectorResource(Res.drawable.ic_analytics),
-                                iconColor = if (navState.value.active.instance is DashChild.ControlBoard) KarikaColors.White else KarikaColors.Gray2,
-                                textColor = if (navState.value.active.instance is DashChild.ControlBoard) KarikaColors.White else KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W600,
-                                text = "Kontrolna ploča",
-                                textAlign = TextAlign.Start
-                            )
-                        },
-                        selected = navState.value.active.instance is DashChild.ControlBoard,
-                        onClick = {
-                            component.dashNavigate(DashConfig.ControlBoard, true)
-                            scope.launch {
-                                drawerState.close()
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconTextItem(
+                                    modifier = Modifier.weight(1f),
+                                    icon = vectorResource(Res.drawable.ic_analytics),
+                                    iconColor = if (isAnalyticsActive) KarikaColors.White else KarikaColors.Gray2,
+                                    textColor = if (isAnalyticsActive) KarikaColors.White else KarikaColors.Gray2,
+                                    textSize = 16.sp,
+                                    fontWeight = FontWeight.W600,
+                                    text = "Analitika",
+                                    textAlign = TextAlign.Start
+                                )
+                                Icon(
+                                    modifier = Modifier.size(20.dp),
+                                    imageVector = vectorResource(
+                                        if (analyticsExpanded) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down
+                                    ),
+                                    tint = if (isAnalyticsActive) KarikaColors.White else KarikaColors.Gray2,
+                                    contentDescription = ""
+                                )
                             }
+                        },
+                        selected = isAnalyticsActive,
+                        onClick = {
+                            analyticsExpanded = !analyticsExpanded
                         }
                     )
+                    if (analyticsExpanded) {
+                        AnalyticsSubItem(
+                            text = "Pregled",
+                            selected = activeAnalyticsTab == AnalyticsTab.Overview,
+                            onClick = {
+                                component.dashNavigate(DashConfig.Analytics(AnalyticsTab.Overview), true)
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+                        AnalyticsSubItem(
+                            text = "Trendovi prodaje",
+                            selected = activeAnalyticsTab == AnalyticsTab.Trends,
+                            onClick = {
+                                component.dashNavigate(DashConfig.Analytics(AnalyticsTab.Trends), true)
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+                        if (canSeeDashboard) {
+                            AnalyticsSubItem(
+                                text = "Komercijalisti",
+                                selected = activeAnalyticsTab == AnalyticsTab.Reps,
+                                onClick = {
+                                    component.dashNavigate(DashConfig.Analytics(AnalyticsTab.Reps), true)
+                                    scope.launch { drawerState.close() }
+                                }
+                            )
+                        }
+                        AnalyticsSubItem(
+                            text = "Analitika kupaca",
+                            selected = activeAnalyticsTab == AnalyticsTab.Customers,
+                            onClick = {
+                                component.dashNavigate(DashConfig.Analytics(AnalyticsTab.Customers), true)
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+                        AnalyticsSubItem(
+                            text = "Kupci koji zahtijevaju pažnju",
+                            selected = navState.value.active.instance is DashChild.AnalyticsAtRisk,
+                            onClick = {
+                                component.dashNavigate(DashConfig.AnalyticsAtRisk, true)
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+                        AnalyticsSubItem(
+                            text = "Proizvodi i kategorije",
+                            selected = navState.value.active.instance is DashChild.AnalyticsProducts,
+                            onClick = {
+                                component.dashNavigate(DashConfig.AnalyticsProducts, true)
+                                scope.launch { drawerState.close() }
+                            }
+                        )
+                    }
                     NavigationDrawerItem(
                         modifier = Modifier,
                         colors = NavigationDrawerItemDefaults.colors(
@@ -410,7 +497,10 @@ fun DashboardView(component: DashboardComponent) {
 
                 Children(stack = component.stack) {
                     when (val child = it.instance) {
-                        is DashChild.ControlBoard -> BoardView(child.component)
+                        is DashChild.Analytics -> AnalyticsView(child.component)
+                        is DashChild.AnalyticsProducts -> AnalyticsProductsView(child.component)
+                        is DashChild.AnalyticsAtRisk -> AnalyticsAtRiskView(child.component)
+                        is DashChild.AnalyticsFilters -> AnalyticsFiltersView(child.component)
 
                         is DashChild.Orders -> OrdersView(child.component)
                         is DashChild.OrderDetails -> OrderDetailsView(child.component)
@@ -433,5 +523,29 @@ fun DashboardView(component: DashboardComponent) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AnalyticsSubItem(text: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onClick(callback = onClick)
+            .padding(start = 28.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(width = 2.dp, height = 16.dp)
+                .background(if (selected) KarikaColors.Blue else KarikaColors.Transparent)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        KarikaText(
+            text = text,
+            color = if (selected) KarikaColors.Blue else KarikaColors.Gray2,
+            textSize = 14.sp,
+            fontWeight = if (selected) FontWeight.W700 else FontWeight.W500
+        )
     }
 }

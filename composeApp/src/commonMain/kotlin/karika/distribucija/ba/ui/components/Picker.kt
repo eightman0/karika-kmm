@@ -83,6 +83,7 @@ fun KarikaPicker(
                     color = if (value.value.isEmpty()) KarikaColors.Placeholder else KarikaColors.Black,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400,
+                    maxLines = 1,
                 )
                 Icon(
                     modifier = Modifier

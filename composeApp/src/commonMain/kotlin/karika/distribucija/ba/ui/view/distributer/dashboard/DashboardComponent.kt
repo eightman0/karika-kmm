@@ -10,7 +10,11 @@ import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
-import karika.distribucija.ba.ui.view.distributer.board.BoardComponent
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsComponent
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsFiltersComponent
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsTab
+import karika.distribucija.ba.ui.view.distributer.analytics.atrisk.AnalyticsAtRiskComponent
+import karika.distribucija.ba.ui.view.distributer.analytics.products.AnalyticsProductsComponent
 import karika.distribucija.ba.ui.view.distributer.customers.CustomerRule
 import karika.distribucija.ba.ui.view.distributer.customers.CustomersComponent
 import karika.distribucija.ba.ui.view.distributer.customers.RuleScope
@@ -33,7 +37,7 @@ class DashboardComponent(componentContext: ComponentContext, stateHolder: Karika
     init {
         backHandler.register(BackCallback {
             when (stack.value.active.instance) {
-                is DashChild.ControlBoard -> {
+                is DashChild.Analytics -> {
                     return@BackCallback
                 }
 
@@ -52,17 +56,42 @@ class DashboardComponent(componentContext: ComponentContext, stateHolder: Karika
         childStack(
             source = stateHolder.dashNavigation,
             serializer = DashConfig.serializer(),
-            initialConfiguration = DashConfig.ControlBoard,
+            initialConfiguration = DashConfig.Analytics(),
             handleBackButton = true,
             childFactory = ::child
         )
 
     private fun child(appConfig: DashConfig, componentContext: ComponentContext): DashChild =
         when (appConfig) {
-            is DashConfig.ControlBoard -> DashChild.ControlBoard(
-                BoardComponent(
+            is DashConfig.Analytics -> DashChild.Analytics(
+                AnalyticsComponent(
+                    componentContext,
+                    stateHolder,
+                    appConfig.tab,
+                    onOpenFilters = { dashNavigate(DashConfig.AnalyticsFilters) },
+                    onOpenAtRiskCustomers = { dashNavigate(DashConfig.AnalyticsAtRisk, true) },
+                )
+            )
+
+            is DashConfig.AnalyticsProducts -> DashChild.AnalyticsProducts(
+                AnalyticsProductsComponent(
                     componentContext,
                     stateHolder
+                )
+            )
+
+            is DashConfig.AnalyticsAtRisk -> DashChild.AnalyticsAtRisk(
+                AnalyticsAtRiskComponent(
+                    componentContext,
+                    stateHolder
+                )
+            )
+
+            is DashConfig.AnalyticsFilters -> DashChild.AnalyticsFilters(
+                AnalyticsFiltersComponent(
+                    componentContext,
+                    stateHolder,
+                    onBack = { dashBack() },
                 )
             )
 
@@ -154,7 +183,16 @@ class DashboardComponent(componentContext: ComponentContext, stateHolder: Karika
 @Serializable
 sealed class DashConfig {
     @Serializable
-    data object ControlBoard : DashConfig()
+    data class Analytics(val tab: AnalyticsTab = AnalyticsTab.Overview) : DashConfig()
+
+    @Serializable
+    data object AnalyticsProducts : DashConfig()
+
+    @Serializable
+    data object AnalyticsAtRisk : DashConfig()
+
+    @Serializable
+    data object AnalyticsFilters : DashConfig()
 
     @Serializable
     data object Orders : DashConfig()
@@ -197,7 +235,10 @@ sealed class DashConfig {
 }
 
 sealed class DashChild {
-    data class ControlBoard(val component: BoardComponent) : DashChild()
+    data class Analytics(val component: AnalyticsComponent) : DashChild()
+    data class AnalyticsProducts(val component: AnalyticsProductsComponent) : DashChild()
+    data class AnalyticsAtRisk(val component: AnalyticsAtRiskComponent) : DashChild()
+    data class AnalyticsFilters(val component: AnalyticsFiltersComponent) : DashChild()
     data class Orders(val component: OrdersComponent) : DashChild()
     data class OrderDetails(val component: OrderDetailsComponent) : DashChild()
     data class Products(val component: ProductsComponent) : DashChild()

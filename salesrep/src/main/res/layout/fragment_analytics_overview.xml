@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/karika_white"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <include
+            android:id="@+id/filter_bar"
+            layout="@layout/layout_analytics_filter_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Ukupan prihod -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_stat_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/analytics_total_revenue"
+                android:textColor="@color/karika_gray6"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/text_revenue_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/karika_gray2"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="12.345,00 KM" />
+
+            <TextView
+                android:id="@+id/text_revenue_delta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="12sp"
+                tools:text="↑ +12,3% vs prethodni period"
+                tools:textColor="@color/karika_green3" />
+
+        </LinearLayout>
+
+        <!-- Ukupan broj narudžbi -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_stat_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/analytics_total_orders"
+                android:textColor="@color/karika_gray6"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/text_orders_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/karika_gray2"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="128" />
+
+            <TextView
+                android:id="@+id/text_orders_delta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="12sp"
+                tools:text="↑ +8,4% vs prethodni period"
+                tools:textColor="@color/karika_green3" />
+
+        </LinearLayout>
+
+        <!-- Prosječna vrijednost narudžbe -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_stat_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/analytics_avg_order_value"
+                android:textColor="@color/karika_gray6"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/text_avg_order_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/karika_gray2"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="96,45 KM" />
+
+            <TextView
+                android:id="@+id/text_avg_order_delta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="12sp"
+                tools:text="↓ 2,1% vs prethodni period"
+                tools:textColor="@color/karika_red" />
+
+        </LinearLayout>
+
+        <!-- Kupci u periodu -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_stat_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/analytics_customers_in_period"
+                android:textColor="@color/karika_gray2"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/text_active_customers_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/karika_gray2"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="42" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/analytics_active_customers"
+                        android:textColor="@color/karika_gray6"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/text_active_customers_delta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="11sp"
+                        tools:text="↑ +5,0% vs prethodni period"
+                        tools:textColor="@color/karika_green3" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/text_new_customers_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/karika_gray2"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="7" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/analytics_new_customers"
+                        android:textColor="@color/karika_gray6"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/text_new_customers_delta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="11sp"
+                        tools:text="↓ 1,2% vs prethodni period"
+                        tools:textColor="@color/karika_red" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/text_distinct_products_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/karika_gray2"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="18" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/analytics_distinct_products"
+                        android:textColor="@color/karika_gray6"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/text_distinct_products_delta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="11sp"
+                        tools:text="↑ +3,3% vs prethodni period"
+                        tools:textColor="@color/karika_green3" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/text_revenue_growth_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/karika_gray2"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="14,2%" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/analytics_revenue_growth"
+                        android:textColor="@color/karika_gray6"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/text_revenue_growth_delta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="11sp"
+                        tools:text="↑ +2,7% vs prethodni period"
+                        tools:textColor="@color/karika_green3" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Ostvarenje cilja -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_stat_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/analytics_goal_achievement"
+                android:textColor="@color/karika_gray6"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/text_goal_achievement_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/karika_gray2"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="85,0%" />
+
+            <ProgressBar
+                android:id="@+id/progress_goal_achievement"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:max="100"
+                tools:progress="85" />
+
+            <TextView
+                android:id="@+id/text_goal_achievement_delta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="12sp"
+                tools:text="↑ +4,5% vs prethodni period"
+                tools:textColor="@color/karika_green3" />
+
+        </LinearLayout>
+
+        <!-- Kupci u riziku -->
+        <LinearLayout
+            android:id="@+id/card_at_risk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_stat_card"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/analytics_at_risk_customers"
+                android:textColor="@color/karika_gray6"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/text_at_risk_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/karika_red"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="9" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/analytics_at_risk_customers_subtitle"
+                android:textColor="@color/karika_gray6"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

@@ -37,6 +37,7 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
 import karika.distribucija.ba.ui.common.KarikaHandler
+import karika.distribucija.ba.ui.common.LocationPermissionBridge
 import karika.distribucija.ba.ui.common.isKiosk
 import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.util.PushHandler
@@ -45,11 +46,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import java.lang.ref.WeakReference
 
 open class KarikaActivity : ComponentActivity(), KarikaHandler {
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { _: Boolean -> }
+    private val requestLocationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted: Boolean ->
+        LocationPermissionBridge.pending?.complete(granted)
+        LocationPermissionBridge.pending = null
+    }
+
+    fun launchLocationPermissionRequest() {
+        requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
     private lateinit var appComponent: AppComponent
     lateinit var appUpdateManager: AppUpdateManager
     private val registerForActivityResult =
@@ -77,6 +89,7 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
         enableEdgeToEdge()
         askNotificationPermission()
         appUpdateManager = AppUpdateManagerFactory.create(this)
+        LocationPermissionBridge.activityRef = WeakReference(this)
         super.onCreate(savedInstanceState)
 
         val screenSize =
@@ -135,6 +148,13 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
                     )
                 }
             }
+    }
+
+    override fun onDestroy() {
+        if (LocationPermissionBridge.activityRef?.get() === this) {
+            LocationPermissionBridge.activityRef = null
+        }
+        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent) {

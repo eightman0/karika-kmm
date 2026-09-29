@@ -47,8 +47,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var appBarConfig: AppBarConfiguration
 
-    private data class NavRow(val container: View, val icon: ImageView, val text: TextView, val destinationId: Int)
+    private data class NavRow(val container: View, val icon: ImageView?, val text: TextView, val destinationId: Int)
     private lateinit var navRows: List<NavRow>
+
+    private val analyticsDestinationIds by lazy {
+        setOf(
+            R.id.analyticsOverviewFragment, R.id.analyticsTrendsFragment, R.id.analyticsRepsFragment,
+            R.id.analyticsCustomersFragment, R.id.analyticsAtRiskFragment, R.id.analyticsProductsFragment
+        )
+    }
 
     private var notificationsMenuItem: MenuItem? = null
 
@@ -80,20 +87,58 @@ class MainActivity : AppCompatActivity() {
             NavRow(findViewById(R.id.row_nav_customers), findViewById(R.id.icon_nav_customers), findViewById(R.id.text_nav_customers), R.id.customersListFragment),
             NavRow(findViewById(R.id.row_nav_customer_messages), findViewById(R.id.icon_nav_customer_messages), findViewById(R.id.text_nav_customer_messages), R.id.customerMessagesFragment),
             NavRow(findViewById(R.id.row_nav_admin_messages), findViewById(R.id.icon_nav_admin_messages), findViewById(R.id.text_nav_admin_messages), R.id.adminMessagesFragment),
-            NavRow(findViewById(R.id.row_nav_internal_messages), findViewById(R.id.icon_nav_internal_messages), findViewById(R.id.text_nav_internal_messages), R.id.internalMessagesFragment)
+            NavRow(findViewById(R.id.row_nav_internal_messages), findViewById(R.id.icon_nav_internal_messages), findViewById(R.id.text_nav_internal_messages), R.id.internalMessagesFragment),
+            NavRow(findViewById<TextView>(R.id.row_nav_analytics_overview), null, findViewById(R.id.row_nav_analytics_overview), R.id.analyticsOverviewFragment),
+            NavRow(findViewById<TextView>(R.id.row_nav_analytics_trends), null, findViewById(R.id.row_nav_analytics_trends), R.id.analyticsTrendsFragment),
+            NavRow(findViewById<TextView>(R.id.row_nav_analytics_reps), null, findViewById(R.id.row_nav_analytics_reps), R.id.analyticsRepsFragment),
+            NavRow(findViewById<TextView>(R.id.row_nav_analytics_customers), null, findViewById(R.id.row_nav_analytics_customers), R.id.analyticsCustomersFragment),
+            NavRow(findViewById<TextView>(R.id.row_nav_analytics_at_risk), null, findViewById(R.id.row_nav_analytics_at_risk), R.id.analyticsAtRiskFragment),
+            NavRow(findViewById<TextView>(R.id.row_nav_analytics_products), null, findViewById(R.id.row_nav_analytics_products), R.id.analyticsProductsFragment)
         )
 
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHost.navController
 
         appBarConfig = AppBarConfiguration(
-            setOf(R.id.ordersListFragment, R.id.customersListFragment, R.id.customerMessagesFragment, R.id.adminMessagesFragment, R.id.internalMessagesFragment),
+            setOf(R.id.ordersListFragment, R.id.customersListFragment, R.id.customerMessagesFragment, R.id.adminMessagesFragment, R.id.internalMessagesFragment) + analyticsDestinationIds,
             drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfig)
 
         findViewById<View>(R.id.button_close_drawer).setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
+        }
+        findViewById<View>(R.id.row_nav_analytics).setOnClickListener {
+            val group = findViewById<View>(R.id.group_nav_analytics_sub)
+            val expand = group.visibility != View.VISIBLE
+            group.visibility = if (expand) View.VISIBLE else View.GONE
+            findViewById<ImageView>(R.id.icon_nav_analytics_chevron).setImageResource(
+                if (expand) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down
+            )
+        }
+        findViewById<View>(R.id.row_nav_analytics_overview).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "analytics_overview")
+            navigateToRoot(R.id.analyticsOverviewFragment)
+        }
+        findViewById<View>(R.id.row_nav_analytics_trends).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "analytics_trends")
+            navigateToRoot(R.id.analyticsTrendsFragment)
+        }
+        findViewById<View>(R.id.row_nav_analytics_reps).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "analytics_reps")
+            navigateToRoot(R.id.analyticsRepsFragment)
+        }
+        findViewById<View>(R.id.row_nav_analytics_customers).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "analytics_customers")
+            navigateToRoot(R.id.analyticsCustomersFragment)
+        }
+        findViewById<View>(R.id.row_nav_analytics_at_risk).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "analytics_at_risk")
+            navigateToRoot(R.id.analyticsAtRiskFragment)
+        }
+        findViewById<View>(R.id.row_nav_analytics_products).setOnClickListener {
+            AnalyticsTracker.trackClick("drawer", "analytics_products")
+            navigateToRoot(R.id.analyticsProductsFragment)
         }
         findViewById<View>(R.id.row_nav_orders).setOnClickListener {
             AnalyticsTracker.trackClick("drawer", "orders")
@@ -286,10 +331,18 @@ class MainActivity : AppCompatActivity() {
                 if (selected) R.drawable.bg_drawer_item_selected else R.drawable.bg_drawer_item_unselected
             )
             val color = getColor(if (selected) R.color.karika_white else R.color.karika_gray6)
-            row.icon.setColorFilter(color)
+            row.icon?.setColorFilter(color)
             row.text.setTextColor(color)
             row.text.setTypeface(row.text.typeface, if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
         }
+
+        val analyticsActive = destination.id in analyticsDestinationIds
+        val analyticsColor = getColor(if (analyticsActive) R.color.karika_white else R.color.karika_gray6)
+        findViewById<View>(R.id.row_nav_analytics).setBackgroundResource(
+            if (analyticsActive) R.drawable.bg_drawer_item_selected else R.drawable.bg_drawer_item_unselected
+        )
+        findViewById<ImageView>(R.id.icon_nav_analytics).setColorFilter(analyticsColor)
+        findViewById<TextView>(R.id.text_nav_analytics).setTextColor(analyticsColor)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -309,6 +362,10 @@ class MainActivity : AppCompatActivity() {
                     AnalyticsTracker.setUser(result.data.employeeId?.toString())
                     findViewById<TextView>(R.id.text_rep_name).text =
                         result.data.name ?: getString(R.string.drawer_role_label)
+                    // GET /analytics/representatives is 403 forbidden without this capability -
+                    // hide the sub-item rather than let the screen error out.
+                    findViewById<View>(R.id.row_nav_analytics_reps).visibility =
+                        if (result.data.capabilities.canSeeDashboard) View.VISIBLE else View.GONE
                 }
             }
         }

@@ -61,3 +61,18 @@ expect fun textFieldImeOptions(
     onNext: () -> Unit,
     useAccessoryView: Boolean = false
 ): PlatformImeOptions?
+
+data class DeviceLocationFix(
+    val latitude: Double,
+    val longitude: Double,
+    val accuracy: Double?,
+    val altitude: Double?,
+    val speed: Double?,
+    val heading: Double?,
+)
+
+/** Checks the current permission state, requesting it from the user (once) if not yet determined. */
+expect suspend fun requestLocationPermission(): Boolean
+
+/** A single, best-effort GPS fix. Returns null if permission is missing or no fix could be obtained. */
+expect suspend fun currentDeviceLocation(): DeviceLocationFix?

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_field_border"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/text_category_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/karika_gray2"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="Kafa i čaj" />
+
+        <TextView
+            android:id="@+id/text_category_revenue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/karika_gray2"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="4.567,00 KM" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_category_revenue"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:max="100"
+        tools:progress="65" />
+
+    <TextView
+        android:id="@+id/text_category_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="12sp"
+        tools:text="120 kom   34 narudžbi   ↑ +12,3%"
+        tools:textColor="@color/karika_green3" />
+
+</LinearLayout>
