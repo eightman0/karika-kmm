@@ -102,6 +102,16 @@ abstract class StageE2ETest {
         compose.onNodeWithText("Prijavi se").performScrollTo().assertIsEnabled().performClick()
     }
 
+    /** Logs the customer test account in from the landing screen and waits for its home screen. */
+    protected fun logInAsCustomer() {
+        val (email, password) = stageAccount("KARIKA_STAGE_SHOP_EMAIL", "KARIKA_STAGE_SHOP_PASSWORD")
+        compose.onNodeWithText("Kupac").performScrollTo().performClick()
+        compose.waitUntilAtLeastOneExists(hasText("Prijava kupac"), SCREEN_TIMEOUT_MS)
+        logIn(email, password)
+        compose.waitUntilAtLeastOneExists(hasText("Početna"), SERVER_TIMEOUT_MS)
+        waitUntilLoaded()
+    }
+
     protected fun pressBack() {
         scenario.onActivity { (it as ComponentActivity).onBackPressedDispatcher.onBackPressed() }
         compose.waitForIdle()

@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -94,6 +95,10 @@ fun HomeView(component: HomeComponent) {
     }
 }
 
+/** Test tags of a product card and its add-to-cart button, for the end-to-end tests. */
+fun productCardTag(product: Product) = "product_${product.sku}"
+fun addToCartTag(product: Product) = "add_to_cart_${product.sku}"
+
 @Composable
 fun ProductItem(
     product: Product,
@@ -108,6 +113,7 @@ fun ProductItem(
     ) {
         Box(
             modifier = Modifier
+                .testTag(productCardTag(product))
                 .onClick {
                     component.navigateToProduct(product)
                 }
@@ -273,6 +279,7 @@ private fun AddToCartButton(product: Product, component: CommonComponent) {
         ) {
             Box(
                 modifier = Modifier
+                    .testTag(addToCartTag(product))
                     .onClick {
                         component.addToCart(product, product.minQty())
                     }

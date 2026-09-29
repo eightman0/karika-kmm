@@ -26,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,10 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.ui.common.CommonComponent
 import kotlinx.coroutines.delay
+
+/** Test tags of a promoted vendor's banner and logo, for the end-to-end tests. */
+fun vendorBannerTag(vendor: PromotedVendor) = "vendor_banner_${vendor.entityId}"
+fun vendorLogoTag(vendor: PromotedVendor) = "vendor_logo_${vendor.entityId}"
 
 @Composable
 fun CarouselBanners(component: CommonComponent) {
@@ -54,6 +59,7 @@ fun CarouselBanners(component: CommonComponent) {
                 items(items = promotedVendors) {
                     CarouselBannerItem(
                         modifier = Modifier
+                            .testTag(vendorBannerTag(it))
                             .width(cardWidth),
                         promotedVendor = it
                     ) {
@@ -213,7 +219,8 @@ fun CarouselLogos(component: CommonComponent) {
         ) {
             items(items = promotedLogos) {
                 CarouselLogoItem(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .testTag(vendorLogoTag(it)),
                     promotedVendor = it
                 ) {
                     component.showVendor(it.toVendor())
