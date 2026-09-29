@@ -5,7 +5,10 @@ import android.content.Context
 import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.hasSetTextAction
@@ -111,6 +114,10 @@ abstract class StageE2ETest {
         compose.waitUntilAtLeastOneExists(hasText("Početna"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
     }
+
+    /** A tab of the shop's bottom bar, which a screen can also have as a heading. */
+    protected fun bottomTab(label: String) =
+        hasText(label) and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)
 
     protected fun pressBack() {
         scenario.onActivity { (it as ComponentActivity).onBackPressedDispatcher.onBackPressed() }

@@ -30,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -59,6 +60,11 @@ import karikav2.composeapp.generated.resources.ic_filter_alt
 import karikav2.composeapp.generated.resources.ic_tertiary
 import karikav2.composeapp.generated.resources.star_outline
 import org.jetbrains.compose.resources.vectorResource
+
+/** Test tags of the vendors tab, for the end-to-end tests. */
+const val VENDOR_FILTER_TAG = "vendor_filter"
+fun vendorCardTag(vendor: Vendor) = "vendor_${vendor.entityId}"
+fun featuredVendorTag(vendor: PromotedVendor) = "featured_vendor_${vendor.entityId}"
 
 @Composable
 fun VendorView(viewModel: VendorComponent) {
@@ -154,6 +160,7 @@ fun VendorItem(vendor: Vendor, component: CommonComponent) {
     ) {
         Box(
             modifier = Modifier
+                .testTag(vendorCardTag(vendor))
                 .onClick {
                     component.showVendor(vendor)
                 }
@@ -211,6 +218,7 @@ private fun Filter(component: VendorComponent) {
         )
         Box(
             modifier = Modifier
+                .testTag(VENDOR_FILTER_TAG)
                 .height(50.dp)
                 .aspectRatio(1f)
                 .onClick {
@@ -393,6 +401,7 @@ private fun FeaturedVendorItem(
 
             Column(
                 modifier = Modifier
+                    .testTag(featuredVendorTag(vendor))
                     .onClick {
                         component.showVendor(vendor.toVendor())
                     }
