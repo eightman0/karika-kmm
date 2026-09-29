@@ -115,6 +115,20 @@ android {
         versionCode = 270
 
         versionName = "2.7.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Stage test accounts for the login E2E tests, from the environment or ~/.gradle/gradle.properties
+        listOf(
+            "KARIKA_STAGE_SHOP_EMAIL",
+            "KARIKA_STAGE_SHOP_PASSWORD",
+            "KARIKA_STAGE_DISTRIBUTER_EMAIL",
+            "KARIKA_STAGE_DISTRIBUTER_PASSWORD",
+        ).forEach { key ->
+            providers.environmentVariable(key)
+                .orElse(providers.gradleProperty(key))
+                .orNull
+                ?.let { testInstrumentationRunnerArguments[key] = it }
+        }
     }
     packaging {
         resources {
@@ -179,6 +193,13 @@ android {
             setRoot("src/kiosk")
         }
     }
+}
+
+dependencies {
+    // End-to-end tests that launch the real app on a device, see src/androidInstrumentedTest
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 }
 
 compose.resources {
