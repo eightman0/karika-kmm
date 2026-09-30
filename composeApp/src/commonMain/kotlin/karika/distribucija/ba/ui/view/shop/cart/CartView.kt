@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -57,6 +58,10 @@ import karikav2.composeapp.generated.resources.ic_check_circle_filled
 import karikav2.composeapp.generated.resources.ic_delete
 import karikav2.composeapp.generated.resources.ic_gift
 import org.jetbrains.compose.resources.vectorResource
+
+/** Test tags of a cart line's image and delete icon, for the end-to-end tests. */
+fun cartProductTag(product: Product) = "cart_product_${product.sku}"
+fun removeFromCartTag(product: Product) = "remove_from_cart_${product.sku}"
 
 @Composable
 fun CartView(component: CartComponent) {
@@ -380,6 +385,7 @@ private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
     ) {
         Box(
             modifier = Modifier
+                .testTag(cartProductTag(item.first))
                 .size(150.dp)
                 .onClick {
                     component.navigateToProduct(item.first)
@@ -433,6 +439,7 @@ private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
                 ) {
                     Icon(
                         modifier = Modifier
+                            .testTag(removeFromCartTag(item.first))
                             .onClick {
                                 component.removeFromCart(item.first)
                             },

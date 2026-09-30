@@ -19,15 +19,12 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import karika.distribucija.ba.domain.api.CartRepository
 import karika.distribucija.ba.domain.api.ProductRepository
-import karika.distribucija.ba.domain.model.Cart
-import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.components.vendorBannerTag
 import karika.distribucija.ba.ui.components.vendorLogoTag
 import karika.distribucija.ba.ui.view.shop.home.addToCartTag
 import karika.distribucija.ba.ui.view.shop.home.productCardTag
-import karika.distribucija.ba.util.KarikaConfig
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -221,32 +218,10 @@ class HomeE2ETest : StageE2ETest() {
         waitUntilLoaded()
     }
 
-    /** The "Karika preporučuje" products, from the same request home makes. */
-    private fun recommendedProducts(): List<Product> {
-        val result = runBlocking {
-            ProductRepository().searchProductsByCategory(
-                categoryId = "${KarikaConfig.getKarikaProductsId()}",
-                currentPage = 1,
-                pageSize = 12
-            ).last()
-        }
-        assertTrue("recommended products: $result", result is ResultState.Success)
-        @Suppress("UNCHECKED_CAST")
-        return ((result as ResultState.Success<*>).data as List<Product>).also {
-            assumeTrue("stage recommends no products", it.isNotEmpty())
-        }
-    }
-
     private fun promotedVendors(): List<PromotedVendor> {
         val result = runBlocking { ProductRepository().promotedVendors().last() }
         assertTrue("promoted vendors: $result", result is ResultState.Success)
         @Suppress("UNCHECKED_CAST")
         return (result as ResultState.Success<*>).data as List<PromotedVendor>
-    }
-
-    /** The customer's cart on stage; an account without an active cart has an empty one. */
-    private fun currentCart(): Cart {
-        val result = runBlocking { CartRepository().getCart().last() }
-        return (result as? ResultState.Success<*>)?.data as? Cart ?: Cart()
     }
 }
