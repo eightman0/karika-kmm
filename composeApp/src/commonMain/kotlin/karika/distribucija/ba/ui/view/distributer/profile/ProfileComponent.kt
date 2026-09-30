@@ -57,7 +57,7 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
         mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.b2bVendorPhone ?: "")
 
     val companyViberPhone =
-        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.viberNumber ?: "")
+        mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.viberNumber?.trim() ?: "")
     val email =
         mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.email ?: "")
 
@@ -177,7 +177,7 @@ class ProfileComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                         companyBanner.value.second,
                         companyBanner.value.third as? ByteArray ?: return@launch
                     ) else null,
-                    viberNumber = companyViberPhone.value,
+                    viberNumber = companyViberPhone.value.ifBlank { " " },
                     about = aboutUs.value
                 )
                 .collect { result ->

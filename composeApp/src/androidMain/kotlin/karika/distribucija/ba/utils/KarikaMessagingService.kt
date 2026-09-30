@@ -32,7 +32,6 @@ class KarikaMessagingService : FirebaseMessagingService() {
         notification: RemoteMessage.Notification,
         data: MutableMap<String, String>
     ) {
-        AppComponent.refreshHandler.invoke(data["route"])
         val nextInt = Random.nextInt()
         val intent = Intent(this, MainActivity::class.java).apply {
             addFlags(
@@ -62,5 +61,8 @@ class KarikaMessagingService : FirebaseMessagingService() {
             NotificationChannel(channelId, "KarikaChannel", IMPORTANCE_DEFAULT)
         )
         manager.notify(nextInt, notificationBuilder.build())
+
+        // Refresh in-app state only after the notification is shown, so a failure here can't swallow it.
+        runCatching { AppComponent.refreshHandler.invoke(data["route"]) }
     }
 }

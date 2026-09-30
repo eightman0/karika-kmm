@@ -172,6 +172,9 @@ class AppComponent(
         }
         screensaverHandler = { showScreenSaver.value = true }
         stateHolder.commonHandler.init()
+        if (stateHolder.sessionHandler.mainConfig() !is AppConfig.PreLogin) {
+            syncPushHandle()
+        }
         backHandler.register(backCallback)
         lifecycle.subscribe(object : Lifecycle.Callbacks {
             override fun onResume() {

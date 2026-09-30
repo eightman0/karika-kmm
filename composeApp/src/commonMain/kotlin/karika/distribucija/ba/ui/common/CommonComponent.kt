@@ -497,6 +497,18 @@ open class CommonComponent(
     }
 
     fun savePushHandle() {
+        syncPushHandle()
+
+        logEvent(
+            eventType = EventType.USER_LOGIN,
+            refType = RefType.USER_LOGIN,
+            product = Product(name = "FCM Token", sku = "", id = 0),
+            qty = 0
+        )
+    }
+
+    // FCM rotates tokens while the session stays alive, so re-send the current one whenever it's needed.
+    fun syncPushHandle() {
         stateHolder.handler.getPushHandle { fId, token ->
             println("TEST_TEST: FCM_TOKEN: $token")
             scope.launch {
@@ -505,13 +517,6 @@ open class CommonComponent(
                     .collect()
             }
         }
-
-        logEvent(
-            eventType = EventType.USER_LOGIN,
-            refType = RefType.USER_LOGIN,
-            product = Product(name = "FCM Token", sku = "", id = 0),
-            qty = 0
-        )
     }
 
     private fun removePushHandle() {
