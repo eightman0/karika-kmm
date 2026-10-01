@@ -4,6 +4,7 @@
 **/build/
 /dist/
 /scripts/publish.env
+/scripts/*firebase-adminsdk*.json
 xcuserdata
 !src/**/build/
 local.properties
