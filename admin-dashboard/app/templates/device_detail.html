@@ -7,7 +7,7 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 {% endblock %}
 {% block content %}
-<p><a href="/devices">&larr; Nazad na listu</a></p>
+<p><a href="/devices?app={{ device.app }}">&larr; Nazad na listu</a></p>
 <div class="page-header">
   <div>
     <h1 class="mono-id">{{ device.id }}</h1>
@@ -28,7 +28,7 @@
     <p class="metric-label">Verzija</p>
     <p class="metric-value">{{ device.installedVersionName or "-" }}</p>
     <p class="metric-sub">code {{ device.installedVersionCode or "-" }}
-      {% if latest_salesrep_code and device.installedPackage == "karika.distribucija.ba.salesrep" and (device.installedVersionCode | string) != (latest_salesrep_code | string) %}
+      {% if latest_code and (device.installedVersionCode | string) != (latest_code | string) %}
       <span class="tag tag-lagging">zaostaje</span>
       {% endif %}
     </p>
@@ -101,6 +101,7 @@
   </form>
 </div>
 
+{% if device.app != "shop" %}{# shop tableti stoje na jednom mjestu, ne šalju lokaciju #}
 <div class="card">
   <h2>GPS lokacija</h2>
   <p class="hint">Uzorkuje se na uređaju otprilike svakih 15 min, šalje se sa sljedećim heartbeat-om.</p>
@@ -153,6 +154,7 @@
   <p class="hint">Nema zabilježenih lokacija za {{ selected_date }}.</p>
   {% endif %}
 </div>
+{% endif %}
 
 <div class="card">
   <h2>Logovi</h2>

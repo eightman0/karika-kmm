@@ -11,6 +11,10 @@ package karika.distribucija.ba.logging
 object KioskIpc {
     const val LAUNCHER_PACKAGE = "karika.distribucija.ba.launcher"
 
+    /** Explicit component the broadcasts below target - must match the launcher manifest's
+     * `.ipc.KioskEventReceiver`, or they're silently dropped. */
+    const val LAUNCHER_EVENT_RECEIVER = "karika.distribucija.ba.launcher.ipc.KioskEventReceiver"
+
     /** Salesrep -> launcher: a user just logged in. */
     const val ACTION_LOGIN_EVENT = "karika.distribucija.ba.kiosk.action.LOGIN_EVENT"
 

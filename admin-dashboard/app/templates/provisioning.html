@@ -10,6 +10,17 @@
 <form method="post" action="/provisioning/generate" id="provisioning-form"></form>
 
 <div class="card">
+  <h2>Aplikacija za sljedeći tablet</h2>
+  <p class="hint">Ugrađuje se u QR (PROVISIONING_ADMIN_EXTRAS_BUNDLE, ključ <span class="mono-id">app</span>) - launcher odmah poslije provisioning-a instalira, pokreće i ažurira baš ovu aplikaciju, sa njenog taba na "Verzije".</p>
+  <div class="toolbar">
+    <select class="select-input" name="app" form="provisioning-form" style="flex: 1 1 180px;">
+      <option value="salesrep" {% if app == "salesrep" %}selected{% endif %}>Salesrep (komercijalisti)</option>
+      <option value="shop" {% if app == "shop" %}selected{% endif %}>Shop (kiosk za kupce)</option>
+    </select>
+  </div>
+</div>
+
+<div class="card">
   <h2>Kupac / lokacija za sljedeći tablet (opcionalno)</h2>
   <p class="hint">Ako se popuni, ugrađuje se u QR kao PROVISIONING_ADMIN_EXTRAS_BUNDLE - launcher to pročita čim provisioning završi i sam javi dashboard-u, bez ručnog unosa poslije na detalj stranici uređaja. Prazno ostavi za generički QR bez unaprijed poznatog kupca.</p>
   <div class="toolbar">

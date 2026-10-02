@@ -184,6 +184,34 @@ def init_db() -> None:
             )
             """
         )
+        # Apps onboarded after salesrep/launcher (shop so far) share these two app-keyed tables -
+        # slot is 'stable' or 'staged' - instead of each getting yet another parallel singleton
+        # pair. Salesrep/launcher stay on their own tables above, untouched.
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS app_version (
+                app TEXT,
+                slot TEXT,
+                version_code INTEGER,
+                version_name TEXT,
+                apk_url TEXT,
+                apk_sha256 TEXT,
+                mandatory INTEGER,
+                published_by TEXT,
+                published_at TEXT,
+                PRIMARY KEY (app, slot)
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS app_version_targets (
+                app TEXT,
+                device_id TEXT,
+                PRIMARY KEY (app, device_id)
+            )
+            """
+        )
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS provisioning_extras (
@@ -201,6 +229,7 @@ def init_db() -> None:
                 "wifi_password": "TEXT",
                 "wifi_security_type": "TEXT",
                 "apk_download_url": "TEXT",
+                "app": "TEXT",
             },
         )
         conn.execute(
@@ -612,22 +641,24 @@ def set_provisioning_extras(
     wifi_password: str | None = None,
     wifi_security_type: str | None = None,
     apk_download_url: str | None = None,
+    app: str | None = None,
 ) -> None:
     with _connect() as conn:
         conn.execute(
             """
             INSERT INTO provisioning_extras
-                (id, customer_id, site_id, wifi_ssid, wifi_password, wifi_security_type, apk_download_url)
-            VALUES (1, ?, ?, ?, ?, ?, ?)
+                (id, customer_id, site_id, wifi_ssid, wifi_password, wifi_security_type, apk_download_url, app)
+            VALUES (1, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 customer_id=excluded.customer_id,
                 site_id=excluded.site_id,
                 wifi_ssid=excluded.wifi_ssid,
                 wifi_password=excluded.wifi_password,
                 wifi_security_type=excluded.wifi_security_type,
-                apk_download_url=excluded.apk_download_url
+                apk_download_url=excluded.apk_download_url,
+                app=excluded.app
             """,
-            (customer_id, site_id, wifi_ssid, wifi_password, wifi_security_type, apk_download_url),
+            (customer_id, site_id, wifi_ssid, wifi_password, wifi_security_type, apk_download_url, app),
         )
 
 
@@ -807,6 +838,72 @@ def is_staged_launcher_target(device_id: str) -> bool:
 def count_staged_launcher_targets() -> int:
     with _connect() as conn:
         return conn.execute("SELECT COUNT(*) FROM staged_launcher_version_targets").fetchone()[0]
+
+
+# --- app version (app-keyed stable/staged, see the schema comment) -------------
+
+def get_app_version_row(app: str, slot: str) -> dict | None:
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT * FROM app_version WHERE app = ? AND slot = ?", (app, slot)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def set_app_version(
+    app: str, slot: str, version_code: int, version_name: str, apk_url: str, apk_sha256: str,
+    mandatory: bool, published_by: str,
+) -> None:
+    """Writing the staged slot also clears its targets, same as set_staged_kiosk_version()."""
+    with _connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO app_version
+                (app, slot, version_code, version_name, apk_url, apk_sha256, mandatory, published_by, published_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(app, slot) DO UPDATE SET
+                version_code=excluded.version_code,
+                version_name=excluded.version_name,
+                apk_url=excluded.apk_url,
+                apk_sha256=excluded.apk_sha256,
+                mandatory=excluded.mandatory,
+                published_by=excluded.published_by,
+                published_at=excluded.published_at
+            """,
+            (app, slot, version_code, version_name, apk_url, apk_sha256, int(mandatory), published_by, now_iso()),
+        )
+        if slot == "staged":
+            conn.execute("DELETE FROM app_version_targets WHERE app = ?", (app,))
+
+
+def clear_app_version(app: str, slot: str) -> None:
+    with _connect() as conn:
+        conn.execute("DELETE FROM app_version WHERE app = ? AND slot = ?", (app, slot))
+        if slot == "staged":
+            conn.execute("DELETE FROM app_version_targets WHERE app = ?", (app,))
+
+
+def add_app_version_target(app: str, device_id: str) -> None:
+    with _connect() as conn:
+        conn.execute(
+            "INSERT INTO app_version_targets (app, device_id) VALUES (?, ?) ON CONFLICT(app, device_id) DO NOTHING",
+            (app, device_id),
+        )
+
+
+def is_app_version_target(app: str, device_id: str) -> bool:
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM app_version_targets WHERE app = ? AND device_id = ?", (app, device_id)
+        ).fetchone()
+        return row is not None
+
+
+def count_app_version_targets(app: str) -> int:
+    with _connect() as conn:
+        return conn.execute(
+            "SELECT COUNT(*) FROM app_version_targets WHERE app = ?", (app,)
+        ).fetchone()[0]
 
 
 # --- version history -----------------------------------------------------------

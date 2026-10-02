@@ -63,14 +63,10 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
         requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
     private lateinit var appComponent: AppComponent
-    lateinit var appUpdateManager: AppUpdateManager
+    private lateinit var appUpdateManager: AppUpdateManager
     private val registerForActivityResult =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult ->
             if (result.resultCode != RESULT_OK) {
-                if (isKiosk()) {
-                    checkUpdate()
-                    return@registerForActivityResult
-                }
                 val builder = AlertDialog.Builder(this, R.style.KarikaAppCompat)
                 builder.setTitle("Ažuriranje otkazano")
                 builder.setMessage("Molimo vas da ažurirate aplikaciju kako biste je mogli koristiti.")
@@ -135,6 +131,7 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
 
     override fun onResume() {
         super.onResume()
+        if (isKiosk()) return
         appUpdateManager
             .appUpdateInfo
             .addOnSuccessListener { appUpdateInfo ->
@@ -298,7 +295,10 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
         }
     }
 
-    fun checkUpdate() {
+    /** Play In-App Update - not for the kiosk flavor, which the launcher updates through the
+     * admin dashboard instead. */
+    private fun checkUpdate() {
+        if (isKiosk()) return
         appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
             showImmediateUpdate(appUpdateInfo)
         }

@@ -171,12 +171,4 @@ class LoginComponent(
     }
 
     fun isShop() = userType == KarikaType.SHOP
-
-    private var exitCount = 0
-    fun exitKiosk() {
-        exitCount++
-        if (exitCount == 10) {
-            stateHolder.handler.exitKiosk()
-        }
-    }
 }

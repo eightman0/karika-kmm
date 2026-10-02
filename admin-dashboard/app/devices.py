@@ -1,6 +1,6 @@
 from datetime import date, datetime, time, timedelta, timezone
 
-from . import launcher_version_config, local_db
+from . import app_version_config, launcher_version_config, local_db
 from .firebase import bucket
 from .push import (
     send_analytics_request_all,
@@ -18,6 +18,7 @@ from .push import (
 from .tz import LOCAL_TZ
 from .version_config import (
     get_staged_version,
+    highest_known_version_code,
     promote_staged_to_stable,
     stage_version_by_code,
     target_device_for_staged,
@@ -29,7 +30,29 @@ SIGNED_URL_MINUTES = 30
 APP_PACKAGES = {
     "salesrep": "karika.distribucija.ba.salesrep",
     "launcher": "karika.distribucija.ba.launcher",
+    "shop": "karika.distribucija.ba.kiosk",
 }
+
+# The payload apps a device can be provisioned to run (the `app` QR extra) - not the launcher.
+PAYLOAD_APPS = ("salesrep", "shop")
+
+
+def app_for_package(package_name: str | None) -> str:
+    """Which payload app a device runs, from the installedPackage its heartbeat reports - the
+    launcher reports its assigned app's package even before that app is installed. Salesrep for
+    devices that haven't reported yet, same default the launcher itself falls back to."""
+    for app in PAYLOAD_APPS:
+        if APP_PACKAGES[app] == package_name:
+            return app
+    return "salesrep"
+
+
+def latest_version_codes() -> dict[str, str]:
+    """Per payload-app package, for the "zaostaje" flag - see highest_known_version_code()."""
+    return {
+        APP_PACKAGES["salesrep"]: highest_known_version_code(),
+        **{APP_PACKAGES[app]: app_version_config.highest_known_version_code(app) for app in app_version_config.APPS},
+    }
 
 
 def _parse_iso(value: str | None) -> datetime | None:
@@ -42,6 +65,7 @@ def _with_computed_fields(row: dict) -> dict:
     return {
         "id": row["id"],
         "installedPackage": row["installed_package"],
+        "app": app_for_package(row["installed_package"]),
         "installedVersionCode": row["installed_version_code"],
         "installedVersionName": row["installed_version_name"],
         "androidSdkInt": row["android_sdk_int"],
@@ -190,19 +214,38 @@ def request_ping(device_id: str) -> None:
     send_ping(_require_token(device_id))
 
 
-def request_update_check(device_id: str, version_code: str | None, published_by: str) -> None:
+def _stage_and_target(app: str, device_ids: list[str], version_code: str | None, published_by: str) -> str:
+    """Stages version_code (if given) on the app's own track and targets the devices at it.
+    Returns the staged version_code."""
+    if app in app_version_config.APPS:
+        if version_code:
+            app_version_config.stage_version_by_code(app, version_code, published_by)
+        for device_id in device_ids:
+            app_version_config.target_device_for_staged(app, device_id)
+        return app_version_config.get_staged_version(app)["version_code"]
     if version_code:
         stage_version_by_code(version_code, published_by)
-    target_device_for_staged(device_id)
-    send_version_check_to_device(_require_token(device_id), get_staged_version()["version_code"])
+    for device_id in device_ids:
+        target_device_for_staged(device_id)
+    return get_staged_version()["version_code"]
+
+
+def _device_app(device_id: str) -> str:
+    row = local_db.get_device(device_id)
+    return app_for_package(row.get("installed_package") if row else None)
+
+
+def request_update_check(device_id: str, version_code: str | None, published_by: str) -> None:
+    resolved_version_code = _stage_and_target(_device_app(device_id), [device_id], version_code, published_by)
+    send_version_check_to_device(_require_token(device_id), resolved_version_code)
 
 
 def request_update_check_bulk(device_ids: list[str], version_code: str | None, published_by: str) -> None:
-    if version_code:
-        stage_version_by_code(version_code, published_by)
-    resolved_version_code = get_staged_version()["version_code"]
+    apps = {_device_app(device_id) for device_id in device_ids}
+    if len(apps) > 1:
+        raise ValueError("Izabrani uređaji imaju različite aplikacije (salesrep/shop) - ažuriraj ih odvojeno.")
+    resolved_version_code = _stage_and_target(apps.pop(), device_ids, version_code, published_by)
     for device_id in device_ids:
-        target_device_for_staged(device_id)
         row = local_db.get_device(device_id)
         token = row.get("fcm_token") if row else None
         if token:
@@ -211,8 +254,13 @@ def request_update_check_bulk(device_ids: list[str], version_code: str | None, p
             send_version_check_to_device(token, resolved_version_code)
 
 
-def request_update_all(published_by: str) -> None:
-    version_code = promote_staged_to_stable(published_by)
+def request_update_all(published_by: str, app: str = "salesrep") -> None:
+    # The broadcast makes every device re-check, not just this app's - harmless, each one only
+    # ever fetches its own assigned app's version.
+    if app in app_version_config.APPS:
+        version_code = app_version_config.promote_staged_to_stable(app, published_by)
+    else:
+        version_code = promote_staged_to_stable(published_by)
     send_version_check_all(version_code)
 
 

@@ -164,7 +164,7 @@ class LoginFragment : Fragment() {
             .apply { timeZone = TimeZone.getTimeZone("UTC") }
             .format(java.util.Date())
         val intent = Intent(KioskIpc.ACTION_LOGIN_EVENT)
-            .setClassName(KioskIpc.LAUNCHER_PACKAGE, "karika.distribucija.ba.launcher.KioskEventReceiver")
+            .setClassName(KioskIpc.LAUNCHER_PACKAGE, KioskIpc.LAUNCHER_EVENT_RECEIVER)
             .putExtra(KioskIpc.EXTRA_TOKEN, BuildConfig.KIOSK_IPC_TOKEN)
             .putExtra(KioskIpc.EXTRA_USER_EMAIL, email)
             .putExtra(KioskIpc.EXTRA_LOGIN_TIMESTAMP, timestamp)

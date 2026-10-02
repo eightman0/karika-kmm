@@ -7,6 +7,7 @@
 
 <div class="tabs">
   <a class="tab {{ 'active' if active_app == 'salesrep' }}" href="/versions?app=salesrep">Salesrep</a>
+  <a class="tab {{ 'active' if active_app == 'shop' }}" href="/versions?app=shop">Shop</a>
   <a class="tab {{ 'active' if active_app == 'launcher' }}" href="/versions?app=launcher">Launcher</a>
 </div>
 
@@ -16,7 +17,7 @@
 {% if rolled_back %}<div class="banner-success">Trenutna verzija je vraćena na stariju objavu.</div>{% endif %}
 
 <div class="card">
-  <h2>Objavi novu verziju{% if active_app == 'launcher' %} launcher-a{% endif %}</h2>
+  <h2>Objavi novu verziju{% if active_app == 'launcher' %} launcher-a{% elif active_app == 'shop' %} shop aplikacije{% endif %}</h2>
   <form method="post" action="/versions/publish" enctype="multipart/form-data" class="stacked-form publish-form">
     <input type="hidden" name="app" value="{{ active_app }}">
     <label>APK fajl

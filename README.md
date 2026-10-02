@@ -1,16 +1,12 @@
-### Activate Kiosk mode:
-adb shell dpm set-device-owner karika.distribucija.ba.kiosk/karika.distribucija.ba.provision.KarikaDeviceAdminReceiver
+### Kiosk / provisioning tableta
 
-### Deactivate Kiosk mode:
-adb shell dpm remove-active-admin karika.distribucija.ba.kiosk/karika.distribucija.ba.provision.KarikaDeviceAdminReceiver
+Ni salesrep ni shop (kiosk flavor `karika.distribucija.ba.kiosk`) više nisu Device Owner niti se same ažuriraju.
+Device Owner je `launcher` - on instalira, zaključava (lock task), ponovo pokreće i ažurira aplikaciju koju uređaj vrti.
 
-### QR Code provisioning
-```json
-{
-  "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "karika.distribucija.ba.kiosk/karika.distribucija.ba.provision.KarikaDeviceAdminReceiver",
-  "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM": "vdoryWCVYyTkr4sXwnQ87szRcP0ArmLuxYCuS5qtdCc=",
-  "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": "https://test.karika.ba/app-builds/android-kiosk.apk",
-  "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true
-}
-```
-![qr-code-json.png](qr-code-json.png)
+1. Admin dashboard (Karika Ops) -> **Provisioning**: izaberi aplikaciju (`app=salesrep|shop`), po želji kupca/lokaciju i WiFi, pa **Generiši QR**.
+2. Factory-resetovan tablet: 6x tap na welcome ekran -> skeniraj QR.
+3. Launcher se instalira, pročita `app` iz `PROVISIONING_ADMIN_EXTRAS_BUNDLE` i povuče tu aplikaciju sa njenog taba na **Verzije** (Salesrep / Shop).
+
+Nove verzije: **Verzije** -> tab aplikacije -> upload APK-a -> izabrani uređaji ili "Pošalji svima".
+Uređaji su na listi podijeljeni na tabove **Komercijalisti** i **Kupci**.
+Izlaz iz kiosk moda ide samo preko dashboard-a (debug unlock / maintenance), u aplikaciji nema skrivenog izlaza.

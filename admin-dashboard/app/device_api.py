@@ -6,7 +6,7 @@ browser. Replaces what the launcher used to read/write directly in Firestore.
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from . import analytics_ingest, local_db
+from . import analytics_ingest, app_version_config, local_db
 from .launcher_version_config import resolve_launcher_version_for_device
 from .version_config import resolve_version_for_device
 
@@ -17,6 +17,8 @@ router = APIRouter(prefix="/api")
 def get_version(device_id: str | None = None, app: str = "salesrep"):
     if app == "launcher":
         return resolve_launcher_version_for_device(device_id)
+    if app in app_version_config.APPS:
+        return app_version_config.resolve_version_for_device(app, device_id)
     return resolve_version_for_device(device_id)
 
 

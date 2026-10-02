@@ -11,6 +11,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from . import (
     analytics,
     apk_storage,
+    app_version_config,
     auth,
     device_api,
     devices,
@@ -35,20 +36,33 @@ templates.env.globals["asset_version"] = str(int(time.time()))
 
 require_login = Depends(auth.require_login)
 
-APP = "salesrep"  # the payload app - launcher is versioned/published the same way now too (see
-# launcher_version_config.py), just through separate parallel tables/routes, not this constant
+# Every app with its own publish track on the "Verzije" tab - salesrep (version_config.py),
+# launcher (launcher_version_config.py) and the app-keyed ones (app_version_config.py).
+VERSION_APPS = ("salesrep", "launcher", *app_version_config.APPS)
+
+
+def _version_app(app: str | None) -> str:
+    return app if app in VERSION_APPS else "salesrep"
+
+
+def _devices_tab(app: str | None) -> str:
+    return app if app in devices.PAYLOAD_APPS else "salesrep"
 
 
 def _device_action_redirect(
-    device_id: str, origin: str, q: str, toast: str, detail_qs: str = ""
+    device_id: str, origin: str, q: str, toast: str, detail_qs: str = "", tab: str | None = None
 ) -> RedirectResponse:
     """Where a per-device action route sends the admin back to. Triggered from the devices list
     (a hidden origin=list field on that row's form, see devices.html) it stays on the list with a
     snackbar (base.html reads the `toast` query param) instead of navigating into the device's own
     page - the whole point of this being separate from the "detail" case below, which keeps its
-    existing query-string banner (`detail_qs`, e.g. "cmd_sent=reboot") unchanged."""
+    existing query-string banner (`detail_qs`, e.g. "cmd_sent=reboot") unchanged. Back on the
+    list, it lands on the Komercijalisti/Kupci tab of the device acted on (or `tab`)."""
     if origin == "list":
-        params = [f"q={quote(q)}"] if q else []
+        device = devices.get_device(device_id) if device_id and not tab else None
+        params = [f"app={_devices_tab(tab or (device['app'] if device else None))}"]
+        if q:
+            params.append(f"q={quote(q)}")
         params.append(f"toast={quote(toast)}")
         return RedirectResponse(f"/devices?{'&'.join(params)}", status_code=303)
     url = f"/devices/{device_id}"
@@ -96,19 +110,27 @@ def logout(request: Request):
 
 
 @app.get("/devices", dependencies=[require_login])
-def devices_page(request: Request, q: str = ""):
+def devices_page(request: Request, q: str = "", app: str = "salesrep"):
+    # Komercijalisti (salesrep) / Kupci (shop) tabs - each device sits under the app it runs.
+    tab = _devices_tab(app)
     all_devices = devices.list_devices()
-    filtered = devices.filter_devices(all_devices, q)
-    latest_salesrep_code = version_config.highest_known_version_code()
+    tab_devices = [d for d in all_devices if d["app"] == tab]
+    filtered = devices.filter_devices(tab_devices, q)
     return templates.TemplateResponse(
         request,
         "devices.html",
         {
             "devices": filtered,
-            "summary": devices.fleet_summary(all_devices),
+            "summary": devices.fleet_summary(tab_devices),
+            "active_tab": tab,
+            "tab_counts": {a: sum(1 for d in all_devices if d["app"] == a) for a in devices.PAYLOAD_APPS},
             "q": q,
-            "latest_salesrep_code": latest_salesrep_code,
-            "available_versions": version_history.get_available_versions(APP),
+            "latest_codes": devices.latest_version_codes(),
+            # Tagged with their app so the modals' JS (devices.html) can still match them against
+            # the device(s) being updated.
+            "available_versions": [
+                {**v, "app": tab} for v in version_history.get_available_versions(tab)
+            ],
             "available_launcher_versions": version_history.get_available_versions("launcher"),
             "active_page": "devices",
         },
@@ -116,9 +138,9 @@ def devices_page(request: Request, q: str = ""):
 
 
 @app.post("/devices/analytics-request", dependencies=[require_login])
-def request_analytics_all(q: str = Form("")):
+def request_analytics_all(q: str = Form(""), app: str = Form("salesrep")):
     devices.request_analytics_all()
-    return _device_action_redirect("", "list", q, "Zahtjev za analitiku poslan svim uređajima.")
+    return _device_action_redirect("", "list", q, "Zahtjev za analitiku poslan svim uređajima.", tab=app)
 
 
 @app.post("/devices/update-selected", dependencies=[require_login])
@@ -128,11 +150,14 @@ def update_selected_devices(
 ):
     if not device_ids:
         return RedirectResponse("/devices", status_code=303)
-    devices.request_update_check_bulk(
-        device_ids, version_code or None, request.session.get("username", "?")
-    )
+    try:
+        devices.request_update_check_bulk(
+            device_ids, version_code or None, request.session.get("username", "?")
+        )
+    except Exception as e:
+        return _device_action_redirect(device_ids[0], "list", q, f"Greška: {e}")
     return _device_action_redirect(
-        "", "list", q, f"Zahtjev za update poslan na {len(device_ids)} izabrana uređaja."
+        device_ids[0], "list", q, f"Zahtjev za update poslan na {len(device_ids)} izabrana uređaja."
     )
 
 
@@ -147,7 +172,7 @@ def update_launcher_selected_devices(
         device_ids, version_code or None, request.session.get("username", "?")
     )
     return _device_action_redirect(
-        "", "list", q, f"Zahtjev za update launcher-a poslan na {len(device_ids)} izabrana uređaja."
+        device_ids[0], "list", q, f"Zahtjev za update launcher-a poslan na {len(device_ids)} izabrana uređaja."
     )
 
 
@@ -167,7 +192,7 @@ def device_detail_page(
     # Unfiltered (not just versions newer than installed) - a device already on the only
     # published version still needs something explicit to pick, otherwise "Ažuriraj sada" falls
     # back to sending whatever's currently staged, which can be nothing at all.
-    available_versions = version_history.get_available_versions(APP)
+    available_versions = version_history.get_available_versions(device["app"])
     selected_date, day_locations = devices.locations_for_day(device_id, date)
     return templates.TemplateResponse(
         request,
@@ -180,7 +205,7 @@ def device_detail_page(
             "cmd_error": cmd_error,
             "cmd_sent": cmd_sent,
             "command_log": devices.command_log(device_id),
-            "latest_salesrep_code": version_config.highest_known_version_code(),
+            "latest_code": devices.latest_version_codes().get(device["installedPackage"]),
             "available_versions": available_versions,
             "available_launcher_versions": version_history.get_available_versions("launcher"),
             "latest_launcher_code": launcher_version_config.highest_known_launcher_version_code(),
@@ -210,8 +235,11 @@ def request_logs(device_id: str, origin: str = Form("detail"), q: str = Form("")
 
 @app.post("/devices/{device_id}/delete", dependencies=[require_login])
 def delete_device(device_id: str, q: str = Form("")):
+    device = devices.get_device(device_id)
     devices.delete_device(device_id)
-    return _device_action_redirect(device_id, "list", q, f"Uređaj {device_id} obrisan.")
+    return _device_action_redirect(
+        device_id, "list", q, f"Uređaj {device_id} obrisan.", tab=device["app"] if device else None
+    )
 
 
 @app.post("/devices/{device_id}/factory-reset", dependencies=[require_login])
@@ -334,7 +362,7 @@ def versions_page(
     sent_all: str | None = None,
     rolled_back: str | None = None,
 ):
-    app = app if app in ("salesrep", "launcher") else "salesrep"
+    app = _version_app(app)
     all_devices = devices.list_devices()
     history = version_history.get_history(app, limit=50)
     if app == "launcher":
@@ -342,6 +370,11 @@ def versions_page(
         staged = launcher_version_config.get_staged_launcher_version()
         is_staged = launcher_version_config.is_launcher_staged()
         staged_target_count = launcher_version_config.staged_launcher_target_count() if is_staged else 0
+    elif app in app_version_config.APPS:
+        current = app_version_config.get_version(app)
+        staged = app_version_config.get_staged_version(app)
+        is_staged = app_version_config.is_staged(app)
+        staged_target_count = app_version_config.staged_target_count(app) if is_staged else 0
     else:
         current = version_config.get_kiosk_version()
         staged = version_config.get_staged_version()
@@ -378,7 +411,7 @@ def versions_page(
 
 @app.post("/versions/publish", dependencies=[require_login])
 def publish_version(request: Request, apk_file: UploadFile = File(...), app: str = Form("salesrep")):
-    app = app if app in ("salesrep", "launcher") else "salesrep"
+    app = _version_app(app)
     try:
         apk_url, apk_sha256, version_code, version_name = apk_storage.upload_apk(apk_file, app)
 
@@ -388,6 +421,10 @@ def publish_version(request: Request, apk_file: UploadFile = File(...), app: str
         if app == "launcher":
             launcher_version_config.publish_staged_launcher_version(
                 version_code, version_name, apk_url, apk_sha256, is_mandatory, username
+            )
+        elif app in app_version_config.APPS:
+            app_version_config.publish_staged_version(
+                app, version_code, version_name, apk_url, apk_sha256, is_mandatory, username
             )
         else:
             version_config.publish_staged_version(
@@ -409,23 +446,25 @@ def publish_version(request: Request, apk_file: UploadFile = File(...), app: str
 
 @app.post("/versions/send-all", dependencies=[require_login])
 def send_version_to_all(request: Request, app: str = Form("salesrep")):
-    app = app if app in ("salesrep", "launcher") else "salesrep"
+    app = _version_app(app)
     username = request.session.get("username", "?")
     if app == "launcher":
         devices.request_update_launcher_all(username)
     else:
-        devices.request_update_all(username)
+        devices.request_update_all(username, app)
     return RedirectResponse(f"/versions?app={app}&sent_all=1", status_code=303)
 
 
 @app.post("/versions/rollback/{entry_id}", dependencies=[require_login])
 def rollback_version(entry_id: int, request: Request):
     entry = local_db.get_history_entry_by_id(entry_id)
-    app = entry["app"] if entry and entry.get("app") == "launcher" else "salesrep"
+    app = _version_app(entry.get("app") if entry else None)
     try:
         username = request.session.get("username", "?")
         if app == "launcher":
             launcher_version_config.rollback_launcher_to_history_entry(entry_id, username)
+        elif app in app_version_config.APPS:
+            app_version_config.rollback_to_history_entry(app, entry_id, username)
         else:
             version_config.rollback_to_history_entry(entry_id, username)
     except Exception as e:
@@ -436,7 +475,7 @@ def rollback_version(entry_id: int, request: Request):
 @app.post("/versions/history/{entry_id}/delete", dependencies=[require_login])
 def delete_history_entry(entry_id: int):
     entry = local_db.get_history_entry_by_id(entry_id)
-    app = entry["app"] if entry and entry.get("app") == "launcher" else "salesrep"
+    app = _version_app(entry.get("app") if entry else None)
     version_history.delete_entry(entry_id)
     return RedirectResponse(f"/versions?app={app}", status_code=303)
 
@@ -456,6 +495,7 @@ def provisioning_page(request: Request, generated: str | None = None):
         "provisioning.html",
         {
             "provisioning_json": provisioning.build_json(saved),
+            "app": saved.get("app") or "salesrep",
             "customer_id": saved.get("customer_id") or "",
             "site_id": saved.get("site_id") or "",
             "wifi_ssid": saved.get("wifi_ssid") or "",
@@ -478,6 +518,7 @@ def provisioning_qr():
 
 @app.post("/provisioning/generate", dependencies=[require_login])
 def generate_provisioning_qr(
+    app: str = Form("salesrep"),
     customer_id: str = Form(""),
     site_id: str = Form(""),
     wifi_ssid: str = Form(""),
@@ -494,6 +535,7 @@ def generate_provisioning_qr(
         wifi_password if ssid else None,
         wifi_security_type if ssid else None,
         url or None,
+        app if app in devices.PAYLOAD_APPS else "salesrep",
     )
     return RedirectResponse("/provisioning?generated=1", status_code=303)
 

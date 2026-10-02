@@ -83,9 +83,7 @@ fun LoginView(component: LoginComponent) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    KarikaLogo {
-                        component.exitKiosk()
-                    }
+                    KarikaLogo()
                     KarikaText(
                         text = component.title(),
                         color = KarikaColors.Black,

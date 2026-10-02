@@ -4,7 +4,8 @@ fresh on every request (see GET /provisioning/qr.png in main.py) rather than cac
 payload field change shows up immediately instead of needing someone to notice and regenerate it.
 The fixed fields (admin component, signature checksum, APK download location) never change;
 everything else comes from the saved provisioning extras (see local_db.get_provisioning_extras()):
-customer_id/site_id go in PROVISIONING_ADMIN_EXTRAS_BUNDLE - a nested JSON object under that one
+app (salesrep|shop - which payload app the launcher installs and runs) and customer_id/site_id go
+in PROVISIONING_ADMIN_EXTRAS_BUNDLE - a nested JSON object under that one
 key, which Android's managed-provisioning QR parser turns into a PersistableBundle automatically
 and hands to the app during provisioning (see DeviceMapping.kt / ProvisioningSuccessActivity.kt on
 the launcher side); wifi_* go in Android's own top-level PROVISIONING_WIFI_* extras, which managed
@@ -59,13 +60,14 @@ def build_payload(extras: dict | None) -> dict:
         resolve_apk_download_url(extras)
     )
 
-    admin_extras = {}
+    # Always present, salesrep by default - the launcher falls back to salesrep without it too, but
+    # spelling it out keeps the QR's JSON self-explanatory.
+    admin_extras = {"app": extras.get("app") or "salesrep"}
     if extras.get("customer_id"):
         admin_extras["customer_id"] = extras["customer_id"]
     if extras.get("site_id"):
         admin_extras["site_id"] = extras["site_id"]
-    if admin_extras:
-        payload["android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE"] = admin_extras
+    payload["android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE"] = admin_extras
 
     ssid = extras.get("wifi_ssid")
     if ssid:

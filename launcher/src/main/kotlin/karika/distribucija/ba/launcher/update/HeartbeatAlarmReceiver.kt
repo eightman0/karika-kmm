@@ -30,7 +30,7 @@ class HeartbeatAlarmReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val targetPackage = KnownApps.PRIMARY.packageName
+                val targetPackage = KnownApps.primary(context).packageName
                 val (versionCode, versionName) = DeviceHeartbeat.installedVersion(context, targetPackage)
                 DeviceHeartbeat.report(context, targetPackage, versionCode, versionName)
             } finally {

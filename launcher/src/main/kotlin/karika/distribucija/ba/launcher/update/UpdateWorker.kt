@@ -16,7 +16,7 @@ import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceHeartbeat
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 
-/** Keeps KnownApps.PRIMARY (salesrep) up to date - not the launcher itself. Whether to install is
+/** Keeps KnownApps.primary() (salesrep or shop, per device) up to date - not the launcher itself. Whether to install is
  * decided by comparing the published APK's sha256 against the one this device last installed,
  * not by version numbers - a publish only has to contain a new APK, nothing has to be typed or
  * incremented correctly for the update to actually reach devices. The heartbeat below still
@@ -32,20 +32,21 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         if (!LauncherBatteryOptimization.isResolved(applicationContext)) {
             return Result.retry()
         }
-        val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext), app = "salesrep")
-        val targetPackage = KnownApps.PRIMARY.packageName
+        val primary = KnownApps.primary(applicationContext)
+        val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext), app = primary.key)
+        val targetPackage = primary.packageName
         val (installedVersionCode, installedVersionName) = DeviceHeartbeat.installedVersion(applicationContext, targetPackage)
 
         DeviceHeartbeat.report(applicationContext, targetPackage, installedVersionCode, installedVersionName)
 
         val alreadyInstalled = latest.apkSha256.isNotBlank() &&
-            latest.apkSha256.equals(InstalledApkState.lastInstalledSha256(applicationContext), ignoreCase = true)
+            latest.apkSha256.equals(InstalledApkState.lastInstalledSha256(applicationContext, targetPackage), ignoreCase = true)
         if (!latest.isPublished || alreadyInstalled) {
             Log.i(TAG, "$targetPackage already on the published build")
             Result.success()
         } else {
             Log.i(TAG, "New build published for $targetPackage (${latest.versionName}), installing")
-            runUpdate(latest)
+            runUpdate(targetPackage, latest)
         }
     } catch (e: Exception) {
         Log.e(TAG, "Update check failed", e)
@@ -53,7 +54,7 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         Result.retry()
     }
 
-    private suspend fun runUpdate(latest: KioskVersion): Result {
+    private suspend fun runUpdate(targetPackage: String, latest: KioskVersion): Result {
         MaintenanceState.begin(applicationContext)
         // Without this, a backgrounded launcher process (salesrep in front, nothing visible of
         // ours) is eligible for the OS's cached-app freezer - it can get frozen mid-download with
@@ -74,7 +75,7 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             apkFile.delete()
             if (!installed) return Result.retry()
 
-            InstalledApkState.setLastInstalledSha256(applicationContext, latest.apkSha256)
+            InstalledApkState.setLastInstalledSha256(applicationContext, targetPackage, latest.apkSha256)
             // Cleared before reporting, not left to the finally block below - otherwise this
             // heartbeat (sent to promptly reflect the new version, see comment below) would still
             // read MaintenanceState as active and report a device that just finished updating as
@@ -83,7 +84,7 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             // Otherwise the dashboard keeps showing the pre-update version (and a stale
             // "lagging" tag) until whatever unrelated event triggers the next heartbeat -
             // there's no guarantee that happens soon after a real-time-triggered install.
-            DeviceHeartbeat.report(applicationContext, KnownApps.PRIMARY.packageName, latest.versionCode, latest.versionName)
+            DeviceHeartbeat.report(applicationContext, targetPackage, latest.versionCode, latest.versionName)
             return Result.success()
         } finally {
             MaintenanceState.end(applicationContext)

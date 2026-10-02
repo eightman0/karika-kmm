@@ -42,6 +42,11 @@
          though the launcher installed it and is Device Owner. -->
     <queries>
         <package android:name="karika.distribucija.ba.salesrep" />
+        <package android:name="karika.distribucija.ba.kiosk" />
+        <!-- LauncherKiosk.cameraPackages() - the camera app has to be lock-task-allowed too. -->
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
     </queries>
 
     <application

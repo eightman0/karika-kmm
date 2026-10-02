@@ -9,17 +9,13 @@ import android.provider.Settings
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
-import com.google.android.play.core.install.InstallState
-import com.google.android.play.core.install.InstallStateUpdatedListener
-import com.google.android.play.core.install.model.InstallStatus
-import karika.distribucija.ba.provision.KarikaKiosk
 import java.io.ByteArrayOutputStream
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-
-class MainActivityKiosk : KarikaActivity(), InstallStateUpdatedListener {
-    private lateinit var kiosk: KarikaKiosk
+/** Plain payload activity - lock task, Home role and updates are all the launcher's job (it is
+ * the Device Owner and installs this app through the admin dashboard), not this app's. */
+class MainActivityKiosk : KarikaActivity() {
     private val idleTimeout = 20000L
     private val handler = Handler(Looper.getMainLooper())
     private val idleRunnable = Runnable {
@@ -41,8 +37,6 @@ class MainActivityKiosk : KarikaActivity(), InstallStateUpdatedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        kiosk = KarikaKiosk(this)
-        appUpdateManager.registerListener(this)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
@@ -59,34 +53,9 @@ class MainActivityKiosk : KarikaActivity(), InstallStateUpdatedListener {
         takePicture()
     }
 
-    override fun onStateUpdate(p0: InstallState) {
-        if (p0.installStatus() == InstallStatus.DOWNLOADED) {
-            notifyUserAndRestartApp()
-        }
-    }
-
-    private fun notifyUserAndRestartApp() {
-        appUpdateManager.completeUpdate()
-            .addOnSuccessListener {}
-    }
-
     override fun onResume() {
         super.onResume()
-        kiosk.enter()
         resetIdleTimer()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        appUpdateManager.unregisterListener(this)
-    }
-
-    override fun exitKiosk() {
-        kiosk.exit()
-    }
-
-    override fun checkForUpdate() {
-        checkUpdate()
     }
 
     override fun openWifi() {
@@ -111,7 +80,6 @@ class MainActivityKiosk : KarikaActivity(), InstallStateUpdatedListener {
     }
 
     private fun showScreensaver() {
-        checkUpdate()
         AppComponent.screensaverHandler.invoke()
     }
 

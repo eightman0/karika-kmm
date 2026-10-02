@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import android.provider.MediaStore
 import android.os.UserManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -126,7 +127,8 @@ class LauncherKiosk(private val context: ComponentActivity) {
     }
 
     /** Allowlist covers the launcher itself plus every known payload app, so lock task survives
-     * the launcher starting one of them on top of it. */
+     * the launcher starting one of them on top of it - and the camera app, since shop takes photos
+     * through an IMAGE_CAPTURE intent, which lock task would otherwise refuse to start. */
     private fun setLockTask(start: Boolean) {
         val allowedPackages = listOf(
             context.packageName,
@@ -135,7 +137,7 @@ class LauncherKiosk(private val context: ComponentActivity) {
             "com.android.packageinstaller",
             "com.google.android.gms",
             "com.google.android.gsf"
-        ) + KnownApps.ALL.map { it.packageName }
+        ) + KnownApps.ALL.map { it.packageName } + cameraPackages()
 
         devicePolicyManager.setLockTaskPackages(
             adminComponentName,
@@ -147,6 +149,12 @@ class LauncherKiosk(private val context: ComponentActivity) {
             context.stopLockTask()
         }
     }
+
+    private fun cameraPackages(): List<String> =
+        context.packageManager
+            .queryIntentActivities(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
+            .map { it.activityInfo.packageName }
+            .distinct()
 
     /** 5 min while active, not indefinite - long enough that a customer/employee glancing at it
      * mid-use never sees it go dark (STAY_ON_WHILE_PLUGGED_IN only helps while actually charging),

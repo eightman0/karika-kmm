@@ -47,7 +47,7 @@ class LauncherActivity : AppCompatActivity() {
         appGrid = findViewById(R.id.app_grid)
         maintenanceBanner = findViewById(R.id.maintenance_banner)
         appGrid.layoutManager = GridLayoutManager(this, SPAN_COUNT)
-        appGrid.adapter = AppTileAdapter(KnownApps.ALL, packageManager) { app ->
+        appGrid.adapter = AppTileAdapter(listOf(KnownApps.primary(this)), packageManager) { app ->
             launchApp(app.packageName, userInitiated = true)
         }
     }
@@ -83,7 +83,7 @@ class LauncherActivity : AppCompatActivity() {
         appGrid.visibility = if (inMaintenance) View.GONE else View.VISIBLE
 
         if (!inMaintenance) {
-            launchApp(KnownApps.PRIMARY.packageName, userInitiated = false)
+            launchApp(KnownApps.primary(this).packageName, userInitiated = false)
         }
     }
 

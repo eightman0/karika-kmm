@@ -18,9 +18,5 @@ interface KarikaHandler {
 
     fun getPushHandle(callback: (String, String) -> Unit)
 
-    fun exitKiosk() {}
-
-    fun checkForUpdate() {}
-
     fun openWifi() {}
 }

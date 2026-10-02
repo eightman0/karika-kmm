@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from . import apk_storage, launcher_version_config, local_db, version_config
+from . import apk_storage, app_version_config, launcher_version_config, local_db, version_config
 from .tz import LOCAL_TZ
 
 
@@ -60,6 +60,9 @@ def _blob_still_needed(app: str, version_code: int) -> bool:
     if app == "launcher":
         live = launcher_version_config.get_launcher_version()
         staged = launcher_version_config.get_staged_launcher_version()
+    elif app in app_version_config.APPS:
+        live = app_version_config.get_version(app)
+        staged = app_version_config.get_staged_version(app)
     else:
         live = version_config.get_kiosk_version()
         staged = version_config.get_staged_version()

@@ -138,9 +138,7 @@ private fun InternalLoginView(component: LoginComponent, showState: MutableState
                         contentDescription = ""
                     )
                 }
-                KarikaLogo {
-                    component.exitKiosk()
-                }
+                KarikaLogo()
                 KarikaText(
                     text = component.title(),
                     color = KarikaColors.Black,

@@ -6,10 +6,12 @@ import android.os.BatteryManager
 import android.os.Build
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
+import karika.distribucija.ba.launcher.KnownApps
 import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.RemoteMaintenanceState
 import karika.distribucija.ba.launcher.update.DashboardApi
 import kotlinx.coroutines.tasks.await
+import org.json.JSONArray
 
 /**
  * Reports what's installed, battery state, and any GPS fixes queued since the last successful
@@ -30,7 +32,12 @@ object DeviceHeartbeat {
             val batteryLevel = batteryManager
                 ?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
                 ?.takeIf { it in 0..100 }
-            val locations = LocationHistoryReader.readNewPoints(context)
+            // Only salesrep queues GPS fixes - shop devices are stationary, nothing to read there.
+            val locations = if (packageName == KnownApps.SALESREP.packageName) {
+                LocationHistoryReader.readNewPoints(context)
+            } else {
+                JSONArray()
+            }
             val (launcherVersionCode, launcherVersionName) = installedVersion(context, context.packageName)
             DashboardApi.reportHeartbeat(
                 deviceId = deviceId,

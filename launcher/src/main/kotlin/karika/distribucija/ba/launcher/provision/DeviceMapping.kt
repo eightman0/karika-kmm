@@ -10,13 +10,14 @@ import androidx.work.workDataOf
 import karika.distribucija.ba.launcher.update.DeviceMappingWorker
 import karika.distribucija.ba.logging.AppLogger
 
-/** customer_id/site_id read once from the QR provisioning payload's admin extras bundle and
+/** customer_id/site_id/app read once from the QR provisioning payload's admin extras bundle and
  * persisted locally so later code (heartbeat, dashboard reports) doesn't need to re-parse
  * provisioning extras, which are only available at provisioning time. */
 object DeviceMapping {
     private const val PREFS = "device_mapping"
     private const val KEY_CUSTOMER_ID = "customer_id"
     private const val KEY_SITE_ID = "site_id"
+    private const val KEY_APP = "app"
 
     fun save(context: Context, customerId: String?, siteId: String?) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
@@ -30,6 +31,16 @@ object DeviceMapping {
 
     fun siteId(context: Context): String? =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_SITE_ID, null)
+
+    /** Which KnownApps entry this device runs (see KnownApps.primary()), null if the QR had none. */
+    fun app(context: Context): String? =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_APP, null)
+
+    private fun saveApp(context: Context, app: String) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+            .putString(KEY_APP, app)
+            .apply()
+    }
 
     /**
      * Which provisioning checkpoint actually carries EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE in
@@ -55,7 +66,12 @@ object DeviceMapping {
         }
         val customerId = extras.getString("customer_id")
         val siteId = extras.getString("site_id")
-        AppLogger.i(TAG, "$checkpoint: admin extras bundle present, customer_id=$customerId site_id=$siteId")
+        val app = extras.getString("app")
+        AppLogger.i(TAG, "$checkpoint: admin extras bundle present, customer_id=$customerId site_id=$siteId app=$app")
+        // Saved on its own, before the customer/site early return below - a QR can carry just the
+        // app choice. Must land before LauncherActivity first resumes (both callers start it only
+        // afterwards), since that is what lets UpdateWorker do its first-ever install.
+        if (app != null) saveApp(activity, app)
         if (customerId == null && siteId == null) return
 
         save(activity, customerId, siteId)

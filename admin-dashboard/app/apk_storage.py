@@ -16,6 +16,7 @@ logger.disable("androguard")
 _APP_PACKAGE_NAMES = {
     "salesrep": "karika.distribucija.ba.salesrep",
     "launcher": "karika.distribucija.ba.launcher",
+    "shop": "karika.distribucija.ba.kiosk",
 }
 
 
