@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -135,8 +136,25 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    // Optional, gitignored - lets scripts/build-release-apks.sh build a signed kiosk (shop) APK
+    // headlessly, same as launcher/salesrep. Without it release builds stay unsigned as before.
+    val keystorePropsFile = file("keystore.properties")
+    signingConfigs {
+        if (keystorePropsFile.exists()) {
+            val keystoreProps = Properties().apply { load(keystorePropsFile.inputStream()) }
+            create("release") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
     buildTypes {
         getByName("release") {
+            if (keystorePropsFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

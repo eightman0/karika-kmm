@@ -19,7 +19,10 @@
 # the exact corruption class hit twice already for salesrep - so bump build.gradle.kts's
 # versionCode for the launcher on every real change, same discipline as salesrep already has.
 #
-# Usage: scripts/build-release-apks.sh [launcher|salesrep|all] [--no-publish]
+# shop is composeApp's kiosk flavor (karika.distribucija.ba.kiosk), published under app=shop -
+# signed with composeApp/keystore.properties.
+#
+# Usage: scripts/build-release-apks.sh [launcher|salesrep|shop|all] [--no-publish]
 # Defaults to "all". Output APKs are copied to dist/ at the repo root.
 set -euo pipefail
 
@@ -32,10 +35,10 @@ DO_PUBLISH=1
 
 for arg in "$@"; do
   case "$arg" in
-    launcher|salesrep|all) TARGET="$arg" ;;
+    launcher|salesrep|shop|all) TARGET="$arg" ;;
     --no-publish) DO_PUBLISH=0 ;;
     *)
-      echo "Usage: $0 [launcher|salesrep|all] [--no-publish]" >&2
+      echo "Usage: $0 [launcher|salesrep|shop|all] [--no-publish]" >&2
       exit 1
       ;;
   esac
@@ -43,12 +46,25 @@ done
 
 MODULES=()
 if [ "$TARGET" = "all" ]; then
-  MODULES=(launcher salesrep)
+  MODULES=(launcher salesrep shop)
 else
   MODULES=("$TARGET")
 fi
 
-for module in "${MODULES[@]}"; do
+# Gradle module, assemble task and output APK per target - shop is a flavor of composeApp, the
+# others are their own modules.
+gradle_module() { [ "$1" = "shop" ] && echo composeApp || echo "$1"; }
+assemble_task() { [ "$1" = "shop" ] && echo ":composeApp:assembleKioskRelease" || echo ":$1:assembleRelease"; }
+output_apk() {
+  if [ "$1" = "shop" ]; then
+    echo "$REPO_ROOT/composeApp/build/outputs/apk/kiosk/release/composeApp-kiosk-release.apk"
+  else
+    echo "$REPO_ROOT/$1/build/outputs/apk/release/$1-release.apk"
+  fi
+}
+
+for target in "${MODULES[@]}"; do
+  module="$(gradle_module "$target")"
   if [ ! -f "$REPO_ROOT/$module/keystore.properties" ]; then
     echo "Error: $module/keystore.properties not found - release signingConfig won't be applied," >&2
     echo "and the release build type would silently come out unsigned. Put the real keystore" >&2
@@ -59,7 +75,7 @@ done
 
 GRADLE_TASKS=()
 for module in "${MODULES[@]}"; do
-  GRADLE_TASKS+=(":${module}:assembleRelease")
+  GRADLE_TASKS+=("$(assemble_task "$module")")
 done
 
 # --rerun-tasks forces every task to actually execute instead of being skipped as UP-TO-DATE;
@@ -135,7 +151,7 @@ publish_apk() {
 }
 
 for module in "${MODULES[@]}"; do
-  apk="$REPO_ROOT/$module/build/outputs/apk/release/${module}-release.apk"
+  apk="$(output_apk "$module")"
   if [ ! -f "$apk" ]; then
     echo "Error: expected output APK not found at $apk" >&2
     exit 1
@@ -151,8 +167,9 @@ for module in "${MODULES[@]}"; do
     echo "[$module] warning: apksigner not found, skipping signature verification" >&2
   fi
 
-  version_name="$(grep -m1 'versionName' "$REPO_ROOT/$module/build.gradle.kts" | sed -E 's/.*versionName = "([^"]*)".*/\1/')"
-  version_code="$(grep -m1 'versionCode' "$REPO_ROOT/$module/build.gradle.kts" | sed -E 's/[^0-9]*([0-9]+).*/\1/')"
+  gradle_file="$REPO_ROOT/$(gradle_module "$module")/build.gradle.kts"
+  version_name="$(grep -m1 'versionName' "$gradle_file" | sed -E 's/.*versionName = "([^"]*)".*/\1/')"
+  version_code="$(grep -m1 'versionCode' "$gradle_file" | sed -E 's/[^0-9]*([0-9]+).*/\1/')"
   dest="$DIST_DIR/${module}-release-v${version_code}-${version_name}.apk"
   cp "$apk" "$dest"
 
