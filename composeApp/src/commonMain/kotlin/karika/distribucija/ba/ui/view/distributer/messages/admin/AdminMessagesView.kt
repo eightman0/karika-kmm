@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +28,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.SecondaryButtonFilled
 import karika.distribucija.ba.ui.components.YSpacer16
+import karika.distribucija.ba.ui.components.conversationTag
 import karika.distribucija.ba.ui.components.onClick
 
 @Composable
@@ -108,6 +110,7 @@ fun AdminMessagesView(component: AdminMessagesComponent) {
 private fun MessageItem(item: ChatConversation, component: AdminMessagesComponent) {
     Column(
         modifier = Modifier
+            .testTag(conversationTag(item))
             .onClick {
                 component.navigateToMessagesOverview(item)
             }

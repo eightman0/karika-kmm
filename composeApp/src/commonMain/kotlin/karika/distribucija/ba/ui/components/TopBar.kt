@@ -24,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -337,6 +338,10 @@ fun ActionBar(component: MainComponent) {
     }
 }
 
+/** Test tags of the supplier dashboard's menu and notifications icons, for the end-to-end tests. */
+const val DASHBOARD_MENU_TAG = "dashboard_menu"
+const val DASHBOARD_NOTIFICATIONS_TAG = "dashboard_notifications"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBarDashboard(
@@ -363,6 +368,7 @@ fun TopBarDashboard(
             navigationIcon = {
                 Icon(
                     modifier = Modifier
+                        .testTag(DASHBOARD_MENU_TAG)
                         .onClick {
                             menu()
                         }
@@ -376,6 +382,7 @@ fun TopBarDashboard(
                 Box(modifier = Modifier) {
                     Icon(
                         modifier = Modifier
+                            .testTag(DASHBOARD_NOTIFICATIONS_TAG)
                             .onClick {
                                 action()
                             }

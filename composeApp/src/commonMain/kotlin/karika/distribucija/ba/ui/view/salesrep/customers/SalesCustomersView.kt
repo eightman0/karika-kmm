@@ -40,6 +40,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -88,6 +89,9 @@ private val statusOptions = listOf(
 )
 
 // ── Screen ───────────────────────────────────────────────────────────────────
+
+/** Test tag of the button that adds a customer, for the end-to-end tests. */
+const val ADD_CUSTOMER_TAG = "add_customer"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -223,6 +227,7 @@ fun SalesCustomersView(component: SalesCustomersComponent) {
 
             Box(
                 modifier = Modifier
+                    .testTag(ADD_CUSTOMER_TAG)
                     .size(36.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(KarikaColors.Blue)

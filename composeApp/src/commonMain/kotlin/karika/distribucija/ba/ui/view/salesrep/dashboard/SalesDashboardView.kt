@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -98,6 +99,9 @@ import karikav2.composeapp.generated.resources.ic_orders
 import karikav2.composeapp.generated.resources.ic_tertiary
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
+
+/** Test tag of the sales rep's menu icon, for the end-to-end tests. */
+const val SALES_MENU_TAG = "sales_menu"
 
 @Composable
 fun SalesDashboardView(component: SalesDashboardComponent) {
@@ -540,6 +544,7 @@ private fun SalesTopBar(onMenuClick: () -> Unit) {
         navigationIcon = {
             Icon(
                 modifier = Modifier
+                    .testTag(SALES_MENU_TAG)
                     .onClick { onMenuClick() }
                     .padding(horizontal = 4.dp),
                 imageVector = vectorResource(Res.drawable.ic_menu),
@@ -572,6 +577,7 @@ private fun SalesRootTopBar(
         navigationIcon = {
             Icon(
                 modifier = Modifier
+                    .testTag(SALES_MENU_TAG)
                     .onClick { onMenuClick() }
                     .padding(horizontal = 4.dp),
                 imageVector = vectorResource(Res.drawable.ic_menu),

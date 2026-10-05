@@ -124,6 +124,8 @@ android {
             "KARIKA_STAGE_SHOP_PASSWORD",
             "KARIKA_STAGE_DISTRIBUTER_EMAIL",
             "KARIKA_STAGE_DISTRIBUTER_PASSWORD",
+            "KARIKA_STAGE_SALESREP_EMAIL",
+            "KARIKA_STAGE_SALESREP_PASSWORD",
         ).forEach { key ->
             providers.environmentVariable(key)
                 .orElse(providers.gradleProperty(key))

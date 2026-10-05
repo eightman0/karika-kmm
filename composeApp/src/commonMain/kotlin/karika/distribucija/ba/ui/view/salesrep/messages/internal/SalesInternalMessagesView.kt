@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.conversationTag
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_add_plus
 import karikav2.composeapp.generated.resources.ic_arrow_right
@@ -100,10 +102,12 @@ fun SalesInternalMessagesView(component: SalesInternalMessagesComponent) {
                 }
             } else {
                 items(threads, key = { it.conversationId ?: 0L }) { thread ->
-                    InternalThreadCard(
-                        thread = thread,
-                        onClick = { component.openConversation(thread) }
-                    )
+                    Box(Modifier.testTag(conversationTag(thread))) {
+                        InternalThreadCard(
+                            thread = thread,
+                            onClick = { component.openConversation(thread) }
+                        )
+                    }
                 }
             }
         }

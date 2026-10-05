@@ -26,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +55,10 @@ import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_arrow_right
 import karikav2.composeapp.generated.resources.ic_filter_outline
 import org.jetbrains.compose.resources.vectorResource
+
+/** Test tags of the orders screen, for the end-to-end tests. */
+const val MIN_ORDER_TAG = "min_order"
+fun vendorOrderTag(order: VendorOrder) = "vendor_order_${order.orderId}"
 
 @Composable
 fun OrdersView(component: OrdersComponent) {
@@ -114,6 +119,7 @@ fun OrdersView(component: OrdersComponent) {
                 }
                 Box(
                     modifier = Modifier
+                        .testTag(MIN_ORDER_TAG)
                         .size(40.dp)
                         .background(color = KarikaColors.Gray20, shape = CircleShape)
                         .onClick {
@@ -284,6 +290,7 @@ private fun OrderItem(component: OrdersComponent, vendorOrder: VendorOrder) {
         ) {
             Row(
                 modifier = Modifier
+                    .testTag(vendorOrderTag(vendorOrder))
                     .onClick {
                         component.dashNavigate(DashConfig.OrderDetails(vendorOrder))
                     }

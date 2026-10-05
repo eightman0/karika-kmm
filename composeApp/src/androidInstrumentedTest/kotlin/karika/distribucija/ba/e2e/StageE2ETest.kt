@@ -1,12 +1,17 @@
 package karika.distribucija.ba.e2e
 
 import android.Manifest
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
 import android.os.Build
+import android.view.KeyEvent
+import android.view.accessibility.AccessibilityWindowInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsEnabled
@@ -18,9 +23,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -68,12 +70,15 @@ abstract class StageE2ETest {
         instrumentation.targetContext
             .getSharedPreferences("instance_prefs", Context.MODE_PRIVATE)
             .edit().clear().commit()
-        // Otherwise the system permission dialog covers the app on first launch
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            instrumentation.uiAutomation.grantRuntimePermission(
-                instrumentation.targetContext.packageName,
-                Manifest.permission.POST_NOTIFICATIONS
-            )
+        // Otherwise the system permission dialogs cover the app: notifications on first launch,
+        // location as soon as the sales rep dashboard opens
+        val permissions = listOfNotNull(
+            Manifest.permission.POST_NOTIFICATIONS.takeIf { Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU },
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+        )
+        permissions.forEach {
+            instrumentation.uiAutomation.grantRuntimePermission(instrumentation.targetContext.packageName, it)
         }
 
         scenario = ActivityScenario.launch(MainActivity::class.java)
@@ -122,22 +127,65 @@ abstract class StageE2ETest {
         compose.onNodeWithText("Prijavi se").performScrollTo().assertIsEnabled().performClick()
     }
 
-    /** Closes the keyboard and waits until it is gone and the screen has settled. */
+    /**
+     * Waits for the first screen after a login. When it does not come, the failure says what
+     * the screen shows instead, such as the backend's message about the login.
+     */
+    protected fun waitAfterLogIn(arrived: SemanticsMatcher) {
+        // Messages only stay up for a few seconds, so they are collected while waiting
+        val seen = linkedSetOf<String>()
+        repeat(LOGIN_ATTEMPTS) { attempt ->
+            try {
+                compose.waitUntil(SERVER_TIMEOUT_MS) {
+                    seen += screenTexts().filter { text -> LOGIN_SCREEN_TEXTS.none { text.startsWith(it) } }
+                    compose.onAllNodes(arrived).fetchSemanticsNodes().isNotEmpty() ||
+                        // A network error ends this attempt early
+                        (attempt < LOGIN_ATTEMPTS - 1 && seen.any { it in NETWORK_ERRORS })
+                }
+                if (compose.onAllNodes(arrived).fetchSemanticsNodes().isNotEmpty()) return
+                // The request did not reach stage: tap "Prijavi se" again, as a user would
+                seen.clear()
+                waitUntilLoaded()
+                Thread.sleep(RETRY_PAUSES_MS[attempt])
+                if (compose.onAllNodes(arrived).fetchSemanticsNodes().isNotEmpty()) return
+                compose.onNodeWithText("Prijavi se").performScrollTo().performClick()
+            } catch (e: ComposeTimeoutException) {
+                throw AssertionError("the login did not get through; besides the login screen it showed: $seen", e)
+            }
+        }
+        throw AssertionError("the login did not get through; besides the login screen it showed: $seen")
+    }
+
+    /** Every text on screen, from the unmerged tree. */
+    protected fun screenTexts(): List<String> =
+        compose.onAllNodes(hasText("", substring = true), useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .flatMap { node -> node.config.getOrNull(SemanticsProperties.Text).orEmpty().map { it.text } }
+
+    /**
+     * Closes the keyboard, wherever it was opened (a bottom sheet is a window of its own), the
+     * way a user does: with the back key, which closes the keyboard first.
+     */
     protected fun closeKeyboard() {
-        scenario.onActivity {
-            WindowCompat.getInsetsController(it.window, it.window.decorView).hide(WindowInsetsCompat.Type.ime())
+        if (keyboardShown()) {
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         }
         compose.waitUntil(SCREEN_TIMEOUT_MS) { !keyboardShown() }
         compose.waitForIdle()
     }
 
+    /** Presses the device's back key, which goes to the focused window (a menu, a sheet, the app). */
+    protected fun pressBackKey() {
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+        compose.waitForIdle()
+    }
+
     private fun keyboardShown(): Boolean {
-        var shown = false
-        scenario.onActivity {
-            shown = ViewCompat.getRootWindowInsets(it.window.decorView)
-                ?.isVisible(WindowInsetsCompat.Type.ime()) == true
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        automation.serviceInfo = automation.serviceInfo.apply {
+            flags = flags or AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
         }
-        return shown
+        return automation.windows.any { it.type == AccessibilityWindowInfo.TYPE_INPUT_METHOD }
     }
 
     /** Logs the customer test account in from the landing screen and waits for its home screen. */
@@ -146,7 +194,32 @@ abstract class StageE2ETest {
         compose.onNodeWithText("Kupac").performScrollTo().performClick()
         compose.waitUntilAtLeastOneExists(hasText("Prijava kupac"), SCREEN_TIMEOUT_MS)
         logIn(email, password)
-        compose.waitUntilAtLeastOneExists(hasText("Početna"), SERVER_TIMEOUT_MS)
+        waitAfterLogIn(hasText("Početna"))
+        waitUntilLoaded()
+    }
+
+    /** Logs the supplier test account in from the landing screen and waits for its dashboard. */
+    protected fun logInAsVendor() {
+        val (email, password) = stageAccount("KARIKA_STAGE_DISTRIBUTER_EMAIL", "KARIKA_STAGE_DISTRIBUTER_PASSWORD")
+        compose.onNodeWithText("Dobavljač").performScrollTo().performClick()
+        compose.waitUntilAtLeastOneExists(hasText("Prijava dobavljač"), SCREEN_TIMEOUT_MS)
+        logIn(email, password)
+        waitAfterLogIn(hasText(VENDOR_HOME, substring = true))
+        waitUntilLoaded()
+    }
+
+    /**
+     * Logs the sales rep test account in through the supplier login (the backend tells it is a
+     * sales employee) and waits for its first screen, the orders, with "Komercijalista" in the
+     * drawer header.
+     */
+    protected fun logInAsSalesRep() {
+        val (email, password) = stageAccount("KARIKA_STAGE_SALESREP_EMAIL", "KARIKA_STAGE_SALESREP_PASSWORD")
+        compose.onNodeWithText("Dobavljač").performScrollTo().performClick()
+        compose.waitUntilAtLeastOneExists(hasText("Prijava dobavljač"), SCREEN_TIMEOUT_MS)
+        logIn(email, password)
+        waitAfterLogIn(hasText("Komercijalista"))
+        compose.waitUntilAtLeastOneExists(hasText(SALES_REP_HOME), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
     }
 
@@ -186,5 +259,21 @@ abstract class StageE2ETest {
         const val SCREEN_TIMEOUT_MS = 10_000L
         const val SERVER_TIMEOUT_MS = 30_000L
         const val WRONG_LOGIN_MESSAGE = "Prijava na račun je bila pogrešna"
+        /** Pauses before each new login attempt, longer each time: network hiccups can last a while. */
+        private val RETRY_PAUSES_MS = listOf(3_000L, 6_000L, 10_000L, 15_000L)
+        private val LOGIN_ATTEMPTS = RETRY_PAUSES_MS.size + 1
+        /** What the app shows when a request does not reach the backend (LoginApi.kt). */
+        private val NETWORK_ERRORS = setOf(
+            "Nema internet konekcije, provjerite Vašu vezu i pokušajte ponovo.",
+            "Došlo je do greške. Pokušajte ponovo!"
+        )
+        private val LOGIN_SCREEN_TEXTS = listOf(
+            "Prijava ", "Email Adresa", "Šifra", "Zapamti me", "Zaboravili ste šifru?", "Prijavi se",
+            "Nemate kreiran račun?", "stage"
+        )
+        /** Where a supplier lands after login: the analytics overview. */
+        const val VENDOR_HOME = "Analitika — Pregled"
+        /** Where a sales rep lands after login: the orders. */
+        const val SALES_REP_HOME = "Upravljanje narudžbama"
     }
 }
