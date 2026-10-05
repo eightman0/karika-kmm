@@ -125,6 +125,7 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
             }
         }
 
+        handleDeepLink(intent)
         handlePushRoute(intent)
         checkUpdate()
     }
@@ -157,15 +158,20 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        val uri = intent.data
-        if (uri != null && uri.path == "/oauth") {
+        handleDeepLink(intent)
+        handlePushRoute(intent)
+    }
+
+    /** App Link (https://<deeplink_host>/...). Any path just opens the app; /oauth also logs in. */
+    private fun handleDeepLink(intent: Intent?) {
+        val uri = intent?.data ?: return
+        if (uri.path == "/oauth") {
             val emailToken = uri.getQueryParameter("email")
             val token = uri.getQueryParameter("token")
             if (token != null && emailToken != null) {
                 appComponent.handleDeepLink(emailToken, token)
             }
         }
-        handlePushRoute(intent)
     }
 
     private fun handlePushRoute(intent: Intent?) {

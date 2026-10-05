@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "karika.distribucija.ba",
+      "sha256_cert_fingerprints": [
+        "B1:D0:32:FF:CD:F0:98:9D:A9:01:84:3B:AE:74:6B:40:21:38:CC:78:B1:23:82:B3:82:9E:77:27:9B:6E:96:8E"
+      ]
+    }
+  }
+]

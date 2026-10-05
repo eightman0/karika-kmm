@@ -28,9 +28,5 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
-	<key>com.apple.developer.associated-domains</key>
-	<array>
-		<string>applinks:${APP_LINKS}</string>
-	</array>
 </dict>
 </plist>

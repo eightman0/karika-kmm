@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["7A4V326XC5.ba.karika.Karika"],
+        "components": [{ "/": "*" }]
+      }
+    ]
+  }
+}
