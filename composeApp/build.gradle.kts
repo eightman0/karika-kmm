@@ -20,7 +20,7 @@ kotlin {
 
     androidTarget {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
@@ -60,6 +60,7 @@ kotlin {
             implementation(libs.app.update.ktx)
 
             implementation(libs.play.services.location)
+            implementation(libs.maps.compose)
             implementation(libs.kotlinx.coroutines.play.services)
         }
 
@@ -200,8 +201,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         buildConfig = true

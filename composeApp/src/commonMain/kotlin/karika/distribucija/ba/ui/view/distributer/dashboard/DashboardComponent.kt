@@ -6,6 +6,7 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackCallback
 import karika.distribucija.ba.domain.model.ChatConversation
+import karika.distribucija.ba.domain.model.VendorEmployee
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.domain.model.VendorProduct
 import karika.distribucija.ba.ui.common.CommonComponent
@@ -19,6 +20,8 @@ import karika.distribucija.ba.ui.view.distributer.customers.CustomerRule
 import karika.distribucija.ba.ui.view.distributer.customers.CustomersComponent
 import karika.distribucija.ba.ui.view.distributer.customers.RuleScope
 import karika.distribucija.ba.ui.view.distributer.customers.editor.CustomerRuleEditorComponent
+import karika.distribucija.ba.ui.view.distributer.employees.EmployeesComponent
+import karika.distribucija.ba.ui.view.distributer.employees.locations.EmployeeLocationsComponent
 import karika.distribucija.ba.ui.view.distributer.messages.admin.AdminMessagesComponent
 import karika.distribucija.ba.ui.view.distributer.messages.customer.CustomerMessagesComponent
 import karika.distribucija.ba.ui.view.distributer.messages.details.MessagesOverviewComponent
@@ -135,6 +138,21 @@ class DashboardComponent(componentContext: ComponentContext, stateHolder: Karika
                 )
             )
 
+            is DashConfig.Employees -> DashChild.Employees(
+                EmployeesComponent(
+                    componentContext,
+                    stateHolder
+                )
+            )
+
+            is DashConfig.EmployeeLocations -> DashChild.EmployeeLocations(
+                EmployeeLocationsComponent(
+                    componentContext,
+                    stateHolder,
+                    appConfig.employee
+                )
+            )
+
             is DashConfig.CustomerMessages -> DashChild.CustomerMessages(
                 CustomerMessagesComponent(
                     componentContext,
@@ -216,6 +234,12 @@ sealed class DashConfig {
     ) : DashConfig()
 
     @Serializable
+    data object Employees : DashConfig()
+
+    @Serializable
+    data class EmployeeLocations(val employee: VendorEmployee) : DashConfig()
+
+    @Serializable
     data object CustomerMessages : DashConfig()
 
     @Serializable
@@ -245,6 +269,8 @@ sealed class DashChild {
     data class ProductDetails(val component: ProductDetailsComponent) : DashChild()
     data class Customers(val component: CustomersComponent) : DashChild()
     data class CustomerRuleEditor(val component: CustomerRuleEditorComponent) : DashChild()
+    data class Employees(val component: EmployeesComponent) : DashChild()
+    data class EmployeeLocations(val component: EmployeeLocationsComponent) : DashChild()
     data class CustomerMessages(val component: CustomerMessagesComponent) : DashChild()
     data class AdminMessages(val component: AdminMessagesComponent) : DashChild()
     data class InternalMessages(val component: InternalMessagesComponent) : DashChild()

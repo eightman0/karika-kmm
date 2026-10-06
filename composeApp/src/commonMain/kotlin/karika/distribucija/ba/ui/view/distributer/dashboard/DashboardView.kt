@@ -56,6 +56,8 @@ import karika.distribucija.ba.ui.view.distributer.analytics.atrisk.AnalyticsAtRi
 import karika.distribucija.ba.ui.view.distributer.analytics.products.AnalyticsProductsView
 import karika.distribucija.ba.ui.view.distributer.customers.CustomersView
 import karika.distribucija.ba.ui.view.distributer.customers.editor.CustomerRuleEditorView
+import karika.distribucija.ba.ui.view.distributer.employees.EmployeesView
+import karika.distribucija.ba.ui.view.distributer.employees.locations.EmployeeLocationsView
 import karika.distribucija.ba.ui.view.distributer.messages.admin.AdminMessagesView
 import karika.distribucija.ba.ui.view.distributer.messages.customer.CustomerMessagesView
 import karika.distribucija.ba.ui.view.distributer.messages.details.MessagesOverviewView
@@ -74,6 +76,7 @@ import karikav2.composeapp.generated.resources.ic_customers
 import karikav2.composeapp.generated.resources.ic_logout
 import karikav2.composeapp.generated.resources.ic_messages
 import karikav2.composeapp.generated.resources.ic_navigation_profile
+import karikav2.composeapp.generated.resources.ic_sales_team
 import karikav2.composeapp.generated.resources.ic_shopping_cart
 import karikav2.composeapp.generated.resources.ic_tertiary
 import kotlinx.coroutines.launch
@@ -86,6 +89,7 @@ fun DashboardView(component: DashboardComponent) {
     val profile = component.stateHolder.vendorSpecificHandler.vendorDetails.collectAsState()
     val me by component.stateHolder.salesSpecificHandler.me.collectAsState()
     val canSeeDashboard = me.capabilities.canSeeDashboard
+    val canViewEmployees = me.vendorOperationsEnabled && me.capabilities.canViewEmployees
     val navState = component.stack.subscribeAsState()
     val messageState = component.stateHolder.vendorNotificationHandler.chatUnreadCount.asState()
     val activeInstance = navState.value.active.instance
@@ -295,6 +299,37 @@ fun DashboardView(component: DashboardComponent) {
                             }
                         }
                     )
+                    if (canViewEmployees) {
+                        val isEmployeesActive = activeInstance is DashChild.Employees ||
+                            activeInstance is DashChild.EmployeeLocations
+                        NavigationDrawerItem(
+                            modifier = Modifier,
+                            colors = NavigationDrawerItemDefaults.colors(
+                                unselectedContainerColor = KarikaColors.White,
+                                selectedContainerColor = KarikaColors.Blue
+                            ),
+                            shape = RectangleShape,
+                            label = {
+                                IconTextItem(
+                                    modifier = Modifier,
+                                    icon = vectorResource(Res.drawable.ic_sales_team),
+                                    iconColor = if (isEmployeesActive) KarikaColors.White else KarikaColors.Gray2,
+                                    textColor = if (isEmployeesActive) KarikaColors.White else KarikaColors.Gray2,
+                                    textSize = 16.sp,
+                                    fontWeight = FontWeight.W600,
+                                    text = "Komercijalisti",
+                                    textAlign = TextAlign.Start
+                                )
+                            },
+                            selected = isEmployeesActive,
+                            onClick = {
+                                component.dashNavigate(DashConfig.Employees, true)
+                                scope.launch {
+                                    drawerState.close()
+                                }
+                            }
+                        )
+                    }
                     /* NavigationDrawerItem(
                          modifier = Modifier,
                          colors = NavigationDrawerItemDefaults.colors(
@@ -510,6 +545,9 @@ fun DashboardView(component: DashboardComponent) {
 
                         is DashChild.Customers -> CustomersView(child.component)
                         is DashChild.CustomerRuleEditor -> CustomerRuleEditorView(child.component)
+
+                        is DashChild.Employees -> EmployeesView(child.component)
+                        is DashChild.EmployeeLocations -> EmployeeLocationsView(child.component)
 
                         is DashChild.CustomerMessages -> CustomerMessagesView(child.component)
                         is DashChild.AdminMessages -> AdminMessagesView(child.component)

@@ -59,7 +59,7 @@
             android:resource="@color/karika" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAhXruU2GPjiEDLP9XInSWTnrTptpgy8jQ" />
+            android:value="AIzaSyC6PoHXGAof0vy-oa-R-EtqwpdmQQZonTI" />
         <meta-data
             android:name="firebase_analytics_collection_enabled"
             android:value="true" />
