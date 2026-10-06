@@ -4,6 +4,7 @@ import android.Manifest
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
 import android.os.Build
+import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.activity.ComponentActivity
@@ -13,11 +14,14 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.IdlingResource
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -50,7 +54,12 @@ import org.junit.runner.RunWith
  *
  *     ./gradlew :composeApp:connectedStageDebugAndroidTest
  *
+ * To watch a run, the argument slowMs pauses before every step, for example
+ * -Pandroid.testInstrumentationRunnerArguments.slowMs=800.
+ *
  * Every test starts from a fresh, logged-out app, so the landing screen is the first thing shown.
+ * A test that needs an account opens it with logInAsCustomer, logInAsVendor or logInAsSalesRep,
+ * which log in through the screen once per run and then reuse that session.
  */
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -67,9 +76,7 @@ abstract class StageE2ETest {
 
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         // Without a saved session the app opens on the landing screen
-        instrumentation.targetContext
-            .getSharedPreferences("instance_prefs", Context.MODE_PRIVATE)
-            .edit().clear().commit()
+        appPrefs().edit().clear().commit()
         // Otherwise the system permission dialogs cover the app: notifications on first launch,
         // location as soon as the sales rep dashboard opens
         val permissions = listOfNotNull(
@@ -81,10 +88,21 @@ abstract class StageE2ETest {
             instrumentation.uiAutomation.grantRuntimePermission(instrumentation.targetContext.packageName, it)
         }
 
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        InstrumentationRegistry.getArguments().getString("slowMs")?.toLongOrNull()
+            ?.takeIf { it > 0 }
+            ?.let { compose.registerIdlingResource(SlowMotion(it)) }
+
+        launchApp()
         compose.waitUntilAtLeastOneExists(hasText(LANDING_TITLE, substring = true), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
     }
+
+    private fun launchApp() {
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+    }
+
+    private fun appPrefs() = InstrumentationRegistry.getInstrumentation().targetContext
+        .getSharedPreferences("instance_prefs", Context.MODE_PRIVATE)
 
     @After
     fun close() {
@@ -188,39 +206,83 @@ abstract class StageE2ETest {
         return automation.windows.any { it.type == AccessibilityWindowInfo.TYPE_INPUT_METHOD }
     }
 
-    /** Logs the customer test account in from the landing screen and waits for its home screen. */
-    protected fun logInAsCustomer() {
-        val (email, password) = stageAccount("KARIKA_STAGE_SHOP_EMAIL", "KARIKA_STAGE_SHOP_PASSWORD")
-        compose.onNodeWithText("Kupac").performScrollTo().performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Prijava kupac"), SCREEN_TIMEOUT_MS)
-        logIn(email, password)
+    /**
+     * Opens the shop as the customer test account, on its home screen. See [enterAs]: only the
+     * first test of a run logs in through the screen.
+     */
+    protected fun logInAsCustomer() = enterAs(Account.CUSTOMER, hasText("Početna")) {
+        logInThroughScreen("Kupac", "Prijava kupac", "KARIKA_STAGE_SHOP_EMAIL", "KARIKA_STAGE_SHOP_PASSWORD")
         waitAfterLogIn(hasText("Početna"))
-        waitUntilLoaded()
     }
 
-    /** Logs the supplier test account in from the landing screen and waits for its dashboard. */
-    protected fun logInAsVendor() {
-        val (email, password) = stageAccount("KARIKA_STAGE_DISTRIBUTER_EMAIL", "KARIKA_STAGE_DISTRIBUTER_PASSWORD")
-        compose.onNodeWithText("Dobavljač").performScrollTo().performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Prijava dobavljač"), SCREEN_TIMEOUT_MS)
-        logIn(email, password)
+    /** Opens the supplier test account's dashboard, on the analytics overview. See [enterAs]. */
+    protected fun logInAsVendor() = enterAs(Account.VENDOR, hasText(VENDOR_HOME, substring = true)) {
+        logInThroughScreen("Dobavljač", "Prijava dobavljač", "KARIKA_STAGE_DISTRIBUTER_EMAIL", "KARIKA_STAGE_DISTRIBUTER_PASSWORD")
         waitAfterLogIn(hasText(VENDOR_HOME, substring = true))
-        waitUntilLoaded()
     }
 
     /**
-     * Logs the sales rep test account in through the supplier login (the backend tells it is a
-     * sales employee) and waits for its first screen, the orders, with "Komercijalista" in the
-     * drawer header.
+     * Opens the sales rep test account's dashboard, on the orders. It logs in through the
+     * supplier login (the backend tells it is a sales employee), with "Komercijalista" in the
+     * drawer header. See [enterAs].
      */
-    protected fun logInAsSalesRep() {
-        val (email, password) = stageAccount("KARIKA_STAGE_SALESREP_EMAIL", "KARIKA_STAGE_SALESREP_PASSWORD")
-        compose.onNodeWithText("Dobavljač").performScrollTo().performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Prijava dobavljač"), SCREEN_TIMEOUT_MS)
-        logIn(email, password)
+    protected fun logInAsSalesRep() = enterAs(Account.SALES_REP, hasText(SALES_REP_HOME)) {
+        logInThroughScreen("Dobavljač", "Prijava dobavljač", "KARIKA_STAGE_SALESREP_EMAIL", "KARIKA_STAGE_SALESREP_PASSWORD")
         waitAfterLogIn(hasText("Komercijalista"))
-        compose.waitUntilAtLeastOneExists(hasText(SALES_REP_HOME), SERVER_TIMEOUT_MS)
+    }
+
+    /**
+     * Opens the app logged in as [account], on the screen that shows [home]. The first time in a
+     * run it logs in through the screen with "Zapamti me" on, as [logInThroughScreen] does, and
+     * keeps the session the app saved. Later tests put that session back and start the app again,
+     * which opens it logged in, as for a user who chose "Zapamti me". Logging out in the app does
+     * not end the session on the backend, so it stays usable; should it stop working, the test
+     * logs in through the screen again.
+     */
+    private fun enterAs(account: Account, home: SemanticsMatcher, logInThroughScreen: () -> Unit) {
+        val saved = sessions[account]
+        if (saved != null) {
+            scenario.close()
+            appPrefs().edit().clear().apply { saved.forEach { (key, value) -> putString(key, value) } }.commit()
+            launchApp()
+            val opened = runCatching {
+                compose.waitUntil(SERVER_TIMEOUT_MS) {
+                    compose.onAllNodes(home).fetchSemanticsNodes().isNotEmpty() ||
+                        compose.onAllNodes(hasText(LANDING_TITLE, substring = true)).fetchSemanticsNodes().isNotEmpty()
+                }
+                compose.onAllNodes(home).fetchSemanticsNodes().isNotEmpty()
+            }.getOrDefault(false)
+            if (opened) {
+                waitUntilLoaded()
+                return
+            }
+            sessions.remove(account)
+            scenario.close()
+            appPrefs().edit().clear().commit()
+            launchApp()
+            compose.waitUntilAtLeastOneExists(hasText(LANDING_TITLE, substring = true), SCREEN_TIMEOUT_MS)
+            waitUntilLoaded()
+        }
+        logInThroughScreen()
+        compose.waitUntilAtLeastOneExists(home, SERVER_TIMEOUT_MS)
         waitUntilLoaded()
+        val session = appPrefs().all.mapNotNull { (key, value) -> (value as? String)?.let { key to it } }.toMap()
+        // Without a remembered login the app would open on the landing screen again
+        if (session["JWT_TOKEN"].orEmpty().isNotEmpty() && session["user_type"].orEmpty().isNotEmpty()) {
+            sessions[account] = session
+        }
+    }
+
+    /**
+     * From the landing screen, opens the login for [role] and logs in with the account under the
+     * given keys, with "Zapamti me" on so that the app keeps the session.
+     */
+    private fun logInThroughScreen(role: String, loginTitle: String, emailKey: String, passwordKey: String) {
+        val (email, password) = stageAccount(emailKey, passwordKey)
+        compose.onNodeWithText(role).performScrollTo().performClick()
+        compose.waitUntilAtLeastOneExists(hasText(loginTitle), SCREEN_TIMEOUT_MS)
+        compose.onNode(isToggleable()).performClick().assertIsOn()
+        logIn(email, password)
     }
 
     /** The "Karika preporučuje" products, from the same request the home screen makes. */
@@ -254,7 +316,11 @@ abstract class StageE2ETest {
         compose.waitForIdle()
     }
 
+    protected enum class Account { CUSTOMER, VENDOR, SALES_REP }
+
     protected companion object {
+        /** The sessions the app saved after each account's first login in this run. */
+        private val sessions = mutableMapOf<Account, Map<String, String>>()
         const val LANDING_TITLE = "Vaše centralno mjesto za"
         const val SCREEN_TIMEOUT_MS = 10_000L
         const val SERVER_TIMEOUT_MS = 30_000L
@@ -275,5 +341,30 @@ abstract class StageE2ETest {
         const val VENDOR_HOME = "Analitika — Pregled"
         /** Where a sales rep lands after login: the orders. */
         const val SALES_REP_HOME = "Upravljanje narudžbama"
+    }
+}
+
+/**
+ * Slows a run down so it can be followed by eye: the test waits for the app to be idle before
+ * every step, and this keeps it busy for [pauseMs] each time.
+ */
+private class SlowMotion(private val pauseMs: Long) : IdlingResource {
+    private var pauseEnd = 0L
+    private var idleUntil = 0L
+
+    override val isIdleNow: Boolean
+        get() {
+            val now = SystemClock.uptimeMillis()
+            // The test asks several times in a row before one step; the pause is once per step
+            if (now < idleUntil) return true
+            if (pauseEnd == 0L) pauseEnd = now + pauseMs
+            if (now < pauseEnd) return false
+            pauseEnd = 0L
+            idleUntil = now + IDLE_WINDOW_MS
+            return true
+        }
+
+    private companion object {
+        const val IDLE_WINDOW_MS = 30L
     }
 }

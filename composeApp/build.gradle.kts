@@ -132,6 +132,10 @@ android {
                 .orNull
                 ?.let { testInstrumentationRunnerArguments[key] = it }
         }
+        // All E2E tests in the order a user goes through the app, unless a run picks its own tests
+        val picksTests = listOf("class", "package", "notClass", "notPackage", "tests_regex")
+            .any { providers.gradleProperty("android.testInstrumentationRunnerArguments.$it").isPresent }
+        if (!picksTests) testInstrumentationRunnerArguments["class"] = "karika.distribucija.ba.e2e.AllE2ETests"
     }
     packaging {
         resources {
