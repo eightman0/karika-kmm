@@ -162,9 +162,16 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
         handlePushRoute(intent)
     }
 
-    /** App Link (https://<deeplink_host>/...). Any path just opens the app; /oauth also logs in. */
+    /** App Link (https://<deeplink_host>/...). Any path just opens the app; /oauth also logs in,
+     * /magic-links/<token> opens the linked order. */
     private fun handleDeepLink(intent: Intent?) {
         val uri = intent?.data ?: return
+        if (!::appComponent.isInitialized) return
+        if (appComponent.handleMagicLink(uri.path)) {
+            // Don't resolve the same link again when the activity is recreated.
+            intent.data = null
+            return
+        }
         if (uri.path == "/oauth") {
             val emailToken = uri.getQueryParameter("email")
             val token = uri.getQueryParameter("token")

@@ -28,6 +28,9 @@ class CommonHandler {
 
     val showLoginRequired = mutableStateOf<String?>(null)
 
+    /** Title and message of the magic link modal, null when hidden. */
+    val magicLinkInfo = mutableStateOf<Pair<String, String>?>(null)
+
     fun showLoginRequired(message: String) {
         showLoginRequired.value = message
     }

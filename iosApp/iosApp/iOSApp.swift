@@ -16,6 +16,9 @@ struct iOSApp: App {
     }
     
     func handleDeepLink(url: URL) {
+        if appDelegate.component.handleMagicLink(path: url.path) {
+            return
+        }
         if let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
             let token = components.queryItems?.first(where: { $0.name == "token" })?.value
             let email = components.queryItems?.first(where: { $0.name == "email" })?.value

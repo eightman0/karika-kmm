@@ -4,26 +4,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asSkiaBitmap
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.vector.VectorPainter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.viewinterop.UIKitView
 import karika.distribucija.ba.domain.model.EmployeeLocationPoint
 import karika.distribucija.ba.ui.components.KarikaColors
-import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_primary_logo
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.allocArray
@@ -31,7 +32,6 @@ import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.useContents
 import kotlinx.cinterop.usePinned
-import org.jetbrains.compose.resources.vectorResource
 import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
 import platform.CoreGraphics.CGPointMake
@@ -62,7 +62,7 @@ private const val TITLE_START = "Početak"
 private const val TITLE_LAST = "Zadnja lokacija"
 private const val TITLE_FOCUS = "Odabrana tačka"
 
-/** MapKit on iOS - no API key or extra SDK needed. Pins match Android: brand logo on a colored drop. */
+/** MapKit on iOS - no API key or extra SDK needed. Pins match Android (`karika_pin` phone). */
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun EmployeeRouteMap(
@@ -72,12 +72,12 @@ actual fun EmployeeRouteMap(
     modifier: Modifier
 ) {
     val density = LocalDensity.current
-    val logo = rememberVectorPainter(vectorResource(Res.drawable.ic_primary_logo))
-    val pins = remember(logo, density) {
+    val pin = rememberKarikaPinPainter()
+    val pins = remember(pin, density) {
         mapOf(
-            TITLE_START to renderPin(logo, KarikaColors.Green5, 30f, density),
-            TITLE_LAST to renderPin(logo, KarikaColors.Primary, 38f, density),
-            TITLE_FOCUS to renderPin(logo, KarikaColors.Blue, 34f, density),
+            TITLE_START to renderPin(pin, KarikaColors.Green5, 40f, density),
+            TITLE_LAST to renderPin(pin, KarikaColors.Primary, 52f, density),
+            TITLE_FOCUS to renderPin(pin, KarikaColors.Blue, 46f, density),
         )
     }
     val delegate = remember { RouteMapDelegate() }
@@ -136,39 +136,44 @@ private fun EmployeeLocationPoint.annotation(title: String) = MKPointAnnotation(
     setTitle(title)
 }
 
-/** Draws the same pin as Android's KarikaPin into a bitmap: colored disc with a white ring,
- * white logo inside and a tail whose tip is the bottom-center of the image. */
-@OptIn(ExperimentalForeignApi::class)
-private fun renderPin(logo: VectorPainter, color: Color, sizeDp: Float, density: Density): UIImage? {
+/** Draws the same pin as Android's KarikaPin into a bitmap: the `karika_pin` phone clipped to
+ * its rounded corners and outlined in [color], with a tail whose tip is the bottom-center. */
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+private fun renderPin(pin: Painter, color: Color, heightDp: Float, density: Density): UIImage? {
     val scale = density.density
-    val disc = sizeDp * scale
-    val tail = disc * 0.3f
-    val width = disc.roundToInt()
-    val height = (disc + tail).roundToInt()
+    val phoneHeight = heightDp * scale
+    val phoneWidth = phoneHeight * KARIKA_PIN_ASPECT
+    val tailWidth = phoneWidth * 0.5f
+    val tailHeight = phoneWidth * 0.35f
+    val width = phoneWidth.roundToInt()
+    val height = (phoneHeight + tailHeight).roundToInt()
     val bitmap = ImageBitmap(width, height)
 
     CanvasDrawScope().draw(density, LayoutDirection.Ltr, Canvas(bitmap), Size(width.toFloat(), height.toFloat())) {
-        val center = Offset(disc / 2, disc / 2)
+        val phone = Size(phoneWidth, phoneHeight)
+        val radius = CornerRadius(phoneWidth * KARIKA_PIN_CORNER)
+        val outline = Path().apply { addRoundRect(RoundRect(Rect(Offset.Zero, phone), radius)) }
+
         drawPath(
             Path().apply {
-                moveTo(disc * 0.3f, disc * 0.8f)
-                lineTo(disc * 0.7f, disc * 0.8f)
-                lineTo(disc / 2, disc + tail)
+                moveTo((phoneWidth - tailWidth) / 2, phoneHeight)
+                lineTo((phoneWidth + tailWidth) / 2, phoneHeight)
+                lineTo(phoneWidth / 2, phoneHeight + tailHeight)
                 close()
             },
             color
         )
-        drawCircle(Color.White, radius = disc / 2, center = center)
-        drawCircle(color, radius = disc / 2 - 2 * scale, center = center)
-
-        // Fit the (non-square) logo into the inner 60% of the disc, keeping its aspect ratio.
-        val box = disc * 0.6f
-        val intrinsic = logo.intrinsicSize
-        val fit = minOf(box / intrinsic.width, box / intrinsic.height)
-        val logoSize = Size(intrinsic.width * fit, intrinsic.height * fit)
-        translate((disc - logoSize.width) / 2, (disc - logoSize.height) / 2) {
-            with(logo) { draw(logoSize, colorFilter = ColorFilter.tint(Color.White)) }
+        clipPath(outline) {
+            with(pin) { draw(phone) }
         }
+        val stroke = 2 * scale
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(stroke / 2, stroke / 2),
+            size = Size(phoneWidth - stroke, phoneHeight - stroke),
+            cornerRadius = radius,
+            style = Stroke(width = stroke)
+        )
     }
 
     val png = Image.makeFromBitmap(bitmap.asSkiaBitmap()).encodeToData(EncodedImageFormat.PNG)?.bytes

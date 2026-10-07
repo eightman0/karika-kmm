@@ -28,6 +28,7 @@ import karika.distribucija.ba.ui.view.shop.MainComponent
 import karika.distribucija.ba.ui.view.shop.menu.blog.BlogsComponent
 import karika.distribucija.ba.ui.view.shop.menu.blog.overview.BlogOverviewComponent
 import karika.distribucija.ba.ui.view.shop.menu.faq.FaqComponent
+import karika.distribucija.ba.util.MagicLinkHandler
 import karika.distribucija.ba.ui.view.shop.product.ProductComponent
 import karika.distribucija.ba.ui.view.shop.profile.account.AccountComponent
 import karika.distribucija.ba.ui.view.shop.profile.messages.admin.AdminMessagesComponent
@@ -176,6 +177,8 @@ class AppComponent(
             syncPushHandle()
         }
         backHandler.register(backCallback)
+        // A magic link opened before login is resolved once the user lands in the app.
+        stack.subscribe { MagicLinkHandler.resolvePendingIfLoggedIn(this) }
         lifecycle.subscribe(object : Lifecycle.Callbacks {
             override fun onResume() {
                 checkForUpdate()
@@ -293,4 +296,7 @@ class AppComponent(
     fun handleDeepLink(emailToken: String, token: String) {
         stateHolder.commonHandler.handleDeepLink(emailToken, token)
     }
+
+    /** Returns true if [path] was a magic link (https://<host>/magic-links/<token>). */
+    fun handleMagicLink(path: String?): Boolean = MagicLinkHandler.handlePath(path, this)
 }

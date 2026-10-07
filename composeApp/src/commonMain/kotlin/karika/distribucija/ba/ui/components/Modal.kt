@@ -62,3 +62,48 @@ fun MandatoryUpdateModal(url: String = appUrl()) {
         }
     }
 }
+@Composable
+fun InfoModal(title: String, message: String, onDismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(16.dp)
+                .rounded(shape = 16.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                KarikaText(
+                    modifier = Modifier,
+                    text = title,
+                    color = KarikaColors.Gray2,
+                    textSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.W600
+                )
+                KarikaText(
+                    modifier = Modifier,
+                    text = message,
+                    color = KarikaColors.Gray2,
+                    textSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.W400
+                )
+                PrimaryButtonFilled(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    title = "U redu",
+                    onClick = onDismiss
+                )
+            }
+        }
+    }
+}

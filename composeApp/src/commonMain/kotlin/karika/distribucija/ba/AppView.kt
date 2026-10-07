@@ -22,6 +22,7 @@ import com.arkivanov.decompose.extensions.compose.stack.Children
 import karika.distribucija.ba.ui.common.getEnvPrefix
 import karika.distribucija.ba.ui.components.GuestUserInfoDialog
 import karika.distribucija.ba.ui.components.ImagePreview
+import karika.distribucija.ba.ui.components.InfoModal
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
@@ -118,7 +119,19 @@ fun App(component: AppComponent) {
     }
 
     GuestUserInfoDialog(component)
+    MagicLinkInfo(component)
     MandatoryUpdate(component)
+}
+
+@Composable
+private fun MagicLinkInfo(component: AppComponent) {
+    val info by component.stateHolder.commonHandler.magicLinkInfo.asState()
+
+    info?.let { (title, message) ->
+        InfoModal(title, message) {
+            component.stateHolder.commonHandler.magicLinkInfo.value = null
+        }
+    }
 }
 
 @Composable

@@ -114,9 +114,9 @@ android {
         applicationId = "karika.distribucija.ba"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 270
+        versionCode = 271
 
-        versionName = "2.7.0"
+        versionName = "2.7.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Stage test accounts for the login E2E tests, from the environment or ~/.gradle/gradle.properties
