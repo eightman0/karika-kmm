@@ -34,3 +34,6 @@ captures
 /salesrep/keystore.properties
 /composeApp/keystore.properties
 /salesrep/release/*
+
+# Android Studio test result exports
+Test Results - *.html
