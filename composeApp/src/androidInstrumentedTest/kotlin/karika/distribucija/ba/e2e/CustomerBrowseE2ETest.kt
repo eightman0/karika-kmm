@@ -88,12 +88,16 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
         waitUntilLoaded()
         compose.onNodeWithText("Dodaj u Korpu").performScrollTo().performClick()
 
-        // The cart on stage gets two minimum quantities
-        compose.waitUntil(SERVER_TIMEOUT_MS) {
-            Thread.sleep(500)
-            currentCart().items.any { it.sku == product.sku }
+        // The cart on stage gets two minimum quantities: the app adds the product, then sets how many
+        var qty: Int? = null
+        runCatching {
+            compose.waitUntil(SERVER_TIMEOUT_MS) {
+                Thread.sleep(500)
+                qty = currentCart().items.singleOrNull { it.sku == product.sku }?.qty
+                qty == 2 * product.minQty()
+            }
         }
-        assertEquals(2 * product.minQty(), currentCart().items.single { it.sku == product.sku }.qty)
+        assertEquals(2 * product.minQty(), qty)
     }
 
     @Test

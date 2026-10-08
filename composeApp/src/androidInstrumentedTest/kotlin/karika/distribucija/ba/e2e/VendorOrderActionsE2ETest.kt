@@ -282,7 +282,12 @@ class VendorOrderActionsE2ETest : VendorE2ETest() {
 
     private fun openAction(item: String) {
         compose.onNode(hasText("Akcije", substring = true) and hasClickAction()).performScrollTo().performClick()
-        compose.waitUntilAtLeastOneExists(hasText(item) and hasClickAction(), SCREEN_TIMEOUT_MS)
+        try {
+            compose.waitUntilAtLeastOneExists(hasText(item) and hasClickAction(), SCREEN_TIMEOUT_MS)
+        } catch (e: Throwable) {
+            dumpScreen("openAction")
+            throw AssertionError("\"$item\" is not in Akcije; the menu offers ${screenTexts().filter { it.length < 40 }}", e)
+        }
         compose.onAllNodes(hasText(item) and hasClickAction()).onFirst().performClick()
         compose.waitUntil(SCREEN_TIMEOUT_MS) { exists(hasAnyAncestor(isDialog())) }
     }

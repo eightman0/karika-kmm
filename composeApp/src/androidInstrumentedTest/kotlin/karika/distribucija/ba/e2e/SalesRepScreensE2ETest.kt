@@ -24,6 +24,7 @@ import karika.distribucija.ba.domain.model.OperationalCustomerSearchResults
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.components.conversationTag
 import karika.distribucija.ba.ui.view.salesrep.customers.ADD_CUSTOMER_TAG
+import karika.distribucija.ba.domain.api.DashRepository
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -73,17 +74,21 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
 
     @Test
     fun anOrderOpensItsDetailsAndBackReturns() {
-        val order = orders().items.firstOrNull()
-        assumeTrue("the sales rep has no orders", order != null)
+        // An order that stage can show: one whose making was cut off can be on the list without details
+        val order = orders().items.firstOrNull { o ->
+            runBlocking { DashRepository().getOrder(o.incrementId).last() } is ResultState.Success
+        }
+        assumeTrue("the sales rep has no order that stage can show", order != null)
 
-        compose.onAllNodesWithText("#${order!!.incrementId}", substring = true).onFirst().performClick()
+        scrollListTo(hasText("#${order!!.incrementId}", substring = true))
+        compose.onAllNodesWithText("#${order.incrementId}", substring = true).onFirst().performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Informacije o narudžbi"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         listOf("BROJ NARUDŽBE", "DATUM", "Specifikacija narudžbe").forEach {
             assertTrue("\"$it\" is not shown", exists(hasText(it, substring = true), unmerged = true))
         }
-        compose.onNodeWithContentDescription("Nazad").performClick()
+        tapBack()
         compose.waitUntilDoesNotExist(hasText("Informacije o narudžbi"), SCREEN_TIMEOUT_MS)
         assertTrue(displayed(hasText(SALES_REP_HOME)))
     }
@@ -149,7 +154,7 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
         listOf("Email adresa", "Kontakt osoba", "Popusti").forEach {
             assertTrue("\"$it\" is not shown", exists(hasText(it), unmerged = true))
         }
-        compose.onNodeWithContentDescription("Nazad").performClick()
+        tapBack()
         compose.waitUntilAtLeastOneExists(hasText("Pretraži kupce..."), SCREEN_TIMEOUT_MS)
     }
 
@@ -200,7 +205,7 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
         assertTrue(exists(hasSetTextAction()))
         assertTrue(exists(hasContentDescription("Korpa")))
         // Leaving without adding anything leaves the customer's cart as it was
-        compose.onNodeWithContentDescription("Nazad").performClick()
+        tapBack()
         compose.waitUntilAtLeastOneExists(hasText("Pretraži kupce..."), SCREEN_TIMEOUT_MS)
     }
 
@@ -225,7 +230,7 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
         compose.waitUntilAtLeastOneExists(hasText("Nova poruka"), SCREEN_TIMEOUT_MS)
         assertTrue(exists(hasText("Pretraži kupca..."), unmerged = true))
         assertTrue(exists(hasSetTextAction()))
-        compose.onNodeWithContentDescription("Nazad").performClick()
+        tapBack()
         compose.waitUntilAtLeastOneExists(hasText("Pošalji novu poruku"), SCREEN_TIMEOUT_MS)
     }
 

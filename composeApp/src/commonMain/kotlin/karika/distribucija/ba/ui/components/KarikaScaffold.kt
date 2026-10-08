@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,9 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.vectorResource
 
+
+/** Test tag of the snackbar's message, which a tap dismisses, for the end-to-end tests. */
+const val SNACKBAR_TAG = "snackbar"
 
 @Composable
 fun KarikaScaffold(
@@ -78,6 +82,7 @@ fun KarikaScaffold(
                         ) {
                             IconTextItem(
                                 modifier = Modifier
+                                    .testTag(SNACKBAR_TAG)
                                     .padding(bottom = 8.dp)
                                     .onClick {
                                         component.snackbarHostState.currentSnackbarData?.dismiss()

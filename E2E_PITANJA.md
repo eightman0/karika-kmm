@@ -7,6 +7,15 @@ Otvorena pitanja koja su se pojavila dok su pisani E2E testovi. Uz svako je zapi
 1. **DNS emulatora povremeno ne radi.** Prijava ponekad dobije "Nema internet konekcije", a u istom trenutku i Googleove aplikacije na emulatoru dobijaju `ERR_NAME_NOT_RESOLVED`. To se dešava i kad se emulator pokrene s `-dns-server 8.8.8.8,1.1.1.1`. Na Macu je DNS na `127.0.0.1` uz više `utun` interfejsa, što liči na VPN ili sigurnosni alat (FortiClient, AnyConnect?). Testovi zato kod mrežne greške pokušaju prijavu do 4 puta. Ako možeš, pokreni set bez tog alata, ili mi reci koji je to alat.
 2. **Stage zaključava nalog nakon neuspjelih prijava.** Magento (`RequestThrottler`) tada i za tačnu šifru vraća "The account sign-in was incorrect or your account is disabled temporarily". Svaki run ima po jedan test s pogrešnom šifrom za kupca i dobavljača. Kad se dva runa sudare ili se set pokreće više puta zaredom, neuspjesi se nakupe i nalog bude zaključan neko vrijeme. Test to sad prepozna i ne pokušava ponovo, jer bi svaki pokušaj produžio zaključavanje. Može li se na stage-u povećati broj dozvoljenih neuspjeha ili isključiti zaključavanje za test naloge? Druga opcija je poseban nalog samo za testove pogrešne šifre.
 
+3. **Stage povremeno ne radi kako treba** (8.10.): greške 500 (npr. `carts/mine/shipping-information`), stari podaci odmah poslije slanja (komentar ili poruka se pojavi na stage-u tek par sekundi kasnije) i red push poruka koji zna kasniti do minute ili zastati. Testovi zato čekaju na podatke na stage-u, a push testovi čekaju do 60 s. Ako padne više push testova odjednom, prvo provjeri red na stage-u.
+4. **Polovična narudžba `3000001022`** ostala je od runa koji je prekinuo pad ADB-a. U listi komercijaliste je `pending`, ali je stage ne može prikazati ni odbiti (`vendor/order` vraća 404 "Requested entity does not exist"). Treba je počistiti na backendu. Testovi komercijaliste sada biraju narudžbu koju stage može prikazati.
+
+## Aplikacija
+
+1. **Snackbar s greškom prekriva strelicu "Nazad".** Snackbar se crta na vrhu (`KarikaScaffold`, `Alignment.TopCenter`), preko gornje trake. Greške idu u red, pa kad stigne nekoliko grešaka zaredom (npr. detalji narudžbe i komentari ne mogu da se učitaju), strelica "Nazad" je prekrivena više sekundi, a klik na nju samo zatvori snackbar. Reproducirano kod komercijaliste na narudžbi `3000001022`. Odluka 8.10.: zasad ostaje ovako.
+2. **"Dodaj u korpu" s količinom većom od minimalne šalje dva zahtjeva:** prvo doda artikal s količinom 1 (`POST carts/mine/items`), pa je promijeni (`PUT`). Na kraju je količina tačna, ali korpa kratko ima pogrešnu količinu, a za isto se troše dva zahtjeva.
+3. **Ispravljeno 8.10.:** tekst korisnika u URL-u se sada enkodira (komentar sa `%` se ranije uopšte nije slao, a `&`, `#` i `+` su ga kvarili), dobavljač osvježava narudžbe na svaki push, a vrijeme sa servera se prikazuje u sarajevskoj zoni.
+
 
 ## Kupac
 

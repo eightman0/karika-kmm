@@ -7,6 +7,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -14,6 +17,7 @@ import androidx.compose.ui.test.performScrollToNode
 import karika.distribucija.ba.domain.api.SalesRepository
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorOperationsMe
+import karika.distribucija.ba.ui.components.SNACKBAR_TAG
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
@@ -115,6 +119,20 @@ abstract class DashboardE2ETest : StageE2ETest() {
         }
     }
 
+    /**
+     * Taps the top bar's back arrow. A snackbar shows over the top bar and takes the tap, so it is
+     * dismissed first (several can come one after another), as a user would.
+     */
+    protected fun tapBack() {
+        repeat(MAX_SNACKBARS) {
+            val shown = compose.onAllNodes(hasTestTag(SNACKBAR_TAG)).fetchSemanticsNodes().isNotEmpty()
+            if (!shown) return@repeat
+            runCatching { compose.onAllNodes(hasTestTag(SNACKBAR_TAG)).onFirst().performClick() }
+            compose.waitForIdle()
+        }
+        compose.onNodeWithContentDescription("Nazad").performClick()
+    }
+
     protected fun drawerItem(label: String) = hasText(label) and hasClickAction()
 
     /** Whether any node matching [matcher] is on screen (the closed drawer's items exist, offscreen). */
@@ -127,4 +145,8 @@ abstract class DashboardE2ETest : StageE2ETest() {
 
     protected fun exists(matcher: SemanticsMatcher, unmerged: Boolean = false) =
         compose.onAllNodes(matcher, useUnmergedTree = unmerged).fetchSemanticsNodes().isNotEmpty()
+
+    private companion object {
+        const val MAX_SNACKBARS = 5
+    }
 }
