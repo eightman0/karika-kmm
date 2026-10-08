@@ -1,5 +1,6 @@
 package karika.distribucija.ba.domain.model
 
+import karika.distribucija.ba.util.serverTimeInSarajevo
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -89,7 +90,7 @@ fun partnershipErrorMessage(code: String?): String = when (code) {
 @OptIn(ExperimentalTime::class)
 private fun String.toPartnershipDateTime(): String {
     return try {
-        val localDateTime = Instant.parse(this).toLocalDateTime(TimeZone.of("Europe/Sarajevo"))
+        val localDateTime = serverTimeInSarajevo() ?: return this
         val dateFormat = LocalDateTime.Format {
             day()
             char('.')

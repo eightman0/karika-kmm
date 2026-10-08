@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.distributer.employees.locations
 
+import karika.distribucija.ba.util.SARAJEVO
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.EmployeesRepository
 import karika.distribucija.ba.domain.model.EmployeeLocationHistory
@@ -55,7 +56,7 @@ class EmployeeLocationsComponent(
         val employeeId = employee.employeeId ?: return
         if (employee.canView != true) return
 
-        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val today = Clock.System.todayIn(SARAJEVO)
         val period = _period.value
         val dateFrom: LocalDate = today.minus(period.daysBack, DateTimeUnit.DAY)
         val dateTo: LocalDate = today.minus(period.endDaysBack, DateTimeUnit.DAY)

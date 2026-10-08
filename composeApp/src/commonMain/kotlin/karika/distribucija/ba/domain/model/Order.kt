@@ -1,5 +1,6 @@
 package karika.distribucija.ba.domain.model
 
+import karika.distribucija.ba.util.inSarajevo
 import androidx.compose.ui.graphics.Color
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.view.distributer.orders.toDateTime
@@ -227,7 +228,7 @@ data class Comment(
 ) {
     fun isMine() = isMine ?: false
     fun message() = message ?: ""
-    fun createdAt() = createdAt ?: ""
+    fun createdAt() = createdAt?.inSarajevo() ?: ""
 }
 
 @Serializable

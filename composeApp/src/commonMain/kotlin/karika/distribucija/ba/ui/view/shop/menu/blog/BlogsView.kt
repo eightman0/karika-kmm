@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.shop.menu.blog
 
+import karika.distribucija.ba.util.inSarajevo
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -95,7 +96,7 @@ private fun BlogItem(blog: Blog, component: BlogsComponent) {
             KarikaText(
                 modifier = Modifier,
                 color = KarikaColors.Gray18,
-                text = blog.date?.split(" ")?.first(),
+                text = blog.date?.inSarajevo()?.split(" ")?.first(),
                 textSize = 14.sp,
                 fontWeight = FontWeight.W400
             )

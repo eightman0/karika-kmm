@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.customer
 
+import karika.distribucija.ba.util.inSarajevo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -464,7 +465,7 @@ private fun CustomerMessageBubble(
                 }
             }
             KarikaText(
-                text = message.createdAt ?: "",
+                text = message.createdAt?.inSarajevo() ?: "",
                 color = KarikaColors.Gray7,
                 textSize = 10.sp,
                 fontWeight = FontWeight.W400,
@@ -507,7 +508,7 @@ private fun CustomerMessageBubble(
                 }
             }
             KarikaText(
-                text = message.createdAt ?: "",
+                text = message.createdAt?.inSarajevo() ?: "",
                 color = KarikaColors.Gray7,
                 textSize = 10.sp,
                 fontWeight = FontWeight.W400,

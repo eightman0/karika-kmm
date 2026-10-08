@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.shop.profile.notifications
 
+import karika.distribucija.ba.util.inSarajevo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -161,7 +162,7 @@ private fun NotificationItem(item: VendorNotification, component: NotificationsC
                 color = KarikaColors.Gray13,
                 fontWeight = FontWeight.W400,
                 textSize = 12.sp,
-                text = item.createdAt
+                text = item.createdAt.inSarajevo()
             )
             YSpacer16()
             HorizontalDivider(

@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.customer
 
+import karika.distribucija.ba.util.inSarajevo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -67,7 +68,7 @@ import org.jetbrains.compose.resources.vectorResource
 
 private fun String?.formatTime(): String {
     if (this == null) return ""
-    val timePart = this.split(" ").getOrNull(1) ?: return ""
+    val timePart = this.inSarajevo().split(" ").getOrNull(1) ?: return ""
     val parts = timePart.split(":")
     return if (parts.size >= 2) "${parts[0]}:${parts[1]}" else timePart
 }

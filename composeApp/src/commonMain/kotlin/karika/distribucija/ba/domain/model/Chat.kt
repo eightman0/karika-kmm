@@ -1,5 +1,6 @@
 package karika.distribucija.ba.domain.model
 
+import karika.distribucija.ba.util.inSarajevo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -31,7 +32,7 @@ data class ChatConversation(
     fun isUnread() = unreadCount > 0
 
     fun dateTimeLabel(): String? {
-        val raw = lastMessageAt ?: return null
+        val raw = lastMessageAt?.inSarajevo() ?: return null
         val segments = raw.split(" ", limit = 2)
         val dateParts = segments.getOrNull(0)?.split("-")
         if (dateParts?.size != 3) return raw

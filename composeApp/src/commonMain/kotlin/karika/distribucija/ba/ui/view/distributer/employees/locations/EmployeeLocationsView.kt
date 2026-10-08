@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.distributer.employees.locations
 
+import karika.distribucija.ba.util.SARAJEVO
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -472,7 +473,7 @@ private fun EmployeeLocationPoint.mapsUrl() =
 private fun String.toLocal(): LocalDateTime? = runCatching {
     LocalDateTime.parse(trim().replace(' ', 'T'))
         .toInstant(TimeZone.UTC)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .toLocalDateTime(SARAJEVO)
 }.getOrNull()
 
 private fun Int.pad2() = toString().padStart(2, '0')

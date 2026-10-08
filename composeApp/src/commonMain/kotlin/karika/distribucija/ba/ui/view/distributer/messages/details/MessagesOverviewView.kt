@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.distributer.messages.details
 
+import karika.distribucija.ba.util.inSarajevo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -435,7 +436,7 @@ fun MessageItem(message: ChatMessage, component: MessagesOverviewComponent, me: 
                 KarikaText(
                     modifier = Modifier
                         .padding(horizontal = 16.dp),
-                    text = message.createdAt ?: "",
+                    text = message.createdAt?.inSarajevo() ?: "",
                     color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400
@@ -482,7 +483,7 @@ fun MessageItem(message: ChatMessage, component: MessagesOverviewComponent, me: 
                 KarikaText(
                     modifier = Modifier
                         .padding(horizontal = 16.dp),
-                    text = message.createdAt ?: "",
+                    text = message.createdAt?.inSarajevo() ?: "",
                     color = KarikaColors.White,
                     textSize = 14.sp,
                     fontWeight = FontWeight.W400

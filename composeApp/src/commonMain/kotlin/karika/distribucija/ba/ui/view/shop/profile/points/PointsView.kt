@@ -1,5 +1,6 @@
 package karika.distribucija.ba.ui.view.shop.profile.points
 
+import karika.distribucija.ba.util.inSarajevo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -228,7 +229,7 @@ private fun TrxItem(item: Transaction) {
             KarikaText(
                 modifier = Modifier
                     .weight(1f),
-                text = item.createdAt,
+                text = item.createdAt.inSarajevo(),
                 fontWeight = FontWeight.W600,
                 color = KarikaColors.Gray2,
                 textSize = 14.sp
