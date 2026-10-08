@@ -132,6 +132,10 @@ class SalesRepMessagingE2ETest : SalesRepE2ETest() {
                 compose.onNodeWithTag(conversationTag(conversation), useUnmergedTree = true).performClick()
                 compose.waitUntil(SERVER_TIMEOUT_MS) { exists(hasText("Napiši poruku..."), unmerged = true) }
                 waitUntilLoaded()
+                // The messages load after the screen opens; typing before that can get lost
+                messages(conversation.conversationId!!).items.lastOrNull()?.body?.lineSequence()?.firstOrNull()
+                    ?.takeIf { it.isNotBlank() }?.take(20)
+                    ?.let { scrollListTo(hasText(it, substring = true) and !hasSetTextAction()) }
                 return
             } catch (e: IllegalArgumentException) {
                 if (e.message?.contains("during measure layout") != true || attempt == OPEN_ATTEMPTS - 1) throw e
@@ -158,7 +162,10 @@ class SalesRepMessagingE2ETest : SalesRepE2ETest() {
         val text = "E2E poruka komercijaliste " + System.currentTimeMillis()
         lastField().performTextInput(text)
         closeKeyboard()
+        compose.waitUntil(SCREEN_TIMEOUT_MS) { exists(hasSetTextAction() and hasText(text)) }
         compose.onNodeWithContentDescription("Pošalji").performClick()
+        // Sent: the field is empty again
+        compose.waitUntil(SERVER_TIMEOUT_MS) { !exists(hasSetTextAction() and hasText(text)) }
         // The conversation may already have older messages, with the new one at the end
         scrollListTo(hasText(text, substring = true) and !hasSetTextAction())
         return text

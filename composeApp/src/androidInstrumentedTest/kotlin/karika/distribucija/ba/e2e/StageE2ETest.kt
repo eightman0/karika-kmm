@@ -3,6 +3,11 @@ package karika.distribucija.ba.e2e
 import android.Manifest
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
+import karika.distribucija.ba.domain.model.Vendor
+import karika.distribucija.ba.domain.model.OrdersResponse
+import karika.distribucija.ba.domain.api.OrdersRepository
+import karika.distribucija.ba.domain.api.DashRepository
+import android.app.NotificationManager
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
@@ -446,6 +451,52 @@ abstract class StageE2ETest {
         }
     }
 
+    // Push notifications
+
+    /** The app's own notifications; the test runs in the app's process. */
+    protected fun appNotifications() = InstrumentationRegistry.getInstrumentation().targetContext
+        .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    /**
+     * Says where something [sender] sent through the API stopped: on stage, in the push, or in the
+     * refresh of the [screen]. The test clears the app's notifications first, so any shown since
+     * came with a push. [whenNoPush] adds what could explain a missing push.
+     */
+    protected fun pushDiagnosis(onStage: Boolean, screen: String, sender: String, whenNoPush: String = ""): String {
+        val notified = appNotifications().activeNotifications.isNotEmpty()
+        return when {
+            !onStage -> "it is not on stage, so $sender's send did not get through"
+            !notified -> "it is on stage, but no push arrived within ${PUSH_TIMEOUT_MS / 1000} s " +
+                "(no notification was shown); $whenNoPush"
+            else -> "the push arrived (its notification is shown), but the $screen did not refresh"
+        }
+    }
+
+    /**
+     * An order of one of the supplier test account's products, placed by the customer through the
+     * API, as the customer's orders have it.
+     */
+    protected fun orderOfTheVendorsProduct(): OrdersResponse {
+        val vendorId = asAccount(Account.VENDOR) {
+            val profile = runBlocking { DashRepository().getProfile().last() }
+            assertTrue("supplier profile: $profile", profile is ResultState.Success)
+            ((profile as ResultState.Success<*>).data as Vendor).entityId
+        }
+        val product = asAccount(Account.CUSTOMER) {
+            val result = runBlocking { ProductRepository().searchProductsByCategory(vendorId = vendorId).last() }
+            @Suppress("UNCHECKED_CAST")
+            ((result as? ResultState.Success<*>)?.data as? List<Product>).orEmpty()
+                .firstOrNull { it.hasOnStock() && it.sku != null && it.currentPrice() > 0 }
+        }
+        assumeTrue("the supplier has no product in stock", product != null)
+        val id = placeCustomerOrderByApi(product!!)
+        return asAccount(Account.CUSTOMER) {
+            val result = runBlocking { OrdersRepository().orders(sortBy = "created_at", sortDirection = "DESC").last() }
+            @Suppress("UNCHECKED_CAST")
+            ((result as ResultState.Success<*>).data as List<OrdersResponse>).first { it.orderId == id }
+        }
+    }
+
     /** A tab of the shop's bottom bar, which a screen can also have as a heading. */
     protected fun bottomTab(label: String) =
         hasText(label) and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)
@@ -498,6 +549,8 @@ abstract class StageE2ETest {
             "wrong password)"
         const val LANDING_TITLE = "Vaše centralno mjesto za"
         const val SCREEN_TIMEOUT_MS = 10_000L
+        /** On stage the push usually arrives within seconds, but its queue can lag half a minute and more. */
+        const val PUSH_TIMEOUT_MS = 60_000L
         /** How long a focused field's keyboard may take to come up. */
         private const val KEYBOARD_DELAY_MS = 1_500L
         const val SERVER_TIMEOUT_MS = 30_000L

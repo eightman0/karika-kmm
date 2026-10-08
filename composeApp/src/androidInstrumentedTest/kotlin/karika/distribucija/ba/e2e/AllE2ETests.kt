@@ -34,6 +34,7 @@ import org.junit.runners.Suite
     VendorScreensE2ETest::class,
     VendorEmployeesE2ETest::class,
     VendorOrderActionsE2ETest::class,
+    VendorPushE2ETest::class,
     // Komercijalista
     SalesRepNavigationE2ETest::class,
     SalesRepScreensE2ETest::class,

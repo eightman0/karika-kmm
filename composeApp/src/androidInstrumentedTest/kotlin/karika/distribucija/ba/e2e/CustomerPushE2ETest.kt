@@ -1,7 +1,5 @@
 package karika.distribucija.ba.e2e
 
-import android.app.NotificationManager
-import android.content.Context
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasClickAction
@@ -10,7 +8,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
-import androidx.test.platform.app.InstrumentationRegistry
 import karika.distribucija.ba.domain.api.ChatRepository
 import karika.distribucija.ba.domain.api.UserRepository
 import karika.distribucija.ba.domain.model.ChatAxis
@@ -23,12 +20,8 @@ import karika.distribucija.ba.util.inSarajevo
 import androidx.compose.ui.test.performScrollTo
 import karika.distribucija.ba.domain.api.DashRepository
 import karika.distribucija.ba.domain.api.OrdersRepository
-import karika.distribucija.ba.domain.api.ProductRepository
 import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.domain.model.OrdersResponse
-import karika.distribucija.ba.domain.model.Product
-import karika.distribucija.ba.domain.model.Vendor
-import org.junit.Assume.assumeTrue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import karika.distribucija.ba.domain.api.NotificationRepository
@@ -67,7 +60,7 @@ class CustomerPushE2ETest : CustomerE2ETest() {
     @Test
     fun aMessageFromTheVendorAppearsInTheOpenConversation() {
         val conversation = conversationWithTheVendor()
-        notifications().cancelAll()
+        appNotifications().cancelAll()
         openProfileButton("Poruke dobavljača")
         compose.waitUntilAtLeastOneExists(hasText(conversation.counterpartName!!), SERVER_TIMEOUT_MS)
         compose.onAllNodesWithText(conversation.counterpartName!!).onFirst().performClick()
@@ -95,9 +88,9 @@ class CustomerPushE2ETest : CustomerE2ETest() {
 
     @Test
     fun aCommentFromTheVendorAppearsOnTheOpenOrderComments() {
-        val order = orderFromTheVendor()
+        val order = orderOfTheVendorsProduct()
         try {
-            notifications().cancelAll()
+            appNotifications().cancelAll()
             reopenApp()
             openOrderComments(order)
 
@@ -134,7 +127,7 @@ class CustomerPushE2ETest : CustomerE2ETest() {
         // Read, so that the new message is sure to change the count
         asAccount(Account.CUSTOMER) { runBlocking { ChatRepository().markRead(conversation.conversationId!!).last() } }
         val before = unreadMessages()
-        notifications().cancelAll()
+        appNotifications().cancelAll()
         reopenApp()
         openProfile()
         compose.waitUntil(SERVER_TIMEOUT_MS) { badgeShows("Poruke dobavljača", before) }
@@ -153,9 +146,9 @@ class CustomerPushE2ETest : CustomerE2ETest() {
 
     @Test
     fun anApprovedOrderRaisesTheBadgeOnNotifikacije() {
-        val order = orderFromTheVendor()
+        val order = orderOfTheVendorsProduct()
         val before = unreadNotifications()
-        notifications().cancelAll()
+        appNotifications().cancelAll()
         reopenApp()
         openProfile()
         compose.waitUntil(SERVER_TIMEOUT_MS) { badgeShows("Notifikacije", before) }
@@ -202,31 +195,6 @@ class CustomerPushE2ETest : CustomerE2ETest() {
         val result = runBlocking { NotificationRepository().vendorNotifications(isRead = false, pageSize = 1).last() }
         assertTrue("unread notifications: $result", result is ResultState.Success)
         ((result as ResultState.Success<*>).data as VendorNotificationSearchResults).totalCount.toInt()
-    }
-
-    /**
-     * An order of one of the supplier test account's products, placed by the customer through the
-     * API, as the customer's orders have it.
-     */
-    private fun orderFromTheVendor(): OrdersResponse {
-        val vendorId = asAccount(Account.VENDOR) {
-            val profile = runBlocking { DashRepository().getProfile().last() }
-            assertTrue("supplier profile: $profile", profile is ResultState.Success)
-            ((profile as ResultState.Success<*>).data as Vendor).entityId
-        }
-        val product = asAccount(Account.CUSTOMER) {
-            val result = runBlocking { ProductRepository().searchProductsByCategory(vendorId = vendorId).last() }
-            @Suppress("UNCHECKED_CAST")
-            ((result as? ResultState.Success<*>)?.data as? List<Product>).orEmpty()
-                .firstOrNull { it.hasOnStock() && it.sku != null && it.currentPrice() > 0 }
-        }
-        assumeTrue("the supplier has no product in stock", product != null)
-        val id = placeCustomerOrderByApi(product!!)
-        return asAccount(Account.CUSTOMER) {
-            val result = runBlocking { OrdersRepository().orders(sortBy = "created_at", sortDirection = "DESC").last() }
-            @Suppress("UNCHECKED_CAST")
-            ((result as ResultState.Success<*>).data as List<OrdersResponse>).first { it.orderId == id }
-        }
     }
 
     /** Opens [order] from "Moje narudžbe", where it is the newest, and then its comments. */
@@ -278,24 +246,15 @@ class CustomerPushE2ETest : CustomerE2ETest() {
             .any { it.body == text }
     }
 
-    /**
-     * Says where a message the supplier sent stopped: on stage, in the push, or in the refresh of
-     * the [screen]. The test clears the app's notifications first, so any shown since came with a push.
-     */
+    /** See [pushDiagnosis]; when no push came, the customer's notification settings say whether stage should have sent one. */
     private fun whyNotShown(onStage: Boolean, screen: String): String {
-        val notified = notifications().activeNotifications.isNotEmpty()
         val settings = asAccount(Account.CUSTOMER) {
             val user = runBlocking { UserRepository().get().last() }
             ((user as? ResultState.Success<*>)?.data as? UserDetails)?.customAttributes.orEmpty()
                 .filter { it.attributeCode.orEmpty().startsWith("notification_") }
                 .joinToString { "${it.attributeCode}=${it.value}" }
         }
-        return when {
-            !onStage -> "it is not on stage, so the supplier's send did not get through"
-            !notified -> "it is on stage, but no push arrived within ${PUSH_TIMEOUT_MS / 1000} s " +
-                "(no notification was shown); the customer's settings on stage: [$settings]"
-            else -> "the push arrived (its notification is shown), but the $screen did not refresh"
-        }
+        return pushDiagnosis(onStage, screen, "the supplier", "the customer's settings on stage: [$settings]")
     }
 
     private fun customerConversations(): List<ChatConversation> {
@@ -303,10 +262,6 @@ class CustomerPushE2ETest : CustomerE2ETest() {
         assertTrue("conversations: $result", result is ResultState.Success)
         return ((result as ResultState.Success<*>).data as ChatConversationSearchResults).items
     }
-
-    /** The app's own notifications; the test runs in the app's process. */
-    private fun notifications() = InstrumentationRegistry.getInstrumentation().targetContext
-        .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     private fun openProfileButton(label: String) {
         compose.onNode(bottomTab("Profil")).performClick()
@@ -320,8 +275,6 @@ class CustomerPushE2ETest : CustomerE2ETest() {
     private fun composer() = hasSetTextAction() and hasText("Napiši komentar")
 
     private companion object {
-        /** On stage the push usually arrives within seconds, but its queue can lag half a minute and more. */
-        const val PUSH_TIMEOUT_MS = 60_000L
         const val PUSH = "notification_push_enabled"
     }
 }

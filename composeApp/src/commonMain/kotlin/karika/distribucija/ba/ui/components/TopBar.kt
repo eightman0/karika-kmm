@@ -342,6 +342,9 @@ fun ActionBar(component: MainComponent) {
 const val DASHBOARD_MENU_TAG = "dashboard_menu"
 const val DASHBOARD_NOTIFICATIONS_TAG = "dashboard_notifications"
 
+/** Test tag of the unread count on the notifications bell, for the end-to-end tests. */
+const val DASHBOARD_NOTIFICATIONS_BADGE_TAG = "dashboard_notifications_badge"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBarDashboard(
@@ -402,7 +405,8 @@ fun TopBarDashboard(
                         ) {
                             KarikaText(
                                 modifier = Modifier
-                                    .padding(0.dp),
+                                    .padding(0.dp)
+                                    .testTag(DASHBOARD_NOTIFICATIONS_BADGE_TAG),
                                 text = if (badge > 9) "9+" else "$badge",
                                 textSize = 10.sp,
                                 fontWeight = FontWeight.W400,

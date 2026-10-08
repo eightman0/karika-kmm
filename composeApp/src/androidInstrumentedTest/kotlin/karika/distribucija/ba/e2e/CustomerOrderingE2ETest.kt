@@ -161,9 +161,34 @@ class CustomerOrderingE2ETest : CustomerE2ETest() {
         compose.onNode(hasText("Pošalji") and hasClickAction()).assertIsEnabled().performClick()
 
         compose.waitUntil(SERVER_TIMEOUT_MS) { exists(hasText(text, substring = true), unmerged = true) }
-        val last = comments(vendorOrder.orderId, vendorOrder.vendorId.toString()).last()
-        assertEquals(text, last.message())
+        // Right after a send stage can still return the comments without it
+        lateinit var last: Comment
+        compose.waitUntil(SERVER_TIMEOUT_MS) {
+            comments(vendorOrder.orderId, vendorOrder.vendorId.toString()).last().also { last = it }.message() == text
+        }
         assertTrue("the comment is not the customer's", last.isMine())
+    }
+
+    @Test
+    fun aCommentWithSignsThatMeanSomethingInAUrlArrivesWhole() {
+        val order = placeOrderByApi()
+        val vendorOrder = order.orders.first()
+        val text = "E2E " + uniqueLetters() + " & 50% + #1 = ok?"
+        openOrderDetails(order)
+
+        compose.onAllNodesWithText("Komentari(", substring = true).onFirst().performScrollTo().performClick()
+        compose.waitUntilAtLeastOneExists(hasSetTextAction() and hasText("Napiši komentar"), SERVER_TIMEOUT_MS)
+        waitUntilLoaded()
+        compose.onNode(hasSetTextAction() and hasText("Napiši komentar")).performTextInput(text)
+        closeKeyboard()
+        compose.onNode(hasText("Pošalji") and hasClickAction()).performClick()
+
+        // The order's note is the customer's first comment; this one comes after it, once stage has it
+        compose.waitUntil(SERVER_TIMEOUT_MS) {
+            comments(vendorOrder.orderId, vendorOrder.vendorId.toString()).count { it.isMine() } >= 2
+        }
+        val last = comments(vendorOrder.orderId, vendorOrder.vendorId.toString()).last { it.isMine() }
+        assertEquals("the comment as stage has it", text, last.message())
     }
 
     @Test

@@ -140,7 +140,11 @@ class CustomerMessagingE2ETest : CustomerE2ETest() {
     }
 
     private fun assertSentOnStage(conversation: ChatConversation, text: String) {
-        val last = messages(conversation.conversationId!!).items.last()
+        // Right after a send stage can still return the messages without it
+        var last = messages(conversation.conversationId!!).items.last()
+        runCatching {
+            compose.waitUntil(SERVER_TIMEOUT_MS) { messages(conversation.conversationId).items.last().also { last = it }.body == text }
+        }
         assertEquals(text, last.body)
         assertEquals("customer", last.senderType)
     }
