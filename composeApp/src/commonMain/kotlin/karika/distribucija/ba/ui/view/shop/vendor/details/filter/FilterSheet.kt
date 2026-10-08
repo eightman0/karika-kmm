@@ -41,7 +41,8 @@ fun FilterSheet(component: VendorComponent) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val selectedRegion = remember { mutableStateOf(Pair("", 0)) }
     val showState = component.showFilter.asState()
-    val checkedElements = component.selectedRegion.asState()
+    // The sheet edits a copy: only "Filtriraj" applies it, "Odustani" and closing the sheet drop it
+    val checkedElements = remember(showState.value) { mutableStateOf(component.selectedRegion.value) }
 
     if (showState.value) {
         ModalBottomSheet(
@@ -204,6 +205,7 @@ fun FilterSheet(component: VendorComponent) {
                             .weight(1f),
                         title = "Filtriraj"
                     ) {
+                        component.selectedRegion.value = checkedElements.value
                         showState.negate()
                         component.loadNextPage(reset = true)
                     }

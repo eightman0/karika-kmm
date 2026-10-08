@@ -196,7 +196,7 @@ fun SalesInviteCustomerView(component: SalesInviteCustomerComponent) {
                         DropdownMenuItem(
                             text = {
                                 KarikaText(
-                                    text = "Pretraži kupce (unesite najmanje 2 znaka)",
+                                    text = "Pretraži kupce (unesite najmanje 3 znaka)",
                                     color = KarikaColors.Gray8,
                                     textSize = 14.sp,
                                     fontWeight = FontWeight.W400

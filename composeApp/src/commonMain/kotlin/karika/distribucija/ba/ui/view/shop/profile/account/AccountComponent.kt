@@ -50,6 +50,7 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
     val viberNotifications = mutableStateOf(true)
     val pushNotifications = mutableStateOf(true)
 
+    /** Saves the edited address only; the notification settings and other attributes stay as they are. */
     fun updateAddress() {
         scope.launch {
             userRepository.put(
@@ -71,25 +72,7 @@ class AccountComponent(componentContext: ComponentContext, stateHolder: KarikaSt
                                     } else {
                                         it
                                     }
-                                },
-                            customAttributes = stateHolder.customerSpecificHandler.userDetails.value.customAttributes
-                                .filter { it.attributeCode !in NOTIFICATION_ATTRIBUTE_CODES }
-                                .plus(
-                                    listOf(
-                                        Attributes(
-                                            "notification_email_enabled",
-                                            emailNotifications.value.toInt()
-                                        ),
-                                        Attributes(
-                                            "notification_viber_enabled",
-                                            viberNotifications.value.toInt()
-                                        ),
-                                        Attributes(
-                                            "notification_push_enabled",
-                                            pushNotifications.value.toInt()
-                                        )
-                                    )
-                                )
+                                }
                         )
                 )
             ).collect { result ->

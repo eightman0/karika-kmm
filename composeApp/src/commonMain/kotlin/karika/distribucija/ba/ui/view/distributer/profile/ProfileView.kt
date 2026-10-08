@@ -82,7 +82,6 @@ fun ProfileView(component: ProfileComponent) {
         ButtonsBox(component)
     }
     DeleteAccountConfirmation(component)
-    DeleteAccountConfirmation(component)
 
     LaunchedEffect(Unit) {
         component.stateHolder.vendorSpecificHandler.getVendorDetails()

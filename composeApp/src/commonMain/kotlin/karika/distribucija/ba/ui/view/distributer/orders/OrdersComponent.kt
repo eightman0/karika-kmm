@@ -8,6 +8,7 @@ import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.state.KarikaStateHolder
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -29,6 +30,7 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
     val showMinOrderModal = mutableStateOf(false)
     val minOrderValueModal = mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.minOrderAmount ?: "0")
     val minOrderValue = mutableStateOf(stateHolder.vendorSpecificHandler.vendorDetails.value.minOrderAmount ?: "0")
+    private var loadJob: Job? = null
     private var queryParams =
         listOf("&searchCriteria[sortOrders][0][field]=created_at&searchCriteria[sortOrders][0][direction]=DESC")
 
@@ -68,15 +70,15 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
 
     override fun loadNextPage(reset: Boolean) {
         if (reset) {
+            // A new filter or refresh replaces a load still running instead of being dropped
+            loadJob?.cancel()
             hasNextPage = true
             currentPage = 1
-        }
-
-        if (!hasNextPage || loader.value) {
+        } else if (!hasNextPage || loadJob?.isActive == true) {
             return
         }
 
-        scope.launch {
+        loadJob = scope.launch {
             DashRepository().getOrders(
                 pageSize = pageSize,
                 currentPage = currentPage,
