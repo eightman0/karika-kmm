@@ -27,6 +27,7 @@ import org.junit.runners.Suite
     CustomerOrderingE2ETest::class,
     CustomerMessagingE2ETest::class,
     CustomerRequestsE2ETest::class,
+    CustomerPushE2ETest::class,
     // Dobavljač
     VendorNavigationE2ETest::class,
     VendorOrdersE2ETest::class,

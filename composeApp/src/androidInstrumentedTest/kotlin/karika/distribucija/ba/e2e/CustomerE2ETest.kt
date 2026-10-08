@@ -13,7 +13,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import karika.distribucija.ba.domain.api.CartRepository
 import karika.distribucija.ba.domain.api.UserRepository
+import karika.distribucija.ba.domain.model.Attributes
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.UpdateCustomerRequest
 import karika.distribucija.ba.domain.model.UserDetails
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
@@ -61,6 +63,21 @@ abstract class CustomerE2ETest : StageE2ETest() {
         return (result as ResultState.Success<*>).data as UserDetails
     }
 
+    /** The customer's Email, Viber and Push notification settings on stage, as "1" or "0" by code. */
+    protected fun notificationSettings(): Map<String, String> = asAccount(Account.CUSTOMER) {
+        val attributes = user().customAttributes
+        NOTIFICATION_CODES.associateWith { code -> attributes.firstOrNull { it.attributeCode == code }?.value ?: "0" }
+    }
+
+    /** Saves [settings] (code to "1" or "0") as the customer's notification settings on stage. */
+    protected fun setNotificationSettings(settings: Map<String, String>) = asAccount(Account.CUSTOMER) {
+        val user = user()
+        val attributes = user.customAttributes.filter { it.attributeCode !in settings.keys } +
+            settings.map { (code, value) -> Attributes(code, value) }
+        val result = runBlocking { UserRepository().put(UpdateCustomerRequest(user.copy(customAttributes = attributes))).last() }
+        assertTrue("could not save the notification settings: $result", result is ResultState.Success)
+    }
+
     /**
      * Starts the app again, logged in, on the home screen: after a test changed something
      * through the API, the app only shows it once it loads it again.
@@ -104,5 +121,11 @@ abstract class CustomerE2ETest : StageE2ETest() {
      */
     protected fun waitForSnackbar(text: String) {
         compose.waitUntil(SERVER_TIMEOUT_MS) { exists(hasText(text, substring = true), unmerged = true) }
+    }
+
+    protected companion object {
+        val NOTIFICATION_CODES = listOf(
+            "notification_email_enabled", "notification_viber_enabled", "notification_push_enabled"
+        )
     }
 }

@@ -24,6 +24,7 @@ import karika.distribucija.ba.domain.model.UserDetails
 import karika.distribucija.ba.util.KarikaConstants
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
@@ -38,6 +39,19 @@ import org.junit.Test
  */
 @OptIn(ExperimentalTestApi::class)
 class CustomerAccountE2ETest : CustomerE2ETest() {
+
+    /** The notification settings before the test, which it puts back: other tests rely on them. */
+    private lateinit var settingsBefore: Map<String, String>
+
+    @Before
+    fun rememberNotificationSettings() {
+        settingsBefore = notificationSettings()
+    }
+
+    @After
+    fun restoreNotificationSettings() {
+        if (::settingsBefore.isInitialized && notificationSettings() != settingsBefore) setNotificationSettings(settingsBefore)
+    }
 
     @Before
     fun openMojNalog() {
@@ -208,11 +222,11 @@ class CustomerAccountE2ETest : CustomerE2ETest() {
         try {
             changePasswordInApp(old = password, new = temporary)
             waitForSnackbar("Lozinka uspješno promijenjena!")
-            assertTrue("the new password does not log in", canLogIn(temporary))
+            assertTrue("the new password does not log in", logsInSoon(temporary))
 
             changePasswordInApp(old = temporary, new = password)
             waitForSnackbar("Lozinka uspješno promijenjena!")
-            assertTrue("the old password does not log in again", canLogIn(password))
+            assertTrue("the old password does not log in again", logsInSoon(password))
         } finally {
             // Every other test logs in with the configured password
             if (!canLogIn(password)) runBlocking { UserRepository().changePass(temporary, password).last() }
@@ -287,6 +301,15 @@ class CustomerAccountE2ETest : CustomerE2ETest() {
         compose.onNode(hasText("Potvrdi") and hasClickAction()).performClick()
     }
 
+    /** Stage can refuse a password for a few seconds right after it was changed, so this tries again. */
+    private fun logsInSoon(password: String): Boolean {
+        repeat(LOGIN_TRIES) {
+            if (canLogIn(password)) return true
+            Thread.sleep(LOGIN_PAUSE_MS)
+        }
+        return false
+    }
+
     private fun canLogIn(password: String): Boolean {
         val (email, _) = stageAccount("KARIKA_STAGE_SHOP_EMAIL", "KARIKA_STAGE_SHOP_PASSWORD")
         val result = runBlocking { LoginRepository().login(LoginDto(email, password)).last() }
@@ -322,6 +345,8 @@ class CustomerAccountE2ETest : CustomerE2ETest() {
     private companion object {
         /** Which "Uredi" on the overview opens which form, in the order the overview shows them. */
         const val EDIT_PROFILE = 0
+        const val LOGIN_TRIES = 4
+        const val LOGIN_PAUSE_MS = 3_000L
         const val EDIT_BILLING = 1
         const val EDIT_SHIPPING = 2
         /** The address form's first text fields, in order; Grad is a dropdown. */
