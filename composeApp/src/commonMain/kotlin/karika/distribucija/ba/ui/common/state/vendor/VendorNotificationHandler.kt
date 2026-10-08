@@ -7,12 +7,27 @@ import karika.distribucija.ba.domain.model.ChatUnreadCount
 import karika.distribucija.ba.domain.model.ResultState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 class VendorNotificationHandler {
     val chatUnreadCount = mutableStateOf(ChatUnreadCount())
     val notificationCount = MutableStateFlow(0)
+
+    private val _pushReceived = MutableSharedFlow<Unit>(extraBufferCapacity = 2)
+
+    /**
+     * Emits on every push, even one that leaves [notificationCount] as it was, so that the open
+     * order screens load again.
+     */
+    val pushReceived: SharedFlow<Unit> = _pushReceived.asSharedFlow()
+
+    fun onPush() {
+        _pushReceived.tryEmit(Unit)
+    }
 
     fun notificationReceived() {
         reloadChatMessageCount()

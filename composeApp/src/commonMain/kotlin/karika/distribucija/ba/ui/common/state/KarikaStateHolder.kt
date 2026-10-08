@@ -81,6 +81,7 @@ class KarikaStateHolder(val handler: KarikaHandler) : NavigationHandler() {
             customerNotificationHandler.notificationReceived()
         } else {
             vendorNotificationHandler.notificationReceived()
+            vendorNotificationHandler.onPush()
         }
 
         if (route?.startsWith("route/chat") == true) {

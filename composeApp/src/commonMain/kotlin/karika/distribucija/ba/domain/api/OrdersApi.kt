@@ -1,5 +1,6 @@
 package karika.distribucija.ba.domain.api
 
+import io.ktor.http.encodeURLParameter
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -57,7 +58,7 @@ internal class OrdersApi {
         comment: String?,
     ): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.post(
-            url("mobile/orders/message?orderId=$orderId&vendorId=$vendorId&message=$comment")
+            url("mobile/orders/message?orderId=$orderId&vendorId=$vendorId&message=${comment.orEmpty().encodeURLParameter()}")
         )
     }
 
@@ -102,7 +103,7 @@ internal class OrdersApi {
         reason: String?,
     ): Result<HttpResponse> = runCatching {
         return@runCatching HttpClientProvider.client.post(
-            url("mobile/orders/cancel?orderId=$orderId&vendorId=$vendorId&message=$reason")
+            url("mobile/orders/cancel?orderId=$orderId&vendorId=$vendorId&message=${reason.orEmpty().encodeURLParameter()}")
         )
     }
 }

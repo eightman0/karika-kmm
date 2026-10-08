@@ -36,7 +36,8 @@ class OrdersComponent(componentContext: ComponentContext, stateHolder: KarikaSta
 
     init {
         scope.launch {
-            stateHolder.vendorNotificationHandler.notificationCount
+            // The first page loads when the screen opens; a push brings the new orders
+            stateHolder.vendorNotificationHandler.pushReceived
                 .collect {
                     loadNextPage(true)
                 }

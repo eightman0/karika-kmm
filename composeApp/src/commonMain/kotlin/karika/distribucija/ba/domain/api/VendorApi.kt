@@ -1,5 +1,6 @@
 package karika.distribucija.ba.domain.api
 
+import io.ktor.http.encodeURLParameter
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
@@ -57,7 +58,7 @@ internal class VendorApi {
                         "&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
 
             searchText.isNotEmpty() ->
-                url("mobile/vendors?searchCriteria[filterGroups][0][filters][0][field]=public_name&searchCriteria[filterGroups][0][filters][0][value]=$searchText&searchCriteria[filterGroups][0][filters][0][conditionType]=like&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
+                url("mobile/vendors?searchCriteria[filterGroups][0][filters][0][field]=public_name&searchCriteria[filterGroups][0][filters][0][value]=${searchText.encodeURLParameter()}&searchCriteria[filterGroups][0][filters][0][conditionType]=like&searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")
 
             else ->
                 url("mobile/vendors?searchCriteria[pageSize]=$pageSize&searchCriteria[currentPage]=$currentPage")

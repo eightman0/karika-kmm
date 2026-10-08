@@ -62,7 +62,7 @@ class OrderDetailsComponent(
         getComments()
 
         scope.launch {
-            stateHolder.vendorNotificationHandler.notificationCount
+            stateHolder.vendorNotificationHandler.pushReceived
                 .collect {
                     getOrder()
                     getComments()
