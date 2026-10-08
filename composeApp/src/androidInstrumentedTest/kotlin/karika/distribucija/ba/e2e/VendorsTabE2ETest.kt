@@ -33,7 +33,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 /**
@@ -157,9 +156,6 @@ class VendorsTabE2ETest : StageE2ETest() {
         compose.waitUntil(SERVER_TIMEOUT_MS) { exists(vendorCardTag(firstPage.first())) }
     }
 
-    // Known bug, left as it is for now: FilterSheet writes the picked regions straight into
-    // selectedRegion, so after "Odustani" the chip shows a filter the list does not apply
-    @Ignore("Poznat bug: Odustani ostavlja cip Ukljuceni filter, a lista nije filtrirana")
     @Test
     fun odustaniLeavesTheListUnfiltered() {
         val region = regions().first()

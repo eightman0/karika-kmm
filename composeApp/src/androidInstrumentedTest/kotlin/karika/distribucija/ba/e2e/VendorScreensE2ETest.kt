@@ -29,7 +29,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
-import org.junit.Ignore
 import org.junit.Test
 
 /**
@@ -192,9 +191,6 @@ class VendorScreensE2ETest : VendorE2ETest() {
         compose.waitUntilDoesNotExist(hasText("Unesite staru lozinku"), SCREEN_TIMEOUT_MS)
     }
 
-    // Known bug, left as it is for now: ProfileView renders DeleteAccountConfirmation twice, so two
-    // dialogs stack on top of each other (seen on stage: the question is on screen twice)
-    @Ignore("Poznat bug: dijalog Obrisi nalog se prikazuje dvaput")
     @Test
     fun obrisiNalogAsksOnceAndOdustaniKeepsTheAccount() {
         goTo("Korisnički profil", "Opšte informacije")

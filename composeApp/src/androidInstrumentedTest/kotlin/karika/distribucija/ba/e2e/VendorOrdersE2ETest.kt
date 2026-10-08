@@ -104,7 +104,6 @@ class VendorOrdersE2ETest : VendorE2ETest() {
         compose.waitUntilAtLeastOneExists(hasText("FILTERI"), SCREEN_TIMEOUT_MS)
         compose.onNode(hasSetTextAction() and hasText("Broj narudžbe")).performTextInput(order.orderId!!)
         closeKeyboard()
-        // OrdersComponent drops a reload asked for while it is still loading
         waitUntilLoaded()
         compose.onNodeWithText("Filtriraj").performClick()
 
@@ -138,7 +137,6 @@ class VendorOrdersE2ETest : VendorE2ETest() {
         priceField("OD").performTextInput("$from")
         priceField("DO").performTextInput("$to")
         closeKeyboard()
-        // OrdersComponent drops a reload asked for while it is still loading
         waitUntilLoaded()
         compose.onNodeWithText("Filtriraj").performClick()
 

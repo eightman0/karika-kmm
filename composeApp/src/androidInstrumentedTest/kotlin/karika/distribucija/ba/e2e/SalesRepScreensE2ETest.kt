@@ -239,9 +239,6 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
         conversations.take(10).forEach { scrollListTo(hasTestTag(conversationTag(it))) }
     }
 
-    private fun OperationalCustomer.displayName() =
-        company?.takeIf { it.isNotBlank() } ?: listOfNotNull(firstname, lastname).joinToString(" ")
-
     /** The sales rep's orders, as the orders screen loads them. */
     private fun orders(page: Int = 1): OnBehalfOrderSearchResults {
         val result = runBlocking { SalesRepository().getOrders(page = page, pageSize = 10).last() }

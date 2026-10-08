@@ -118,7 +118,8 @@ android {
 
         versionName = "2.7.1"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Runs every E2E test once in the app's order when all of them are asked for, see E2ETestRunner
+        testInstrumentationRunner = "karika.distribucija.ba.e2e.E2ETestRunner"
         // Stage test accounts for the login E2E tests, from the environment or ~/.gradle/gradle.properties
         listOf(
             "KARIKA_STAGE_SHOP_EMAIL",
@@ -133,10 +134,6 @@ android {
                 .orNull
                 ?.let { testInstrumentationRunnerArguments[key] = it }
         }
-        // All E2E tests in the order a user goes through the app, unless a run picks its own tests
-        val picksTests = listOf("class", "package", "notClass", "notPackage", "tests_regex")
-            .any { providers.gradleProperty("android.testInstrumentationRunnerArguments.$it").isPresent }
-        if (!picksTests) testInstrumentationRunnerArguments["class"] = "karika.distribucija.ba.e2e.AllE2ETests"
     }
     packaging {
         resources {

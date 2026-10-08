@@ -2,13 +2,21 @@ package karika.distribucija.ba.e2e
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollToNodeAction
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import karika.distribucija.ba.domain.api.SalesRepository
+import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.VendorOperationsMe
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertTrue
 import org.junit.Before
 
 /**
@@ -77,6 +85,33 @@ abstract class DashboardE2ETest : StageE2ETest() {
             (0 until lists.fetchSemanticsNodes().size).any {
                 runCatching { lists[it].performScrollToNode(matcher) }.isSuccess
             }
+        }
+    }
+
+    /** Who the logged-in account is in the supplier's team and what it may do, as the app reads it. */
+    protected fun me(): VendorOperationsMe {
+        val result = runBlocking { SalesRepository().getMe().last() }
+        assertTrue("vendor operations me: $result", result is ResultState.Success)
+        return (result as ResultState.Success<*>).data as VendorOperationsMe
+    }
+
+    /**
+     * The [index]th text field on screen. The screens under the open one stay composed, with
+     * their own fields, so only the displayed ones count.
+     */
+    protected fun field(index: Int): SemanticsNodeInteraction {
+        val shown = shownFieldIndices()
+        assertTrue("only ${shown.size} text fields are shown", index in shown.indices)
+        return compose.onAllNodes(hasSetTextAction())[shown[index]]
+    }
+
+    /** The last text field on screen, such as a conversation's message field. */
+    protected fun lastField() = field(shownFieldIndices().size - 1)
+
+    protected fun shownFieldIndices(): List<Int> {
+        val fields = compose.onAllNodes(hasSetTextAction())
+        return (0 until fields.fetchSemanticsNodes().size).filter {
+            runCatching { fields[it].assertIsDisplayed() }.isSuccess
         }
     }
 

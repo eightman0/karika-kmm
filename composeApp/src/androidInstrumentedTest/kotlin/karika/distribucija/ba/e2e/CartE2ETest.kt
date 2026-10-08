@@ -12,16 +12,10 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import karika.distribucija.ba.domain.api.CartRepository
-import karika.distribucija.ba.domain.model.AddToCart
-import karika.distribucija.ba.domain.model.CartItem
 import karika.distribucija.ba.domain.model.Product
-import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.view.shop.cart.cartProductTag
 import karika.distribucija.ba.ui.view.shop.cart.removeFromCartTag
 import kotlin.math.ceil
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -296,38 +290,6 @@ class CartE2ETest : StageE2ETest() {
 
     private fun exists(matcher: androidx.compose.ui.test.SemanticsMatcher, unmerged: Boolean = false) =
         compose.onAllNodes(matcher, useUnmergedTree = unmerged).fetchSemanticsNodes().isNotEmpty()
-
-    // The cart API, as the logged-in customer
-
-    private fun cartId(): String {
-        // POST carts/mine returns the active cart, creating it only if there is none
-        val result = runBlocking { CartRepository().createCart().last() }
-        assertTrue("no cart: $result", result is ResultState.Success)
-        return (result as ResultState.Success<*>).data as String
-    }
-
-    private fun addByApi(sku: String, qty: Int) {
-        val result = runBlocking {
-            CartRepository().addToCart(AddToCart(CartItem(sku = sku, qty = qty, quoteId = cartId()))).last()
-        }
-        assertTrue("could not put $sku in the cart: $result", result is ResultState.Success)
-    }
-
-    private fun setQtyByApi(product: Product, qty: Int) {
-        val item = currentCart().items.first { it.sku == product.sku }
-        val result = runBlocking {
-            CartRepository().updateCart(
-                AddToCart(CartItem(sku = item.sku, qty = qty, quoteId = cartId(), itemId = item.itemId))
-            ).last()
-        }
-        assertTrue("could not set ${product.sku} to $qty: $result", result is ResultState.Success)
-    }
-
-    private fun emptyCartByApi() {
-        currentCart().items.mapNotNull { it.itemId }.forEach {
-            runBlocking { CartRepository().removeFromCart(it.toString()).last() }
-        }
-    }
 
     private companion object {
         /** ProductQtyAction waits this long before it sends a changed quantity. */

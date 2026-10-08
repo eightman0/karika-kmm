@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -407,6 +408,9 @@ private fun ProfileInfoRow(
 
 // ── Discount card ─────────────────────────────────────────────────────────────
 
+/** Test tag of a discount rule's card, for the end-to-end tests. */
+fun discountTag(rule: DiscountRule) = "discount_${rule.ruleId}"
+
 @Composable
 private fun DiscountCard(
     rule: DiscountRule,
@@ -430,6 +434,7 @@ private fun DiscountCard(
 
     Column(
         modifier = modifier
+            .testTag(discountTag(rule))
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .background(KarikaColors.White)

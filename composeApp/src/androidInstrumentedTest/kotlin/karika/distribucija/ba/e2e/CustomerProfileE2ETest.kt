@@ -2,9 +2,11 @@ package karika.distribucija.ba.e2e
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
@@ -14,12 +16,10 @@ import androidx.compose.ui.test.performTextInput
 import karika.distribucija.ba.domain.api.OrdersRepository
 import karika.distribucija.ba.domain.api.PartnershipRepository
 import karika.distribucija.ba.domain.api.PointsRepository
-import karika.distribucija.ba.domain.api.UserRepository
 import karika.distribucija.ba.domain.model.Bonus
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.PartnershipRequest
 import karika.distribucija.ba.domain.model.ResultState
-import karika.distribucija.ba.domain.model.UserDetails
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
@@ -97,9 +97,12 @@ class CustomerProfileE2ETest : CustomerE2ETest() {
         assumeTrue("the customer has no orders", orders().isNotEmpty())
         open("Moje narudžbe")
 
+        // The option in the status menu, not an order's status chip of the same text
+        val option = hasText("Otkazana") and hasAnyAncestor(isPopup())
         compose.onAllNodesWithText("Sve").onFirst().performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Otkazana"), SCREEN_TIMEOUT_MS)
-        compose.onNodeWithText("Otkazana").performClick()
+        compose.waitUntilAtLeastOneExists(option, SCREEN_TIMEOUT_MS)
+        compose.onNode(option).performClick()
+        compose.waitUntilDoesNotExist(option, SCREEN_TIMEOUT_MS)
 
         waitUntilLoaded()
         val cancelled = orders(status = "cancelled")
@@ -154,12 +157,6 @@ class CustomerProfileE2ETest : CustomerE2ETest() {
         compose.onNode(hasText(button) and hasClickAction()).performClick()
         compose.waitUntilDoesNotExist(hasText("Zahtjevi za partnerstvo") and hasClickAction(), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
-    }
-
-    private fun user(): UserDetails {
-        val result = runBlocking { UserRepository().get().last() }
-        assertTrue("customer: $result", result is ResultState.Success)
-        return (result as ResultState.Success<*>).data as UserDetails
     }
 
     private fun orders(status: String = ""): List<OrdersResponse> {

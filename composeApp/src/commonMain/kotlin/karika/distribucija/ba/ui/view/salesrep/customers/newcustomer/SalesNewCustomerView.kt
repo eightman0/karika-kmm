@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -617,6 +618,9 @@ private fun FormField(label: String, content: @Composable () -> Unit) {
 
 // ── Text input ─────────────────────────────────────────────────────────────────
 
+/** Test tag of the form's text field with [placeholder], for the end-to-end tests. */
+fun newCustomerFieldTag(placeholder: String) = "new_customer_$placeholder"
+
 @Composable
 private fun FormTextField(
     value: String,
@@ -662,7 +666,7 @@ private fun FormTextField(
                 ),
                 keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().testTag(newCustomerFieldTag(placeholder))
             )
         }
     }

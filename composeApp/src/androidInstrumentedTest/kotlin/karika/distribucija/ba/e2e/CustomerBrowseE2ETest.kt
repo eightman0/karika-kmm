@@ -50,8 +50,11 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
 
     @Test
     fun searchWithoutAMatchShowsNoResults() {
+        // One made-up word: real words, even "nema", can match a product's text on stage
+        val query = "zzqxvkarikae2e"
+        assertTrue("stage finds products for \"$query\"", products(searchText = query).isEmpty())
         openSearch()
-        compose.onNode(hasSetTextAction()).performTextInput("zzqxv nema takvog")
+        compose.onNode(hasSetTextAction()).performTextInput(query)
 
         compose.waitUntilAtLeastOneExists(hasText("Nema rezultata."), SERVER_TIMEOUT_MS)
     }

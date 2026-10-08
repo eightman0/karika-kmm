@@ -5,6 +5,7 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
 import android.os.Build
 import android.os.SystemClock
+import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.activity.ComponentActivity
@@ -21,23 +22,37 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToString
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import karika.distribucija.ba.BuildConfig
 import karika.distribucija.ba.MainActivity
+import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.api.CartRepository
+import karika.distribucija.ba.domain.api.LoginRepository
 import karika.distribucija.ba.domain.api.ProductRepository
+import karika.distribucija.ba.domain.api.UserRepository
+import karika.distribucija.ba.domain.model.AddToCart
 import karika.distribucija.ba.domain.model.Cart
+import karika.distribucija.ba.domain.model.CartItem
+import karika.distribucija.ba.domain.model.LoginDto
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.SetShippingAddressRequest
+import karika.distribucija.ba.domain.model.ShippingAddress
+import karika.distribucija.ba.domain.model.UserDetails
+import karika.distribucija.ba.ui.common.KarikaType
+import karika.distribucija.ba.ui.common.getEnvJwt
 import karika.distribucija.ba.util.KarikaConfig
+import kotlin.math.ceil
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -77,6 +92,9 @@ abstract class StageE2ETest {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         // Without a saved session the app opens on the landing screen
         appPrefs().edit().clear().commit()
+        // The tests share one app process, which keeps the last account's token in memory;
+        // a freshly started app has the guest token
+        HttpClientProvider.token = getEnvJwt()
         // Otherwise the system permission dialogs cover the app: notifications on first launch,
         // location as soon as the sales rep dashboard opens
         val permissions = listOfNotNull(
@@ -155,12 +173,17 @@ abstract class StageE2ETest {
         repeat(LOGIN_ATTEMPTS) { attempt ->
             try {
                 compose.waitUntil(SERVER_TIMEOUT_MS) {
-                    seen += screenTexts().filter { text -> LOGIN_SCREEN_TEXTS.none { text.startsWith(it) } }
+                    seen += screenTexts().filter { text ->
+                        text.startsWith(WRONG_LOGIN_MESSAGE) || LOGIN_SCREEN_TEXTS.none { text.startsWith(it) }
+                    }
                     compose.onAllNodes(arrived).fetchSemanticsNodes().isNotEmpty() ||
+                        seen.any { it.startsWith(WRONG_LOGIN_MESSAGE) } ||
                         // A network error ends this attempt early
                         (attempt < LOGIN_ATTEMPTS - 1 && seen.any { it in NETWORK_ERRORS })
                 }
                 if (compose.onAllNodes(arrived).fetchSemanticsNodes().isNotEmpty()) return
+                // Trying again would only keep a locked account locked, see LoginRefused
+                if (seen.any { it.startsWith(WRONG_LOGIN_MESSAGE) }) throw LoginRefused()
                 // The request did not reach stage: tap "Prijavi se" again, as a user would
                 seen.clear()
                 waitUntilLoaded()
@@ -174,6 +197,14 @@ abstract class StageE2ETest {
         throw AssertionError("the login did not get through; besides the login screen it showed: $seen")
     }
 
+    /** Writes the screen's whole semantics tree to logcat (tag E2E_SCREEN), to see why a step failed. */
+    protected fun dumpScreen(label: String) {
+        val roots = compose.onAllNodes(isRoot(), useUnmergedTree = true)
+        repeat(roots.fetchSemanticsNodes().size) { i ->
+            roots[i].printToString(Int.MAX_VALUE).chunked(3000).forEach { Log.i("E2E_SCREEN", "[$label/$i] $it") }
+        }
+    }
+
     /** Every text on screen, from the unmerged tree. */
     protected fun screenTexts(): List<String> =
         compose.onAllNodes(hasText("", substring = true), useUnmergedTree = true)
@@ -185,6 +216,10 @@ abstract class StageE2ETest {
      * way a user does: with the back key, which closes the keyboard first.
      */
     protected fun closeKeyboard() {
+        // Right after typing, a focused field's keyboard may still be on its way up
+        if (!keyboardShown() && fieldFocused()) {
+            runCatching { compose.waitUntil(KEYBOARD_DELAY_MS) { keyboardShown() } }
+        }
         if (keyboardShown()) {
             InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         }
@@ -197,6 +232,10 @@ abstract class StageE2ETest {
         InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         compose.waitForIdle()
     }
+
+    private fun fieldFocused() = compose.onAllNodes(
+        hasSetTextAction() and SemanticsMatcher.expectValue(SemanticsProperties.Focused, true)
+    ).fetchSemanticsNodes().isNotEmpty()
 
     private fun keyboardShown(): Boolean {
         val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
@@ -240,6 +279,7 @@ abstract class StageE2ETest {
      * logs in through the screen again.
      */
     private fun enterAs(account: Account, home: SemanticsMatcher, logInThroughScreen: () -> Unit) {
+        if (account in refused) throw AssertionError("$account: $LOGIN_REFUSED, so this test did not try again")
         val saved = sessions[account]
         if (saved != null) {
             scenario.close()
@@ -263,7 +303,12 @@ abstract class StageE2ETest {
             compose.waitUntilAtLeastOneExists(hasText(LANDING_TITLE, substring = true), SCREEN_TIMEOUT_MS)
             waitUntilLoaded()
         }
-        logInThroughScreen()
+        try {
+            logInThroughScreen()
+        } catch (e: LoginRefused) {
+            refused += account
+            throw AssertionError("$account: $LOGIN_REFUSED", e)
+        }
         compose.waitUntilAtLeastOneExists(home, SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         val session = appPrefs().all.mapNotNull { (key, value) -> (value as? String)?.let { key to it } }.toMap()
@@ -307,6 +352,100 @@ abstract class StageE2ETest {
         return (result as? ResultState.Success<*>)?.data as? Cart ?: Cart()
     }
 
+    // The cart API, as the logged-in customer
+
+    protected fun cartIdByApi(): String {
+        // POST carts/mine returns the active cart, creating it only if there is none
+        val result = runBlocking { CartRepository().createCart().last() }
+        assertTrue("no cart: $result", result is ResultState.Success)
+        return (result as ResultState.Success<*>).data as String
+    }
+
+    protected fun addByApi(sku: String, qty: Int) {
+        var result: ResultState<*>? = null
+        // Right after an order stage may not have the new cart ready yet
+        repeat(3) { attempt ->
+            result = runBlocking {
+                CartRepository().addToCart(AddToCart(CartItem(sku = sku, qty = qty, quoteId = cartIdByApi()))).last()
+            }
+            if (result is ResultState.Success) return
+            Thread.sleep(1_000L * (attempt + 1))
+        }
+        throw AssertionError("could not put $sku in the cart: $result")
+    }
+
+    protected fun setQtyByApi(product: Product, qty: Int) {
+        val item = currentCart().items.first { it.sku == product.sku }
+        val result = runBlocking {
+            CartRepository().updateCart(
+                AddToCart(CartItem(sku = item.sku, qty = qty, quoteId = cartIdByApi(), itemId = item.itemId))
+            ).last()
+        }
+        assertTrue("could not set ${product.sku} to $qty: $result", result is ResultState.Success)
+    }
+
+    protected fun emptyCartByApi() {
+        currentCart().items.mapNotNull { it.itemId }.forEach {
+            runBlocking { CartRepository().removeFromCart(it.toString()).last() }
+        }
+    }
+
+    /**
+     * Empties the customer's cart and puts in [product], as many minimum quantities as its
+     * vendor's minimum order needs (with PDV, as the cart counts it). Runs as the customer.
+     */
+    protected fun fillCustomerCartToTheVendorMinimum(product: Product) = asAccount(Account.CUSTOMER) {
+        emptyCartByApi()
+        val cart = putInCart(product)
+        val vendorId = cart.items.first { it.sku == product.sku }.extensionAttributes?.vendorId
+        val minimum = cart.extensionAttributes?.vendors
+            ?.firstOrNull { it.id?.toString() == vendorId }?.minOrderAmount()?.toDoubleOrNull() ?: 0.0
+        val steps = ceil(minimum / (product.currentPrice() * product.minQty() * PDV)).toInt().coerceAtLeast(1)
+        assumeTrue("the vendor's minimum takes $steps minimum quantities", steps <= MAX_MINIMUM_STEPS)
+        if (steps > 1) setQtyByApi(product, steps * product.minQty())
+    }
+
+    /**
+     * Puts [product] in the customer's cart and returns the cart once it shows it. Right after an
+     * order stage can take the item into the old cart while it makes the new one, so the item is
+     * put in again when it does not show up.
+     */
+    private fun putInCart(product: Product): Cart {
+        repeat(CART_ATTEMPTS) {
+            addByApi(product.sku!!, product.minQty())
+            repeat(10) {
+                val cart = currentCart()
+                if (cart.items.any { it.sku == product.sku }) return cart
+                Thread.sleep(1_000)
+            }
+        }
+        throw AssertionError("${product.sku} does not show up in the customer's cart")
+    }
+
+    /**
+     * Orders [product] as the customer through the API, the way "Završi narudžbu" does, with the
+     * default shipping address, and returns the order's id (its entity id, which the supplier's
+     * orders call order_id).
+     */
+    protected fun placeCustomerOrderByApi(product: Product, note: String = "E2E narudžba"): String {
+        fillCustomerCartToTheVendorMinimum(product)
+        return asAccount(Account.CUSTOMER) {
+            val user = (runBlocking { UserRepository().get().last() } as ResultState.Success<*>).data as UserDetails
+            val address = user.shippingAddress()
+            assumeTrue("the customer has no default shipping address", address != null)
+            val forOrder = address!!.copy(id = null, defaultShipping = null, defaultBilling = null, save = 0)
+            val set = runBlocking {
+                CartRepository().setAddress(
+                    SetShippingAddressRequest(ShippingAddress(forOrder, forOrder, "freeshipping", "freeshipping"))
+                ).last()
+            }
+            assertTrue("could not set the shipping address: $set", set is ResultState.Success)
+            val placed = runBlocking { CartRepository().placeOrder(note).last() }
+            assertTrue("could not place the order: $placed", placed is ResultState.Success)
+            ((placed as ResultState.Success<*>).data as String).trim().trim('"')
+        }
+    }
+
     /** A tab of the shop's bottom bar, which a screen can also have as a heading. */
     protected fun bottomTab(label: String) =
         hasText(label) and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)
@@ -316,13 +455,51 @@ abstract class StageE2ETest {
         compose.waitForIdle()
     }
 
-    protected enum class Account { CUSTOMER, VENDOR, SALES_REP }
+    protected enum class Account(val emailKey: String, val passwordKey: String, val type: KarikaType) {
+        CUSTOMER("KARIKA_STAGE_SHOP_EMAIL", "KARIKA_STAGE_SHOP_PASSWORD", KarikaType.SHOP),
+        VENDOR("KARIKA_STAGE_DISTRIBUTER_EMAIL", "KARIKA_STAGE_DISTRIBUTER_PASSWORD", KarikaType.VENDOR),
+        SALES_REP("KARIKA_STAGE_SALESREP_EMAIL", "KARIKA_STAGE_SALESREP_PASSWORD", KarikaType.VENDOR),
+    }
+
+    /**
+     * Runs [block] against stage as [account] through the API, for what another account has to
+     * do first: the customer orders from the supplier before the supplier can approve it. The
+     * app's own session is left as it was.
+     */
+    protected fun <T> asAccount(account: Account, block: () -> T): T {
+        val token = apiTokens.getOrPut(account) {
+            val (email, password) = stageAccount(account.emailKey, account.passwordKey)
+            val result = runBlocking { LoginRepository().login(LoginDto(email, password, account.type)).last() }
+            assertTrue("$account could not log in through the API: $result", result is ResultState.Success)
+            (result as ResultState.Success<*>).data as String
+        }
+        val before = HttpClientProvider.token
+        HttpClientProvider.token = token
+        try {
+            return block()
+        } finally {
+            HttpClientProvider.token = before
+        }
+    }
 
     protected companion object {
+        /** API tokens of the accounts [asAccount] ran as in this run. */
+        private val apiTokens = mutableMapOf<Account, String>()
+        /** The cart counts the vendor's minimum with PDV. */
+        private const val PDV = 1.17
+        private const val MAX_MINIMUM_STEPS = 40
+        private const val CART_ATTEMPTS = 3
         /** The sessions the app saved after each account's first login in this run. */
         private val sessions = mutableMapOf<Account, Map<String, String>>()
+        /** Accounts whose right password stage refused in this run, see [LoginRefused]. */
+        private val refused = mutableSetOf<Account>()
+        private const val LOGIN_REFUSED = "stage refused the right password: the account is " +
+            "locked for a while after too many failed logins (Magento says the same as for a " +
+            "wrong password)"
         const val LANDING_TITLE = "Vaše centralno mjesto za"
         const val SCREEN_TIMEOUT_MS = 10_000L
+        /** How long a focused field's keyboard may take to come up. */
+        private const val KEYBOARD_DELAY_MS = 1_500L
         const val SERVER_TIMEOUT_MS = 30_000L
         const val WRONG_LOGIN_MESSAGE = "Prijava na račun je bila pogrešna"
         /** Pauses before each new login attempt, longer each time: network hiccups can last a while. */
@@ -343,6 +520,13 @@ abstract class StageE2ETest {
         const val SALES_REP_HOME = "Upravljanje narudžbama"
     }
 }
+
+/**
+ * Stage refused a login with the right password. Magento then answers as for a wrong password,
+ * which the app shows as WRONG_LOGIN_MESSAGE: after too many failed logins it locks the account
+ * for a while, and every further attempt keeps it locked.
+ */
+private class LoginRefused : RuntimeException()
 
 /**
  * Slows a run down so it can be followed by eye: the test waits for the app to be idle before
