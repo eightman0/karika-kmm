@@ -21,8 +21,8 @@ import com.arkivanov.decompose.extensions.compose.stack.Children
 import karika.distribucija.ba.ui.components.BottomBar
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.SideBar
-import karika.distribucija.ba.ui.components.TopBar
 import karika.distribucija.ba.ui.components.isTabletLandscape
 import karika.distribucija.ba.ui.view.shop.cart.CartView
 import karika.distribucija.ba.ui.view.shop.cart.nextstep.ShippingDetailsView
@@ -50,9 +50,11 @@ fun MainView(component: MainComponent) {
 fun MainViewPhone(component: MainComponent) {
     Box(
         modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
+            .fillMaxSize()
+            .background(color = KarikaUiColors.Page),
+        contentAlignment = Alignment.TopCenter
     ) {
+        // White behind the status bar, so it blends with the screens' white headers
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -63,7 +65,7 @@ fun MainViewPhone(component: MainComponent) {
             modifier = Modifier
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .fillMaxSize(),
-            topBar = { TopBar(component) },
+            containerColor = KarikaUiColors.Page,
             bottomBar = { BottomBar(component) },
             component = component
         ) { padding ->
@@ -126,7 +128,7 @@ fun MainViewTablet(component: MainComponent) {
                 modifier = Modifier
                     .windowInsetsPadding(WindowInsets.safeDrawing)
                     .fillMaxSize(),
-                topBar = { TopBar(component) },
+                containerColor = KarikaUiColors.Page,
                 component = component
             ) { padding ->
                 Children(

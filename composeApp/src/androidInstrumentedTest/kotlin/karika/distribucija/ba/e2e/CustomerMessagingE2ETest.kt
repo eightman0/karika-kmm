@@ -104,7 +104,7 @@ class CustomerMessagingE2ETest : CustomerE2ETest() {
         val product = recommendedProducts().first()
         compose.waitUntilAtLeastOneExists(hasTestTag(productCardTag(product)), SERVER_TIMEOUT_MS)
         compose.onNodeWithTag(productCardTag(product)).performScrollTo().performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Minimalna količina:"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Min. količina", substring = true), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
 
         compose.onAllNodes(hasText("Pošalji poruku dobavljaču") and hasClickAction()).onFirst().performScrollTo().performClick()

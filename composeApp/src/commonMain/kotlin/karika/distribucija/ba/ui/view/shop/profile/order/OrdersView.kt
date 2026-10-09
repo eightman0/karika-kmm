@@ -1,20 +1,30 @@
 package karika.distribucija.ba.ui.view.shop.profile.order
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,50 +33,55 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withLink
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Order
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.Vendor
-import karika.distribucija.ba.ui.components.HorizontalButtons
+import karika.distribucija.ba.ui.components.KBackHeader
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KChip
+import karika.distribucija.ba.ui.components.KDivider
+import karika.distribucija.ba.ui.components.KEmptyState
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KInitials
+import karika.distribucija.ba.ui.components.KPill
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KSecondaryButton
 import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.KarikaPickerSmall
-import karika.distribucija.ba.ui.components.KarikaPickerSmall1
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.TopBarWithBack
-import karika.distribucija.ba.ui.components.YSpacer16
-import karika.distribucija.ba.ui.components.YSpacer8
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.negate
-import karika.distribucija.ba.ui.components.onClick
-import karika.distribucija.ba.ui.components.rounded
-import karika.distribucija.ba.ui.components.roundedWithBorder
 import karika.distribucija.ba.ui.view.shop.profile.order.components.AttachBillModal
 import karika.distribucija.ba.ui.view.shop.profile.order.components.CancelOrderModal
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_arrow_down
-import karikav2.composeapp.generated.resources.ic_arrow_up
-import karikav2.composeapp.generated.resources.ic_gift
+import karikav2.composeapp.generated.resources.ic_k_chat
+import karikav2.composeapp.generated.resources.ic_k_chevron_down
+import karikav2.composeapp.generated.resources.ic_k_document
+import karikav2.composeapp.generated.resources.ic_k_gift
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun OrdersView(component: OrdersComponent) {
     KarikaScaffold(
-        containerColor = KarikaColors.White,
-        contentWindowInsets = WindowInsets.systemBars,
+        containerColor = KarikaUiColors.Page,
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
-            TopBarWithBack("Moje narudžbe") {
-                component.appBack()
+            Column(modifier = Modifier.fillMaxWidth().background(KarikaUiColors.Page)) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(KarikaColors.White)
+                        .windowInsetsTopHeight(WindowInsets.statusBars)
+                )
+                KBackHeader(title = "Moje narudžbe", onBack = { component.appBack() })
             }
         },
         component = component
@@ -74,8 +89,8 @@ fun OrdersView(component: OrdersComponent) {
         Column(
             modifier = Modifier
                 .padding(it)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize()
+                .background(KarikaUiColors.Page)
         ) {
             FilterView(component)
             Orders(component)
@@ -83,51 +98,87 @@ fun OrdersView(component: OrdersComponent) {
     }
 }
 
+private val statusOptions = listOf(
+    "Sve" to "",
+    "Na čekanju" to "pending",
+    "Odobrena" to "approved",
+    "Otkazana" to "cancelled",
+    "Odbijena" to "rejected",
+    "Čekanje na uplatu" to "estimate-sent",
+    "Uplaćena" to "bill-sent"
+)
+
 @Composable
 private fun FilterView(component: OrdersComponent) {
-    val statusSort = mutableStateOf("Sve").asState()
-    val dateSort = mutableStateOf("Najnovije").asState()
+    val statusSort = mutableStateOf(
+        statusOptions.firstOrNull { it.second == component.status }?.first ?: "Sve"
+    ).asState()
+    val dateSort = mutableStateOf(
+        if (component.sortDirection == "ASC") "Najstarije" else "Najnovije"
+    ).asState()
 
     Row(
-        modifier = Modifier,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        KarikaPickerSmall1(
-            modifier = Modifier
-                .weight(1f),
-            value = statusSort,
-            values = mutableStateOf(
-                listOf(
-                    Pair("Sve", KarikaColors.Gray2),
-                    Pair("Na čekanju", KarikaColors.Blue),
-                    Pair("Odobrena", KarikaColors.Green3),
-                    Pair("Otkazana", KarikaColors.Gray2),
-                    Pair("Odbijena", KarikaColors.Red),
-                    Pair("Čekanje na uplatu", KarikaColors.Orange),
-                    Pair("Uplaćena", KarikaColors.Orange)
-                )
-            ).asState()
-        ) {
-            component.status = when (statusSort.value) {
-                "Odobrena" -> "approved"
-                "Na čekanju" -> "pending"
-                "Odbijena" -> "rejected"
-                "Otkazana" -> "cancelled"
-                "Čekanje na uplatu" -> "estimate-sent"
-                "Uplaćena" -> "bill-sent"
-                else -> ""
-            }
+        DropdownChip(
+            value = statusSort.value,
+            values = statusOptions.map { it.first }
+        ) { selected ->
+            statusSort.value = selected
+            component.status = statusOptions.firstOrNull { it.first == selected }?.second ?: ""
             component.loadNextPage(reset = true)
         }
-        KarikaPickerSmall(
-            modifier = Modifier
-                .weight(1f),
-            value = dateSort,
-            values = mutableStateOf(listOf("Najnovije", "Najstarije")).asState()
-        ) {
-            component.sortDirection = if (dateSort.value == "Najnovije") "DESC" else "ASC"
+        DropdownChip(
+            value = dateSort.value,
+            values = listOf("Najnovije", "Najstarije")
+        ) { selected ->
+            dateSort.value = selected
+            component.sortDirection = if (selected == "Najnovije") "DESC" else "ASC"
             component.loadNextPage(reset = true)
+        }
+    }
+}
+
+/** White chip with a chevron that opens a menu of [values]. */
+@Composable
+private fun DropdownChip(
+    value: String,
+    values: List<String>,
+    onSelect: (String) -> Unit,
+) {
+    val expanded = remember { mutableStateOf(false) }
+    Box {
+        KChip(
+            text = value,
+            selected = false,
+            trailingIcon = vectorResource(Res.drawable.ic_k_chevron_down),
+            onClick = { expanded.value = true }
+        )
+        DropdownMenu(
+            modifier = Modifier.background(KarikaColors.White),
+            expanded = expanded.value,
+            onDismissRequest = { expanded.value = false }
+        ) {
+            values.forEach { option ->
+                DropdownMenuItem(
+                    text = {
+                        KarikaText(
+                            text = option,
+                            color = KarikaUiColors.Ink,
+                            textSize = 14.sp,
+                            fontWeight = if (option == value) FontWeight.W700 else FontWeight.W500
+                        )
+                    },
+                    onClick = {
+                        expanded.value = false
+                        onSelect(option)
+                    }
+                )
+            }
         }
     }
 }
@@ -140,14 +191,16 @@ private fun Orders(component: OrdersComponent) {
 
     LazyColumn(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxSize(),
         state = state,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(items = items, key = { it.orderId }) {
             OrderItem(it, component)
         }
         item { EmptyState(component) }
+        item { Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars)) }
     }
 
     LaunchedEffect(state.canScrollForward) {
@@ -164,143 +217,136 @@ private fun Orders(component: OrdersComponent) {
     }
 }
 
+/** Status pill colors: approved green, pending amber, cancelled/rejected red, others gray. */
+internal fun orderStatusColors(status: String?): Triple<Color, Color, Color> = when (status) {
+    "approved" -> Triple(KarikaUiColors.GreenSoft, KarikaUiColors.Green, KarikaUiColors.Green)
+    "pending" -> Triple(KarikaUiColors.AmberSoft, KarikaUiColors.Amber, KarikaUiColors.Amber)
+    "cancelled", "rejected" -> Triple(KarikaUiColors.RedSoft, KarikaUiColors.Red, KarikaUiColors.Red)
+    else -> Triple(KarikaUiColors.Field, KarikaUiColors.Muted, KarikaUiColors.Muted)
+}
+
+@Composable
+private fun StatusPill(order: Order) {
+    val (background, color, dot) = orderStatusColors(order.status)
+    KPill(text = order.status(), background = background, color = color, dot = dot, textSize = 11.5.sp)
+}
+
 @Composable
 private fun OrderItem(order: OrdersResponse, component: OrdersComponent) {
-    Column(
-        modifier = Modifier
-            .onClick { component.navigateDetails(order) }
-            .roundedWithBorder(
-                color = KarikaColors.Gray14,
-                borderColor = KarikaColors.Border,
-                shape = 4.dp
-            )
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    KCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp)
     ) {
         Column(
             modifier = Modifier
-                .rounded(color = KarikaColors.White, shape = 4.dp)
                 .fillMaxWidth()
+                .clickable { component.navigateDetails(order) }
+                .padding(14.dp)
         ) {
-            YSpacer16()
             Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
             ) {
-                KarikaText(
-                    modifier = Modifier
-                        .weight(1f),
-                    text = "#${order.incrementId}",
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W600,
-                )
-                KarikaText(
-                    modifier = Modifier
-                        .weight(1f),
-                    text = order.vpcString(),
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W600,
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KarikaText(
-                    modifier = Modifier
-                        .weight(1f),
-                    text = order.date(),
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W600,
-                )
-                KarikaText(
-                    modifier = Modifier
-                        .weight(1f),
-                    text = "UKUPNO VPC",
-                    color = KarikaColors.Gray13,
-                    textSize = 10.sp,
-                    fontWeight = FontWeight.W600,
-                )
-            }
-            YSpacer16()
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KarikaText(
-                    modifier = Modifier
-                        .weight(1f),
-                    text = order.vpcPdvString(),
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W600,
-                )
-                KarikaText(
-                    modifier = Modifier
-                        .weight(1f),
-                    text = order.bonus(),
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W600,
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KarikaText(
-                    modifier = Modifier
-                        .weight(1f),
-                    text = "UKUPNO SA PDV",
-                    color = KarikaColors.Gray13,
-                    textSize = 10.sp,
-                    fontWeight = FontWeight.W600
-                )
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .size(12.dp),
-                        imageVector = vectorResource(Res.drawable.ic_gift),
-                        tint = KarikaColors.Green1,
-                        contentDescription = ""
+                Column(modifier = Modifier.weight(1f)) {
+                    KarikaText(
+                        text = "#${order.incrementId}",
+                        color = KarikaUiColors.Ink,
+                        textSize = 14.5.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.W700,
+                        maxLines = 1
                     )
                     KarikaText(
-                        modifier = Modifier,
-                        text = "OSTVARENI BONUS",
-                        color = KarikaColors.Gray13,
-                        textSize = 10.sp,
-                        fontWeight = FontWeight.W600
+                        modifier = Modifier.padding(top = 2.dp),
+                        text = order.date(),
+                        color = KarikaUiColors.Muted,
+                        textSize = 12.sp,
+                        lineHeight = 16.sp,
+                        maxLines = 1
                     )
                 }
-            }
-            YSpacer16()
-            HorizontalButtons(
-                primaryTitle = "Naruči ponovo",
-                secondaryTitle = "Vidi narudžbu"
-            ) {
-                if (it == "Vidi narudžbu") {
-                    component.navigateDetails(order)
-                    return@HorizontalButtons
+                val statuses = order.orders.map { it.status }.distinct()
+                if (statuses.size == 1) {
+                    Spacer(Modifier.width(10.dp))
+                    StatusPill(order.orders.first())
                 }
-
-                component.orderAgain(order)
             }
-            YSpacer16()
+            Spacer(Modifier.height(14.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    KarikaText(
+                        text = "Ukupno sa PDV",
+                        color = KarikaUiColors.Muted,
+                        textSize = 11.5.sp,
+                        fontWeight = FontWeight.W500
+                    )
+                    KarikaText(
+                        modifier = Modifier.padding(top = 2.dp),
+                        text = order.vpcPdvString(),
+                        color = KarikaUiColors.Ink,
+                        textSize = 22.sp,
+                        lineHeight = 26.sp,
+                        fontWeight = FontWeight.W700,
+                        maxLines = 1
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    KarikaText(
+                        text = "VPC ${order.vpcString()}",
+                        color = KarikaUiColors.Muted,
+                        textSize = 11.5.sp,
+                        maxLines = 1
+                    )
+                    Row(
+                        modifier = Modifier.padding(top = 3.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KIcon(
+                            icon = vectorResource(Res.drawable.ic_k_gift),
+                            tint = KarikaUiColors.Green,
+                            size = 13.dp
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        KarikaText(
+                            text = "Bonus ${order.bonus()}",
+                            color = KarikaUiColors.Green,
+                            textSize = 11.5.sp,
+                            fontWeight = FontWeight.W500,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
         }
         order.orders.forEach {
+            KDivider()
             VendorItem(it, component)
         }
-        Spacer(modifier = Modifier.height(1.dp))
+        KDivider()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            KSecondaryButton(
+                modifier = Modifier.weight(1f),
+                text = "Vidi narudžbu",
+                height = 42.dp
+            ) {
+                component.navigateDetails(order)
+            }
+            KPrimaryButton(
+                modifier = Modifier.weight(1f),
+                text = "Naruči ponovo",
+                height = 42.dp
+            ) {
+                component.orderAgain(order)
+            }
+        }
     }
 }
 
@@ -309,207 +355,143 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
     val cancelModal = remember { mutableStateOf<Order?>(null) }
     val attachBillModal = remember { mutableStateOf<Order?>(null) }
     val showAdditionalOptions = mutableStateOf(false).asState()
+
     Column(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .roundedWithBorder(
-                color = KarikaColors.White,
-                borderColor = KarikaColors.Border,
-                shape = 4.dp
-            )
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .fillMaxWidth()
+            .background(KarikaUiColors.Page)
     ) {
-        KarikaText(
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            atext = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.W600,
-                        color = KarikaColors.Gray13,
-                        fontSize = 10.sp
-                    )
-                ) {
-                    append("DOBAVLJAČ   ")
-                }
-                withLink(
-                    LinkAnnotation.Clickable(
-                        tag = "",
-                        styles = TextLinkStyles(),
-                        linkInteractionListener = {
-                            component.showVendor(
-                                Vendor(
-                                    entityId = order.vendorId ?: 0,
-                                    publicName = order.vendorName
-                                )
-                            )
-                        }
-                    )
-                ) {
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.W600,
-                            color = KarikaColors.Blue,
-                            fontSize = 14.sp,
-                            textDecoration = TextDecoration.Underline
-                        )
-                    ) {
-                        append(order.vendorName)
-                    }
-                }
-            }
-        )
-        KarikaText(
-            modifier = Modifier
-                .padding(horizontal = 16.dp),
-            atext = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.W600,
-                        color = KarikaColors.Gray13,
-                        fontSize = 10.sp
-                    )
-                ) {
-                    append("UKUPNO VPC   ")
-                }
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.W600,
-                        color = KarikaColors.Gray2,
-                        fontSize = 14.sp
-                    )
-                ) {
-                    append(order.vpcString())
-                }
-            }
-        )
-        KarikaText(
-            modifier = Modifier
-                .padding(horizontal = 16.dp),
-            atext = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.W600,
-                        color = KarikaColors.Gray13,
-                        fontSize = 10.sp
-                    )
-                ) {
-                    append("UKUPNO SA PDV   ")
-                }
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.W600,
-                        color = KarikaColors.Gray2,
-                        fontSize = 14.sp
-                    )
-                ) {
-                    append(order.vpcPdvString())
-                }
-            }
-        )
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .fillMaxWidth()
+                .clickable { showAdditionalOptions.negate() }
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            KInitials(name = order.vendorName, size = 28.dp, textSize = 9.sp)
+            Spacer(Modifier.width(10.dp))
             KarikaText(
-                modifier = Modifier
-                    .padding(start = 16.dp),
-                text = "STATUS",
-                fontWeight = FontWeight.W600,
-                color = KarikaColors.Gray13,
-                textSize = 10.sp
+                modifier = Modifier.weight(1f),
+                text = order.vendorName,
+                color = KarikaUiColors.Ink,
+                textSize = 13.sp,
+                fontWeight = FontWeight.W500,
+                maxLines = 1
             )
-            Box(
-                modifier = Modifier
-                    .rounded(color = order.statusColor(), shape = 6.dp)
-            ) {
-                KarikaText(
-                    modifier = Modifier
-                        .padding(8.dp),
-                    text = order.status(),
-                    fontWeight = FontWeight.W700,
-                    color = order.statusTextColor(),
-                    textSize = 12.sp
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                modifier = Modifier
-                    .onClick {
-                        showAdditionalOptions.negate()
-                    }
-                    .padding(end = 16.dp),
-                imageVector = vectorResource(
-                    if (!showAdditionalOptions.value) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up
-                ),
-                tint = KarikaColors.Black1,
-                contentDescription = ""
+            KIcon(
+                modifier = Modifier.rotate(if (showAdditionalOptions.value) 180f else 0f),
+                icon = vectorResource(Res.drawable.ic_k_chevron_down),
+                tint = KarikaUiColors.Muted,
+                size = 18.dp
             )
         }
         if (showAdditionalOptions.value) {
-            Row(
+            Column(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    .fillMaxWidth()
+                    .padding(start = 14.dp, end = 14.dp, bottom = 12.dp)
             ) {
-                KarikaText(
-                    modifier = Modifier
-                        .onClick {
-                            if (!order.canceled()) {
-                                cancelModal.value = order
-                            }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    KarikaText(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                component.showVendor(
+                                    Vendor(
+                                        entityId = order.vendorId ?: 0,
+                                        publicName = order.vendorName
+                                    )
+                                )
+                            },
+                        text = "Profil dobavljača",
+                        color = KarikaUiColors.Pink,
+                        textSize = 13.sp,
+                        fontWeight = FontWeight.W600,
+                        decoration = TextDecoration.Underline
+                    )
+                    StatusPill(order)
+                }
+                Spacer(Modifier.height(10.dp))
+                VendorValueRow(label = "Ukupno VPC", value = order.vpcString())
+                VendorValueRow(label = "Ukupno sa PDV", value = order.vpcPdvString())
+                Spacer(Modifier.height(10.dp))
+                KCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxSize()
+                                .clickable {
+                                    if (!order.canceled()) {
+                                        cancelModal.value = order
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            KarikaText(
+                                text = "Otkaži narudžbu",
+                                color = if (order.canceled()) KarikaUiColors.Subtle else KarikaUiColors.Pink,
+                                textSize = 13.sp,
+                                fontWeight = FontWeight.W600,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1
+                            )
                         }
-                        .weight(1f),
-                    text = "Otkaži narudžbu",
-                    fontWeight = FontWeight.W600,
-                    color = if (order.canceled()) KarikaColors.Divider else KarikaColors.Primary,
-                    textSize = 16.sp,
-                    textAlign = TextAlign.Center
-                )
-                KarikaText(
-                    modifier = Modifier
-                        .onClick {
-                            if (order.commentsArchived()) {
-                                component.showWarningMessage("Komentari narudžbe su arhivirani.")
-                            } else {
-                                component.navigateToComments(order)
-                            }
+                        VerticalDivider(thickness = 1.dp, color = KarikaUiColors.Line)
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxSize()
+                                .clickable {
+                                    if (order.commentsArchived()) {
+                                        component.showWarningMessage("Komentari narudžbe su arhivirani.")
+                                    } else {
+                                        component.navigateToComments(order)
+                                    }
+                                },
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            KIcon(
+                                icon = vectorResource(Res.drawable.ic_k_chat),
+                                tint = KarikaUiColors.Ink,
+                                size = 16.dp
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            KarikaText(
+                                text = "Komentari (${order.commentCount})",
+                                color = KarikaUiColors.Ink,
+                                textSize = 13.sp,
+                                fontWeight = FontWeight.W600,
+                                maxLines = 1
+                            )
                         }
-                        .weight(1f),
-                    text = "Komentari(${order.commentCount})",
-                    fontWeight = FontWeight.W600,
-                    color = KarikaColors.Gray2,
-                    textSize = 16.sp,
-                    textAlign = TextAlign.Center
-                )
+                    }
+                }
+                if (order.showAddBill()) {
+                    Spacer(Modifier.height(8.dp))
+                    KPrimaryButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Pošalji uplatnicu",
+                        height = 42.dp,
+                        icon = vectorResource(Res.drawable.ic_k_document)
+                    ) {
+                        attachBillModal.value = order
+                    }
+                }
             }
         }
-        if (order.showAddBill()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                KarikaText(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .onClick {
-                            attachBillModal.value = order
-                        },
-                    text = "Pošalji uplatnicu",
-                    fontWeight = FontWeight.W600,
-                    color = KarikaColors.Primary,
-                    textSize = 16.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-        YSpacer8()
     }
 
     if (cancelModal.value != null) {
@@ -548,23 +530,36 @@ private fun VendorItem(order: Order, component: OrdersComponent) {
 }
 
 @Composable
+private fun VendorValueRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = label,
+            color = KarikaUiColors.Muted,
+            textSize = 12.5.sp
+        )
+        KarikaText(
+            text = value,
+            color = KarikaUiColors.Ink,
+            textSize = 13.sp,
+            fontWeight = FontWeight.W700
+        )
+    }
+}
+
+@Composable
 private fun EmptyState(component: OrdersComponent) {
     val vendors by component.orders.collectAsState()
     if (vendors.isNotEmpty()) {
         return
     }
-    Box(
-        modifier = Modifier
-            .height(200.dp)
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Primary,
-            textSize = 16.sp,
-            fontWeight = FontWeight.W700,
-            text = if (component.status.isEmpty()) "Nema narudžbi" else "Nema narudžbi za izabrani status."
-        )
-    }
+    KEmptyState(
+        modifier = Modifier.height(200.dp),
+        text = if (component.status.isEmpty()) "Nema narudžbi" else "Nema narudžbi za izabrani status."
+    )
 }

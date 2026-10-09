@@ -1,43 +1,55 @@
 package karika.distribucija.ba.ui.view.shop.menu.blog.overview
 
 import karika.distribucija.ba.util.inSarajevo
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Blog
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
+import karika.distribucija.ba.ui.components.KBackHeader
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KImage
 import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.TopBarWithBack
+import karika.distribucija.ba.ui.components.KarikaUiColors
 
 @Composable
 fun BlogOverviewView(component: BlogOverviewComponent) {
     val blog by component.blog.collectAsState()
 
     KarikaScaffold(
-        containerColor = KarikaColors.White,
+        containerColor = KarikaUiColors.Page,
         contentWindowInsets = WindowInsets.systemBars,
         topBar = {
-            TopBarWithBack(blog.title ?: "") {
-                component.appBack()
+            Column(modifier = Modifier.fillMaxWidth().background(KarikaUiColors.Page)) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(KarikaColors.White)
+                        .windowInsetsTopHeight(WindowInsets.statusBars)
+                )
+                KBackHeader(title = blog.title ?: "", overline = "Blog", onBack = { component.appBack() })
             }
         },
         component = component
@@ -61,39 +73,40 @@ private fun BlogItem(blog: Blog, component: BlogOverviewComponent) {
     Column(
         modifier = Modifier
             .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray18,
-            text = blog.date?.inSarajevo()?.split(" ")?.first(),
-            textSize = 14.sp,
-            fontWeight = FontWeight.W300
-        )
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray2,
-            text = blog.title,
-            textSize = 16.sp,
-            fontWeight = FontWeight.W500
-        )
-        Box(
+        KImage(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1.5f)
-                .border(width = 1.dp, color = KarikaColors.Gray5)
-        ) {
-            KarikaImage(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                model = blog.image()
-            )
-        }
-        HtmlTextWithStyles(
-            modifier = Modifier
-                .fillMaxWidth(),
-            html = blog.content ?: "",
-            textColor = KarikaColors.Gray2
+                .clip(RoundedCornerShape(16.dp)),
+            url = blog.image()
         )
+        KCard(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                KarikaText(
+                    color = KarikaUiColors.Muted,
+                    text = blog.date?.inSarajevo()?.split(" ")?.first(),
+                    textSize = 12.sp,
+                    lineHeight = 16.sp
+                )
+                KarikaText(
+                    color = KarikaUiColors.Ink,
+                    text = blog.title,
+                    textSize = 20.sp,
+                    lineHeight = 26.sp,
+                    fontWeight = FontWeight.W700
+                )
+                HtmlTextWithStyles(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    html = blog.content ?: "",
+                    textColor = KarikaUiColors.Ink
+                )
+            }
+        }
     }
 }

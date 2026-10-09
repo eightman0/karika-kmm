@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -36,13 +38,14 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
+import karika.distribucija.ba.ui.components.KBackHeader
+import karika.distribucija.ba.ui.components.KPrimaryButton
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaTextField2
-import karika.distribucija.ba.ui.components.PrimaryButtonFilled
-import karika.distribucija.ba.ui.components.TopBarWithBack
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.onClick
@@ -56,11 +59,17 @@ fun CommentsView(component: CommentsComponent) {
     val state = rememberLazyListState()
 
     KarikaScaffold(
-        containerColor = KarikaColors.White,
-        contentWindowInsets = WindowInsets.systemBars,
+        containerColor = KarikaUiColors.Page,
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
-            TopBarWithBack("Komentari") {
-                component.appBack()
+            Column(modifier = Modifier.fillMaxWidth().background(KarikaUiColors.Page)) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(KarikaColors.White)
+                        .windowInsetsTopHeight(WindowInsets.statusBars)
+                )
+                KBackHeader(title = "Komentari", onBack = { component.appBack() })
             }
         },
         bottomBar = {
@@ -76,8 +85,9 @@ fun CommentsView(component: CommentsComponent) {
         ) {
             LazyColumn(
                 modifier = Modifier
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 state = state
             ) {
                 items(items = comments.value) { item ->
@@ -99,11 +109,15 @@ private fun EnterComment(component: CommentsComponent) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .background(
+                color = KarikaColors.White,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            )
             .imePadding()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         KarikaTextField2(
             modifier = Modifier
@@ -124,10 +138,9 @@ private fun EnterComment(component: CommentsComponent) {
             //     )
             // }
         )
-        PrimaryButtonFilled(
-            modifier = Modifier
-                .height(50.dp),
-            title = "Pošalji",
+        KPrimaryButton(
+            text = "Pošalji",
+            height = 50.dp,
             enabled = comment.value.isNotEmpty()
         ) {
             keyboardController?.hide()
@@ -148,11 +161,12 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                 modifier = Modifier
                     .padding(start = 32.dp)
                     .background(
-                        color = KarikaColors.MineMessage,
+                        color = KarikaUiColors.Pink,
                         shape = RoundedCornerShape(
-                            topStart = 8.dp,
-                            topEnd = 8.dp,
-                            bottomStart = 8.dp
+                            topStart = 16.dp,
+                            topEnd = 16.dp,
+                            bottomStart = 16.dp,
+                            bottomEnd = 4.dp
                         )
                     ),
                 horizontalAlignment = Alignment.End
@@ -203,8 +217,8 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                     modifier = Modifier
                         .padding(horizontal = 16.dp),
                     text = comment.createdAt(),
-                    color = KarikaColors.White,
-                    textSize = 14.sp,
+                    color = KarikaColors.White.copy(alpha = 0.8f),
+                    textSize = 12.sp,
                     fontWeight = FontWeight.W400
                 )
                 YSpacer16()
@@ -220,11 +234,12 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                 modifier = Modifier
                     .padding(end = 32.dp)
                     .background(
-                        color = KarikaColors.NotMineMessage,
+                        color = KarikaColors.White,
                         shape = RoundedCornerShape(
-                            topStart = 8.dp,
-                            topEnd = 8.dp,
-                            bottomStart = 8.dp
+                            topStart = 16.dp,
+                            topEnd = 16.dp,
+                            bottomStart = 4.dp,
+                            bottomEnd = 16.dp
                         )
                     ),
                 horizontalAlignment = Alignment.Start
@@ -233,7 +248,7 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                     modifier = Modifier
                         .padding(16.dp),
                     html = comment.message(),
-                    textColor = KarikaColors.Gray2
+                    textColor = KarikaUiColors.Ink
                 )
                 comment.files?.forEach {
                     if (it.type?.startsWith("image") == true) {
@@ -275,8 +290,8 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                     modifier = Modifier
                         .padding(horizontal = 16.dp),
                     text = comment.createdAt(),
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp,
+                    color = KarikaUiColors.Muted,
+                    textSize = 12.sp,
                     fontWeight = FontWeight.W400
                 )
                 YSpacer16()

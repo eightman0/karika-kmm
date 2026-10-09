@@ -7,56 +7,74 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.VendorNotification
+import karika.distribucija.ba.ui.components.KBackHeader
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KEmptyState
+import karika.distribucija.ba.ui.components.KIcon
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.ReadFilterDropdown
-import karika.distribucija.ba.ui.components.TopBarWithBack
-import karika.distribucija.ba.ui.components.YSpacer16
-import karika.distribucija.ba.ui.components.YSpacer8
 import karika.distribucija.ba.ui.components.onClick
+import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_k_bell
+import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun NotificationsView(component: NotificationsComponent) {
     KarikaScaffold(
-        containerColor = KarikaColors.White,
-        contentWindowInsets = WindowInsets.systemBars,
+        containerColor = KarikaUiColors.Page,
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
-            TopBarWithBack(
-                title = "Notifikacije",
-                actions = {
-                    val readFilter by component.readFilter.collectAsState()
-                    ReadFilterDropdown(
-                        selected = readFilter,
-                        borderColor = KarikaColors.White,
-                        textColor = KarikaColors.White,
-                        iconColor = KarikaColors.White,
-                        selectedTextColor = KarikaColors.Primary,
-                        onSelect = { component.setReadFilter(it) }
-                    )
-                }
-            ) {
-                component.appBack()
+            Column(modifier = Modifier.fillMaxWidth().background(KarikaUiColors.Page)) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(KarikaColors.White)
+                        .windowInsetsTopHeight(WindowInsets.statusBars)
+                )
+                KBackHeader(
+                    title = "Notifikacije",
+                    onBack = { component.appBack() },
+                    actions = {
+                        val readFilter by component.readFilter.collectAsState()
+                        ReadFilterDropdown(
+                            selected = readFilter,
+                            borderColor = KarikaUiColors.Border,
+                            textColor = KarikaUiColors.Ink,
+                            iconColor = KarikaUiColors.Muted,
+                            selectedTextColor = KarikaUiColors.Pink,
+                            onSelect = { component.setReadFilter(it) }
+                        )
+                    }
+                )
             }
         },
         component = component
@@ -73,24 +91,29 @@ private fun Notifications(padding: PaddingValues, component: NotificationsCompon
     Box(
         modifier = Modifier
             .padding(padding)
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(KarikaUiColors.Page),
         contentAlignment = Alignment.Center
     ) {
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (hasUnread) {
                 item {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
                         KarikaText(
-                            modifier = Modifier.onClick { component.markAllAsRead() },
-                            color = KarikaColors.Primary,
-                            fontWeight = FontWeight.W700,
-                            textSize = 13.sp,
+                            modifier = Modifier
+                                .onClick { component.markAllAsRead() }
+                                .padding(4.dp),
+                            color = KarikaUiColors.Pink,
+                            fontWeight = FontWeight.W600,
+                            textSize = 14.sp,
                             text = "Označi sve kao pročitano"
                         )
                     }
@@ -99,78 +122,73 @@ private fun Notifications(padding: PaddingValues, component: NotificationsCompon
             items(items = notifications) {
                 NotificationItem(it, component)
             }
+            item {
+                Column {
+                    Spacer(Modifier.height(20.dp))
+                    Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+                }
+            }
         }
 
         if (notifications.isEmpty()) {
-            KarikaText(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                color = KarikaColors.Primary,
-                fontWeight = FontWeight.W700,
-                textSize = 16.sp,
-                text = "Nema obavijesti",
-                maxLines = 1
-            )
+            KEmptyState(text = "Nema obavijesti")
         }
     }
 }
 
 @Composable
 private fun NotificationItem(item: VendorNotification, component: NotificationsComponent) {
-    Box(
-        modifier = Modifier
-            .onClick {
-                component.markAsRead(item)
-            }
-            .height(72.dp)
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center
+    KCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        onClick = { component.markAsRead(item) }
     ) {
-        if (!item.isRead) {
-            Box(
-                modifier = Modifier
-                    .background(color = KarikaColors.Red2)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .size(8.dp)
-                        .background(color = KarikaColors.Red3, shape = CircleShape)
-                )
-            }
-        }
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            YSpacer16()
-            KarikaText(
+            Box(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                color = KarikaColors.Gray18,
-                fontWeight = FontWeight.W700,
-                textSize = 14.sp,
-                text = item.title,
-                maxLines = 2
-            )
-            YSpacer8()
-            KarikaText(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                color = KarikaColors.Gray13,
-                fontWeight = FontWeight.W400,
-                textSize = 12.sp,
-                text = item.createdAt.inSarajevo()
-            )
-            YSpacer16()
-            HorizontalDivider(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                thickness = 1.dp,
-                color = KarikaColors.Divider
-            )
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(if (item.isRead) KarikaUiColors.Field else KarikaUiColors.PinkSoft),
+                contentAlignment = Alignment.Center
+            ) {
+                KIcon(
+                    icon = vectorResource(Res.drawable.ic_k_bell),
+                    tint = if (item.isRead) KarikaUiColors.Muted else KarikaUiColors.Pink,
+                    size = 19.dp
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                KarikaText(
+                    color = KarikaUiColors.Ink,
+                    fontWeight = if (item.isRead) FontWeight.W500 else FontWeight.W700,
+                    textSize = 14.sp,
+                    lineHeight = 19.sp,
+                    text = item.title,
+                    maxLines = 2
+                )
+                Spacer(Modifier.height(4.dp))
+                KarikaText(
+                    color = KarikaUiColors.Subtle,
+                    fontWeight = FontWeight.W400,
+                    textSize = 12.sp,
+                    text = item.createdAt.inSarajevo()
+                )
+            }
+            if (!item.isRead) {
+                Spacer(Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(KarikaUiColors.Pink)
+                )
+            }
         }
     }
 }

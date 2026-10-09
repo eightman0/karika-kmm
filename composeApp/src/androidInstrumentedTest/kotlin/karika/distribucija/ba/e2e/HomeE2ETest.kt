@@ -123,9 +123,9 @@ class HomeE2ETest : StageE2ETest() {
 
         compose.onNodeWithTag(productCardTag(product)).performScrollTo().performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Minimalna količina:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Min. količina", substring = true), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
-        compose.onNodeWithText("Dostupnost:").assertExists()
+        compose.onAllNodesWithText("zalihama", substring = true).onFirst().assertExists()
         // Once in the top bar, once above the image
         assertTrue(compose.onAllNodesWithText(product.name()).fetchSemanticsNodes().isNotEmpty())
 

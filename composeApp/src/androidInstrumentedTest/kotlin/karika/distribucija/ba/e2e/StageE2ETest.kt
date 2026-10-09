@@ -30,6 +30,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -56,6 +57,8 @@ import karika.distribucija.ba.domain.model.ShippingAddress
 import karika.distribucija.ba.domain.model.UserDetails
 import karika.distribucija.ba.ui.common.KarikaType
 import karika.distribucija.ba.ui.common.getEnvJwt
+import karika.distribucija.ba.ui.view.prelogin.login.LOGIN_EMAIL_FIELD_TAG
+import karika.distribucija.ba.ui.view.prelogin.login.LOGIN_PASSWORD_FIELD_TAG
 import karika.distribucija.ba.util.KarikaConfig
 import kotlin.math.ceil
 import kotlinx.coroutines.flow.last
@@ -162,10 +165,10 @@ abstract class StageE2ETest {
      * where the button was.
      */
     protected fun logIn(email: String, password: String) {
-        compose.onNode(hasSetTextAction() and hasText("Email Adresa")).performTextInput(email)
-        compose.onNode(hasSetTextAction() and hasText("Šifra")).performTextInput(password)
+        compose.onNodeWithTag(LOGIN_EMAIL_FIELD_TAG).performTextInput(email)
+        compose.onNodeWithTag(LOGIN_PASSWORD_FIELD_TAG).performTextInput(password)
         closeKeyboard()
-        compose.onNodeWithText("Prijavi se").performScrollTo().assertIsEnabled().performClick()
+        compose.onNodeWithText("Prijavi se").assertIsEnabled().performClick()
     }
 
     /**
@@ -194,7 +197,7 @@ abstract class StageE2ETest {
                 waitUntilLoaded()
                 Thread.sleep(RETRY_PAUSES_MS[attempt])
                 if (compose.onAllNodes(arrived).fetchSemanticsNodes().isNotEmpty()) return
-                compose.onNodeWithText("Prijavi se").performScrollTo().performClick()
+                compose.onNodeWithText("Prijavi se").performClick()
             } catch (e: ComposeTimeoutException) {
                 throw AssertionError("the login did not get through; besides the login screen it showed: $seen", e)
             }
@@ -564,8 +567,8 @@ abstract class StageE2ETest {
             "Došlo je do greške. Pokušajte ponovo!"
         )
         private val LOGIN_SCREEN_TEXTS = listOf(
-            "Prijava ", "Email Adresa", "Šifra", "Zapamti me", "Zaboravili ste šifru?", "Prijavi se",
-            "Nemate kreiran račun?", "stage"
+            "Prijava ", "Dobrodošli nazad", "Email adresa", "Šifra", "Zapamti me", "Zaboravili ste šifru?", "Prijavi se",
+            "Nemate račun?", "stage"
         )
         /** Where a supplier lands after login: the analytics overview. */
         const val VENDOR_HOME = "Analitika — Pregled"

@@ -28,7 +28,7 @@ class CustomerMenuE2ETest : CustomerE2ETest() {
     @Before
     fun openMenu() {
         compose.onNode(bottomTab("Meni")).performClick()
-        compose.waitUntilAtLeastOneExists(hasText("MENI"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Kontaktirajte nas"), SCREEN_TIMEOUT_MS)
     }
 
     @Test
@@ -42,7 +42,7 @@ class CustomerMenuE2ETest : CustomerE2ETest() {
     fun kategorijeProizvodaListsStagesCategoriesAndOpensOne() {
         val categories = categories()
         compose.onNodeWithText("Kategorije proizvoda", useUnmergedTree = true).performClick()
-        compose.waitUntilAtLeastOneExists(hasText("SVI PROIZVODI"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Svi proizvodi"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
 
         categories.take(5).forEach {

@@ -25,11 +25,11 @@ class LandingE2ETest : StageE2ETest() {
         compose.onNodeWithText(LANDING_TITLE, substring = true).assertIsDisplayed()
         compose.onNodeWithText("povezuje kupce i provjerene dobavljače", substring = true).assertIsDisplayed()
         listOf(
-            "Samo za pravna lica!",
+            "Samo za pravna lica",
             "Direktna komunikacija kupaca i dobavljača",
             "Direktna isporuka od strane dobavljača",
             "Efikasnost i optimizacija poslovanja",
-            "Prijavi se ili registruj kao:",
+            "Prijavi se ili registruj kao",
             "Kupac",
             "Dobavljač",
             "Nastavi kao gost",
@@ -48,9 +48,9 @@ class LandingE2ETest : StageE2ETest() {
             .filter { it.promoteVendorLogo && it.companyLogo != null }
 
         if (logos.isEmpty()) {
-            compose.onNodeWithText("Dobavljači").assertDoesNotExist()
+            compose.onNodeWithText("Dobavljači na Kariki").assertDoesNotExist()
         } else {
-            compose.onNodeWithText("Dobavljači").performScrollTo().assertIsDisplayed()
+            compose.onNodeWithText("Dobavljači na Kariki").performScrollTo().assertIsDisplayed()
         }
     }
 
@@ -60,8 +60,8 @@ class LandingE2ETest : StageE2ETest() {
 
         compose.waitUntilAtLeastOneExists(hasText("Prijava kupac"), SCREEN_TIMEOUT_MS)
         // The field's label and its placeholder
-        compose.onAllNodesWithText("Email Adresa", useUnmergedTree = true).assertCountEquals(2)
-        compose.onNodeWithText("Registrujte se ovdje.", substring = true).performScrollTo().assertIsDisplayed()
+        compose.onAllNodesWithText("Email adresa", useUnmergedTree = true).assertCountEquals(2)
+        compose.onNodeWithText("Registrujte se", substring = true).assertIsDisplayed()
 
         pressBack()
         compose.waitUntilAtLeastOneExists(hasText(LANDING_TITLE, substring = true), SCREEN_TIMEOUT_MS)

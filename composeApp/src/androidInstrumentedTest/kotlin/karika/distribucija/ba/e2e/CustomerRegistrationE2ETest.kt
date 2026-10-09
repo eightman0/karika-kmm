@@ -32,7 +32,7 @@ class CustomerRegistrationE2ETest : StageE2ETest() {
     fun openRegistration() {
         compose.onNodeWithText("Kupac").performScrollTo().performClick()
         compose.waitUntilAtLeastOneExists(hasText("Prijava kupac"), SCREEN_TIMEOUT_MS)
-        compose.onNode(hasText("Registrujte se ovdje", substring = true)).performScrollTo().performClick()
+        compose.onNode(hasText("Registrujte se", substring = true)).performClick()
         compose.waitUntilAtLeastOneExists(hasText("Registracija kupca"), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
     }

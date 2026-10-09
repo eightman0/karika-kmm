@@ -2,27 +2,33 @@ package karika.distribucija.ba.ui.view.shop.product
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -35,8 +41,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -44,35 +54,49 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
-import karika.distribucija.ba.ui.components.IconTextItem
+import karika.distribucija.ba.ui.components.KBottomPanel
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KCircleButton
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KInitials
+import karika.distribucija.ba.ui.components.KPill
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KSectionTitle
+import karika.distribucija.ba.ui.components.KTonalButton
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaIntTextField
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.PagerIndicator
-import karika.distribucija.ba.ui.components.PrimaryButton
-import karika.distribucija.ba.ui.components.PrimaryButtonFilled
-import karika.distribucija.ba.ui.components.TopBarWithBack
-import karika.distribucija.ba.ui.components.asState
-import karika.distribucija.ba.ui.components.bgWhite
-import karika.distribucija.ba.ui.components.gridColumnCount
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.isTabletLandscape
-import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
-import karika.distribucija.ba.ui.components.toGrid
 import karika.distribucija.ba.ui.view.shop.home.DiscountView
 import karika.distribucija.ba.ui.view.shop.home.NewView
 import karika.distribucija.ba.ui.view.shop.home.NotAvailableOverlay
 import karika.distribucija.ba.ui.view.shop.home.ProductItem
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_arrow_down
-import karikav2.composeapp.generated.resources.ic_arrow_up
-import karikav2.composeapp.generated.resources.ic_gift
-import karikav2.composeapp.generated.resources.ic_navigation_cart
+import karikav2.composeapp.generated.resources.ic_k_cart
+import karikav2.composeapp.generated.resources.ic_k_chat
+import karikav2.composeapp.generated.resources.ic_k_chevron_down
+import karikav2.composeapp.generated.resources.ic_k_chevron_left
+import karikav2.composeapp.generated.resources.ic_k_chevron_right
+import karikav2.composeapp.generated.resources.ic_k_gift
+import karikav2.composeapp.generated.resources.ic_k_minus
+import karikav2.composeapp.generated.resources.ic_k_plus
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.vectorResource
+
+/** Test tag of the "+" of the quantity stepper in the bottom panel of the product details. */
+const val PRODUCT_QTY_PLUS_TAG = "product_qty_plus"
+
+private val SheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+private val BonusText = Color(0xFF166534)
+private val BonusBackground = Color(0xFFF0FDF4)
+private val GrayPill = Color(0xFFF3F4F6)
+private val PhoneImageHeight = 340.dp
+private val SheetOverlap = 22.dp
 
 @Composable
 fun ProductView(component: ProductComponent) {
@@ -80,69 +104,538 @@ fun ProductView(component: ProductComponent) {
 
     key(product.hashCode()) {
         KarikaScaffold(
-            containerColor = KarikaColors.Transparent,
+            containerColor = KarikaUiColors.Page,
             contentWindowInsets = WindowInsets.systemBars,
             component = component,
             topBar = {
-                TopBarWithBack(product.name()) {
-                    component.back()
+                // White behind the status bar when shown at the app root (inside the shell it is already consumed)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(KarikaColors.White)
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                )
+            },
+            bottomBar = {
+                if (product.createdAt != null) {
+                    ProductBottomPanel(component)
                 }
             }
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(KarikaUiColors.Page)
+                    .padding(it)
+                    .verticalScroll(rememberScrollState())
+                    .hideKeyboard()
+            ) {
+                if (product.createdAt == null) {
+                    return@KarikaScaffold
+                }
+
+                if (isTabletLandscape()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        ProductGallery(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(16.dp)),
+                            component = component
+                        )
+                        Column(
+                            modifier = Modifier
+                                .weight(2f)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(KarikaColors.White)
+                                .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 18.dp)
+                        ) {
+                            ProductSummary(component)
+                        }
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        ProductGallery(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(PhoneImageHeight),
+                            component = component
+                        )
+                        Column(
+                            modifier = Modifier
+                                .padding(top = PhoneImageHeight - SheetOverlap)
+                                .fillMaxWidth()
+                                .clip(SheetShape)
+                                .background(KarikaColors.White)
+                                .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 18.dp)
+                        ) {
+                            ProductSummary(component)
+                        }
+                    }
+                }
+
+                ProductDescriptionCard(component)
+                VendorProducts(component)
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+        }
+    }
+}
+
+/** Image pager with the floating back and chat buttons and the pink page indicator. */
+@Composable
+private fun ProductGallery(modifier: Modifier, component: ProductComponent) {
+    val product by component.product.collectAsState()
+    val images = product.getImages()
+    val pagerState = rememberPagerState { images.size }
+
+    Box(
+        modifier = modifier
+            .background(KarikaColors.White)
+    ) {
+        Box(
+            modifier = Modifier
+                .blur(radius = if (product.hasOnStock()) 0.dp else 5.dp)
+                .fillMaxSize()
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) { page ->
+                KarikaImage(
+                    modifier = Modifier
+                        .onClick {
+                            component.showImagesPreview(images, page)
+                        }
+                        .fillMaxSize(),
+                    model = images[page],
+                    contentScale = ContentScale.Fit
+                )
+            }
+        }
+        NotAvailableOverlay(product)
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(bottom = SheetOverlap)
+        ) {
+            DiscountView(product)
+            NewView(product)
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KCircleButton(
+                icon = vectorResource(Res.drawable.ic_k_chevron_left),
+                background = KarikaColors.White
+            ) {
+                component.back()
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            KCircleButton(
+                icon = vectorResource(Res.drawable.ic_k_chat),
+                background = KarikaColors.White
+            ) {
+                component.sendMessageToVendor(product)
+            }
+        }
+        if (images.size > 1) {
+            ProductPagerIndicator(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = SheetOverlap + 8.dp),
+                pageCount = images.size,
+                currentPage = pagerState.currentPage
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProductPagerIndicator(modifier: Modifier, pageCount: Int, currentPage: Int) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        repeat(pageCount) { page ->
             Box(
                 modifier = Modifier
-                    .bgWhite()
-                    .padding(16.dp)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
+                    .height(5.dp)
+                    .width(if (page == currentPage) 16.dp else 5.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(if (page == currentPage) KarikaUiColors.Pink else KarikaUiColors.Border)
+            )
+        }
+    }
+}
+
+/** Vendor, name, price, stock and minimum quantity, bonus and the message action. */
+@Composable
+private fun ProductSummary(component: ProductComponent) {
+    val product by component.product.collectAsState()
+    val unit = component.getUnit(product.minQtyUnit())
+
+    ProductVendorRow(product, component)
+    KarikaText(
+        modifier = Modifier.padding(top = 10.dp),
+        text = product.name(),
+        color = KarikaUiColors.Ink,
+        textSize = 22.sp,
+        lineHeight = 27.sp,
+        fontWeight = FontWeight.W700
+    )
+
+    Row(
+        modifier = Modifier.padding(top = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        KarikaText(
+            modifier = Modifier.alignByBaseline(),
+            text = if (product.hasSpecialPrice()) product.specialPriceString() else product.originalPriceString(),
+            color = if (product.hasSpecialPrice()) KarikaUiColors.Pink else KarikaUiColors.Ink,
+            textSize = 27.sp,
+            lineHeight = 32.sp,
+            fontWeight = FontWeight.W700,
+            maxLines = 1
+        )
+        KarikaText(
+            modifier = Modifier.alignByBaseline(),
+            text = "/ $unit",
+            color = KarikaUiColors.Subtle,
+            textSize = 13.sp,
+            maxLines = 1
+        )
+        if (product.hasSpecialPrice()) {
+            KarikaText(
+                modifier = Modifier.alignByBaseline(),
+                text = product.originalPriceString(),
+                color = KarikaUiColors.Subtle,
+                textSize = 15.sp,
+                fontWeight = FontWeight.W500,
+                maxLines = 1,
+                decoration = TextDecoration.LineThrough
+            )
+        }
+    }
+
+    if (product.hasMpc()) {
+        Row(
+            modifier = Modifier.padding(top = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KarikaText(
+                text = "Preporučena MPC:",
+                color = KarikaUiColors.Muted,
+                textSize = 13.sp
+            )
+            KarikaText(
+                text = product.mpcString(),
+                color = KarikaUiColors.Ink,
+                textSize = 13.sp,
+                fontWeight = FontWeight.W600
+            )
+        }
+    }
+
+    Row(
+        modifier = Modifier.padding(top = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (product.hasOnStock()) {
+            KPill(
+                text = product.isInStockLabel(),
+                background = KarikaUiColors.GreenSoft,
+                color = KarikaUiColors.Green,
+                dot = KarikaUiColors.Green
+            )
+        } else {
+            KPill(
+                text = product.isInStockLabel(),
+                background = KarikaUiColors.RedSoft,
+                color = KarikaUiColors.Red,
+                dot = KarikaUiColors.Red
+            )
+        }
+        KPill(
+            text = "Min. količina ${product.minQty()} $unit",
+            background = GrayPill,
+            color = KarikaUiColors.Muted
+        )
+    }
+
+    if (product.hasBonus()) {
+        Row(
+            modifier = Modifier
+                .padding(top = 14.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(BonusBackground)
+                .border(1.dp, KarikaUiColors.GreenSoft, RoundedCornerShape(12.dp))
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KIcon(
+                icon = vectorResource(Res.drawable.ic_k_gift),
+                tint = KarikaUiColors.Green,
+                size = 20.dp
+            )
+            KarikaText(
+                modifier = Modifier.weight(1f),
+                text = "Bonus za kupovinu proizvoda",
+                color = BonusText,
+                textSize = 13.sp,
+                fontWeight = FontWeight.W500
+            )
+            KarikaText(
+                text = product.bonusString(),
+                color = BonusText,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W700,
+                maxLines = 1
+            )
+        }
+    }
+
+    KTonalButton(
+        modifier = Modifier
+            .padding(top = 14.dp)
+            .fillMaxWidth(),
+        text = "Pošalji poruku dobavljaču",
+        icon = vectorResource(Res.drawable.ic_k_chat)
+    ) {
+        component.sendMessageToVendor(product)
+    }
+}
+
+/** Pink vendor link with initials, hidden for guests (they cannot open vendors). */
+@Composable
+private fun ProductVendorRow(product: Product, component: CommonComponent) {
+    if (component.isGuest()) {
+        return
+    }
+    Row(
+        modifier = Modifier
+            .onClick {
+                component.showVendor(product.toVendor())
+            }
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KInitials(
+            name = product.vendorName(),
+            size = 24.dp,
+            shape = RoundedCornerShape(7.dp),
+            textSize = 9.sp
+        )
+        KarikaText(
+            modifier = Modifier.weight(1f, fill = false),
+            text = product.vendorName(),
+            color = KarikaUiColors.Pink,
+            textSize = 13.sp,
+            fontWeight = FontWeight.W500,
+            maxLines = 1
+        )
+        KIcon(
+            icon = vectorResource(Res.drawable.ic_k_chevron_right),
+            tint = KarikaUiColors.Pink,
+            size = 14.dp
+        )
+    }
+}
+
+@Composable
+private fun ProductDescriptionCard(component: ProductComponent) {
+    val product by component.product.collectAsState()
+    if (product.description.isNullOrEmpty()) {
+        return
+    }
+    var showDescription by remember { mutableStateOf(false) }
+
+    KCard(
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (!product.shortDescription.isNullOrEmpty()) {
+                HtmlTextWithStyles(
+                    html = product.shortDescription ?: "",
+                    textColor = KarikaUiColors.Muted
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDescription = !showDescription },
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .hideKeyboard()
-                        .fillMaxSize()
-                        .padding(it),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    if (product.createdAt == null) {
-                        return@KarikaScaffold
-                    }
+                KarikaText(
+                    modifier = Modifier.weight(1f),
+                    text = "Opis proizvoda",
+                    color = KarikaUiColors.Ink,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W700
+                )
+                KIcon(
+                    modifier = Modifier.rotate(if (showDescription) 180f else 0f),
+                    icon = vectorResource(Res.drawable.ic_k_chevron_down),
+                    tint = KarikaUiColors.Muted,
+                    size = 20.dp
+                )
+            }
+            if (showDescription) {
+                HtmlTextWithStyles(
+                    html = product.description ?: "",
+                    textColor = KarikaUiColors.Ink
+                )
+            }
+        }
+    }
+}
 
-                    if (isTabletLandscape()) {
-                        Row(
-                            modifier = Modifier,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            ProductImageTablet(Modifier.weight(1f), component)
-                            Column(
-                                modifier = Modifier
-                                    .weight(2f),
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                VendorName(product, component)
-                                ProductName(component)
-                                ProductAvailability(component)
-                                ProductMinQty(component)
-                                ProductPriceTablet(component)
-                                ProductBonus(component)
-                            }
-                        }
-                        ProductDescription(component)
-                    } else {
-                        VendorName(product, component)
-                        ProductName(component)
-                        ProductImage(component)
-                        ProductPrice(component)
-                        ProductDescription(component)
-                        ProductAvailability(component)
-                        ProductMinQty(component)
-                        ProductBonus(component)
-                        ProductButtons(component)
-                    }
-
-                    VendorProducts(component)
+@Composable
+private fun VendorProducts(component: ProductComponent) {
+    val product by component.product.collectAsState()
+    val products by component.products.collectAsState()
+    if (products.size > 1) {
+        KSectionTitle(
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 22.dp, bottom = 12.dp),
+            title = "Proizvodi istog dobavljača",
+            actionText = if (component.isGuest()) null else "Svi",
+            onAction = { component.showVendor(product.toVendor()) }
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            products.forEach {
+                Box(modifier = Modifier.width(150.dp)) {
+                    ProductItem(it, component)
                 }
             }
+        }
+    }
+}
+
+/** Bottom panel: quantity stepper (steps by the minimum quantity) and "Dodaj u korpu". */
+@Composable
+private fun ProductBottomPanel(component: ProductComponent) {
+    val product by component.product.collectAsState()
+
+    KBottomPanel(
+        modifier = Modifier
+            .shadow(elevation = 12.dp, shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (product.hasOnStock()) {
+                ProductQtyStepper(product, component.productQty)
+            }
+            KPrimaryButton(
+                modifier = Modifier.weight(1f),
+                text = "Dodaj u korpu",
+                height = 50.dp,
+                icon = vectorResource(Res.drawable.ic_k_cart),
+                enabled = product.hasOnStock()
+            ) {
+                component.addToCartWithPut(product, component.productQty.value)
+            }
+        }
+        Spacer(modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars))
+    }
+}
+
+@Composable
+private fun ProductQtyStepper(product: Product, qty: MutableState<Int>) {
+    Row(
+        modifier = Modifier
+            .height(50.dp)
+            .clip(RoundedCornerShape(50))
+            .background(KarikaUiColors.PinkSoft)
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(42.dp)
+                .clip(CircleShape)
+                .background(KarikaColors.White)
+                .clickable {
+                    if (qty.value != product.minQty()) {
+                        qty.value -= product.minQty()
+                    }
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            KIcon(icon = vectorResource(Res.drawable.ic_k_minus), tint = KarikaUiColors.Pink, size = 18.dp)
+        }
+        Box(
+            modifier = Modifier
+                .widthIn(min = 40.dp, max = 72.dp)
+                .width(IntrinsicSize.Min),
+            contentAlignment = Alignment.Center
+        ) {
+            KarikaIntTextField(
+                value = qty,
+                minValue = product.minQty(),
+                onValueChange = {
+                    if (it == qty.value) {
+                        return@KarikaIntTextField
+                    }
+
+                    val entered = it ?: qty.value
+                    val min = product.minQty()
+
+                    val adjusted = if (entered <= min) {
+                        min
+                    } else {
+                        val remainder = entered % min
+                        if (remainder == 0) {
+                            entered
+                        } else {
+                            entered + (min - remainder)
+                        }
+                    }
+
+                    qty.value = adjusted
+                }
+            )
+        }
+        Box(
+            modifier = Modifier
+                .testTag(PRODUCT_QTY_PLUS_TAG)
+                .size(42.dp)
+                .clip(CircleShape)
+                .background(KarikaUiColors.Pink)
+                .clickable {
+                    qty.value += product.minQty()
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            KIcon(icon = vectorResource(Res.drawable.ic_k_plus), tint = KarikaColors.White, size = 18.dp)
         }
     }
 }
@@ -170,473 +663,6 @@ fun VendorName(product: Product, component: CommonComponent) {
             fontWeight = FontWeight.W600,
             decoration = TextDecoration.Underline
         )
-    }
-}
-
-@Composable
-fun ProductName(viewModel: ProductComponent) {
-    val product by viewModel.product.collectAsState()
-    KarikaText(
-        modifier = Modifier,
-        color = KarikaColors.Black,
-        text = product.name(),
-        textSize = 20.sp,
-        fontWeight = FontWeight.W700
-    )
-}
-
-@Composable
-fun ProductImage(component: ProductComponent) {
-    val product by component.product.collectAsState()
-    val grid = gridColumnCount()
-
-    Row {
-        if (grid == 4) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .aspectRatio(1f),
-            )
-        }
-        Box(
-            modifier = Modifier
-                .onClick {
-                    component.navigateToProduct(product)
-                }
-                .weight(1f)
-                .border(width = 1.dp, color = KarikaColors.Gray5)
-                .aspectRatio(1f),
-        ) {
-            ProductImageContent(product, component)
-        }
-        if (grid == 4) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .aspectRatio(1f),
-            )
-        }
-    }
-}
-
-@Composable
-fun ProductImageTablet(modifier: Modifier, component: ProductComponent) {
-    val product by component.product.collectAsState()
-    Box(
-        modifier = modifier
-            .onClick {
-                component.navigateToProduct(product)
-            }
-            .border(width = 1.dp, color = KarikaColors.Gray5)
-            .aspectRatio(1f),
-    ) {
-        ProductImageContent(product, component)
-    }
-}
-
-@Composable
-private fun ProductImageContent(product: Product, component: ProductComponent) {
-    val images = product.getImages()
-    val pagerState = rememberPagerState { images.size }
-
-    Box(
-        modifier = Modifier
-            .blur(radius = if (product.hasOnStock()) 0.dp else 5.dp)
-            .fillMaxSize()
-    ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-        ) { page ->
-            KarikaImage(
-                modifier = Modifier
-                    .onClick {
-                        component.showImagesPreview(images, page)
-                    }
-                    .fillMaxSize(),
-                model = images[page]
-            )
-        }
-        Column {
-            DiscountView(product)
-            NewView(product)
-        }
-        if (images.size > 1) {
-            PagerIndicator(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 8.dp),
-                pageCount = images.size,
-                currentPage = pagerState.currentPage
-            )
-        }
-    }
-    NotAvailableOverlay(product)
-}
-
-@Composable
-fun ProductPrice(component: ProductComponent) {
-    val product by component.product.collectAsState()
-    val productQty = component.productQty.asState()
-
-    Column(
-        modifier = Modifier
-    ) {
-        if (product.hasMpc()) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                KarikaText(
-                    color = KarikaColors.Gray2,
-                    text = "Preporučena MPC:",
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W900
-                )
-                KarikaText(
-                    color = KarikaColors.Gray1,
-                    text = product.mpcString(),
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W500
-                )
-            }
-        }
-        if (product.hasSpecialPrice()) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                KarikaText(
-                    modifier = Modifier
-                        .weight(1f),
-                    color = KarikaColors.Gray2,
-                    text = product.specialPriceString(),
-                    textSize = 22.sp,
-                    fontWeight = FontWeight.W600
-                )
-                ProductQtyAction(product, productQty, component)
-            }
-            KarikaText(
-                modifier = Modifier.drawBehind {
-                    drawLine(
-                        color = KarikaColors.Gray1,
-                        strokeWidth = 1.dp.toPx(),
-                        start = Offset(0f, size.height / 2),
-                        end = Offset(size.width, size.height / 2)
-                    )
-                },
-                color = KarikaColors.Gray6,
-                text = product.originalPriceString(),
-                textSize = 18.sp,
-                fontWeight = FontWeight.W500
-            )
-        } else {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                KarikaText(
-                    modifier = Modifier
-                        .weight(1f),
-                    color = KarikaColors.Gray2,
-                    text = product.originalPriceString(),
-                    textSize = 22.sp,
-                    fontWeight = FontWeight.W600
-                )
-                ProductQtyAction(product, productQty, component)
-            }
-        }
-    }
-}
-
-@Composable
-fun ProductPriceTablet(component: ProductComponent) {
-    val product by component.product.collectAsState()
-    val productQty = component.productQty.asState()
-
-    Column(
-        modifier = Modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        if (product.hasMpc()) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                KarikaText(
-                    color = KarikaColors.Gray2,
-                    text = "Preporučena MPC:",
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W900
-                )
-                KarikaText(
-                    color = KarikaColors.Gray1,
-                    text = product.mpcString(),
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W500
-                )
-            }
-        }
-        if (product.hasSpecialPrice()) {
-            KarikaText(
-                color = KarikaColors.Gray2,
-                text = product.specialPriceString(),
-                textSize = 22.sp,
-                fontWeight = FontWeight.W600
-            )
-            KarikaText(
-                modifier = Modifier.drawBehind {
-                    drawLine(
-                        color = KarikaColors.Gray1,
-                        strokeWidth = 1.dp.toPx(),
-                        start = Offset(0f, size.height / 2),
-                        end = Offset(size.width, size.height / 2)
-                    )
-                },
-                color = KarikaColors.Gray6,
-                text = product.originalPriceString(),
-                textSize = 18.sp,
-                fontWeight = FontWeight.W500
-            )
-        } else {
-            KarikaText(
-                color = KarikaColors.Gray2,
-                text = product.originalPriceString(),
-                textSize = 22.sp,
-                fontWeight = FontWeight.W600
-            )
-        }
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ProductQtyAction(product, productQty, component)
-            if (product.hasOnStock()) {
-                PrimaryButtonFilled(
-                    modifier = Modifier
-                        .height(48.dp),
-                    title = "Dodaj u Korpu",
-                    icon = Res.drawable.ic_navigation_cart,
-                    enabled = product.hasOnStock()
-                ) {
-                    component.addToCartWithPut(product, productQty.value)
-                }
-            }
-
-        }
-
-        PrimaryButton(
-            modifier = Modifier
-                .height(48.dp),
-            title = "Pošalji poruku dobavljaču",
-        ) {
-            component.sendMessageToVendor(product)
-        }
-    }
-}
-
-@Composable
-fun ProductDescription(viewModel: ProductComponent) {
-    val product by viewModel.product.collectAsState()
-    if (product.description.isNullOrEmpty()) {
-        return
-    }
-    val showDescription = mutableStateOf(false).asState()
-
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        HtmlTextWithStyles(
-            html = product.shortDescription ?: "",
-            textColor = KarikaColors.Gray2
-        )
-        IconTextItem(
-            modifier = Modifier
-                .onClick {
-                    showDescription.negate()
-                },
-            icon = vectorResource(if (showDescription.value) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
-            iconColor = KarikaColors.Gray2,
-            textColor = KarikaColors.Gray2,
-            textSize = 18.sp,
-            fontWeight = FontWeight.W700,
-            text = "Opis proizvoda",
-            iconPosition = FabPosition.End
-        )
-        /* KarikaText(
-             modifier = Modifier,
-             color = KarikaColors.Black,
-             text = product.description
-                 ?: "",
-             textSize = 16.sp,
-             fontWeight = FontWeight.W400
-         )*/
-        if (showDescription.value) {
-            HtmlTextWithStyles(
-                html = product.description ?: "",
-                textColor = KarikaColors.Gray2
-            )
-        }
-    }
-}
-
-@Composable
-fun ProductAvailability(viewModel: ProductComponent) {
-    val product by viewModel.product.collectAsState()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray6,
-            text = "Dostupnost:",
-            textSize = 14.sp,
-            fontWeight = FontWeight.W400
-        )
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Black,
-            text = product.isInStockLabel().uppercase(),
-            textSize = 14.sp,
-            fontWeight = FontWeight.W700
-        )
-    }
-}
-
-@Composable
-fun ProductMinQty(component: ProductComponent) {
-    val product by component.product.collectAsState()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray6,
-            text = "Minimalna količina:",
-            textSize = 14.sp,
-            fontWeight = FontWeight.W400
-        )
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Black,
-            text = "${product.minQty()} ${component.getUnit(product.minQtyUnit())}",
-            textSize = 14.sp,
-            fontWeight = FontWeight.W700
-        )
-    }
-}
-
-@Composable
-fun ProductBonus(viewModel: ProductComponent) {
-    val product by viewModel.product.collectAsState()
-    Box(
-        modifier = Modifier
-            .background(color = KarikaColors.Green, shape = RoundedCornerShape(4.dp))
-    ) {
-        Row(
-            modifier = Modifier
-                .height(40.dp)
-                .padding(4.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_gift),
-                tint = KarikaColors.Green1,
-                contentDescription = ""
-            )
-            KarikaText(
-                modifier = Modifier,
-                color = KarikaColors.Black,
-                text = "Bonus za kupovinu proizvoda:",
-                textSize = 14.sp,
-                fontWeight = FontWeight.W400
-            )
-            KarikaText(
-                modifier = Modifier,
-                color = KarikaColors.Gray2,
-                text = product.bonusString(),
-                textSize = 14.sp,
-                fontWeight = FontWeight.W600
-            )
-        }
-    }
-}
-
-@Composable
-fun ProductButtons(component: ProductComponent) {
-    val product by component.product.collectAsState()
-    val productQty by component.productQty.asState()
-
-    if (product.hasOnStock()) {
-        PrimaryButtonFilled(
-            modifier = Modifier
-                .height(48.dp)
-                .fillMaxWidth(),
-            title = "Dodaj u Korpu",
-            icon = Res.drawable.ic_navigation_cart,
-            enabled = product.hasOnStock()
-        ) {
-            component.addToCartWithPut(product, productQty)
-        }
-    }
-
-    PrimaryButton(
-        modifier = Modifier
-            .height(48.dp)
-            .fillMaxWidth(),
-        title = "Pošalji poruku dobavljaču",
-    ) {
-        component.sendMessageToVendor(product)
-    }
-}
-
-@Composable
-private fun VendorProducts(viewModel: ProductComponent) {
-    val products by viewModel.products.collectAsState()
-    if (products.size > 1) {
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Black,
-            text = "Proizvodi istog dobavljača:",
-            textSize = 20.sp,
-            fontWeight = FontWeight.W700
-        )
-        products.toGrid()
-            .forEach {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        it.forEach {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                            ) {
-                                ProductItem(it, viewModel)
-                            }
-                        }
-                        repeat(gridColumnCount() - it.size) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                            )
-                        }
-                    }
-                }
-            }
     }
 }
 

@@ -16,6 +16,7 @@ import karika.distribucija.ba.domain.api.ProductRepository
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.view.shop.home.productCardTag
+import karika.distribucija.ba.ui.view.shop.product.PRODUCT_QTY_PLUS_TAG
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -68,8 +69,8 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
 
         openProduct(product)
 
-        listOf("Dostupnost:", "Minimalna količina:").forEach {
-            assertTrue("\"$it\" is not shown", exists(hasText(it)))
+        listOf("zalihama", "Min. količina").forEach {
+            assertTrue("\"$it\" is not shown", exists(hasText(it, substring = true)))
         }
         assertTrue(count(hasText(details.name())) >= 1)
         assertTrue(exists(hasText("${details.minQty()} ", substring = true), unmerged = true))
@@ -83,10 +84,10 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
 
         // The products of the same vendor load after the product, with a loader that takes taps
         waitUntilLoaded()
-        compose.onNodeWithText("+", useUnmergedTree = true).performScrollTo().performClick()
+        compose.onNodeWithTag(PRODUCT_QTY_PLUS_TAG).performClick()
         compose.waitUntil(SCREEN_TIMEOUT_MS) { exists(hasText("${2 * product.minQty()}"), unmerged = true) }
         waitUntilLoaded()
-        compose.onNodeWithText("Dodaj u Korpu").performScrollTo().performClick()
+        compose.onNodeWithText("Dodaj u korpu").performClick()
 
         // The cart on stage gets two minimum quantities: the app adds the product, then sets how many
         var qty: Int? = null
@@ -182,7 +183,7 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
     private fun openProduct(product: Product) {
         compose.waitUntilAtLeastOneExists(hasTestTag(productCardTag(product)), SERVER_TIMEOUT_MS)
         compose.onNodeWithTag(productCardTag(product)).performScrollTo().performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Minimalna količina:"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Min. količina", substring = true), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
     }
 

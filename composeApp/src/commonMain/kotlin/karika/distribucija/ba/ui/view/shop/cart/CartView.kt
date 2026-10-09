@@ -1,67 +1,103 @@
 package karika.distribucija.ba.ui.view.shop.cart
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.TextButton
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.components.IconTextItem
+import karika.distribucija.ba.ui.common.textFieldImeOptions
+import karika.distribucija.ba.ui.components.KBottomPanel
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KConfirmSheet
+import karika.distribucija.ba.ui.components.KDivider
+import karika.distribucija.ba.ui.components.KEmptyState
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KImage
+import karika.distribucija.ba.ui.components.KInitials
+import karika.distribucija.ba.ui.components.KPill
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KTitleHeader
+import karika.distribucija.ba.ui.components.KTonalButton
 import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.PrimaryButtonFilled
-import karika.distribucija.ba.ui.components.YSpacer16
-import karika.distribucija.ba.ui.components.YSpacer32
-import karika.distribucija.ba.ui.components.YSpacer8
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
+import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rememberImeVisible
-import karika.distribucija.ba.ui.view.shop.home.DiscountView
-import karika.distribucija.ba.ui.view.shop.product.ProductQtyAction
-import karika.distribucija.ba.ui.view.shop.product.VendorName
-import karika.distribucija.ba.ui.view.shop.profile.account.ConfirmationModal
 import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_check_circle_filled
-import karikav2.composeapp.generated.resources.ic_delete
-import karikav2.composeapp.generated.resources.ic_gift
+import karikav2.composeapp.generated.resources.ic_k_check
+import karikav2.composeapp.generated.resources.ic_k_chevron_right
+import karikav2.composeapp.generated.resources.ic_k_gift
+import karikav2.composeapp.generated.resources.ic_k_minus
+import karikav2.composeapp.generated.resources.ic_k_plus
+import karikav2.composeapp.generated.resources.ic_k_trash
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.vectorResource
 
 /** Test tags of a cart line's image and delete icon, for the end-to-end tests. */
 fun cartProductTag(product: Product) = "cart_product_${product.sku}"
 fun removeFromCartTag(product: Product) = "remove_from_cart_${product.sku}"
+
+/** Test tags of a cart line's "–" and "+" buttons, for the end-to-end tests. */
+fun cartQtyMinusTag(product: Product) = "cart_qty_minus_${product.sku}"
+fun cartQtyPlusTag(product: Product) = "cart_qty_plus_${product.sku}"
+
+/** Test tag of the cart's list of vendors, shown only while the cart has products. */
+const val CART_LIST_TAG = "cart_list"
 
 @Composable
 fun CartView(component: CartComponent) {
@@ -69,120 +105,93 @@ fun CartView(component: CartComponent) {
     val clearCartModal = mutableStateOf(false).asState()
     val imeVisible = rememberImeVisible()
     val focusManager = LocalFocusManager.current
-    Box(
-        modifier = Modifier
-            .background(color = KarikaColors.White)
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        if (items.value.items.isEmpty()) {
-            KarikaText(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                color = KarikaColors.Primary,
-                text = "Nema artikala u korpi.",
-                textSize = 16.sp,
-                fontWeight = FontWeight.W500
-            )
-        } else {
-            Column {
-                Column(
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        KarikaText(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 16.dp),
-                            color = KarikaColors.Black,
-                            text = "Pregled korpe:",
-                            fontWeight = FontWeight.W700,
-                            textSize = 20.sp
-                        )
-                        IconTextItem(
-                            modifier = Modifier
-                                .onClick {
-                                    clearCartModal.negate()
-                                },
-                            icon = vectorResource(Res.drawable.ic_delete),
-                            iconColor = KarikaColors.Red,
-                            textColor = KarikaColors.Red,
-                            text = "Isprazni korpu",
-                            fontWeight = FontWeight.W500,
-                            textSize = 14.sp,
-                            iconPosition = FabPosition.Start
-                        )
-                    }
-                    LazyColumn(
-                        modifier = Modifier
-                            .hideKeyboard()
-                            .padding(horizontal = 16.dp)
-                            .weight(1f)
-                    ) {
-                        itemsIndexed(items.value.items.entries.toList()) { index, it ->
-                            CartItem(it, component)
-                            YSpacer16()
-                            if (index != items.value.items.entries.toList().lastIndex) {
-                                HorizontalDivider(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = KarikaColors.Gray5,
-                                    thickness = 1.dp
-                                )
-                                YSpacer32()
-                            }
-                        }
-                    }
-                    PinnedFooter(component)
-                }
-                if (imeVisible) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
+    val isEmpty = items.value.items.isEmpty()
 
-                        TextButton(
-                            modifier = Modifier,
-                            onClick = {
-                                focusManager.clearFocus()
-                            }
-                        ) {
-                            KarikaText(
-                                text = "Zatvori",
-                                textSize = 14.sp,
-                                fontWeight = FontWeight.W600,
-                                color = KarikaColors.Blue
-                            )
-                        }
-                    }
+    Column(
+        modifier = Modifier
+            .background(color = KarikaUiColors.Page)
+            .fillMaxSize()
+    ) {
+        KTitleHeader(
+            title = "Korpa",
+            trailing = {
+                if (!isEmpty) {
+                    KTonalButton(
+                        text = "Isprazni",
+                        icon = vectorResource(Res.drawable.ic_k_trash),
+                        background = KarikaUiColors.RedSoft,
+                        color = KarikaUiColors.Red,
+                        height = 38.dp,
+                        onClick = { clearCartModal.negate() }
+                    )
+                }
+            }
+        )
+        if (isEmpty) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                KEmptyState(text = "Nema artikala u korpi.")
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .testTag(CART_LIST_TAG)
+                    .hideKeyboard()
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(items.value.items.entries.toList()) {
+                    CartItem(it, component)
+                }
+            }
+            PinnedFooter(component)
+            if (imeVisible) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(KarikaColors.White),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    KarikaText(
+                        modifier = Modifier
+                            .clickable { focusManager.clearFocus() }
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        text = "Zatvori",
+                        textSize = 14.sp,
+                        fontWeight = FontWeight.W600,
+                        color = KarikaUiColors.Pink
+                    )
                 }
             }
         }
     }
 
     if (clearCartModal.value) {
-        ConfirmationModal(
-            title = "Da li želite da ispraznite korpu?",
-            message = "Ova akcija će ukloniti sve artikle iz korpe.",
-            primaryButtonText = "Da",
-            secondaryButtonText = "Ne",
-            onPrimaryClick = {
-                component.clearCart()
-                clearCartModal.negate()
-            },
-            onSecondaryClick = {
-                clearCartModal.negate()
-            }
-        )
+        Dialog(
+            onDismissRequest = { clearCartModal.negate() },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            KConfirmSheet(
+                title = "Isprazniti korpu?",
+                message = "Ova akcija će ukloniti sve artikle iz korpe.",
+                icon = vectorResource(Res.drawable.ic_k_trash),
+                confirmText = "Da, isprazni",
+                dismissText = "Ne",
+                onConfirm = {
+                    component.clearCart()
+                    clearCartModal.negate()
+                },
+                onDismiss = {
+                    clearCartModal.negate()
+                }
+            )
+        }
     }
 }
 
@@ -190,46 +199,46 @@ fun CartView(component: CartComponent) {
 private fun PinnedFooter(component: CartComponent) {
     val cart by component.stateHolder.cartHandler.cart.collectAsState()
 
-    HorizontalDivider(
-        modifier = Modifier.fillMaxWidth(),
-        thickness = 1.dp,
-        color = KarikaColors.Divider
-    )
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        KarikaText(
+    KBottomPanel {
+        Row(
             modifier = Modifier
-                .weight(1f),
-            color = KarikaColors.Gray2,
-            text = "Ukupno sa PDV:",
-            textSize = 16.sp,
-            fontWeight = FontWeight.W500
-        )
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Gray2,
-            text = cart.items.calculateTotal(),
-            textSize = 20.sp,
-            fontWeight = FontWeight.W700
-        )
-    }
-    PrimaryButtonFilled(
-        modifier = Modifier
-            .height(48.dp)
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        title = "Nastavi dalje",
-        fontWeight = FontWeight.W700,
-        textSize = 18.sp,
-        enabled = true
-    ) {
-        if (cart.items.orderValid()) {
-            component.shippingDetails()
-        } else {
-            component.showMessage("Nije zadovoljena minimalna vrijednost narudžbe za dobavljača!")
+                .fillMaxWidth()
+                .padding(bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                KarikaText(
+                    text = "Ukupno sa PDV",
+                    color = KarikaUiColors.Muted,
+                    textSize = 12.sp,
+                    fontWeight = FontWeight.W500
+                )
+                KarikaText(
+                    modifier = Modifier.padding(top = 2.dp),
+                    text = "VPC " + cart.items.calculateTotalVpc(),
+                    color = KarikaUiColors.Subtle,
+                    textSize = 11.sp
+                )
+            }
+            KarikaText(
+                text = cart.items.calculateTotal(),
+                color = KarikaUiColors.Ink,
+                textSize = 22.sp,
+                lineHeight = 26.sp,
+                fontWeight = FontWeight.W700,
+                maxLines = 1
+            )
+        }
+        KPrimaryButton(
+            modifier = Modifier.fillMaxWidth(),
+            text = "Nastavi dalje",
+            height = 50.dp
+        ) {
+            if (cart.items.orderValid()) {
+                component.shippingDetails()
+            } else {
+                component.showMessage("Nije zadovoljena minimalna vrijednost narudžbe za dobavljača!")
+            }
         }
     }
 }
@@ -239,22 +248,51 @@ private fun CartItem(
     item: Map.Entry<Vendor, List<Pair<Product, Int>>>,
     component: CommonComponent
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        VendorName(
-            Product(
-                vendorName = item.key.name(),
-                vendorId = item.key.entityId.toString()
-            ),
-            component = component
-        )
+    val vendorProduct = Product(
+        vendorName = item.key.name(),
+        vendorId = item.key.entityId.toString()
+    )
+    val canOpenVendor = !component.isGuest()
+
+    KCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(
+                    if (canOpenVendor) {
+                        Modifier.clickable { component.showVendor(vendorProduct.toVendor()) }
+                    } else {
+                        Modifier
+                    }
+                )
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KInitials(name = vendorProduct.vendorName(), textSize = 11.sp)
+            Spacer(Modifier.width(10.dp))
+            KarikaText(
+                modifier = Modifier.weight(1f),
+                text = vendorProduct.vendorName(),
+                color = KarikaUiColors.Ink,
+                textSize = 14.sp,
+                fontWeight = FontWeight.W600,
+                maxLines = 1
+            )
+            if (canOpenVendor) {
+                KIcon(
+                    icon = vectorResource(Res.drawable.ic_k_chevron_right),
+                    tint = KarikaUiColors.Subtle,
+                    size = 16.dp
+                )
+            }
+        }
+        KDivider()
         MinOrderAmount(item)
-        item.value.forEach {
-            ProductItem(it, component)
-            YSpacer8()
+        item.value.forEachIndexed { index, product ->
+            if (index > 0) {
+                KDivider(modifier = Modifier.padding(horizontal = 14.dp))
+            }
+            ProductItem(product, component)
         }
     }
 }
@@ -264,94 +302,84 @@ private fun MinOrderAmount(item: Map.Entry<Vendor, List<Pair<Product, Int>>>) {
     if (item.key.minOrderAmount() == null) {
         return
     }
+    val reached = item.minAmountRestValue().toDouble() <= 0
 
     Column(
         modifier = Modifier
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .fillMaxWidth()
+            .background(if (reached) KarikaUiColors.GreenSoft.copy(alpha = 0.45f) else KarikaUiColors.Field)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        KarikaText(
+            atext = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaUiColors.Muted,
+                        fontSize = 12.sp
+                    )
+                ) {
+                    append("Minimum: ")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W600,
+                        color = KarikaUiColors.Ink,
+                        fontSize = 12.sp
+                    )
+                ) {
+                    append("${item.key.minOrderAmount()}KM")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W600,
+                        color = KarikaUiColors.Subtle,
+                        fontSize = 12.sp
+                    )
+                ) {
+                    append(" • ")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W400,
+                        color = KarikaUiColors.Muted,
+                        fontSize = 12.sp
+                    )
+                ) {
+                    append("Nedostaje: ")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.W600,
+                        color = if (reached) KarikaUiColors.Green else KarikaUiColors.Pink,
+                        fontSize = 12.sp
+                    )
+                ) {
+                    append("${item.minAmountRest()}KM")
+                }
+            },
+            color = KarikaUiColors.Muted,
+            textSize = 12.sp
+        )
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            KarikaText(
-                modifier = Modifier,
-                color = KarikaColors.Gray6,
-                atext = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.W400,
-                            color = KarikaColors.Gray2,
-                            fontSize = 14.sp
-                        )
-                    ) {
-                        append("Minimum: ")
-                    }
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.W600,
-                            color = KarikaColors.Gray2,
-                            fontSize = 14.sp
-                        )
-                    ) {
-                        append("${item.key.minOrderAmount()}KM")
-                    }
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.W600,
-                            color = KarikaColors.Divider,
-                            fontSize = 14.sp
-                        )
-                    ) {
-                        append(" • ")
-                    }
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.W400,
-                            color = KarikaColors.Gray2,
-                            fontSize = 14.sp
-                        )
-                    ) {
-                        append("Nedostaje: ")
-                    }
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.W600,
-                            color = KarikaColors.Gray2,
-                            fontSize = 14.sp
-                        )
-                    ) {
-                        append(
-                            "${item.minAmountRest()}KM"
-                        )
-                    }
-                },
-                textSize = 14.sp,
-                fontWeight = FontWeight.W400
-            )
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .height(6.dp)
-                    .background(color = KarikaColors.Gray9, shape = CircleShape)
                     .weight(1f)
+                    .height(6.dp)
+                    .clip(CircleShape)
+                    .background(color = KarikaUiColors.Border)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
+                Row(modifier = Modifier.fillMaxSize()) {
                     Box(
                         modifier = Modifier
                             .height(6.dp)
-                            .background(color = KarikaColors.Green2, shape = CircleShape)
+                            .clip(CircleShape)
+                            .background(color = if (reached) KarikaUiColors.GreenDot else KarikaUiColors.Pink)
                             .weight(item.progress().first)
                     )
                     if (item.progress().second > 0) {
@@ -363,166 +391,341 @@ private fun MinOrderAmount(item: Map.Entry<Vendor, List<Pair<Product, Int>>>) {
                     }
                 }
             }
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_check_circle_filled),
-                tint = if (item.minAmountRestValue()
-                        .toDouble() > 0
-                ) KarikaColors.Gray9 else KarikaColors.Green1,
-                contentDescription = ""
-            )
+            Box(
+                modifier = Modifier
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .background(if (reached) KarikaUiColors.GreenDot else KarikaUiColors.Border),
+                contentAlignment = Alignment.Center
+            ) {
+                KIcon(
+                    icon = vectorResource(Res.drawable.ic_k_check),
+                    tint = KarikaColors.White,
+                    size = 12.dp
+                )
+            }
         }
     }
+    KDivider()
 }
 
 @Composable
 private fun ProductItem(item: Pair<Product, Int>, component: CommonComponent) {
+    val product = item.first
     Row(
         modifier = Modifier
-            .height(150.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+            .fillMaxWidth()
+            .padding(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Box(
             modifier = Modifier
-                .testTag(cartProductTag(item.first))
-                .size(150.dp)
+                .testTag(cartProductTag(product))
+                .size(72.dp)
+                .clip(RoundedCornerShape(10.dp))
                 .onClick {
-                    component.navigateToProduct(item.first)
+                    component.navigateToProduct(product)
                 }
-                .fillMaxWidth()
-                .border(width = 1.dp, color = KarikaColors.Gray5)
         ) {
-            KarikaImage(
-                modifier = Modifier
-                    .fillMaxSize(),
-                model = item.first.image()
+            KImage(
+                modifier = Modifier.fillMaxSize(),
+                url = product.image()
             )
-            Column {
-                DiscountView(item.first)
-            }
+            DiscountBadge(product)
         }
         Column(
-            modifier = Modifier
-                .weight(1f)
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Row {
-                Column(modifier = Modifier.weight(1f)) {
-                    ProductName(item.first)
-                    ProductBonus(item.first, item.second)
-                    Row(
-                        modifier = Modifier
-                            .padding(bottom = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        KarikaText(
-                            modifier = Modifier,
-                            color = KarikaColors.Gray6,
-                            text = "Min. kol.:",
-                            textSize = 14.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                        KarikaText(
-                            modifier = Modifier,
-                            color = KarikaColors.Black,
-                            text = "${item.first.minQty()} ${component.getUnit(item.first.minQtyUnit())}",
-                            textSize = 14.sp,
-                            fontWeight = FontWeight.W700
-                        )
-                    }
-                }
-                Column(
-                    modifier = Modifier,
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .testTag(removeFromCartTag(item.first))
-                            .onClick {
-                                component.removeFromCart(item.first)
-                            },
-                        imageVector = vectorResource(Res.drawable.ic_delete),
-                        tint = KarikaColors.Black1,
-                        contentDescription = ""
-                    )
-                    KarikaText(
-                        modifier = Modifier,
-                        color = KarikaColors.Gray2,
-                        text = "VPC:",
-                        textSize = 12.sp,
-                        fontWeight = FontWeight.W300
-                    )
-                    KarikaText(
-                        modifier = Modifier,
-                        color = KarikaColors.Gray2,
-                        text = item.first.vpcString(item.second),
-                        textSize = 12.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                    KarikaText(
-                        modifier = Modifier,
-                        color = KarikaColors.Gray2,
-                        text = "VPC+PDV:",
-                        textSize = 12.sp,
-                        fontWeight = FontWeight.W300
-                    )
-                    KarikaText(
-                        modifier = Modifier,
-                        color = KarikaColors.Gray2,
-                        text = item.first.vpcPdvString(item.second),
-                        textSize = 12.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                }
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                KarikaText(
+                    modifier = Modifier.weight(1f),
+                    text = product.name(),
+                    color = KarikaUiColors.Ink,
+                    textSize = 14.sp,
+                    lineHeight = 18.sp,
+                    fontWeight = FontWeight.W600,
+                    maxLines = 2
+                )
+                KIcon(
+                    modifier = Modifier
+                        .testTag(removeFromCartTag(product))
+                        .onClick {
+                            component.removeFromCart(product)
+                        },
+                    icon = vectorResource(Res.drawable.ic_k_trash),
+                    tint = KarikaUiColors.Subtle,
+                    size = 18.dp
+                )
             }
-            YSpacer8()
-            ProductQtyAction(
-                product = item.first,
-                qty = mutableStateOf(item.second),
-                component = component,
-                disableUpdate = false,
-                autoUpdate = true
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                KPill(
+                    text = "Bonus " + product.bonusString(item.second),
+                    icon = vectorResource(Res.drawable.ic_k_gift),
+                    textSize = 11.sp
+                )
+                KPill(
+                    text = "Min. ${product.minQty()} ${component.getUnit(product.minQtyUnit())}",
+                    background = KarikaUiColors.Field,
+                    color = KarikaUiColors.Muted,
+                    textSize = 11.sp
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    KarikaText(
+                        text = product.vpcPdvString(item.second) + " KM",
+                        color = KarikaUiColors.Ink,
+                        textSize = 16.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.W700,
+                        maxLines = 1
+                    )
+                    KarikaText(
+                        text = "VPC " + product.vpcString(item.second) + " KM",
+                        color = KarikaUiColors.Muted,
+                        textSize = 11.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 1
+                    )
+                }
+                CartQtyStepper(
+                    product = product,
+                    quantity = item.second,
+                    component = component
+                )
+            }
         }
     }
 }
 
+/** Small pink "-x%" label over the photo of a product on special price. */
 @Composable
-fun ProductName(product: Product) {
+private fun DiscountBadge(product: Product) {
+    if (!product.hasSpecialPrice()) {
+        return
+    }
     KarikaText(
-        modifier = Modifier,
-        color = KarikaColors.Black,
-        text = product.name(),
-        textSize = 14.sp,
-        maxLines = 2,
-        fontWeight = FontWeight.W700
+        modifier = Modifier
+            .padding(4.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(KarikaUiColors.Pink)
+            .padding(horizontal = 5.dp, vertical = 2.dp),
+        text = "-" + product.calculatePercent() + "%",
+        color = KarikaColors.White,
+        textSize = 10.sp,
+        fontWeight = FontWeight.W700,
+        maxLines = 1
     )
 }
 
+/**
+ * Pink "– n +" stepper of a cart line. Steps by the product's minimum quantity, never below it,
+ * accepts a typed quantity and sends a change to the cart after a short pause.
+ */
 @Composable
-fun ProductBonus(product: Product, qty: Int) {
+private fun CartQtyStepper(product: Product, quantity: Int, component: CommonComponent) {
+    val qty = remember(quantity) { mutableStateOf(quantity) }
+    var pendingQty by remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(pendingQty) {
+        pendingQty?.let { newQty ->
+            delay(600)
+            component.updateCart(product, newQty)
+            pendingQty = null
+        }
+    }
+
     Row(
         modifier = Modifier
-            .height(40.dp)
-            .padding(4.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+            .clip(RoundedCornerShape(50))
+            .background(KarikaUiColors.PinkSoft)
+            .padding(3.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_gift),
-            tint = KarikaColors.Green1,
-            contentDescription = ""
+        Box(
+            modifier = Modifier
+                .testTag(cartQtyMinusTag(product))
+                .size(30.dp)
+                .clip(CircleShape)
+                .background(KarikaColors.White)
+                .clickable {
+                    if (qty.value == product.minQty()) {
+                        return@clickable
+                    }
+                    qty.value -= product.minQty()
+                    pendingQty = qty.value
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            KIcon(icon = vectorResource(Res.drawable.ic_k_minus), tint = KarikaUiColors.Pink, size = 16.dp)
+        }
+        CartQtyField(
+            value = qty,
+            minValue = product.minQty(),
+            onValueChange = {
+                if (it == qty.value) {
+                    return@CartQtyField
+                }
+                val entered = it ?: qty.value
+                val min = product.minQty()
+                val adjusted = if (entered <= min) {
+                    min
+                } else {
+                    val remainder = entered % min
+                    if (remainder == 0) {
+                        entered
+                    } else {
+                        entered + (min - remainder)
+                    }
+                }
+                qty.value = adjusted
+                pendingQty = qty.value
+            }
         )
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Black,
-            text = product.bonusString(qty),
-            textSize = 14.sp,
-            fontWeight = FontWeight.W400
+        Box(
+            modifier = Modifier
+                .testTag(cartQtyPlusTag(product))
+                .size(30.dp)
+                .clip(CircleShape)
+                .background(KarikaUiColors.Pink)
+                .clickable {
+                    qty.value += product.minQty()
+                    pendingQty = qty.value
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            KIcon(icon = vectorResource(Res.drawable.ic_k_plus), tint = KarikaColors.White, size = 16.dp)
+        }
+    }
+}
+
+/** Typed quantity between the stepper buttons, as KarikaIntTextField but sized for the stepper. */
+@Composable
+private fun CartQtyField(
+    value: MutableState<Int>,
+    onValueChange: (Int?) -> Unit,
+    minValue: Int = 1
+) {
+    val focusManager = LocalFocusManager.current
+    val imeVisible = rememberImeVisible()
+    var textFieldValue by remember(value) {
+        mutableStateOf(
+            TextFieldValue(
+                text = value.value.toString(),
+                selection = TextRange(value.value.toString().length)
+            )
         )
+    }
+
+    BasicTextField(
+        value = textFieldValue,
+        modifier = Modifier
+            .width(IntrinsicSize.Min)
+            .defaultMinSize(minWidth = 34.dp)
+            .onFocusChanged {
+                if (!it.isFocused) {
+                    val currentValue = textFieldValue.text.toIntOrNull()
+                    val finalValue = when {
+                        currentValue == null || currentValue < minValue -> minValue
+                        else -> currentValue
+                    }
+                    textFieldValue = TextFieldValue(
+                        text = finalValue.toString(),
+                        selection = TextRange(finalValue.toString().length)
+                    )
+                    onValueChange(finalValue)
+                }
+            },
+        onValueChange = { newValue ->
+            if (newValue.text.length > 7) {
+                return@BasicTextField
+            }
+            val filtered = newValue.text.filter { it.isDigit() }
+            val withoutLeadingZero = if (filtered.startsWith("0") && filtered.length > 1) {
+                filtered.trimStart('0')
+            } else if (filtered == "0") {
+                ""
+            } else {
+                filtered
+            }
+            val parsedValue = withoutLeadingZero.toIntOrNull()
+            textFieldValue = TextFieldValue(
+                text = withoutLeadingZero,
+                selection = TextRange(withoutLeadingZero.length)
+            )
+            if ((parsedValue ?: return@BasicTextField) % minValue == 0) {
+                onValueChange(parsedValue)
+            }
+        },
+        textStyle = TextStyle(
+            color = KarikaUiColors.Ink,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.W600,
+            textAlign = TextAlign.Center,
+            fontFamily = karikaFonts()
+        ),
+        cursorBrush = SolidColor(KarikaUiColors.Pink),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Done,
+            platformImeOptions = textFieldImeOptions(
+                onDone = {
+                    focusManager.clearFocus()
+                },
+                onNext = {
+                    focusManager.moveFocus(FocusDirection.Next)
+                },
+                onPrevious = {
+                    focusManager.moveFocus(FocusDirection.Previous)
+                },
+                useAccessoryView = false
+            )
+        ),
+        decorationBox = { innerTextField ->
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            ) {
+                innerTextField()
+            }
+        },
+        singleLine = false,
+        maxLines = 1,
+        minLines = 1
+    )
+
+    LaunchedEffect(imeVisible) {
+        if (!imeVisible) {
+            val currentValue = textFieldValue.text.toIntOrNull()
+            val finalValue = when {
+                currentValue == null || currentValue < minValue -> minValue
+                else -> currentValue
+            }
+            textFieldValue = TextFieldValue(
+                text = finalValue.toString(),
+                selection = TextRange(finalValue.toString().length)
+            )
+            onValueChange(finalValue)
+        }
+    }
+
+    LaunchedEffect(value.value) {
+        val valueString = value.value.toString()
+        if (valueString != textFieldValue.text) {
+            textFieldValue = TextFieldValue(
+                text = valueString,
+                selection = TextRange(valueString.length)
+            )
+        }
     }
 }
 
@@ -532,6 +735,14 @@ private fun Map<Vendor, List<Pair<Product, Int>>>.calculateTotal(): String {
         .sumOf { (product, quantity) -> product.currentPrice() * quantity }
 
     return karikaPriceFormat(total * 1.17) + " KM"
+}
+
+private fun Map<Vendor, List<Pair<Product, Int>>>.calculateTotalVpc(): String {
+    val total = values
+        .flatten()
+        .sumOf { (product, quantity) -> product.vpc(quantity) }
+
+    return karikaPriceFormat(total) + " KM"
 }
 
 private fun Map.Entry<Vendor, List<Pair<Product, Int>>>.minAmountRestValue(): String {

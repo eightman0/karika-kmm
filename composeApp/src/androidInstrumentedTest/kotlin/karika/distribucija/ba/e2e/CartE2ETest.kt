@@ -146,7 +146,7 @@ class CartE2ETest : StageE2ETest() {
 
         compose.onNodeWithTag(cartProductTag(product)).performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Minimalna količina:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Min. količina", substring = true), SCREEN_TIMEOUT_MS)
         compose.onNodeWithText("Pregled korpe:").assertDoesNotExist()
     }
 

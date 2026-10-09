@@ -11,92 +11,108 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.ui.common.appVersionName
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KCircleButton
+import karika.distribucija.ba.ui.components.KHeader
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KInitials
+import karika.distribucija.ba.ui.components.KMenuRow
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.PrimaryButton
-import karika.distribucija.ba.ui.components.YSpacer16
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_gift
-import karikav2.composeapp.generated.resources.ic_logout
-import karikav2.composeapp.generated.resources.ic_messages
-import karikav2.composeapp.generated.resources.ic_navigation_profile
-import karikav2.composeapp.generated.resources.ic_notifications
-import karikav2.composeapp.generated.resources.ic_orders
+import karikav2.composeapp.generated.resources.ic_k_bell
+import karikav2.composeapp.generated.resources.ic_k_chat
+import karikav2.composeapp.generated.resources.ic_k_document
+import karikav2.composeapp.generated.resources.ic_k_gift
+import karikav2.composeapp.generated.resources.ic_k_logout
+import karikav2.composeapp.generated.resources.ic_k_mail
+import karikav2.composeapp.generated.resources.ic_k_user
 import kotlinx.coroutines.flow.asStateFlow
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun ProfileView(component: ProfileComponent) {
-    Box(
+    Column(
         modifier = Modifier
-            .background(color = KarikaColors.Background)
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
+            .fillMaxSize()
+            .background(color = KarikaUiColors.Page)
+            .verticalScroll(rememberScrollState())
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Header(component)
-            Actions(component)
-        }
+        Header(component)
+        Actions(component)
     }
 }
 
 @Composable
 private fun Header(component: ProfileComponent) {
     val profile by component.stateHolder.customerSpecificHandler.userDetails.collectAsState()
-    Box(
-        modifier = Modifier
-            .background(color = KarikaColors.White)
-            .fillMaxWidth()
+    val notificationCount by component.stateHolder.customerNotificationHandler.notificationCount
+        .asStateFlow()
+        .collectAsState()
+
+    KHeader(
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 18.dp, bottom = 18.dp)
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(color = KarikaColors.Red1, shape = CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_navigation_profile),
-                    contentDescription = ""
+            KInitials(
+                name = profile.companyNameNullable() ?: profile.email,
+                size = 56.dp,
+                shape = CircleShape,
+                background = KarikaUiColors.Pink,
+                color = KarikaColors.White,
+                textSize = 20.sp
+            )
+            Spacer(Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                KarikaText(
+                    text = profile.companyName(),
+                    color = KarikaUiColors.Ink,
+                    textSize = 20.sp,
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight.W700,
+                    maxLines = 2
+                )
+                KarikaText(
+                    modifier = Modifier.padding(top = 2.dp),
+                    text = profile.email,
+                    color = KarikaUiColors.Muted,
+                    textSize = 12.5.sp,
+                    lineHeight = 16.sp,
+                    maxLines = 1
                 )
             }
-            KarikaText(
-                modifier = Modifier
-                    .clickable {
-
-                    },
-                color = KarikaColors.Black,
-                fontWeight = FontWeight.W700,
-                textSize = 18.sp,
-                text = profile.companyName()
+            Spacer(Modifier.width(8.dp))
+            KCircleButton(
+                icon = vectorResource(Res.drawable.ic_k_bell),
+                showDot = notificationCount > 0,
+                onClick = { component.appNavigate(AppConfig.Notifications) }
             )
         }
     }
-
 }
 
 @Composable
@@ -106,156 +122,171 @@ private fun Actions(component: ProfileComponent) {
             .asStateFlow()
             .collectAsState()
     val adminCount =
-        component.stateHolder.customerNotificationHandler.messageUnreadCount.
-        asStateFlow()
+        component.stateHolder.customerNotificationHandler.messageUnreadCount
+            .asStateFlow()
             .collectAsState()
 
     Column(
         modifier = Modifier
-            .background(color = KarikaColors.White)
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        YSpacer16()
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            PrimaryButton(
-                modifier = Modifier
-                    .height(50.dp)
-                    .weight(1f),
-                title = "Moj nalog",
-                icon = Res.drawable.ic_navigation_profile,
-                color = KarikaColors.Gray2,
-                contentPadding = PaddingValues(4.dp)
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProfileTile(
+                modifier = Modifier.weight(1f),
+                text = "Moj nalog",
+                icon = vectorResource(Res.drawable.ic_k_user)
             ) {
                 component.appNavigate(AppConfig.Account)
             }
-            PrimaryButton(
-                modifier = Modifier
-                    .height(50.dp)
-                    .weight(1f),
-                title = "Moje narudžbe",
-                icon = Res.drawable.ic_orders,
-                color = KarikaColors.Gray2,
-                contentPadding = PaddingValues(4.dp)
+            ProfileTile(
+                modifier = Modifier.weight(1f),
+                text = "Moje narudžbe",
+                icon = vectorResource(Res.drawable.ic_k_document)
             ) {
                 component.appNavigate(AppConfig.Orders)
             }
         }
-        YSpacer16()
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            PrimaryButton(
-                modifier = Modifier
-                    .height(50.dp)
-                    .weight(1f),
-                title = "Poruke admina",
-                icon = Res.drawable.ic_messages,
-                color = KarikaColors.Gray2,
-                badge = adminCount.value.customerAdmin,
-                contentPadding = PaddingValues(4.dp)
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProfileTile(
+                modifier = Modifier.weight(1f),
+                text = "Poruke admina",
+                icon = vectorResource(Res.drawable.ic_k_mail),
+                badge = adminCount.value.customerAdmin
             ) {
                 component.appNavigate(AppConfig.AdminMessages)
             }
-            PrimaryButton(
-                modifier = Modifier
-                    .height(50.dp)
-                    .weight(1f),
-                title = "Poruke dobavljača",
-                icon = Res.drawable.ic_navigation_profile,
-                color = KarikaColors.Gray2,
-                badge = adminCount.value.vendorCustomer,
-                contentPadding = PaddingValues(4.dp)
+            ProfileTile(
+                modifier = Modifier.weight(1f),
+                text = "Poruke dobavljača",
+                icon = vectorResource(Res.drawable.ic_k_chat),
+                badge = adminCount.value.vendorCustomer
             ) {
                 component.appNavigate(AppConfig.VendorMessages)
             }
         }
-        YSpacer16()
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            PrimaryButton(
-                modifier = Modifier
-                    .height(50.dp)
-                    .weight(1f),
-                title = "Moji bodovi",
-                icon = Res.drawable.ic_gift,
-                color = KarikaColors.Gray2,
-                contentPadding = PaddingValues(4.dp)
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProfileTile(
+                modifier = Modifier.weight(1f),
+                text = "Moji bodovi",
+                icon = vectorResource(Res.drawable.ic_k_gift)
             ) {
                 component.appNavigate(AppConfig.Points)
             }
-            PrimaryButton(
-                modifier = Modifier
-                    .height(50.dp)
-                    .weight(1f),
-                title = "Notifikacije",
-                icon = Res.drawable.ic_notifications,
-                color = KarikaColors.Gray2,
-                badge = notificationCount.value,
-                contentPadding = PaddingValues(4.dp)
+            ProfileTile(
+                modifier = Modifier.weight(1f),
+                text = "Notifikacije",
+                icon = vectorResource(Res.drawable.ic_k_bell),
+                badge = notificationCount.value
             ) {
                 component.appNavigate(AppConfig.Notifications)
             }
         }
-        YSpacer16()
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        KCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp)
         ) {
-            PrimaryButton(
+            KMenuRow(
+                text = "Zahtjevi za partnerstvo",
+                icon = vectorResource(Res.drawable.ic_k_mail),
+                onClick = { component.appNavigate(AppConfig.PartnershipRequests) }
+            )
+        }
+        Spacer(Modifier.height(14.dp))
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            Row(
                 modifier = Modifier
-                    .height(50.dp)
-                    .weight(1f),
-                title = "Zahtjevi za partnerstvo",
-                icon = Res.drawable.ic_messages,
-                color = KarikaColors.Gray2,
-                contentPadding = PaddingValues(4.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { component.logout() }
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                component.appNavigate(AppConfig.PartnershipRequests)
+                KIcon(
+                    icon = vectorResource(Res.drawable.ic_k_logout),
+                    tint = KarikaUiColors.Pink,
+                    size = 18.dp
+                )
+                Spacer(Modifier.width(8.dp))
+                KarikaText(
+                    text = "Odjava",
+                    color = KarikaUiColors.Pink,
+                    textSize = 15.sp,
+                    fontWeight = FontWeight.W700
+                )
             }
         }
-        YSpacer16()
-        KarikaText(
-            modifier = Modifier,
-            color = KarikaColors.Black,
-            fontWeight = FontWeight.W600,
-            textSize = 14.sp,
-            text = appVersionName()
-        )
-        YSpacer16()
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            KarikaText(
+                text = appVersionName(),
+                color = KarikaUiColors.Subtle,
+                textSize = 12.sp
+            )
+        }
     }
-    Box(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center
+}
+
+/** White grid tile: soft pink icon tile, bold label and an unread badge when [badge] > 0. */
+@Composable
+private fun ProfileTile(
+    text: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    badge: Int = 0,
+    onClick: () -> Unit,
+) {
+    KCard(
+        modifier = modifier.heightIn(min = 100.dp),
+        shape = RoundedCornerShape(14.dp),
+        onClick = onClick
     ) {
-        PrimaryButton(
-            modifier = Modifier,
-            title = "Odjava",
-            icon = Res.drawable.ic_logout,
-            color = KarikaColors.Primary,
-            textSize = 16.sp,
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            component.logout()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(KarikaUiColors.PinkSoft),
+                    contentAlignment = Alignment.Center
+                ) {
+                    KIcon(icon = icon, tint = KarikaUiColors.Pink, size = 20.dp)
+                }
+                Spacer(Modifier.weight(1f))
+                if (badge > 0) {
+                    Box(
+                        modifier = Modifier
+                            .heightIn(min = 22.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(KarikaUiColors.Pink)
+                            .padding(horizontal = 7.dp, vertical = 3.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        KarikaText(
+                            text = "$badge",
+                            color = KarikaColors.White,
+                            textSize = 11.sp,
+                            fontWeight = FontWeight.W700,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+            KarikaText(
+                text = text,
+                color = KarikaUiColors.Ink,
+                textSize = 14.sp,
+                lineHeight = 18.sp,
+                fontWeight = FontWeight.W700,
+                maxLines = 2
+            )
         }
     }
 }
