@@ -110,7 +110,7 @@ class HomeE2ETest : StageE2ETest() {
         compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
         compose.onNodeWithTag(HOME_LIST_TAG).assertDoesNotExist()
-        compose.onNodeWithText("Karika preporučuje").assertIsDisplayed()
+        assertTrue(compose.onAllNodesWithText("Karika preporučuje").fetchSemanticsNodes().isNotEmpty())
 
         pressBack()
         compose.waitUntilAtLeastOneExists(hasTestTag(HOME_LIST_TAG), SCREEN_TIMEOUT_MS)

@@ -13,7 +13,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import karika.distribucija.ba.domain.model.Product
+import karika.distribucija.ba.ui.view.shop.cart.CART_LIST_TAG
 import karika.distribucija.ba.ui.view.shop.cart.cartProductTag
+import karika.distribucija.ba.ui.view.shop.cart.cartQtyMinusTag
+import karika.distribucija.ba.ui.view.shop.cart.cartQtyPlusTag
 import karika.distribucija.ba.ui.view.shop.cart.removeFromCartTag
 import kotlin.math.ceil
 import org.junit.After
@@ -64,17 +67,17 @@ class CartE2ETest : StageE2ETest() {
     fun showsTheLineWithItsPricesAndTheTotal() {
         val product = putInCart()
 
-        compose.onNodeWithText("Pregled korpe:").assertIsDisplayed()
+        compose.onNodeWithTag(CART_LIST_TAG).assertIsDisplayed()
         compose.onNodeWithTag(cartProductTag(product)).assertIsDisplayed()
         assertShown(product.name())
         assertShown(product.vendorName())
-        assertShown("Min. kol.:")
-        assertShown("VPC:")
-        assertShown("VPC+PDV:")
-        compose.onNodeWithText("Ukupno sa PDV:").assertIsDisplayed()
-        // With one line the total is that line's price with PDV
-        val linePrice = textOf("VPC+PDV:", offset = 1)
-        compose.onNodeWithText("$linePrice KM").assertIsDisplayed()
+        assertShown("Min. ${product.minQty()} ", substring = true)
+        assertShown("VPC ", substring = true)
+        compose.onNodeWithText("Ukupno sa PDV").assertIsDisplayed()
+        // With one line the total is that line's price with PDV: the line's price (the text
+        // before its "VPC …") is shown twice, on the line and as the total
+        val linePrice = textOf(texts().first { it.startsWith("VPC ") }, offset = -1)
+        assertEquals(2, compose.onAllNodes(hasText(linePrice), useUnmergedTree = true).fetchSemanticsNodes().size)
         compose.onNodeWithText("Nastavi dalje").assertIsDisplayed()
     }
 
@@ -82,7 +85,7 @@ class CartE2ETest : StageE2ETest() {
     fun plusAddsTheMinimumQuantityAgain() {
         val product = putInCart()
 
-        compose.onNodeWithText("+", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag(cartQtyPlusTag(product)).performClick()
 
         waitForQuantity(product, 2 * product.minQty())
     }
@@ -91,11 +94,11 @@ class CartE2ETest : StageE2ETest() {
     fun minusGoesBackButNotBelowTheMinimum() {
         val product = putInCart(qtyOf = 2)
 
-        compose.onNodeWithText("-", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag(cartQtyMinusTag(product)).performClick()
         waitForQuantity(product, product.minQty())
 
         // At the minimum "-" does nothing
-        compose.onNodeWithText("-", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag(cartQtyMinusTag(product)).performClick()
         compose.mainClock.advanceTimeBy(QTY_DEBOUNCE_MS)
         compose.waitForIdle()
         waitUntilLoaded()
@@ -117,13 +120,13 @@ class CartE2ETest : StageE2ETest() {
     fun isprazniKorpuAsksFirstAndNeKeepsTheCart() {
         val product = putInCart()
 
-        compose.onNodeWithText("Isprazni korpu").performClick()
+        compose.onNodeWithText("Isprazni").performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Da li želite da ispraznite korpu?"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Isprazniti korpu?"), SCREEN_TIMEOUT_MS)
         compose.onNodeWithText("Ova akcija će ukloniti sve artikle iz korpe.").assertIsDisplayed()
         compose.onNodeWithText("Ne").performClick()
 
-        compose.waitUntilDoesNotExist(hasText("Da li želite da ispraznite korpu?"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilDoesNotExist(hasText("Isprazniti korpu?"), SCREEN_TIMEOUT_MS)
         compose.onNodeWithTag(cartProductTag(product)).assertIsDisplayed()
         assertEquals(product.minQty(), qtyInCart(product))
     }
@@ -132,9 +135,9 @@ class CartE2ETest : StageE2ETest() {
     fun isprazniKorpuDaEmptiesTheCart() {
         putInCart()
 
-        compose.onNodeWithText("Isprazni korpu").performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Da li želite da ispraznite korpu?"), SCREEN_TIMEOUT_MS)
-        compose.onNodeWithText("Da").performClick()
+        compose.onNodeWithText("Isprazni").performClick()
+        compose.waitUntilAtLeastOneExists(hasText("Isprazniti korpu?"), SCREEN_TIMEOUT_MS)
+        compose.onNodeWithText("Da, isprazni").performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Nema artikala u korpi."), SERVER_TIMEOUT_MS)
         waitForServer({ "an empty cart" }) { currentCart().items.isEmpty() }
@@ -147,7 +150,7 @@ class CartE2ETest : StageE2ETest() {
         compose.onNodeWithTag(cartProductTag(product)).performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Min. količina", substring = true), SCREEN_TIMEOUT_MS)
-        compose.onNodeWithText("Pregled korpe:").assertDoesNotExist()
+        compose.onNodeWithTag(CART_LIST_TAG).assertDoesNotExist()
     }
 
     @Test
@@ -156,7 +159,7 @@ class CartE2ETest : StageE2ETest() {
 
         compose.onAllNodesWithText(product.vendorName(), useUnmergedTree = true).onFirst().performClick()
 
-        compose.waitUntilDoesNotExist(hasText("Pregled korpe:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilDoesNotExist(hasTestTag(CART_LIST_TAG), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
         assertShown(product.vendorName())
     }
@@ -177,8 +180,8 @@ class CartE2ETest : StageE2ETest() {
             hasText("Nije zadovoljena minimalna vrijednost narudžbe za dobavljača!"),
             SCREEN_TIMEOUT_MS
         )
-        compose.onNodeWithText("Pregled korpe:").assertIsDisplayed()
-        compose.onNodeWithText("Informacije za dostavu:").assertDoesNotExist()
+        compose.onNodeWithTag(CART_LIST_TAG).assertIsDisplayed()
+        compose.onNodeWithText("Informacije za dostavu").assertDoesNotExist()
     }
 
     @Test
@@ -198,12 +201,12 @@ class CartE2ETest : StageE2ETest() {
 
         compose.onNodeWithText("Nastavi dalje").performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Informacije za dostavu:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Informacije za dostavu"), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
         compose.onNodeWithText("Napomena za dobavljača").assertExists()
         // Going no further: the next step would place an order
         pressBack()
-        compose.waitUntilAtLeastOneExists(hasText("Pregled korpe:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(CART_LIST_TAG), SCREEN_TIMEOUT_MS)
     }
 
     /**
@@ -226,7 +229,7 @@ class CartE2ETest : StageE2ETest() {
     private fun openCart() {
         compose.onNode(bottomTab("Korpa")).performClick()
         compose.waitUntil(SERVER_TIMEOUT_MS) {
-            exists(hasText("Pregled korpe:")) || exists(hasText("Nema artikala u korpi."))
+            exists(hasTestTag(CART_LIST_TAG)) || exists(hasText("Nema artikala u korpi."))
         }
         waitUntilLoaded()
     }
@@ -268,7 +271,7 @@ class CartE2ETest : StageE2ETest() {
         texts().firstNotNullOfOrNull { MINIMUM.find(it)?.groupValues?.get(1) }
             ?.replace(',', '.')?.toDoubleOrNull()
 
-    /** The text shown [offset] texts after [label], e.g. the price after "VPC+PDV:". */
+    /** The text shown [offset] texts after [label], e.g. the price before "VPC 7,40 KM". */
     private fun textOf(label: String, offset: Int): String {
         val all = texts()
         return all[all.indexOf(label) + offset]

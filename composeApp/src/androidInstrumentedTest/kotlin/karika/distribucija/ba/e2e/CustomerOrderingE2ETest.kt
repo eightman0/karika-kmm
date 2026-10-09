@@ -21,6 +21,7 @@ import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.domain.model.OrdersResponse
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.ui.view.shop.cart.CART_LIST_TAG
 import karika.distribucija.ba.ui.view.shop.cart.cartProductTag
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
@@ -49,10 +50,10 @@ class CustomerOrderingE2ETest : CustomerE2ETest() {
         val defaultAddress = user().shippingAddress()!!.address()
         assertTrue("the default address is not offered", exists(hasText(defaultAddress, substring = true), unmerged = true))
 
-        compose.onNode(hasSetTextAction() and hasText("Napomena za dobavljaca (opcionalno)"))
+        compose.onNode(hasSetTextAction() and hasText("Napomena (opciono)"))
             .performTextInput("E2E napomena " + uniqueLetters())
         closeKeyboard()
-        compose.onNodeWithText("Završi narudžbu").performClick()
+        compose.onNodeWithText("Završi narudžbu", substring = true).performClick()
 
         val order = assertOrderPlaced()
         assertTrue("the order is not pending", order.orders.all { it.status == "pending" })
@@ -90,9 +91,9 @@ class CustomerOrderingE2ETest : CustomerE2ETest() {
         closeKeyboard()
         compose.onNode(hasText("Spasi i nastavi dalje") and hasClickAction()).assertIsEnabled().performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Završi narudžbu"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Završi narudžbu", substring = true), SCREEN_TIMEOUT_MS)
         assertTrue("the new address is not offered", exists(hasText(street, substring = true), unmerged = true))
-        compose.onNodeWithText("Završi narudžbu").performClick()
+        compose.onNodeWithText("Završi narudžbu", substring = true).performClick()
 
         val order = assertOrderPlaced()
         assertEquals(street, order.shippingAddress?.street?.firstOrNull() ?: street)
@@ -107,7 +108,7 @@ class CustomerOrderingE2ETest : CustomerE2ETest() {
 
         compose.onAllNodesWithText("Odustani").onFirst().performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Pregled korpe:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(CART_LIST_TAG), SCREEN_TIMEOUT_MS)
         assertTrue("the cart lost the product", currentCart().items.any { it.sku == product.sku })
     }
 
@@ -152,7 +153,7 @@ class CustomerOrderingE2ETest : CustomerE2ETest() {
         val text = "E2E komentar " + uniqueLetters()
         openOrderDetails(order)
 
-        compose.onAllNodesWithText("Komentari(", substring = true).onFirst().performScrollTo().performClick()
+        compose.onAllNodesWithText("Komentari (", substring = true).onFirst().performScrollTo().performClick()
         compose.waitUntilAtLeastOneExists(hasSetTextAction() and hasText("Napiši komentar"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         compose.onNode(hasText("Pošalji") and hasClickAction()).assertIsNotEnabled()
@@ -176,7 +177,7 @@ class CustomerOrderingE2ETest : CustomerE2ETest() {
         val text = "E2E " + uniqueLetters() + " & 50% + #1 = ok?"
         openOrderDetails(order)
 
-        compose.onAllNodesWithText("Komentari(", substring = true).onFirst().performScrollTo().performClick()
+        compose.onAllNodesWithText("Komentari (", substring = true).onFirst().performScrollTo().performClick()
         compose.waitUntilAtLeastOneExists(hasSetTextAction() and hasText("Napiši komentar"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         compose.onNode(hasSetTextAction() and hasText("Napiši komentar")).performTextInput(text)
@@ -198,9 +199,9 @@ class CustomerOrderingE2ETest : CustomerE2ETest() {
         assumeTrue("the order has no product skus", products.isNotEmpty())
         openOrderDetails(placed)
 
-        compose.onAllNodesWithText("Naruči ponovo").onFirst().performScrollTo().performClick()
+        compose.onAllNodesWithText("Naruči ponovo").onFirst().performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Pregled korpe:"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(CART_LIST_TAG), SERVER_TIMEOUT_MS)
         compose.waitUntil(SERVER_TIMEOUT_MS) { currentCart().items.map { it.sku }.containsAll(products) }
     }
 
@@ -234,7 +235,7 @@ class CustomerOrderingE2ETest : CustomerE2ETest() {
         compose.waitUntilAtLeastOneExists(hasTestTag(cartProductTag(product)), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         compose.onNodeWithText("Nastavi dalje").performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Informacije za dostavu:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Informacije za dostavu"), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
     }
 
@@ -281,7 +282,8 @@ class CustomerOrderingE2ETest : CustomerE2ETest() {
         openOrders()
         compose.waitUntilAtLeastOneExists(hasText("#${order.incrementId}", substring = true), SERVER_TIMEOUT_MS)
         compose.onAllNodesWithText("Vidi narudžbu").onFirst().performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Narudžba br.${order.incrementId}", substring = true), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Narudžba ·", substring = true), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("#${order.incrementId}"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
     }
 

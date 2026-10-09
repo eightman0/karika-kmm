@@ -74,8 +74,8 @@ class CustomerAccountE2ETest : CustomerE2ETest() {
         val viber = "06" + uniqueDigits(7)
 
         openForm(EDIT_PROFILE, "Informacije profila")
-        pick("Veličina objekta*", size)
-        pick("Tip objekta*", type)
+        pick("Veličina objekta", size)
+        pick("Tip objekta", type)
         replaceField(0, employees)
         replaceField(1, viber)
         save()
@@ -109,7 +109,8 @@ class CustomerAccountE2ETest : CustomerE2ETest() {
         replaceField(0, "999")
         closeKeyboard()
 
-        compose.onNodeWithText("Odustani").performScrollTo().performClick()
+        // "Odustani" is in the panel pinned below the form
+        compose.onNodeWithText("Odustani").performClick()
 
         compose.waitUntilDoesNotExist(hasText("Sačuvaj izmjene"), SCREEN_TIMEOUT_MS)
         assertEquals(before.employeeCount(), user().employeeCount())
@@ -241,7 +242,8 @@ class CustomerAccountE2ETest : CustomerE2ETest() {
 
     private fun save() {
         closeKeyboard()
-        compose.onNodeWithText("Sačuvaj izmjene").performScrollTo().performClick()
+        // "Sačuvaj izmjene" is in the panel pinned below the form
+        compose.onNodeWithText("Sačuvaj izmjene").performClick()
         compose.waitUntilDoesNotExist(hasText("Sačuvaj izmjene"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
     }
@@ -268,7 +270,7 @@ class CustomerAccountE2ETest : CustomerE2ETest() {
         replaceField(FIELD_STREET, new.street.first())
         // Poštanski broj is the last field; the disabled Država before it may not take text
         replaceField(compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().size - 1, new.postcode!!)
-        pick("Grad*", new.city!!)
+        pick("Grad", new.city!!)
         save()
 
         compose.waitUntil(SERVER_TIMEOUT_MS) { exists(hasText("${new.firstname} ${new.lastname}", substring = true), unmerged = true) }

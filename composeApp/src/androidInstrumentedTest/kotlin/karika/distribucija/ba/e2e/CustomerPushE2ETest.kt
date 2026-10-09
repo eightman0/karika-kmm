@@ -206,9 +206,10 @@ class CustomerPushE2ETest : CustomerE2ETest() {
         compose.waitUntilAtLeastOneExists(hasText("#${order.incrementId}", substring = true), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         compose.onAllNodesWithText("Vidi narudžbu").onFirst().performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Narudžba br.${order.incrementId}", substring = true), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Narudžba ·", substring = true), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("#${order.incrementId}"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
-        compose.onAllNodesWithText("Komentari(", substring = true).onFirst().performScrollTo().performClick()
+        compose.onAllNodesWithText("Komentari (", substring = true).onFirst().performScrollTo().performClick()
         compose.waitUntilAtLeastOneExists(composer(), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
     }

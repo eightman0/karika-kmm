@@ -27,8 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.PrimaryButtonFilled
-import karika.distribucija.ba.ui.components.SecondaryButton
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KSecondaryButton
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
@@ -55,8 +56,8 @@ fun FilterSheet(component: VendorComponent) {
             containerColor = KarikaColors.White,
             dragHandle = {
                 BottomSheetDefaults.DragHandle(
-                    color = KarikaColors.Gray2,
-                    width = 60.dp
+                    color = KarikaUiColors.Border,
+                    width = 40.dp
                 )
             }
         ) {
@@ -74,23 +75,23 @@ fun FilterSheet(component: VendorComponent) {
                             .padding(horizontal = 16.dp)
                             .fillMaxWidth(),
                         text = "FILTERI",
-                        color = KarikaColors.Gray2,
+                        color = KarikaUiColors.Ink,
                         textSize = 18.sp,
-                        fontWeight = FontWeight.W400,
+                        fontWeight = FontWeight.W700,
                         textAlign = TextAlign.Center
                     )
                     HorizontalDivider(
                         modifier = Modifier
                             .fillMaxWidth(),
                         thickness = 1.dp,
-                        color = KarikaColors.Divider
+                        color = KarikaUiColors.Line
                     )
                     KarikaText(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
                         text = "REGIJE",
-                        color = KarikaColors.Gray2,
-                        textSize = 16.sp,
+                        color = KarikaUiColors.Muted,
+                        textSize = 13.sp,
                         fontWeight = FontWeight.W700,
                         textAlign = TextAlign.Center
                     )
@@ -121,16 +122,16 @@ fun FilterSheet(component: VendorComponent) {
                                 }
                             },
                             colors = CheckboxDefaults.colors(
-                                checkedColor = KarikaColors.Primary,
-                                uncheckedColor = KarikaColors.Gray7
+                                checkedColor = KarikaUiColors.Pink,
+                                uncheckedColor = KarikaUiColors.Border
                             ),
                             enabled = true
                         )
                         KarikaText(
                             text = "Svi regioni",
-                            color = KarikaColors.Gray2,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W400,
+                            color = KarikaUiColors.Ink,
+                            textSize = 15.sp,
+                            fontWeight = FontWeight.W500,
                         )
                     }
                     component.stateHolder.commonHandler.config.value.customerRegionList.forEach {
@@ -165,16 +166,16 @@ fun FilterSheet(component: VendorComponent) {
                                     }
                                 },
                                 colors = CheckboxDefaults.colors(
-                                    checkedColor = KarikaColors.Primary,
-                                    uncheckedColor = KarikaColors.Gray7
+                                    checkedColor = KarikaUiColors.Pink,
+                                    uncheckedColor = KarikaUiColors.Border
                                 ),
                                 enabled = true
                             )
                             KarikaText(
                                 text = it.label(),
-                                color = KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W400,
+                                color = KarikaUiColors.Ink,
+                                textSize = 15.sp,
+                                fontWeight = FontWeight.W500,
                             )
                         }
                     }
@@ -184,7 +185,7 @@ fun FilterSheet(component: VendorComponent) {
                     modifier = Modifier
                         .fillMaxWidth(),
                     thickness = 1.dp,
-                    color = KarikaColors.Divider
+                    color = KarikaUiColors.Line
                 )
                 Row(
                     modifier = Modifier
@@ -192,18 +193,17 @@ fun FilterSheet(component: VendorComponent) {
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    SecondaryButton(
+                    KSecondaryButton(
                         modifier = Modifier
                             .weight(1f),
-                        title = "Odustani",
-                        textSize = 16.sp
+                        text = "Odustani"
                     ) {
                         showState.negate()
                     }
-                    PrimaryButtonFilled(
+                    KPrimaryButton(
                         modifier = Modifier
                             .weight(1f),
-                        title = "Filtriraj"
+                        text = "Filtriraj"
                     ) {
                         component.selectedRegion.value = checkedElements.value
                         showState.negate()

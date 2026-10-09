@@ -33,10 +33,11 @@ import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.ui.components.KarikaAmountField
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.PrimaryButtonFilled
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KSecondaryButton
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.RadioGroup
 import karika.distribucija.ba.ui.components.SearchBoxBorder
-import karika.distribucija.ba.ui.components.SecondaryButton
 import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.YSpacer32
 import karika.distribucija.ba.ui.components.asState
@@ -75,8 +76,8 @@ fun ProductsFilterSheet(
             containerColor = KarikaColors.White,
             dragHandle = {
                 BottomSheetDefaults.DragHandle(
-                    color = KarikaColors.Gray2,
-                    width = 60.dp
+                    color = KarikaUiColors.Border,
+                    width = 40.dp
                 )
             }
         ) {
@@ -86,9 +87,9 @@ fun ProductsFilterSheet(
                         .padding(horizontal = 16.dp)
                         .fillMaxWidth(),
                     text = "FILTERI",
-                    color = KarikaColors.Gray2,
+                    color = KarikaUiColors.Ink,
                     textSize = 18.sp,
-                    fontWeight = FontWeight.W400,
+                    fontWeight = FontWeight.W700,
                     textAlign = TextAlign.Center
                 )
                 YSpacer16()
@@ -96,7 +97,7 @@ fun ProductsFilterSheet(
                     modifier = Modifier
                         .fillMaxWidth(),
                     thickness = 1.dp,
-                    color = KarikaColors.Divider
+                    color = KarikaUiColors.Line
                 )
                 YSpacer16()
                 Column(
@@ -110,8 +111,8 @@ fun ProductsFilterSheet(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
                         text = "CIJENA",
-                        color = KarikaColors.Gray2,
-                        textSize = 16.sp,
+                        color = KarikaUiColors.Muted,
+                        textSize = 13.sp,
                         fontWeight = FontWeight.W700
                     )
                     Row(
@@ -139,7 +140,7 @@ fun ProductsFilterSheet(
                         modifier = Modifier
                             .fillMaxWidth(),
                         thickness = 1.dp,
-                        color = KarikaColors.Divider
+                        color = KarikaUiColors.Line
                     )
 
                     Row(
@@ -162,30 +163,30 @@ fun ProductsFilterSheet(
                                isInStock.value = if (state) "1" else ""
                             },
                             colors = CheckboxDefaults.colors(
-                                checkedColor = KarikaColors.Primary,
-                                uncheckedColor = KarikaColors.Gray7
+                                checkedColor = KarikaUiColors.Pink,
+                                uncheckedColor = KarikaUiColors.Border
                             ),
                             enabled = true
                         )
                         KarikaText(
                             text = "Prikaži rasprodate",
-                            color = KarikaColors.Gray2,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W400,
+                            color = KarikaUiColors.Ink,
+                            textSize = 15.sp,
+                            fontWeight = FontWeight.W500,
                         )
                     }
                     HorizontalDivider(
                         modifier = Modifier
                             .fillMaxWidth(),
                         thickness = 1.dp,
-                        color = KarikaColors.Divider
+                        color = KarikaUiColors.Line
                     )
                     KarikaText(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
                         text = "DOBAVLJAČI",
-                        color = KarikaColors.Gray2,
-                        textSize = 16.sp,
+                        color = KarikaUiColors.Muted,
+                        textSize = 13.sp,
                         fontWeight = FontWeight.W700
                     )
                     SearchBoxBorder(
@@ -212,7 +213,7 @@ fun ProductsFilterSheet(
                                 .fillMaxWidth()
                                 .padding(16.dp),
                             text = "Nema rezultata za unijeti pojam '${searchText.value}'",
-                            color = KarikaColors.Primary,
+                            color = KarikaUiColors.Pink,
                             textSize = 14.sp,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.W600
@@ -250,16 +251,16 @@ fun ProductsFilterSheet(
                                     component.clear()
                                 },
                                 colors = CheckboxDefaults.colors(
-                                    checkedColor = KarikaColors.Primary,
-                                    uncheckedColor = KarikaColors.Gray7
+                                    checkedColor = KarikaUiColors.Pink,
+                                    uncheckedColor = KarikaUiColors.Border
                                 ),
                                 enabled = true
                             )
                             KarikaText(
                                 text = selectedVendor.value.first,
-                                color = KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W400,
+                                color = KarikaUiColors.Ink,
+                                textSize = 15.sp,
+                                fontWeight = FontWeight.W500,
                             )
                         }
                     }
@@ -267,14 +268,14 @@ fun ProductsFilterSheet(
                         modifier = Modifier
                             .fillMaxWidth(),
                         thickness = 1.dp,
-                        color = KarikaColors.Divider
+                        color = KarikaUiColors.Line
                     )
                     KarikaText(
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
                         text = "REGIJA",
-                        color = KarikaColors.Gray2,
-                        textSize = 16.sp,
+                        color = KarikaUiColors.Muted,
+                        textSize = 13.sp,
                         fontWeight = FontWeight.W700
                     )
                     Row(
@@ -306,16 +307,16 @@ fun ProductsFilterSheet(
                                 }
                             },
                             colors = CheckboxDefaults.colors(
-                                checkedColor = KarikaColors.Primary,
-                                uncheckedColor = KarikaColors.Gray7
+                                checkedColor = KarikaUiColors.Pink,
+                                uncheckedColor = KarikaUiColors.Border
                             ),
                             enabled = true
                         )
                         KarikaText(
                             text = "Svi regioni",
-                            color = KarikaColors.Gray2,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W400,
+                            color = KarikaUiColors.Ink,
+                            textSize = 15.sp,
+                            fontWeight = FontWeight.W500,
                         )
                     }
                     config.customerRegionList.forEach {
@@ -350,16 +351,16 @@ fun ProductsFilterSheet(
                                     }
                                 },
                                 colors = CheckboxDefaults.colors(
-                                    checkedColor = KarikaColors.Primary,
-                                    uncheckedColor = KarikaColors.Gray7
+                                    checkedColor = KarikaUiColors.Pink,
+                                    uncheckedColor = KarikaUiColors.Border
                                 ),
                                 enabled = true
                             )
                             KarikaText(
                                 text = it.label(),
-                                color = KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W400,
+                                color = KarikaUiColors.Ink,
+                                textSize = 15.sp,
+                                fontWeight = FontWeight.W500,
                             )
                         }
                     }
@@ -369,7 +370,7 @@ fun ProductsFilterSheet(
                     modifier = Modifier
                         .fillMaxWidth(),
                     thickness = 1.dp,
-                    color = KarikaColors.Divider
+                    color = KarikaUiColors.Line
                 )
                 Row(
                     modifier = Modifier
@@ -377,18 +378,17 @@ fun ProductsFilterSheet(
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    SecondaryButton(
+                    KSecondaryButton(
                         modifier = Modifier
                             .weight(1f),
-                        title = "Zatvori",
-                        textSize = 16.sp
+                        text = "Zatvori"
                     ) {
                         showState.negate()
                     }
-                    PrimaryButtonFilled(
+                    KPrimaryButton(
                         modifier = Modifier
                             .weight(1f),
-                        title = "Primijeni"
+                        text = "Primijeni"
                     ) {
                         showState.negate()
                         component.loadNextPage(reset = true)
