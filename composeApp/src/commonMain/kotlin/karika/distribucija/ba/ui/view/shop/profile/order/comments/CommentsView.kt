@@ -200,7 +200,7 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                         ) {
                             Icon(
                                 imageVector = vectorResource(Res.drawable.ic_pdf),
-                                tint = KarikaColors.Primary,
+                                tint = KarikaColors.White,
                                 contentDescription = null
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -208,7 +208,7 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                                 text = it.name ?: "",
                                 fontWeight = FontWeight.Bold,
                                 textSize = 12.sp,
-                                color = KarikaColors.Primary
+                                color = KarikaColors.White
                             )
                         }
                     }
@@ -273,7 +273,7 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                         ) {
                             Icon(
                                 imageVector = vectorResource(Res.drawable.ic_pdf),
-                                tint = KarikaColors.Primary,
+                                tint = KarikaUiColors.Pink,
                                 contentDescription = null
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -281,7 +281,7 @@ fun CommentItem(comment: Comment, component: CommentsComponent) {
                                 text = it.name ?: "",
                                 fontWeight = FontWeight.Bold,
                                 textSize = 12.sp,
-                                color = KarikaColors.Primary
+                                color = KarikaUiColors.Pink
                             )
                         }
                     }

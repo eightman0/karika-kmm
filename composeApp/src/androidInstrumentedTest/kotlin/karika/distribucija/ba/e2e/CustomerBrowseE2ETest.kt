@@ -15,6 +15,8 @@ import androidx.compose.ui.test.performTextInput
 import karika.distribucija.ba.domain.api.ProductRepository
 import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.ui.view.shop.home.HOME_LIST_TAG
+import karika.distribucija.ba.ui.view.shop.home.HOME_SEARCH_PLACEHOLDER
 import karika.distribucija.ba.ui.view.shop.home.productCardTag
 import karika.distribucija.ba.ui.view.shop.product.PRODUCT_QTY_PLUS_TAG
 import kotlinx.coroutines.flow.last
@@ -145,7 +147,7 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
 
     @Test
     fun sortingByPriceOrdersTheProducts() {
-        compose.onNodeWithText("AKCIJE").performClick()
+        compose.onNodeWithText("Akcije").performClick()
         compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
 
@@ -160,7 +162,7 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
 
     @Test
     fun filterSheetOffersPriceVendorsAndRegions() {
-        compose.onNodeWithText("AKCIJE").performClick()
+        compose.onNodeWithText("Akcije").performClick()
         compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
 
@@ -175,8 +177,8 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
     }
 
     private fun openSearch() {
-        compose.onNodeWithText("Pretraži..", useUnmergedTree = true).performClick()
-        compose.waitUntilDoesNotExist(hasText("OUTLET"), SCREEN_TIMEOUT_MS)
+        compose.onNodeWithText(HOME_SEARCH_PLACEHOLDER, useUnmergedTree = true).performClick()
+        compose.waitUntilDoesNotExist(hasTestTag(HOME_LIST_TAG), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
     }
 

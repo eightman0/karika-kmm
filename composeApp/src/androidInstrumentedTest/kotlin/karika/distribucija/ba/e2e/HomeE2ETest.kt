@@ -5,8 +5,6 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasAnyDescendant
-import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -16,13 +14,14 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performScrollToNode
 import karika.distribucija.ba.domain.api.CartRepository
 import karika.distribucija.ba.domain.api.ProductRepository
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.components.vendorBannerTag
 import karika.distribucija.ba.ui.components.vendorLogoTag
+import karika.distribucija.ba.ui.view.shop.home.HOME_LIST_TAG
+import karika.distribucija.ba.ui.view.shop.home.HOME_SEARCH_PLACEHOLDER
 import karika.distribucija.ba.ui.view.shop.home.addToCartTag
 import karika.distribucija.ba.ui.view.shop.home.productCardTag
 import kotlinx.coroutines.flow.last
@@ -49,7 +48,7 @@ class HomeE2ETest : StageE2ETest() {
     fun openHomeAsCustomer() {
         logInAsCustomer()
         // Home starts loading only once it is shown, so the loader may not have been up yet
-        compose.waitUntilAtLeastOneExists(hasText("Karika preporučuje:"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Karika preporučuje"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         cartBefore = currentCart().items.mapNotNull { it.itemId }.toSet()
     }
@@ -65,18 +64,18 @@ class HomeE2ETest : StageE2ETest() {
 
     @Test
     fun showsTheSearchAndTheCustomerShortcuts() {
-        compose.onNodeWithText("Pretraži..", useUnmergedTree = true).assertIsDisplayed()
-        compose.onNodeWithText("OUTLET").assertIsDisplayed()
-        compose.onNodeWithText("AKCIJE").assertIsDisplayed()
+        compose.onNodeWithText(HOME_SEARCH_PLACEHOLDER, useUnmergedTree = true).assertIsDisplayed()
+        compose.onNodeWithText("Outlet").assertIsDisplayed()
+        compose.onNodeWithText("Akcije").assertIsDisplayed()
         // A guest's shortcuts, not a customer's
-        compose.onNodeWithText("PROIZVODI").assertDoesNotExist()
+        compose.onNodeWithText("Svi proizvodi").assertDoesNotExist()
     }
 
     @Test
     fun showsTheProductsKarikaRecommends() {
         val products = recommendedProducts()
 
-        compose.onNodeWithText("Karika preporučuje:").assertIsDisplayed()
+        compose.onNodeWithText("Karika preporučuje").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Vidi sve").assertIsDisplayed()
         products.forEach { product ->
             compose.onNodeWithTag(productCardTag(product)).performScrollTo().assertIsDisplayed()
@@ -86,35 +85,35 @@ class HomeE2ETest : StageE2ETest() {
 
     @Test
     fun searchOpensTheSearchScreen() {
-        compose.onNodeWithText("Pretraži..", useUnmergedTree = true).performClick()
+        compose.onNodeWithText(HOME_SEARCH_PLACEHOLDER, useUnmergedTree = true).performClick()
 
-        compose.waitUntilDoesNotExist(hasText("PROIZVODI"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilDoesNotExist(hasTestTag(HOME_LIST_TAG), SCREEN_TIMEOUT_MS)
         compose.onNode(hasSetTextAction()).assertIsDisplayed()
-        compose.onNodeWithText("Karika preporučuje:").assertDoesNotExist()
+        compose.onNodeWithText("Karika preporučuje").assertDoesNotExist()
     }
 
     @Test
     fun outletOpensTheOutletCategory() {
-        opensItsCategory("OUTLET")
+        opensItsCategory("Outlet", "OUTLET")
     }
 
     @Test
     fun akcijeOpensTheActionsCategory() {
-        opensItsCategory("AKCIJE")
+        opensItsCategory("Akcije", "AKCIJE")
     }
 
     @Test
     fun vidiSveOpensTheRecommendedCategory() {
-        compose.onNodeWithText("Vidi sve").performClick()
+        compose.onNodeWithText("Vidi sve").performScrollTo().performClick()
 
-        // The category's title, without the colon of the home heading
-        compose.waitUntilAtLeastOneExists(hasText("Karika preporučuje"), SCREEN_TIMEOUT_MS)
+        // The category has the same title as the home heading
+        compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
-        compose.onNodeWithText("Filteri").assertIsDisplayed()
-        compose.onNodeWithText("Karika preporučuje:").assertDoesNotExist()
+        compose.onNodeWithTag(HOME_LIST_TAG).assertDoesNotExist()
+        compose.onNodeWithText("Karika preporučuje").assertIsDisplayed()
 
         pressBack()
-        compose.waitUntilAtLeastOneExists(hasText("Karika preporučuje:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(HOME_LIST_TAG), SCREEN_TIMEOUT_MS)
     }
 
     @Test
@@ -130,7 +129,7 @@ class HomeE2ETest : StageE2ETest() {
         assertTrue(compose.onAllNodesWithText(product.name()).fetchSemanticsNodes().isNotEmpty())
 
         pressBack()
-        compose.waitUntilAtLeastOneExists(hasText("Karika preporučuje:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(HOME_LIST_TAG), SCREEN_TIMEOUT_MS)
     }
 
     @Test
@@ -141,7 +140,6 @@ class HomeE2ETest : StageE2ETest() {
         compose.onAllNodesWithText(product.vendorName()).onFirst().performScrollTo().performClick()
 
         waitForVendorPage()
-        compose.onNodeWithText("Karika preporučuje:").assertDoesNotExist()
         assertTrue(compose.onAllNodesWithText(product.vendorName()).fetchSemanticsNodes().isNotEmpty())
     }
 
@@ -168,7 +166,7 @@ class HomeE2ETest : StageE2ETest() {
             return
         }
 
-        compose.onNodeWithTag(vendorBannerTag(banners.first())).assertIsDisplayed().performClick()
+        compose.onNodeWithTag(vendorBannerTag(banners.first())).performScrollTo().assertIsDisplayed().performClick()
 
         waitForVendorPage()
         compose.onNodeWithText(banners.first().name()).assertExists()
@@ -184,24 +182,23 @@ class HomeE2ETest : StageE2ETest() {
             return
         }
 
-        homeList().performScrollToNode(hasTestTag(vendorLogoTag(logos.first())))
-        compose.onNodeWithTag(vendorLogoTag(logos.first())).assertIsDisplayed().performClick()
+        compose.onNodeWithTag(vendorLogoTag(logos.first())).performScrollTo().assertIsDisplayed().performClick()
 
         waitForVendorPage()
         compose.onNodeWithText(logos.first().name()).assertExists()
     }
 
-    /** Taps a shortcut under the search, which opens the category of the same name. */
-    private fun opensItsCategory(shortcut: String) {
-        compose.onNodeWithText(shortcut).performClick()
+    /** Taps a tile under the search, which opens the category with [title]. */
+    private fun opensItsCategory(tile: String, title: String) {
+        compose.onNodeWithText(tile).performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
-        compose.onNodeWithText(shortcut).assertIsDisplayed()
-        compose.onNodeWithText("Karika preporučuje:").assertDoesNotExist()
+        compose.onNodeWithText(title).assertIsDisplayed()
+        compose.onNodeWithTag(HOME_LIST_TAG).assertDoesNotExist()
 
         pressBack()
-        compose.waitUntilAtLeastOneExists(hasText("Karika preporučuje:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(HOME_LIST_TAG), SCREEN_TIMEOUT_MS)
     }
 
     private fun hasTestTagStartingWith(prefix: String) =
@@ -209,12 +206,9 @@ class HomeE2ETest : StageE2ETest() {
             node.config.getOrNull(SemanticsProperties.TestTag)?.startsWith(prefix) == true
         }
 
-    private fun homeList() =
-        compose.onNode(hasScrollToNodeAction() and hasAnyDescendant(hasText("Karika preporučuje:")))
-
     /** A vendor's page has no home heading and loads its products. */
     private fun waitForVendorPage() {
-        compose.waitUntilDoesNotExist(hasText("Karika preporučuje:"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilDoesNotExist(hasTestTag(HOME_LIST_TAG), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
     }
 

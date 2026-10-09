@@ -1,15 +1,14 @@
 package karika.distribucija.ba.ui.view.shop.vendor
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,46 +18,53 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.AppConfig
 import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.PromotedVendor
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.components.IconTextItem
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KChip
+import karika.distribucija.ba.ui.components.KCircleButton
+import karika.distribucija.ba.ui.components.KDivider
+import karika.distribucija.ba.ui.components.KEmptyState
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KImage
+import karika.distribucija.ba.ui.components.KInitials
+import karika.distribucija.ba.ui.components.KPill
+import karika.distribucija.ba.ui.components.KSquareIconButton
+import karika.distribucija.ba.ui.components.KTitleHeader
 import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaLazyColumn
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.SearchBoxBorder
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.gridColumnCount
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
-import karika.distribucija.ba.ui.components.onClick
-import karika.distribucija.ba.ui.components.rounded
 import karika.distribucija.ba.ui.view.shop.MainConfig
+import karika.distribucija.ba.ui.view.shop.vendor.details.KarikaSearchInput
 import karika.distribucija.ba.ui.view.shop.vendor.details.filter.FilterSheet
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_filter_alt
+import karikav2.composeapp.generated.resources.ic_k_bell
+import karikav2.composeapp.generated.resources.ic_k_filter
+import karikav2.composeapp.generated.resources.ic_k_pin
+import karikav2.composeapp.generated.resources.ic_k_star
 import karikav2.composeapp.generated.resources.ic_tertiary
-import karikav2.composeapp.generated.resources.star_outline
 import org.jetbrains.compose.resources.vectorResource
 
 /** Test tags of the vendors tab, for the end-to-end tests. */
@@ -70,19 +76,11 @@ fun featuredVendorTag(vendor: PromotedVendor) = "featured_vendor_${vendor.entity
 fun VendorView(viewModel: VendorComponent) {
     Box(
         modifier = Modifier
-            .background(color = KarikaColors.White)
+            .background(color = KarikaUiColors.Page)
             .fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.TopCenter
     ) {
-        Column(
-            modifier = Modifier
-                .hideKeyboard()
-                .padding(16.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Vendors(viewModel)
-        }
+        Vendors(viewModel)
     }
 }
 
@@ -92,53 +90,60 @@ private fun Vendors(component: VendorComponent) {
     val state = rememberLazyListState()
     val gridColumnCount = gridColumnCount()
 
-    KarikaText(
-        modifier = Modifier,
-        color = KarikaColors.Black,
-        text = "DOBAVLJAČI",
-        textSize = 20.sp,
-        fontWeight = FontWeight.W700
-    )
-    Box(modifier = Modifier) {
-        KarikaLazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            state = state
+    KarikaLazyColumn(
+        modifier = Modifier
+            .hideKeyboard()
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        state = state
+    ) {
+        item {
+            Header(component)
+        }
+        item {
+            ActiveFilter(component)
+        }
+        item {
+            FeaturedVendors(component)
+        }
+        item {
+            AllVendorsTitle(component)
+        }
+        item {
+            EmptyState(component)
+        }
+        items(
+            items = vendors.chunked(gridColumnCount)
         ) {
-            item {
-                Filter(component)
-            }
-            item {
-                FeaturedVendors(component)
-            }
-            item {
-                EmptyState(component)
-            }
-            items(
-                items = vendors.chunked(gridColumnCount)
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    it.forEach { vendor ->
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                        ) {
-                            VendorItem(vendor, component)
-                        }
+                it.forEach { vendor ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        VendorItem(vendor, component)
                     }
-                    repeat(gridColumnCount - it.size) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                        )
-                    }
+                }
+                repeat(gridColumnCount - it.size) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    )
                 }
             }
         }
+        item {
+            Spacer(Modifier.height(10.dp))
+        }
     }
+
+    // Outside the list, so the sheet stays open while the list scrolls
+    FilterSheet(component)
 
     LaunchedEffect(state.canScrollForward) {
         if (!state.canScrollForward) {
@@ -152,141 +157,192 @@ private fun Vendors(component: VendorComponent) {
 }
 
 @Composable
-fun VendorItem(vendor: Vendor, component: CommonComponent) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .testTag(vendorCardTag(vendor))
-                .onClick {
-                    component.showVendor(vendor)
+private fun Header(component: VendorComponent) {
+    val showState = component.showFilter.asState()
+    val searchText = component.searchText.asState()
+    val notificationCount by component.stateHolder.customerNotificationHandler.notificationCount.collectAsState()
+
+    KTitleHeader(
+        title = "Dobavljači",
+        trailing = {
+            if (!component.isGuest()) {
+                KCircleButton(
+                    icon = vectorResource(Res.drawable.ic_k_bell),
+                    showDot = notificationCount > 0
+                ) {
+                    component.appNavigate(AppConfig.Notifications)
                 }
-                .fillMaxWidth()
-                .border(width = 1.dp, color = KarikaColors.Gray5)
-                .aspectRatio(1f),
-        ) {
-            KarikaImage(
-                modifier = Modifier
-                    .fillMaxSize(),
-                model = vendor.image(),
-                contentScale = ContentScale.Inside
-            )
+            }
+        },
+        below = {
+            Spacer(Modifier.height(14.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                KarikaSearchInput(
+                    modifier = Modifier
+                        .weight(1f),
+                    placeholder = "Pretraži dobavljače…",
+                    initial = searchText.value,
+                    onValueChange = {
+                        searchText.value = it
+                    },
+                    onClear = {
+                        searchText.value = ""
+                        component.loadNextPage(true)
+                    },
+                    onSearch = {
+                        if (searchText.value.length > 2) {
+                            component.loadNextPage(true)
+                        }
+                    }
+                )
+                KSquareIconButton(
+                    modifier = Modifier
+                        .testTag(VENDOR_FILTER_TAG),
+                    icon = vectorResource(Res.drawable.ic_k_filter)
+                ) {
+                    showState.negate()
+                }
+            }
         }
-        KarikaText(
-            modifier = Modifier
-                .fillMaxWidth(),
-            color = KarikaColors.Black,
-            text = vendor.name(),
-            textSize = 14.sp,
-            fontWeight = FontWeight.W400,
-            textAlign = TextAlign.Center
-        )
-    }
+    )
 }
 
 @Composable
-private fun Filter(component: VendorComponent) {
-    val showState = component.showFilter.asState()
+private fun ActiveFilter(component: VendorComponent) {
     val filter = component.selectedRegion.asState()
-    val searchText = component.searchText.asState()
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        SearchBoxBorder(
-            modifier = Modifier
-                .height(50.dp)
-                .weight(1f),
-            preselected = searchText.value,
-            onValueChange = {
-                searchText.value = it
-            },
-            onClose = {
-                searchText.value = ""
-                component.loadNextPage(true)
-            },
-            onSearchExecute = {
-                if (searchText.value.length > 2) {
-                    component.loadNextPage(true)
-                }
-            },
-            placeholder = "Pretraži dobavljače.."
-        )
-        Box(
-            modifier = Modifier
-                .testTag(VENDOR_FILTER_TAG)
-                .height(50.dp)
-                .aspectRatio(1f)
-                .onClick {
-                    showState.negate()
-                }
-                .border(
-                    width = 1.dp,
-                    color = KarikaColors.Divider,
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .background(
-                    color = KarikaColors.White,
-                    shape = RoundedCornerShape(12.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                modifier = Modifier
-                    .size(24.dp),
-                imageVector = vectorResource(Res.drawable.ic_filter_alt),
-                contentDescription = "",
-                tint = KarikaColors.Black1
-            )
-        }
-    }
 
     if (filter.value.isNotEmpty()) {
         FlowRow(
             modifier = Modifier
-                .padding(top = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             KarikaText(
                 modifier = Modifier
-                    .padding(vertical = 4.dp),
-                color = KarikaColors.Black,
-                textSize = 16.sp,
-                fontWeight = FontWeight.W700,
+                    .align(Alignment.CenterVertically)
+                    .padding(end = 2.dp),
+                color = KarikaUiColors.Muted,
+                textSize = 13.sp,
+                fontWeight = FontWeight.W600,
                 text = "Uključeni filter: "
             )
             filter.value.forEach {
-                Box(
-                    modifier = Modifier
-                        .rounded(color = KarikaColors.Gray19)
+                KChip(
+                    text = it.label(),
+                    selected = true,
+                    trailingIcon = vectorResource(Res.drawable.ic_tertiary)
                 ) {
-                    IconTextItem(
-                        modifier = Modifier
-                            .onClick {
-                                component.selectedRegion.value -= it
-                                component.loadNextPage(reset = true)
-                            }
-                            .padding(4.dp),
-                        icon = vectorResource(Res.drawable.ic_tertiary),
-                        iconColor = KarikaColors.Black1,
-                        iconSize = 16.dp,
-                        text = it.label(),
-                        textColor = KarikaColors.Gray2,
-                        textSize = 16.sp,
-                        fontWeight = FontWeight.W700,
-                        iconPosition = FabPosition.End
+                    component.selectedRegion.value -= it
+                    component.loadNextPage(reset = true)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AllVendorsTitle(component: VendorComponent) {
+    val vendors by component.vendors.collectAsState()
+
+    Row(
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 2.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KarikaText(
+            modifier = Modifier
+                .weight(1f),
+            text = "Svi dobavljači",
+            color = KarikaUiColors.Ink,
+            textSize = 17.sp,
+            lineHeight = 22.sp,
+            fontWeight = FontWeight.W700,
+            maxLines = 1
+        )
+        if (vendors.isNotEmpty()) {
+            KarikaText(
+                text = if (component.hasNextPage) "${vendors.size}+" else "${vendors.size}",
+                color = KarikaUiColors.Pink,
+                textSize = 13.sp,
+                fontWeight = FontWeight.W600,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/** Vendor card of the 2-column grid: logo area, name and city. */
+@Composable
+fun VendorItem(vendor: Vendor, component: CommonComponent) {
+    KCard(
+        modifier = Modifier
+            .testTag(vendorCardTag(vendor))
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        onClick = {
+            component.showVendor(vendor)
+        }
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .background(KarikaColors.White),
+            contentAlignment = Alignment.Center
+        ) {
+            if (vendor.companyLogo.isNullOrBlank()) {
+                KInitials(
+                    name = vendor.name(),
+                    size = 64.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    textSize = 20.sp
+                )
+            } else {
+                KImage(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    url = vendor.image(),
+                    contentScale = ContentScale.Fit
+                )
+            }
+        }
+        KDivider()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp)
+        ) {
+            KarikaText(
+                text = vendor.name(),
+                color = KarikaUiColors.Ink,
+                textSize = 14.sp,
+                lineHeight = 18.sp,
+                fontWeight = FontWeight.W600,
+                maxLines = 2
+            )
+            val city = vendor.city?.takeIf { it.isNotBlank() } ?: vendor.b2bVendorGrad?.takeIf { it.isNotBlank() }
+            if (city != null) {
+                Spacer(Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    KIcon(icon = vectorResource(Res.drawable.ic_k_pin), tint = KarikaUiColors.Muted, size = 12.dp)
+                    Spacer(Modifier.width(4.dp))
+                    KarikaText(
+                        text = city,
+                        color = KarikaUiColors.Muted,
+                        textSize = 12.sp,
+                        lineHeight = 16.sp,
+                        maxLines = 1
                     )
                 }
             }
         }
     }
-
-    FilterSheet(component)
 }
 
 @Composable
@@ -297,58 +353,44 @@ private fun FeaturedVendors(component: VendorComponent) {
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
                 modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 12.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 KarikaText(
-                    modifier = Modifier,
-                    color = KarikaColors.Black,
-                    text = "ISTAKNUTI DOBAVLJAČI",
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W700
+                    text = "Istaknuti",
+                    color = KarikaUiColors.Ink,
+                    textSize = 17.sp,
+                    lineHeight = 22.sp,
+                    fontWeight = FontWeight.W700,
+                    maxLines = 1
                 )
-                Box(
-                    modifier = Modifier
-                        .background(
-                            color = KarikaColors.Primary.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    KarikaText(
-                        text = "Sponzorisano",
-                        color = KarikaColors.Gray2,
-                        textSize = 10.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                }
+                KPill(
+                    text = "Sponzorisano",
+                    background = KarikaUiColors.PinkSoft,
+                    color = KarikaUiColors.Pink,
+                    textSize = 11.sp
+                )
             }
 
-            BoxWithConstraints(
+            LazyRow(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp)
             ) {
-                val cardWidth = maxWidth * 0.8f
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(end = maxWidth * 0.2f)
-                ) {
-                    items(items = featuredVendors) { vendor ->
-                        FeaturedVendorItem(
-                            modifier = Modifier
-                                .width(cardWidth)
-                                .padding(horizontal = 4.dp),
-                            vendor = vendor,
-                            component = component
-                        )
-                    }
+                items(items = featuredVendors) { vendor ->
+                    FeaturedVendorItem(
+                        modifier = Modifier
+                            .width(290.dp),
+                        vendor = vendor,
+                        component = component
+                    )
                 }
             }
         }
@@ -361,143 +403,89 @@ private fun FeaturedVendorItem(
     vendor: PromotedVendor,
     component: CommonComponent
 ) {
-    Card(
-        modifier = modifier,
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp,
-        ),
-        shape = RoundedCornerShape(12.dp),
+    KCard(
+        modifier = modifier
+            .testTag(featuredVendorTag(vendor)),
+        shape = RoundedCornerShape(14.dp),
+        onClick = {
+            component.showVendor(vendor.toVendor())
+        }
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .background(color = KarikaColors.White)
                 .fillMaxWidth()
+                .padding(14.dp)
         ) {
-            Box(
+            Row(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp)
-                    .background(color = KarikaColors.Primary, shape = RoundedCornerShape(12.dp))
-                    .padding(horizontal = 4.dp, vertical = 4.dp)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        modifier = Modifier.size(12.dp),
-                        imageVector = vectorResource(Res.drawable.star_outline),
-                        contentDescription = null,
-                        tint = KarikaColors.White,
-                    )
-                    KarikaText(
-                        text = "ISTAKNUTO",
-                        color = KarikaColors.White,
-                        textSize = 10.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .testTag(featuredVendorTag(vendor))
-                    .onClick {
-                        component.showVendor(vendor.toVendor())
-                    }
-                    .padding(16.dp)
-                    .padding(top = 24.dp)
                     .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
+                if (vendor.companyLogo.isNullOrBlank()) {
+                    KInitials(
+                        name = vendor.name(),
+                        size = 52.dp,
+                        shape = RoundedCornerShape(14.dp),
+                        textSize = 17.sp
+                    )
+                } else {
+                    KImage(
                         modifier = Modifier
-                            .size(56.dp)
-                            .border(
-                                color = KarikaColors.Gray5,
-                                shape = RoundedCornerShape(8.dp),
-                                width = 1.dp
-                            )
-                            .background(
-                                color = KarikaColors.Primary.copy(alpha = 0.2f),
-                                shape = RoundedCornerShape(8.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        KarikaImage(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp)),
-                            model = vendor.logoImage(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        KarikaText(
-                            modifier = Modifier,
-                            color = KarikaColors.Black,
-                            text = vendor.name(),
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W700,
-                            maxLines = 2
-                        )
-                        KarikaText(
-                            modifier = Modifier,
-                            color = KarikaColors.Gray2,
-                            text = vendor.description ?: " ",
-                            textSize = 12.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                    }
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(KarikaUiColors.PinkSoft),
+                        url = vendor.logoImage()
+                    )
                 }
-
-                FlowRow(
+                Spacer(Modifier.weight(1f))
+                KPill(
+                    text = "ISTAKNUTO",
+                    background = KarikaUiColors.Pink,
+                    color = KarikaColors.White,
+                    icon = vectorResource(Res.drawable.ic_k_star),
+                    textSize = 11.sp
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+            KarikaText(
+                text = vendor.name(),
+                color = KarikaUiColors.Ink,
+                textSize = 16.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.W700,
+                maxLines = 2
+            )
+            if (!vendor.description.isNullOrBlank()) {
+                Spacer(Modifier.height(4.dp))
+                KarikaText(
+                    text = vendor.description,
+                    color = KarikaUiColors.Muted,
+                    textSize = 12.sp,
+                    lineHeight = 16.sp,
+                    maxLines = 2
+                )
+            }
+            val categories = vendor.categories.orEmpty()
+            if (categories.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(40.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    maxItemsInEachRow = 3
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    vendor.categories?.forEach { tag ->
-                        Box(
-                            modifier = Modifier
-                                .onClick {
-                                    component.mainNavigate(
-                                        MainConfig.CategoryProducts(
-                                            Category(
-                                                id = tag.categoryId ?: 0,
-                                                name = tag.name
-                                            )
-                                        )
-                                    )
-                                }
-                                .background(
-                                    color = KarikaColors.White,
-                                    shape = RoundedCornerShape(100)
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = KarikaColors.Gray5,
-                                    shape = RoundedCornerShape(100)
-                                )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                    categories.forEach { tag ->
+                        KChip(
+                            text = tag.name,
+                            selected = false
                         ) {
-                            KarikaText(
-                                text = tag.name,
-                                color = KarikaColors.Black1,
-                                textSize = 10.sp,
-                                fontWeight = FontWeight.W400
+                            component.mainNavigate(
+                                MainConfig.CategoryProducts(
+                                    Category(
+                                        id = tag.categoryId ?: 0,
+                                        name = tag.name
+                                    )
+                                )
                             )
                         }
                     }
@@ -512,18 +500,6 @@ private fun EmptyState(component: VendorComponent) {
     val vendors by component.vendors.collectAsState()
     val loader by component.stateHolder.loaderHandler.loader.collectAsState()
     if (vendors.isEmpty() && !loader) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            KarikaText(
-                modifier = Modifier,
-                color = KarikaColors.Primary,
-                textSize = 16.sp,
-                fontWeight = FontWeight.W700,
-                text = "Nema rezultata."
-            )
-        }
+        KEmptyState(text = "Nema rezultata.")
     }
 }
