@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -58,7 +59,8 @@ class VendorsTabE2ETest : StageE2ETest() {
 
     @Test
     fun showsTheVendorsFromTheBackend() {
-        compose.onNodeWithText("DOBAVLJAČI").assertIsDisplayed()
+        // The screen title, besides the bottom bar tab
+        assertTrue(compose.onAllNodesWithText("Dobavljači").fetchSemanticsNodes().size >= 2)
         compose.onNode(searchField).assertIsDisplayed()
         firstPage.forEach { vendor ->
             vendorList().performScrollToNode(hasTestTag(vendorCardTag(vendor)))
@@ -173,18 +175,19 @@ class VendorsTabE2ETest : StageE2ETest() {
     fun featuredVendorsMatchTheBackendAndOpenTheVendor() {
         val featured = promotedVendors().filter { it.promoteVendorInList }
         if (featured.isEmpty()) {
-            compose.onNodeWithText("ISTAKNUTI DOBAVLJAČI").assertDoesNotExist()
+            compose.onNodeWithText("Istaknuti").assertDoesNotExist()
             return
         }
 
-        compose.onNodeWithText("ISTAKNUTI DOBAVLJAČI").assertIsDisplayed()
+        compose.onNodeWithText("Istaknuti").assertIsDisplayed()
         compose.onNodeWithTag(featuredVendorTag(featured.first())).assertIsDisplayed().performClick()
 
         compose.waitUntilDoesNotExist(hasTestTag(VENDOR_FILTER_TAG), SCREEN_TIMEOUT_MS)
         assertTrue(exists(hasText(featured.first().name())))
     }
 
-    private val searchField = hasSetTextAction() and hasText("Pretraži dobavljače..")
+    /** The search field, the only text field of the tab (its placeholder "Pretraži dobavljače…" is a separate node). */
+    private val searchField = hasSetTextAction()
 
     /** The vendor list; the filter row at its top scrolls away, the vendor cards stay. */
     private fun vendorList() =
