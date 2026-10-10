@@ -169,7 +169,7 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
         compose.onNodeWithText("Novi kupac").performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Informacije o pravnom licu"), SCREEN_TIMEOUT_MS)
-        listOf("Naziv pravnog lica*", "ID broj*", "Kontakt osoba", "Email adresa*").forEach {
+        listOf("Naziv pravnog lica", "ID broj", "Kontakt osoba", "Email adresa").forEach {
             assertTrue("\"$it\" is not in the form", exists(hasText(it), unmerged = true))
         }
         compose.onNodeWithText("Odustani").performScrollTo().performClick()

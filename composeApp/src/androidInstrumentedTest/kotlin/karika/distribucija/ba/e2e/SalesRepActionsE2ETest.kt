@@ -380,7 +380,7 @@ class SalesRepActionsE2ETest : SalesRepE2ETest() {
     }
 
     /**
-     * The discount form's text fields: the item search, "Min. količina", "Rabat %". Once an item
+     * The discount form's text fields: the item search, "Min. količina", "Rabat". Once an item
      * is chosen the search is read-only and no longer a text field, so they count from the end.
      */
     private fun formField(fromEnd: Int) = field(shownFieldIndices().size - 1 - fromEnd)

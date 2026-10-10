@@ -3,7 +3,6 @@ package karika.distribucija.ba.ui.view.salesrep.customers.invite
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
@@ -25,7 +26,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,30 +36,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KDivider
+import karika.distribucija.ba.ui.components.KFieldLabel
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KSecondaryButton
+import karika.distribucija.ba.ui.components.KSectionTitle
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.YSpacer16
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.view.distributer.VendorAccent
+import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_close
-import karikav2.composeapp.generated.resources.ic_email
-import karikav2.composeapp.generated.resources.ic_info
-import karikav2.composeapp.generated.resources.ic_phone
-import karikav2.composeapp.generated.resources.ic_search
-import karikav2.composeapp.generated.resources.ic_viber
-import org.jetbrains.compose.resources.DrawableResource
+import karikav2.composeapp.generated.resources.ic_k_close
+import karikav2.composeapp.generated.resources.ic_k_info
+import karikav2.composeapp.generated.resources.ic_k_mail
+import karikav2.composeapp.generated.resources.ic_k_search
 import org.jetbrains.compose.resources.vectorResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesInviteCustomerView(component: SalesInviteCustomerComponent) {
     val email by component.email.collectAsState()
-    val phone by component.phone.collectAsState()
     val note by component.note.collectAsState()
     val contactMethod by component.contactMethod.collectAsState()
     val isSaving by component.isSaving.collectAsState()
@@ -68,500 +74,255 @@ fun SalesInviteCustomerView(component: SalesInviteCustomerComponent) {
     val isSearching by component.isSearching.collectAsState()
     val uriHandler = LocalUriHandler.current
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(KarikaColors.Gray20)
+            .background(KarikaUiColors.Page)
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+            .navigationBarsPadding()
+            .imePadding()
     ) {
-        Column(
+        // ── Info banner ────────────────────────────────────────────────────────
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-                .navigationBarsPadding()
-                .imePadding()
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(VendorAccentSoft)
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            YSpacer16()
-
-            // ── Info banner ────────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(KarikaColors.Blue.copy(alpha = 0.08f))
-                    .border(1.dp, KarikaColors.Blue.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
-                    .padding(14.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_info),
-                    contentDescription = "",
-                    tint = KarikaColors.Blue,
-                    modifier = Modifier.size(20.dp)
-                )
-                KarikaText(
-                    text = "Kupac dobija zahtjev za partnerstvo i mora ga prihvatiti da bi se pojavio na vašoj listi.",
-                    color = KarikaColors.Gray2,
-                    textSize = 13.sp,
-                    fontWeight = FontWeight.W400
-                )
-            }
-
-            YSpacer16()
-
-            // ── Pretraga kupca ─────────────────────────────────────────────────
+            KIcon(icon = vectorResource(Res.drawable.ic_k_info), tint = VendorAccent, size = 18.dp)
             KarikaText(
-                text = "Pretraži kupca",
-                color = KarikaColors.Gray2,
-                textSize = 12.sp,
-                fontWeight = FontWeight.W600,
-                modifier = Modifier.padding(bottom = 6.dp)
+                modifier = Modifier.weight(1f),
+                text = "Kupac dobija zahtjev za partnerstvo i mora ga prihvatiti da bi se pojavio na vašoj listi.",
+                color = KarikaUiColors.Ink,
+                textSize = 13.sp,
+                lineHeight = 19.sp
             )
-            var searchExpanded by remember { mutableStateOf(false) }
-            ExposedDropdownMenuBox(
-                expanded = searchExpanded,
-                onExpandedChange = { searchExpanded = it }
+        }
+
+        // ── Kupac ──────────────────────────────────────────────────────────────
+        KSectionTitle(modifier = Modifier.padding(top = 22.dp, bottom = 12.dp), title = "Kupac")
+        KCard(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(KarikaColors.White)
-                        .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(14.dp))
-                        .padding(horizontal = 14.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_search),
-                        contentDescription = "",
-                        tint = KarikaColors.Gray6,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    BasicTextField(
-                        value = searchQuery,
-                        onValueChange = { component.setSearchQuery(it) },
-                        singleLine = true,
-                        textStyle = TextStyle(
-                            color = KarikaColors.Gray2,
-                            fontSize = 15.sp,
-                            fontFamily = karikaFonts()
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .onFocusChanged { if (it.isFocused) searchExpanded = true },
-                        decorationBox = { inner ->
-                            if (searchQuery.isEmpty()) {
-                                KarikaText(
-                                    text = "Pretraži kupca po imenu, kompaniji ili emailu",
-                                    color = KarikaColors.Gray8,
-                                    textSize = 15.sp,
-                                    fontWeight = FontWeight.W400
-                                )
-                            }
-                            inner()
-                        }
-                    )
-                    if (isSearching) {
-                        CircularProgressIndicator(
-                            color = KarikaColors.Blue,
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp
-                        )
-                    } else if (searchQuery.isNotEmpty()) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_close),
-                            contentDescription = "",
-                            tint = KarikaColors.Gray6,
+                Column {
+                    KFieldLabel(text = "Pretraži kupca", required = true, requiredColor = VendorAccent)
+                    var searchExpanded by remember { mutableStateOf(false) }
+                    val shape = RoundedCornerShape(12.dp)
+                    ExposedDropdownMenuBox(
+                        expanded = searchExpanded,
+                        onExpandedChange = { searchExpanded = it }
+                    ) {
+                        Row(
                             modifier = Modifier
-                                .size(18.dp)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() }
-                                ) {
-                                    component.setSearchQuery("")
-                                    searchExpanded = false
-                                }
-                        )
-                    }
-                }
-                ExposedDropdownMenu(
-                    expanded = searchExpanded,
-                    containerColor = KarikaColors.White,
-                    shape = RoundedCornerShape(14.dp),
-                    onDismissRequest = { searchExpanded = false }
-                ) {
-                    if (searchQuery.length < 3) {
-                        DropdownMenuItem(
-                            text = {
-                                KarikaText(
-                                    text = "Pretraži kupce (unesite najmanje 3 znaka)",
-                                    color = KarikaColors.Gray8,
-                                    textSize = 14.sp,
-                                    fontWeight = FontWeight.W400
-                                )
-                            },
-                            enabled = false,
-                            onClick = {}
-                        )
-                    } else if (searchResults.isEmpty()) {
-                        DropdownMenuItem(
-                            text = {
-                                KarikaText(
-                                    text = "Nema korisnika za taj pretragu",
-                                    color = KarikaColors.Gray8,
-                                    textSize = 14.sp,
-                                    fontWeight = FontWeight.W400
-                                )
-                            },
-                            enabled = false,
-                            onClick = {}
-                        )
-                    } else {
-                        searchResults.forEach { customer ->
-                            DropdownMenuItem(
-                                text = {
-                                    KarikaText(
-                                        text = customer.company ?: customer.fullName,
-                                        color = KarikaColors.Gray2,
-                                        textSize = 14.sp,
-                                        fontWeight = FontWeight.W400
-                                    )
-                                },
-                                onClick = {
-                                    component.selectCustomer(customer)
-                                    searchExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-            /*
-                        YSpacer16()
-
-                        // ── Način kontakta ─────────────────────────────────────────────────
-                        KarikaText(
-                            text = "Način kontakta*",
-                            color = KarikaColors.Gray2,
-                            textSize = 12.sp,
-                            fontWeight = FontWeight.W600,
-                            modifier = Modifier.padding(bottom = 6.dp)
-                        )
-                        var methodExpanded by remember { mutableStateOf(false) }
-                        ExposedDropdownMenuBox(
-                            expanded = methodExpanded,
-                            onExpandedChange = { methodExpanded = it }
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .clip(shape)
+                                .background(KarikaColors.White)
+                                .border(1.dp, if (searchExpanded) VendorAccent else KarikaUiColors.Border, shape)
+                                .padding(horizontal = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(KarikaColors.White)
-                                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(14.dp))
-                                    .padding(horizontal = 14.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Icon(
-                                    imageVector = vectorResource(contactMethodIcon(contactMethod)),
-                                    contentDescription = "",
-                                    tint = if (contactMethod == ContactMethod.VIBER) Color.Unspecified else KarikaColors.Gray6,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                KarikaText(
-                                    modifier = Modifier.weight(1f),
-                                    text = contactMethod.label,
-                                    color = KarikaColors.Gray2,
-                                    textSize = 15.sp,
-                                    fontWeight = FontWeight.W400
-                                )
-                                Icon(
-                                    imageVector = vectorResource(Res.drawable.ic_arrow_down),
-                                    contentDescription = "",
-                                    tint = KarikaColors.Gray6,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                            ExposedDropdownMenu(
-                                expanded = methodExpanded,
-                                containerColor = KarikaColors.White,
-                                shape = RoundedCornerShape(14.dp),
-                                onDismissRequest = { methodExpanded = false }
-                            ) {
-                                ContactMethod.entries.forEach { method ->
-                                    DropdownMenuItem(
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = vectorResource(contactMethodIcon(method)),
-                                                contentDescription = "",
-                                                tint = if (method == ContactMethod.VIBER) Color.Unspecified else KarikaColors.Gray6,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        },
-                                        text = {
-                                            KarikaText(
-                                                text = method.label,
-                                                color = KarikaColors.Gray2,
-                                                textSize = 14.sp,
-                                                fontWeight = if (method == contactMethod) FontWeight.W700 else FontWeight.W400
-                                            )
-                                        },
-                                        onClick = {
-                                            component.setContactMethod(method)
-                                            methodExpanded = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-
-                        YSpacer16()
-
-                        if (contactMethod == ContactMethod.EMAIL) {
-                            // ── Email ────────────────────────────────────────────────────
-                            KarikaText(
-                                text = "Email kupca*",
-                                color = KarikaColors.Gray2,
-                                textSize = 12.sp,
-                                fontWeight = FontWeight.W600,
-                                modifier = Modifier.padding(bottom = 6.dp)
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(KarikaColors.White)
-                                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(14.dp))
-                                    .padding(horizontal = 14.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Icon(
-                                    imageVector = vectorResource(Res.drawable.ic_email),
-                                    contentDescription = "",
-                                    tint = KarikaColors.Gray6,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                BasicTextField(
-                                    value = email,
-                                    onValueChange = { component.setEmail(it) },
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                                    textStyle = TextStyle(
-                                        color = KarikaColors.Gray2,
-                                        fontSize = 15.sp,
-                                        fontFamily = karikaFonts()
-                                    ),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    decorationBox = { inner ->
-                                        if (email.isEmpty()) {
-                                            KarikaText(
-                                                text = "kupac@primjer.ba",
-                                                color = KarikaColors.Gray8,
-                                                textSize = 15.sp,
-                                                fontWeight = FontWeight.W400
-                                            )
-                                        }
-                                        inner()
-                                    }
-                                )
-                            }
-
-                            YSpacer16()
-
-                            // ── Napomena ─────────────────────────────────────────────────
-                            KarikaText(
-                                text = "Napomena (opcionalno)",
-                                color = KarikaColors.Gray2,
-                                textSize = 12.sp,
-                                fontWeight = FontWeight.W600,
-                                modifier = Modifier.padding(bottom = 6.dp)
-                            )
+                            KIcon(icon = vectorResource(Res.drawable.ic_k_search), tint = KarikaUiColors.Muted, size = 18.dp)
+                            Spacer(Modifier.width(10.dp))
                             BasicTextField(
-                                value = note,
-                                onValueChange = { component.setNote(it) },
+                                value = searchQuery,
+                                onValueChange = { component.setSearchQuery(it) },
+                                singleLine = true,
                                 textStyle = TextStyle(
-                                    color = KarikaColors.Gray2,
+                                    color = KarikaUiColors.Ink,
                                     fontSize = 15.sp,
                                     fontFamily = karikaFonts()
                                 ),
+                                cursorBrush = SolidColor(VendorAccent),
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(120.dp)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(KarikaColors.White)
-                                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(14.dp))
-                                    .padding(14.dp),
+                                    .weight(1f)
+                                    .onFocusChanged { if (it.isFocused) searchExpanded = true },
                                 decorationBox = { inner ->
-                                    if (note.isEmpty()) {
-                                        KarikaText(
-                                            text = "Kratka napomena za kupca",
-                                            color = KarikaColors.Gray8,
-                                            textSize = 15.sp,
-                                            fontWeight = FontWeight.W400
-                                        )
-                                    }
-                                    inner()
-                                }
-                            )
-                        } else {
-                            // ── Broj telefona / Viber ────────────────────────────────────
-                            KarikaText(
-                                text = "Broj telefona kupca*",
-                                color = KarikaColors.Gray2,
-                                textSize = 12.sp,
-                                fontWeight = FontWeight.W600,
-                                modifier = Modifier.padding(bottom = 6.dp)
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(KarikaColors.White)
-                                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(14.dp))
-                                    .padding(horizontal = 14.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Icon(
-                                    imageVector = vectorResource(Res.drawable.ic_phone),
-                                    contentDescription = "",
-                                    tint = KarikaColors.Gray6,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                BasicTextField(
-                                    value = phone,
-                                    onValueChange = { component.setPhone(it) },
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                                    textStyle = TextStyle(
-                                        color = KarikaColors.Gray2,
-                                        fontSize = 15.sp,
-                                        fontFamily = karikaFonts()
-                                    ),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    decorationBox = { inner ->
-                                        if (phone.isEmpty()) {
+                                    Box(contentAlignment = Alignment.CenterStart) {
+                                        if (searchQuery.isEmpty()) {
                                             KarikaText(
-                                                text = "+387 6X XXX XXX",
-                                                color = KarikaColors.Gray8,
+                                                text = "Ime, kompanija ili email",
+                                                color = KarikaUiColors.Subtle,
                                                 textSize = 15.sp,
-                                                fontWeight = FontWeight.W400
+                                                maxLines = 1
                                             )
                                         }
                                         inner()
                                     }
+                                }
+                            )
+                            if (isSearching) {
+                                Spacer(Modifier.width(8.dp))
+                                CircularProgressIndicator(
+                                    color = VendorAccent,
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp
                                 )
+                            } else if (searchQuery.isNotEmpty()) {
+                                Spacer(Modifier.width(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(CircleShape)
+                                        .background(KarikaUiColors.Field)
+                                        .clickable {
+                                            component.setSearchQuery("")
+                                            searchExpanded = false
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    KIcon(icon = vectorResource(Res.drawable.ic_k_close), tint = KarikaUiColors.Muted, size = 14.dp)
+                                }
                             }
                         }
+                        ExposedDropdownMenu(
+                            expanded = searchExpanded,
+                            containerColor = KarikaColors.White,
+                            shape = RoundedCornerShape(12.dp),
+                            onDismissRequest = { searchExpanded = false }
+                        ) {
+                            if (searchQuery.length < 3) {
+                                MenuHint("Pretraži kupce (unesite najmanje 3 znaka)")
+                            } else if (searchResults.isEmpty()) {
+                                MenuHint("Nema korisnika za taj pretragu")
+                            } else {
+                                searchResults.forEachIndexed { index, customer ->
+                                    if (index > 0) KDivider()
+                                    DropdownMenuItem(
+                                        text = {
+                                            Column {
+                                                KarikaText(
+                                                    text = customer.company ?: customer.fullName,
+                                                    color = KarikaUiColors.Ink,
+                                                    textSize = 15.sp,
+                                                    fontWeight = FontWeight.W600
+                                                )
+                                                if (!customer.email.isNullOrBlank()) {
+                                                    KarikaText(
+                                                        text = customer.email,
+                                                        color = KarikaUiColors.Muted,
+                                                        textSize = 12.5.sp
+                                                    )
+                                                }
+                                            }
+                                        },
+                                        onClick = {
+                                            component.selectCustomer(customer)
+                                            searchExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
 
+                // The email the request goes to (chosen customer's, or the one from "Novi kupac")
+                if (email.isNotBlank()) {
+                    Column {
+                        KFieldLabel(text = "Email kupca")
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(KarikaUiColors.Field)
+                                .padding(horizontal = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            KIcon(icon = vectorResource(Res.drawable.ic_k_mail), tint = KarikaUiColors.Muted, size = 18.dp)
+                            Spacer(Modifier.width(10.dp))
+                            KarikaText(
+                                modifier = Modifier.weight(1f),
+                                text = email,
+                                color = KarikaUiColors.Ink,
+                                textSize = 15.sp,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
-            */
-            YSpacer16()
-            // ── Napomena ─────────────────────────────────────────────────
-            KarikaText(
-                text = "Napomena (opcionalno)",
-                color = KarikaColors.Gray2,
-                textSize = 12.sp,
-                fontWeight = FontWeight.W600,
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
+        // The phone/Viber contact method picker of the component is not offered (it was turned off before)
+
+        // ── Napomena ───────────────────────────────────────────────────────────
+        KSectionTitle(modifier = Modifier.padding(top = 22.dp, bottom = 12.dp), title = "Napomena (opcionalno)")
+        KCard(modifier = Modifier.fillMaxWidth()) {
+            val shape = RoundedCornerShape(12.dp)
             BasicTextField(
                 value = note,
                 onValueChange = { component.setNote(it) },
                 textStyle = TextStyle(
-                    color = KarikaColors.Gray2,
+                    color = KarikaUiColors.Ink,
                     fontSize = 15.sp,
                     fontFamily = karikaFonts()
                 ),
+                cursorBrush = SolidColor(VendorAccent),
                 modifier = Modifier
+                    .padding(16.dp)
                     .fillMaxWidth()
                     .height(120.dp)
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(shape)
                     .background(KarikaColors.White)
-                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(14.dp))
+                    .border(1.dp, KarikaUiColors.Border, shape)
                     .padding(14.dp),
                 decorationBox = { inner ->
-                    if (note.isEmpty()) {
-                        KarikaText(
-                            text = "Kratka napomena za kupca",
-                            color = KarikaColors.Gray8,
-                            textSize = 15.sp,
-                            fontWeight = FontWeight.W400
-                        )
+                    Box {
+                        if (note.isEmpty()) {
+                            KarikaText(
+                                text = "Kratka napomena za kupca",
+                                color = KarikaUiColors.Subtle,
+                                textSize = 15.sp
+                            )
+                        }
+                        inner()
                     }
-                    inner()
                 }
             )
+        }
 
-            Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(20.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .border(1.dp, KarikaColors.Blue, RoundedCornerShape(18.dp))
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { component.goBack() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    KarikaText(
-                        text = "Odustani",
-                        color = KarikaColors.Blue,
-                        textSize = 16.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(KarikaColors.Blue)
-                        .clickable(
-                            enabled = !isSaving,
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            if (contactMethod == ContactMethod.EMAIL) {
-                                component.send()
-                            } else {
-                                component.callTarget()?.let { uriHandler.openUri(it) }
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isSaving) {
-                        CircularProgressIndicator(
-                            color = KarikaColors.White,
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp
-                        )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            KSecondaryButton(
+                modifier = Modifier.weight(1f),
+                text = "Odustani",
+                onClick = { component.goBack() }
+            )
+            KPrimaryButton(
+                modifier = Modifier.weight(1.6f),
+                text = if (contactMethod == ContactMethod.EMAIL) "Pošalji zahtjev" else "Pozovi",
+                background = VendorAccent,
+                enabled = !isSaving,
+                onClick = {
+                    if (contactMethod == ContactMethod.EMAIL) {
+                        component.send()
                     } else {
-                        KarikaText(
-                            text = if (contactMethod == ContactMethod.EMAIL) "Pošalji zahtjev" else "Pozovi",
-                            color = KarikaColors.White,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W700
-                        )
+                        component.callTarget()?.let { uriHandler.openUri(it) }
                     }
                 }
-            }
-
-            YSpacer16()
+            )
         }
+
+        Spacer(Modifier.height(8.dp))
     }
 }
 
-private fun contactMethodIcon(method: ContactMethod): DrawableResource = when (method) {
-    ContactMethod.EMAIL -> Res.drawable.ic_email
-    ContactMethod.PHONE -> Res.drawable.ic_phone
-    ContactMethod.VIBER -> Res.drawable.ic_viber
+@Composable
+private fun MenuHint(text: String) {
+    DropdownMenuItem(
+        text = {
+            KarikaText(text = text, color = KarikaUiColors.Muted, textSize = 14.sp)
+        },
+        enabled = false,
+        onClick = {}
+    )
 }

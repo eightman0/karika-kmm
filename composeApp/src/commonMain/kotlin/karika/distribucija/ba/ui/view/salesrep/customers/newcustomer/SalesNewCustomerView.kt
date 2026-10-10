@@ -3,10 +3,10 @@ package karika.distribucija.ba.ui.view.salesrep.customers.newcustomer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -27,13 +26,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,27 +39,41 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.components.KBottomPanel
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KConfirmDialog
+import karika.distribucija.ba.ui.components.KDivider
+import karika.distribucija.ba.ui.components.KFieldLabel
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KSecondaryButton
+import karika.distribucija.ba.ui.components.KSectionTitle
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.YSpacer8
+import karika.distribucija.ba.ui.components.KarikaUiColors
+import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.view.distributer.VendorAccent
+import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_arrow_down
-import karikav2.composeapp.generated.resources.ic_check_circle_filled
-import karikav2.composeapp.generated.resources.ic_email
-import karikav2.composeapp.generated.resources.ic_info
-import karikav2.composeapp.generated.resources.ic_person
-import karikav2.composeapp.generated.resources.ic_phone
-import karikav2.composeapp.generated.resources.ic_storefront
+import karikav2.composeapp.generated.resources.ic_k_check
+import karikav2.composeapp.generated.resources.ic_k_chevron_down
+import karikav2.composeapp.generated.resources.ic_k_info
+import karikav2.composeapp.generated.resources.ic_k_lock
+import karikav2.composeapp.generated.resources.ic_k_mail
+import karikav2.composeapp.generated.resources.ic_k_phone
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.vectorResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,39 +100,17 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
     val showInviteDialog by component.showInviteDialog.collectAsState()
 
     if (showInviteDialog) {
-        AlertDialog(
-            onDismissRequest = { component.dismissInviteDialog() },
-            containerColor = KarikaColors.White,
-            title = {
-                KarikaText(
-                    text = "Kupac već postoji",
-                    color = KarikaColors.Gray2,
-                    fontWeight = FontWeight.W700,
-                    textSize = 18.sp
-                )
-            },
-            text = {
-                KarikaText(
-                    text = "Kupac sa ovim email-om već postoji. Želiš li ga pozvati kao partnera?",
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp
-                )
-            },
-            dismissButton = {
-                TextButton(onClick = { component.dismissInviteDialog() }) {
-                    KarikaText(text = "Odustani", color = KarikaColors.Blue, textSize = 14.sp)
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { component.openInviteCustomer() }) {
-                    KarikaText(
-                        text = "Pozovi",
-                        color = KarikaColors.Blue,
-                        fontWeight = FontWeight.W700,
-                        textSize = 14.sp
-                    )
-                }
-            }
+        KConfirmDialog(
+            title = "Kupac već postoji",
+            message = "Kupac sa ovim email-om već postoji. Želiš li ga pozvati kao partnera?",
+            icon = vectorResource(Res.drawable.ic_k_mail),
+            confirmText = "Pozovi",
+            dismissText = "Odustani",
+            onConfirm = { component.openInviteCustomer() },
+            onDismiss = { component.dismissInviteDialog() },
+            iconBackground = VendorAccentSoft,
+            iconTint = VendorAccent,
+            confirmColor = VendorAccent
         )
     }
 
@@ -142,68 +128,28 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
     val isBrcko = entity == "Distrikt Brčko"
     val showCantonPicker = (isFBiH || isRS) && cantonOptions.isNotEmpty()
     val showCityPicker = isFBiH && canton != null && cityOptions.isNotEmpty()
-    // Brčko: city is pre-filled "Brčko Grad", shown as read-only chip
+    // Brčko: city is pre-filled "Brčko Grad", shown read-only
     val brckoCity = if (isBrcko) city else null
 
     KarikaScaffold(
         modifier = Modifier.fillMaxSize(),
         component = component,
-        containerColor = KarikaColors.Gray20,
+        containerColor = KarikaUiColors.Page,
         bottomBar = {
-            // ── Footer ─────────────────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .border(1.dp, KarikaColors.Blue, RoundedCornerShape(18.dp))
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { component.goBack() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    KarikaText(
+            KBottomPanel {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    KSecondaryButton(
+                        modifier = Modifier.weight(1f),
                         text = "Odustani",
-                        color = KarikaColors.Blue,
-                        textSize = 16.sp,
-                        fontWeight = FontWeight.W700
+                        onClick = { component.goBack() }
                     )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(if (isSaving) KarikaColors.Gray9 else KarikaColors.Blue)
-                        .clickable(
-                            enabled = !isSaving,
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { component.save() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isSaving) {
-                        CircularProgressIndicator(
-                            color = KarikaColors.White,
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        KarikaText(
-                            text = "Sačuvaj kupca",
-                            color = KarikaColors.White,
-                            textSize = 16.sp,
-                            fontWeight = FontWeight.W700
-                        )
-                    }
+                    KPrimaryButton(
+                        modifier = Modifier.weight(1.6f),
+                        text = "Sačuvaj kupca",
+                        background = VendorAccent,
+                        enabled = !isSaving,
+                        onClick = { component.save() }
+                    )
                 }
             }
         }
@@ -215,270 +161,173 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
                         .union(WindowInsets.navigationBars)
                         .only(WindowInsetsSides.Bottom)
                 )
-                .fillMaxSize()
+                .fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp)
         ) {
             // ── Info banner ────────────────────────────────────────────────────
             item {
-                Row(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(KarikaColors.Blue.copy(alpha = 0.08f))
-                        .border(
-                            1.dp,
-                            KarikaColors.Blue.copy(alpha = 0.2f),
-                            RoundedCornerShape(16.dp)
-                        )
-                        .padding(14.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_info),
-                        contentDescription = "",
-                        tint = KarikaColors.Blue,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    KarikaText(
-                        text = "Kupac dobija email za postavljanje lozinke i može se samostalno prijaviti na Kariku. Partnerstvo i dodjela kreiraju se automatski, a kupac se odmah pojavljuje na vašoj listi.",
-                        color = KarikaColors.Gray2,
-                        textSize = 13.sp,
-                        fontWeight = FontWeight.W400
-                    )
-                }
+                InfoNote(
+                    "Kupac dobija email za postavljanje lozinke i može se samostalno prijaviti na Kariku. " +
+                        "Partnerstvo i dodjela kreiraju se automatski, a kupac se odmah pojavljuje na vašoj listi."
+                )
             }
 
             // ── Section 1: Informacije o pravnom licu ──────────────────────────
             item {
-                FormSection(
-                    icon = Res.drawable.ic_storefront,
-                    title = "Informacije o pravnom licu"
-                ) {
-
-                    // Naziv pravnog lica (full width)
-                    FormField(label = "Naziv pravnog lica*") {
+                Section("Informacije o pravnom licu") {
+                    FormTextField(
+                        label = "Naziv pravnog lica",
+                        value = company,
+                        placeholder = "Naziv pravnog lica",
+                        onValueChange = { component.setCompany(it) }
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         FormTextField(
-                            value = company,
-                            placeholder = "Naziv pravnog lica",
-                            onValueChange = { component.setCompany(it) }
+                            modifier = Modifier.weight(1f),
+                            label = "ID broj",
+                            value = idNumber,
+                            placeholder = "ID broj",
+                            keyboardType = KeyboardType.Number,
+                            onValueChange = { component.setIdNumber(it) }
+                        )
+                        FormTextField(
+                            modifier = Modifier.weight(1f),
+                            label = "PDV broj",
+                            value = vatNumber,
+                            placeholder = "PDV broj",
+                            required = false,
+                            keyboardType = KeyboardType.Number,
+                            onValueChange = { component.setVatNumber(it) }
                         )
                     }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // ID broj + PDV broj
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            FormField(label = "ID broj*") {
-                                FormTextField(
-                                    value = idNumber,
-                                    placeholder = "ID broj",
-                                    keyboardType = KeyboardType.Number,
-                                    onValueChange = { component.setIdNumber(it) }
-                                )
-                            }
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            FormField(label = "PDV broj") {
-                                FormTextField(
-                                    value = vatNumber,
-                                    placeholder = "PDV broj",
-                                    keyboardType = KeyboardType.Number,
-                                    onValueChange = { component.setVatNumber(it) }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // Adresa (full width)
-                    FormField(label = "Adresa i broj ulice*") {
-                        FormTextField(
-                            value = street,
-                            placeholder = "Adresa i broj ulice",
-                            onValueChange = { component.setStreet(it) }
-                        )
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // Poštanski broj + Entitet
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            FormField(label = "Poštanski broj*") {
-                                FormTextField(
-                                    value = postcode,
-                                    placeholder = "Poštanski broj",
-                                    keyboardType = KeyboardType.Number,
-                                    onValueChange = { component.setPostcode(it) }
-                                )
-                            }
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            FormField(label = "Entitet*") {
-                                FormPicker(
-                                    value = entity,
-                                    placeholder = "Odaberite entitet",
-                                    onClick = { activeSheet = "entity" }
-                                )
-                            }
-                        }
-                    }
+                    FormTextField(
+                        label = "Adresa i broj ulice",
+                        value = street,
+                        placeholder = "Adresa i broj ulice",
+                        onValueChange = { component.setStreet(it) }
+                    )
+                    FormTextField(
+                        label = "Poštanski broj",
+                        value = postcode,
+                        placeholder = "Poštanski broj",
+                        keyboardType = KeyboardType.Number,
+                        onValueChange = { component.setPostcode(it) }
+                    )
+                    DropdownField(
+                        label = "Entitet",
+                        value = entity,
+                        placeholder = "Odaberite entitet",
+                        onClick = { activeSheet = "entity" }
+                    )
 
                     // Kanton (FBiH) or Općina (RS) — appears after entity is selected
                     if (showCantonPicker) {
-                        Spacer(Modifier.height(16.dp))
-                        FormField(label = if (isFBiH) "Kanton*" else "Općina*") {
-                            FormPicker(
-                                value = canton,
-                                placeholder = if (isFBiH) "Odaberite kanton" else "Odaberite općinu",
-                                onClick = { activeSheet = "canton" }
-                            )
-                        }
+                        DropdownField(
+                            label = if (isFBiH) "Kanton" else "Općina",
+                            value = canton,
+                            placeholder = if (isFBiH) "Odaberite kanton" else "Odaberite općinu",
+                            onClick = { activeSheet = "canton" }
+                        )
                     }
 
                     // Grad — appears after kanton is selected (FBiH only)
                     if (showCityPicker) {
-                        Spacer(Modifier.height(16.dp))
-                        FormField(label = "Grad*") {
-                            FormPicker(
-                                value = city,
-                                placeholder = "Odaberite grad",
-                                onClick = { activeSheet = "city" }
-                            )
-                        }
+                        DropdownField(
+                            label = "Grad",
+                            value = city,
+                            placeholder = "Odaberite grad",
+                            onClick = { activeSheet = "city" }
+                        )
                     }
 
-                    // Brčko: show pre-filled city as read-only
+                    // Brčko: the pre-filled city, read-only
                     if (isBrcko && brckoCity != null) {
-                        Spacer(Modifier.height(16.dp))
-                        FormField(label = "Grad") {
+                        Column {
+                            KFieldLabel(text = "Grad")
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .height(50.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(KarikaColors.Gray20)
-                                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                                    .background(KarikaUiColors.Field)
+                                    .padding(horizontal = 14.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 KarikaText(
+                                    modifier = Modifier.weight(1f),
                                     text = brckoCity,
-                                    color = KarikaColors.Gray2,
-                                    textSize = 14.sp,
-                                    fontWeight = FontWeight.W500
+                                    color = KarikaUiColors.Ink,
+                                    textSize = 15.sp,
+                                    maxLines = 1
+                                )
+                                KIcon(
+                                    icon = vectorResource(Res.drawable.ic_k_lock),
+                                    tint = KarikaUiColors.Subtle,
+                                    size = 16.dp
                                 )
                             }
                         }
                     }
 
-                    Spacer(Modifier.height(16.dp))
-
-                    // Veličina + Tip objekta
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            FormField(label = "Veličina objekta*") {
-                                FormPicker(
-                                    value = storeSize,
-                                    placeholder = "Veličina objekta",
-                                    onClick = { activeSheet = "storeSize" }
-                                )
-                            }
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            FormField(label = "Tip objekta*") {
-                                FormPicker(
-                                    value = storeType,
-                                    placeholder = "Tip objekta",
-                                    onClick = { activeSheet = "storeType" }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // Broj zaposlenih (full width)
-                    FormField(label = "Broj zaposlenih") {
-                        FormTextField(
-                            value = employeeCount,
-                            placeholder = "Broj zaposlenih",
-                            keyboardType = KeyboardType.Number,
-                            onValueChange = { component.setEmployeeCount(it) }
-                        )
-                    }
+                    DropdownField(
+                        label = "Veličina objekta",
+                        value = storeSize,
+                        placeholder = "Odaberite veličinu objekta",
+                        onClick = { activeSheet = "storeSize" }
+                    )
+                    DropdownField(
+                        label = "Tip objekta",
+                        value = storeType,
+                        placeholder = "Odaberite tip objekta",
+                        onClick = { activeSheet = "storeType" }
+                    )
+                    FormTextField(
+                        label = "Broj zaposlenih",
+                        value = employeeCount,
+                        placeholder = "Broj zaposlenih",
+                        required = false,
+                        keyboardType = KeyboardType.Number,
+                        onValueChange = { component.setEmployeeCount(it) }
+                    )
                 }
             }
 
             // ── Section 2: Kontakt osoba ───────────────────────────────────────
             item {
-                FormSection(icon = Res.drawable.ic_person, title = "Kontakt osoba") {
-
-                    // Ime + Prezime
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            FormField(label = "Ime*") {
-                                FormTextField(
-                                    value = firstname,
-                                    placeholder = "Ime",
-                                    onValueChange = { component.setFirstname(it) }
-                                )
-                            }
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            FormField(label = "Prezime*") {
-                                FormTextField(
-                                    value = lastname,
-                                    placeholder = "Prezime",
-                                    onValueChange = { component.setLastname(it) }
-                                )
-                            }
-                        }
+                Section("Kontakt osoba") {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        FormTextField(
+                            modifier = Modifier.weight(1f),
+                            label = "Ime",
+                            value = firstname,
+                            placeholder = "Ime",
+                            onValueChange = { component.setFirstname(it) }
+                        )
+                        FormTextField(
+                            modifier = Modifier.weight(1f),
+                            label = "Prezime",
+                            value = lastname,
+                            placeholder = "Prezime",
+                            onValueChange = { component.setLastname(it) }
+                        )
                     }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // Telefon + Email
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            FormField(label = "Broj telefona*") {
-                                FormTextField(
-                                    value = phone,
-                                    placeholder = "Broj telefona",
-                                    keyboardType = KeyboardType.Phone,
-                                    leadingIcon = Res.drawable.ic_phone,
-                                    onValueChange = { component.setPhone(it) }
-                                )
-                            }
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            FormField(label = "Email adresa*") {
-                                FormTextField(
-                                    value = email,
-                                    placeholder = "Email adresa",
-                                    keyboardType = KeyboardType.Email,
-                                    leadingIcon = Res.drawable.ic_email,
-                                    onValueChange = { component.setEmail(it) }
-                                )
-                            }
-                        }
-                    }
+                    FormTextField(
+                        label = "Broj telefona",
+                        value = phone,
+                        placeholder = "Broj telefona",
+                        keyboardType = KeyboardType.Phone,
+                        leadingIcon = vectorResource(Res.drawable.ic_k_phone),
+                        onValueChange = { component.setPhone(it) }
+                    )
+                    FormTextField(
+                        label = "Email adresa",
+                        value = email,
+                        placeholder = "Email adresa",
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Done,
+                        leadingIcon = vectorResource(Res.drawable.ic_k_mail),
+                        onValueChange = { component.setEmail(it) }
+                    )
                 }
             }
         }
@@ -489,7 +338,8 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
         ModalBottomSheet(
             onDismissRequest = { activeSheet = null },
             sheetState = sheetState,
-            containerColor = KarikaColors.White
+            containerColor = KarikaColors.White,
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -553,66 +403,42 @@ fun SalesNewCustomerView(component: SalesNewCustomerComponent) {
     }
 }
 
-// ── Section wrapper ────────────────────────────────────────────────────────────
+// ── Section ────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun FormSection(
-    icon: DrawableResource,
-    title: String,
-    content: @Composable () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .background(KarikaColors.White)
-            .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(24.dp))
-            .padding(20.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+private fun Section(title: String, content: @Composable () -> Unit) {
+    KSectionTitle(
+        modifier = Modifier.padding(top = 22.dp, bottom = 12.dp),
+        title = title
+    )
+    KCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(KarikaColors.Blue.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = vectorResource(icon),
-                    contentDescription = "",
-                    tint = KarikaColors.Blue,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            KarikaText(
-                text = title,
-                color = KarikaColors.Gray2,
-                textSize = 16.sp,
-                fontWeight = FontWeight.W700
-            )
+            content()
         }
-        Spacer(Modifier.height(20.dp))
-        content()
     }
 }
 
-// ── Form field label wrapper ───────────────────────────────────────────────────
-
 @Composable
-private fun FormField(label: String, content: @Composable () -> Unit) {
-    Column {
+private fun InfoNote(text: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(VendorAccentSoft)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        KIcon(icon = vectorResource(Res.drawable.ic_k_info), tint = VendorAccent, size = 18.dp)
         KarikaText(
-            text = label,
-            color = KarikaColors.Gray6,
-            textSize = 12.sp,
-            fontWeight = FontWeight.W600
+            modifier = Modifier.weight(1f),
+            text = text,
+            color = KarikaUiColors.Ink,
+            textSize = 13.sp,
+            lineHeight = 19.sp
         )
-        Spacer(Modifier.height(5.dp))
-        content()
     }
 }
 
@@ -621,94 +447,108 @@ private fun FormField(label: String, content: @Composable () -> Unit) {
 /** Test tag of the form's text field with [placeholder], for the end-to-end tests. */
 fun newCustomerFieldTag(placeholder: String) = "new_customer_$placeholder"
 
+/**
+ * Label and white bordered field. The placeholder is drawn inside the text field, so tests can
+ * find a field by it (and by [newCustomerFieldTag]).
+ */
 @Composable
 private fun FormTextField(
+    label: String,
     value: String,
     placeholder: String,
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    required: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.Text,
-    leadingIcon: DrawableResource? = null,
+    imeAction: ImeAction = ImeAction.Next,
+    leadingIcon: ImageVector? = null,
     onValueChange: (String) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(KarikaColors.Gray20)
-            .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(12.dp))
-            .padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (leadingIcon != null) {
-            Icon(
-                imageVector = vectorResource(leadingIcon),
-                contentDescription = "",
-                tint = KarikaColors.Gray6,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-        }
-        Box(modifier = Modifier.weight(1f)) {
-            if (value.isEmpty()) {
-                KarikaText(
-                    text = placeholder,
-                    color = KarikaColors.Gray7,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W400
-                )
+    val shape = RoundedCornerShape(12.dp)
+    Column(modifier = modifier) {
+        KFieldLabel(text = label, required = required, requiredColor = VendorAccent)
+        BasicTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(newCustomerFieldTag(placeholder)),
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            textStyle = TextStyle(
+                color = KarikaUiColors.Ink,
+                fontSize = 15.sp,
+                fontFamily = karikaFonts()
+            ),
+            cursorBrush = SolidColor(VendorAccent),
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+            decorationBox = { innerTextField ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .clip(shape)
+                        .background(KarikaColors.White)
+                        .border(1.dp, KarikaUiColors.Border, shape)
+                        .padding(horizontal = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (leadingIcon != null) {
+                        KIcon(icon = leadingIcon, tint = KarikaUiColors.Muted, size = 18.dp)
+                        Spacer(Modifier.width(10.dp))
+                    }
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                        if (value.isEmpty()) {
+                            KarikaText(text = placeholder, color = KarikaUiColors.Subtle, textSize = 15.sp, maxLines = 1)
+                        }
+                        innerTextField()
+                    }
+                }
             }
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                textStyle = TextStyle(
-                    color = KarikaColors.Gray2,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.W500
-                ),
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().testTag(newCustomerFieldTag(placeholder))
-            )
-        }
+        )
     }
 }
 
-// ── Picker trigger ─────────────────────────────────────────────────────────────
+// ── Picker ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Picker drawn as a bordered field with a chevron; the label and the field both open its sheet.
+ * Until something is chosen it shows [placeholder].
+ */
 @Composable
-private fun FormPicker(value: String?, placeholder: String, onClick: () -> Unit) {
+private fun DropdownField(label: String, value: String?, placeholder: String, onClick: () -> Unit) {
     val focusManager = LocalFocusManager.current
-
-    Row(
+    val shape = RoundedCornerShape(12.dp)
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(KarikaColors.Gray20)
-            .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(12.dp))
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = {
-                    focusManager.clearFocus()
-                    onClick()
-                }
-            )
-            .padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .clickable {
+                focusManager.clearFocus()
+                onClick()
+            }
     ) {
-        KarikaText(
-            text = value ?: placeholder,
-            color = if (value != null) KarikaColors.Gray2 else KarikaColors.Gray7,
-            textSize = 14.sp,
-            fontWeight = if (value != null) FontWeight.W500 else FontWeight.W400,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_arrow_down),
-            contentDescription = "",
-            tint = KarikaColors.Gray6,
-            modifier = Modifier.size(18.dp)
-        )
+        KFieldLabel(text = label, required = true, requiredColor = VendorAccent)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .clip(shape)
+                .background(KarikaColors.White)
+                .border(1.dp, KarikaUiColors.Border, shape)
+                .padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KarikaText(
+                modifier = Modifier.weight(1f),
+                text = value ?: placeholder,
+                color = if (value != null) KarikaUiColors.Ink else KarikaUiColors.Subtle,
+                textSize = 15.sp,
+                maxLines = 1
+            )
+            KIcon(
+                icon = vectorResource(Res.drawable.ic_k_chevron_down),
+                tint = KarikaUiColors.Muted,
+                size = 18.dp
+            )
+        }
     }
 }
 
@@ -723,46 +563,36 @@ private fun SimplePickerSheet(
 ) {
     KarikaText(
         text = title,
-        color = KarikaColors.Gray2,
-        textSize = 16.sp,
+        color = KarikaUiColors.Ink,
+        textSize = 18.sp,
+        lineHeight = 24.sp,
         fontWeight = FontWeight.W700,
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 12.dp)
     )
-    HorizontalDivider(color = KarikaColors.Gray9)
+    KDivider()
     options.forEachIndexed { index, option ->
         val isSelected = selected == option
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) { onSelect(option) }
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .background(if (isSelected) VendorAccentSoft else Color.Transparent)
+                .clickable { onSelect(option) }
+                .padding(horizontal = 20.dp, vertical = 15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             KarikaText(
+                modifier = Modifier.weight(1f),
                 text = option,
-                color = if (isSelected) KarikaColors.Blue else KarikaColors.Gray2,
+                color = if (isSelected) VendorAccent else KarikaUiColors.Ink,
                 textSize = 15.sp,
                 fontWeight = if (isSelected) FontWeight.W700 else FontWeight.W500
             )
             if (isSelected) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_check_circle_filled),
-                    contentDescription = "",
-                    tint = KarikaColors.Blue,
-                    modifier = Modifier.size(20.dp)
-                )
+                KIcon(icon = vectorResource(Res.drawable.ic_k_check), tint = VendorAccent, size = 18.dp)
             }
         }
         if (index < options.lastIndex) {
-            HorizontalDivider(
-                color = KarikaColors.Gray9,
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
+            KDivider(modifier = Modifier.padding(horizontal = 20.dp))
         }
     }
-    YSpacer8()
 }

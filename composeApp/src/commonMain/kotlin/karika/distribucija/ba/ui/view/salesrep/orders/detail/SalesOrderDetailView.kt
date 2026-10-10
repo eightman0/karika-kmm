@@ -196,30 +196,30 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
             // ── Informacije o narudžbi ───────────────────────────────────────────
             item {
                 Column {
-                KSectionTitle(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    title = "Informacije o narudžbi"
-                )
-                OrderSummary(
-                    order = vendorOrder,
-                    vpcTotal = vpcTotal,
-                    grandTotal = grandTotal,
-                    commission = commission,
-                    blurred = blurInfoFields
-                )
+                    KSectionTitle(
+                        modifier = Modifier.padding(bottom = 12.dp),
+                        title = "Informacije o narudžbi"
+                    )
+                    OrderSummary(
+                        order = vendorOrder,
+                        vpcTotal = vpcTotal,
+                        grandTotal = grandTotal,
+                        commission = commission,
+                        blurred = blurInfoFields
+                    )
                 }
             }
 
             // ── Kupac ────────────────────────────────────────────────────────────
             item {
                 Column {
-                CustomerSection(
-                    order = vendorOrder,
-                    phone = phone,
-                    address = address,
-                    blurred = blurInfoFields,
-                    onError = { component.showMessage(it) }
-                )
+                    CustomerSection(
+                        order = vendorOrder,
+                        phone = phone,
+                        address = address,
+                        blurred = blurInfoFields,
+                        onError = { component.showMessage(it) }
+                    )
                 }
             }
 
@@ -246,115 +246,117 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
             // ── Specifikacija narudžbe ───────────────────────────────────────────
             item {
                 Column {
-                Specification(
-                    order = vendorOrder,
-                    canEdit = canEdit,
-                    vpcTotal = vpcTotal,
-                    pdvTotal = pdvTotal,
-                    grandTotal = grandTotal,
-                    commission = commission,
-                    onEditClick = { editingItem = it }
-                )
+                    Specification(
+                        order = vendorOrder,
+                        canEdit = canEdit,
+                        vpcTotal = vpcTotal,
+                        pdvTotal = pdvTotal,
+                        grandTotal = grandTotal,
+                        commission = commission,
+                        onEditClick = { editingItem = it }
+                    )
                 }
             }
 
             // ── Komentari narudžbe ───────────────────────────────────────────────
-            item { Column {
-                KSectionTitle(
-                    modifier = Modifier.padding(top = 22.dp, bottom = 12.dp),
-                    title = "Komentari narudžbe"
-                )
-                if (comments.isNotEmpty()) {
-                    Column(
-                        modifier = Modifier.padding(bottom = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        comments.forEach { comment ->
-                            CommentBubble(
-                                comment = comment,
-                                customerName = vendorOrder.b2bPravnoLice,
-                                component = component
-                            )
-                        }
-                    }
-                }
-
-                KCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
-                    if (vendorOrder.commentsArchived()) {
-                        KarikaText(
-                            text = "Komentari narudžbe su arhivirani",
-                            color = KarikaUiColors.Muted,
-                            textSize = 14.sp,
-                            fontWeight = FontWeight.W500,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(16.dp)
-                        )
-                    } else {
+            item {
+                Column {
+                    KSectionTitle(
+                        modifier = Modifier.padding(top = 22.dp, bottom = 12.dp),
+                        title = "Komentari narudžbe"
+                    )
+                    if (comments.isNotEmpty()) {
                         Column(
-                            modifier = Modifier.padding(14.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            modifier = Modifier.padding(bottom = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            // Textarea
-                            val fieldShape = RoundedCornerShape(12.dp)
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(fieldShape)
-                                    .background(KarikaUiColors.Field)
-                                    .padding(horizontal = 14.dp, vertical = 12.dp)
-                            ) {
-                                if (commentText.isEmpty()) {
-                                    KarikaText(
-                                        text = "Napiši komentar kupcu...",
-                                        color = KarikaUiColors.Subtle,
-                                        textSize = 14.sp
-                                    )
-                                }
-                                BasicTextField(
-                                    value = commentText,
-                                    onValueChange = { commentText = it },
-                                    textStyle = TextStyle(
-                                        color = KarikaUiColors.Ink,
-                                        fontSize = 14.sp,
-                                        fontFamily = karikaFonts()
-                                    ),
-                                    cursorBrush = SolidColor(VendorAccent),
-                                    modifier = Modifier.fillMaxWidth()
+                            comments.forEach { comment ->
+                                CommentBubble(
+                                    comment = comment,
+                                    customerName = vendorOrder.b2bPravnoLice,
+                                    component = component
                                 )
                             }
+                        }
+                    }
 
-                            // Send button
-                            if (isSendingComment) {
+                    KCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+                        if (vendorOrder.commentsArchived()) {
+                            KarikaText(
+                                text = "Komentari narudžbe su arhivirani",
+                                color = KarikaUiColors.Muted,
+                                textSize = 14.sp,
+                                fontWeight = FontWeight.W500,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                            )
+                        } else {
+                            Column(
+                                modifier = Modifier.padding(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                // Textarea
+                                val fieldShape = RoundedCornerShape(12.dp)
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(48.dp)
-                                        .clip(RoundedCornerShape(14.dp))
-                                        .background(KarikaUiColors.Field),
-                                    contentAlignment = Alignment.Center
+                                        .clip(fieldShape)
+                                        .background(KarikaUiColors.Field)
+                                        .padding(horizontal = 14.dp, vertical = 12.dp)
                                 ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(18.dp),
-                                        color = VendorAccent,
-                                        strokeWidth = 2.dp
+                                    if (commentText.isEmpty()) {
+                                        KarikaText(
+                                            text = "Napiši komentar kupcu...",
+                                            color = KarikaUiColors.Subtle,
+                                            textSize = 14.sp
+                                        )
+                                    }
+                                    BasicTextField(
+                                        value = commentText,
+                                        onValueChange = { commentText = it },
+                                        textStyle = TextStyle(
+                                            color = KarikaUiColors.Ink,
+                                            fontSize = 14.sp,
+                                            fontFamily = karikaFonts()
+                                        ),
+                                        cursorBrush = SolidColor(VendorAccent),
+                                        modifier = Modifier.fillMaxWidth()
                                     )
                                 }
-                            } else {
-                                KPrimaryButton(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = "Pošalji komentar",
-                                    icon = vectorResource(Res.drawable.ic_k_send),
-                                    background = VendorAccent,
-                                    height = 48.dp
-                                ) {
-                                    component.sendComment(commentText)
-                                    commentText = ""
+
+                                // Send button
+                                if (isSendingComment) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(48.dp)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(KarikaUiColors.Field),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(18.dp),
+                                            color = VendorAccent,
+                                            strokeWidth = 2.dp
+                                        )
+                                    }
+                                } else {
+                                    KPrimaryButton(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = "Pošalji komentar",
+                                        icon = vectorResource(Res.drawable.ic_k_send),
+                                        background = VendorAccent,
+                                        height = 48.dp
+                                    ) {
+                                        component.sendComment(commentText)
+                                        commentText = ""
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            } }
+            }
         }
 
         // ── Print FAB ────────────────────────────────────────────────────────────
