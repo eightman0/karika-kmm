@@ -1,7 +1,6 @@
 package karika.distribucija.ba.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -61,6 +60,7 @@ fun KarikaScaffold(
     floatingActionButton: @Composable () -> Unit = {},
     disableSnackBar: Boolean = true,
     ignoreImeTweak: Boolean = false,
+    snackbarAccent: Color = KarikaUiColors.Pink,
     content: @Composable (PaddingValues) -> Unit
 ) {
     val imeVisible = rememberImeVisible()
@@ -85,6 +85,7 @@ fun KarikaScaffold(
                         KSnackbar(
                             message = data.visuals.message,
                             type = data.visuals.actionLabel,
+                            accent = snackbarAccent,
                             onDismiss = { data.dismiss() }
                         )
 
@@ -138,22 +139,27 @@ fun rememberImeVisible(): Boolean {
     return isVisible
 }
 
-/** Snackbar in the redesign style: white card, tinted icon per message type and the message. */
+/** Snackbar in the redesign style: card in the user's accent (red for errors) with a type icon and the message. */
 @Composable
 private fun KSnackbar(
     message: String,
     type: String?,
+    accent: Color,
     onDismiss: () -> Unit
 ) {
-    val style = type.toSnackbarStyle()
+    val background = if (type == "ERROR") KarikaUiColors.Red else accent
+    val icon = when (type) {
+        "ERROR" -> Res.drawable.ic_k_close
+        "WARNING" -> Res.drawable.ic_k_info
+        else -> Res.drawable.ic_k_check
+    }
     Row(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
-            .shadow(12.dp, RoundedCornerShape(16.dp), ambientColor = KarikaUiColors.Ink, spotColor = KarikaUiColors.Ink)
+            .shadow(14.dp, RoundedCornerShape(16.dp), ambientColor = background, spotColor = background)
             .clip(RoundedCornerShape(16.dp))
-            .background(KarikaColors.White)
-            .border(1.dp, KarikaUiColors.Line, RoundedCornerShape(16.dp))
+            .background(background)
             .testTag(SNACKBAR_TAG)
             .onClick { onDismiss() }
             .padding(start = 12.dp, end = 14.dp, top = 12.dp, bottom = 12.dp),
@@ -163,16 +169,16 @@ private fun KSnackbar(
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(style.soft),
+                .background(KarikaColors.White.copy(alpha = 0.22f)),
             contentAlignment = Alignment.Center
         ) {
-            KIcon(icon = vectorResource(style.icon), tint = style.color, size = 18.dp)
+            KIcon(icon = vectorResource(icon), tint = KarikaColors.White, size = 18.dp)
         }
         Spacer(Modifier.width(12.dp))
         KarikaText(
             modifier = Modifier.weight(1f),
             text = message,
-            color = KarikaUiColors.Ink,
+            color = KarikaColors.White,
             textSize = 14.sp,
             lineHeight = 19.sp,
             fontWeight = FontWeight.W600
@@ -180,18 +186,8 @@ private fun KSnackbar(
         Spacer(Modifier.width(10.dp))
         KIcon(
             icon = vectorResource(Res.drawable.ic_k_close),
-            tint = KarikaUiColors.Subtle,
+            tint = KarikaColors.White.copy(alpha = 0.8f),
             size = 16.dp
         )
-    }
-}
-
-private class SnackbarStyle(val color: Color, val soft: Color, val icon: DrawableResource)
-
-private fun String?.toSnackbarStyle(): SnackbarStyle {
-    return when (this) {
-        "ERROR" -> SnackbarStyle(KarikaUiColors.Red, KarikaUiColors.RedSoft, Res.drawable.ic_k_close)
-        "WARNING" -> SnackbarStyle(KarikaUiColors.Amber, KarikaUiColors.AmberSoft, Res.drawable.ic_k_info)
-        else -> SnackbarStyle(KarikaUiColors.Green, KarikaUiColors.GreenSoft, Res.drawable.ic_k_check)
     }
 }

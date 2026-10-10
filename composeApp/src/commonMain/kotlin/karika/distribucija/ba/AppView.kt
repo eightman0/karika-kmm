@@ -25,6 +25,10 @@ import karika.distribucija.ba.ui.components.ImagePreview
 import karika.distribucija.ba.ui.components.InfoModal
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
+import karika.distribucija.ba.ui.view.prelogin.PreLoginChild
+import karika.distribucija.ba.ui.components.KarikaUiColors
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import androidx.compose.ui.graphics.Color
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.LoadingView1
 import karika.distribucija.ba.ui.components.MandatoryUpdateModal
@@ -61,7 +65,8 @@ fun App(component: AppComponent) {
             .fillMaxSize(),
         containerColor = KarikaColors.White,
         component = component,
-        disableSnackBar = false
+        disableSnackBar = false,
+        snackbarAccent = rememberSnackbarAccent(component)
     ) {
         Box {
             Column {
@@ -182,5 +187,23 @@ fun WaterMarkBox(watermarkText: String) {
                 )
             }
         }
+    }
+}
+
+/** Pink for customers, the suppliers' blue for suppliers and sales reps, also on their login and registration. */
+@Composable
+private fun rememberSnackbarAccent(component: AppComponent): Color {
+    val stack by component.stack.subscribeAsState()
+    return when (val child = stack.active.instance) {
+        is Child.Dashboard, is Child.SalesRep -> KarikaUiColors.Blue
+        is Child.PreLogin -> {
+            val preLogin by child.component.stack.subscribeAsState()
+            when (val pre = preLogin.active.instance) {
+                is PreLoginChild.Login -> if (pre.component.isShop()) KarikaUiColors.Pink else KarikaUiColors.Blue
+                is PreLoginChild.Registration -> if (pre.component.userType.isShop()) KarikaUiColors.Pink else KarikaUiColors.Blue
+                else -> KarikaUiColors.Pink
+            }
+        }
+        else -> KarikaUiColors.Pink
     }
 }
