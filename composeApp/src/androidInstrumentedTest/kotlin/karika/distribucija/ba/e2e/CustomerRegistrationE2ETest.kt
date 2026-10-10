@@ -22,7 +22,7 @@ import org.junit.Test
 
 /**
  * End-to-end test of the customer registration on stage.karika.ba, see [StageE2ETest]: every
- * check "Prijavi se" makes, in the order the app makes them, and one real registration with a new
+ * check "Registruj se" makes, in the order the app makes them, and one real registration with a new
  * email, which stage keeps waiting for approval.
  */
 @OptIn(ExperimentalTestApi::class)
@@ -44,15 +44,15 @@ class CustomerRegistrationE2ETest : StageE2ETest() {
         expect("ID broj je obavezno polje!")
         type("ID broj", "4200000000001")
         expect("Entitet je obavezno polje!")
-        pickOption("Entitet*", "Federacija")
+        pickOption("Entitet", "Federacija")
         expect("Kanton je obavezno polje!")
-        pickOption("Kanton*", CANTON)
+        pickOption("Kanton", CANTON)
         expect("Grad je obavezno polje!")
-        pickOption("Grad*", KarikaConstants.cities(CANTON).first())
+        pickOption("Grad", KarikaConstants.cities(CANTON).first())
         expect("Veličina objekta je obavezno polje!")
-        pickOption("Veličina objekta*", KarikaConstants.companySizes.first())
+        pickOption("Veličina objekta", KarikaConstants.companySizes.first())
         expect("Tip objekta je obavezno polje!")
-        pickOption("Tip objekta*", KarikaConstants.companyTypes.first())
+        pickOption("Tip objekta", KarikaConstants.companyTypes.first())
         expect("Ime je obavezno polje!")
         type("Ime", "Test")
         expect("Prezime je obavezno polje!")
@@ -88,11 +88,11 @@ class CustomerRegistrationE2ETest : StageE2ETest() {
         val digits = System.currentTimeMillis().toString().takeLast(9)
         type("Naziv pravnog lica", "E2E Firma $digits")
         type("ID broj", "42$digits")
-        pickOption("Entitet*", "Federacija")
-        pickOption("Kanton*", CANTON)
-        pickOption("Grad*", KarikaConstants.cities(CANTON).first())
-        pickOption("Veličina objekta*", KarikaConstants.companySizes.first())
-        pickOption("Tip objekta*", KarikaConstants.companyTypes.first())
+        pickOption("Entitet", "Federacija")
+        pickOption("Kanton", CANTON)
+        pickOption("Grad", KarikaConstants.cities(CANTON).first())
+        pickOption("Veličina objekta", KarikaConstants.companySizes.first())
+        pickOption("Tip objekta", KarikaConstants.companyTypes.first())
         type("Ime", "Test")
         type("Prezime", "Registracija")
         type("Adresa i broj ulice", "Testna ulica 1")
@@ -116,10 +116,10 @@ class CustomerRegistrationE2ETest : StageE2ETest() {
 
     private fun tapPrijaviSe() {
         closeKeyboard()
-        compose.onNode(hasText("Prijavi se") and hasClickAction()).performScrollTo().performClick()
+        compose.onNode(hasText("Registruj se") and hasClickAction()).performScrollTo().performClick()
     }
 
-    /** Taps "Prijavi se" and waits for the snackbar with [message]. */
+    /** Taps "Registruj se" and waits for the snackbar with [message]. */
     private fun expect(message: String) {
         tapPrijaviSe()
         compose.waitUntil(SCREEN_TIMEOUT_MS) {
