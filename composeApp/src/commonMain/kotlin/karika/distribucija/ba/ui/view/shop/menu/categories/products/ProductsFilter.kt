@@ -1,15 +1,22 @@
 package karika.distribucija.ba.ui.view.shop.menu.categories.products
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,16 +32,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KSecondaryButton
 import karika.distribucija.ba.ui.components.KarikaAmountField
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.KPrimaryButton
-import karika.distribucija.ba.ui.components.KSecondaryButton
 import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.RadioGroup
 import karika.distribucija.ba.ui.components.SearchBoxBorder
@@ -67,17 +75,25 @@ fun ProductsFilterSheet(
 
     if (showState.value) {
         ModalBottomSheet(
+            // Keeps the sheet clear of the status bar when it is tall; the sheet itself then
+            // only pads the bottom, so there is no empty band above the handle
             modifier = Modifier
-                .padding(top = 100.dp),
+                .padding(top = 56.dp),
             onDismissRequest = {
                 showState.negate()
             },
             sheetState = sheetState,
             containerColor = KarikaColors.White,
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            contentWindowInsets = { WindowInsets.navigationBars.only(WindowInsetsSides.Bottom) },
             dragHandle = {
-                BottomSheetDefaults.DragHandle(
-                    color = KarikaUiColors.Border,
-                    width = 40.dp
+                Box(
+                    modifier = Modifier
+                        .padding(top = 10.dp, bottom = 10.dp)
+                        .width(40.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(KarikaUiColors.Border)
                 )
             }
         ) {
@@ -102,7 +118,7 @@ fun ProductsFilterSheet(
                 YSpacer16()
                 Column(
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(1f, fill = false)
                         .verticalScroll(rememberScrollState())
                         .hideKeyboard(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
