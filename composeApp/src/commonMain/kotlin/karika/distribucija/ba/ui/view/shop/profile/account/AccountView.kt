@@ -2,6 +2,7 @@ package karika.distribucija.ba.ui.view.shop.profile.account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,10 +26,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -58,6 +55,7 @@ import karika.distribucija.ba.ui.components.KBottomPanel
 import karika.distribucija.ba.ui.components.KCard
 import karika.distribucija.ba.ui.components.KDivider
 import karika.distribucija.ba.ui.components.KFieldLabel
+import karika.distribucija.ba.ui.components.KOptionSheet
 import karika.distribucija.ba.ui.components.KIcon
 import karika.distribucija.ba.ui.components.KKeyValueRow
 import karika.distribucija.ba.ui.components.KMenuRow
@@ -429,8 +427,7 @@ private fun FormField(
     }
 }
 
-/** The existing dropdown pickers, drawn as a bordered field with a chevron. */
-@OptIn(ExperimentalMaterial3Api::class)
+/** Bordered field with a chevron that picks its value in a bottom sheet. */
 @Composable
 private fun DropdownField(
     label: String,
@@ -444,68 +441,45 @@ private fun DropdownField(
     }
     var expanded by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(12.dp)
-    Box(modifier = modifier) {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = it }
+    Column(
+        modifier = modifier.clickable { expanded = true }
+    ) {
+        KFieldLabel(text = label, required = true)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .clip(shape)
+                .background(KarikaColors.White)
+                .border(1.dp, if (expanded) KarikaUiColors.Pink else KarikaUiColors.Border, shape)
+                .padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                    .fillMaxWidth()
-            ) {
-                KFieldLabel(text = label, required = true)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .clip(shape)
-                        .background(KarikaColors.White)
-                        .border(1.dp, KarikaUiColors.Border, shape)
-                        .padding(horizontal = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    KarikaText(
-                        modifier = Modifier.weight(1f),
-                        text = value.value.ifEmpty { placeholder },
-                        color = if (value.value.isEmpty()) KarikaUiColors.Subtle else KarikaUiColors.Ink,
-                        textSize = 15.sp,
-                        maxLines = 1
-                    )
-                    KIcon(
-                        icon = vectorResource(Res.drawable.ic_k_chevron_down),
-                        tint = KarikaUiColors.Muted,
-                        size = 18.dp
-                    )
-                }
-            }
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                shape = RoundedCornerShape(12.dp),
-                containerColor = KarikaColors.White
-            ) {
-                values.forEachIndexed { index, option ->
-                    DropdownMenuItem(
-                        onClick = {
-                            value.value = option
-                            expanded = false
-                        },
-                        text = {
-                            KarikaText(
-                                text = option,
-                                fontWeight = if (option == value.value) FontWeight.W700 else FontWeight.W400,
-                                textSize = 15.sp,
-                                color = if (option == value.value) KarikaUiColors.Pink else KarikaUiColors.Ink
-                            )
-                        }
-                    )
-                    if (index < values.size - 1) {
-                        KDivider()
-                    }
-                }
-            }
+            KarikaText(
+                modifier = Modifier.weight(1f),
+                text = value.value.ifEmpty { placeholder },
+                color = if (value.value.isEmpty()) KarikaUiColors.Subtle else KarikaUiColors.Ink,
+                textSize = 15.sp,
+                maxLines = 1
+            )
+            KIcon(
+                icon = vectorResource(Res.drawable.ic_k_chevron_down),
+                tint = KarikaUiColors.Muted,
+                size = 18.dp
+            )
         }
+    }
+    if (expanded) {
+        KOptionSheet(
+            title = label,
+            options = values,
+            selected = value.value,
+            onDismiss = { expanded = false },
+            onSelect = {
+                value.value = it
+                expanded = false
+            }
+        )
     }
 }
 

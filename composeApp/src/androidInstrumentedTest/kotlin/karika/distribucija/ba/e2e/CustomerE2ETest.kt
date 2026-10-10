@@ -3,6 +3,7 @@ package karika.distribucija.ba.e2e
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import karika.distribucija.ba.domain.api.CartRepository
 import karika.distribucija.ba.domain.api.UserRepository
@@ -106,8 +108,12 @@ abstract class CustomerE2ETest : StageE2ETest() {
     /** Opens the dropdown titled [title] and picks [option] from it. */
     protected fun pick(title: String, option: String) {
         compose.onAllNodesWithText(title).onFirst().performClick()
-        val inMenu = hasText(option) and hasAnyAncestor(isPopup())
+        // A dropdown menu (popup) or an option bottom sheet (dialog window)
+        val inMenu = hasText(option) and hasClickAction() and
+            (hasAnyAncestor(isPopup()) or hasAnyAncestor(isDialog()))
         compose.waitUntilAtLeastOneExists(inMenu, SCREEN_TIMEOUT_MS)
+        // The sheet's options are a scrolling column, long lists (the cities) need a scroll first
+        runCatching { compose.onNode(inMenu).performScrollTo() }
         compose.onNode(inMenu).performClick()
         compose.waitUntilDoesNotExist(inMenu, SCREEN_TIMEOUT_MS)
     }
