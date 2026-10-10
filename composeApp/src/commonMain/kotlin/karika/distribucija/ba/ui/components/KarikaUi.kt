@@ -255,6 +255,7 @@ fun KSearchField(
     modifier: Modifier = Modifier,
     onSearch: () -> Unit = {},
     onClick: (() -> Unit)? = null,
+    cursorColor: Color = KarikaUiColors.Pink,
 ) {
     Row(
         modifier = modifier
@@ -284,7 +285,7 @@ fun KSearchField(
                         fontSize = 15.sp,
                         fontFamily = karikaFonts()
                     ),
-                    cursorBrush = SolidColor(KarikaUiColors.Pink),
+                    cursorBrush = SolidColor(cursorColor),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { onSearch() })
                 )

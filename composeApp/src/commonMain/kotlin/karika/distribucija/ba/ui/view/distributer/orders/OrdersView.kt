@@ -118,6 +118,7 @@ fun OrdersView(component: OrdersComponent) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             KSearchField(
+                cursorColor = VendorAccent,
                 modifier = Modifier
                     .testTag(ORDER_SEARCH_TAG)
                     .weight(1f),

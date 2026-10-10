@@ -150,6 +150,7 @@ fun SalesOrderCatalogView(component: SalesOrderCatalogComponent) {
             ) {
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
                     KSearchField(
+                        cursorColor = VendorAccent,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
@@ -898,6 +899,7 @@ private fun CategorySheet(
             contentAlignment = Alignment.CenterEnd
         ) {
             KSearchField(
+                cursorColor = VendorAccent,
                 modifier = Modifier.fillMaxWidth(),
                 value = categorySearch,
                 onValueChange = { categorySearch = it },
