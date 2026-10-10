@@ -2,12 +2,16 @@ package karika.distribucija.ba.ui.view.shop.profile.order.details
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.Address
@@ -47,7 +52,6 @@ import karika.distribucija.ba.ui.components.KBottomPanel
 import karika.distribucija.ba.ui.components.KCard
 import karika.distribucija.ba.ui.components.KDivider
 import karika.distribucija.ba.ui.components.KIcon
-import karika.distribucija.ba.ui.components.KImagePlaceholder
 import karika.distribucija.ba.ui.components.KInitials
 import karika.distribucija.ba.ui.components.KKeyValueCard
 import karika.distribucija.ba.ui.components.KKeyValueRow
@@ -59,6 +63,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
+import karika.distribucija.ba.ui.components.isTablet
 import karika.distribucija.ba.ui.view.shop.profile.order.components.AttachBillModal
 import karika.distribucija.ba.ui.view.shop.profile.order.components.CancelOrderModal
 import karika.distribucija.ba.ui.view.shop.profile.order.orderStatusColors
@@ -133,6 +138,11 @@ private fun OrderCommon(component: OrderDetailsComponent) {
             )
             ShippingAddress(address)
         }
+        KSectionTitle(
+            modifier = Modifier.padding(top = 22.dp, bottom = 12.dp),
+            title = "Pregled artikala"
+        )
+        AllItemsTable(order)
         VendorOrder(order, component)
     }
 }
@@ -232,7 +242,7 @@ fun VendorOrder(order: OrdersResponse, component: OrderDetailsComponent) {
 
     KSectionTitle(
         modifier = Modifier.padding(top = 22.dp, bottom = 12.dp),
-        title = "Artikli"
+        title = "Detalji narudžbe po dobavljaču"
     )
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         order.orders.forEach {
@@ -343,10 +353,8 @@ private fun VendorCard(
         }
         KKeyValueRow(label = "Ukupno VPC", value = order.vpcString())
         KKeyValueRow(label = "Ukupno sa PDV", value = order.vpcPdvString())
-        order.products.forEach { product ->
-            KDivider()
-            ProductRow(product)
-        }
+        Spacer(Modifier.height(4.dp))
+        VendorItemsTable(order.products)
         if (order.showAddBill()) {
             KDivider()
             KTonalButton(
@@ -418,78 +426,206 @@ private fun VendorCard(
     }
 }
 
+/** Column of an items table; [width] is used on phones where the table scrolls sideways. */
+private class TableColumn(val title: String, val weight: Float, val width: Dp, val alignEnd: Boolean = true)
+
 @Composable
-private fun ProductRow(product: OrderProduct) {
+private fun TableHeader(columns: List<TableColumn>, scrollable: Boolean) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(14.dp),
-        verticalAlignment = Alignment.Top
+            .background(KarikaUiColors.Field)
+            .then(if (scrollable) Modifier else Modifier.fillMaxWidth())
     ) {
-        KImagePlaceholder(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(RoundedCornerShape(10.dp))
-        )
-        Spacer(Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
+        columns.forEach { column ->
             KarikaText(
-                text = product.name,
-                color = KarikaUiColors.Ink,
-                textSize = 14.sp,
-                lineHeight = 18.sp,
-                fontWeight = FontWeight.W600,
-                maxLines = 3
-            )
-            KarikaText(
-                modifier = Modifier.padding(top = 3.dp),
-                text = "${product.qty()} × ${product.vpc()}",
+                modifier = cellWidth(column, scrollable)
+                    .padding(horizontal = 10.dp, vertical = 9.dp),
+                text = column.title,
                 color = KarikaUiColors.Muted,
-                textSize = 12.sp,
-                lineHeight = 16.sp
+                textSize = 10.5.sp,
+                fontWeight = FontWeight.W700,
+                textAlign = if (column.alignEnd) TextAlign.End else TextAlign.Start,
+                maxLines = 1
             )
-            if (product.qtyChanged()) {
-                KarikaText(
-                    modifier = Modifier.padding(top = 2.dp),
-                    text = "Naručeno ${product.originalQty()}",
-                    color = KarikaUiColors.Subtle,
-                    textSize = 12.sp,
-                    lineHeight = 16.sp,
-                    decoration = TextDecoration.LineThrough
-                )
-            }
-            if (product.rabat() != "0") {
-                KarikaText(
-                    modifier = Modifier.padding(top = 2.dp),
-                    text = "Rabat ${product.rabat()}%",
-                    color = KarikaUiColors.Green,
-                    textSize = 12.sp,
-                    lineHeight = 16.sp,
-                    fontWeight = FontWeight.W500
-                )
-            }
         }
-        Spacer(Modifier.width(8.dp))
+    }
+}
+
+@Composable
+private fun RowScope.TableCell(
+    column: TableColumn,
+    scrollable: Boolean,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = cellWidth(column, scrollable)
+            .fillMaxHeight()
+            .padding(horizontal = 10.dp, vertical = 10.dp),
+        contentAlignment = if (column.alignEnd) Alignment.CenterEnd else Alignment.CenterStart
+    ) {
+        content()
+    }
+}
+
+/** Fixed width when the table scrolls sideways, otherwise a share of the row. */
+private fun RowScope.cellWidth(column: TableColumn, scrollable: Boolean): Modifier =
+    if (scrollable) Modifier.width(column.width) else Modifier.weight(column.weight)
+
+@Composable
+private fun CellText(
+    text: String,
+    bold: Boolean = false,
+    color: Color = KarikaUiColors.Ink,
+    struck: Boolean = false,
+) {
+    KarikaText(
+        text = text,
+        color = color,
+        textSize = 12.5.sp,
+        lineHeight = 16.sp,
+        fontWeight = if (bold) FontWeight.W700 else FontWeight.W500,
+        decoration = if (struck) TextDecoration.LineThrough else TextDecoration.None,
+        textAlign = TextAlign.End
+    )
+}
+
+@Composable
+private fun ItemName(product: OrderProduct) {
+    Column {
         KarikaText(
-            text = product.total(),
+            text = product.name,
             color = KarikaUiColors.Ink,
-            textSize = 14.sp,
-            fontWeight = FontWeight.W700,
+            textSize = 12.5.sp,
+            lineHeight = 16.sp,
+            fontWeight = FontWeight.W600,
+            maxLines = 3
+        )
+        KarikaText(
+            modifier = Modifier.padding(top = 2.dp),
+            text = product.vendorName(),
+            color = KarikaUiColors.Muted,
+            textSize = 11.5.sp,
+            lineHeight = 15.sp,
             maxLines = 1
         )
     }
 }
 
+/** Quantity, with the originally ordered quantity struck through when the vendor changed it. */
+@Composable
+private fun QtyCell(product: OrderProduct) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (product.qtyChanged()) {
+            CellText(text = product.originalQty(), color = KarikaUiColors.Subtle, struck = true)
+        }
+        CellText(text = product.qty())
+    }
+}
+
+/** Rabat, with a struck "0" in front when the item got a discount. */
+@Composable
+private fun RabatCell(product: OrderProduct) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (product.rabat() != "0") {
+            CellText(text = "0", color = KarikaUiColors.Subtle, struck = true)
+            CellText(text = product.rabat(), color = KarikaUiColors.Green)
+        } else {
+            CellText(text = product.rabat())
+        }
+    }
+}
+
+/** Every item of the order, as in the old "ARTIKAL / VPC / KOLIČINA / UKUPNO" table, plus the totals. */
+@Composable
+private fun AllItemsTable(order: OrdersResponse) {
+    val columns = listOf(
+        TableColumn("ARTIKAL", weight = 1.7f, width = 160.dp, alignEnd = false),
+        TableColumn("VPC", weight = 1f, width = 90.dp),
+        TableColumn("KOLIČINA", weight = 1f, width = 90.dp),
+        TableColumn("UKUPNO", weight = 1.1f, width = 100.dp),
+    )
+    KCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+        ItemsTable(columns = columns, scrollable = false) {
+            order.orders.flatMap { it.products }.forEach { product ->
+                KDivider()
+                Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                    TableCell(columns[0], false) { ItemName(product) }
+                    TableCell(columns[1], false) { CellText(product.vpc()) }
+                    TableCell(columns[2], false) { QtyCell(product) }
+                    TableCell(columns[3], false) { CellText(product.total(), bold = true) }
+                }
+            }
+        }
+        KDivider()
+        Column(modifier = Modifier.background(KarikaUiColors.Page.copy(alpha = 0.6f))) {
+            KKeyValueRow(label = "Ukupna VPC", value = order.vpcString())
+            KKeyValueRow(label = "Ukupno PDV 17%", value = order.pdvString())
+            KKeyValueRow(label = "Ukupno sa PDV", value = order.vpcPdvString(), valueColor = KarikaUiColors.Pink)
+        }
+    }
+}
+
+/** Items of one vendor with rabat, as in the old per-vendor table. Scrolls sideways on phones. */
+@Composable
+private fun VendorItemsTable(products: List<OrderProduct>) {
+    val scrollable = !isTablet()
+    val columns = listOf(
+        TableColumn("ARTIKAL", weight = 0.4f, width = 160.dp, alignEnd = false),
+        TableColumn("RABAT %", weight = 0.15f, width = 90.dp),
+        TableColumn("VPC", weight = 0.15f, width = 90.dp),
+        TableColumn("KOLIČINA", weight = 0.15f, width = 100.dp),
+        TableColumn("UKUPNO", weight = 0.15f, width = 100.dp),
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (scrollable) Modifier.horizontalScroll(rememberScrollState()) else Modifier)
+    ) {
+        ItemsTable(columns = columns, scrollable = scrollable) {
+            products.forEach { product ->
+                KDivider(modifier = if (scrollable) Modifier.width(columns.sumOf { it.width.value.toDouble() }.dp) else Modifier)
+                Row(
+                    modifier = Modifier
+                        .then(if (scrollable) Modifier else Modifier.fillMaxWidth())
+                        .height(IntrinsicSize.Min)
+                ) {
+                    TableCell(columns[0], scrollable) { ItemName(product) }
+                    TableCell(columns[1], scrollable) { RabatCell(product) }
+                    TableCell(columns[2], scrollable) { CellText(product.vpc()) }
+                    TableCell(columns[3], scrollable) { QtyCell(product) }
+                    TableCell(columns[4], scrollable) { CellText(product.total(), bold = true) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ItemsTable(
+    columns: List<TableColumn>,
+    scrollable: Boolean,
+    rows: @Composable () -> Unit,
+) {
+    Column {
+        TableHeader(columns, scrollable)
+        rows()
+    }
+}
+
 @Composable
 private fun ShippingAddress(address: Address) {
-    val street = address.street.joinToString(" ")
     KKeyValueCard(
         rows = listOf(
             "Kontakt osoba" to listOfNotNull(address.firstname, address.lastname).joinToString(" "),
-            "Telefon" to address.telephone,
-            "Adresa" to listOf(street, address.city.orEmpty())
-                .filter { it.isNotBlank() }
-                .joinToString(", ")
+            "Broj telefona" to address.telephone,
+            "Grad" to address.city,
+            "Adresa i broj ulice" to address.street.joinToString(" ")
         )
     )
 }

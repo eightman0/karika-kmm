@@ -88,7 +88,7 @@ class CustomerProfileE2ETest : CustomerE2ETest() {
 
         compose.onAllNodesWithText("Vidi narudžbu").onFirst().performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Artikli"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Detalji narudžbe po dobavljaču"), SERVER_TIMEOUT_MS)
         assertTrue(exists(hasText("Narudžba ·", substring = true), unmerged = true))
     }
 
