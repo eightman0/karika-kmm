@@ -113,20 +113,12 @@ fun ProfileView(component: ProfileComponent) {
             }
         }
         KBottomPanel {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                KSecondaryButton(
-                    modifier = Modifier.weight(1f),
-                    text = "Nazad"
-                ) {
-                    component.dashNavigate(DashConfig.Analytics(), true)
-                }
-                KPrimaryButton(
-                    modifier = Modifier.weight(2f),
-                    text = "Spasi izmjene",
-                    background = VendorAccent
-                ) {
-                    component.updateProfile()
-                }
+            KPrimaryButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Spasi izmjene",
+                background = VendorAccent
+            ) {
+                component.updateProfile()
             }
         }
     }
