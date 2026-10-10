@@ -967,16 +967,33 @@ private fun Comments(component: OrderDetailsComponent) {
     val comments by component.comments.collectAsState()
     val order by component.order.collectAsState()
     if (comments.isEmpty()) return
-    KSectionTitle(
-        modifier = Modifier.padding(top = 22.dp, bottom = 12.dp),
-        title = "Komentari"
-    )
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        comments.forEach {
-            CommentItem(it, component, order.b2bPravnoLice)
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 22.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KSectionTitle(modifier = Modifier.weight(1f), title = "Komentari")
+        KarikaText(
+            text = commentsLabel(comments.size),
+            color = KarikaUiColors.Muted,
+            textSize = 13.sp,
+            fontWeight = FontWeight.W500
+        )
+    }
+    // A card of its own so the conversation stands apart from the order's details
+    KCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            comments.forEach {
+                CommentItem(it, component, order.b2bPravnoLice)
+            }
         }
     }
 }
+
+private fun commentsLabel(count: Int): String =
+    if (count % 10 == 1 && count % 100 != 11) "$count komentar" else "$count komentara"
 
 /** Comment field with the round send button, pinned to the bottom of the screen. */
 @Composable
@@ -1108,12 +1125,7 @@ fun CommentItem(comment: Comment, component: OrderDetailsComponent, customerName
                     .weight(1f, fill = false)
                     .padding(end = 32.dp)
                     .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 14.dp, bottomStart = 14.dp, bottomEnd = 14.dp))
-                    .background(KarikaColors.White)
-                    .border(
-                        1.dp,
-                        KarikaUiColors.Line,
-                        RoundedCornerShape(topStart = 4.dp, topEnd = 14.dp, bottomStart = 14.dp, bottomEnd = 14.dp)
-                    )
+                    .background(KarikaUiColors.Page)
                     .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
                 HtmlTextWithStyles(
