@@ -89,8 +89,8 @@ class VendorNavigationE2ETest : VendorE2ETest() {
 
     @Test
     fun upravljanjeRabatimaOpensTheDiscountRules() {
-        goTo("Rabati", "Upravljanje rabatima")
-        compose.onNodeWithText("Postavke po kupcu").assertIsDisplayed()
+        goTo("Rabati")
+        compose.onNodeWithText("Po kupcu").assertIsDisplayed()
     }
 
     @Test
@@ -113,7 +113,7 @@ class VendorNavigationE2ETest : VendorE2ETest() {
 
     @Test
     fun korisnickiProfilOpensTheProfile() {
-        goTo("Korisnički profil", "Opšte informacije")
+        goTo("Korisnički profil", "Opšte")
         compose.onNodeWithText("Spasi izmjene").assertExists()
     }
 

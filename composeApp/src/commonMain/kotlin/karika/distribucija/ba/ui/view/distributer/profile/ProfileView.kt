@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -84,7 +85,7 @@ private val ProfileTabs = listOf("Opšte", "Ciljanje", "Postavke")
 
 @Composable
 fun ProfileView(component: ProfileComponent) {
-    var tab by rememberSaveable { mutableTabIndex() }
+    var tab by rememberSaveable { mutableIntStateOf(0) }
 
     Column(
         modifier = Modifier
@@ -137,8 +138,6 @@ fun ProfileView(component: ProfileComponent) {
         component.stateHolder.vendorSpecificHandler.getVendorDetails()
     }
 }
-
-private fun mutableTabIndex() = 0
 
 /** White block continuing the shell header: logo, name, email and the segmented tabs. */
 @Composable
@@ -454,21 +453,21 @@ private fun SettingsTab(component: ProfileComponent) {
     KCard(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
         NotificationRow(
             icon = vectorResource(Res.drawable.ic_k_mail),
-            title = "Email obavijesti",
+            title = "Email",
             subtitle = "Nove narudžbe i poruke",
             checked = emailNotifications.value
         ) { emailNotifications.value = it }
         KDivider()
         NotificationRow(
             icon = vectorResource(Res.drawable.ic_k_chat),
-            title = "Viber obavijesti",
+            title = "Viber",
             subtitle = if (viber.isNotBlank()) "Na $viber" else "Na Viber broj kompanije",
             checked = viberNotifications.value
         ) { viberNotifications.value = it }
         KDivider()
         NotificationRow(
             icon = vectorResource(Res.drawable.ic_k_bell),
-            title = "Push obavijesti",
+            title = "Push",
             subtitle = "Na ovom uređaju",
             checked = pushNotifications.value
         ) { pushNotifications.value = it }

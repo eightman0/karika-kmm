@@ -24,6 +24,7 @@ import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.domain.model.VendorNotificationSearchResults
 import karika.distribucija.ba.ui.components.DASHBOARD_NOTIFICATIONS_TAG
 import karika.distribucija.ba.ui.components.conversationTag
+import karika.distribucija.ba.ui.view.distributer.customers.CUSTOMER_RULE_TAG
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -45,49 +46,49 @@ class VendorScreensE2ETest : VendorE2ETest() {
     @Test
     fun discountRulesShowTheThreeSectionsWithStagesRules() {
         val rules = rules()
-        goTo("Rabati", "Upravljanje rabatima")
+        goTo("Rabati")
 
-        listOf("Postavke po kupcu", "Postavke po tipu kupca", "Postavke po regiji kupca").forEach {
+        listOf("Po kupcu", "Po tipu kupca", "Po regiji kupca").forEach {
             assertTrue("\"$it\" is not shown", exists(hasText(it), unmerged = true))
         }
-        // One "Rabat:" per rule; a section without rules says so
+        // One card per rule; a section without rules says so
         val sections = rules.groupBy { it.discountType }
         val emptySections = listOf("per_customer", "per_customer_group", "per_customer_region")
             .count { sections[it].isNullOrEmpty() }
-        assertEquals(rules.size, count(hasText("Rabat:", substring = true)))
+        assertEquals(rules.size, count(hasTestTag(CUSTOMER_RULE_TAG)))
         assertEquals(emptySections, count(hasText("Još nema pravila", substring = true)))
     }
 
     @Test
     fun dodajRedOpensTheRuleEditorWhichNeedsADiscount() {
-        goTo("Rabati", "Upravljanje rabatima")
+        goTo("Rabati")
 
-        compose.onAllNodesWithText("Dodaj red").onFirst().performClick()
+        compose.onAllNodesWithText("Dodaj").onFirst().performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Dodavanje pravila", substring = true), SCREEN_TIMEOUT_MS)
-        listOf("Odaberi kupca", "Odaberi artikal ili kategoriju", "Min. količina za rabat", "Rabat %").forEach {
+        compose.waitUntilAtLeastOneExists(hasText("Novo pravilo"), SCREEN_TIMEOUT_MS)
+        listOf("Kupac", "Artikal ili kategorija", "Min. količina", "Rabat").forEach {
             assertTrue("\"$it\" is not shown", exists(hasText(it), unmerged = true))
         }
         // No customer means every customer ("Svi kupci"), but without a discount nothing is saved
-        compose.onNodeWithText("Sačuvaj").performScrollTo().performClick()
+        compose.onNodeWithText("Sačuvaj pravilo").performClick()
         compose.waitUntilAtLeastOneExists(hasText("Rabat mora biti između 0 i 100 %."), SCREEN_TIMEOUT_MS)
 
-        compose.onNodeWithText("Nazad na upravljanje rabatima").performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Postavke po kupcu"), SCREEN_TIMEOUT_MS)
+        compose.onNodeWithText("Odustani").performClick()
+        compose.waitUntilAtLeastOneExists(hasText("Po kupcu"), SCREEN_TIMEOUT_MS)
     }
 
     @Test
     fun aRuleOpensInTheEditorForChanging() {
         assumeTrue("stage has no discount rules for this supplier", rules().isNotEmpty())
-        goTo("Rabati", "Upravljanje rabatima")
-        compose.waitUntil(SERVER_TIMEOUT_MS) { count(hasText("Rabat:", substring = true)) > 0 }
+        goTo("Rabati")
+        compose.waitUntil(SERVER_TIMEOUT_MS) { count(hasTestTag(CUSTOMER_RULE_TAG)) > 0 }
 
-        compose.onAllNodesWithText("Rabat:", substring = true, useUnmergedTree = true).onFirst().performClick()
+        compose.onAllNodes(hasTestTag(CUSTOMER_RULE_TAG)).onFirst().performScrollTo().performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Izmjena pravila", substring = true), SCREEN_TIMEOUT_MS)
-        compose.onNodeWithText("Izmijeni").assertExists()
-        compose.onNodeWithText("Nazad na upravljanje rabatima").performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Postavke po kupcu"), SCREEN_TIMEOUT_MS)
+        compose.onNodeWithText("Sačuvaj izmjene").assertExists()
+        compose.onNodeWithText("Odustani").performClick()
+        compose.waitUntilAtLeastOneExists(hasText("Po kupcu"), SCREEN_TIMEOUT_MS)
     }
 
     // Poruke
@@ -172,9 +173,9 @@ class VendorScreensE2ETest : VendorE2ETest() {
     @Test
     fun profileShowsTheSuppliersDetails() {
         val profile = profile()
-        goTo("Korisnički profil", "Opšte informacije")
+        goTo("Korisnički profil", "Opšte")
 
-        listOf("Naziv pravnog lica*", "Email adresa*", "Broj telefona*", "Minimalna vrijednost narudžbe").forEach {
+        listOf("Naziv pravnog lica", "Email adresa", "Telefon", "Minimalna vrijednost narudžbe").forEach {
             assertTrue("\"$it\" is not shown", exists(hasText(it), unmerged = true))
         }
         profile.email?.let { assertTrue("$it is not shown", exists(hasText(it), unmerged = true)) }
@@ -182,7 +183,9 @@ class VendorScreensE2ETest : VendorE2ETest() {
 
     @Test
     fun promijeniLozinkuOpensTheSheetAndZatvoriClosesIt() {
-        goTo("Korisnički profil", "Opšte informacije")
+        goTo("Korisnički profil", "Opšte")
+        // Promijeni lozinku is on the Postavke tab
+        compose.onNodeWithText("Postavke").performClick()
 
         compose.onNodeWithText("Promijeni lozinku").performScrollTo().performClick()
 
@@ -193,7 +196,9 @@ class VendorScreensE2ETest : VendorE2ETest() {
 
     @Test
     fun obrisiNalogAsksOnceAndOdustaniKeepsTheAccount() {
-        goTo("Korisnički profil", "Opšte informacije")
+        goTo("Korisnički profil", "Opšte")
+        // Obriši nalog is on the Postavke tab
+        compose.onNodeWithText("Postavke").performClick()
 
         compose.onNode(hasText("Obriši nalog") and hasClickAction()).performScrollTo().performClick()
 
@@ -201,7 +206,7 @@ class VendorScreensE2ETest : VendorE2ETest() {
         assertEquals("the delete dialog is shown more than once", 1, count(hasText("Jeste li sigurni da želite obrisati nalog?")))
         compose.onAllNodesWithText("Odustani").onFirst().performClick()
         compose.waitUntilDoesNotExist(hasText("Jeste li sigurni da želite obrisati nalog?"), SCREEN_TIMEOUT_MS)
-        compose.onNodeWithText("Opšte informacije").assertExists()
+        compose.onNodeWithText("Promijeni lozinku").assertExists()
     }
 
     // Analitika
