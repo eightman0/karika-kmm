@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,10 +48,11 @@ import karika.distribucija.ba.ui.components.KDivider
 import karika.distribucija.ba.ui.components.KFeatureTile
 import karika.distribucija.ba.ui.components.KIcon
 import karika.distribucija.ba.ui.components.KImage
+import karika.distribucija.ba.ui.components.KInitials
+import karika.distribucija.ba.ui.components.KLogo
 import karika.distribucija.ba.ui.components.KSectionTitle
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaHeaderShape
-import karika.distribucija.ba.ui.components.KLogo
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
@@ -205,22 +207,52 @@ fun LandingView(component: LandingComponent) {
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             items(items = promotedLogos) { vendor ->
-                                val shape = RoundedCornerShape(18.dp)
-                                Box(
+                                Column(
                                     modifier = Modifier
                                         .testTag(vendorLogoTag(vendor))
-                                        .size(76.dp)
-                                        .clip(shape)
-                                        .background(KarikaColors.White)
-                                        .border(1.dp, KarikaUiColors.Line, shape)
+                                        .width(72.dp)
                                         .clickable {
                                             component.showVendor(vendor.toVendor())
-                                        }
+                                        },
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    KImage(
-                                        modifier = Modifier.fillMaxSize(),
-                                        url = vendor.logoImage(),
-                                        contentScale = ContentScale.Crop
+                                    Box(
+                                        modifier = Modifier
+                                            .size(68.dp)
+                                            .clip(CircleShape)
+                                            .background(KarikaColors.White)
+                                            .border(1.dp, KarikaUiColors.Border, CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (vendor.companyLogo.isNullOrBlank()) {
+                                            KInitials(
+                                                name = vendor.name(),
+                                                size = 68.dp,
+                                                shape = CircleShape,
+                                                background = KarikaColors.White,
+                                                color = KarikaUiColors.Ink,
+                                                textSize = 17.sp
+                                            )
+                                        } else {
+                                            KImage(
+                                                modifier = Modifier
+                                                    .size(50.dp)
+                                                    .clip(CircleShape),
+                                                url = vendor.logoImage(),
+                                                contentScale = ContentScale.Fit
+                                            )
+                                        }
+                                    }
+                                    Spacer(Modifier.height(6.dp))
+                                    KarikaText(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = vendor.name(),
+                                        color = KarikaUiColors.Ink,
+                                        textSize = 11.sp,
+                                        lineHeight = 14.sp,
+                                        fontWeight = FontWeight.W500,
+                                        textAlign = TextAlign.Center,
+                                        maxLines = 1
                                     )
                                 }
                             }
