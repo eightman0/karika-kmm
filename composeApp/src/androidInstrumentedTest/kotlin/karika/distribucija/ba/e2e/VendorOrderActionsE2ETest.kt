@@ -210,7 +210,7 @@ class VendorOrderActionsE2ETest : VendorE2ETest() {
         val original = profile().minOrderAmount
         val amount = (10 + System.currentTimeMillis() % 40).toString()
         try {
-            goTo("Upravljanje narudžbama")
+            goTo("Narudžbe", "Upravljanje narudžbama")
             compose.onNodeWithTag(MIN_ORDER_TAG).performClick()
             compose.waitUntilAtLeastOneExists(hasText("Iznos"), SCREEN_TIMEOUT_MS)
 
@@ -248,7 +248,7 @@ class VendorOrderActionsE2ETest : VendorE2ETest() {
         }
         settleOlderOrders(order)
         logInAsVendor()
-        goTo("Upravljanje narudžbama")
+        goTo("Narudžbe", "Upravljanje narudžbama")
         compose.waitUntilAtLeastOneExists(hasTestTag(vendorOrderTag(order)), SERVER_TIMEOUT_MS)
         compose.onNodeWithTag(vendorOrderTag(order)).performScrollTo().performClick()
         compose.waitUntilAtLeastOneExists(hasText("Nazad na upravljanje narudžbama"), SERVER_TIMEOUT_MS)

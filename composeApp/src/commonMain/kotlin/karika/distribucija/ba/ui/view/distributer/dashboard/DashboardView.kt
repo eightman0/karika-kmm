@@ -1,6 +1,7 @@
 package karika.distribucija.ba.ui.view.distributer.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,13 +18,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,7 +35,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,14 +45,18 @@ import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import karika.distribucija.ba.ui.common.appVersionName
-import karika.distribucija.ba.ui.components.IconTextItem
+import karika.distribucija.ba.ui.components.KCircleButton
+import karika.distribucija.ba.ui.components.KDivider
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KInitials
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.TopBarDashboard
-import karika.distribucija.ba.ui.components.YSpacer16
 import karika.distribucija.ba.ui.components.asState
-import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.view.distributer.VendorAccent
+import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsFiltersView
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsTab
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsView
@@ -69,16 +77,17 @@ import karika.distribucija.ba.ui.view.distributer.products.ProductsView
 import karika.distribucija.ba.ui.view.distributer.products.details.ProductDetailsView
 import karika.distribucija.ba.ui.view.distributer.profile.ProfileView
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_analytics
-import karikav2.composeapp.generated.resources.ic_arrow_down
-import karikav2.composeapp.generated.resources.ic_arrow_up
-import karikav2.composeapp.generated.resources.ic_customers
-import karikav2.composeapp.generated.resources.ic_logout
-import karikav2.composeapp.generated.resources.ic_messages
-import karikav2.composeapp.generated.resources.ic_navigation_profile
-import karikav2.composeapp.generated.resources.ic_sales_team
-import karikav2.composeapp.generated.resources.ic_shopping_cart
-import karikav2.composeapp.generated.resources.ic_tertiary
+import karikav2.composeapp.generated.resources.ic_k_cart
+import karikav2.composeapp.generated.resources.ic_k_chart
+import karikav2.composeapp.generated.resources.ic_k_chat
+import karikav2.composeapp.generated.resources.ic_k_chevron_down
+import karikav2.composeapp.generated.resources.ic_k_close
+import karikav2.composeapp.generated.resources.ic_k_inbox
+import karikav2.composeapp.generated.resources.ic_k_logout_left
+import karikav2.composeapp.generated.resources.ic_k_shield
+import karikav2.composeapp.generated.resources.ic_k_tag
+import karikav2.composeapp.generated.resources.ic_k_user
+import karikav2.composeapp.generated.resources.ic_k_users
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
 
@@ -114,397 +123,185 @@ fun DashboardView(component: DashboardComponent) {
             drawerContent = {
                 ModalDrawerSheet(
                     modifier = Modifier
-                        .width(maxWidth * 0.7f),
+                        .width(minOf(maxWidth * 0.82f, 340.dp)),
                     drawerContainerColor = KarikaColors.White,
-                    drawerShape = RectangleShape
+                    drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
                 ) {
+                    val closeDrawer: () -> Unit = { scope.launch { drawerState.close() } }
+                    val go: (DashConfig) -> Unit = { config ->
+                        component.dashNavigate(config, true)
+                        closeDrawer()
+                    }
+
+                    // Supplier: initials, name and email, close button
                     Row(
                         modifier = Modifier
-                            .padding(16.dp)
                             .fillMaxWidth()
+                            .padding(start = 16.dp, end = 12.dp, top = 16.dp, bottom = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                        ) {
+                        KInitials(
+                            name = profile.value.publicName,
+                            size = 48.dp,
+                            shape = CircleShape,
+                            background = VendorAccent,
+                            color = KarikaColors.White,
+                            textSize = 16.sp
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
                             KarikaText(
-                                modifier = Modifier,
                                 text = profile.value.publicName,
-                                color = KarikaColors.Gray2,
+                                color = KarikaUiColors.Ink,
                                 textSize = 16.sp,
+                                lineHeight = 20.sp,
                                 fontWeight = FontWeight.W700,
+                                maxLines = 1
                             )
                             KarikaText(
-                                modifier = Modifier,
                                 text = profile.value.email,
-                                color = KarikaColors.Gray2,
+                                color = KarikaUiColors.Muted,
                                 textSize = 12.sp,
-                                fontWeight = FontWeight.W400,
+                                lineHeight = 16.sp,
+                                maxLines = 1
                             )
                         }
-                        Icon(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .onClick {
-                                    scope.launch {
-                                        drawerState.close()
-                                    }
-                                },
-                            imageVector = vectorResource(Res.drawable.ic_tertiary),
-                            contentDescription = "",
-                            tint = KarikaColors.Gray2
+                        KCircleButton(
+                            icon = vectorResource(Res.drawable.ic_k_close),
+                            size = 40.dp,
+                            iconSize = 18.dp,
+                            onClick = closeDrawer
                         )
                     }
-                    HorizontalDivider()
-                    NavigationDrawerItem(
-                        modifier = Modifier,
-                        colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = KarikaColors.White,
-                            selectedContainerColor = KarikaColors.Blue
-                        ),
-                        shape = RectangleShape,
-                        label = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                IconTextItem(
-                                    modifier = Modifier.weight(1f),
-                                    icon = vectorResource(Res.drawable.ic_analytics),
-                                    iconColor = if (isAnalyticsActive) KarikaColors.White else KarikaColors.Gray2,
-                                    textColor = if (isAnalyticsActive) KarikaColors.White else KarikaColors.Gray2,
-                                    textSize = 16.sp,
-                                    fontWeight = FontWeight.W600,
-                                    text = "Analitika",
-                                    textAlign = TextAlign.Start
-                                )
-                                Icon(
-                                    modifier = Modifier.size(20.dp),
-                                    imageVector = vectorResource(
-                                        if (analyticsExpanded) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down
-                                    ),
-                                    tint = if (isAnalyticsActive) KarikaColors.White else KarikaColors.Gray2,
-                                    contentDescription = ""
-                                )
-                            }
-                        },
-                        selected = isAnalyticsActive,
-                        onClick = {
-                            analyticsExpanded = !analyticsExpanded
-                        }
-                    )
-                    if (analyticsExpanded) {
-                        AnalyticsSubItem(
-                            text = "Pregled",
-                            selected = activeAnalyticsTab == AnalyticsTab.Overview,
-                            onClick = {
-                                component.dashNavigate(DashConfig.Analytics(AnalyticsTab.Overview), true)
-                                scope.launch { drawerState.close() }
-                            }
-                        )
-                        AnalyticsSubItem(
-                            text = "Trendovi prodaje",
-                            selected = activeAnalyticsTab == AnalyticsTab.Trends,
-                            onClick = {
-                                component.dashNavigate(DashConfig.Analytics(AnalyticsTab.Trends), true)
-                                scope.launch { drawerState.close() }
-                            }
-                        )
-                        if (canSeeDashboard) {
-                            AnalyticsSubItem(
-                                text = "Komercijalisti",
-                                selected = activeAnalyticsTab == AnalyticsTab.Reps,
-                                onClick = {
-                                    component.dashNavigate(DashConfig.Analytics(AnalyticsTab.Reps), true)
-                                    scope.launch { drawerState.close() }
-                                }
-                            )
-                        }
-                        AnalyticsSubItem(
-                            text = "Analitika kupaca",
-                            selected = activeAnalyticsTab == AnalyticsTab.Customers,
-                            onClick = {
-                                component.dashNavigate(DashConfig.Analytics(AnalyticsTab.Customers), true)
-                                scope.launch { drawerState.close() }
-                            }
-                        )
-                        AnalyticsSubItem(
-                            text = "Kupci koji zahtijevaju pažnju",
-                            selected = navState.value.active.instance is DashChild.AnalyticsAtRisk,
-                            onClick = {
-                                component.dashNavigate(DashConfig.AnalyticsAtRisk, true)
-                                scope.launch { drawerState.close() }
-                            }
-                        )
-                        AnalyticsSubItem(
-                            text = "Proizvodi i kategorije",
-                            selected = navState.value.active.instance is DashChild.AnalyticsProducts,
-                            onClick = {
-                                component.dashNavigate(DashConfig.AnalyticsProducts, true)
-                                scope.launch { drawerState.close() }
-                            }
-                        )
-                    }
-                    NavigationDrawerItem(
-                        modifier = Modifier,
-                        colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = KarikaColors.White,
-                            selectedContainerColor = KarikaColors.Blue
-                        ),
-                        shape = RectangleShape,
-                        label = {
-                            IconTextItem(
-                                modifier = Modifier,
-                                icon = vectorResource(Res.drawable.ic_shopping_cart),
-                                iconColor = if (navState.value.active.instance is DashChild.Orders) KarikaColors.White else KarikaColors.Gray2,
-                                textColor = if (navState.value.active.instance is DashChild.Orders) KarikaColors.White else KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W600,
-                                text = "Upravljanje narudžbama",
-                                textAlign = TextAlign.Start
-                            )
-                        },
-                        selected = navState.value.active.instance is DashChild.Orders,
-                        onClick = {
-                            component.dashNavigate(DashConfig.Orders, true)
-                            scope.launch {
-                                drawerState.close()
-                            }
-                        }
-                    )
-                    NavigationDrawerItem(
-                        modifier = Modifier,
-                        colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = KarikaColors.White,
-                            selectedContainerColor = KarikaColors.Blue
-                        ),
-                        shape = RectangleShape,
-                        label = {
-                            IconTextItem(
-                                modifier = Modifier,
-                                icon = vectorResource(Res.drawable.ic_customers),
-                                iconColor = if (navState.value.active.instance is DashChild.Customers) KarikaColors.White else KarikaColors.Gray2,
-                                textColor = if (navState.value.active.instance is DashChild.Customers) KarikaColors.White else KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W600,
-                                text = "Upravljanje rabatima",
-                                textAlign = TextAlign.Start
-                            )
-                        },
-                        selected = navState.value.active.instance is DashChild.Customers,
-                        onClick = {
-                            component.dashNavigate(DashConfig.Customers, true)
-                            scope.launch {
-                                drawerState.close()
-                            }
-                        }
-                    )
-                    if (canViewEmployees) {
-                        val isEmployeesActive = activeInstance is DashChild.Employees ||
-                            activeInstance is DashChild.EmployeeLocations
-                        NavigationDrawerItem(
-                            modifier = Modifier,
-                            colors = NavigationDrawerItemDefaults.colors(
-                                unselectedContainerColor = KarikaColors.White,
-                                selectedContainerColor = KarikaColors.Blue
-                            ),
-                            shape = RectangleShape,
-                            label = {
-                                IconTextItem(
-                                    modifier = Modifier,
-                                    icon = vectorResource(Res.drawable.ic_sales_team),
-                                    iconColor = if (isEmployeesActive) KarikaColors.White else KarikaColors.Gray2,
-                                    textColor = if (isEmployeesActive) KarikaColors.White else KarikaColors.Gray2,
-                                    textSize = 16.sp,
-                                    fontWeight = FontWeight.W600,
-                                    text = "Komercijalisti",
-                                    textAlign = TextAlign.Start
-                                )
-                            },
-                            selected = isEmployeesActive,
-                            onClick = {
-                                component.dashNavigate(DashConfig.Employees, true)
-                                scope.launch {
-                                    drawerState.close()
-                                }
-                            }
-                        )
-                    }
-                    /* NavigationDrawerItem(
-                         modifier = Modifier,
-                         colors = NavigationDrawerItemDefaults.colors(
-                             unselectedContainerColor = KarikaColors.White,
-                             selectedContainerColor = KarikaColors.Blue
-                         ),
-                         shape = RectangleShape,
-                         label = {
-                             IconTextItem(
-                                 modifier = Modifier,
-                                 icon = vectorResource(Res.drawable.ic_inventory),
-                                 iconColor = if (navState.value.active.instance is DashChild.Products) KarikaColors.White else KarikaColors.Gray2,
-                                 textColor = if (navState.value.active.instance is DashChild.Products) KarikaColors.White else KarikaColors.Gray2,
-                                 textSize = 16.sp,
-                                 fontWeight = FontWeight.W600,
-                                 text = "Upravljanje artiklima",
-                                 textAlign = TextAlign.Start
-                             )
-                         },
-                         selected = navState.value.active.instance is DashChild.Products,
-                         onClick = {
-                             component.dashNavigate(DashConfig.Products, true)
-                             scope.launch {
-                                 drawerState.close()
-                             }
-                         }
-                     )*/
-                    NavigationDrawerItem(
-                        modifier = Modifier,
-                        colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = KarikaColors.White,
-                            selectedContainerColor = KarikaColors.Blue
-                        ),
-                        shape = RectangleShape,
-                        label = {
-                            IconTextItem(
-                                modifier = Modifier,
-                                icon = vectorResource(Res.drawable.ic_messages),
-                                iconColor = if (navState.value.active.instance is DashChild.CustomerMessages) KarikaColors.White else KarikaColors.Gray2,
-                                textColor = if (navState.value.active.instance is DashChild.CustomerMessages) KarikaColors.White else KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W600,
-                                text = "Poruke kupaca",
-                                textAlign = TextAlign.Start,
-                                badge = messageState.value.vendorCustomer
-                            )
-                        },
-                        selected = navState.value.active.instance is DashChild.CustomerMessages,
-                        onClick = {
-                            component.dashNavigate(DashConfig.CustomerMessages, true)
-                            scope.launch {
-                                drawerState.close()
-                            }
-                        }
-                    )
-                    NavigationDrawerItem(
-                        modifier = Modifier,
-                        colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = KarikaColors.White,
-                            selectedContainerColor = KarikaColors.Blue
-                        ),
-                        shape = RectangleShape,
-                        label = {
-                            IconTextItem(
-                                modifier = Modifier,
-                                icon = vectorResource(Res.drawable.ic_messages),
-                                iconColor = if (navState.value.active.instance is DashChild.AdminMessages) KarikaColors.White else KarikaColors.Gray2,
-                                textColor = if (navState.value.active.instance is DashChild.AdminMessages) KarikaColors.White else KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W600,
-                                text = "Poruke admina",
-                                textAlign = TextAlign.Start,
-                                badge = messageState.value.vendorAdmin
-                            )
-                        },
-                        selected = navState.value.active.instance is DashChild.AdminMessages,
-                        onClick = {
-                            component.dashNavigate(DashConfig.AdminMessages, true)
-                            scope.launch {
-                                drawerState.close()
-                            }
-                        }
-                    )
-                    NavigationDrawerItem(
-                        modifier = Modifier,
-                        colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = KarikaColors.White,
-                            selectedContainerColor = KarikaColors.Blue
-                        ),
-                        shape = RectangleShape,
-                        label = {
-                            IconTextItem(
-                                modifier = Modifier,
-                                icon = vectorResource(Res.drawable.ic_messages),
-                                iconColor = if (navState.value.active.instance is DashChild.InternalMessages) KarikaColors.White else KarikaColors.Gray2,
-                                textColor = if (navState.value.active.instance is DashChild.InternalMessages) KarikaColors.White else KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W600,
-                                text = "Interne poruke",
-                                textAlign = TextAlign.Start,
-                                badge = messageState.value.staff
-                            )
-                        },
-                        selected = navState.value.active.instance is DashChild.InternalMessages,
-                        onClick = {
-                            component.dashNavigate(DashConfig.InternalMessages, true)
-                            scope.launch {
-                                drawerState.close()
-                            }
-                        }
-                    )
-                    NavigationDrawerItem(
-                        modifier = Modifier,
-                        colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = KarikaColors.White,
-                            selectedContainerColor = KarikaColors.Blue
-                        ),
-                        shape = RectangleShape,
-                        label = {
-                            IconTextItem(
-                                modifier = Modifier,
-                                icon = vectorResource(Res.drawable.ic_navigation_profile),
-                                iconColor = if (navState.value.active.instance is DashChild.Profile) KarikaColors.White else KarikaColors.Gray2,
-                                textColor = if (navState.value.active.instance is DashChild.Profile) KarikaColors.White else KarikaColors.Gray2,
-                                textSize = 16.sp,
-                                fontWeight = FontWeight.W600,
-                                text = "Korisnički profil",
-                                textAlign = TextAlign.Start
-                            )
-                        },
-                        selected = navState.value.active.instance is DashChild.Profile,
-                        onClick = {
-                            component.dashNavigate(DashConfig.Profile, true)
-                            scope.launch {
-                                drawerState.close()
-                            }
-                        }
-                    )
-                    HorizontalDivider()
+                    KDivider()
+
                     Column(
                         modifier = Modifier
-                            .weight(1f),
-                        verticalArrangement = Arrangement.Bottom
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 10.dp, vertical = 10.dp)
                     ) {
+                        DrawerItem(
+                            text = "Analitika",
+                            icon = vectorResource(Res.drawable.ic_k_chart),
+                            selected = isAnalyticsActive,
+                            trailing = {
+                                KIcon(
+                                    modifier = Modifier.rotate(if (analyticsExpanded) 180f else 0f),
+                                    icon = vectorResource(Res.drawable.ic_k_chevron_down),
+                                    tint = if (isAnalyticsActive) VendorAccent else KarikaUiColors.Muted,
+                                    size = 18.dp
+                                )
+                            }
+                        ) {
+                            analyticsExpanded = !analyticsExpanded
+                        }
+                        if (analyticsExpanded) {
+                            AnalyticsSubItem(
+                                text = "Pregled",
+                                selected = activeAnalyticsTab == AnalyticsTab.Overview
+                            ) { go(DashConfig.Analytics(AnalyticsTab.Overview)) }
+                            AnalyticsSubItem(
+                                text = "Trendovi prodaje",
+                                selected = activeAnalyticsTab == AnalyticsTab.Trends
+                            ) { go(DashConfig.Analytics(AnalyticsTab.Trends)) }
+                            if (canSeeDashboard) {
+                                AnalyticsSubItem(
+                                    text = "Komercijalisti",
+                                    selected = activeAnalyticsTab == AnalyticsTab.Reps
+                                ) { go(DashConfig.Analytics(AnalyticsTab.Reps)) }
+                            }
+                            AnalyticsSubItem(
+                                text = "Analitika kupaca",
+                                selected = activeAnalyticsTab == AnalyticsTab.Customers
+                            ) { go(DashConfig.Analytics(AnalyticsTab.Customers)) }
+                            AnalyticsSubItem(
+                                text = "Kupci koji zahtijevaju pažnju",
+                                selected = activeInstance is DashChild.AnalyticsAtRisk
+                            ) { go(DashConfig.AnalyticsAtRisk) }
+                            AnalyticsSubItem(
+                                text = "Proizvodi i kategorije",
+                                selected = activeInstance is DashChild.AnalyticsProducts
+                            ) { go(DashConfig.AnalyticsProducts) }
+                        }
+                        DrawerItem(
+                            text = "Narudžbe",
+                            icon = vectorResource(Res.drawable.ic_k_cart),
+                            selected = activeInstance is DashChild.Orders || activeInstance is DashChild.OrderDetails
+                        ) { go(DashConfig.Orders) }
+                        DrawerItem(
+                            text = "Rabati",
+                            icon = vectorResource(Res.drawable.ic_k_tag),
+                            selected = activeInstance is DashChild.Customers || activeInstance is DashChild.CustomerRuleEditor
+                        ) { go(DashConfig.Customers) }
+                        if (canViewEmployees) {
+                            DrawerItem(
+                                text = "Komercijalisti",
+                                icon = vectorResource(Res.drawable.ic_k_users),
+                                selected = activeInstance is DashChild.Employees || activeInstance is DashChild.EmployeeLocations
+                            ) { go(DashConfig.Employees) }
+                        }
+
+                        DrawerSection("Poruke")
+                        DrawerItem(
+                            text = "Poruke kupaca",
+                            icon = vectorResource(Res.drawable.ic_k_chat),
+                            selected = activeInstance is DashChild.CustomerMessages,
+                            badge = messageState.value.vendorCustomer
+                        ) { go(DashConfig.CustomerMessages) }
+                        DrawerItem(
+                            text = "Poruke admina",
+                            icon = vectorResource(Res.drawable.ic_k_shield),
+                            selected = activeInstance is DashChild.AdminMessages,
+                            badge = messageState.value.vendorAdmin
+                        ) { go(DashConfig.AdminMessages) }
+                        DrawerItem(
+                            text = "Interne poruke",
+                            icon = vectorResource(Res.drawable.ic_k_inbox),
+                            selected = activeInstance is DashChild.InternalMessages,
+                            badge = messageState.value.staff
+                        ) { go(DashConfig.InternalMessages) }
+
+                        DrawerSection("Nalog")
+                        DrawerItem(
+                            text = "Korisnički profil",
+                            icon = vectorResource(Res.drawable.ic_k_user),
+                            selected = activeInstance is DashChild.Profile
+                        ) { go(DashConfig.Profile) }
+                    }
+
+                    KDivider()
+                    Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(KarikaUiColors.RedSoft)
+                                .clickable { component.logout() }
+                                .padding(horizontal = 14.dp, vertical = 13.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            KIcon(
+                                icon = vectorResource(Res.drawable.ic_k_logout_left),
+                                tint = KarikaUiColors.Red,
+                                size = 20.dp
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            KarikaText(
+                                text = "Odjavi se",
+                                color = KarikaUiColors.Red,
+                                textSize = 15.sp,
+                                fontWeight = FontWeight.W700
+                            )
+                        }
                         KarikaText(
                             modifier = Modifier
-                                .fillMaxWidth(),
-                            color = KarikaColors.Black,
-                            fontWeight = FontWeight.W600,
-                            textSize = 14.sp,
+                                .fillMaxWidth()
+                                .padding(top = 10.dp),
+                            color = KarikaUiColors.Subtle,
+                            textSize = 12.sp,
                             text = appVersionName(),
                             textAlign = TextAlign.Center
-                        )
-                        YSpacer16()
-                        NavigationDrawerItem(
-                            modifier = Modifier,
-                            colors = NavigationDrawerItemDefaults.colors(
-                                unselectedContainerColor = KarikaColors.Gray20,
-                            ),
-                            shape = RectangleShape,
-                            label = {
-                                IconTextItem(
-                                    icon = vectorResource(Res.drawable.ic_logout),
-                                    iconColor = KarikaColors.Gray2,
-                                    textColor = KarikaColors.Gray2,
-                                    textSize = 16.sp,
-                                    fontWeight = FontWeight.W600,
-                                    text = "Odjavi se",
-                                    textAlign = TextAlign.Start
-                                )
-                            },
-                            selected = false,
-                            onClick = {
-                                component.logout()
-                            }
                         )
                     }
                 }
@@ -564,26 +361,97 @@ fun DashboardView(component: DashboardComponent) {
     }
 }
 
+/** Drawer row: icon and label, highlighted with the supplier accent when selected, optional badge. */
+@Composable
+private fun DrawerItem(
+    text: String,
+    icon: ImageVector,
+    selected: Boolean,
+    badge: Int = 0,
+    trailing: @Composable () -> Unit = {},
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (selected) VendorAccentSoft else KarikaColors.White)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KIcon(
+            icon = icon,
+            tint = if (selected) VendorAccent else KarikaUiColors.Ink,
+            size = 21.dp
+        )
+        Spacer(Modifier.width(14.dp))
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = text,
+            color = if (selected) VendorAccent else KarikaUiColors.Ink,
+            textSize = 15.sp,
+            fontWeight = if (selected) FontWeight.W700 else FontWeight.W500,
+            maxLines = 1
+        )
+        if (badge > 0) {
+            Box(
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .defaultMinSize(minWidth = 22.dp, minHeight = 22.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(VendorAccent)
+                    .padding(horizontal = 6.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    text = "$badge",
+                    color = KarikaColors.White,
+                    textSize = 11.sp,
+                    fontWeight = FontWeight.W700,
+                    maxLines = 1
+                )
+            }
+        }
+        trailing()
+    }
+}
+
+/** Small uppercase heading of a drawer group ("PORUKE", "NALOG"). */
+@Composable
+private fun DrawerSection(title: String) {
+    KarikaText(
+        modifier = Modifier.padding(start = 12.dp, top = 16.dp, bottom = 6.dp),
+        text = title.uppercase(),
+        color = KarikaUiColors.Subtle,
+        textSize = 11.sp,
+        fontWeight = FontWeight.W700
+    )
+}
+
 @Composable
 private fun AnalyticsSubItem(text: String, selected: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .onClick(callback = onClick)
-            .padding(start = 28.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(start = 46.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(width = 2.dp, height = 16.dp)
-                .background(if (selected) KarikaColors.Blue else KarikaColors.Transparent)
+                .size(6.dp)
+                .clip(CircleShape)
+                .background(if (selected) VendorAccent else KarikaUiColors.Border)
         )
         Spacer(modifier = Modifier.width(12.dp))
         KarikaText(
             text = text,
-            color = if (selected) KarikaColors.Blue else KarikaColors.Gray2,
+            color = if (selected) VendorAccent else KarikaUiColors.Muted,
             textSize = 14.sp,
-            fontWeight = if (selected) FontWeight.W700 else FontWeight.W500
+            fontWeight = if (selected) FontWeight.W700 else FontWeight.W500,
+            maxLines = 1
         )
     }
 }

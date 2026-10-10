@@ -38,7 +38,7 @@ class VendorNavigationE2ETest : VendorE2ETest() {
         vendor.publicName?.let { assertTrue("\"$it\" is not shown", displayed(hasText(it))) }
         vendor.email?.let { assertTrue("\"$it\" is not shown", displayed(hasText(it))) }
         listOf(
-            "Analitika", "Upravljanje narudžbama", "Upravljanje rabatima", "Poruke kupaca",
+            "Analitika", "Narudžbe", "Rabati", "Poruke kupaca",
             "Poruke admina", "Interne poruke", "Korisnički profil", "Odjavi se"
         ).forEach { assertTrue("\"$it\" is not in the drawer", displayed(drawerItem(it))) }
         // Product management is switched off in the app
@@ -83,13 +83,13 @@ class VendorNavigationE2ETest : VendorE2ETest() {
 
     @Test
     fun upravljanjeNarudzbamaOpensTheOrders() {
-        goTo("Upravljanje narudžbama")
+        goTo("Narudžbe", "Upravljanje narudžbama")
         compose.onNodeWithText("Postavi minimalnu vrijednost narudžbe").assertIsDisplayed()
     }
 
     @Test
     fun upravljanjeRabatimaOpensTheDiscountRules() {
-        goTo("Upravljanje rabatima")
+        goTo("Rabati", "Upravljanje rabatima")
         compose.onNodeWithText("Postavke po kupcu").assertIsDisplayed()
     }
 

@@ -40,7 +40,7 @@ class VendorOrdersE2ETest : VendorE2ETest() {
     @Before
     fun openOrders() {
         latest = orders()
-        goTo("Upravljanje narudžbama")
+        goTo("Narudžbe", "Upravljanje narudžbama")
         latest.firstOrNull()?.let {
             compose.waitUntilAtLeastOneExists(hasTestTag(vendorOrderTag(it)), SERVER_TIMEOUT_MS)
         }

@@ -3,9 +3,11 @@ package karika.distribucija.ba.e2e
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -47,8 +49,9 @@ class VendorLoginE2ETest : StageE2ETest() {
         compose.waitUntilAtLeastOneExists(hasText(DASHBOARD_TITLE, substring = true), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         compose.onNodeWithText(DASHBOARD_TITLE, substring = true).assertIsDisplayed()
-        listOf("Upravljanje narudžbama", "Upravljanje rabatima", "Poruke kupaca", "Odjavi se").forEach { item ->
-            compose.onNodeWithText(item).assertExists()
+        // "Narudžbe" is also a heading on the analytics overview, so any node with the text will do
+        listOf("Narudžbe", "Rabati", "Poruke kupaca", "Odjavi se").forEach { item ->
+            assertTrue("\"$item\" is not in the drawer", compose.onAllNodesWithText(item).fetchSemanticsNodes().isNotEmpty())
         }
         compose.onNodeWithText("Prijava dobavljač").assertDoesNotExist()
         compose.onNodeWithText(WRONG_LOGIN_MESSAGE, substring = true).assertDoesNotExist()

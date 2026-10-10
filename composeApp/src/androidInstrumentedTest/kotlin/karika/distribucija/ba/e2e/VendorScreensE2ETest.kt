@@ -45,7 +45,7 @@ class VendorScreensE2ETest : VendorE2ETest() {
     @Test
     fun discountRulesShowTheThreeSectionsWithStagesRules() {
         val rules = rules()
-        goTo("Upravljanje rabatima")
+        goTo("Rabati", "Upravljanje rabatima")
 
         listOf("Postavke po kupcu", "Postavke po tipu kupca", "Postavke po regiji kupca").forEach {
             assertTrue("\"$it\" is not shown", exists(hasText(it), unmerged = true))
@@ -60,7 +60,7 @@ class VendorScreensE2ETest : VendorE2ETest() {
 
     @Test
     fun dodajRedOpensTheRuleEditorWhichNeedsADiscount() {
-        goTo("Upravljanje rabatima")
+        goTo("Rabati", "Upravljanje rabatima")
 
         compose.onAllNodesWithText("Dodaj red").onFirst().performClick()
 
@@ -79,7 +79,7 @@ class VendorScreensE2ETest : VendorE2ETest() {
     @Test
     fun aRuleOpensInTheEditorForChanging() {
         assumeTrue("stage has no discount rules for this supplier", rules().isNotEmpty())
-        goTo("Upravljanje rabatima")
+        goTo("Rabati", "Upravljanje rabatima")
         compose.waitUntil(SERVER_TIMEOUT_MS) { count(hasText("Rabat:", substring = true)) > 0 }
 
         compose.onAllNodesWithText("Rabat:", substring = true, useUnmergedTree = true).onFirst().performClick()
