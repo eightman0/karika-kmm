@@ -195,6 +195,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
 
             // ── Informacije o narudžbi ───────────────────────────────────────────
             item {
+                Column {
                 KSectionTitle(
                     modifier = Modifier.padding(bottom = 12.dp),
                     title = "Informacije o narudžbi"
@@ -206,10 +207,12 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                     commission = commission,
                     blurred = blurInfoFields
                 )
+                }
             }
 
             // ── Kupac ────────────────────────────────────────────────────────────
             item {
+                Column {
                 CustomerSection(
                     order = vendorOrder,
                     phone = phone,
@@ -217,6 +220,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                     blurred = blurInfoFields,
                     onError = { component.showMessage(it) }
                 )
+                }
             }
 
             // ── Usluga dostave (foldable) ────────────────────────────────────────
@@ -241,6 +245,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
 
             // ── Specifikacija narudžbe ───────────────────────────────────────────
             item {
+                Column {
                 Specification(
                     order = vendorOrder,
                     canEdit = canEdit,
@@ -250,10 +255,11 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                     commission = commission,
                     onEditClick = { editingItem = it }
                 )
+                }
             }
 
             // ── Komentari narudžbe ───────────────────────────────────────────────
-            item {
+            item { Column {
                 KSectionTitle(
                     modifier = Modifier.padding(top = 22.dp, bottom = 12.dp),
                     title = "Komentari narudžbe"
@@ -348,7 +354,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                         }
                     }
                 }
-            }
+            } }
         }
 
         // ── Print FAB ────────────────────────────────────────────────────────────
@@ -1318,10 +1324,14 @@ private fun EditOrderItemModal(
                     value = discountText,
                     label = "Rabat (%)",
                     keyboardType = KeyboardType.Number,
-                    allowedChars = KarikaConstants.numbers,
                     trailingText = "%",
                     onValueChange = { v ->
-                        if ((v.toIntOrNull() ?: 0) > 100) discountText.value = "100"
+                        val digits = v.filter { it.isDigit() }
+                        discountText.value = when {
+                            digits.isEmpty() -> ""
+                            (digits.toIntOrNull() ?: 0) > 100 -> "100"
+                            else -> digits
+                        }
                     }
                 )
             } else if ((item.rabat().toIntOrNull() ?: 0) > 0) {
@@ -1338,7 +1348,7 @@ private fun EditOrderItemModal(
                 value = qtyText,
                 label = "Količina",
                 keyboardType = KeyboardType.Number,
-                allowedChars = KarikaConstants.numbers
+                onValueChange = { v -> qtyText.value = v.filter { it.isDigit() } }
             )
 
             OrderModalButtons(
