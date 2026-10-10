@@ -1,17 +1,24 @@
 package karika.distribucija.ba.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,15 +29,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.ui.common.CommonComponent
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_cancel_circle
-import karikav2.composeapp.generated.resources.ic_checked_circle
-import karikav2.composeapp.generated.resources.ic_warning
+import karikav2.composeapp.generated.resources.ic_k_check
+import karikav2.composeapp.generated.resources.ic_k_close
+import karikav2.composeapp.generated.resources.ic_k_info
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.vectorResource
@@ -71,35 +82,15 @@ fun KarikaScaffold(
                             .padding(bottom = 100.dp),
                         hostState = component.snackbarHostState
                     ) { data ->
-                        Snackbar(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp),
-                            action = null,
-                            containerColor = component.snackbarHostState.currentSnackbarData?.visuals?.actionLabel?.toContainerColor()
-                                ?: KarikaColors.Blue,
-                            contentColor = KarikaColors.Blue,
-                            shape = RoundedCornerShape(8.dp),
-                        ) {
-                            IconTextItem(
-                                modifier = Modifier
-                                    .testTag(SNACKBAR_TAG)
-                                    .padding(bottom = 8.dp)
-                                    .onClick {
-                                        component.snackbarHostState.currentSnackbarData?.dismiss()
-                                    },
-                                icon = vectorResource(
-                                    component.snackbarHostState.currentSnackbarData?.visuals?.actionLabel?.toContainerIcon()
-                                        ?: Res.drawable.ic_checked_circle
-                                ),
-                                iconColor = KarikaColors.White,
-                                textColor = KarikaColors.White,
-                                text = data.visuals.message
-                            )
+                        KSnackbar(
+                            message = data.visuals.message,
+                            type = data.visuals.actionLabel,
+                            onDismiss = { data.dismiss() }
+                        )
 
-                            LaunchedEffect(Unit) {
-                                delay(1500)
-                                component.snackbarHostState.currentSnackbarData?.dismiss()
-                            }
+                        LaunchedEffect(data) {
+                            delay(1500)
+                            data.dismiss()
                         }
                     }
                 }
@@ -147,20 +138,60 @@ fun rememberImeVisible(): Boolean {
     return isVisible
 }
 
-private fun String.toContainerColor(): Color {
-    return when (this) {
-        "ERROR" -> KarikaColors.Error
-        "SUCCESS" -> KarikaColors.Blue
-        "WARNING" -> KarikaColors.Yellow
-        else -> KarikaColors.Blue
+/** Snackbar in the redesign style: white card, tinted icon per message type and the message. */
+@Composable
+private fun KSnackbar(
+    message: String,
+    type: String?,
+    onDismiss: () -> Unit
+) {
+    val style = type.toSnackbarStyle()
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .shadow(12.dp, RoundedCornerShape(16.dp), ambientColor = KarikaUiColors.Ink, spotColor = KarikaUiColors.Ink)
+            .clip(RoundedCornerShape(16.dp))
+            .background(KarikaColors.White)
+            .border(1.dp, KarikaUiColors.Line, RoundedCornerShape(16.dp))
+            .testTag(SNACKBAR_TAG)
+            .onClick { onDismiss() }
+            .padding(start = 12.dp, end = 14.dp, top = 12.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(style.soft),
+            contentAlignment = Alignment.Center
+        ) {
+            KIcon(icon = vectorResource(style.icon), tint = style.color, size = 18.dp)
+        }
+        Spacer(Modifier.width(12.dp))
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = message,
+            color = KarikaUiColors.Ink,
+            textSize = 14.sp,
+            lineHeight = 19.sp,
+            fontWeight = FontWeight.W600
+        )
+        Spacer(Modifier.width(10.dp))
+        KIcon(
+            icon = vectorResource(Res.drawable.ic_k_close),
+            tint = KarikaUiColors.Subtle,
+            size = 16.dp
+        )
     }
 }
 
-private fun String?.toContainerIcon(): DrawableResource {
+private class SnackbarStyle(val color: Color, val soft: Color, val icon: DrawableResource)
+
+private fun String?.toSnackbarStyle(): SnackbarStyle {
     return when (this) {
-        "ERROR" -> Res.drawable.ic_cancel_circle
-        "SUCCESS" -> Res.drawable.ic_checked_circle
-        "WARNING" -> Res.drawable.ic_warning
-        else -> Res.drawable.ic_checked_circle
+        "ERROR" -> SnackbarStyle(KarikaUiColors.Red, KarikaUiColors.RedSoft, Res.drawable.ic_k_close)
+        "WARNING" -> SnackbarStyle(KarikaUiColors.Amber, KarikaUiColors.AmberSoft, Res.drawable.ic_k_info)
+        else -> SnackbarStyle(KarikaUiColors.Green, KarikaUiColors.GreenSoft, Res.drawable.ic_k_check)
     }
 }
