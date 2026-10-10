@@ -58,7 +58,7 @@ import karika.distribucija.ba.ui.common.CommonComponent
 import karika.distribucija.ba.ui.common.textFieldImeOptions
 import karika.distribucija.ba.ui.components.KBottomPanel
 import karika.distribucija.ba.ui.components.KCard
-import karika.distribucija.ba.ui.components.KConfirmSheet
+import karika.distribucija.ba.ui.components.KConfirmDialog
 import karika.distribucija.ba.ui.components.KDivider
 import karika.distribucija.ba.ui.components.KEmptyState
 import karika.distribucija.ba.ui.components.KIcon
@@ -173,25 +173,20 @@ fun CartView(component: CartComponent) {
     }
 
     if (clearCartModal.value) {
-        Dialog(
-            onDismissRequest = { clearCartModal.negate() },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
-        ) {
-            KConfirmSheet(
-                title = "Isprazniti korpu?",
-                message = "Ova akcija će ukloniti sve artikle iz korpe.",
-                icon = vectorResource(Res.drawable.ic_k_trash),
-                confirmText = "Da, isprazni",
-                dismissText = "Ne",
-                onConfirm = {
-                    component.clearCart()
-                    clearCartModal.negate()
-                },
-                onDismiss = {
-                    clearCartModal.negate()
-                }
-            )
-        }
+        KConfirmDialog(
+            title = "Isprazniti korpu?",
+            message = "Ova akcija će ukloniti sve artikle iz korpe.",
+            icon = vectorResource(Res.drawable.ic_k_trash),
+            confirmText = "Da, isprazni",
+            dismissText = "Ne",
+            onConfirm = {
+                component.clearCart()
+                clearCartModal.negate()
+            },
+            onDismiss = {
+                clearCartModal.negate()
+            }
+        )
     }
 }
 

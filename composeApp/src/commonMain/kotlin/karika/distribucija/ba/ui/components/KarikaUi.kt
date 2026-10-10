@@ -52,6 +52,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Dialog
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_k_chevron_left
 import karikav2.composeapp.generated.resources.ic_k_chevron_right
@@ -963,6 +965,75 @@ fun KConfirmSheet(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 KSecondaryButton(modifier = Modifier.weight(1f), text = dismissText, onClick = onDismiss)
                 KPrimaryButton(modifier = Modifier.weight(1f), text = confirmText, background = confirmColor, onClick = onConfirm)
+            }
+        }
+    }
+}
+
+/** Centered confirmation dialog (icon, title, message, two buttons), for destructive actions. */
+@Composable
+fun KConfirmDialog(
+    title: String,
+    message: String,
+    icon: ImageVector,
+    confirmText: String,
+    dismissText: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    iconBackground: Color = KarikaUiColors.RedSoft,
+    iconTint: Color = KarikaUiColors.Red,
+    confirmColor: Color = KarikaUiColors.Red,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .fillMaxWidth()
+                .widthIn(max = 420.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(KarikaColors.White)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(iconBackground),
+                contentAlignment = Alignment.Center
+            ) {
+                KIcon(icon = icon, tint = iconTint, size = 24.dp)
+            }
+            Spacer(Modifier.height(16.dp))
+            KarikaText(
+                text = title,
+                color = KarikaUiColors.Ink,
+                textSize = 20.sp,
+                lineHeight = 24.sp,
+                fontWeight = FontWeight.W700,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(8.dp))
+            KarikaText(
+                text = message,
+                color = KarikaUiColors.Muted,
+                textSize = 14.sp,
+                lineHeight = 20.sp,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(22.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                KSecondaryButton(modifier = Modifier.weight(1f), text = dismissText, height = 48.dp, onClick = onDismiss)
+                KPrimaryButton(
+                    modifier = Modifier.weight(1f),
+                    text = confirmText,
+                    background = confirmColor,
+                    height = 48.dp,
+                    onClick = onConfirm
+                )
             }
         }
     }
