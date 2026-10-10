@@ -308,7 +308,7 @@ fun VendorItem(vendor: Vendor, component: CommonComponent) {
                     modifier = Modifier
                         .fillMaxSize(),
                     url = vendor.image(),
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.Crop
                 )
             }
         }
