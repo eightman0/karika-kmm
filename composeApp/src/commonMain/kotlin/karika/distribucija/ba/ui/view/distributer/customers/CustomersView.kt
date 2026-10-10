@@ -2,18 +2,22 @@ package karika.distribucija.ba.ui.view.distributer.customers
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -26,21 +30,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KConfirmDialog
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KarikaCardShape
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.SecondaryButtonFilled
-import karika.distribucija.ba.ui.components.YSpacer16
-import karika.distribucija.ba.ui.components.onClick
-import karika.distribucija.ba.ui.view.shop.profile.account.ConfirmationModal
+import karika.distribucija.ba.ui.components.KarikaUiColors
+import karika.distribucija.ba.ui.view.distributer.VendorAccent
+import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_add_plus
-import karikav2.composeapp.generated.resources.ic_arrow_right
-import karikav2.composeapp.generated.resources.ic_delete
+import karikav2.composeapp.generated.resources.ic_k_chevron_right
+import karikav2.composeapp.generated.resources.ic_k_plus
+import karikav2.composeapp.generated.resources.ic_k_trash
 import org.jetbrains.compose.resources.vectorResource
+
+/** Test tag of every discount rule card in the "Rabati" list. */
+const val CUSTOMER_RULE_TAG = "customer_rule"
 
 @Composable
 fun CustomersView(component: CustomersComponent) {
@@ -52,27 +65,17 @@ fun CustomersView(component: CustomersComponent) {
 
     LazyColumn(
         modifier = Modifier
-            .background(color = KarikaColors.Gray20)
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .background(color = KarikaUiColors.Page)
+            .fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        item {
-            KarikaText(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = "Upravljanje rabatima",
-                color = KarikaColors.Gray2,
-                textSize = 18.sp,
-                fontWeight = FontWeight.W700
-            )
-            YSpacer16()
-        }
+        item { PriorityCard() }
         item {
             RuleSection(
-                title = "Postavke po kupcu",
-                subtitle = "Pravila po kupcu imaju prednost nad tipom i regijom.",
-                targetLabel = "Kupac:",
+                number = 1,
+                title = "Po kupcu",
+                subtitle = "Imaju prednost nad tipom i regijom.",
                 rules = customerRules,
                 onAddRow = { component.addCustomerRule() },
                 onEditRow = { component.editRule(RuleScope.CUSTOMER, it) },
@@ -81,9 +84,9 @@ fun CustomersView(component: CustomersComponent) {
         }
         item {
             RuleSection(
-                title = "Postavke po tipu kupca",
-                subtitle = "Tip kupca primjenjuje se kada nema pravila za tog kupca.",
-                targetLabel = "Tip:",
+                number = 2,
+                title = "Po tipu kupca",
+                subtitle = "Primjenjuje se kad nema pravila za kupca.",
                 rules = customerTypeRules,
                 onAddRow = { component.addCustomerTypeRule() },
                 onEditRow = { component.editRule(RuleScope.CUSTOMER_TYPE, it) },
@@ -92,9 +95,9 @@ fun CustomersView(component: CustomersComponent) {
         }
         item {
             RuleSection(
-                title = "Postavke po regiji kupca",
-                subtitle = "Regija je posljednja u prioritetu i primjenjuje se kada nema pravila za kupca ni tip.",
-                targetLabel = "Regija:",
+                number = 3,
+                title = "Po regiji kupca",
+                subtitle = "Primjenjuje se kad nema pravila ni za kupca ni za tip.",
                 rules = customerRegionRules,
                 onAddRow = { component.addCustomerRegionRule() },
                 onEditRow = { component.editRule(RuleScope.CUSTOMER_REGION, it) },
@@ -104,19 +107,19 @@ fun CustomersView(component: CustomersComponent) {
     }
 
     ruleToDelete?.let { rule ->
-        ConfirmationModal(
+        KConfirmDialog(
             title = "Obriši pravilo",
             message = "Jeste li sigurni da želite obrisati ovo pravilo?",
-            primaryButtonText = "Obriši",
-            secondaryButtonText = "Odustani",
-            onPrimaryClick = {
+            icon = vectorResource(Res.drawable.ic_k_trash),
+            confirmText = "Obriši",
+            dismissText = "Odustani",
+            onConfirm = {
                 component.deleteRule(rule)
                 ruleToDelete = null
             },
-            onSecondaryClick = {
+            onDismiss = {
                 ruleToDelete = null
-            },
-            type = 1
+            }
         )
     }
 
@@ -125,165 +128,43 @@ fun CustomersView(component: CustomersComponent) {
     }
 }
 
+/** "Redoslijed primjene rabata": Kupac › Tip kupca › Regija. */
 @Composable
-private fun RuleSection(
-    title: String,
-    subtitle: String,
-    targetLabel: String,
-    rules: List<CustomerRule>,
-    onAddRow: () -> Unit,
-    onEditRow: (CustomerRule) -> Unit,
-    onDeleteRow: (CustomerRule) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .background(color = KarikaColors.White, shape = RoundedCornerShape(6.dp))
-            .border(
-                width = 1.dp,
-                color = KarikaColors.Border,
-                shape = RoundedCornerShape(6.dp)
-            )
-            .fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                KarikaText(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    text = title,
-                    color = KarikaColors.Gray2,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W700
-                )
-                KarikaText(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    text = subtitle,
-                    color = KarikaColors.Gray15,
-                    textSize = 13.sp,
-                    fontWeight = FontWeight.W400
-                )
-            }
-            SecondaryButtonFilled(
-                modifier = Modifier
-                    .height(36.dp),
-                title = "Dodaj red",
-                icon = Res.drawable.ic_add_plus,
-                fontWeight = FontWeight.W600,
-                textSize = 14.sp,
-                contentPadding = PaddingValues(8.dp),
-                onClick = onAddRow
-            )
-        }
-        HorizontalDivider(color = KarikaColors.Border)
-
-        if (rules.isEmpty()) {
+private fun PriorityCard() {
+    KCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             KarikaText(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                text = "Još nema pravila — kliknite \"Dodaj red\".",
-                color = KarikaColors.Gray15,
-                textSize = 13.sp,
-                fontWeight = FontWeight.W400
+                text = "Redoslijed primjene rabata",
+                color = KarikaUiColors.Muted,
+                textSize = 12.sp,
+                fontWeight = FontWeight.W500
             )
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(0.dp)
+            Spacer(Modifier.height(10.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                rules.forEach { rule ->
-                    val dismissState = rememberSwipeToDismissBoxState(
-                        confirmValueChange = { value ->
-                            if (value == SwipeToDismissBoxValue.EndToStart) {
-                                onDeleteRow(rule)
-                                false
-                            } else {
-                                false
-                            }
-                        }
-                    )
-
-                    SwipeToDismissBox(
-                        state = dismissState,
-                        enableDismissFromStartToEnd = false,
-                        backgroundContent = {
-                            val color = when (dismissState.dismissDirection) {
-                                SwipeToDismissBoxValue.EndToStart -> Color.Red
-                                else -> Color.Transparent
-                            }
-                            val arrangement = Arrangement.End
-                            val icon = when (dismissState.dismissDirection) {
-                                SwipeToDismissBoxValue.EndToStart -> Res.drawable.ic_delete
-                                else -> null
-                            }
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(color)
-                                    .padding(horizontal = 20.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = arrangement
-                            ) {
-                                if (icon != null) {
-                                    Icon(
-                                        imageVector = vectorResource(icon),
-                                        contentDescription = null,
-                                        tint = Color.White
-                                    )
-                                }
-                            }
-                        }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .background(KarikaColors.White)
-                                .onClick { onEditRow(rule) }
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                RuleInfoRow(label = targetLabel, value = rule.targetName)
-                                RuleInfoRow(
-                                    label = rule.itemOrCategoryLabel,
-                                    value = rule.itemOrCategoryName
-                                )
-                                rule.minQtyForDiscount.toDoubleOrNull()?.toInt()?.let { minQty ->
-                                    RuleInfoRow(
-                                        label = "Min. količina:",
-                                        value = minQty.toString()
-                                    )
-                                }
-                                RuleInfoRow(
-                                    label = "Rabat:",
-                                    value = "${rule.discountPercent.replace(".", ",")}%",
-                                    isHighlight = true
-                                )
-                            }
-                            Icon(
-                                imageVector = vectorResource(Res.drawable.ic_arrow_right),
-                                contentDescription = null,
-                                tint = KarikaColors.Gray15
-                            )
-                        }
+                listOf("Kupac", "Tip kupca", "Regija").forEachIndexed { index, label ->
+                    if (index > 0) {
+                        KIcon(
+                            icon = vectorResource(Res.drawable.ic_k_chevron_right),
+                            tint = KarikaUiColors.Subtle,
+                            size = 14.dp
+                        )
                     }
-                    HorizontalDivider(color = KarikaColors.Border)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        StepCircle(number = index + 1, first = index == 0)
+                        KarikaText(
+                            text = label,
+                            color = KarikaUiColors.Ink,
+                            textSize = 12.5.sp,
+                            fontWeight = FontWeight.W600,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }
@@ -291,26 +172,250 @@ private fun RuleSection(
 }
 
 @Composable
-private fun RuleInfoRow(
-    label: String,
-    value: String,
-    isHighlight: Boolean = false
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+private fun StepCircle(number: Int, first: Boolean) {
+    Box(
+        modifier = Modifier
+            .size(20.dp)
+            .clip(CircleShape)
+            .background(if (first) VendorAccent else KarikaColors.White)
+            .border(1.dp, if (first) VendorAccent else KarikaUiColors.Border, CircleShape),
+        contentAlignment = Alignment.Center
     ) {
         KarikaText(
-            text = label,
-            color = KarikaColors.Gray15,
-            textSize = 13.sp,
-            fontWeight = FontWeight.W400
-        )
-        KarikaText(
-            text = value,
-            color = if (isHighlight) KarikaColors.Primary else KarikaColors.Gray2,
-            textSize = 13.sp,
-            fontWeight = if (isHighlight) FontWeight.W700 else FontWeight.W600
+            text = number.toString(),
+            color = if (first) KarikaColors.White else KarikaUiColors.Muted,
+            textSize = 11.sp,
+            fontWeight = FontWeight.W700,
+            textAlign = TextAlign.Center
         )
     }
+}
+
+@Composable
+private fun RuleSection(
+    number: Int,
+    title: String,
+    subtitle: String,
+    rules: List<CustomerRule>,
+    onAddRow: () -> Unit,
+    onEditRow: (CustomerRule) -> Unit,
+    onDeleteRow: (CustomerRule) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 1.dp)
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(if (number == 1) VendorAccent else KarikaUiColors.Ink),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    text = number.toString(),
+                    color = KarikaColors.White,
+                    textSize = 12.sp,
+                    fontWeight = FontWeight.W700,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                KarikaText(
+                    text = title,
+                    color = KarikaUiColors.Ink,
+                    textSize = 16.sp,
+                    fontWeight = FontWeight.W700
+                )
+                Spacer(Modifier.height(2.dp))
+                KarikaText(
+                    text = subtitle,
+                    color = KarikaUiColors.Muted,
+                    textSize = 12.5.sp,
+                    lineHeight = 17.sp,
+                    fontWeight = FontWeight.W400
+                )
+            }
+            AddButton(onClick = onAddRow)
+        }
+
+        if (rules.isEmpty()) {
+            KCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+                KarikaText(
+                    modifier = Modifier
+                        .padding(14.dp)
+                        .fillMaxWidth(),
+                    text = "Još nema pravila — dodajte ga sa „Dodaj“.",
+                    color = KarikaUiColors.Muted,
+                    textSize = 13.sp,
+                    fontWeight = FontWeight.W400
+                )
+            }
+        } else {
+            rules.forEach { rule ->
+                SwipeableRuleCard(
+                    rule = rule,
+                    onEdit = { onEditRow(rule) },
+                    onDelete = { onDeleteRow(rule) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddButton(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .height(32.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(VendorAccentSoft)
+            .clickable(onClick = onClick)
+            .padding(start = 10.dp, end = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KIcon(icon = vectorResource(Res.drawable.ic_k_plus), tint = VendorAccent, size = 15.dp)
+        Spacer(Modifier.width(4.dp))
+        KarikaText(
+            text = "Dodaj",
+            color = VendorAccent,
+            textSize = 12.5.sp,
+            fontWeight = FontWeight.W600,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun SwipeableRuleCard(
+    rule: CustomerRule,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                onDelete()
+            }
+            false
+        }
+    )
+    val shape = RoundedCornerShape(14.dp)
+
+    SwipeToDismissBox(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape),
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            val swiping = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(if (swiping) KarikaUiColors.Red else Color.Transparent)
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+            ) {
+                if (swiping) {
+                    KIcon(
+                        icon = vectorResource(Res.drawable.ic_k_trash),
+                        tint = KarikaColors.White,
+                        size = 22.dp
+                    )
+                }
+            }
+        }
+    ) {
+        RuleCard(rule = rule, onClick = onEdit)
+    }
+}
+
+@Composable
+private fun RuleCard(rule: CustomerRule, onClick: () -> Unit) {
+    KCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(CUSTOMER_RULE_TAG),
+        shape = RoundedCornerShape(14.dp),
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                KarikaText(
+                    text = rule.targetName,
+                    color = KarikaUiColors.Ink,
+                    textSize = 14.5.sp,
+                    fontWeight = FontWeight.W700,
+                    maxLines = 2
+                )
+                Spacer(Modifier.height(3.dp))
+                KarikaText(
+                    text = rule.detailLine(),
+                    color = KarikaUiColors.Muted,
+                    textSize = 12.5.sp,
+                    lineHeight = 17.sp,
+                    fontWeight = FontWeight.W400,
+                    maxLines = 2
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .height(34.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(VendorAccentSoft)
+                    .padding(horizontal = 10.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    text = rule.percentLabel(),
+                    color = VendorAccent,
+                    textSize = 15.sp,
+                    fontWeight = FontWeight.W700,
+                    maxLines = 1
+                )
+            }
+            KIcon(
+                icon = vectorResource(Res.drawable.ic_k_chevron_right),
+                tint = KarikaUiColors.Subtle,
+                size = 18.dp
+            )
+        }
+    }
+}
+
+/** "Graševina Kutjevo · min. 30 kom": the product or category and the minimum quantity, if any. */
+private fun CustomerRule.detailLine(): String {
+    val item = when (itemType) {
+        "category" -> "Kategorija: $itemOrCategoryName"
+        else -> itemOrCategoryName
+    }
+    val minQty = minQtyForDiscount.toDoubleOrNull()?.toInt()
+    return if (minQty != null) "$item · min. $minQty kom" else item
+}
+
+/** "10%" for 10.0, "7,5%" for 7.5. */
+private fun CustomerRule.percentLabel(): String {
+    val value = discountPercent.toDoubleOrNull()
+    val text = when {
+        value == null -> discountPercent
+        value % 1.0 == 0.0 -> value.toLong().toString()
+        else -> discountPercent.replace(".", ",")
+    }
+    return "$text%"
 }
