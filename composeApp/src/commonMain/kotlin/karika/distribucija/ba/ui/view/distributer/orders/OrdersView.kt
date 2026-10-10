@@ -218,16 +218,19 @@ private fun MinOrderCard(amount: String, onChange: () -> Unit) {
             .clip(RoundedCornerShape(16.dp))
             .background(KarikaUiColors.Ink)
     ) {
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .offset(x = 24.dp, y = 34.dp)
-                .size(110.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.06f))
-        )
+        // Decorative circle; matchParentSize keeps it from setting the card's height
+        Box(modifier = Modifier.matchParentSize()) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 24.dp, y = 30.dp)
+                    .size(84.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.06f))
+            )
+        }
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -238,12 +241,12 @@ private fun MinOrderCard(amount: String, onChange: () -> Unit) {
                     textSize = 12.sp,
                     fontWeight = FontWeight.W500
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(2.dp))
                 KarikaText(
                     text = "$amount KM",
                     color = KarikaColors.White,
-                    textSize = 26.sp,
-                    lineHeight = 30.sp,
+                    textSize = 22.sp,
+                    lineHeight = 26.sp,
                     fontWeight = FontWeight.W700,
                     maxLines = 1
                 )
