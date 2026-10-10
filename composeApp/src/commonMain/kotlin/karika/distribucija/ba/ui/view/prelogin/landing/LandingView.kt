@@ -152,7 +152,7 @@ fun LandingView(component: LandingComponent) {
                     title = "Dobavljač",
                     subtitle = "Prodajem robu",
                     icon = vectorResource(Res.drawable.ic_k_store),
-                    background = KarikaUiColors.Ink,
+                    background = KarikaColors.Blue,
                     showChevron = true
                 ) {
                     component.navigateLogin(KarikaType.VENDOR)
