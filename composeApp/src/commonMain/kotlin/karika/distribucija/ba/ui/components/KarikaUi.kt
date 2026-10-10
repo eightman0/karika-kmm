@@ -57,6 +57,7 @@ import androidx.compose.ui.window.Dialog
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_k_chevron_left
 import karikav2.composeapp.generated.resources.ic_k_chevron_right
+import karikav2.composeapp.generated.resources.ic_k_lock
 import karikav2.composeapp.generated.resources.ic_k_minus
 import karikav2.composeapp.generated.resources.ic_k_plus
 import karikav2.composeapp.generated.resources.ic_k_search
@@ -864,6 +865,10 @@ fun KTextField(
         if (trailing != null) {
             Spacer(Modifier.width(8.dp))
             trailing()
+        } else if (!enabled) {
+            // A read-only field shows a lock, so it does not look like a broken input
+            Spacer(Modifier.width(8.dp))
+            KIcon(icon = vectorResource(Res.drawable.ic_k_lock), tint = KarikaUiColors.Subtle, size = 16.dp)
         }
     }
 }
