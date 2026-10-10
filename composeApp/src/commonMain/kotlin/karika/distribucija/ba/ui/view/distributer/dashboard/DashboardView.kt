@@ -384,7 +384,7 @@ private fun DashChild.title(): String = when (this) {
 
 /** Screens with their own back header instead of the supplier header. */
 private fun DashChild.hasOwnHeader(): Boolean =
-    this is DashChild.OrderDetails || this is DashChild.CustomerRuleEditor
+    this is DashChild.OrderDetails || this is DashChild.CustomerRuleEditor || this is DashChild.MessageDetails
 
 /** Screens that continue the white header with their own content (search, tabs). */
 private fun DashChild.continuesHeader(): Boolean =
