@@ -72,6 +72,7 @@ import karika.distribucija.ba.ui.components.KHeader
 import karika.distribucija.ba.ui.components.KIcon
 import karika.distribucija.ba.ui.components.KInitials
 import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KSecondaryButton
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
@@ -85,7 +86,10 @@ import karika.distribucija.ba.util.inSarajevo
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_attachment
 import karikav2.composeapp.generated.resources.ic_camera
+import karikav2.composeapp.generated.resources.ic_k_chevron_right
 import karikav2.composeapp.generated.resources.ic_k_close
+import karikav2.composeapp.generated.resources.ic_k_document
+import karikav2.composeapp.generated.resources.ic_k_image
 import karikav2.composeapp.generated.resources.ic_k_search
 import karikav2.composeapp.generated.resources.ic_k_send
 import karikav2.composeapp.generated.resources.ic_pdf
@@ -619,81 +623,115 @@ fun AttachmentModal(
         ModalBottomSheet(
             onDismissRequest = { showAttachmentModal.value = false },
             containerColor = KarikaColors.White,
-            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 10.dp, bottom = 6.dp)
+                        .width(40.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(KarikaUiColors.Border)
+                )
+            }
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, bottom = 24.dp)
+                    .padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp)
             ) {
                 KarikaText(
                     text = "Dodaj prilog",
-                    fontWeight = FontWeight.W700,
-                    textSize = 20.sp,
-                    lineHeight = 24.sp,
+                    fontWeight = FontWeight.W800,
+                    textSize = 22.sp,
+                    lineHeight = 28.sp,
                     color = KarikaUiColors.Ink
                 )
-                Spacer(Modifier.height(16.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Spacer(Modifier.height(4.dp))
+                KarikaText(
+                    text = "Pošaljite sliku ili dokument uz poruku.",
+                    textSize = 14.sp,
+                    lineHeight = 20.sp,
+                    color = KarikaUiColors.Muted
+                )
+                Spacer(Modifier.height(18.dp))
+                KCard(modifier = Modifier.fillMaxWidth()) {
                     AttachmentOption(
-                        modifier = Modifier.weight(1f),
-                        icon = vectorResource(Res.drawable.ic_photo),
-                        text = "Sliku iz galerije"
+                        icon = vectorResource(Res.drawable.ic_k_image),
+                        title = "Slika iz galerije",
+                        subtitle = "Fotografija sa telefona"
                     ) {
                         onPickPhoto()
                         showAttachmentModal.value = false
                     }
+                    KDivider()
                     AttachmentOption(
-                        modifier = Modifier.weight(1f),
-                        icon = vectorResource(Res.drawable.ic_attachment),
-                        text = "Fajl sa uređaja"
+                        icon = vectorResource(Res.drawable.ic_k_document),
+                        title = "Fajl sa uređaja",
+                        subtitle = "PDF ili drugi dokument"
                     ) {
                         onPickFile()
                         showAttachmentModal.value = false
                     }
+                }
+                Spacer(Modifier.height(14.dp))
+                KSecondaryButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Odustani"
+                ) {
+                    showAttachmentModal.value = false
                 }
             }
         }
     }
 }
 
+/** Row of the attachment sheet: tinted icon tile, title, hint and chevron. */
 @Composable
 private fun AttachmentOption(
-    modifier: Modifier,
     icon: ImageVector,
-    text: String,
+    title: String,
+    subtitle: String,
     onClick: () -> Unit,
 ) {
-    KCard(modifier = modifier, onClick = onClick) {
-        Column(
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 22.dp, horizontal = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .size(44.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(KarikaUiColors.PinkSoft),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(KarikaUiColors.PinkSoft),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    modifier = Modifier.size(22.dp),
-                    imageVector = icon,
-                    tint = KarikaUiColors.Pink,
-                    contentDescription = null
-                )
-            }
-            Spacer(Modifier.height(10.dp))
+            KIcon(icon = icon, tint = KarikaUiColors.Pink, size = 22.dp)
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
             KarikaText(
-                modifier = Modifier.fillMaxWidth(),
-                text = text,
-                fontWeight = FontWeight.W600,
-                textSize = 14.sp,
+                text = title,
+                fontWeight = FontWeight.W700,
+                textSize = 15.sp,
+                lineHeight = 20.sp,
                 color = KarikaUiColors.Ink,
-                textAlign = TextAlign.Center
+                maxLines = 1
+            )
+            KarikaText(
+                text = subtitle,
+                textSize = 12.5.sp,
+                lineHeight = 17.sp,
+                color = KarikaUiColors.Muted,
+                maxLines = 1
             )
         }
+        KIcon(
+            icon = vectorResource(Res.drawable.ic_k_chevron_right),
+            tint = KarikaUiColors.Subtle,
+            size = 18.dp
+        )
     }
 }
