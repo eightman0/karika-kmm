@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,9 +42,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -51,14 +55,22 @@ import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import karika.distribucija.ba.ui.common.appVersionName
+import karika.distribucija.ba.ui.components.KCircleButton
+import karika.distribucija.ba.ui.components.KDivider
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KInitials
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaHeaderShape
 import karika.distribucija.ba.ui.components.KarikaLogo
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.ReadFilterDropdown
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.view.distributer.VendorAccent
+import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsFiltersView
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsTab
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsView
@@ -86,17 +98,16 @@ import karika.distribucija.ba.ui.view.salesrep.operations.SalesOperationsView
 import karika.distribucija.ba.ui.view.salesrep.orders.SalesOrdersView
 import karika.distribucija.ba.ui.view.salesrep.orders.detail.SalesOrderDetailView
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_analytics
-import karikav2.composeapp.generated.resources.ic_arrow_back
-import karikav2.composeapp.generated.resources.ic_arrow_down
-import karikav2.composeapp.generated.resources.ic_arrow_up
-import karikav2.composeapp.generated.resources.ic_customers
-import karikav2.composeapp.generated.resources.ic_logout
-import karikav2.composeapp.generated.resources.ic_menu
-import karikav2.composeapp.generated.resources.ic_messages
-import karikav2.composeapp.generated.resources.ic_notifications
-import karikav2.composeapp.generated.resources.ic_orders
-import karikav2.composeapp.generated.resources.ic_tertiary
+import karikav2.composeapp.generated.resources.ic_k_bell
+import karikav2.composeapp.generated.resources.ic_k_cart
+import karikav2.composeapp.generated.resources.ic_k_chart
+import karikav2.composeapp.generated.resources.ic_k_chat
+import karikav2.composeapp.generated.resources.ic_k_chevron_down
+import karikav2.composeapp.generated.resources.ic_k_chevron_left
+import karikav2.composeapp.generated.resources.ic_k_close
+import karikav2.composeapp.generated.resources.ic_k_logout_left
+import karikav2.composeapp.generated.resources.ic_k_menu
+import karikav2.composeapp.generated.resources.ic_k_users
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
 
@@ -142,54 +153,62 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
             drawerState = drawerState,
             drawerContent = {
                 ModalDrawerSheet(
-                    modifier = Modifier.width(maxWidth * 0.82f),
-                    drawerContainerColor = KarikaColors.Gray20,
-                    drawerShape = RoundedCornerShape(0.dp)
+                    modifier = Modifier.width(minOf(maxWidth * 0.82f, 340.dp)),
+                    drawerContainerColor = KarikaColors.White,
+                    drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
                 ) {
                     // ── Profile header ──────────────────────────────────────
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            // Avatar circle with initials
-                            KarikaLogo(size = 52)
-                            Spacer(Modifier.width(12.dp))
-                            Column(Modifier.weight(1f)) {
-                                KarikaText(
-                                    text = "${salesManager.name}",
-                                    color = KarikaColors.Gray2,
-                                    textSize = 16.sp,
-                                    fontWeight = FontWeight.W700
-                                )
-                                KarikaText(
-                                    text = "Komercijalista",
-                                    color = KarikaColors.Gray6,
-                                    textSize = 13.sp,
-                                    fontWeight = FontWeight.W400
-                                )
-                            }
-                            // Close button
-                            Icon(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .onClick { coroutineScope.launch { drawerState.close() } },
-                                imageVector = vectorResource(Res.drawable.ic_tertiary),
-                                contentDescription = "",
-                                tint = KarikaColors.Gray6
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 12.dp, top = 16.dp, bottom = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KInitials(
+                            name = salesManager.name,
+                            size = 48.dp,
+                            shape = CircleShape,
+                            background = VendorAccent,
+                            color = KarikaColors.White,
+                            textSize = 16.sp
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            KarikaText(
+                                text = "${salesManager.name}",
+                                color = KarikaUiColors.Ink,
+                                textSize = 16.sp,
+                                lineHeight = 20.sp,
+                                fontWeight = FontWeight.W700,
+                                maxLines = 1
+                            )
+                            KarikaText(
+                                text = "Komercijalista",
+                                color = KarikaUiColors.Muted,
+                                textSize = 12.sp,
+                                lineHeight = 16.sp
                             )
                         }
-                        Spacer(Modifier.height(16.dp))
-                        HorizontalDivider(color = KarikaColors.Gray9)
+                        KCircleButton(
+                            icon = vectorResource(Res.drawable.ic_k_close),
+                            size = 40.dp,
+                            iconSize = 18.dp
+                        ) {
+                            coroutineScope.launch { drawerState.close() }
+                        }
                     }
+                    KDivider()
 
                     // ── Navigation items ────────────────────────────────────
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(horizontal = 8.dp)
-                            .verticalScroll(rememberScrollState()),
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 10.dp, vertical = 10.dp),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         SalesExpandableNavItem(
-                            icon = vectorResource(Res.drawable.ic_analytics),
+                            icon = vectorResource(Res.drawable.ic_k_chart),
                             text = "Analitika",
                             expanded = analyticsExpanded,
                             selected = isAnalyticsActive,
@@ -248,7 +267,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             )
                         }
                         SalesNavItem(
-                            icon = vectorResource(Res.drawable.ic_orders),
+                            icon = vectorResource(Res.drawable.ic_k_cart),
                             text = "Upravljanje narudžbama",
                             selected = navState.value.active.instance is SalesChild.Orders,
                             onClick = {
@@ -257,7 +276,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             }
                         )
                         SalesNavItem(
-                            icon = vectorResource(Res.drawable.ic_customers),
+                            icon = vectorResource(Res.drawable.ic_k_users),
                             text = "Upravljanje kupcima",
                             selected = navState.value.active.instance is SalesChild.Customers,
                             onClick = {
@@ -266,7 +285,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             }
                         )
                         SalesExpandableNavItem(
-                            icon = vectorResource(Res.drawable.ic_messages),
+                            icon = vectorResource(Res.drawable.ic_k_chat),
                             text = "Poruke",
                             expanded = messagesExpanded,
                             selected = isMessagesActive,
@@ -317,67 +336,49 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                     }
 
                     // ── Footer ──────────────────────────────────────────────
-                    Column(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-                    ) {
-                        HorizontalDivider(color = KarikaColors.Gray9)
-                        Spacer(Modifier.height(8.dp))
-
-                        // Logout row
+                    KDivider()
+                    Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp)) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() }
-                                ) { component.logout() }
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                .background(KarikaUiColors.RedSoft)
+                                .clickable { component.logout() }
+                                .padding(horizontal = 14.dp, vertical = 13.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = vectorResource(Res.drawable.ic_logout),
-                                contentDescription = "",
-                                tint = KarikaColors.Error,
-                                modifier = Modifier.size(22.dp)
+                            KIcon(
+                                icon = vectorResource(Res.drawable.ic_k_logout_left),
+                                tint = KarikaUiColors.Red,
+                                size = 20.dp
                             )
                             Spacer(Modifier.width(12.dp))
                             KarikaText(
                                 text = "Odjavi se",
-                                color = KarikaColors.Error,
+                                color = KarikaUiColors.Red,
                                 textSize = 15.sp,
                                 fontWeight = FontWeight.W700
                             )
                         }
-
-                        // Version + status dots
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                                .padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             KarikaText(
                                 text = appVersionName(),
-                                color = KarikaColors.Gray7,
-                                textSize = 12.sp,
-                                fontWeight = FontWeight.W400
+                                color = KarikaUiColors.Subtle,
+                                textSize = 12.sp
                             )
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(KarikaColors.Green1)
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(KarikaColors.Green1)
-                                )
-                            }
+                            Spacer(Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(KarikaUiColors.GreenDot)
+                            )
                         }
                     }
                 }
@@ -387,7 +388,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                 modifier = Modifier
                     .hideKeyboard()
                     .windowInsetsPadding(WindowInsets.safeDrawing),
-                containerColor = KarikaColors.White,
+                containerColor = KarikaUiColors.Page,
                 topBar = {
                     val menuClick = { coroutineScope.launch { drawerState.open() } }
                     val onNotifications = { component.salesRepNavigate(SalesRepConfig.Notifications) }
@@ -525,37 +526,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SalesTopBar(onMenuClick: () -> Unit) {
-    TopAppBar(
-        modifier = Modifier.fillMaxWidth(),
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = KarikaColors.White
-        ),
-        title = {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                KarikaLogo(size = 40)
-            }
-        },
-        navigationIcon = {
-            Icon(
-                modifier = Modifier
-                    .testTag(SALES_MENU_TAG)
-                    .onClick { onMenuClick() }
-                    .padding(horizontal = 4.dp),
-                imageVector = vectorResource(Res.drawable.ic_menu),
-                contentDescription = "",
-                tint = KarikaColors.Gray2
-            )
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
+/** White header of the sales rep's main screens: menu, title and the notifications bell. */
 @Composable
 private fun SalesRootTopBar(
     title: String,
@@ -563,90 +534,91 @@ private fun SalesRootTopBar(
     onNotifications: () -> Unit = {},
     onMenuClick: () -> Unit = {}
 ) {
-    TopAppBar(
-        modifier = Modifier.fillMaxWidth(),
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = KarikaColors.White),
-        title = {
-            KarikaText(
-                text = title,
-                color = KarikaColors.Gray2,
-                textSize = 18.sp,
-                fontWeight = FontWeight.W700
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(KarikaHeaderShape)
+            .background(KarikaColors.White)
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KCircleButton(
+            modifier = Modifier.testTag(SALES_MENU_TAG),
+            icon = vectorResource(Res.drawable.ic_k_menu),
+            onClick = onMenuClick
+        )
+        Spacer(Modifier.width(12.dp))
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = title,
+            color = KarikaUiColors.Ink,
+            textSize = 22.sp,
+            lineHeight = 28.sp,
+            fontWeight = FontWeight.W700,
+            maxLines = 1
+        )
+        Box {
+            KCircleButton(
+                modifier = Modifier.semantics { contentDescription = "Obavijesti" },
+                icon = vectorResource(Res.drawable.ic_k_bell),
+                onClick = onNotifications
             )
-        },
-        navigationIcon = {
-            Icon(
-                modifier = Modifier
-                    .testTag(SALES_MENU_TAG)
-                    .onClick { onMenuClick() }
-                    .padding(horizontal = 4.dp),
-                imageVector = vectorResource(Res.drawable.ic_menu),
-                contentDescription = "",
-                tint = KarikaColors.Gray2
-            )
-        },
-        actions = {
-            Box(modifier = Modifier) {
-                Icon(
+            if (notificationBadge > 0) {
+                Box(
                     modifier = Modifier
-                        .onClick { onNotifications() }
-                        .padding(horizontal = 4.dp),
-                    imageVector = vectorResource(Res.drawable.ic_notifications),
-                    contentDescription = "Obavijesti",
-                    tint = KarikaColors.Gray2
-                )
-                if (notificationBadge > 0) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .offset(16.dp, (-8).dp)
-                            .background(color = KarikaColors.Red, shape = CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        KarikaText(
-                            modifier = Modifier.padding(0.dp),
-                            text = "$notificationBadge",
-                            textSize = 10.sp,
-                            fontWeight = FontWeight.W400,
-                            color = KarikaColors.White
-                        )
-                    }
+                        .align(Alignment.TopEnd)
+                        .offset(x = 4.dp, y = (-2).dp)
+                        .defaultMinSize(minWidth = 18.dp, minHeight = 18.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(VendorAccent)
+                        .padding(horizontal = 5.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    KarikaText(
+                        text = if (notificationBadge > 9) "9+" else "$notificationBadge",
+                        textSize = 10.sp,
+                        fontWeight = FontWeight.W700,
+                        color = KarikaColors.White,
+                        maxLines = 1
+                    )
                 }
             }
         }
-    )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** White header of the sales rep's detail screens: back, title and optional actions. */
 @Composable
 fun SalesDetailTopBar(
     title: String,
     onBack: () -> Unit,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
-    TopAppBar(
-        modifier = Modifier.fillMaxWidth(),
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = KarikaColors.White),
-        title = {
-            KarikaText(
-                text = title,
-                color = KarikaColors.Gray2,
-                textSize = 18.sp,
-                fontWeight = FontWeight.W700
-            )
-        },
-        navigationIcon = {
-            Icon(
-                modifier = Modifier
-                    .onClick { onBack() }
-                    .padding(horizontal = 4.dp),
-                imageVector = vectorResource(Res.drawable.ic_arrow_back),
-                contentDescription = "Nazad",
-                tint = KarikaColors.Blue
-            )
-        },
-        actions = actions
-    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(KarikaHeaderShape)
+            .background(KarikaColors.White)
+            .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KCircleButton(
+            modifier = Modifier.semantics { contentDescription = "Nazad" },
+            icon = vectorResource(Res.drawable.ic_k_chevron_left),
+            onClick = onBack
+        )
+        Spacer(Modifier.width(12.dp))
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = title,
+            color = KarikaUiColors.Ink,
+            textSize = 17.sp,
+            lineHeight = 22.sp,
+            fontWeight = FontWeight.W700,
+            maxLines = 2
+        )
+        actions()
+    }
 }
 
 @Composable
@@ -658,61 +630,14 @@ private fun SalesExpandableNavItem(
     badge: Int = 0,
     onClick: () -> Unit
 ) {
-    val bgColor = if (selected) KarikaColors.Blue else KarikaColors.Transparent
-    val contentColor = if (selected) KarikaColors.White else KarikaColors.Gray6
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(color = bgColor)
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = onClick
-            )
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = "",
-            tint = contentColor,
-            modifier = Modifier.size(22.dp)
+    SalesNavItem(icon = icon, text = text, selected = selected, badge = badge, onClick = onClick, trailing = {
+        KIcon(
+            modifier = Modifier.rotate(if (expanded) 180f else 0f),
+            icon = vectorResource(Res.drawable.ic_k_chevron_down),
+            tint = if (selected) VendorAccent else KarikaUiColors.Muted,
+            size = 18.dp
         )
-        Spacer(Modifier.width(12.dp))
-        KarikaText(
-            modifier = Modifier.weight(1f),
-            text = text,
-            color = contentColor,
-            textSize = 15.sp,
-            fontWeight = if (selected) FontWeight.W700 else FontWeight.W500,
-            textAlign = TextAlign.Start
-        )
-        if (badge > 0) {
-            Box(
-                modifier = Modifier
-                    .size(20.dp)
-                    .clip(CircleShape)
-                    .background(if (selected) KarikaColors.White else KarikaColors.Blue),
-                contentAlignment = Alignment.Center
-            ) {
-                KarikaText(
-                    text = "$badge",
-                    color = if (selected) KarikaColors.Blue else KarikaColors.White,
-                    textSize = 10.sp,
-                    fontWeight = FontWeight.W700
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-        }
-        Icon(
-            imageVector = vectorResource(if (expanded) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
-            contentDescription = "",
-            tint = contentColor,
-            modifier = Modifier.size(20.dp)
-        )
-    }
+    })
 }
 
 @Composable
@@ -720,38 +645,28 @@ private fun SalesSubNavItem(text: String, selected: Boolean, badge: Int = 0, onC
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .onClick(callback = onClick)
-            .padding(start = 28.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(start = 46.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(width = 2.dp, height = 16.dp)
-                .background(if (selected) KarikaColors.Blue else KarikaColors.Transparent)
+                .size(6.dp)
+                .clip(CircleShape)
+                .background(if (selected) VendorAccent else KarikaUiColors.Border)
         )
         Spacer(modifier = Modifier.width(12.dp))
         KarikaText(
             modifier = Modifier.weight(1f),
             text = text,
-            color = if (selected) KarikaColors.Blue else KarikaColors.Gray6,
+            color = if (selected) VendorAccent else KarikaUiColors.Muted,
             textSize = 14.sp,
-            fontWeight = if (selected) FontWeight.W700 else FontWeight.W500
+            fontWeight = if (selected) FontWeight.W700 else FontWeight.W500,
+            maxLines = 1
         )
         if (badge > 0) {
-            Box(
-                modifier = Modifier
-                    .size(18.dp)
-                    .clip(CircleShape)
-                    .background(KarikaColors.Blue),
-                contentAlignment = Alignment.Center
-            ) {
-                KarikaText(
-                    text = "$badge",
-                    color = KarikaColors.White,
-                    textSize = 10.sp,
-                    fontWeight = FontWeight.W700
-                )
-            }
+            NavBadge(badge)
         }
     }
 }
@@ -762,54 +677,57 @@ private fun SalesNavItem(
     text: String,
     selected: Boolean,
     badge: Int = 0,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    trailing: @Composable () -> Unit = {},
 ) {
-    val bgColor = if (selected) KarikaColors.Blue else KarikaColors.Transparent
-    val contentColor = if (selected) KarikaColors.White else KarikaColors.Gray6
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(color = bgColor)
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = onClick
-            )
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .background(if (selected) VendorAccentSoft else KarikaColors.White)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = "",
-            tint = contentColor,
-            modifier = Modifier.size(22.dp)
+        KIcon(
+            icon = icon,
+            tint = if (selected) VendorAccent else KarikaUiColors.Ink,
+            size = 21.dp
         )
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(14.dp))
         KarikaText(
             modifier = Modifier.weight(1f),
             text = text,
-            color = contentColor,
+            color = if (selected) VendorAccent else KarikaUiColors.Ink,
             textSize = 15.sp,
             fontWeight = if (selected) FontWeight.W700 else FontWeight.W500,
-            textAlign = TextAlign.Start
+            textAlign = TextAlign.Start,
+            maxLines = 1
         )
         if (badge > 0) {
-            Box(
-                modifier = Modifier
-                    .size(20.dp)
-                    .clip(CircleShape)
-                    .background(KarikaColors.Blue),
-                contentAlignment = Alignment.Center
-            ) {
-                KarikaText(
-                    text = "$badge",
-                    color = KarikaColors.White,
-                    textSize = 10.sp,
-                    fontWeight = FontWeight.W700
-                )
-            }
+            NavBadge(badge)
         }
+        trailing()
+    }
+}
+
+@Composable
+private fun NavBadge(count: Int) {
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 6.dp)
+            .defaultMinSize(minWidth = 22.dp, minHeight = 22.dp)
+            .clip(RoundedCornerShape(50))
+            .background(VendorAccent)
+            .padding(horizontal = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        KarikaText(
+            text = "$count",
+            color = KarikaColors.White,
+            textSize = 11.sp,
+            fontWeight = FontWeight.W700,
+            maxLines = 1
+        )
     }
 }
