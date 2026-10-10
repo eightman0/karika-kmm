@@ -57,7 +57,6 @@ import karika.distribucija.ba.ui.components.KInitials
 import karika.distribucija.ba.ui.components.KPill
 import karika.distribucija.ba.ui.components.KSearchField
 import karika.distribucija.ba.ui.components.KSectionTitle
-import karika.distribucija.ba.ui.components.KSquareIconButton
 import karika.distribucija.ba.ui.components.KTonalButton
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
@@ -73,7 +72,6 @@ import karikav2.composeapp.generated.resources.ic_k_bell
 import karikav2.composeapp.generated.resources.ic_k_cart_add
 import karikav2.composeapp.generated.resources.ic_k_chevron_down
 import karikav2.composeapp.generated.resources.ic_k_chevron_right
-import karikav2.composeapp.generated.resources.ic_k_filter
 import karikav2.composeapp.generated.resources.ic_k_gift
 import karikav2.composeapp.generated.resources.ic_k_menu
 import karikav2.composeapp.generated.resources.ic_k_outlet
@@ -182,20 +180,13 @@ private fun HomeHeader(component: HomeComponent) {
             )
         }
         Spacer(Modifier.height(14.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            KSearchField(
-                modifier = Modifier.weight(1f),
-                value = "",
-                onValueChange = {},
-                placeholder = HOME_SEARCH_PLACEHOLDER,
-                onClick = openSearch
-            )
-            Spacer(Modifier.width(8.dp))
-            KSquareIconButton(
-                icon = vectorResource(Res.drawable.ic_k_filter),
-                onClick = openSearch
-            )
-        }
+        KSearchField(
+            modifier = Modifier.fillMaxWidth(),
+            value = "",
+            onValueChange = {},
+            placeholder = HOME_SEARCH_PLACEHOLDER,
+            onClick = openSearch
+        )
     }
 }
 
