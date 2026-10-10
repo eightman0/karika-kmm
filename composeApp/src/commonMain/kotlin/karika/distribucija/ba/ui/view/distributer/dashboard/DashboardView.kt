@@ -1,6 +1,7 @@
 package karika.distribucija.ba.ui.view.distributer.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,18 +39,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.ui.common.appVersionName
 import karika.distribucija.ba.ui.components.KCircleButton
 import karika.distribucija.ba.ui.components.KDivider
 import karika.distribucija.ba.ui.components.KIcon
 import karika.distribucija.ba.ui.components.KInitials
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
@@ -140,14 +144,32 @@ fun DashboardView(component: DashboardComponent) {
                             .padding(start = 16.dp, end = 12.dp, top = 16.dp, bottom = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        KInitials(
-                            name = profile.value.publicName,
-                            size = 48.dp,
-                            shape = CircleShape,
-                            background = VendorAccent,
-                            color = KarikaColors.White,
-                            textSize = 16.sp
-                        )
+                        val logo = HttpClientProvider.profileImage(profile.value.companyLogo)
+                        if (logo != null) {
+                            // The supplier's logo, as on the profile; initials until it is set
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(KarikaColors.White)
+                                    .border(1.dp, KarikaUiColors.Line, CircleShape)
+                            ) {
+                                KarikaImage(
+                                    modifier = Modifier.fillMaxSize(),
+                                    model = logo,
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        } else {
+                            KInitials(
+                                name = profile.value.publicName,
+                                size = 48.dp,
+                                shape = CircleShape,
+                                background = VendorAccent,
+                                color = KarikaColors.White,
+                                textSize = 16.sp
+                            )
+                        }
                         Spacer(Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             KarikaText(
