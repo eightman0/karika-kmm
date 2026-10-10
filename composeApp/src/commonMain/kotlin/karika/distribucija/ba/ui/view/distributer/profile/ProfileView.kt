@@ -699,6 +699,7 @@ private fun ProfileField(
     Column(modifier = modifier) {
         KFieldLabel(text = label, required = required, requiredColor = VendorAccent)
         KTextField(
+            cursorColor = VendorAccent,
             value = value.value,
             onValueChange = { new ->
                 if (new.startsWith(" ")) return@KTextField

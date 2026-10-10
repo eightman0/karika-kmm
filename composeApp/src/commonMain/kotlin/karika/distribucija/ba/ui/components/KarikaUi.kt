@@ -822,6 +822,7 @@ fun KTextField(
     password: Boolean = false,
     singleLine: Boolean = true,
     minHeight: Dp = 50.dp,
+    cursorColor: Color = KarikaUiColors.Pink,
 ) {
     val shape = RoundedCornerShape(12.dp)
     val borderColor = when {
@@ -858,7 +859,7 @@ fun KTextField(
                     fontSize = 15.sp,
                     fontFamily = karikaFonts()
                 ),
-                cursorBrush = SolidColor(KarikaUiColors.Pink),
+                cursorBrush = SolidColor(cursorColor),
                 visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None,
                 keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction, platformImeOptions = rememberKeyboardCloseOptions())
             )

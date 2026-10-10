@@ -162,6 +162,7 @@ fun OrderFilterSheet(
                     FilterSection("Ukupno VPC") {
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             KTextField(
+                                cursorColor = VendorAccent,
                                 modifier = Modifier
                                     .testTag(ORDER_FILTER_PRICE_FROM_TAG)
                                     .weight(1f),
@@ -173,6 +174,7 @@ fun OrderFilterSheet(
                                 trailing = { KmSuffix() }
                             )
                             KTextField(
+                                cursorColor = VendorAccent,
                                 modifier = Modifier
                                     .testTag(ORDER_FILTER_PRICE_TO_TAG)
                                     .weight(1f),
@@ -187,6 +189,7 @@ fun OrderFilterSheet(
                     }
                     FilterSection("Broj narudžbe") {
                         KTextField(
+                            cursorColor = VendorAccent,
                             modifier = Modifier.testTag(ORDER_FILTER_NUMBER_TAG),
                             value = orderNumber.value,
                             onValueChange = { new -> if (new.all { it.isDigit() }) orderNumber.value = new },
@@ -197,6 +200,7 @@ fun OrderFilterSheet(
                     }
                     FilterSection("Račun na ime", divider = false) {
                         KTextField(
+                            cursorColor = VendorAccent,
                             modifier = Modifier.testTag(ORDER_FILTER_PAYER_TAG),
                             value = payerName.value,
                             onValueChange = { payerName.value = it },

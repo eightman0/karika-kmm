@@ -217,6 +217,7 @@ private fun NumberField(
     suffix: String
 ) {
     KTextField(
+        cursorColor = VendorAccent,
         value = value.value,
         onValueChange = { text ->
             if (text.startsWith("0") || text.startsWith(" ")) return@KTextField
@@ -334,6 +335,7 @@ private fun SearchDropdownField(
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
             ) {
                 KTextField(
+                    cursorColor = VendorAccent,
                     value = value,
                     onValueChange = { text ->
                         if (text.startsWith(" ")) return@KTextField
