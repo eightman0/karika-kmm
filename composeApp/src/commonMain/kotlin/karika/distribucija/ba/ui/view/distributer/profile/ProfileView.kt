@@ -371,7 +371,8 @@ private fun TargetSection(
     options: List<KarikaUnit>,
     selected: MutableState<List<KarikaUnit>>,
 ) {
-    fun isSelected(option: KarikaUnit) = selected.value.any { c -> c.unit == option.unit() }
+    // Compare the normalized units: the config's values may carry "|" and spaces, the saved ones don't
+    fun isSelected(option: KarikaUnit) = selected.value.any { c -> c.unit() == option.unit() }
     val selectedCount = options.count { isSelected(it) }
     val allSelected = options.isNotEmpty() && selectedCount == options.size
 
@@ -399,9 +400,9 @@ private fun TargetSection(
             )
             KarikaText(
                 modifier = Modifier.clickable {
-                    selected.value = if (allSelected) emptyList() else options
+                    selected.value = if (allSelected) emptyList() else options.map { it.normalized() }
                 },
-                text = "Sve",
+                text = if (allSelected) "Poništi sve" else "Označi sve",
                 color = VendorAccent,
                 textSize = 12.sp,
                 fontWeight = FontWeight.W600
@@ -422,15 +423,17 @@ private fun TargetSection(
                     trailingIcon = if (on) vectorResource(Res.drawable.ic_k_check) else null
                 ) {
                     selected.value = if (isSelected(option)) {
-                        selected.value.filterNot { c -> c.unit == option.unit() }
+                        selected.value.filterNot { c -> c.unit() == option.unit() }
                     } else {
-                        selected.value + option
+                        selected.value + option.normalized()
                     }
                 }
             }
         }
     }
 }
+
+private fun KarikaUnit.normalized() = KarikaUnit(label = label, unit = unit())
 
 // Postavke
 
