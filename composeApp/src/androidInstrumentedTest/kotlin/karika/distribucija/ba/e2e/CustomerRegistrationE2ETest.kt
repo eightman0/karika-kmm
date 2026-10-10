@@ -7,7 +7,7 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isPopup
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -154,7 +154,8 @@ class CustomerRegistrationE2ETest : StageE2ETest() {
     private fun pickOption(title: String, option: String) {
         closeKeyboard()
         compose.onAllNodesWithText(title).onFirst().performScrollTo().performClick()
-        val inMenu = hasText(option) and hasAnyAncestor(isPopup())
+        // The options open in a bottom sheet, its own dialog window
+        val inMenu = hasText(option) and hasClickAction() and hasAnyAncestor(isDialog())
         compose.waitUntilAtLeastOneExists(inMenu, SCREEN_TIMEOUT_MS)
         compose.onAllNodes(inMenu).onFirst().performScrollTo().performClick()
         compose.waitUntilDoesNotExist(inMenu, SCREEN_TIMEOUT_MS)
