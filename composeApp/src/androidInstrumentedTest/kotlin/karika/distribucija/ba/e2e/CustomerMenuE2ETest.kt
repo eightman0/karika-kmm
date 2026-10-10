@@ -1,6 +1,7 @@
 package karika.distribucija.ba.e2e
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -11,6 +12,7 @@ import karika.distribucija.ba.domain.model.Blog
 import karika.distribucija.ba.domain.model.Category
 import karika.distribucija.ba.domain.model.Faq
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.ui.view.shop.menu.categories.products.PRODUCTS_FILTER_TAG
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
@@ -54,7 +56,7 @@ class CustomerMenuE2ETest : CustomerE2ETest() {
             compose.waitUntilAtLeastOneExists(hasText(leaf.name), SCREEN_TIMEOUT_MS)
         }
         compose.onNodeWithText(leaf.name).performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Filteri"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(PRODUCTS_FILTER_TAG), SERVER_TIMEOUT_MS)
     }
 
     @Test
@@ -75,7 +77,7 @@ class CustomerMenuE2ETest : CustomerE2ETest() {
     @Test
     fun samoNaKarikiOpensItsCategory() {
         compose.onNodeWithText("Samo na Kariki", useUnmergedTree = true).performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Filteri"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(PRODUCTS_FILTER_TAG), SERVER_TIMEOUT_MS)
         assertTrue(exists(hasText("Samo na Kariki")))
     }
 

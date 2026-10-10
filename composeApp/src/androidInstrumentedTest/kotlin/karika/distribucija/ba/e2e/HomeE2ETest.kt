@@ -24,6 +24,7 @@ import karika.distribucija.ba.ui.view.shop.home.HOME_LIST_TAG
 import karika.distribucija.ba.ui.view.shop.home.HOME_SEARCH_PLACEHOLDER
 import karika.distribucija.ba.ui.view.shop.home.addToCartTag
 import karika.distribucija.ba.ui.view.shop.home.productCardTag
+import karika.distribucija.ba.ui.view.shop.menu.categories.products.PRODUCTS_FILTER_TAG
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -107,7 +108,7 @@ class HomeE2ETest : StageE2ETest() {
         compose.onNodeWithText("Vidi sve").performScrollTo().performClick()
 
         // The category has the same title as the home heading
-        compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(PRODUCTS_FILTER_TAG), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
         compose.onNodeWithTag(HOME_LIST_TAG).assertDoesNotExist()
         assertTrue(compose.onAllNodesWithText("Karika preporučuje").fetchSemanticsNodes().isNotEmpty())
@@ -192,7 +193,7 @@ class HomeE2ETest : StageE2ETest() {
     private fun opensItsCategory(tile: String, title: String) {
         compose.onNodeWithText(tile).performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(PRODUCTS_FILTER_TAG), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
         compose.onNodeWithText(title).assertIsDisplayed()
         compose.onNodeWithTag(HOME_LIST_TAG).assertDoesNotExist()

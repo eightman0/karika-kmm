@@ -1,6 +1,8 @@
 package karika.distribucija.ba.ui.view.shop.menu.categories.products
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -10,9 +12,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -24,8 +29,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +42,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,11 +52,12 @@ import karika.distribucija.ba.ui.components.KAddButton
 import karika.distribucija.ba.ui.components.KBackHeader
 import karika.distribucija.ba.ui.components.KCard
 import karika.distribucija.ba.ui.components.KChip
+import karika.distribucija.ba.ui.components.KDivider
 import karika.distribucija.ba.ui.components.KEmptyState
+import karika.distribucija.ba.ui.components.KIcon
 import karika.distribucija.ba.ui.components.KImage
 import karika.distribucija.ba.ui.components.KPill
 import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.KarikaPickerSmall
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
@@ -56,7 +68,9 @@ import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.view.shop.vendor.details.KarikaProductCard
 import karika.distribucija.ba.ui.view.shop.vendor.details.KarikaSearchInput
 import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_k_check
 import karikav2.composeapp.generated.resources.ic_k_filter
+import karikav2.composeapp.generated.resources.ic_k_sort
 import karikav2.composeapp.generated.resources.ic_k_star
 import karikav2.composeapp.generated.resources.ic_tertiary
 import org.jetbrains.compose.resources.vectorResource
@@ -161,56 +175,67 @@ private fun Filter(component: ProductByCategoryComponent) {
     val hasFilter = filter.value.first.isNotBlank()
             || selectedRegions.value.isNotEmpty() || selectedVendor.value.second != 0 || isInStock.value == "1"
 
+    val showSort = remember { mutableStateOf(false) }
+    val sortChanged = sort.value != DEFAULT_SORT
+
     Column(modifier = Modifier.fillMaxWidth()) {
-        KarikaSearchInput(
-            modifier = Modifier
-                .fillMaxWidth(),
-            placeholder = "Pretraži proizvode…",
-            initial = searchText.value,
-            onValueChange = {
-                searchText.value = it
-            },
-            onClear = {
-                searchText.value = ""
-                component.loadNextPage(true)
-            },
-            onSearch = {
-                component.loadNextPage(true)
-            }
-        )
-        Spacer(Modifier.height(12.dp))
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            KChip(
-                text = "Filteri",
-                selected = hasFilter,
-                trailingIcon = vectorResource(Res.drawable.ic_k_filter)
+            KarikaSearchInput(
+                modifier = Modifier
+                    .weight(1f),
+                placeholder = "Pretraži proizvode…",
+                initial = searchText.value,
+                onValueChange = {
+                    searchText.value = it
+                },
+                onClear = {
+                    searchText.value = ""
+                    component.loadNextPage(true)
+                },
+                onSearch = {
+                    component.loadNextPage(true)
+                }
+            )
+            HeaderIconButton(
+                modifier = Modifier.testTag(PRODUCTS_FILTER_TAG),
+                icon = vectorResource(Res.drawable.ic_k_filter),
+                active = hasFilter
             ) {
                 showState.negate()
             }
-            KarikaPickerSmall(
-                modifier = Modifier
-                    .weight(1f),
-                padding = 4.dp,
-                borderColor = KarikaUiColors.Border,
-                value = sort,
-                values = mutableStateOf(
-                    listOf(
-                        "Najnoviji",
-                        "Najstariji",
-                        "Najjeftiniji",
-                        "Najskuplji",
-                        "Min. Količina",
-                        "Po datumu",
-                        "Sa popustom"
-                    )
-                ).asState()
+            HeaderIconButton(
+                modifier = Modifier.testTag(PRODUCTS_SORT_TAG),
+                icon = vectorResource(Res.drawable.ic_k_sort),
+                active = sortChanged
             ) {
-                component.loadNextPage(reset = true)
+                showSort.value = true
+            }
+        }
+
+        if (sortChanged) {
+            Spacer(Modifier.height(12.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                KarikaText(
+                    color = KarikaUiColors.Muted,
+                    textSize = 13.sp,
+                    fontWeight = FontWeight.W600,
+                    text = "Sortiranje: "
+                )
+                KChip(
+                    text = sort.value,
+                    selected = true,
+                    trailingIcon = vectorResource(Res.drawable.ic_tertiary)
+                ) {
+                    sort.value = DEFAULT_SORT
+                    component.loadNextPage(reset = true)
+                }
             }
         }
 
@@ -265,6 +290,136 @@ private fun Filter(component: ProductByCategoryComponent) {
     }
 
     ProductsFilterSheet(showState, component)
+    SortSheet(
+        show = showSort,
+        selected = sort.value
+    ) {
+        sort.value = it
+        component.loadNextPage(reset = true)
+    }
+}
+
+/** Test tags of the filter and sort buttons next to the search, for the end-to-end tests. */
+const val PRODUCTS_FILTER_TAG = "products_filter"
+const val PRODUCTS_SORT_TAG = "products_sort"
+
+private const val DEFAULT_SORT = "Najnoviji"
+
+private val SORT_OPTIONS = listOf(
+    "Najnoviji",
+    "Najstariji",
+    "Najjeftiniji",
+    "Najskuplji",
+    "Min. Količina",
+    "Po datumu",
+    "Sa popustom"
+)
+
+/** Square button next to the search; navy when its filter or sort is in use. */
+@Composable
+private fun HeaderIconButton(
+    modifier: Modifier,
+    icon: ImageVector,
+    active: Boolean,
+    onClick: () -> Unit,
+) {
+    val shape = RoundedCornerShape(12.dp)
+    Box(
+        modifier = modifier
+            .size(46.dp)
+            .clip(shape)
+            .background(if (active) KarikaUiColors.Ink else KarikaColors.White)
+            .border(1.dp, if (active) KarikaUiColors.Ink else KarikaUiColors.Border, shape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        KIcon(
+            icon = icon,
+            tint = if (active) KarikaColors.White else KarikaUiColors.Ink,
+            size = 20.dp
+        )
+    }
+}
+
+/** Sort options as a bottom sheet, the chosen one marked with a pink check. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SortSheet(
+    show: MutableState<Boolean>,
+    selected: String,
+    onSelect: (String) -> Unit,
+) {
+    if (!show.value) {
+        return
+    }
+    ModalBottomSheet(
+        onDismissRequest = { show.value = false },
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = KarikaColors.White,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        contentWindowInsets = { WindowInsets.navigationBars.only(WindowInsetsSides.Bottom) },
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = 10.dp, bottom = 6.dp)
+                    .width(40.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(KarikaUiColors.Border)
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp)
+        ) {
+            KarikaText(
+                text = "Sortiraj po",
+                color = KarikaUiColors.Ink,
+                textSize = 22.sp,
+                lineHeight = 28.sp,
+                fontWeight = FontWeight.W800
+            )
+            Spacer(Modifier.height(14.dp))
+            KCard(modifier = Modifier.fillMaxWidth()) {
+                SORT_OPTIONS.forEachIndexed { index, option ->
+                    if (index > 0) {
+                        KDivider()
+                    }
+                    val isSelected = option == selected
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                show.value = false
+                                if (!isSelected) {
+                                    onSelect(option)
+                                }
+                            }
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KarikaText(
+                            modifier = Modifier.weight(1f),
+                            text = option,
+                            color = if (isSelected) KarikaUiColors.Pink else KarikaUiColors.Ink,
+                            textSize = 15.sp,
+                            fontWeight = if (isSelected) FontWeight.W700 else FontWeight.W500,
+                            maxLines = 1
+                        )
+                        if (isSelected) {
+                            KIcon(
+                                icon = vectorResource(Res.drawable.ic_k_check),
+                                tint = KarikaUiColors.Pink,
+                                size = 20.dp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable

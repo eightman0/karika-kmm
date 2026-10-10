@@ -18,6 +18,8 @@ import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.ui.view.shop.home.HOME_LIST_TAG
 import karika.distribucija.ba.ui.view.shop.home.HOME_SEARCH_PLACEHOLDER
 import karika.distribucija.ba.ui.view.shop.home.productCardTag
+import karika.distribucija.ba.ui.view.shop.menu.categories.products.PRODUCTS_FILTER_TAG
+import karika.distribucija.ba.ui.view.shop.menu.categories.products.PRODUCTS_SORT_TAG
 import karika.distribucija.ba.ui.view.shop.product.PRODUCT_QTY_PLUS_TAG
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
@@ -148,10 +150,10 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
     @Test
     fun sortingByPriceOrdersTheProducts() {
         compose.onNodeWithText("Akcije").performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(PRODUCTS_FILTER_TAG), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
 
-        compose.onAllNodesWithText("Najnoviji", useUnmergedTree = true).onFirst().performClick()
+        compose.onNodeWithTag(PRODUCTS_SORT_TAG).performClick()
         compose.waitUntilAtLeastOneExists(hasText("Najjeftiniji"), SCREEN_TIMEOUT_MS)
         compose.onNodeWithText("Najjeftiniji").performClick()
 
@@ -163,10 +165,10 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
     @Test
     fun filterSheetOffersPriceVendorsAndRegions() {
         compose.onNodeWithText("Akcije").performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(PRODUCTS_FILTER_TAG), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
 
-        compose.onNodeWithText("Filteri").performClick()
+        compose.onNodeWithTag(PRODUCTS_FILTER_TAG).performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("FILTERI"), SCREEN_TIMEOUT_MS)
         listOf("CIJENA", "DOBAVLJAČI", "REGIJA", "Svi regioni", "Primijeni").forEach {
