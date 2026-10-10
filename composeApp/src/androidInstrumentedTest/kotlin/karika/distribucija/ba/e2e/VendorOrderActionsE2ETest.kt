@@ -27,6 +27,7 @@ import karika.distribucija.ba.domain.model.Product
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.domain.model.VendorOrder
+import karika.distribucija.ba.ui.view.distributer.orders.MIN_ORDER_FIELD_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.MIN_ORDER_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.vendorOrderTag
 import kotlinx.coroutines.flow.last
@@ -210,11 +211,11 @@ class VendorOrderActionsE2ETest : VendorE2ETest() {
         val original = profile().minOrderAmount
         val amount = (10 + System.currentTimeMillis() % 40).toString()
         try {
-            goTo("Narudžbe", "Upravljanje narudžbama")
+            goTo("Narudžbe", "Minimalna vrijednost narudžbe")
             compose.onNodeWithTag(MIN_ORDER_TAG).performClick()
-            compose.waitUntilAtLeastOneExists(hasText("Iznos"), SCREEN_TIMEOUT_MS)
+            compose.waitUntilAtLeastOneExists(hasTestTag(MIN_ORDER_FIELD_TAG), SCREEN_TIMEOUT_MS)
 
-            compose.onNode(hasSetTextAction() and hasAnyAncestor(isDialog())).performTextReplacement(amount)
+            compose.onNodeWithTag(MIN_ORDER_FIELD_TAG).performTextReplacement(amount)
             closeKeyboard()
             compose.onNode(dialogButton("Sačuvaj")).performClick()
 
@@ -248,7 +249,7 @@ class VendorOrderActionsE2ETest : VendorE2ETest() {
         }
         settleOlderOrders(order)
         logInAsVendor()
-        goTo("Narudžbe", "Upravljanje narudžbama")
+        goTo("Narudžbe", "Minimalna vrijednost narudžbe")
         compose.waitUntilAtLeastOneExists(hasTestTag(vendorOrderTag(order)), SERVER_TIMEOUT_MS)
         compose.onNodeWithTag(vendorOrderTag(order)).performScrollTo().performClick()
         compose.waitUntilAtLeastOneExists(hasText("Nazad na upravljanje narudžbama"), SERVER_TIMEOUT_MS)

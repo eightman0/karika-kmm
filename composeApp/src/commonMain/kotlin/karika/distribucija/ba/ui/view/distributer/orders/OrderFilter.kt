@@ -1,43 +1,53 @@
 package karika.distribucija.ba.ui.view.distributer.orders
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.ui.components.KarikaAmountField
+import karika.distribucija.ba.ui.components.KDivider
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KTextField
+import karika.distribucija.ba.ui.components.KTonalButton
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaDatePicker
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.KarikaTextField2
-import karika.distribucija.ba.ui.components.SecondaryButton
-import karika.distribucija.ba.ui.components.SecondaryButtonFilled
-import karika.distribucija.ba.ui.components.YSpacer16
-import karika.distribucija.ba.ui.components.YSpacer32
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.negate
-import karika.distribucija.ba.ui.components.onClick
-import karika.distribucija.ba.util.KarikaConstants
+import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_calendar
+import karikav2.composeapp.generated.resources.ic_k_calendar
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -48,6 +58,28 @@ import org.jetbrains.compose.resources.vectorResource
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+/** Test tags of the order filter sheet, for the end-to-end tests. */
+const val ORDER_FILTER_PRICE_FROM_TAG = "order_filter_price_from"
+const val ORDER_FILTER_PRICE_TO_TAG = "order_filter_price_to"
+const val ORDER_FILTER_NUMBER_TAG = "order_filter_number"
+const val ORDER_FILTER_PAYER_TAG = "order_filter_payer"
+
+private val AMOUNT_REGEX = Regex("^(0|[1-9]\\d*)([.]\\d{0,2})?$")
+
+/** Same input rules as KarikaAmountField: a positive amount with at most two decimals. */
+private fun MutableState<String>.setAmount(input: String) {
+    val newValue = input.replace(',', '.')
+    if (newValue == "0") {
+        value = newValue
+        return
+    }
+    if (newValue.startsWith("0") && !newValue.startsWith("0.")) {
+        return
+    }
+    if (newValue.isEmpty() || AMOUNT_REGEX.matches(newValue)) {
+        value = newValue
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,241 +99,138 @@ fun OrderFilterSheet(
 
     if (showState.value) {
         ModalBottomSheet(
-            modifier = Modifier
-                .padding(top = 100.dp),
+            // Keeps the sheet clear of the status bar when it is tall
+            modifier = Modifier.padding(top = 56.dp),
             onDismissRequest = {
                 showState.negate()
             },
             sheetState = sheetState,
             containerColor = KarikaColors.White,
-            dragHandle = {
-                BottomSheetDefaults.DragHandle(
-                    color = KarikaColors.Gray2,
-                    width = 60.dp
-                )
-            }
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            contentWindowInsets = { WindowInsets.navigationBars.only(WindowInsetsSides.Bottom) },
+            dragHandle = { SheetHandle() }
         ) {
-            Column {
-                KarikaText(
+            Column(modifier = Modifier.imePadding()) {
+                Row(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .fillMaxWidth(),
-                    text = "FILTERI",
-                    color = KarikaColors.Gray2,
-                    textSize = 18.sp,
-                    fontWeight = FontWeight.W400,
-                    textAlign = TextAlign.Center
-                )
-                YSpacer16()
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    thickness = 1.dp,
-                    color = KarikaColors.Divider
-                )
-                YSpacer16()
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .hideKeyboard(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, end = 12.dp, top = 4.dp, bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     KarikaText(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp),
-                        text = "Datum kupovine",
-                        color = KarikaColors.Gray2,
-                        textSize = 16.sp,
+                        modifier = Modifier.weight(1f),
+                        text = "Filteri",
+                        color = KarikaUiColors.Ink,
+                        textSize = 20.sp,
+                        lineHeight = 24.sp,
                         fontWeight = FontWeight.W700
-                    )
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        KarikaTextField2(
-                            modifier = Modifier
-                                .onClick {
-                                    showDateDialogFrom.negate()
-                                }
-                                .weight(1f),
-                            value = dateFrom,
-                            placeholder = "OD",
-                            imeAction = ImeAction.Next,
-                            enabled = false,
-                            disabledTextColor = KarikaColors.Gray2,
-                            keyboardType = KeyboardType.Number,
-                            trailingIcons = {
-                                Icon(
-                                    modifier = Modifier
-                                        .onClick {
-                                            showDateDialogFrom.negate()
-                                        },
-                                    imageVector = vectorResource(Res.drawable.ic_calendar),
-                                    tint = KarikaColors.Gray22,
-                                    contentDescription = ""
-                                )
-                            }
-                        )
-                        KarikaTextField2(
-                            modifier = Modifier
-                                .onClick {
-                                    showDateDialogTo.negate()
-                                }
-                                .weight(1f),
-                            value = dateTo,
-                            placeholder = "DO",
-                            disabledTextColor = KarikaColors.Gray2,
-                            imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number,
-                            enabled = false,
-                            trailingIcons = {
-                                Icon(
-                                    modifier = Modifier
-                                        .onClick {
-                                            showDateDialogTo.negate()
-                                        },
-                                    imageVector = vectorResource(Res.drawable.ic_calendar),
-                                    tint = KarikaColors.Gray22,
-                                    contentDescription = ""
-                                )
-                            }
-                        )
-                    }
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        thickness = 1.dp,
-                        color = KarikaColors.Divider
-                    )
-
-                    KarikaText(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp),
-                        text = "Ukupno VPC",
-                        color = KarikaColors.Gray2,
-                        textSize = 16.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        KarikaAmountField(
-                            modifier = Modifier
-                                .weight(1f),
-                            value = startPrice,
-                            placeholder = "OD",
-                            imeAction = ImeAction.Next,
-                            trailingIcons = {
-                                KarikaText(
-                                    modifier = Modifier,
-                                    text = "KM",
-                                    color = KarikaColors.Gray22,
-                                    textSize = 14.sp,
-                                    fontWeight = FontWeight.W400
-                                )
-                            }
-                        )
-                        KarikaAmountField(
-                            modifier = Modifier
-                                .weight(1f),
-                            value = endPrice,
-                            placeholder = "DO",
-                            imeAction = ImeAction.Next,
-                            trailingIcons = {
-                                KarikaText(
-                                    modifier = Modifier,
-                                    text = "KM",
-                                    color = KarikaColors.Gray22,
-                                    textSize = 14.sp,
-                                    fontWeight = FontWeight.W400
-                                )
-                            }
-                        )
-                    }
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        thickness = 1.dp,
-                        color = KarikaColors.Divider
                     )
                     KarikaText(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp),
-                        text = "Broj narudžbe",
-                        color = KarikaColors.Gray2,
-                        textSize = 16.sp,
-                        fontWeight = FontWeight.W700
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { component.clear() }
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        text = "Poništi sve",
+                        color = VendorAccent,
+                        textSize = 14.sp,
+                        fontWeight = FontWeight.W600
                     )
-                    KarikaTextField2(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth(),
-                        value = orderNumber,
-                        placeholder = "Broj narudžbe",
-                        allowedChars = KarikaConstants.numbers,
-                        imeAction = ImeAction.Next,
-                        keyboardType = KeyboardType.Number
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        thickness = 1.dp,
-                        color = KarikaColors.Divider
-                    )
-                    KarikaText(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp),
-                        text = "Račun na ime",
-                        color = KarikaColors.Gray2,
-                        textSize = 16.sp,
-                        fontWeight = FontWeight.W700
-                    )
-                    KarikaTextField2(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth(),
-                        value = payerName,
-                        placeholder = "Račun na ime",
-                        imeAction = ImeAction.Next,
-                        keyboardType = KeyboardType.Text
-                    )
-
-                    YSpacer32()
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        thickness = 1.dp,
-                        color = KarikaColors.Divider
-                    )
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        SecondaryButton(
-                            modifier = Modifier
-                                .weight(1f),
-                            title = "Odustani",
-                            textSize = 16.sp,
-                            color = KarikaColors.Blue
-                        ) {
-                            showState.negate()
+                }
+                KDivider()
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .verticalScroll(rememberScrollState())
+                        .hideKeyboard()
+                ) {
+                    FilterSection("Datum kupovine") {
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            DateBox(
+                                modifier = Modifier.weight(1f),
+                                value = dateFrom.value,
+                                placeholder = "Od",
+                                onClick = { showDateDialogFrom.negate() }
+                            )
+                            DateBox(
+                                modifier = Modifier.weight(1f),
+                                value = dateTo.value,
+                                placeholder = "Do",
+                                onClick = { showDateDialogTo.negate() }
+                            )
                         }
-                        SecondaryButtonFilled(
-                            modifier = Modifier
-                                .weight(1f),
-                            title = "Filtriraj"
-                        ) {
+                    }
+                    FilterSection("Ukupno VPC") {
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            KTextField(
+                                modifier = Modifier
+                                    .testTag(ORDER_FILTER_PRICE_FROM_TAG)
+                                    .weight(1f),
+                                value = startPrice.value,
+                                onValueChange = { startPrice.setAmount(it) },
+                                placeholder = "Od",
+                                keyboardType = KeyboardType.Decimal,
+                                minHeight = 48.dp,
+                                trailing = { KmSuffix() }
+                            )
+                            KTextField(
+                                modifier = Modifier
+                                    .testTag(ORDER_FILTER_PRICE_TO_TAG)
+                                    .weight(1f),
+                                value = endPrice.value,
+                                onValueChange = { endPrice.setAmount(it) },
+                                placeholder = "Do",
+                                keyboardType = KeyboardType.Decimal,
+                                minHeight = 48.dp,
+                                trailing = { KmSuffix() }
+                            )
+                        }
+                    }
+                    FilterSection("Broj narudžbe") {
+                        KTextField(
+                            modifier = Modifier.testTag(ORDER_FILTER_NUMBER_TAG),
+                            value = orderNumber.value,
+                            onValueChange = { new -> if (new.all { it.isDigit() }) orderNumber.value = new },
+                            placeholder = "npr. 3000000859",
+                            keyboardType = KeyboardType.Number,
+                            minHeight = 48.dp
+                        )
+                    }
+                    FilterSection("Račun na ime", divider = false) {
+                        KTextField(
+                            modifier = Modifier.testTag(ORDER_FILTER_PAYER_TAG),
+                            value = payerName.value,
+                            onValueChange = { payerName.value = it },
+                            placeholder = "Naziv kupca",
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Done,
+                            minHeight = 48.dp
+                        )
+                    }
+                }
+                KDivider()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 18.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    KTonalButton(
+                        modifier = Modifier.weight(1f),
+                        text = "Odustani",
+                        background = KarikaUiColors.Field,
+                        color = KarikaUiColors.Ink,
+                        height = 52.dp,
+                        onClick = { showState.negate() }
+                    )
+                    KPrimaryButton(
+                        modifier = Modifier.weight(1f),
+                        text = "Prikaži narudžbe",
+                        background = VendorAccent,
+                        onClick = {
                             showState.negate()
                             component.filter()
                         }
-                    }
+                    )
                 }
             }
             KarikaDatePicker(
@@ -318,6 +247,62 @@ fun OrderFilterSheet(
             }
         }
     }
+}
+
+@Composable
+private fun FilterSection(
+    title: String,
+    divider: Boolean = true,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+        KarikaText(
+            modifier = Modifier.padding(bottom = 10.dp),
+            text = title,
+            color = KarikaUiColors.Ink,
+            textSize = 14.sp,
+            fontWeight = FontWeight.W700
+        )
+        content()
+    }
+    if (divider) {
+        KDivider()
+    }
+}
+
+/** Read-only date field that opens the date picker. */
+@Composable
+private fun DateBox(
+    value: String,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val shape = RoundedCornerShape(12.dp)
+    Row(
+        modifier = modifier
+            .height(48.dp)
+            .clip(shape)
+            .background(KarikaColors.White)
+            .border(1.dp, KarikaUiColors.Border, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = value.ifEmpty { placeholder },
+            color = if (value.isEmpty()) KarikaUiColors.Subtle else KarikaUiColors.Ink,
+            textSize = 15.sp,
+            maxLines = 1
+        )
+        KIcon(icon = vectorResource(Res.drawable.ic_k_calendar), tint = KarikaUiColors.Muted, size = 18.dp)
+    }
+}
+
+@Composable
+private fun KmSuffix() {
+    KarikaText(text = "KM", color = KarikaUiColors.Muted, textSize = 13.sp, fontWeight = FontWeight.W700)
 }
 
 @OptIn(ExperimentalTime::class)

@@ -4,6 +4,7 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
@@ -18,7 +19,13 @@ import androidx.compose.ui.test.performTextInput
 import karika.distribucija.ba.domain.api.DashRepository
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorOrder
+import karika.distribucija.ba.ui.view.distributer.orders.MIN_ORDER_FIELD_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.MIN_ORDER_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.ORDER_FILTER_NUMBER_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.ORDER_FILTER_PRICE_FROM_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.ORDER_FILTER_PRICE_TO_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.ORDER_FILTER_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.ORDER_SEARCH_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.vendorOrderTag
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
@@ -40,7 +47,7 @@ class VendorOrdersE2ETest : VendorE2ETest() {
     @Before
     fun openOrders() {
         latest = orders()
-        goTo("Narudžbe", "Upravljanje narudžbama")
+        goTo("Narudžbe", "Minimalna vrijednost narudžbe")
         latest.firstOrNull()?.let {
             compose.waitUntilAtLeastOneExists(hasTestTag(vendorOrderTag(it)), SERVER_TIMEOUT_MS)
         }
@@ -65,7 +72,7 @@ class VendorOrdersE2ETest : VendorE2ETest() {
         assumeTrue("no order has a company name", company != null)
         val expected = orders(filter("b2b_pravno_lice", company!!, "like"))
 
-        compose.onNode(hasSetTextAction() and hasText("Pretraži narudžbe...")).performTextInput(company)
+        compose.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(ORDER_SEARCH_TAG))).performTextInput(company)
 
         val others = latest.filter { it !in expected }
         compose.waitUntil(SERVER_TIMEOUT_MS) { others.none { exists(hasTestTag(vendorOrderTag(it))) } }
@@ -76,16 +83,16 @@ class VendorOrdersE2ETest : VendorE2ETest() {
 
     @Test
     fun filterSheetOpensAndOdustaniLeavesTheList() {
-        compose.onNodeWithText("Filteri").performClick()
+        compose.onNodeWithTag(ORDER_FILTER_TAG).performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("FILTERI"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
         // A field's title and placeholder can be the same text
         listOf("Datum kupovine", "Ukupno VPC", "Broj narudžbe", "Račun na ime").forEach {
             assertTrue("\"$it\" is not in the sheet", exists(hasText(it)))
         }
         compose.onNodeWithText("Odustani").performClick()
 
-        compose.waitUntilDoesNotExist(hasText("FILTERI"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilDoesNotExist(hasText("Filteri"), SCREEN_TIMEOUT_MS)
         compose.onNodeWithText("Očisti").assertDoesNotExist()
         latest.firstOrNull()?.let { compose.onNodeWithTag(vendorOrderTag(it)).assertExists() }
     }
@@ -100,12 +107,12 @@ class VendorOrdersE2ETest : VendorE2ETest() {
             expected.map { it.orderId } == listOf(order.orderId)
         )
 
-        compose.onNodeWithText("Filteri").performClick()
-        compose.waitUntilAtLeastOneExists(hasText("FILTERI"), SCREEN_TIMEOUT_MS)
-        compose.onNode(hasSetTextAction() and hasText("Broj narudžbe")).performTextInput(order.orderId!!)
+        compose.onNodeWithTag(ORDER_FILTER_TAG).performClick()
+        compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
+        compose.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(ORDER_FILTER_NUMBER_TAG))).performTextInput(order.orderId!!)
         closeKeyboard()
         waitUntilLoaded()
-        compose.onNodeWithText("Filtriraj").performClick()
+        compose.onNodeWithText("Prikaži narudžbe").performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Očisti"), SCREEN_TIMEOUT_MS)
         val others = latest.filter { it.orderId != order.orderId }
@@ -132,13 +139,13 @@ class VendorOrdersE2ETest : VendorE2ETest() {
         }
         assumeTrue("every recent order costs about the same", outside.isNotEmpty())
 
-        compose.onNodeWithText("Filteri").performClick()
-        compose.waitUntilAtLeastOneExists(hasText("FILTERI"), SCREEN_TIMEOUT_MS)
-        priceField("OD").performTextInput("$from")
-        priceField("DO").performTextInput("$to")
+        compose.onNodeWithTag(ORDER_FILTER_TAG).performClick()
+        compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
+        priceField(ORDER_FILTER_PRICE_FROM_TAG).performTextInput("$from")
+        priceField(ORDER_FILTER_PRICE_TO_TAG).performTextInput("$to")
         closeKeyboard()
         waitUntilLoaded()
-        compose.onNodeWithText("Filtriraj").performClick()
+        compose.onNodeWithText("Prikaži narudžbe").performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Očisti"), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
@@ -193,15 +200,15 @@ class VendorOrdersE2ETest : VendorE2ETest() {
     fun minimumOrderDialogShowsTheAmountAndOtkaziClosesIt() {
         compose.onNodeWithTag(MIN_ORDER_TAG).performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Iznos"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(MIN_ORDER_FIELD_TAG), SCREEN_TIMEOUT_MS)
         compose.onNodeWithText("Sačuvaj").assertExists()
         compose.onNodeWithText("Otkaži").performClick()
 
-        compose.waitUntilDoesNotExist(hasText("Iznos"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilDoesNotExist(hasTestTag(MIN_ORDER_FIELD_TAG), SCREEN_TIMEOUT_MS)
     }
 
-    private fun priceField(placeholder: String) =
-        compose.onNode(hasSetTextAction() and hasText(placeholder) and isEnabled())
+    private fun priceField(tag: String) =
+        compose.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(tag)))
 
     private fun orderList() =
         compose.onNode(hasScrollToNodeAction() and hasAnyDescendant(hasTestTagStartingWith("vendor_order_")))

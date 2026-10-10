@@ -83,8 +83,8 @@ class VendorNavigationE2ETest : VendorE2ETest() {
 
     @Test
     fun upravljanjeNarudzbamaOpensTheOrders() {
-        goTo("Narudžbe", "Upravljanje narudžbama")
-        compose.onNodeWithText("Postavi minimalnu vrijednost narudžbe").assertIsDisplayed()
+        goTo("Narudžbe", "Minimalna vrijednost narudžbe")
+        compose.onNodeWithText("Minimalna vrijednost narudžbe").assertIsDisplayed()
     }
 
     @Test

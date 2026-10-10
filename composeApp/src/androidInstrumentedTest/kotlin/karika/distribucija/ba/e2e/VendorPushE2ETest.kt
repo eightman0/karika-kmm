@@ -94,7 +94,7 @@ class VendorPushE2ETest : VendorE2ETest() {
     @Test
     fun aNewOrderAppearsInTheOpenOrdersList() {
         appNotifications().cancelAll()
-        goTo("Narudžbe", "Upravljanje narudžbama")
+        goTo("Narudžbe", "Minimalna vrijednost narudžbe")
 
         val order = orderOfTheVendorsProduct()
         try {
@@ -165,7 +165,7 @@ class VendorPushE2ETest : VendorE2ETest() {
 
     /** Opens the supplier's [order] from "Upravljanje narudžbama". */
     private fun openOrder(order: OrdersResponse) {
-        goTo("Narudžbe", "Upravljanje narudžbama")
+        goTo("Narudžbe", "Minimalna vrijednost narudžbe")
         val tag = vendorOrderTag(VendorOrder(orderId = order.incrementId))
         compose.waitUntilAtLeastOneExists(hasTestTag(tag), SERVER_TIMEOUT_MS)
         compose.onNodeWithTag(tag).performScrollTo().performClick()
