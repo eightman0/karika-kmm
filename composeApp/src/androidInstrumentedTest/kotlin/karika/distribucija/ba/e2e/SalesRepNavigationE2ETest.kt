@@ -30,7 +30,7 @@ class SalesRepNavigationE2ETest : SalesRepE2ETest() {
 
         assertTrue(displayed(hasText("Komercijalista")))
         me.name?.let { assertTrue("\"$it\" is not shown", displayed(hasText(it))) }
-        listOf("Analitika", "Upravljanje narudžbama", "Upravljanje kupcima", "Poruke", "Odjavi se").forEach {
+        listOf("Analitika", "Upravljanje narudžbama", "Upravljanje kupcima", "Poruke kupaca", "Poruke admina", "Interne poruke", "Odjavi se").forEach {
             assertTrue("\"$it\" is not in the drawer", displayed(drawerItem(it)))
         }
         // "Operacije" is switched off in the app
@@ -71,9 +71,9 @@ class SalesRepNavigationE2ETest : SalesRepE2ETest() {
 
     @Test
     fun porukeOpensTheThreeMessageLists() {
-        goTo("Interne poruke", under = "Poruke")
-        goTo("Poruke admina", under = "Poruke")
-        goTo("Poruke kupaca", under = "Poruke")
+        goTo("Interne poruke")
+        goTo("Poruke admina")
+        goTo("Poruke kupaca")
         assertTrue(exists(hasText("Pošalji novu poruku")))
     }
 

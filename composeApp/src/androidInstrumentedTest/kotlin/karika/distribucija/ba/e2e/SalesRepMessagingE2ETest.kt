@@ -41,7 +41,7 @@ class SalesRepMessagingE2ETest : SalesRepE2ETest() {
         val customer = testCustomer()
         val recipient = recipients(ChatAxis.VENDOR_CUSTOMER).firstOrNull { it.counterpartId == customer.customerId }
         assumeTrue("the test customer is not among the message recipients", recipient?.name != null)
-        goTo("Poruke kupaca", under = "Poruke")
+        goTo("Poruke kupaca")
         compose.onNodeWithText("Pošalji novu poruku").performClick()
         compose.waitUntilAtLeastOneExists(hasText("Nova poruka"), SCREEN_TIMEOUT_MS)
 
@@ -70,7 +70,7 @@ class SalesRepMessagingE2ETest : SalesRepE2ETest() {
 
     @Test
     fun aNewMessageToTheAdminIsSent() {
-        goTo("Poruke admina", under = "Poruke")
+        goTo("Poruke admina")
         compose.onNodeWithText("Pošalji novu poruku").performClick()
         compose.waitUntil(SERVER_TIMEOUT_MS) { exists(hasText("Napiši poruku..."), unmerged = true) }
 
@@ -87,7 +87,7 @@ class SalesRepMessagingE2ETest : SalesRepE2ETest() {
             all.firstOrNull { it.counterpartType == "vendor_owner" } ?: all.firstOrNull()
         }
         assumeTrue("the sales rep has no colleague to write to", colleague?.name != null)
-        goTo("Interne poruke", under = "Poruke")
+        goTo("Interne poruke")
         compose.onNodeWithText("Nova interna poruka").performClick()
         compose.waitUntil(SERVER_TIMEOUT_MS) { exists(hasText("Pretraži sagovornika..."), unmerged = true) }
 
@@ -104,7 +104,7 @@ class SalesRepMessagingE2ETest : SalesRepE2ETest() {
 
     @Test
     fun theSendButtonDoesNothingWithoutAMessage() {
-        goTo("Poruke admina", under = "Poruke")
+        goTo("Poruke admina")
         compose.onNodeWithText("Pošalji novu poruku").performClick()
         compose.waitUntil(SERVER_TIMEOUT_MS) { exists(hasText("Napiši poruku..."), unmerged = true) }
         val before = conversations(ChatAxis.VENDOR_ADMIN).map { it.lastMessagePreview }
@@ -124,7 +124,7 @@ class SalesRepMessagingE2ETest : SalesRepE2ETest() {
     private fun openConversation(conversation: ChatConversation) {
         repeat(OPEN_ATTEMPTS) { attempt ->
             try {
-                goTo("Poruke kupaca", under = "Poruke")
+                goTo("Poruke kupaca")
                 // Newest first, so it is usually on screen already
                 val tag = hasTestTag(conversationTag(conversation))
                 if (!exists(tag, unmerged = true)) scrollListTo(tag)

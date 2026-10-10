@@ -214,7 +214,7 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
     @Test
     fun customerMessagesListStagesConversations() {
         val conversations = conversations(ChatAxis.VENDOR_CUSTOMER)
-        goTo("Poruke kupaca", under = "Poruke")
+        goTo("Poruke kupaca")
         if (conversations.isEmpty()) {
             compose.waitUntilAtLeastOneExists(hasText("Još nema poruka"), SERVER_TIMEOUT_MS)
         }
@@ -223,7 +223,7 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
 
     @Test
     fun newCustomerMessageAsksForACustomer() {
-        goTo("Poruke kupaca", under = "Poruke")
+        goTo("Poruke kupaca")
 
         compose.onNodeWithText("Pošalji novu poruku").performClick()
 
@@ -237,7 +237,7 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
     @Test
     fun internalMessagesListStagesConversations() {
         val conversations = conversations(ChatAxis.STAFF)
-        goTo("Interne poruke", under = "Poruke")
+        goTo("Interne poruke")
         if (conversations.isEmpty()) {
             compose.waitUntilAtLeastOneExists(hasText("Još nema internih poruka"), SERVER_TIMEOUT_MS)
         }

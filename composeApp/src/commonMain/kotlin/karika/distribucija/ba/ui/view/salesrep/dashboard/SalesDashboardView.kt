@@ -102,6 +102,8 @@ import karikav2.composeapp.generated.resources.ic_k_bell
 import karikav2.composeapp.generated.resources.ic_k_cart
 import karikav2.composeapp.generated.resources.ic_k_chart
 import karikav2.composeapp.generated.resources.ic_k_chat
+import karikav2.composeapp.generated.resources.ic_k_inbox
+import karikav2.composeapp.generated.resources.ic_k_shield
 import karikav2.composeapp.generated.resources.ic_k_chevron_down
 import karikav2.composeapp.generated.resources.ic_k_chevron_left
 import karikav2.composeapp.generated.resources.ic_k_close
@@ -132,10 +134,6 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
     } else {
         null
     }
-    val isMessagesActive = activeInstance is SalesChild.CustomerMessages ||
-        activeInstance is SalesChild.AdminMessages ||
-        activeInstance is SalesChild.InternalMessages
-    var messagesExpanded by remember { mutableStateOf(false) }
 
     BoxWithConstraints(
         modifier = Modifier
@@ -284,43 +282,44 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                                 coroutineScope.launch { drawerState.close() }
                             }
                         )
-                        SalesExpandableNavItem(
-                            icon = vectorResource(Res.drawable.ic_k_chat),
-                            text = "Poruke",
-                            expanded = messagesExpanded,
-                            selected = isMessagesActive,
-                            badge = messageState.staff + messageState.vendorAdmin + messageState.vendorCustomer,
-                            onClick = { messagesExpanded = !messagesExpanded }
+                        // Messages as their own group, as in the supplier's menu
+                        KarikaText(
+                            modifier = Modifier.padding(start = 12.dp, top = 16.dp, bottom = 6.dp),
+                            text = "PORUKE",
+                            color = KarikaUiColors.Subtle,
+                            textSize = 11.sp,
+                            fontWeight = FontWeight.W700
                         )
-                        if (messagesExpanded) {
-                            SalesSubNavItem(
-                                text = "Interne poruke",
-                                selected = navState.value.active.instance is SalesChild.InternalMessages,
-                                badge = messageState.staff,
-                                onClick = {
-                                    component.salesRepNavigate(SalesRepConfig.InternalMessages, replace = true)
-                                    coroutineScope.launch { drawerState.close() }
-                                }
-                            )
-                            SalesSubNavItem(
-                                text = "Poruke admina",
-                                selected = navState.value.active.instance is SalesChild.AdminMessages,
-                                badge = messageState.vendorAdmin,
-                                onClick = {
-                                    component.salesRepNavigate(SalesRepConfig.AdminMessages, replace = true)
-                                    coroutineScope.launch { drawerState.close() }
-                                }
-                            )
-                            SalesSubNavItem(
-                                text = "Poruke kupaca",
-                                selected = navState.value.active.instance is SalesChild.CustomerMessages,
-                                badge = messageState.vendorCustomer,
-                                onClick = {
-                                    component.salesRepNavigate(SalesRepConfig.CustomerMessages, replace = true)
-                                    coroutineScope.launch { drawerState.close() }
-                                }
-                            )
-                        }
+                        SalesNavItem(
+                            icon = vectorResource(Res.drawable.ic_k_chat),
+                            text = "Poruke kupaca",
+                            selected = navState.value.active.instance is SalesChild.CustomerMessages,
+                            badge = messageState.vendorCustomer,
+                            onClick = {
+                                component.salesRepNavigate(SalesRepConfig.CustomerMessages, replace = true)
+                                coroutineScope.launch { drawerState.close() }
+                            }
+                        )
+                        SalesNavItem(
+                            icon = vectorResource(Res.drawable.ic_k_shield),
+                            text = "Poruke admina",
+                            selected = navState.value.active.instance is SalesChild.AdminMessages,
+                            badge = messageState.vendorAdmin,
+                            onClick = {
+                                component.salesRepNavigate(SalesRepConfig.AdminMessages, replace = true)
+                                coroutineScope.launch { drawerState.close() }
+                            }
+                        )
+                        SalesNavItem(
+                            icon = vectorResource(Res.drawable.ic_k_inbox),
+                            text = "Interne poruke",
+                            selected = navState.value.active.instance is SalesChild.InternalMessages,
+                            badge = messageState.staff,
+                            onClick = {
+                                component.salesRepNavigate(SalesRepConfig.InternalMessages, replace = true)
+                                coroutineScope.launch { drawerState.close() }
+                            }
+                        )
                         //SalesNavItem(
                         //    icon = vectorResource(Res.drawable.ic_action),
                         //    text = "Operacije",
