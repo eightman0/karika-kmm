@@ -215,7 +215,8 @@ private fun ProductGallery(modifier: Modifier, component: ProductComponent) {
                         }
                         .fillMaxSize(),
                     model = images[page],
-                    contentScale = ContentScale.Fit
+                    // Fill the gallery like the vendor cards, so the floating buttons sit on the photo
+                    contentScale = ContentScale.Crop
                 )
             }
         }
@@ -235,6 +236,7 @@ private fun ProductGallery(modifier: Modifier, component: ProductComponent) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             KCircleButton(
+                modifier = Modifier.shadow(6.dp, CircleShape),
                 icon = vectorResource(Res.drawable.ic_k_chevron_left),
                 background = KarikaColors.White
             ) {
@@ -242,6 +244,7 @@ private fun ProductGallery(modifier: Modifier, component: ProductComponent) {
             }
             Spacer(modifier = Modifier.weight(1f))
             KCircleButton(
+                modifier = Modifier.shadow(6.dp, CircleShape),
                 icon = vectorResource(Res.drawable.ic_k_chat),
                 background = KarikaColors.White
             ) {
