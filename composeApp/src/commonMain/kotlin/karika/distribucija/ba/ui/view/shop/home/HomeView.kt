@@ -101,15 +101,16 @@ fun HomeView(component: HomeComponent) {
         HomeHeader(component)
         Spacer(Modifier.height(16.dp))
         Shortcuts(component)
-        if (promotedLogos.isNotEmpty()) {
-            Spacer(Modifier.height(22.dp))
-            Suppliers(component, promotedLogos)
-        }
         if (promotedVendors.isNotEmpty()) {
             Spacer(Modifier.height(18.dp))
             FeaturedVendors(component, promotedVendors)
         }
         KarikaProducts(component)
+        // The round supplier logos close the page, below the recommendations
+        if (promotedLogos.isNotEmpty()) {
+            Spacer(Modifier.height(22.dp))
+            Suppliers(component, promotedLogos)
+        }
         Spacer(Modifier.height(20.dp))
     }
 
