@@ -1,36 +1,7 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.customer
 
-import karika.distribucija.ba.util.inSarajevo
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,44 +9,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.HttpClientProvider.chatAttachment
-import karika.distribucija.ba.domain.model.ChatAttachment
-import karika.distribucija.ba.domain.model.ChatMessage
-import karika.distribucija.ba.ui.common.CommonComponent
-import karika.distribucija.ba.ui.common.HtmlTextWithStyles
-import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.KarikaImage
-import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.onClick
-import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_attachment
-import karikav2.composeapp.generated.resources.ic_cancel_circle
-import karikav2.composeapp.generated.resources.ic_pdf
-import karikav2.composeapp.generated.resources.ic_photo
-import karikav2.composeapp.generated.resources.ic_send_receipt
-import org.jetbrains.compose.resources.vectorResource
+import karika.distribucija.ba.ui.view.salesrep.messages.SalesChatBubble
+import karika.distribucija.ba.ui.view.salesrep.messages.SalesChatInput
+import karika.distribucija.ba.ui.view.salesrep.messages.SalesChatScaffold
+import karika.distribucija.ba.util.inSarajevo
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-private fun String.isImageFile() = lowercase().let {
-    it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".png") ||
-            it.endsWith(".gif") || it.endsWith(".webp")
-}
-
-// ── View ───────────────────────────────────────────────────────────────────────
-
-@OptIn(ExperimentalMaterial3Api::class)
+/** Chat with a customer; the shell draws the header with the conversation's name. */
 @Composable
 fun SalesCustomerConversationView(component: SalesCustomerConversationComponent) {
     val messages by component.messages.collectAsState()
@@ -84,435 +24,42 @@ fun SalesCustomerConversationView(component: SalesCustomerConversationComponent)
     val keyboard = LocalSoftwareKeyboardController.current
 
     var text by remember { mutableStateOf("") }
-    var showAttachSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) listState.scrollToItem(messages.size - 1)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(KarikaColors.Gray20)
+    SalesChatScaffold(
+        listState = listState,
+        isEmpty = messages.isEmpty(),
+        emptyText = null,
+        input = {
+            SalesChatInput(
+                text = text,
+                onTextChange = { text = it },
+                canSend = text.isNotBlank() || attachment != null,
+                onSend = {
+                    keyboard?.hide()
+                    component.sendMessage(text)
+                    text = ""
+                },
+                attachment = attachment,
+                onRemoveAttachment = { component.attachment.value = null },
+                onPreviewAttachment = { component.showImagePreview(it) },
+                onPickFile = component::pickFile,
+                onPickPhoto = component::pickPhoto
+            )
+        }
     ) {
-        // ── Messages ──────────────────────────────────────────────────────────
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(messages) { message ->
-                CustomerMessageBubble(
-                    message = message,
-                    component = component
-                )
-            }
-        }
-
-        // ── Input area ────────────────────────────────────────────────────────
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(KarikaColors.White)
-                .imePadding()
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            // Attachment thumbnail
-            if (attachment != null) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(KarikaColors.Blue.copy(alpha = 0.08f))
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = vectorResource(
-                            if (attachment!!.first.isImageFile()) Res.drawable.ic_photo
-                            else Res.drawable.ic_attachment
-                        ),
-                        contentDescription = null,
-                        tint = KarikaColors.Blue,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    KarikaText(
-                        text = attachment!!.first.take(32),
-                        color = KarikaColors.Blue,
-                        textSize = 12.sp,
-                        fontWeight = FontWeight.W500,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_cancel_circle),
-                        contentDescription = "Ukloni prilog",
-                        tint = KarikaColors.Gray6,
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) { component.attachment.value = null }
-                    )
-                }
-            }
-
-            // Text input row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(KarikaColors.Gray20)
-                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(20.dp))
-                    .padding(horizontal = 4.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.Bottom
-            ) {
-                // Attach button
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { showAttachSheet = true },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_attachment),
-                        contentDescription = "Priloži",
-                        tint = if (attachment != null) KarikaColors.Blue else KarikaColors.Gray6,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-
-                // Text field
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = 10.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    if (text.isEmpty()) {
-                        KarikaText(
-                            text = "Napiši poruku...",
-                            color = KarikaColors.Gray7,
-                            textSize = 14.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                    }
-                    BasicTextField(
-                        value = text,
-                        onValueChange = { text = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        textStyle = TextStyle(
-                            color = KarikaColors.Gray2,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.W400
-                        ),
-                        cursorBrush = SolidColor(KarikaColors.Blue),
-                        maxLines = 5
-                    )
-                }
-
-                // Send button
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            if (text.isNotBlank() || attachment != null) KarikaColors.Blue
-                            else KarikaColors.Gray9
-                        )
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            enabled = text.isNotBlank() || attachment != null
-                        ) {
-                            keyboard?.hide()
-                            component.sendMessage(text)
-                            text = ""
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_send_receipt),
-                        contentDescription = "Pošalji",
-                        tint = KarikaColors.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
-    }
-
-    // ── Attach bottom sheet ────────────────────────────────────────────────────
-    if (showAttachSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showAttachSheet = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            containerColor = KarikaColors.White
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(bottom = 24.dp)
-            ) {
-                KarikaText(
-                    text = "Dodaj prilog",
-                    color = KarikaColors.Gray2,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W700,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
-                )
-                HorizontalDivider(color = KarikaColors.Gray9)
-                Spacer(Modifier.height(8.dp))
-
-                // File option
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            showAttachSheet = false
-                            component.pickFile()
-                        }
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(KarikaColors.Blue.copy(alpha = 0.10f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_attachment),
-                            contentDescription = null,
-                            tint = KarikaColors.Blue,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                    Column {
-                        KarikaText(
-                            text = "Fajl",
-                            color = KarikaColors.Gray2,
-                            textSize = 15.sp,
-                            fontWeight = FontWeight.W600
-                        )
-                        KarikaText(
-                            text = "Dokument, PDF, tabela...",
-                            color = KarikaColors.Gray6,
-                            textSize = 12.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                    }
-                }
-
-                HorizontalDivider(
-                    color = KarikaColors.Gray10,
-                    modifier = Modifier.padding(horizontal = 20.dp)
-                )
-
-                // Photo option
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            showAttachSheet = false
-                            component.pickPhoto()
-                        }
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(KarikaColors.Blue.copy(alpha = 0.10f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_photo),
-                            contentDescription = null,
-                            tint = KarikaColors.Blue,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                    Column {
-                        KarikaText(
-                            text = "Slika",
-                            color = KarikaColors.Gray2,
-                            textSize = 15.sp,
-                            fontWeight = FontWeight.W600
-                        )
-                        KarikaText(
-                            text = "Fotografija iz galerije ili kamere",
-                            color = KarikaColors.Gray6,
-                            textSize = 12.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-// ── Attachment renderer ────────────────────────────────────────────────────────
-
-@Composable
-private fun MessageAttachments(attachments: List<ChatAttachment>, component: CommonComponent) {
-    attachments.forEach { attachment ->
-        val relpath = attachment.relpath ?: return@forEach
-        if (attachment.isPdf()) {
-            Row(
-                modifier = Modifier
-                    .onClick {
-                        component.downloadChatAttachment(relpath)
-                    }
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_pdf),
-                    contentDescription = null,
-                    tint = KarikaColors.White,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                KarikaText(
-                    text = attachment.filename ?: "",
-                    color = KarikaColors.White,
-                    textSize = 12.sp,
-                    fontWeight = FontWeight.W500
-                )
-            }
-        } else {
-            KarikaImage(
-                modifier = Modifier
-                    .onClick {
-                        component.showImagePreview(chatAttachment(relpath))
-                    }
-                    .widthIn(max = 220.dp)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                model = chatAttachment(relpath),
-                contentScale = ContentScale.Inside
-            )
-        }
-    }
-}
-
-// ── Message bubble ─────────────────────────────────────────────────────────────
-
-@Composable
-private fun CustomerMessageBubble(
-    message: ChatMessage,
-    component: CommonComponent
-) {
-    val isVendor = message.isFromVendor()
-
-    if (isVendor) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.End
-        ) {
-            KarikaText(
-                text = "Ja",
-                color = KarikaColors.Blue,
-                textSize = 11.sp,
-                fontWeight = FontWeight.W600,
-                modifier = Modifier.padding(end = 4.dp, bottom = 2.dp)
-            )
-            Column(
-                modifier = Modifier
-                    .widthIn(max = 280.dp)
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 20.dp, topEnd = 4.dp,
-                            bottomStart = 20.dp, bottomEnd = 20.dp
-                        )
-                    )
-                    .background(KarikaColors.Blue)
-            ) {
-                MessageAttachments(
-                    attachments = message.attachments,
-                    component = component
-                )
-                if (!message.body.isNullOrEmpty()) {
-                    HtmlTextWithStyles(
-                        html = message.message(),
-                        textColor = KarikaColors.White,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
-                    )
-                }
-            }
-            KarikaText(
-                text = message.createdAt?.inSarajevo() ?: "",
-                color = KarikaColors.Gray7,
-                textSize = 10.sp,
-                fontWeight = FontWeight.W400,
-                modifier = Modifier.padding(top = 2.dp, end = 4.dp)
-            )
-        }
-    } else {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start
-        ) {
-            KarikaText(
-                text = message.senderDisplayName ?: "",
-                color = KarikaColors.Primary,
-                textSize = 11.sp,
-                fontWeight = FontWeight.W600,
-                modifier = Modifier.padding(start = 4.dp, bottom = 2.dp)
-            )
-            Column(
-                modifier = Modifier
-                    .widthIn(max = 280.dp)
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 4.dp, topEnd = 20.dp,
-                            bottomStart = 20.dp, bottomEnd = 20.dp
-                        )
-                    )
-                    .background(KarikaColors.Primary)
-            ) {
-                MessageAttachments(
-                    attachments = message.attachments,
-                    component = component
-                )
-                if (!message.body.isNullOrEmpty()) {
-                    HtmlTextWithStyles(
-                        html = message.message(),
-                        textColor = KarikaColors.White,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
-                    )
-                }
-            }
-            KarikaText(
-                text = message.createdAt?.inSarajevo() ?: "",
-                color = KarikaColors.Gray7,
-                textSize = 10.sp,
-                fontWeight = FontWeight.W400,
-                modifier = Modifier.padding(top = 2.dp, start = 4.dp)
+        items(messages) { message ->
+            SalesChatBubble(
+                mine = message.isFromVendor(),
+                senderName = message.senderDisplayName,
+                time = message.createdAt?.inSarajevo() ?: "",
+                body = message.message(),
+                attachments = message.attachments,
+                onOpenPdf = { component.downloadChatAttachment(it) },
+                onOpenImage = { component.showImagePreview(it) }
             )
         }
     }

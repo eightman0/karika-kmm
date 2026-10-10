@@ -1,9 +1,7 @@
 package karika.distribucija.ba.ui.view.salesrep.cart
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,12 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -43,21 +41,35 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.OnBehalfCartResponseItem
+import karika.distribucija.ba.ui.components.KBottomPanel
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KDivider
+import karika.distribucija.ba.ui.components.KEmptyPlaceholder
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KImage
+import karika.distribucija.ba.ui.components.KInitials
+import karika.distribucija.ba.ui.components.KPill
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KTonalButton
 import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.KarikaImage
 import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.view.distributer.VendorAccent
+import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_add_plus
-import karikav2.composeapp.generated.resources.ic_delete
-import karikav2.composeapp.generated.resources.ic_products
+import karikav2.composeapp.generated.resources.ic_k_cart
+import karikav2.composeapp.generated.resources.ic_k_minus
+import karikav2.composeapp.generated.resources.ic_k_plus
+import karikav2.composeapp.generated.resources.ic_k_trash
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun SalesOrderCartView(component: SalesOrderCartComponent) {
     val cart by component.cart.collectAsState()
     val items = cart?.items.orEmpty()
+    val customer = component.customer
 
     val vpcTotal = items.sumOf { it.price * it.qty }
     val rowTotal = items.sumOf { it.rowTotal }
@@ -67,7 +79,7 @@ fun SalesOrderCartView(component: SalesOrderCartComponent) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(KarikaColors.Gray20)
+            .background(KarikaUiColors.Page)
     ) {
         // ── Item list ──────────────────────────────────────────────────────────
         if (items.isEmpty()) {
@@ -75,160 +87,198 @@ fun SalesOrderCartView(component: SalesOrderCartComponent) {
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_products),
-                        contentDescription = "",
-                        tint = KarikaColors.Gray9,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    KarikaText(
-                        text = "Korpa je prazna",
-                        color = KarikaColors.Gray6,
-                        textSize = 15.sp
-                    )
-                }
+                KEmptyPlaceholder(
+                    icon = vectorResource(Res.drawable.ic_k_cart),
+                    title = "Korpa je prazna",
+                    message = "Dodajte artikle iz kataloga za ovog kupca.",
+                    iconTint = VendorAccent,
+                    iconBackground = VendorAccentSoft
+                )
             }
         } else {
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 20.dp)
             ) {
-                items(items, key = { it.itemId }) { item ->
-                    CartItemRow(
-                        item = item,
-                        canDiscount = component.canCreateDiscountFor,
-                        onQtyChange = { newQty -> component.updateQty(item, newQty) },
-                        onDiscountChange = { newDiscount -> component.updateDiscount(item, newDiscount) },
-                        onRemove = { component.removeItem(item) }
+                // Title row with "Isprazni korpu"
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        KarikaText(
+                            modifier = Modifier.weight(1f),
+                            text = "Artikli (${items.size})",
+                            color = KarikaUiColors.Ink,
+                            textSize = 18.sp,
+                            lineHeight = 22.sp,
+                            fontWeight = FontWeight.W700,
+                            maxLines = 1
+                        )
+                        KTonalButton(
+                            text = "Isprazni korpu",
+                            icon = vectorResource(Res.drawable.ic_k_trash),
+                            background = KarikaUiColors.RedSoft,
+                            color = KarikaUiColors.Red,
+                            height = 38.dp,
+                            onClick = { component.clearCart() }
+                        )
+                    }
+                }
+
+                // Customer header of the cart card
+                item {
+                    CustomerHeader(
+                        name = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName,
+                        email = customer.email
                     )
                 }
-            }
-        }
 
-        // ── Sticky bottom summary ──────────────────────────────────────────────
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(KarikaColors.White)
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Međuzbir
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KarikaText(
-                    text = "Međuzbir",
-                    color = KarikaColors.Gray6,
-                    textSize = 13.sp,
-                    fontWeight = FontWeight.W500
-                )
-                KarikaText(
-                    text = karikaPriceFormat(vpcTotal) + " KM",
-                    color = KarikaColors.Gray2,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W600
-                )
+                itemsIndexed(items, key = { _, item -> item.itemId }) { index, item ->
+                    CardSegment(isLast = index == items.lastIndex) {
+                        if (index > 0) {
+                            KDivider(modifier = Modifier.padding(horizontal = 14.dp))
+                        }
+                        CartItemRow(
+                            item = item,
+                            canDiscount = component.canCreateDiscountFor,
+                            onQtyChange = { newQty -> component.updateQty(item, newQty) },
+                            onDiscountChange = { newDiscount -> component.updateDiscount(item, newDiscount) },
+                            onRemove = { component.removeItem(item) }
+                        )
+                    }
+                }
             }
 
-            // Popust
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KarikaText(
-                    text = "Popust",
-                    color = KarikaColors.Gray6,
-                    textSize = 13.sp,
-                    fontWeight = FontWeight.W500
+            // ── Sticky bottom summary ──────────────────────────────────────────
+            KBottomPanel(modifier = Modifier.navigationBarsPadding()) {
+                SummaryRow(label = "Međuzbir", value = karikaPriceFormat(vpcTotal) + " KM")
+                SummaryRow(
+                    label = "Popust",
+                    value = "-" + karikaPriceFormat(discountTotal) + " KM",
+                    valueColor = KarikaUiColors.Red
                 )
-                KarikaText(
-                    text = "-" + karikaPriceFormat(discountTotal) + " KM",
-                    color = KarikaColors.Red,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W600
-                )
-            }
-
-            HorizontalDivider(color = KarikaColors.Gray9, thickness = 1.dp)
-
-            // Total
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KarikaText(
-                    text = "Ukupno",
-                    color = KarikaColors.Gray2,
-                    textSize = 15.sp,
-                    fontWeight = FontWeight.W700
-                )
-                KarikaText(
-                    text = karikaPriceFormat(grandTotal) + " KM",
-                    color = KarikaColors.Blue,
-                    textSize = 18.sp,
-                    fontWeight = FontWeight.W700
-                )
-            }
-
-            Spacer(Modifier.height(4.dp))
-
-            // Pregledaj narudžbu
-            val canReview = items.isNotEmpty()
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(if (canReview) KarikaColors.Blue else KarikaColors.Gray9)
-                    .clickable(
-                        enabled = canReview,
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { component.openOrderReview() },
-                contentAlignment = Alignment.Center
-            ) {
-                KarikaText(
-                    text = "Pregledaj narudžbu",
-                    color = KarikaColors.White,
-                    textSize = 15.sp,
-                    fontWeight = FontWeight.W700
-                )
-            }
-
-            // Isprazni korpu
-            if (items.isNotEmpty()) {
-                Box(
+                KDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(44.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(14.dp))
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { component.clearCart() },
-                    contentAlignment = Alignment.Center
+                        .padding(bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     KarikaText(
-                        text = "Isprazni korpu",
-                        color = KarikaColors.Gray4,
-                        textSize = 14.sp,
+                        modifier = Modifier.weight(1f),
+                        text = "Ukupno",
+                        color = KarikaUiColors.Muted,
+                        textSize = 13.sp,
                         fontWeight = FontWeight.W600
+                    )
+                    KarikaText(
+                        text = karikaPriceFormat(grandTotal) + " KM",
+                        color = KarikaUiColors.Ink,
+                        textSize = 22.sp,
+                        lineHeight = 26.sp,
+                        fontWeight = FontWeight.W700,
+                        maxLines = 1
+                    )
+                }
+
+                // Pregledaj narudžbu
+                KPrimaryButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Pregledaj narudžbu",
+                    background = VendorAccent,
+                    height = 50.dp,
+                    enabled = items.isNotEmpty()
+                ) { component.openOrderReview() }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SummaryRow(
+    label: String,
+    value: String,
+    valueColor: androidx.compose.ui.graphics.Color = KarikaUiColors.Ink
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = label,
+            color = KarikaUiColors.Muted,
+            textSize = 13.sp
+        )
+        KarikaText(
+            text = value,
+            color = valueColor,
+            textSize = 14.sp,
+            fontWeight = FontWeight.W600,
+            maxLines = 1
+        )
+    }
+}
+
+private val CardTopShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+private val CardBottomShape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+
+/** Customer row on top of the cart card, as the vendor row of the customer's cart. */
+@Composable
+private fun CustomerHeader(name: String, email: String?) {
+    KCard(modifier = Modifier.fillMaxWidth(), shape = CardTopShape, border = null) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            KInitials(
+                name = name,
+                textSize = 11.sp,
+                background = VendorAccentSoft,
+                color = VendorAccent
+            )
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                KarikaText(
+                    text = name,
+                    color = KarikaUiColors.Ink,
+                    textSize = 14.sp,
+                    lineHeight = 18.sp,
+                    fontWeight = FontWeight.W600,
+                    maxLines = 1
+                )
+                if (!email.isNullOrBlank()) {
+                    KarikaText(
+                        text = email,
+                        color = KarikaUiColors.Muted,
+                        textSize = 12.sp,
+                        lineHeight = 16.sp,
+                        maxLines = 1
                     )
                 }
             }
         }
+        KDivider()
+    }
+}
+
+/** One part of the white cart card (the card is split so the list stays lazy). */
+@Composable
+private fun CardSegment(isLast: Boolean, content: @Composable () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (isLast) Modifier.clip(CardBottomShape) else Modifier)
+            .background(KarikaColors.White)
+    ) {
+        content()
     }
 }
 
@@ -247,137 +297,121 @@ private fun CartItemRow(
         mutableStateOf(item.discountPercent?.takeIf { it > 0 }?.toString() ?: "")
     }
 
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(KarikaColors.White)
-            .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(16.dp))
+            .padding(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // ── Top row: image + info + delete ────────────────────────────────────
-        Row(
+        KImage(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            // Image
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(KarikaColors.Gray20)
-                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(12.dp))
-            ) {
-                KarikaImage(
-                    model = item.imageUrl,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+                .size(72.dp)
+                .clip(RoundedCornerShape(10.dp)),
+            url = item.imageUrl
+        )
 
-            // Info
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(3.dp)
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 KarikaText(
+                    modifier = Modifier.weight(1f),
                     text = item.name,
-                    color = KarikaColors.Gray2,
+                    color = KarikaUiColors.Ink,
                     textSize = 14.sp,
-                    fontWeight = FontWeight.W700
+                    lineHeight = 18.sp,
+                    fontWeight = FontWeight.W600,
+                    maxLines = 2
                 )
-                if (item.sku.isNotBlank()) {
-                    KarikaText(
-                        text = "#${item.sku}",
-                        color = KarikaColors.Gray6,
-                        textSize = 11.sp,
-                        fontWeight = FontWeight.W500
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .clickable { onRemove() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = vectorResource(Res.drawable.ic_k_trash),
+                        contentDescription = "Ukloni",
+                        tint = KarikaUiColors.Subtle,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
-                Spacer(Modifier.height(4.dp))
-                val discountPercent = localDiscount.toIntOrNull() ?: 0
-                val vpc = item.price * localQty
-                val discountedVpc = vpc * (1 - discountPercent / 100.0)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (item.sku.isNotBlank()) {
+                    KPill(
+                        text = "#${item.sku}",
+                        background = KarikaUiColors.Field,
+                        color = KarikaUiColors.Muted,
+                        textSize = 11.sp
+                    )
+                }
+                if (!canDiscount && (item.discountPercent ?: 0) > 0) {
+                    KPill(
+                        text = "Rabat: ${item.discountPercent}%",
+                        background = VendorAccentSoft,
+                        color = VendorAccent,
+                        textSize = 11.sp
+                    )
+                }
+            }
+
+            val discountPercent = localDiscount.toIntOrNull() ?: 0
+            val vpc = item.price * localQty
+            val discountedVpc = vpc * (1 - discountPercent / 100.0)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
                     if (discountPercent > 0) {
                         KarikaText(
                             text = karikaPriceFormat(vpc) + " KM",
-                            color = KarikaColors.Gray6,
-                            textSize = 12.sp,
-                            fontWeight = FontWeight.W500,
+                            color = KarikaUiColors.Subtle,
+                            textSize = 11.5.sp,
+                            maxLines = 1,
                             decoration = TextDecoration.LineThrough
                         )
                     }
                     KarikaText(
                         text = karikaPriceFormat(discountedVpc) + " KM",
-                        color = KarikaColors.Blue,
+                        color = KarikaUiColors.Ink,
                         textSize = 16.sp,
-                        fontWeight = FontWeight.W700
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.W700,
+                        maxLines = 1
+                    )
+                    KarikaText(
+                        text = item.priceString() + " / " + (item.quantityUnit ?: "kom"),
+                        color = KarikaUiColors.Muted,
+                        textSize = 11.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 1
                     )
                 }
-            }
 
-            // Delete button
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(KarikaColors.Red.copy(alpha = 0.08f))
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { onRemove() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = vectorResource(Res.drawable.ic_delete),
-                    contentDescription = "Ukloni",
-                    tint = KarikaColors.Red,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-
-        // ── Bottom row: stepper + rabat ───────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(KarikaColors.Gray20)
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                KarikaText(
-                    text = "Količina:",
-                    color = KarikaColors.Gray6,
-                    textSize = 13.sp,
-                    fontWeight = FontWeight.W500
-                )
-
+                // Blue "– n +" stepper
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(KarikaColors.White)
-                        .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(10.dp))
-                        .padding(horizontal = 2.dp, vertical = 2.dp),
+                        .clip(RoundedCornerShape(50))
+                        .background(VendorAccentSoft)
+                        .padding(3.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(KarikaColors.White)
+                            .clickable {
                                 if (localQty > 1) {
                                     localQty--
                                     onQtyChange(localQty)
@@ -385,12 +419,7 @@ private fun CartItemRow(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        KarikaText(
-                            text = "−",
-                            color = KarikaColors.Gray2,
-                            textSize = 18.sp,
-                            fontWeight = FontWeight.W700
-                        )
+                        KIcon(icon = vectorResource(Res.drawable.ic_k_minus), tint = VendorAccent, size = 16.dp)
                     }
 
                     BasicTextField(
@@ -402,35 +431,34 @@ private fun CartItemRow(
                                 onQtyChange(n)
                             }
                         },
-                        modifier = Modifier.width(46.dp),
+                        modifier = Modifier.width(40.dp),
                         textStyle = TextStyle(
                             fontFamily = karikaFonts(),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.W700,
-                            color = KarikaColors.Gray2,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.W600,
+                            color = KarikaUiColors.Ink,
                             textAlign = TextAlign.Center
                         ),
+                        cursorBrush = SolidColor(VendorAccent),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true
                     )
 
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(VendorAccent)
+                            .clickable {
                                 localQty++
                                 onQtyChange(localQty)
                             },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = vectorResource(Res.drawable.ic_add_plus),
+                            imageVector = vectorResource(Res.drawable.ic_k_plus),
                             contentDescription = "+",
-                            tint = KarikaColors.Gray2,
+                            tint = KarikaColors.White,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -439,22 +467,26 @@ private fun CartItemRow(
 
             if (canDiscount) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(KarikaUiColors.Field)
+                        .padding(start = 12.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     KarikaText(
-                        text = "Rabat:",
-                        color = KarikaColors.Gray6,
+                        modifier = Modifier.weight(1f),
+                        text = "Rabat",
+                        color = KarikaUiColors.Muted,
                         textSize = 13.sp,
-                        fontWeight = FontWeight.W500
+                        fontWeight = FontWeight.W600
                     )
-
                     Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(8.dp))
                             .background(KarikaColors.White)
-                            .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(10.dp))
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         BasicTextField(
@@ -468,32 +500,26 @@ private fun CartItemRow(
                                 }
                                 onDiscountChange(localDiscount.toIntOrNull() ?: 0)
                             },
-                            modifier = Modifier.width(30.dp),
+                            modifier = Modifier.width(34.dp),
                             textStyle = TextStyle(
                                 fontFamily = karikaFonts(),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.W700,
-                                color = KarikaColors.Gray2,
+                                color = KarikaUiColors.Ink,
                                 textAlign = TextAlign.End
                             ),
+                            cursorBrush = SolidColor(VendorAccent),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true
                         )
                         KarikaText(
                             text = "%",
-                            color = KarikaColors.Gray6,
+                            color = KarikaUiColors.Muted,
                             textSize = 14.sp,
                             fontWeight = FontWeight.W600
                         )
                     }
                 }
-            } else if ((item.discountPercent ?: 0) > 0) {
-                KarikaText(
-                    text = "Rabat: ${item.discountPercent}%",
-                    color = KarikaColors.Gray6,
-                    textSize = 13.sp,
-                    fontWeight = FontWeight.W500
-                )
             }
         }
     }

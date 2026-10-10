@@ -216,7 +216,7 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
         val conversations = conversations(ChatAxis.VENDOR_CUSTOMER)
         goTo("Poruke kupaca", under = "Poruke")
         if (conversations.isEmpty()) {
-            compose.waitUntilAtLeastOneExists(hasText("Nema poruka"), SERVER_TIMEOUT_MS)
+            compose.waitUntilAtLeastOneExists(hasText("Još nema poruka"), SERVER_TIMEOUT_MS)
         }
         conversations.take(10).forEach { scrollListTo(hasTestTag(conversationTag(it))) }
     }
@@ -239,7 +239,7 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
         val conversations = conversations(ChatAxis.STAFF)
         goTo("Interne poruke", under = "Poruke")
         if (conversations.isEmpty()) {
-            compose.waitUntilAtLeastOneExists(hasText("Nema internih poruka"), SERVER_TIMEOUT_MS)
+            compose.waitUntilAtLeastOneExists(hasText("Još nema internih poruka"), SERVER_TIMEOUT_MS)
         }
         conversations.take(10).forEach { scrollListTo(hasTestTag(conversationTag(it))) }
     }

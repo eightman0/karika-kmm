@@ -3,47 +3,56 @@ package karika.distribucija.ba.ui.view.salesrep.customers.detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import karika.distribucija.ba.ui.components.KBottomPanel
+import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KDivider
+import karika.distribucija.ba.ui.components.KFieldLabel
+import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KPrimaryButton
+import karika.distribucija.ba.ui.components.KSecondaryButton
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
-import karika.distribucija.ba.ui.components.YSpacer16
+import karika.distribucija.ba.ui.components.KarikaUiColors
+import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.view.distributer.VendorAccent
+import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_search
-import karikav2.composeapp.generated.resources.ic_tertiary
+import karikav2.composeapp.generated.resources.ic_k_close
+import karikav2.composeapp.generated.resources.ic_k_info
+import karikav2.composeapp.generated.resources.ic_k_lock
+import karikav2.composeapp.generated.resources.ic_k_tag
+import karikav2.composeapp.generated.resources.ic_k_user
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -56,296 +65,291 @@ fun SalesDiscountFormView(component: SalesDiscountFormComponent) {
     val isSaving by component.isSaving.collectAsState()
 
     val showDropdown = searchResults.isNotEmpty() && selectedItem == null
+    val customerName = component.customer.company?.takeIf { it.isNotBlank() } ?: component.customer.fullName
 
-    Box(modifier = Modifier.fillMaxSize().background(KarikaColors.Gray20)) {
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 180.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(KarikaUiColors.Page)
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item {
+            KCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
                 Column(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(KarikaColors.White)
-                        .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(24.dp))
-                        .padding(20.dp)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // ── Artikal ili kategorija ─────────────────────────────────
-                    KarikaText(
-                        text = "Artikal ili kategorija",
-                        color = KarikaColors.Gray6,
-                        textSize = 12.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                    Spacer(Modifier.height(6.dp))
+                    // ── Kupac (fixed: the discount is for this customer) ───────────
+                    Column {
+                        KFieldLabel(text = "Kupac")
+                        ReadOnlyField(icon = vectorResource(Res.drawable.ic_k_user), text = customerName)
+                    }
 
-                    // Search field
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(
-                                if (showDropdown) RoundedCornerShape(
-                                    topStart = 12.dp,
-                                    topEnd = 12.dp
-                                )
-                                else RoundedCornerShape(12.dp)
+                    // ── Artikal ili kategorija ─────────────────────────────────────
+                    Column {
+                        KFieldLabel(text = "Artikal ili kategorija")
+                        val selected = selectedItem
+                        if (selected != null) {
+                            // Once chosen, the item is shown read-only with a button to clear it
+                            SelectedItemField(
+                                text = itemSearch.ifEmpty { selected.displayName },
+                                isCategory = selected is DiscountSearchItem.CategoryItem,
+                                onClear = { component.clearItem() }
                             )
-                            .background(KarikaColors.Gray20)
-                            .border(
-                                1.dp,
-                                if (selectedItem != null) KarikaColors.Blue else KarikaColors.Gray9,
-                                if (showDropdown) RoundedCornerShape(
-                                    topStart = 12.dp,
-                                    topEnd = 12.dp
-                                )
-                                else RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_search),
-                            contentDescription = "",
-                            tint = if (selectedItem != null) KarikaColors.Blue else KarikaColors.Gray6,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Box(modifier = Modifier.weight(1f)) {
-                            if (itemSearch.isEmpty()) {
-                                KarikaText(
-                                    text = "Svi artikli i kategorije",
-                                    color = KarikaColors.Gray7,
-                                    textSize = 14.sp,
-                                    fontWeight = FontWeight.W400
-                                )
-                            }
-                            BasicTextField(
+                        } else {
+                            BorderedField(
                                 value = itemSearch,
                                 onValueChange = { component.setItemSearch(it) },
-                                textStyle = TextStyle(
-                                    color = if (selectedItem != null) KarikaColors.Blue else KarikaColors.Gray2,
-                                    fontSize = 14.sp,
-                                    fontWeight = if (selectedItem != null) FontWeight.W600 else FontWeight.W500
-                                ),
-                                cursorBrush = SolidColor(KarikaColors.Blue),
-                                singleLine = true,
-                                readOnly = selectedItem != null,
-                                modifier = Modifier.fillMaxWidth()
+                                placeholder = "Svi artikli i kategorije",
+                                leadingIcon = vectorResource(Res.drawable.ic_k_tag),
+                                keyboardType = KeyboardType.Text,
+                                imeAction = ImeAction.Next,
+                                focusedBorder = showDropdown,
+                                trailing = if (itemSearch.isNotEmpty()) {
+                                    { ClearButton(onClick = { component.clearItem() }) }
+                                } else null
                             )
                         }
-                        if (itemSearch.isNotEmpty()) {
-                            Spacer(Modifier.width(8.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clip(CircleShape)
-                                    .background(KarikaColors.Gray9)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() }
-                                    ) { component.clearItem() },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = vectorResource(Res.drawable.ic_tertiary),
-                                    contentDescription = "Obriši",
-                                    tint = KarikaColors.Gray6,
-                                    modifier = Modifier.size(12.dp)
-                                )
-                            }
-                        }
-                    }
 
-                    // Dropdown results
-                    if (showDropdown) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
-                                .background(KarikaColors.White)
-                                .border(
-                                    1.dp,
-                                    KarikaColors.Gray9,
-                                    RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
-                                )
-                        ) {
-                            searchResults.forEachIndexed { index, item ->
-                                SearchItemRow(
-                                    item = item,
-                                    onClick = { component.selectItem(item) }
-                                )
-                                if (index < searchResults.lastIndex) {
-                                    HorizontalDivider(
-                                        color = KarikaColors.Gray10,
-                                        modifier = Modifier.padding(horizontal = 12.dp)
+                        // Dropdown results
+                        if (showDropdown) {
+                            Spacer(Modifier.height(6.dp))
+                            KCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
+                                searchResults.forEachIndexed { index, item ->
+                                    if (index > 0) KDivider()
+                                    SearchItemRow(
+                                        item = item,
+                                        onClick = { component.selectItem(item) }
                                     )
                                 }
                             }
                         }
                     }
 
-                    YSpacer16()
-
-                    // ── Min. količina | Rabat % ────────────────────────────────
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
+                    // ── Min. količina | Rabat ──────────────────────────────────────
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Column(modifier = Modifier.weight(1f)) {
-                            KarikaText(
-                                text = "Min. količina",
-                                color = KarikaColors.Gray6,
-                                textSize = 12.sp,
-                                fontWeight = FontWeight.W600
+                            KFieldLabel(text = "Min. količina")
+                            BorderedField(
+                                value = minQty,
+                                onValueChange = { component.setMinQty(it) },
+                                placeholder = "Opcionalno",
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Next,
+                                suffix = "kom"
                             )
-                            Spacer(Modifier.height(6.dp))
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(KarikaColors.Gray20)
-                                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 12.dp, vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(modifier = Modifier.weight(1f)) {
-                                    if (minQty.isEmpty()) {
-                                        KarikaText(
-                                            text = "Opcionalno",
-                                            color = KarikaColors.Gray7,
-                                            textSize = 14.sp,
-                                            fontWeight = FontWeight.W400
-                                        )
-                                    }
-                                    BasicTextField(
-                                        value = minQty,
-                                        onValueChange = { component.setMinQty(it) },
-                                        textStyle = TextStyle(
-                                            color = KarikaColors.Gray2,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.W500
-                                        ),
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                        cursorBrush = SolidColor(KarikaColors.Blue),
-                                        singleLine = true,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            }
                         }
-
                         Column(modifier = Modifier.weight(1f)) {
-                            KarikaText(
-                                text = "Rabat %",
-                                color = KarikaColors.Gray6,
-                                textSize = 12.sp,
-                                fontWeight = FontWeight.W600
+                            KFieldLabel(text = "Rabat", required = true, requiredColor = VendorAccent)
+                            BorderedField(
+                                value = discountPercent,
+                                onValueChange = { component.setDiscountPercent(it) },
+                                placeholder = "0",
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Done,
+                                suffix = "%"
                             )
-                            Spacer(Modifier.height(6.dp))
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(KarikaColors.Gray20)
-                                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 12.dp, vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(modifier = Modifier.weight(1f)) {
-                                    if (discountPercent.isEmpty()) {
-                                        KarikaText(
-                                            text = "0",
-                                            color = KarikaColors.Gray7,
-                                            textSize = 14.sp,
-                                            fontWeight = FontWeight.W400
-                                        )
-                                    }
-                                    BasicTextField(
-                                        value = discountPercent,
-                                        onValueChange = { component.setDiscountPercent(it) },
-                                        textStyle = TextStyle(
-                                            color = KarikaColors.Gray2,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.W500
-                                        ),
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                        cursorBrush = SolidColor(KarikaColors.Blue),
-                                        singleLine = true,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                                Spacer(Modifier.width(4.dp))
-                                KarikaText(
-                                    text = "%",
-                                    color = KarikaColors.Gray6,
-                                    textSize = 14.sp,
-                                    fontWeight = FontWeight.W600
-                                )
-                            }
                         }
                     }
                 }
             }
+
+            InfoNote("Popust važi samo za ovog kupca. Bez odabranog artikla ili kategorije važi za sve artikle i kategorije.")
         }
 
-        // ── Footer ─────────────────────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(18.dp))
-                    .border(1.dp, KarikaColors.Blue, RoundedCornerShape(18.dp))
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }) { component.goBack() },
-                contentAlignment = Alignment.Center
-            ) {
-                KarikaText(
+        KBottomPanel {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                KSecondaryButton(
+                    modifier = Modifier.weight(1f),
                     text = "Odustani",
-                    color = KarikaColors.Blue,
-                    textSize = 16.sp,
-                    fontWeight = FontWeight.W700
+                    onClick = { component.goBack() }
+                )
+                KPrimaryButton(
+                    modifier = Modifier.weight(1.6f),
+                    text = "Sačuvaj",
+                    background = VendorAccent,
+                    enabled = !isSaving,
+                    onClick = { component.save() }
                 )
             }
-            Box(
+        }
+    }
+}
+
+/** White bordered text field with the placeholder inside it and an optional suffix ("kom", "%"). */
+@Composable
+private fun BorderedField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    keyboardType: KeyboardType,
+    imeAction: ImeAction,
+    leadingIcon: ImageVector? = null,
+    suffix: String? = null,
+    focusedBorder: Boolean = false,
+    trailing: (@Composable () -> Unit)? = null,
+) {
+    val shape = RoundedCornerShape(12.dp)
+    BasicTextField(
+        modifier = Modifier.fillMaxWidth(),
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = true,
+        textStyle = TextStyle(color = KarikaUiColors.Ink, fontSize = 15.sp, fontFamily = karikaFonts()),
+        cursorBrush = SolidColor(VendorAccent),
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+        decorationBox = { inner ->
+            Row(
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
                     .height(48.dp)
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(if (isSaving) KarikaColors.Gray9 else KarikaColors.Blue)
-                    .clickable(
-                        enabled = !isSaving,
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }) { component.save() },
-                contentAlignment = Alignment.Center
+                    .clip(shape)
+                    .background(KarikaColors.White)
+                    .border(1.dp, if (focusedBorder) VendorAccent else KarikaUiColors.Border, shape)
+                    .padding(horizontal = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (isSaving) {
-                    CircularProgressIndicator(
-                        color = KarikaColors.White,
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    KarikaText(
-                        text = "Sačuvaj",
-                        color = KarikaColors.White,
-                        textSize = 16.sp,
-                        fontWeight = FontWeight.W700
-                    )
+                if (leadingIcon != null) {
+                    KIcon(icon = leadingIcon, tint = KarikaUiColors.Muted, size = 18.dp)
+                    Spacer(Modifier.width(10.dp))
+                }
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                    if (value.isEmpty()) {
+                        KarikaText(text = placeholder, color = KarikaUiColors.Subtle, textSize = 15.sp, maxLines = 1)
+                    }
+                    inner()
+                }
+                if (suffix != null) {
+                    Spacer(Modifier.width(6.dp))
+                    KarikaText(text = suffix, color = KarikaUiColors.Muted, textSize = 13.sp, fontWeight = FontWeight.W600)
+                }
+                if (trailing != null) {
+                    Spacer(Modifier.width(8.dp))
+                    trailing()
                 }
             }
         }
+    )
+}
+
+@Composable
+private fun ReadOnlyField(icon: ImageVector, text: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(KarikaUiColors.Field)
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KIcon(icon = icon, tint = KarikaUiColors.Muted, size = 18.dp)
+        Spacer(Modifier.width(10.dp))
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = text,
+            color = KarikaUiColors.Ink,
+            textSize = 15.sp,
+            maxLines = 1
+        )
+        KIcon(icon = vectorResource(Res.drawable.ic_k_lock), tint = KarikaUiColors.Subtle, size = 16.dp)
+    }
+}
+
+@Composable
+private fun SelectedItemField(text: String, isCategory: Boolean, onClear: () -> Unit) {
+    val shape = RoundedCornerShape(12.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .clip(shape)
+            .background(VendorAccentSoft)
+            .border(1.dp, VendorAccent, shape)
+            .padding(start = 14.dp, end = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KIcon(icon = vectorResource(Res.drawable.ic_k_tag), tint = VendorAccent, size = 18.dp)
+        Spacer(Modifier.width(10.dp))
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = text,
+            color = KarikaUiColors.Ink,
+            textSize = 15.sp,
+            fontWeight = FontWeight.W600,
+            maxLines = 1
+        )
+        Spacer(Modifier.width(8.dp))
+        // Not the "KAT."/"ART." badge: the tests take it for the open result list
+        KarikaText(
+            text = if (isCategory) "Kategorija" else "Artikal",
+            color = VendorAccent,
+            textSize = 11.sp,
+            fontWeight = FontWeight.W700
+        )
+        Spacer(Modifier.width(8.dp))
+        ClearButton(onClick = onClear)
+    }
+}
+
+@Composable
+private fun ClearButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(24.dp)
+            .clip(CircleShape)
+            .background(KarikaUiColors.Field)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        KIcon(icon = vectorResource(Res.drawable.ic_k_close), tint = KarikaUiColors.Muted, size = 14.dp)
+    }
+}
+
+/** "KAT." or "ART." label of a search result. */
+@Composable
+private fun TypeBadge(isCategory: Boolean) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (isCategory) VendorAccentSoft else KarikaUiColors.Field)
+            .padding(horizontal = 6.dp, vertical = 3.dp)
+    ) {
+        KarikaText(
+            text = if (isCategory) "KAT." else "ART.",
+            color = if (isCategory) VendorAccent else KarikaUiColors.Muted,
+            textSize = 10.sp,
+            fontWeight = FontWeight.W700
+        )
+    }
+}
+
+@Composable
+private fun InfoNote(text: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(KarikaUiColors.Field)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        KIcon(icon = vectorResource(Res.drawable.ic_k_info), tint = KarikaUiColors.Muted, size = 18.dp)
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = text,
+            color = KarikaUiColors.Muted,
+            textSize = 12.5.sp,
+            lineHeight = 18.sp
+        )
     }
 }
 
@@ -356,39 +360,20 @@ private fun SearchItemRow(item: DiscountSearchItem, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = onClick
-            )
+            .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // Type badge
-        val isCategory = item is DiscountSearchItem.CategoryItem
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(if (isCategory) KarikaColors.Blue.copy(alpha = 0.12f) else KarikaColors.Gray10)
-                .padding(horizontal = 6.dp, vertical = 3.dp)
-        ) {
-            KarikaText(
-                text = if (isCategory) "KAT." else "ART.",
-                color = if (isCategory) KarikaColors.Blue else KarikaColors.Gray6,
-                textSize = 10.sp,
-                fontWeight = FontWeight.W700
-            )
-        }
+        TypeBadge(isCategory = item is DiscountSearchItem.CategoryItem)
 
-        // Name / path
         Column(modifier = Modifier.weight(1f)) {
             when (item) {
                 is DiscountSearchItem.CategoryItem -> {
                     KarikaText(
                         text = item.fullPath,
-                        color = KarikaColors.Gray2,
-                        textSize = 13.sp,
+                        color = KarikaUiColors.Ink,
+                        textSize = 14.sp,
                         fontWeight = FontWeight.W600
                     )
                 }
@@ -396,16 +381,15 @@ private fun SearchItemRow(item: DiscountSearchItem, onClick: () -> Unit) {
                 is DiscountSearchItem.ProductItem -> {
                     KarikaText(
                         text = item.product.name ?: "—",
-                        color = KarikaColors.Gray2,
-                        textSize = 13.sp,
+                        color = KarikaUiColors.Ink,
+                        textSize = 14.sp,
                         fontWeight = FontWeight.W600
                     )
                     if (!item.product.sku.isNullOrBlank()) {
                         KarikaText(
                             text = item.product.sku!!,
-                            color = KarikaColors.Gray6,
-                            textSize = 11.sp,
-                            fontWeight = FontWeight.W400
+                            color = KarikaUiColors.Muted,
+                            textSize = 12.sp
                         )
                     }
                 }

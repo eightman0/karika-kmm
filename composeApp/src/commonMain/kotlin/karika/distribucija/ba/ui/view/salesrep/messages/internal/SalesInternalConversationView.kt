@@ -1,29 +1,7 @@
 package karika.distribucija.ba.ui.view.salesrep.messages.internal
 
-import karika.distribucija.ba.util.inSarajevo
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,30 +9,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import karika.distribucija.ba.domain.model.ChatMessage
-import karika.distribucija.ba.domain.model.VendorOperationsMe
-import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.KarikaText
-import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_send_receipt
-import org.jetbrains.compose.resources.vectorResource
+import karika.distribucija.ba.ui.view.salesrep.messages.SalesChatBubble
+import karika.distribucija.ba.ui.view.salesrep.messages.SalesChatInput
+import karika.distribucija.ba.ui.view.salesrep.messages.SalesChatScaffold
+import karika.distribucija.ba.util.inSarajevo
 
-private fun String?.formatTime(): String {
+internal fun String?.formatChatTime(): String {
     if (this == null) return ""
     val timePart = this.inSarajevo().split(" ").getOrNull(1) ?: return ""
     val parts = timePart.split(":")
     return if (parts.size >= 2) "${parts[0]}:${parts[1]}" else timePart
 }
 
+/** Internal chat with a colleague; the shell draws the header with the colleague's name. */
 @Composable
 fun SalesInternalConversationView(component: SalesInternalConversationComponent) {
     val messages by component.messages.collectAsState()
@@ -68,169 +36,30 @@ fun SalesInternalConversationView(component: SalesInternalConversationComponent)
         if (messages.isNotEmpty()) listState.scrollToItem(messages.size - 1)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(KarikaColors.Gray20)
+    SalesChatScaffold(
+        listState = listState,
+        isEmpty = messages.isEmpty(),
+        emptyText = null,
+        input = {
+            SalesChatInput(
+                text = text,
+                onTextChange = { text = it },
+                canSend = text.isNotBlank(),
+                onSend = {
+                    keyboard?.hide()
+                    component.sendMessage(text)
+                    text = ""
+                }
+            )
+        }
     ) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(messages, key = { it.messageId ?: 0L }) { message ->
-                InternalMessageBubble(
-                    message = message,
-                    isMine = component.isMine(message, me),
-                    counterpartName = component.conversation.counterpartName ?: "-"
-                )
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(KarikaColors.White)
-                .imePadding()
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(KarikaColors.Gray20)
-                    .border(1.dp, KarikaColors.Gray9, RoundedCornerShape(20.dp))
-                    .padding(horizontal = 4.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    if (text.isEmpty()) {
-                        KarikaText(
-                            text = "Napiši poruku...",
-                            color = KarikaColors.Gray7,
-                            textSize = 14.sp,
-                            fontWeight = FontWeight.W400
-                        )
-                    }
-                    BasicTextField(
-                        value = text,
-                        onValueChange = { text = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        textStyle = TextStyle(
-                            color = KarikaColors.Gray2,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.W400
-                        ),
-                        cursorBrush = SolidColor(KarikaColors.Blue),
-                        maxLines = 5
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (text.isNotBlank()) KarikaColors.Blue else KarikaColors.Gray9)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            enabled = text.isNotBlank()
-                        ) {
-                            keyboard?.hide()
-                            component.sendMessage(text)
-                            text = ""
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = vectorResource(Res.drawable.ic_send_receipt),
-                        contentDescription = "Pošalji",
-                        tint = KarikaColors.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun InternalMessageBubble(message: ChatMessage, isMine: Boolean, counterpartName: String) {
-    if (isMine) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.End
-        ) {
-            KarikaText(
-                text = "Ja",
-                color = KarikaColors.Blue,
-                textSize = 11.sp,
-                fontWeight = FontWeight.W600,
-                modifier = Modifier.padding(end = 4.dp, bottom = 2.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .widthIn(max = 280.dp)
-                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 4.dp, bottomStart = 20.dp, bottomEnd = 20.dp))
-                    .background(KarikaColors.Blue)
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
-            ) {
-                KarikaText(
-                    text = message.body ?: "",
-                    color = KarikaColors.White,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W400
-                )
-            }
-            KarikaText(
-                text = message.createdAt.formatTime(),
-                color = KarikaColors.Gray7,
-                textSize = 10.sp,
-                fontWeight = FontWeight.W400,
-                modifier = Modifier.padding(top = 2.dp, end = 4.dp)
-            )
-        }
-    } else {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start
-        ) {
-            KarikaText(
-                text = counterpartName,
-                color = KarikaColors.Primary,
-                textSize = 11.sp,
-                fontWeight = FontWeight.W600,
-                modifier = Modifier.padding(start = 4.dp, bottom = 2.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .widthIn(max = 280.dp)
-                    .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 20.dp))
-                    .background(KarikaColors.Primary)
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
-            ) {
-                KarikaText(
-                    text = message.body ?: "",
-                    color = KarikaColors.White,
-                    textSize = 14.sp,
-                    fontWeight = FontWeight.W400
-                )
-            }
-            KarikaText(
-                text = message.createdAt.formatTime(),
-                color = KarikaColors.Gray7,
-                textSize = 10.sp,
-                fontWeight = FontWeight.W400,
-                modifier = Modifier.padding(top = 2.dp, start = 4.dp)
+        items(messages, key = { it.messageId ?: 0L }) { message ->
+            SalesChatBubble(
+                mine = component.isMine(message, me),
+                senderName = component.conversation.counterpartName ?: "-",
+                time = message.createdAt.formatChatTime(),
+                body = message.body,
+                html = false
             )
         }
     }
