@@ -128,12 +128,26 @@ fun OrdersView(component: OrdersComponent) {
                 placeholder = "Pretraži narudžbe…",
                 onSearch = { component.filter() }
             )
-            KSquareIconButton(
-                modifier = Modifier.testTag(ORDER_FILTER_TAG),
-                icon = vectorResource(Res.drawable.ic_k_filter),
-                background = if (component.hasFilter()) VendorAccent else KarikaUiColors.Ink,
-                onClick = { component.showFilterState.negate() }
-            )
+            Box {
+                KSquareIconButton(
+                    modifier = Modifier.testTag(ORDER_FILTER_TAG),
+                    icon = vectorResource(Res.drawable.ic_k_filter),
+                    background = VendorAccent,
+                    onClick = { component.showFilterState.negate() }
+                )
+                // An active filter shows as a dot on the button
+                if (component.hasFilter()) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 8.dp, end = 8.dp)
+                            .size(9.dp)
+                            .clip(CircleShape)
+                            .background(KarikaUiColors.Amber)
+                            .border(1.5.dp, KarikaColors.White, CircleShape)
+                    )
+                }
+            }
         }
 
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
@@ -218,7 +232,7 @@ private fun MinOrderCard(amount: String, onChange: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(KarikaUiColors.Ink)
+            .background(VendorAccent)
     ) {
         // Decorative circle; matchParentSize keeps it from setting the card's height
         Box(modifier = Modifier.matchParentSize()) {
@@ -228,7 +242,7 @@ private fun MinOrderCard(amount: String, onChange: () -> Unit) {
                     .offset(x = 24.dp, y = 30.dp)
                     .size(84.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.06f))
+                    .background(Color.White.copy(alpha = 0.12f))
             )
         }
         Row(
@@ -239,7 +253,7 @@ private fun MinOrderCard(amount: String, onChange: () -> Unit) {
             Column(modifier = Modifier.weight(1f)) {
                 KarikaText(
                     text = "Minimalna vrijednost narudžbe",
-                    color = Color(0xFF9AA1B4),
+                    color = KarikaColors.White.copy(alpha = 0.8f),
                     textSize = 12.sp,
                     fontWeight = FontWeight.W500
                 )
@@ -258,14 +272,14 @@ private fun MinOrderCard(amount: String, onChange: () -> Unit) {
                     .testTag(MIN_ORDER_TAG)
                     .height(36.dp)
                     .clip(RoundedCornerShape(18.dp))
-                    .background(VendorAccent)
+                    .background(KarikaColors.White)
                     .clickable(onClick = onChange)
                     .padding(horizontal = 14.dp),
                 contentAlignment = Alignment.Center
             ) {
                 KarikaText(
                     text = "Promijeni",
-                    color = KarikaColors.White,
+                    color = VendorAccent,
                     textSize = 13.sp,
                     fontWeight = FontWeight.W600
                 )
