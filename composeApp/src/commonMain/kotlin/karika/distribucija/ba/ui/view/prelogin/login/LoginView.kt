@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -96,7 +97,7 @@ fun LoginView(component: LoginComponent) {
     val emailValid = remember { mutableStateOf("") }
     val formValid = component.formValid.asState()
     val passwordVisible = remember { mutableStateOf(false) }
-    val accent = if (component.isShop()) KarikaUiColors.Pink else KarikaUiColors.Navy
+    val accent = if (component.isShop()) KarikaUiColors.Pink else KarikaUiColors.Blue
 
     KarikaScaffold(
         containerColor = KarikaUiColors.Page,
@@ -177,8 +178,8 @@ fun LoginView(component: LoginComponent) {
                             } else {
                                 KPill(
                                     text = "Dobavljač",
-                                    background = KarikaUiColors.Field,
-                                    color = KarikaUiColors.Navy
+                                    background = KarikaUiColors.BlueSoft,
+                                    color = KarikaUiColors.Blue
                                 )
                             }
                         }
@@ -204,6 +205,7 @@ fun LoginView(component: LoginComponent) {
                                 KFieldLabel(text = "Email adresa")
                                 LoginField(
                                     tag = LOGIN_EMAIL_FIELD_TAG,
+                                    accent = accent,
                                     value = component.email.value,
                                     onValueChange = { value ->
                                         component.email.value = value
@@ -234,6 +236,7 @@ fun LoginView(component: LoginComponent) {
                                 KFieldLabel(text = "Šifra")
                                 LoginField(
                                     tag = LOGIN_PASSWORD_FIELD_TAG,
+                                    accent = accent,
                                     value = component.pass.value,
                                     onValueChange = { value ->
                                         component.pass.value = value
@@ -258,7 +261,7 @@ fun LoginView(component: LoginComponent) {
                                                     passwordVisible.value = !passwordVisible.value
                                                 },
                                             icon = vectorResource(Res.drawable.ic_k_eye),
-                                            tint = if (passwordVisible.value) KarikaUiColors.Pink else KarikaUiColors.Muted,
+                                            tint = if (passwordVisible.value) accent else KarikaUiColors.Muted,
                                             size = 20.dp
                                         )
                                     }
@@ -271,6 +274,7 @@ fun LoginView(component: LoginComponent) {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 KToggle(
+                                    color = accent,
                                     modifier = Modifier.semantics {
                                         toggleableState = ToggleableState(component.rememberMe.value)
                                         role = Role.Switch
@@ -298,7 +302,7 @@ fun LoginView(component: LoginComponent) {
                                         }
                                         .padding(vertical = 4.dp),
                                     text = "Zaboravili ste šifru?",
-                                    color = KarikaUiColors.Pink,
+                                    color = accent,
                                     fontWeight = FontWeight.W600,
                                     textSize = 13.sp,
                                     maxLines = 1
@@ -330,7 +334,7 @@ fun LoginView(component: LoginComponent) {
                                 withStyle(
                                     style = SpanStyle(
                                         fontWeight = FontWeight.W700,
-                                        color = KarikaUiColors.Pink
+                                        color = accent
                                     )
                                 ) {
                                     append("Registrujte se")
@@ -364,6 +368,7 @@ internal fun LoginField(
     onDone: () -> Unit = {},
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailing: (@Composable () -> Unit)? = null,
+    accent: Color = KarikaUiColors.Pink,
 ) {
     val shape = RoundedCornerShape(12.dp)
     Row(
@@ -394,7 +399,7 @@ internal fun LoginField(
                     fontWeight = FontWeight.W500,
                     fontFamily = karikaFonts()
                 ),
-                cursorBrush = SolidColor(KarikaUiColors.Pink),
+                cursorBrush = SolidColor(accent),
                 visualTransformation = visualTransformation,
                 keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
                 keyboardActions = KeyboardActions(onDone = { onDone() })

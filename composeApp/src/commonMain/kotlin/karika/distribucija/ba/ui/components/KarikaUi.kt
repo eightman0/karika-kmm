@@ -68,6 +68,9 @@ import org.jetbrains.compose.resources.vectorResource
  */
 object KarikaUiColors {
     val Pink = Color(0xFFE8368F)
+    /** Suppliers' blue (KarikaColors.Blue), used instead of pink on supplier screens. */
+    val Blue = Color(0xFF3575E2)
+    val BlueSoft = Color(0xFFE7EFFC)
     val PinkSoft = Color(0xFFFDE7F1)
     val Ink = Color(0xFF1A1F36)
     val Navy = Color(0xFF1C2038)
@@ -374,6 +377,7 @@ fun KChip(
     selected: Boolean,
     modifier: Modifier = Modifier,
     trailingIcon: ImageVector? = null,
+    selectedColor: Color = KarikaUiColors.Ink,
     onClick: () -> Unit,
 ) {
     val shape = RoundedCornerShape(50)
@@ -381,7 +385,7 @@ fun KChip(
         modifier = modifier
             .height(34.dp)
             .clip(shape)
-            .background(if (selected) KarikaUiColors.Ink else KarikaColors.White)
+            .background(if (selected) selectedColor else KarikaColors.White)
             .then(if (selected) Modifier else Modifier.border(1.dp, KarikaUiColors.Border, shape))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp),
@@ -753,13 +757,18 @@ fun KAddButton(modifier: Modifier = Modifier, size: Dp = 38.dp, onClick: () -> U
 
 /** Pink switch from the design ("Zapamti me", notification toggles). */
 @Composable
-fun KToggle(checked: Boolean, modifier: Modifier = Modifier, onCheckedChange: (Boolean) -> Unit) {
+fun KToggle(
+    checked: Boolean,
+    modifier: Modifier = Modifier,
+    color: Color = KarikaUiColors.Pink,
+    onCheckedChange: (Boolean) -> Unit,
+) {
     Box(
         modifier = modifier
             .width(46.dp)
             .height(28.dp)
             .clip(RoundedCornerShape(50))
-            .background(if (checked) KarikaUiColors.Pink else KarikaUiColors.Border)
+            .background(if (checked) color else KarikaUiColors.Border)
             .clickable { onCheckedChange(!checked) }
             .padding(3.dp),
         contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart
@@ -775,11 +784,16 @@ fun KToggle(checked: Boolean, modifier: Modifier = Modifier, onCheckedChange: (B
 
 /** Label above a form field, with a pink asterisk when the field is required. */
 @Composable
-fun KFieldLabel(text: String, modifier: Modifier = Modifier, required: Boolean = false) {
+fun KFieldLabel(
+    text: String,
+    modifier: Modifier = Modifier,
+    required: Boolean = false,
+    requiredColor: Color = KarikaUiColors.Pink,
+) {
     Row(modifier = modifier.padding(bottom = 8.dp)) {
         KarikaText(text = text, color = KarikaUiColors.Muted, textSize = 13.sp, fontWeight = FontWeight.W600)
         if (required) {
-            KarikaText(text = " *", color = KarikaUiColors.Pink, textSize = 13.sp, fontWeight = FontWeight.W600)
+            KarikaText(text = " *", color = requiredColor, textSize = 13.sp, fontWeight = FontWeight.W600)
         }
     }
 }

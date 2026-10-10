@@ -37,11 +37,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -91,9 +93,12 @@ import karikav2.composeapp.generated.resources.ic_k_lock
 import karikav2.composeapp.generated.resources.ic_k_mail
 import org.jetbrains.compose.resources.vectorResource
 
-/** Pink for customers, navy for suppliers, as on the login screen. */
+/** Pink for customers, the suppliers' blue for suppliers, as on the login screen. */
 private fun RegistrationComponent.accent(): Color =
-    if (userType.isShop()) KarikaUiColors.Pink else KarikaUiColors.Navy
+    if (userType.isShop()) KarikaUiColors.Pink else KarikaUiColors.Blue
+
+/** Accent of the fields (cursor, focus, required mark), provided by [RegistrationView]. */
+private val LocalAccent = staticCompositionLocalOf { KarikaUiColors.Pink }
 
 private fun RegistrationComponent.backToLogin() {
     stateHolder.preLoginNavigation.replaceAll(PreLoginConfig.Login(userType))
@@ -101,6 +106,13 @@ private fun RegistrationComponent.backToLogin() {
 
 @Composable
 fun RegistrationView(component: RegistrationComponent) {
+    CompositionLocalProvider(LocalAccent provides component.accent()) {
+        RegistrationContent(component)
+    }
+}
+
+@Composable
+private fun RegistrationContent(component: RegistrationComponent) {
     KarikaScaffold(
         containerColor = KarikaUiColors.Page,
         contentWindowInsets = WindowInsets(0.dp),
@@ -183,7 +195,7 @@ private fun Header(component: RegistrationComponent) {
         if (component.userType.isShop()) {
             KPill(text = "Kupac", background = KarikaUiColors.PinkSoft, color = KarikaUiColors.Pink)
         } else {
-            KPill(text = "Dobavljač", background = KarikaUiColors.Field, color = KarikaUiColors.Navy)
+            KPill(text = "Dobavljač", background = KarikaUiColors.BlueSoft, color = KarikaUiColors.Blue)
         }
         Spacer(Modifier.height(10.dp))
         KarikaText(
@@ -270,13 +282,14 @@ private fun CompanyInfo(component: RegistrationComponent) {
         if (groups.isNotEmpty() || regions.isNotEmpty()) {
             Section("Ciljani kupci") {
                 if (groups.isNotEmpty()) {
-                    KFieldLabel(text = "Ciljana grupa kupaca")
+                    GroupTitle("Ciljana grupa kupaca")
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         groups.forEach { group ->
                             KChip(
+                                selectedColor = component.accent(),
                                 text = group.label(),
                                 selected = customerGroups.value.contains(group)
                             ) {
@@ -293,13 +306,14 @@ private fun CompanyInfo(component: RegistrationComponent) {
                     KDivider()
                 }
                 if (regions.isNotEmpty()) {
-                    KFieldLabel(text = "Ciljana regija kupaca")
+                    GroupTitle("Ciljana regija kupaca")
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         regions.forEach { region ->
                             KChip(
+                                selectedColor = component.accent(),
                                 text = region.label(),
                                 selected = customerRegions.value.contains(region)
                             ) {
@@ -315,6 +329,18 @@ private fun CompanyInfo(component: RegistrationComponent) {
             }
         }
     }
+}
+
+/** Title above a group of chips, in the field labels' font with the accent color. */
+@Composable
+private fun GroupTitle(text: String) {
+    KarikaText(
+        modifier = Modifier.padding(bottom = 2.dp),
+        text = text,
+        color = LocalAccent.current,
+        textSize = 14.sp,
+        fontWeight = FontWeight.W700
+    )
 }
 
 @Composable
@@ -546,7 +572,7 @@ private fun FormField(
 ) {
     val shape = RoundedCornerShape(12.dp)
     Column(modifier = modifier) {
-        KFieldLabel(text = label, required = required)
+        KFieldLabel(text = label, required = required, requiredColor = LocalAccent.current)
         BasicTextField(
             modifier = Modifier.fillMaxWidth(),
             value = value.value,
@@ -564,7 +590,7 @@ private fun FormField(
                 fontSize = 15.sp,
                 fontFamily = karikaFonts()
             ),
-            cursorBrush = SolidColor(KarikaUiColors.Pink),
+            cursorBrush = SolidColor(LocalAccent.current),
             visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
             decorationBox = { innerTextField ->
@@ -595,7 +621,7 @@ private fun FormField(
                                 .clip(RoundedCornerShape(50))
                                 .clickable(onClick = onTogglePassword),
                             icon = vectorResource(Res.drawable.ic_k_eye),
-                            tint = if (password) KarikaUiColors.Muted else KarikaUiColors.Pink,
+                            tint = if (password) KarikaUiColors.Muted else LocalAccent.current,
                             size = 20.dp
                         )
                     }
@@ -620,6 +646,7 @@ private fun DropdownField(
     }
     var expanded by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(12.dp)
+    val accent = LocalAccent.current
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = it }
@@ -629,14 +656,14 @@ private fun DropdownField(
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 .fillMaxWidth()
         ) {
-            KFieldLabel(text = label, required = true)
+            KFieldLabel(text = label, required = true, requiredColor = accent)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
                     .clip(shape)
                     .background(KarikaColors.White)
-                    .border(1.dp, if (expanded) KarikaUiColors.Pink else KarikaUiColors.Border, shape)
+                    .border(1.dp, if (expanded) LocalAccent.current else KarikaUiColors.Border, shape)
                     .padding(horizontal = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -672,7 +699,7 @@ private fun DropdownField(
                             text = option,
                             fontWeight = if (option == value.value) FontWeight.W700 else FontWeight.W400,
                             textSize = 15.sp,
-                            color = if (option == value.value) KarikaUiColors.Pink else KarikaUiColors.Ink
+                            color = if (option == value.value) accent else KarikaUiColors.Ink
                         )
                     }
                 )
