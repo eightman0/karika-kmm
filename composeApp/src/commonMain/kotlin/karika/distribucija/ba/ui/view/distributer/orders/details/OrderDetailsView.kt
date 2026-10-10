@@ -87,6 +87,7 @@ import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.ui.components.negate
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karika.distribucija.ba.ui.view.distributer.orders.details.component.ApproveOrderModal
@@ -1020,7 +1021,7 @@ private fun CommentBar(component: OrderDetailsComponent) {
                     fontFamily = karikaFonts()
                 ),
                 cursorBrush = SolidColor(VendorAccent),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, platformImeOptions = rememberKeyboardCloseOptions()),
                 keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
                 decorationBox = { innerTextField ->
                     Box(

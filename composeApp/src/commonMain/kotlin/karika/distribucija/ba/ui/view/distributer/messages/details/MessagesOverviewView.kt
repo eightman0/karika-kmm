@@ -74,6 +74,7 @@ import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karika.distribucija.ba.ui.view.shop.profile.messages.overview.AttachmentModal
@@ -226,7 +227,7 @@ private fun SearchForRecipient(component: MessagesOverviewComponent) {
                 fontFamily = karikaFonts()
             ),
             cursorBrush = SolidColor(VendorAccent),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search, platformImeOptions = rememberKeyboardCloseOptions()),
             keyboardActions = KeyboardActions(onSearch = { expand.value = true }),
             decorationBox = { innerTextField ->
                 Row(
@@ -441,7 +442,8 @@ private fun EnterComment(component: MessagesOverviewComponent) {
                 cursorBrush = SolidColor(VendorAccent),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Done
+                    imeAction = ImeAction.Done,
+                    platformImeOptions = rememberKeyboardCloseOptions()
                 ),
                 decorationBox = { innerTextField ->
                     Box(

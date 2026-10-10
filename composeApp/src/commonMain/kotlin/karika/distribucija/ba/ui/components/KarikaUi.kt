@@ -286,7 +286,7 @@ fun KSearchField(
                         fontFamily = karikaFonts()
                     ),
                     cursorBrush = SolidColor(cursorColor),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search, platformImeOptions = rememberKeyboardCloseOptions()),
                     keyboardActions = KeyboardActions(onSearch = { onSearch() })
                 )
             }
@@ -860,7 +860,7 @@ fun KTextField(
                 ),
                 cursorBrush = SolidColor(KarikaUiColors.Pink),
                 visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None,
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction)
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction, platformImeOptions = rememberKeyboardCloseOptions())
             )
         }
         if (trailing != null) {

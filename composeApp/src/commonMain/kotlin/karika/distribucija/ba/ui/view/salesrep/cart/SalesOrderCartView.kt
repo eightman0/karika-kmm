@@ -55,6 +55,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karika.distribucija.ba.util.karikaPriceFormat
@@ -440,7 +441,7 @@ private fun CartItemRow(
                             textAlign = TextAlign.Center
                         ),
                         cursorBrush = SolidColor(VendorAccent),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, platformImeOptions = rememberKeyboardCloseOptions()),
                         singleLine = true
                     )
 
@@ -509,7 +510,7 @@ private fun CartItemRow(
                                 textAlign = TextAlign.End
                             ),
                             cursorBrush = SolidColor(VendorAccent),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, platformImeOptions = rememberKeyboardCloseOptions()),
                             singleLine = true
                         )
                         KarikaText(

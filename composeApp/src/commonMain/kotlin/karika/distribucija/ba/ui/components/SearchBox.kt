@@ -82,6 +82,7 @@ fun SearchBox(
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Search,
             keyboardType = KeyboardType.Text,
+            platformImeOptions = rememberKeyboardCloseOptions()
         ),
         keyboardActions = KeyboardActions(
             onSearch = {
@@ -182,6 +183,7 @@ fun SearchBoxBorder(
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Search,
             keyboardType = KeyboardType.Text,
+            platformImeOptions = rememberKeyboardCloseOptions()
         ),
         keyboardActions = KeyboardActions(
             onSearch = {

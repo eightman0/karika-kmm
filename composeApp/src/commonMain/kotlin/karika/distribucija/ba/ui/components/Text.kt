@@ -295,18 +295,7 @@ fun KarikaIntTextField(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done,
-                platformImeOptions = textFieldImeOptions(
-                    onDone = {
-                        focusManager.clearFocus()
-                    },
-                    onNext = {
-                        focusManager.moveFocus(FocusDirection.Next)
-                    },
-                    onPrevious = {
-                        focusManager.moveFocus(FocusDirection.Previous)
-                    },
-                    useAccessoryView = false
-                )
+                platformImeOptions = rememberKeyboardCloseOptions()
             ),
             decorationBox = { innerTextField ->
                 Box(
@@ -427,6 +416,7 @@ fun KarikaTextField1(
             keyboardOptions = KeyboardOptions(
                 imeAction = imeAction,
                 keyboardType = keyboardType,
+                platformImeOptions = rememberKeyboardCloseOptions()
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
@@ -541,6 +531,7 @@ fun KarikaTextField2(
         keyboardOptions = KeyboardOptions(
             imeAction = imeAction,
             keyboardType = keyboardType,
+            platformImeOptions = rememberKeyboardCloseOptions()
         ),
         keyboardActions = KeyboardActions(
             onDone = {
@@ -632,6 +623,7 @@ fun KarikaTextFieldWithoutBorder(
         keyboardOptions = KeyboardOptions(
             imeAction = imeAction,
             keyboardType = keyboardType,
+            platformImeOptions = rememberKeyboardCloseOptions()
         ),
         keyboardActions = KeyboardActions(
             onDone = {
@@ -736,6 +728,7 @@ fun KarikaTextField4(
             keyboardOptions = KeyboardOptions(
                 imeAction = imeAction,
                 keyboardType = keyboardType,
+                platformImeOptions = rememberKeyboardCloseOptions()
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
@@ -841,6 +834,7 @@ fun KarikaAmountField(
         keyboardOptions = KeyboardOptions(
             imeAction = imeAction,
             keyboardType = KeyboardType.Decimal,
+            platformImeOptions = rememberKeyboardCloseOptions()
         ),
         keyboardActions = KeyboardActions(
             onDone = {
@@ -940,6 +934,7 @@ fun KarikaPasswordTextField(
             keyboardOptions = KeyboardOptions(
                 imeAction = imeAction,
                 keyboardType = KeyboardType.Text,
+                platformImeOptions = rememberKeyboardCloseOptions()
             ),
             keyboardActions = KeyboardActions(
                 onDone = {

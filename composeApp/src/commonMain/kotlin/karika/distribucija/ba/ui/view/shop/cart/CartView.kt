@@ -77,6 +77,7 @@ import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.ui.components.negate
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.components.rememberImeVisible
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_k_check
@@ -672,18 +673,7 @@ private fun CartQtyField(
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Done,
-            platformImeOptions = textFieldImeOptions(
-                onDone = {
-                    focusManager.clearFocus()
-                },
-                onNext = {
-                    focusManager.moveFocus(FocusDirection.Next)
-                },
-                onPrevious = {
-                    focusManager.moveFocus(FocusDirection.Previous)
-                },
-                useAccessoryView = false
-            )
+            platformImeOptions = rememberKeyboardCloseOptions()
         ),
         decorationBox = { innerTextField ->
             Box(

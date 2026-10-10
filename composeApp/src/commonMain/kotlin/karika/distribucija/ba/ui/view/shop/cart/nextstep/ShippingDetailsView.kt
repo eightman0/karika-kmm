@@ -61,6 +61,7 @@ import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.util.KarikaConstants
 import karika.distribucija.ba.util.karikaPriceFormat
 import karikav2.composeapp.generated.resources.Res
@@ -428,7 +429,7 @@ private fun ShippingField(
             fontFamily = karikaFonts()
         ),
         cursorBrush = SolidColor(KarikaUiColors.Pink),
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction, platformImeOptions = rememberKeyboardCloseOptions()),
         keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
         decorationBox = { innerTextField ->
             Box(

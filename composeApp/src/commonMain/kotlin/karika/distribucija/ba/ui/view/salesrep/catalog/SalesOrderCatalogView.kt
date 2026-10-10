@@ -74,6 +74,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karikav2.composeapp.generated.resources.Res
@@ -87,9 +88,9 @@ import karikav2.composeapp.generated.resources.ic_k_filter
 import karikav2.composeapp.generated.resources.ic_k_inbox
 import karikav2.composeapp.generated.resources.ic_k_minus
 import karikav2.composeapp.generated.resources.ic_k_plus
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -778,7 +779,7 @@ private fun BlueQtyStepper(
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             ),
             cursorBrush = SolidColor(VendorAccent),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, platformImeOptions = rememberKeyboardCloseOptions()),
             singleLine = true
         )
 

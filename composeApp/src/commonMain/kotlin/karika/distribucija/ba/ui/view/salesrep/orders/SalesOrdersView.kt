@@ -65,6 +65,7 @@ import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karika.distribucija.ba.ui.view.distributer.orders.SheetHandle
@@ -328,7 +329,7 @@ private fun OrderSearchField(value: String, onValueChange: (String) -> Unit, mod
                     fontFamily = karikaFonts()
                 ),
                 cursorBrush = SolidColor(VendorAccent),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search, platformImeOptions = rememberKeyboardCloseOptions()),
                 keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() })
             )
         }

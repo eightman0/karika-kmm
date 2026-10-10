@@ -83,6 +83,7 @@ import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.prelogin.PreLoginConfig
 import karika.distribucija.ba.util.KarikaConstants
 import karikav2.composeapp.generated.resources.Res
@@ -592,7 +593,7 @@ private fun FormField(
             ),
             cursorBrush = SolidColor(LocalAccent.current),
             visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction, platformImeOptions = rememberKeyboardCloseOptions()),
             decorationBox = { innerTextField ->
                 Row(
                     modifier = Modifier

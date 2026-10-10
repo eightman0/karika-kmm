@@ -46,6 +46,7 @@ import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.ui.components.negate
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.prelogin.login.LoginComponent
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_k_lock
@@ -131,7 +132,8 @@ fun ForgotPasswordSheet(
                     cursorBrush = SolidColor(accent),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Done
+                        imeAction = ImeAction.Done,
+                        platformImeOptions = rememberKeyboardCloseOptions()
                     ),
                     keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
                     // The placeholder sits inside the text field, so tests find the field by it

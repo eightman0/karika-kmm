@@ -1,11 +1,15 @@
 package karika.distribucija.ba.ui.common
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
+import platform.CoreGraphics.CGRectMake
 import platform.UIKit.UIAction
 import platform.UIKit.UIBarButtonItem
 import platform.UIKit.UIBarButtonItemStyle
 import platform.UIKit.UIBarButtonSystemItem
+import platform.UIKit.UIScreen
 import platform.UIKit.UIToolbar
+import platform.UIKit.UIViewAutoresizingFlexibleWidth
 import platform.UIKit.UIView
 
 @OptIn(ExperimentalForeignApi::class)
@@ -14,8 +18,11 @@ fun createInputAccessoryToolbar(
     onNext: () -> Unit,
     onDone: () -> Unit
 ): UIView {
-    val toolbar = UIToolbar().apply {
-        sizeToFit()
+    // An accessory view needs a real frame: a toolbar created without one is 0 wide and
+    // never shows. Width follows the screen, the toolbar resizes with rotation.
+    val screenWidth = UIScreen.mainScreen.bounds.useContents { size.width }
+    val toolbar = UIToolbar(frame = CGRectMake(0.0, 0.0, screenWidth, 44.0)).apply {
+        autoresizingMask = UIViewAutoresizingFlexibleWidth
         translucent = true
     }
 

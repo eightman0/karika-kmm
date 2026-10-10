@@ -71,6 +71,7 @@ import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.ui.components.negate
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karika.distribucija.ba.ui.view.distributer.dashboard.DashConfig
@@ -332,7 +333,7 @@ private fun MinOrderSheet(component: OrdersComponent) {
                         fontFamily = karikaFonts()
                     ),
                     cursorBrush = SolidColor(VendorAccent),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done, platformImeOptions = rememberKeyboardCloseOptions())
                 )
                 Spacer(Modifier.width(8.dp))
                 KarikaText(text = "KM", color = KarikaUiColors.Muted, textSize = 16.sp, fontWeight = FontWeight.W700)

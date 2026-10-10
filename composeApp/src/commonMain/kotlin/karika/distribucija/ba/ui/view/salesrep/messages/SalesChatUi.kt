@@ -68,6 +68,7 @@ import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.conversationTag
 import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.ui.components.onClick
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karika.distribucija.ba.ui.view.shop.profile.messages.overview.AttachmentModal
@@ -465,7 +466,7 @@ fun SalesChatInput(
                     fontFamily = karikaFonts()
                 ),
                 cursorBrush = SolidColor(VendorAccent),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, platformImeOptions = rememberKeyboardCloseOptions()),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier

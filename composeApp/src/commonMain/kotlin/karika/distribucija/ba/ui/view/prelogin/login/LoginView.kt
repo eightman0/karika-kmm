@@ -66,18 +66,19 @@ import karika.distribucija.ba.ui.components.KCard
 import karika.distribucija.ba.ui.components.KCircleButton
 import karika.distribucija.ba.ui.components.KFieldLabel
 import karika.distribucija.ba.ui.components.KIcon
+import karika.distribucija.ba.ui.components.KLogo
 import karika.distribucija.ba.ui.components.KPill
 import karika.distribucija.ba.ui.components.KPrimaryButton
 import karika.distribucija.ba.ui.components.KToggle
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaHeaderShape
-import karika.distribucija.ba.ui.components.KLogo
 import karika.distribucija.ba.ui.components.KarikaScaffold
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.components.isEmailFormat
 import karika.distribucija.ba.ui.components.karikaFonts
+import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.prelogin.login.component.ForgotPasswordSheet
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_k_eye
@@ -401,7 +402,7 @@ internal fun LoginField(
                 ),
                 cursorBrush = SolidColor(accent),
                 visualTransformation = visualTransformation,
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction, platformImeOptions = rememberKeyboardCloseOptions()),
                 keyboardActions = KeyboardActions(onDone = { onDone() })
             )
         }
