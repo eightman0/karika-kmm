@@ -3,11 +3,13 @@ package karika.distribucija.ba.e2e
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -25,6 +27,7 @@ import karika.distribucija.ba.domain.model.VendorNotificationSearchResults
 import karika.distribucija.ba.ui.components.DASHBOARD_NOTIFICATIONS_TAG
 import karika.distribucija.ba.ui.components.conversationTag
 import karika.distribucija.ba.ui.view.distributer.customers.CUSTOMER_RULE_TAG
+import karika.distribucija.ba.ui.view.distributer.messages.details.VENDOR_CHAT_BACK
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -96,7 +99,7 @@ class VendorScreensE2ETest : VendorE2ETest() {
     @Test
     fun customerMessagesListStagesConversations() {
         val conversations = conversations(ChatAxis.VENDOR_CUSTOMER)
-        goTo("Poruke kupaca", "Poruke kupca")
+        goTo("Poruke kupaca")
         conversations.take(10).forEach {
             compose.waitUntilAtLeastOneExists(hasTestTag(conversationTag(it)), SERVER_TIMEOUT_MS)
         }
@@ -124,26 +127,26 @@ class VendorScreensE2ETest : VendorE2ETest() {
     fun aConversationOpensWithItsMessagesAndTheBackLinkReturns() {
         val conversation = conversations(ChatAxis.VENDOR_CUSTOMER).firstOrNull()
         assumeTrue("the supplier has no customer conversations", conversation != null)
-        goTo("Poruke kupaca", "Poruke kupca")
+        goTo("Poruke kupaca")
 
         compose.onNodeWithTag(conversationTag(conversation!!)).performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Nazad na poruke"), SCREEN_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasContentDescription(VENDOR_CHAT_BACK), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
         assertTrue(exists(hasSetTextAction() and hasText("Napiši komentar")))
-        compose.onNodeWithText("Nazad na poruke").performClick()
+        compose.onNodeWithContentDescription(VENDOR_CHAT_BACK).performClick()
         compose.waitUntilAtLeastOneExists(hasTestTag(conversationTag(conversation)), SCREEN_TIMEOUT_MS)
     }
 
     @Test
     fun newCustomerMessageAsksForARecipientFirst() {
-        goTo("Poruke kupaca", "Poruke kupca")
+        goTo("Poruke kupaca")
 
         compose.onNodeWithText("Pošalji novu poruku").performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Primalac"), SCREEN_TIMEOUT_MS)
         assertTrue(exists(hasSetTextAction() and hasText("Pretražite primaoce")))
-        compose.onNodeWithText("Nazad na poruke").performClick()
+        compose.onNodeWithContentDescription(VENDOR_CHAT_BACK).performClick()
         compose.waitUntilAtLeastOneExists(hasText("Pošalji novu poruku"), SCREEN_TIMEOUT_MS)
     }
 

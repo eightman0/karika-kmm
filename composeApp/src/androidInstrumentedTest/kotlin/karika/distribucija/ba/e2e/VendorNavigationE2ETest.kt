@@ -95,7 +95,7 @@ class VendorNavigationE2ETest : VendorE2ETest() {
 
     @Test
     fun porukeKupacaOpensTheCustomerMessages() {
-        goTo("Poruke kupaca", "Poruke kupca")
+        goTo("Poruke kupaca")
         compose.onNodeWithText("Pošalji novu poruku").assertIsDisplayed()
     }
 

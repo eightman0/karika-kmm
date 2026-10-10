@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -616,7 +617,9 @@ private fun MessageAttachments(message: ChatMessage, component: MessagesOverview
 fun AttachmentModal(
     showAttachmentModal: MutableState<Boolean>,
     onPickFile: () -> Unit = { },
-    onPickPhoto: () -> Unit = { }
+    onPickPhoto: () -> Unit = { },
+    accent: Color = KarikaUiColors.Pink,
+    accentSoft: Color = KarikaUiColors.PinkSoft,
 ) {
 
     if (showAttachmentModal.value) {
@@ -659,7 +662,9 @@ fun AttachmentModal(
                     AttachmentOption(
                         icon = vectorResource(Res.drawable.ic_k_image),
                         title = "Slika iz galerije",
-                        subtitle = "Fotografija sa telefona"
+                        subtitle = "Fotografija sa telefona",
+                        accent = accent,
+                        accentSoft = accentSoft
                     ) {
                         onPickPhoto()
                         showAttachmentModal.value = false
@@ -668,7 +673,9 @@ fun AttachmentModal(
                     AttachmentOption(
                         icon = vectorResource(Res.drawable.ic_k_document),
                         title = "Fajl sa uređaja",
-                        subtitle = "PDF ili drugi dokument"
+                        subtitle = "PDF ili drugi dokument",
+                        accent = accent,
+                        accentSoft = accentSoft
                     ) {
                         onPickFile()
                         showAttachmentModal.value = false
@@ -692,6 +699,8 @@ private fun AttachmentOption(
     icon: ImageVector,
     title: String,
     subtitle: String,
+    accent: Color,
+    accentSoft: Color,
     onClick: () -> Unit,
 ) {
     Row(
@@ -705,10 +714,10 @@ private fun AttachmentOption(
             modifier = Modifier
                 .size(44.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(KarikaUiColors.PinkSoft),
+                .background(accentSoft),
             contentAlignment = Alignment.Center
         ) {
-            KIcon(icon = icon, tint = KarikaUiColors.Pink, size = 22.dp)
+            KIcon(icon = icon, tint = accent, size = 22.dp)
         }
         Spacer(Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {

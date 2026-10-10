@@ -49,10 +49,10 @@ class VendorPushE2ETest : VendorE2ETest() {
     fun aMessageFromTheCustomerAppearsInTheOpenConversation() {
         val conversation = conversationWithTheCustomer()
         appNotifications().cancelAll()
-        goTo("Poruke kupaca", "Poruke kupca")
+        goTo("Poruke kupaca")
         scrollListTo(hasTestTag(conversationTag(conversation)))
         compose.onNodeWithTag(conversationTag(conversation), useUnmergedTree = true).performClick()
-        compose.waitUntilAtLeastOneExists(composer(), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasSetTextAction() and hasText("Napiši komentar"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
 
         val text = "E2E push kupca " + System.currentTimeMillis()
