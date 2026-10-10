@@ -35,7 +35,7 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * End-to-end test of the supplier's "Upravljanje narudžbama" on stage.karika.ba, see
+ * End-to-end test of the supplier's "Narudžbe" on stage.karika.ba, see
  * [VendorE2ETest]: the list against stage, search, the filter sheet, an order's details and its
  * actions menu, and the minimum order amount dialog. Nothing is approved, rejected, sent or saved.
  */

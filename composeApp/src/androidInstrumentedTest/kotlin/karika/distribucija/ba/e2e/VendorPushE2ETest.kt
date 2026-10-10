@@ -163,7 +163,7 @@ class VendorPushE2ETest : VendorE2ETest() {
 
     private fun composer() = hasSetTextAction() and hasText("Napiši komentar")
 
-    /** Opens the supplier's [order] from "Upravljanje narudžbama". */
+    /** Opens the supplier's [order] from "Narudžbe". */
     private fun openOrder(order: OrdersResponse) {
         goTo("Narudžbe", "Minimalna vrijednost narudžbe")
         val tag = vendorOrderTag(VendorOrder(orderId = order.incrementId))

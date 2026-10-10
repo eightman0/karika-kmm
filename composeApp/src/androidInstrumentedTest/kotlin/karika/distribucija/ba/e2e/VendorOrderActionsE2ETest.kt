@@ -217,7 +217,7 @@ class VendorOrderActionsE2ETest : VendorE2ETest() {
 
             compose.onNodeWithTag(MIN_ORDER_FIELD_TAG).performTextReplacement(amount)
             closeKeyboard()
-            compose.onNode(dialogButton("Sačuvaj")).performClick()
+            compose.onNodeWithText("Sačuvaj").performClick()
 
             compose.waitUntil(SERVER_TIMEOUT_MS) { profile().minOrderAmount?.toDoubleOrNull() == amount.toDouble() }
             compose.waitUntil(SCREEN_TIMEOUT_MS) { exists(hasText("$amount KM", substring = true), unmerged = true) }
