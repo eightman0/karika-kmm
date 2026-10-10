@@ -36,16 +36,21 @@ object MagicLinkHandler {
             return true
         }
         pendingToken = token
+        if (!isLoggedIn(component)) {
+            showLoginRequired(component)
+            return true
+        }
         resolvePendingIfLoggedIn(component)
         return true
     }
 
-    /** Called whenever the app stack changes, so a token kept before login resolves after it. */
+    /**
+     * Called whenever the app stack changes, so a token kept before login resolves after it.
+     * Stays silent while nobody is logged in (also as a guest): the user was already told once,
+     * when the link arrived, and every screen change must not show the dialog again.
+     */
     fun resolvePendingIfLoggedIn(component: CommonComponent) {
-        if (component.stateHolder.sessionHandler.mainConfig() is AppConfig.PreLogin) {
-            if (pendingToken != null) {
-                showInfo(component, "Potrebna prijava", "Prijavite se da biste otvorili link.")
-            }
+        if (!isLoggedIn(component)) {
             return
         }
         val token = pendingToken ?: return
@@ -61,11 +66,20 @@ object MagicLinkHandler {
                     // Session is no longer valid: log in again, then retry the same token.
                     pendingToken = token
                     component.logout()
+                    showLoginRequired(component)
                 }
 
                 is MagicLinkResult.Error -> showInfo(component, ERROR_TITLE, result.message)
             }
         }
+    }
+
+    /** A guest has the app's own JWT, for which mainConfig() is PreLogin as well. */
+    private fun isLoggedIn(component: CommonComponent): Boolean =
+        component.stateHolder.sessionHandler.mainConfig() !is AppConfig.PreLogin
+
+    private fun showLoginRequired(component: CommonComponent) {
+        showInfo(component, "Potrebna prijava", "Prijavite se da biste otvorili link.")
     }
 
     private fun showInfo(component: CommonComponent, title: String, message: String) {

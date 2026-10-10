@@ -352,7 +352,7 @@ fun LoginView(component: LoginComponent) {
 
 /** Gray, borderless login field with a leading icon, as in the design's login form. */
 @Composable
-private fun LoginField(
+internal fun LoginField(
     tag: String,
     value: String,
     onValueChange: (String) -> Unit,
