@@ -310,19 +310,24 @@ fun DashboardView(component: DashboardComponent) {
             KarikaScaffold(
                 modifier = Modifier
                     .windowInsetsPadding(WindowInsets.safeDrawing),
-                containerColor = KarikaColors.White,
+                containerColor = KarikaUiColors.Page,
                 topBar = {
-                    TopBarDashboard(
-                        component = component,
-                        menu = {
-                            scope.launch {
-                                drawerState.open()
+                    // Detail screens draw their own header with a back button
+                    if (!activeInstance.hasOwnHeader()) {
+                        TopBarDashboard(
+                            component = component,
+                            title = activeInstance.title(),
+                            roundedBottom = !activeInstance.continuesHeader(),
+                            menu = {
+                                scope.launch {
+                                    drawerState.open()
+                                }
+                            },
+                            action = {
+                                component.dashNavigate(DashConfig.Notifications)
                             }
-                        },
-                        action = {
-                            component.dashNavigate(DashConfig.Notifications)
-                        }
-                    )
+                        )
+                    }
                 },
                 component = component
             ) {
@@ -360,6 +365,30 @@ fun DashboardView(component: DashboardComponent) {
         }
     }
 }
+
+/** Title of the supplier header for the active screen. */
+private fun DashChild.title(): String = when (this) {
+    is DashChild.Analytics, is DashChild.AnalyticsProducts, is DashChild.AnalyticsAtRisk,
+    is DashChild.AnalyticsFilters -> "Analitika"
+    is DashChild.Orders, is DashChild.OrderDetails -> "Narudžbe"
+    is DashChild.Customers, is DashChild.CustomerRuleEditor -> "Rabati"
+    is DashChild.Employees, is DashChild.EmployeeLocations -> "Komercijalisti"
+    is DashChild.Products, is DashChild.ProductDetails -> "Artikli"
+    is DashChild.CustomerMessages -> "Poruke kupaca"
+    is DashChild.AdminMessages -> "Poruke admina"
+    is DashChild.InternalMessages -> "Interne poruke"
+    is DashChild.MessageDetails -> "Poruke"
+    is DashChild.Profile -> "Profil"
+    is DashChild.Notifications -> "Notifikacije"
+}
+
+/** Screens with their own back header instead of the supplier header. */
+private fun DashChild.hasOwnHeader(): Boolean =
+    this is DashChild.OrderDetails || this is DashChild.CustomerRuleEditor
+
+/** Screens that continue the white header with their own content (search, tabs). */
+private fun DashChild.continuesHeader(): Boolean =
+    this is DashChild.Orders || this is DashChild.Profile
 
 /** Drawer row: icon and label, highlighted with the supplier accent when selected, optional badge. */
 @Composable

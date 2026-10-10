@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -24,9 +26,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -42,6 +45,8 @@ import karika.distribucija.ba.util.KarikaConfig
 import karikav2.composeapp.generated.resources.Res
 import karikav2.composeapp.generated.resources.ic_action
 import karikav2.composeapp.generated.resources.ic_arrow_back
+import karikav2.composeapp.generated.resources.ic_k_bell
+import karikav2.composeapp.generated.resources.ic_k_menu
 import karikav2.composeapp.generated.resources.ic_menu
 import karikav2.composeapp.generated.resources.ic_navigation_vendors
 import karikav2.composeapp.generated.resources.ic_notifications
@@ -345,87 +350,70 @@ const val DASHBOARD_NOTIFICATIONS_TAG = "dashboard_notifications"
 /** Test tag of the unread count on the notifications bell, for the end-to-end tests. */
 const val DASHBOARD_NOTIFICATIONS_BADGE_TAG = "dashboard_notifications_badge"
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * White header of the supplier app: menu, the screen's [title] and the notifications bell.
+ * With [roundedBottom] off the screen continues the white block itself (e.g. search on Narudžbe).
+ */
 @Composable
 fun TopBarDashboard(
     component: DashboardComponent,
-    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
+    title: String,
+    roundedBottom: Boolean = true,
     menu: () -> Unit,
     action: () -> Unit
 ) {
     val badge by component.stateHolder.vendorNotificationHandler.notificationCount.collectAsState()
 
-    Column {
-        TopAppBar(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (roundedBottom) Modifier.clip(KarikaHeaderShape) else Modifier)
+            .background(KarikaColors.White)
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (roundedBottom) 16.dp else 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KCircleButton(
+            modifier = Modifier.testTag(DASHBOARD_MENU_TAG),
+            icon = vectorResource(Res.drawable.ic_k_menu),
+            onClick = menu
+        )
+        Spacer(Modifier.width(12.dp))
+        KarikaText(
+            modifier = Modifier.weight(1f),
+            text = title,
+            color = KarikaUiColors.Ink,
+            textSize = 24.sp,
+            lineHeight = 30.sp,
+            fontWeight = FontWeight.W700,
+            maxLines = 1
+        )
+        Box {
+            KCircleButton(
+                modifier = Modifier.testTag(DASHBOARD_NOTIFICATIONS_TAG),
+                icon = vectorResource(Res.drawable.ic_k_bell),
+                onClick = action
+            )
+            if (badge > 0) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .align(Alignment.TopEnd)
+                        .offset(x = 4.dp, y = (-2).dp)
+                        .defaultMinSize(minWidth = 18.dp, minHeight = 18.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(KarikaUiColors.Blue)
+                        .padding(horizontal = 5.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    KarikaLogo(size = 40)
-                }
-            },
-            navigationIcon = {
-                Icon(
-                    modifier = Modifier
-                        .testTag(DASHBOARD_MENU_TAG)
-                        .onClick {
-                            menu()
-                        }
-                        .padding(horizontal = 4.dp),
-                    imageVector = vectorResource(Res.drawable.ic_menu),
-                    contentDescription = "",
-                    tint = KarikaColors.Gray2
-                )
-            },
-            actions = {
-                Box(modifier = Modifier) {
-                    Icon(
-                        modifier = Modifier
-                            .testTag(DASHBOARD_NOTIFICATIONS_TAG)
-                            .onClick {
-                                action()
-                            }
-                            .padding(horizontal = 4.dp),
-                        imageVector = vectorResource(Res.drawable.ic_notifications),
-                        contentDescription = "",
-                        tint = KarikaColors.Gray2
+                    KarikaText(
+                        modifier = Modifier.testTag(DASHBOARD_NOTIFICATIONS_BADGE_TAG),
+                        text = if (badge > 9) "9+" else "$badge",
+                        textSize = 10.sp,
+                        fontWeight = FontWeight.W700,
+                        color = KarikaColors.White,
+                        maxLines = 1
                     )
-                    if (badge > 0) {
-                        Box(
-                            modifier = Modifier
-                                .defaultMinSize(minWidth = 16.dp, minHeight = 16.dp)
-                                .offset(16.dp, (-8).dp)
-                                .background(color = KarikaColors.Red, shape = RoundedCornerShape(50))
-                                .padding(horizontal = 4.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            KarikaText(
-                                modifier = Modifier
-                                    .padding(0.dp)
-                                    .testTag(DASHBOARD_NOTIFICATIONS_BADGE_TAG),
-                                text = if (badge > 9) "9+" else "$badge",
-                                textSize = 10.sp,
-                                fontWeight = FontWeight.W400,
-                                color = KarikaColors.White
-                            )
-                        }
-                    }
                 }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = KarikaColors.White
-            ),
-            windowInsets = windowInsets
-        )
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth(),
-            thickness = 1.dp,
-            color = KarikaColors.Gray11
-        )
+            }
+        }
     }
 }
