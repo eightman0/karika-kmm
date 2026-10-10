@@ -1,6 +1,8 @@
 package karika.distribucija.ba.e2e
 
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
@@ -29,6 +31,9 @@ import karika.distribucija.ba.domain.model.Vendor
 import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.ui.view.distributer.orders.MIN_ORDER_FIELD_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.MIN_ORDER_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_COMMENT_FIELD_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_COMMENT_SEND_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_DETAILS_BACK_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.vendorOrderTag
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
@@ -93,18 +98,22 @@ class VendorOrderActionsE2ETest : VendorE2ETest() {
         val order = openNewOrder()
         val text = "E2E komentar dobavljaca " + System.currentTimeMillis()
 
-        val field = hasSetTextAction() and hasText("Napiši komentar")
-        compose.onNode(field).performScrollTo()
-        compose.onNode(hasText("Pošalji") and hasClickAction()).assertIsNotEnabled()
+        // The comment bar ("Napiši komentar kupcu…" and the round send button) is pinned below the list
+        val field = hasSetTextAction() and hasTestTag(ORDER_COMMENT_FIELD_TAG)
+        val send = hasTestTag(ORDER_COMMENT_SEND_TAG) and hasClickAction()
+        compose.waitUntilAtLeastOneExists(field, SCREEN_TIMEOUT_MS)
+        compose.onNode(send).assertIsNotEnabled()
         compose.onNode(field).performTextInput(text)
         closeKeyboard()
         waitUntilLoaded()
-        // A tap on "Pošalji" at the screen's bottom does not reach the button in the test (no
+        // A tap on the send button at the screen's bottom does not reach the button in the test (no
         // request is sent), so the click goes through the button's own action; see E2E_PITANJA.md
-        compose.onNode(hasText("Pošalji") and hasClickAction()).performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNode(send).performSemanticsAction(SemanticsActions.OnClick)
 
         // Sent: the field is empty again and the comment is on stage
-        compose.waitUntil(SCREEN_TIMEOUT_MS) { exists(field) }
+        compose.waitUntil(SCREEN_TIMEOUT_MS) {
+            compose.onNode(field).fetchSemanticsNode().config.getOrNull(SemanticsProperties.EditableText)?.text.isNullOrEmpty()
+        }
         compose.waitUntil(SERVER_TIMEOUT_MS) { comments(order).any { it.message() == text } }
         compose.waitUntil(SERVER_TIMEOUT_MS) { exists(hasText(text, substring = true), unmerged = true) }
     }
@@ -252,7 +261,7 @@ class VendorOrderActionsE2ETest : VendorE2ETest() {
         goTo("Narudžbe", "Minimalna vrijednost narudžbe")
         compose.waitUntilAtLeastOneExists(hasTestTag(vendorOrderTag(order)), SERVER_TIMEOUT_MS)
         compose.onNodeWithTag(vendorOrderTag(order)).performScrollTo().performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Nazad na upravljanje narudžbama"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(ORDER_DETAILS_BACK_TAG), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         return order
     }
@@ -372,7 +381,7 @@ class VendorOrderActionsE2ETest : VendorE2ETest() {
         const val SHEET_QTY = 1
         val CONTACT = listOf(
             "Kontakt osoba" to "E2E Kontakt", "Email adresa" to "e2e.kontakt@example.com", "Telefon" to "061234567",
-            "Grad" to "Sarajevo", "Adresa" to "Testna 1", "Poštanski broj" to "71000"
+            "Grad" to "Sarajevo", "Poštanski broj" to "71000", "Adresa" to "Testna 1"
         )
         val DIMENSIONS = listOf(
             "Ukupna širina" to "30", "Ukupna visina" to "20", "Ukupna dubina" to "10", "Ukupna težina" to "2"

@@ -26,6 +26,8 @@ import karika.distribucija.ba.ui.view.distributer.orders.ORDER_FILTER_PRICE_FROM
 import karika.distribucija.ba.ui.view.distributer.orders.ORDER_FILTER_PRICE_TO_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.ORDER_FILTER_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.ORDER_SEARCH_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_DETAILS_BACK_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_DETAILS_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.vendorOrderTag
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
@@ -164,13 +166,13 @@ class VendorOrdersE2ETest : VendorE2ETest() {
 
         compose.onNodeWithTag(vendorOrderTag(order!!)).performClick()
 
-        compose.waitUntilAtLeastOneExists(hasText("Informacije o narudžbi"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(ORDER_DETAILS_TAG), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
-        listOf("STATUS NARUDŽBE", "BROJ NARUDŽBE", "DATUM NARUDŽBE", "UKUPNO VPC", "Specifikacija narudžbe")
+        listOf("Ukupno sa PDV", "Ukupno VPC", "Kupac", "Specifikacija", "Usluga dostave")
             .forEach { assertTrue("\"$it\" is not shown", exists(hasText(it), unmerged = true)) }
         assertTrue(exists(hasText(order.orderId!!, substring = true), unmerged = true))
 
-        compose.onNodeWithText("Nazad na upravljanje narudžbama").performClick()
+        compose.onNodeWithTag(ORDER_DETAILS_BACK_TAG).performClick()
         compose.waitUntilAtLeastOneExists(hasTestTag(vendorOrderTag(order)), SCREEN_TIMEOUT_MS)
     }
 
@@ -179,7 +181,7 @@ class VendorOrdersE2ETest : VendorE2ETest() {
         val order = latest.firstOrNull { !it.locked() }
         assumeTrue("no unlocked order", order != null)
         compose.onNodeWithTag(vendorOrderTag(order!!)).performClick()
-        compose.waitUntilAtLeastOneExists(hasText("Informacije o narudžbi"), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(ORDER_DETAILS_TAG), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         val akcije = compose.onNode(hasText("Akcije", substring = true) and isEnabled())
         assumeTrue("this order has no actions", exists(hasText("Akcije", substring = true) and isEnabled()))
@@ -193,7 +195,7 @@ class VendorOrdersE2ETest : VendorE2ETest() {
         // The back key closes the menu, which has the focus, and does nothing to the order
         pressBackKey()
         compose.waitUntilDoesNotExist(hasText("Printaj narudžbu"), SCREEN_TIMEOUT_MS)
-        compose.onNodeWithText("Informacije o narudžbi").assertExists()
+        compose.onNodeWithTag(ORDER_DETAILS_TAG).assertExists()
     }
 
     @Test

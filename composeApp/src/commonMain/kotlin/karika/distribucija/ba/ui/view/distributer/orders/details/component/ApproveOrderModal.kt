@@ -27,7 +27,7 @@ fun ApproveOrderModal(
     val reason = remember { mutableStateOf("") }
     OrderModal(title = "Odobri narudžbu", onDismiss = onCancel) {
         KarikaText(
-            text = "Usluga dostave",
+            text = "Dostava",
             color = KarikaUiColors.Muted,
             textSize = 13.sp,
             fontWeight = FontWeight.W600
