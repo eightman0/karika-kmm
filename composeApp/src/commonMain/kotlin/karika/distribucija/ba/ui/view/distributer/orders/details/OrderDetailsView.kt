@@ -43,7 +43,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -124,7 +123,7 @@ const val ORDER_DETAILS_BACK_TAG = "vendor_order_details_back"
 const val ORDER_COMMENT_FIELD_TAG = "vendor_order_comment_field"
 const val ORDER_COMMENT_SEND_TAG = "vendor_order_comment_send"
 
-private val NavyLabel = Color(0xFF9AA1B4)
+private val SummaryLabel = KarikaColors.White.copy(alpha = 0.75f)
 private val AmberCard = Color(0xFFFFFBEB)
 private val AmberBorder = Color(0xFFFCD34D)
 private val AmberLine = Color(0xFFFDE68A)
@@ -221,7 +220,7 @@ private fun OrderActions(component: OrderDetailsComponent) {
             modifier = Modifier
                 .height(38.dp)
                 .clip(RoundedCornerShape(50))
-                .background(if (enabled) KarikaUiColors.Ink else KarikaUiColors.Ink.copy(alpha = 0.35f))
+                .background(if (enabled) VendorAccent else VendorAccent.copy(alpha = 0.35f))
                 .clickable(enabled = enabled) { dropdownState.negate() }
                 .padding(start = 14.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -361,17 +360,17 @@ private fun LockedNotice(component: OrderDetailsComponent) {
     }
 }
 
-/** Light status colors for the pill on the navy summary card. */
-private fun statusOnNavy(status: String?): Color = when (status) {
-    "approved" -> Color(0xFF86EFAC)
-    "pending", "estimate-sent", "bill-sent" -> Color(0xFFFCD34D)
-    "rejected" -> Color(0xFFFCA5A5)
-    else -> Color(0xFFD1D5DB)
+/** Status colors for the white pill on the blue summary card. */
+private fun statusOnSummary(status: String?): Color = when (status) {
+    "approved" -> KarikaUiColors.Green
+    "pending", "estimate-sent", "bill-sent" -> KarikaUiColors.Amber
+    "rejected" -> KarikaUiColors.Red
+    else -> KarikaUiColors.Ink
 }
 
 private fun Modifier.lockedBlur(order: VendorOrder) = blur(radius = if (order.locked()) 5.dp else 0.dp)
 
-/** Navy card: total with PDV, status, total VPC and Karika's commission. */
+/** Blue card: total with PDV, status, total VPC and Karika's commission. */
 @Composable
 private fun OrderSummary(component: OrderDetailsComponent) {
     val order by component.order.collectAsState()
@@ -380,7 +379,7 @@ private fun OrderSummary(component: OrderDetailsComponent) {
             .padding(top = 16.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(KarikaUiColors.Ink)
+            .background(VendorAccent)
             .padding(16.dp)
     ) {
         Row(
@@ -390,14 +389,14 @@ private fun OrderSummary(component: OrderDetailsComponent) {
             KarikaText(
                 modifier = Modifier.weight(1f),
                 text = "Ukupno sa PDV",
-                color = NavyLabel,
+                color = SummaryLabel,
                 textSize = 12.sp,
                 fontWeight = FontWeight.W500
             )
-            val color = statusOnNavy(order.realOrderStatus)
+            val color = statusOnSummary(order.realOrderStatus)
             KPill(
                 text = order.status(),
-                background = color.copy(alpha = 0.15f),
+                background = KarikaColors.White,
                 color = color,
                 dot = color,
                 textSize = 11.5.sp
@@ -417,7 +416,7 @@ private fun OrderSummary(component: OrderDetailsComponent) {
                 .padding(top = 14.dp, bottom = 12.dp)
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(KarikaColors.White.copy(alpha = 0.12f))
+                .background(KarikaColors.White.copy(alpha = 0.25f))
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -432,8 +431,7 @@ private fun OrderSummary(component: OrderDetailsComponent) {
                 SummaryValue(
                     modifier = Modifier.weight(1f).lockedBlur(order),
                     label = "Karika provizija",
-                    value = order.totalCommission(),
-                    color = lerp(VendorAccent, KarikaColors.White, 0.45f)
+                    value = order.totalCommission()
                 )
             }
         }
@@ -443,7 +441,7 @@ private fun OrderSummary(component: OrderDetailsComponent) {
 @Composable
 private fun SummaryValue(modifier: Modifier, label: String, value: String, color: Color = KarikaColors.White) {
     Column(modifier = modifier) {
-        KarikaText(text = label, color = NavyLabel, textSize = 11.sp)
+        KarikaText(text = label, color = SummaryLabel, textSize = 11.sp)
         KarikaText(
             modifier = Modifier.padding(top = 2.dp),
             text = value,
