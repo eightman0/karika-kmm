@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,12 +39,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.EmployeeLocationHistory
 import karika.distribucija.ba.domain.model.EmployeeLocationPoint
+import karika.distribucija.ba.ui.components.KBackButton
 import karika.distribucija.ba.ui.components.KarikaColors
+import karika.distribucija.ba.ui.components.KarikaHeaderShape
+import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.XSpacer8
 import karika.distribucija.ba.ui.components.onClick
@@ -53,7 +58,6 @@ import karika.distribucija.ba.ui.view.distributer.employees.EmployeesPill
 import karika.distribucija.ba.ui.view.distributer.employees.RoleBadge
 import karika.distribucija.ba.ui.view.distributer.employees.StatusBadge
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_arrow_back
 import karikav2.composeapp.generated.resources.ic_location
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
@@ -64,6 +68,9 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.vectorResource
 import kotlin.math.roundToInt
 import kotlin.time.ExperimentalTime
+
+/** Test tag of the back button in the locations header, for the end-to-end tests. */
+const val EMPLOYEE_LOCATIONS_BACK_TAG = "employee_locations_back"
 
 @Composable
 fun EmployeeLocationsView(component: EmployeeLocationsComponent) {
@@ -84,31 +91,21 @@ fun EmployeeLocationsView(component: EmployeeLocationsComponent) {
     var focus by remember(history) { mutableStateOf<EmployeeLocationPoint?>(null) }
     // Map opens on the latest pin only; the full trace is opt-in and kept across period changes.
     var showRoute by remember { mutableStateOf(false) }
-    // back, header, periods, summary, [sampled banner], map
-    val mapItemIndex = if (history?.sampled == true) 5 else 4
+    // employee, periods, summary, [sampled banner], map
+    val mapItemIndex = if (history?.sampled == true) 4 else 3
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(KarikaUiColors.Page)
+    ) {
+    LocationsHeader(employee.fullName) { component.dashBack() }
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.weight(1f).fillMaxWidth(),
         state = listState,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item {
-            Row(
-                modifier = Modifier.onClick { component.dashBack() }.padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    modifier = Modifier.size(18.dp),
-                    imageVector = vectorResource(Res.drawable.ic_arrow_back),
-                    contentDescription = null,
-                    tint = KarikaColors.Blue
-                )
-                XSpacer8()
-                KarikaText(text = "Komercijalisti", color = KarikaColors.Blue, textSize = 14.sp, fontWeight = FontWeight.W600)
-            }
-        }
-
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 EmployeeAvatar(employee, 52.dp)
@@ -228,9 +225,44 @@ fun EmployeeLocationsView(component: EmployeeLocationsComponent) {
             item { EmployeesInfoState(title = "Učitavanje", text = "Dohvatam lokacije…") }
         }
     }
+    }
 
     LaunchedEffect(Unit) {
         component.load()
+    }
+}
+
+/** White header like the order details: back, "Historija lokacija" and the employee's name. */
+@Composable
+private fun LocationsHeader(name: String, onBack: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(KarikaHeaderShape)
+            .background(KarikaColors.White)
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KBackButton(modifier = Modifier.testTag(EMPLOYEE_LOCATIONS_BACK_TAG), onClick = onBack)
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            KarikaText(
+                text = "Historija lokacija",
+                color = KarikaUiColors.Muted,
+                textSize = 11.5.sp,
+                lineHeight = 15.sp,
+                fontWeight = FontWeight.W500,
+                maxLines = 1
+            )
+            KarikaText(
+                text = name,
+                color = KarikaUiColors.Ink,
+                textSize = 17.sp,
+                lineHeight = 22.sp,
+                fontWeight = FontWeight.W700,
+                maxLines = 1
+            )
+        }
     }
 }
 

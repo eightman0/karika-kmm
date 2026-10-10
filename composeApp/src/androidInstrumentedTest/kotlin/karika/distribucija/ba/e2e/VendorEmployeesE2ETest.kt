@@ -1,7 +1,7 @@
 package karika.distribucija.ba.e2e
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
@@ -15,6 +15,7 @@ import karika.distribucija.ba.domain.model.EmployeeLocationHistory
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorEmployee
 import karika.distribucija.ba.domain.model.VendorEmployeeSearchResults
+import karika.distribucija.ba.ui.view.distributer.employees.locations.EMPLOYEE_LOCATIONS_BACK_TAG
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.DateTimeUnit
@@ -119,7 +120,7 @@ class VendorEmployeesE2ETest : VendorE2ETest() {
     }
 
     @Test
-    fun theBackLinkOnTheLocationsReturnsToTheTeam() {
+    fun theBackButtonOnTheLocationsReturnsToTheTeam() {
         assumeTrue("the supplier may not see the team", canViewEmployees())
         val employee = employees().items.firstOrNull { it.canOpenLocations }
         assumeTrue("no employee whose locations the supplier may see", employee != null)
@@ -129,12 +130,7 @@ class VendorEmployeesE2ETest : VendorE2ETest() {
         compose.waitUntilAtLeastOneExists(hasText("Zadnjih 30 dana"), SCREEN_TIMEOUT_MS)
         waitUntilLoaded()
 
-        // The back link, not the drawer's item of the same name, which is off screen
-        val links = compose.onAllNodesWithText("Komercijalisti")
-        val link = (0 until links.fetchSemanticsNodes().size).first {
-            runCatching { links[it].assertIsDisplayed() }.isSuccess
-        }
-        links[link].performClick()
+        compose.onNodeWithTag(EMPLOYEE_LOCATIONS_BACK_TAG).performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Pretraži po imenu ili emailu"), SCREEN_TIMEOUT_MS)
         compose.waitUntilDoesNotExist(hasText("Zadnjih 30 dana"), SCREEN_TIMEOUT_MS)
