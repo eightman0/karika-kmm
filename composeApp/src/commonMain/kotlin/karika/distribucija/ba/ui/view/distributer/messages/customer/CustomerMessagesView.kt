@@ -32,6 +32,7 @@ import karika.distribucija.ba.domain.model.ChatAxis
 import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.ui.components.KBottomPanel
 import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KEmptyPlaceholder
 import karika.distribucija.ba.ui.components.KInitials
 import karika.distribucija.ba.ui.components.KPrimaryButton
 import karika.distribucija.ba.ui.components.KarikaText
@@ -40,6 +41,7 @@ import karika.distribucija.ba.ui.components.conversationTag
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
 import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_k_chat
 import karikav2.composeapp.generated.resources.ic_k_send
 import org.jetbrains.compose.resources.vectorResource
 
@@ -79,16 +81,33 @@ fun VendorConversationList(
             .fillMaxSize()
             .background(KarikaUiColors.Page)
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            state = state,
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(items = conversations) {
-                VendorConversationItem(it, onOpen)
+        if (conversations.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                KEmptyPlaceholder(
+                    icon = vectorResource(Res.drawable.ic_k_chat),
+                    title = "Još nema poruka",
+                    message = "Započnite razgovor dugmetom „Pošalji novu poruku” ispod.",
+                    iconTint = VendorAccent,
+                    iconBackground = VendorAccentSoft
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                state = state,
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(items = conversations) {
+                    VendorConversationItem(it, onOpen)
+                }
             }
         }
         KBottomPanel {

@@ -915,6 +915,52 @@ fun KEmptyState(text: String, modifier: Modifier = Modifier) {
     }
 }
 
+/** Empty state with a round icon, a title and a hint, centered in the available space. */
+@Composable
+fun KEmptyPlaceholder(
+    icon: ImageVector,
+    title: String,
+    message: String,
+    modifier: Modifier = Modifier,
+    iconTint: Color = KarikaUiColors.Pink,
+    iconBackground: Color = KarikaUiColors.PinkSoft,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(iconBackground),
+            contentAlignment = Alignment.Center
+        ) {
+            KIcon(icon = icon, tint = iconTint, size = 30.dp)
+        }
+        Spacer(Modifier.height(16.dp))
+        KarikaText(
+            text = title,
+            color = KarikaUiColors.Ink,
+            textSize = 18.sp,
+            lineHeight = 24.sp,
+            fontWeight = FontWeight.W700,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(6.dp))
+        KarikaText(
+            text = message,
+            color = KarikaUiColors.Muted,
+            textSize = 14.sp,
+            lineHeight = 20.sp,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
 /** Bottom sheet style confirmation panel used on top of a dimmed screen. */
 @Composable
 fun KConfirmSheet(

@@ -37,6 +37,7 @@ import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.ui.components.KBackHeader
 import karika.distribucija.ba.ui.components.KBottomPanel
 import karika.distribucija.ba.ui.components.KCard
+import karika.distribucija.ba.ui.components.KEmptyPlaceholder
 import karika.distribucija.ba.ui.components.KInitials
 import karika.distribucija.ba.ui.components.KPrimaryButton
 import karika.distribucija.ba.ui.components.KarikaColors
@@ -45,6 +46,7 @@ import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
 import karika.distribucija.ba.ui.components.conversationTag
 import karikav2.composeapp.generated.resources.Res
+import karikav2.composeapp.generated.resources.ic_k_chat
 import karikav2.composeapp.generated.resources.ic_k_send
 import org.jetbrains.compose.resources.vectorResource
 
@@ -113,6 +115,17 @@ fun MessagesScreen(
 @Composable
 fun MessageList(component: AdminMessagesComponent) {
     val messages by component.messages.collectAsState()
+
+    if (messages.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            KEmptyPlaceholder(
+                icon = vectorResource(Res.drawable.ic_k_chat),
+                title = "Još nema poruka",
+                message = "Započnite razgovor dugmetom „Pošalji novu poruku” ispod."
+            )
+        }
+        return
+    }
 
     LazyColumn(
         modifier = Modifier
