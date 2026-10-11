@@ -168,7 +168,7 @@ private fun Header(component: VendorComponent) {
             if (!component.isGuest()) {
                 KCircleButton(
                     icon = vectorResource(Res.drawable.ic_k_bell),
-                    showDot = notificationCount > 0
+                    badgeCount = notificationCount
                 ) {
                     component.appNavigate(AppConfig.Notifications)
                 }

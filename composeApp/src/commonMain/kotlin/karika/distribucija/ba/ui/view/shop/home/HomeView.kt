@@ -170,7 +170,7 @@ private fun HomeHeader(component: HomeComponent) {
             Spacer(Modifier.width(12.dp))
             KCircleButton(
                 icon = vectorResource(Res.drawable.ic_k_bell),
-                showDot = notificationCount > 0,
+                badgeCount = notificationCount,
                 onClick = {
                     if (guest) {
                         component.stateHolder.commonHandler.showLoginRequired("")

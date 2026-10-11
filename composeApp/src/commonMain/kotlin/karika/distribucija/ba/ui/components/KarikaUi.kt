@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -130,6 +131,8 @@ fun KCircleButton(
     size: Dp = 42.dp,
     iconSize: Dp = 20.dp,
     showDot: Boolean = false,
+    badgeCount: Int = 0,
+    badgeColor: Color = KarikaUiColors.Pink,
     onClick: () -> Unit,
 ) {
     Box(modifier = modifier.size(size)) {
@@ -143,7 +146,32 @@ fun KCircleButton(
         ) {
             KIcon(icon = icon, tint = tint, size = iconSize)
         }
-        if (showDot) {
+        if (badgeCount > 0) {
+            // Count badge on the top right corner, white ring to stand off the button
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 5.dp, y = (-3).dp)
+                    .defaultMinSize(minWidth = 20.dp, minHeight = 20.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(KarikaColors.White)
+                    .padding(2.dp)
+                    .defaultMinSize(minWidth = 16.dp, minHeight = 16.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(badgeColor)
+                    .padding(horizontal = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                KarikaText(
+                    text = if (badgeCount > 9) "9+" else "$badgeCount",
+                    color = KarikaColors.White,
+                    textSize = 10.sp,
+                    lineHeight = 12.sp,
+                    fontWeight = FontWeight.W700,
+                    maxLines = 1
+                )
+            }
+        } else if (showDot) {
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)

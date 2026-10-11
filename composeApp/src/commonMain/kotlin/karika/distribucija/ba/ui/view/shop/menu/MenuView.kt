@@ -77,7 +77,7 @@ fun MenuView(component: MenuComponent) {
             trailing = {
                 KCircleButton(
                     icon = vectorResource(Res.drawable.ic_k_bell),
-                    showDot = notificationCount > 0
+                    badgeCount = notificationCount
                 ) {
                     if (component.isGuest()) {
                         component.stateHolder.commonHandler.showLoginRequired("*Potrebna registracija za pristup notifikacijama")

@@ -108,7 +108,7 @@ private fun Header(component: ProfileComponent) {
             Spacer(Modifier.width(8.dp))
             KCircleButton(
                 icon = vectorResource(Res.drawable.ic_k_bell),
-                showDot = notificationCount > 0,
+                badgeCount = notificationCount,
                 onClick = { component.appNavigate(AppConfig.Notifications) }
             )
         }
