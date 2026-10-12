@@ -1,17 +1,18 @@
 package karika.distribucija.ba
 
+import android.Manifest
+import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
-import java.io.ByteArrayOutputStream
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import androidx.core.content.ContextCompat
+import java.io.File
 
 /** Plain payload activity - lock task, Home role and updates are all the launcher's job (it is
  * the Device Owner and installs this app through the admin dashboard), not this app's. */
@@ -23,14 +24,30 @@ class MainActivityKiosk : KarikaActivity() {
     }
     private var takePhotoCallback: ((String, ByteArray) -> Unit)? = null
 
-    @OptIn(ExperimentalUuidApi::class)
-    private val takePictureLauncher =
-        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            if (bitmap != null) {
-                takePhotoCallback?.invoke(
-                    Uuid.random().toString() + ".png",
-                    bitmapToByteArray(bitmap)
-                )
+    /** CameraCaptureActivity, not an IMAGE_CAPTURE intent - see its own doc comment for why. */
+    private val cameraLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val callback = takePhotoCallback
+            takePhotoCallback = null
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+            val path = result.data?.getStringExtra(CameraCaptureActivity.EXTRA_RESULT_PATH)
+                ?: return@registerForActivityResult
+            val file = File(path)
+            if (!file.exists()) return@registerForActivityResult
+            val bytes = file.readBytes()
+            file.delete()
+            callback?.invoke(file.name, bytes)
+        }
+
+    /** A plain runtime request - the dialog opens in this app's own task, so lock task allows it,
+     * same as salesrep's AttachmentPicker. */
+    private val cameraPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                launchCamera()
+            } else {
+                takePhotoCallback = null
+                Toast.makeText(this, "Za slikanje je potrebna dozvola za kameru", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -45,12 +62,16 @@ class MainActivityKiosk : KarikaActivity() {
     }
 
     override fun takePhoto(callback: (String, ByteArray) -> Unit) {
-        fun takePicture() {
-            takePhotoCallback = callback
-            takePictureLauncher.launch()
+        takePhotoCallback = callback
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            launchCamera()
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
+    }
 
-        takePicture()
+    private fun launchCamera() {
+        cameraLauncher.launch(Intent(this, CameraCaptureActivity::class.java))
     }
 
     override fun onResume() {
@@ -86,14 +107,4 @@ class MainActivityKiosk : KarikaActivity() {
     private fun removeCallbacks() {
         handler.removeCallbacks(idleRunnable)
     }
-}
-
-fun bitmapToByteArray(
-    bitmap: Bitmap,
-    format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
-    quality: Int = 100
-): ByteArray {
-    val stream = ByteArrayOutputStream()
-    bitmap.compress(format, quality, stream)
-    return stream.toByteArray()
 }

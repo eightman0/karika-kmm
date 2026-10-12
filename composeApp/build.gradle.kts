@@ -114,9 +114,9 @@ android {
         applicationId = "karika.distribucija.ba"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 271
+        versionCode = 275
 
-        versionName = "2.7.1"
+        versionName = "2.7.5"
 
         // Runs every E2E test once in the app's order when all of them are asked for, see E2ETestRunner
         testInstrumentationRunner = "karika.distribucija.ba.e2e.E2ETestRunner"
@@ -218,6 +218,16 @@ android {
 }
 
 dependencies {
+    // In-app photo capture for the shop kiosk (see src/kiosk/.../CameraCaptureActivity.kt) - the
+    // launcher provisions tablets with system apps disabled, so there is no Camera app to take an
+    // IMAGE_CAPTURE intent. Both kiosk flavors share src/kiosk, so both need it.
+    listOf("kioskImplementation", "kioskTestImplementation").forEach { configuration ->
+        add(configuration, libs.androidx.camera.core)
+        add(configuration, libs.androidx.camera.camera2)
+        add(configuration, libs.androidx.camera.lifecycle)
+        add(configuration, libs.androidx.camera.view)
+    }
+
     // End-to-end tests that launch the real app on a device, see src/androidInstrumentedTest
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
