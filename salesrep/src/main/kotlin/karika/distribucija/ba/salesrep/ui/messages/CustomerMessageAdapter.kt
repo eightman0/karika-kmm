@@ -57,12 +57,20 @@ class CustomerMessageAdapter(
 
             binding.textSenderLabel.text = if (isMine) context.getString(R.string.customer_message_me_label) else counterpartName()
             binding.textSenderLabel.setTextColor(
-                context.getColor(if (isMine) R.color.karika_blue else R.color.karika_primary)
+                context.getColor(if (isMine) R.color.k_subtle else R.color.k_accent)
             )
 
             binding.bubbleContainer.setBackgroundResource(
-                if (isMine) R.drawable.bg_bubble_mine else R.drawable.bg_bubble_other
+                if (isMine) R.drawable.bg_k_msg_bubble_mine else R.drawable.bg_k_msg_bubble_other
             )
+            binding.textMessageBubble.setTextColor(context.getColor(if (isMine) R.color.k_white else R.color.k_ink))
+            // PDF chip: translucent white on the blue bubble, soft blue on the white one.
+            binding.rowAttachmentPdf.setBackgroundResource(
+                if (isMine) R.drawable.bg_k_msg_pdf_mine else R.drawable.bg_k_msg_soft_10
+            )
+            val pdfColor = context.getColor(if (isMine) R.color.k_white else R.color.k_accent)
+            binding.textAttachmentPdfName.setTextColor(pdfColor)
+            binding.iconAttachmentPdf.setColorFilter(pdfColor)
 
             renderAttachment(message)
 

@@ -36,13 +36,14 @@ class InternalMessageAdapter(
 
             binding.textSenderLabel.text = if (isMine) context.getString(R.string.internal_message_me_label) else counterpartName()
             binding.textSenderLabel.setTextColor(
-                context.getColor(if (isMine) R.color.karika_blue else R.color.karika_primary)
+                context.getColor(if (isMine) R.color.k_subtle else R.color.k_accent)
             )
 
             binding.textMessageBubble.text = message.message
             binding.textMessageBubble.setBackgroundResource(
-                if (isMine) R.drawable.bg_bubble_mine else R.drawable.bg_bubble_other
+                if (isMine) R.drawable.bg_k_msg_bubble_mine else R.drawable.bg_k_msg_bubble_other
             )
+            binding.textMessageBubble.setTextColor(context.getColor(if (isMine) R.color.k_white else R.color.k_ink))
 
             binding.textMessageTime.text = message.formattedTime()
 

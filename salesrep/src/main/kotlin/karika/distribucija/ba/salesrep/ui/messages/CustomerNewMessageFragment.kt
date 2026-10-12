@@ -121,7 +121,7 @@ class CustomerNewMessageFragment : Fragment() {
             binding.textAttachmentName.text = attachment.first.take(32)
         }
         binding.iconAttach.setColorFilter(
-            requireContext().getColor(if (attachment != null) R.color.karika_blue else R.color.karika_gray6)
+            requireContext().getColor(if (attachment != null) R.color.k_accent else R.color.k_ink)
         )
         renderSendButton()
     }
@@ -151,7 +151,7 @@ class CustomerNewMessageFragment : Fragment() {
         binding.editCustomerSearch.isFocusable = selected == null
         binding.editCustomerSearch.isFocusableInTouchMode = selected == null
         binding.editCustomerSearch.setTextColor(
-            requireContext().getColor(if (selected != null) R.color.karika_blue else R.color.karika_gray2)
+            requireContext().getColor(if (selected != null) R.color.k_accent else R.color.k_ink)
         )
 
         val query = binding.editCustomerSearch.text?.toString().orEmpty()
@@ -162,9 +162,9 @@ class CustomerNewMessageFragment : Fragment() {
 
         binding.recipientFieldContainer.setBackgroundResource(
             when {
-                showDropdown -> R.drawable.bg_message_field_open
-                customerFieldFocused -> R.drawable.bg_message_field_focused
-                else -> R.drawable.bg_message_field_default
+                showDropdown -> R.drawable.bg_k_msg_field_open
+                customerFieldFocused -> R.drawable.bg_k_field_outline_focused
+                else -> R.drawable.bg_k_field_outline
             }
         )
     }
@@ -172,7 +172,7 @@ class CustomerNewMessageFragment : Fragment() {
     private fun renderSendButton() {
         val canSend = !binding.editMessage.text.isNullOrBlank() || viewModel.attachment.value != null
         binding.buttonSend.setBackgroundResource(
-            if (canSend) R.drawable.bg_message_send_active else R.drawable.bg_message_send_inactive
+            if (canSend) R.drawable.bg_k_msg_send_active else R.drawable.bg_k_msg_send_inactive
         )
         binding.buttonSend.isEnabled = canSend
     }

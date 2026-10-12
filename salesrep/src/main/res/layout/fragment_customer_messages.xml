@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_gray20">
+    android:background="@color/k_page">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,51 +21,55 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
-                android:paddingVertical="10dp">
+                android:paddingTop="12dp"
+                android:paddingBottom="6dp">
 
                 <TextView
                     android:id="@+id/pill_filter_all"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_message_filter_selected"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_k_chip_selected"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="8dp"
+                    android:gravity="center"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:paddingHorizontal="14dp"
                     android:text="@string/customer_messages_filter_all"
-                    android:textColor="@color/karika_white"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textColor="@color/k_white"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/pill_filter_sent"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="34dp"
                     android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_message_filter_unselected"
+                    android:background="@drawable/bg_k_chip"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="8dp"
+                    android:gravity="center"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:paddingHorizontal="14dp"
                     android:text="@string/customer_messages_filter_sent"
-                    android:textColor="@color/karika_gray2"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textColor="@color/k_ink"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/pill_filter_received"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="34dp"
                     android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_message_filter_unselected"
+                    android:background="@drawable/bg_k_chip"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="8dp"
+                    android:gravity="center"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:paddingHorizontal="14dp"
                     android:text="@string/customer_messages_filter_received"
-                    android:textColor="@color/karika_gray2"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textColor="@color/k_ink"
+                    android:textSize="14sp" />
             </LinearLayout>
         </HorizontalScrollView>
 
@@ -85,11 +89,12 @@
                     android:layout_height="match_parent"
                     android:clipToPadding="false"
                     android:paddingHorizontal="16dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="120dp" />
+                    android:paddingTop="8dp"
+                    android:paddingBottom="104dp" />
 
                 <LinearLayout
                     android:id="@+id/layout_empty"
+                    android:paddingHorizontal="32dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -100,26 +105,26 @@
                     <FrameLayout
                         android:layout_width="72dp"
                         android:layout_height="72dp"
-                        android:background="@drawable/bg_empty_icon_circle">
+                        android:background="@drawable/bg_k_avatar">
 
                         <ImageView
                             android:id="@+id/icon_empty"
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_messages"
-                            app:tint="@color/karika_gray6" />
+                            app:tint="@color/k_accent" />
                     </FrameLayout>
 
                     <TextView
                         android:id="@+id/text_empty_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="16dp"
                         android:gravity="center"
-                        android:textColor="@color/karika_gray2"
-                        android:textSize="15sp"
+                        android:textColor="@color/k_ink"
+                        android:textSize="18sp"
                         android:textStyle="bold"
                         tools:text="@string/customer_messages_empty_all" />
 
@@ -127,45 +132,56 @@
                         android:id="@+id/text_empty_subtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
                         android:gravity="center"
+                        android:lineSpacingExtra="4dp"
                         android:text="@string/customer_messages_empty_subtitle"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="13sp" />
+                        android:textColor="@color/k_muted"
+                        android:textSize="14sp" />
                 </LinearLayout>
             </FrameLayout>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/button_new_message"
-        android:layout_width="wrap_content"
+    <!-- Bottom panel with the full-width primary button (composeApp KBottomPanel + KPrimaryButton). -->
+    <FrameLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/bg_fab_pill_blue"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="24dp"
-        android:paddingVertical="16dp">
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_k_msg_composer"
+        android:elevation="8dp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
 
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_add_plus"
-            app:tint="@color/karika_white" />
+        <LinearLayout
+            android:id="@+id/button_new_message"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_k_button_primary"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="18dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/customer_messages_fab"
-            android:textColor="@color/karika_white"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_send_receipt"
+                app:tint="@color/k_white" />
+
+            <TextView
+                style="@style/K.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/customer_messages_fab"
+                android:textColor="@color/k_white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
 
 </FrameLayout>

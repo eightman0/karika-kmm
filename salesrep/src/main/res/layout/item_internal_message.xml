@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp">
+    android:layout_marginBottom="10dp">
 
     <LinearLayout
         android:id="@+id/bubble_column"
@@ -22,9 +22,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginBottom="2dp"
-            android:textColor="@color/karika_blue"
-            android:textSize="11sp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginHorizontal="4dp"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:textColor="@color/k_accent"
+            android:textSize="12sp"
             android:textStyle="bold"
             tools:text="Ja" />
 
@@ -33,10 +36,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:background="@drawable/bg_bubble_mine"
+            android:background="@drawable/bg_k_msg_bubble_mine"
             android:paddingHorizontal="14dp"
             android:paddingVertical="10dp"
-            android:textColor="@color/karika_white"
+            android:lineSpacingExtra="3dp"
+            android:textColor="@color/k_white"
             android:textSize="14sp"
             tools:text="Vidimo se sutra na sastanku u 10h." />
 
@@ -45,9 +49,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginTop="2dp"
-            android:textColor="@color/karika_gray7"
-            android:textSize="10sp"
+            android:layout_marginTop="4dp"
+            android:layout_marginHorizontal="4dp"
+            android:textColor="@color/k_subtle"
+            android:textSize="11sp"
             tools:text="14:32" />
     </LinearLayout>
 

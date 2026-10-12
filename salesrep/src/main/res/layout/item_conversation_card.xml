@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors composeApp's SalesChatUi.kt SalesConversationItem: white 14dp card, initials avatar,
+     bold name + time on the right, muted subject and a blue unread badge. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    android:background="@drawable/bg_thread_card_read"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/bg_k_msg_card"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center_vertical"
@@ -14,9 +16,9 @@
 
     <FrameLayout
         android:id="@+id/icon_avatar_container"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="@drawable/bg_avatar_circle_read">
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:background="@drawable/bg_k_avatar">
 
         <ImageView
             android:id="@+id/icon_avatar"
@@ -25,7 +27,21 @@
             android:layout_gravity="center"
             android:contentDescription="@null"
             android:src="@drawable/ic_messages"
-            app:tint="@color/karika_gray6" />
+            android:visibility="gone"
+            app:tint="@color/k_accent" />
+
+        <TextView
+            android:id="@+id/text_avatar_initials"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="sans-serif"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/k_accent"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            tools:text="KD" />
     </FrameLayout>
 
     <LinearLayout
@@ -43,50 +59,64 @@
 
             <TextView
                 android:id="@+id/text_name"
+                style="@style/K.Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:textColor="@color/k_ink"
+                android:textSize="14.5sp"
+                tools:text="Kupac d.o.o." />
+
+            <TextView
+                android:id="@+id/text_date"
+                style="@style/K.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:maxLines="1"
+                android:textColor="@color/k_subtle"
+                android:textSize="11sp"
+                tools:text="09.08.2026." />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_subject"
+                style="@style/K.Text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/karika_gray6"
-                android:textSize="14sp"
-                tools:text="Kupac d.o.o." />
+                android:textColor="@color/k_muted"
+                android:textSize="13sp"
+                tools:text="Pitanje o narudžbi #100000123" />
 
             <TextView
-                android:id="@+id/text_date"
+                android:id="@+id/text_unread_badge"
+                style="@style/K.Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:textColor="@color/karika_gray7"
-                android:textSize="11sp"
-                tools:text="09.08.2026." />
+                android:background="@drawable/bg_k_chip_selected"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:text="@string/customer_messages_badge_new"
+                android:textColor="@color/k_white"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/text_subject"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@color/karika_gray2"
-            android:textSize="13sp"
-            tools:text="Pitanje o narudžbi #100000123" />
-
-        <TextView
-            android:id="@+id/text_unread_badge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:background="@drawable/bg_unread_badge"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="3dp"
-            android:text="@string/customer_messages_badge_new"
-            android:textColor="@color/karika_white"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:visibility="gone"
-            tools:visibility="visible" />
     </LinearLayout>
 
     <ImageView
@@ -96,6 +126,7 @@
         android:layout_marginStart="8dp"
         android:contentDescription="@null"
         android:src="@drawable/ic_arrow_right"
-        app:tint="@color/karika_gray9" />
+        android:visibility="gone"
+        app:tint="@color/k_subtle" />
 
 </LinearLayout>

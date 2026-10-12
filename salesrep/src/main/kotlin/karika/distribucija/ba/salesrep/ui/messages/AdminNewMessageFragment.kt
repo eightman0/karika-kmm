@@ -103,7 +103,7 @@ class AdminNewMessageFragment : Fragment() {
             binding.textAttachmentName.text = attachment.first.take(32)
         }
         binding.iconAttach.setColorFilter(
-            requireContext().getColor(if (attachment != null) R.color.karika_blue else R.color.karika_gray6)
+            requireContext().getColor(if (attachment != null) R.color.k_accent else R.color.k_ink)
         )
         renderSendButton()
     }
@@ -111,7 +111,7 @@ class AdminNewMessageFragment : Fragment() {
     private fun renderSendButton() {
         val canSend = !binding.editMessage.text.isNullOrBlank() || viewModel.attachment.value != null
         binding.buttonSend.setBackgroundResource(
-            if (canSend) R.drawable.bg_message_send_active else R.drawable.bg_message_send_inactive
+            if (canSend) R.drawable.bg_k_msg_send_active else R.drawable.bg_k_msg_send_inactive
         )
         binding.buttonSend.isEnabled = canSend
     }

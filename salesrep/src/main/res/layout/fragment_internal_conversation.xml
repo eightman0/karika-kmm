@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_gray20"
+    android:background="@color/k_page"
     android:orientation="vertical">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -13,44 +14,49 @@
         android:layout_weight="1"
         android:clipToPadding="false"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp" />
+        android:paddingVertical="16dp" />
 
+    <!-- Composer: white panel, round k_field input and a round blue send button (SalesChatInput). -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/karika_white"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:background="@drawable/bg_k_msg_composer"
+        android:elevation="8dp"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/bg_message_input_bar"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="4dp">
+            android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/edit_message"
+                style="@style/K.Text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@null"
+                android:background="@drawable/bg_k_msg_input"
+                android:gravity="center_vertical"
                 android:hint="@string/internal_message_input_hint"
                 android:inputType="textMultiLine"
                 android:maxLines="5"
-                android:paddingHorizontal="14dp"
-                android:paddingVertical="10dp"
-                android:textColor="@color/karika_gray2"
-                android:textColorHint="@color/karika_gray7"
-                android:textSize="14sp" />
+                android:minHeight="48dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textColor="@color/k_ink"
+                android:textColorHint="@color/k_subtle"
+                android:textCursorDrawable="@drawable/bg_k_msg_cursor"
+                android:textSize="15sp" />
 
             <FrameLayout
                 android:id="@+id/button_send"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_message_send_inactive"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_k_msg_send_inactive"
                 android:clickable="true"
                 android:focusable="true">
 
@@ -60,7 +66,7 @@
                     android:layout_gravity="center"
                     android:contentDescription="@string/internal_message_send_cd"
                     android:src="@drawable/ic_send_receipt"
-                    app:tint="@color/karika_white" />
+                    app:tint="@color/k_white" />
             </FrameLayout>
         </LinearLayout>
     </LinearLayout>

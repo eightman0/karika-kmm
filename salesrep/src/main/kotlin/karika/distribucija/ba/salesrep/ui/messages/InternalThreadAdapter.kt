@@ -38,27 +38,21 @@ class InternalThreadAdapter(
             val context = binding.root.context
             val isUnread = thread.hasUnread()
 
-            binding.root.setBackgroundResource(
-                if (isUnread) R.drawable.bg_thread_card_unread else R.drawable.bg_thread_card_read
-            )
-            binding.iconAvatarContainer.setBackgroundResource(
-                if (isUnread) R.drawable.bg_avatar_circle_unread else R.drawable.bg_avatar_circle_read
-            )
-            binding.iconAvatar.setColorFilter(
-                context.getColor(if (isUnread) R.color.karika_blue else R.color.karika_gray6)
-            )
+            // Redesign: same white card for read/unread; unread shows bolder text + blue badge.
+            binding.root.setBackgroundResource(R.drawable.bg_k_msg_card)
+            binding.iconAvatarContainer.setBackgroundResource(R.drawable.bg_k_avatar)
+            binding.iconAvatar.setColorFilter(context.getColor(R.color.k_accent))
+            binding.textAvatarInitials.text = thread.counterpartName.messageInitials()
 
             binding.textName.text = thread.counterpartName
-            binding.textName.setTextColor(
-                context.getColor(if (isUnread) R.color.karika_gray2 else R.color.karika_gray6)
+            binding.textName.setTextColor(context.getColor(R.color.k_ink))
+            binding.textName.typeface = android.graphics.Typeface.create(
+                if (isUnread) "sans-serif" else "sans-serif-medium",
+                if (isUnread) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
             )
-            binding.textName.setTypeface(binding.textName.typeface, if (isUnread) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
-            binding.textName.textSize = if (isUnread) 15f else 14f
 
             binding.textDate.text = (thread.lastMessageAt ?: thread.updatedAt).formatDate()
-            binding.textDate.setTextColor(
-                context.getColor(if (isUnread) R.color.karika_blue else R.color.karika_gray7)
-            )
+            binding.textDate.setTextColor(context.getColor(if (isUnread) R.color.k_accent else R.color.k_subtle))
 
             binding.textRole.text = thread.displayRole()
 
@@ -66,8 +60,10 @@ class InternalThreadAdapter(
             binding.textLastMessage.visibility = if (hasLastMessage) View.VISIBLE else View.GONE
             if (hasLastMessage) {
                 binding.textLastMessage.text = thread.lastMessage
-                binding.textLastMessage.setTypeface(binding.textLastMessage.typeface, if (isUnread) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
-                binding.textLastMessage.textSize = if (isUnread) 14f else 13f
+                binding.textLastMessage.typeface = android.graphics.Typeface.create(
+                    if (isUnread) "sans-serif-medium" else "sans-serif", android.graphics.Typeface.NORMAL
+                )
+                binding.textLastMessage.setTextColor(context.getColor(if (isUnread) R.color.k_ink else R.color.k_muted))
             }
 
             binding.textUnreadBadge.visibility = if (isUnread) View.VISIBLE else View.GONE
@@ -75,9 +71,7 @@ class InternalThreadAdapter(
                 binding.textUnreadBadge.text = context.getString(R.string.internal_messages_unread_format, thread.unreadCount)
             }
 
-            binding.iconArrow.setColorFilter(
-                context.getColor(if (isUnread) R.color.karika_blue else R.color.karika_gray9)
-            )
+            binding.iconArrow.setColorFilter(context.getColor(R.color.k_subtle))
 
             binding.root.setOnClickListener { onClick(thread) }
         }

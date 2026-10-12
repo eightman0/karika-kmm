@@ -119,7 +119,7 @@ class InternalNewMessageFragment : Fragment() {
         binding.editRecipientSearch.isFocusable = selected == null
         binding.editRecipientSearch.isFocusableInTouchMode = selected == null
         binding.editRecipientSearch.setTextColor(
-            requireContext().getColor(if (selected != null) R.color.karika_blue else R.color.karika_gray2)
+            requireContext().getColor(if (selected != null) R.color.k_accent else R.color.k_ink)
         )
 
         val query = binding.editRecipientSearch.text?.toString().orEmpty()
@@ -130,9 +130,9 @@ class InternalNewMessageFragment : Fragment() {
 
         binding.recipientFieldContainer.setBackgroundResource(
             when {
-                showDropdown -> R.drawable.bg_message_field_open
-                recipientFieldFocused -> R.drawable.bg_message_field_focused
-                else -> R.drawable.bg_message_field_default
+                showDropdown -> R.drawable.bg_k_msg_field_open
+                recipientFieldFocused -> R.drawable.bg_k_field_outline_focused
+                else -> R.drawable.bg_k_field_outline
             }
         )
     }
@@ -140,7 +140,7 @@ class InternalNewMessageFragment : Fragment() {
     private fun renderSendButton() {
         val canSend = !binding.editMessage.text.isNullOrBlank() && viewModel.selectedRecipient.value != null
         binding.buttonSend.setBackgroundResource(
-            if (canSend) R.drawable.bg_message_send_active else R.drawable.bg_message_send_inactive
+            if (canSend) R.drawable.bg_k_msg_send_active else R.drawable.bg_k_msg_send_inactive
         )
         binding.buttonSend.isEnabled = canSend
     }

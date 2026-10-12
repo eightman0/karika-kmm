@@ -41,37 +41,32 @@ class ConversationCardAdapter(
             val context = binding.root.context
             val isUnread = !conversation.isRead()
 
-            binding.root.setBackgroundResource(
-                if (isUnread) R.drawable.bg_thread_card_unread else R.drawable.bg_thread_card_read
-            )
-            binding.iconAvatarContainer.setBackgroundResource(
-                if (isUnread) R.drawable.bg_avatar_circle_unread else R.drawable.bg_avatar_circle_read
-            )
-            binding.iconAvatar.setColorFilter(
-                context.getColor(if (isUnread) R.color.karika_blue else R.color.karika_gray6)
-            )
+            // Redesign: same white card for read/unread; unread shows bolder text + blue badge.
+            binding.root.setBackgroundResource(R.drawable.bg_k_msg_card)
+            binding.iconAvatarContainer.setBackgroundResource(R.drawable.bg_k_avatar)
+            binding.iconAvatar.setColorFilter(context.getColor(R.color.k_accent))
 
-            binding.textName.text = displayName(conversation)
-            binding.textName.setTextColor(
-                context.getColor(if (isUnread) R.color.karika_gray2 else R.color.karika_gray6)
+            val name = displayName(conversation)
+            binding.textName.text = name
+            binding.textAvatarInitials.text = name.messageInitials()
+            binding.textName.setTextColor(context.getColor(R.color.k_ink))
+            binding.textName.typeface = android.graphics.Typeface.create(
+                if (isUnread) "sans-serif" else "sans-serif-medium",
+                if (isUnread) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
             )
-            binding.textName.setTypeface(binding.textName.typeface, if (isUnread) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
-            binding.textName.textSize = if (isUnread) 15f else 14f
 
             binding.textDate.text = conversation.date().formatDate()
-            binding.textDate.setTextColor(
-                context.getColor(if (isUnread) R.color.karika_blue else R.color.karika_gray7)
-            )
+            binding.textDate.setTextColor(context.getColor(if (isUnread) R.color.k_accent else R.color.k_subtle))
 
             binding.textSubject.text = conversation.subject ?: "—"
-            binding.textSubject.setTypeface(binding.textSubject.typeface, if (isUnread) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
-            binding.textSubject.textSize = if (isUnread) 14f else 13f
+            binding.textSubject.typeface = android.graphics.Typeface.create(
+                if (isUnread) "sans-serif-medium" else "sans-serif", android.graphics.Typeface.NORMAL
+            )
+            binding.textSubject.setTextColor(context.getColor(if (isUnread) R.color.k_ink else R.color.k_muted))
 
             binding.textUnreadBadge.visibility = if (isUnread) View.VISIBLE else View.GONE
 
-            binding.iconArrow.setColorFilter(
-                context.getColor(if (isUnread) R.color.karika_blue else R.color.karika_gray9)
-            )
+            binding.iconArrow.setColorFilter(context.getColor(R.color.k_subtle))
 
             binding.root.setOnClickListener { onClick(conversation) }
         }

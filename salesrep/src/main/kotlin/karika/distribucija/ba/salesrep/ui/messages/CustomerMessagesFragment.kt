@@ -88,9 +88,9 @@ open class CustomerMessagesFragment : Fragment() {
 
     private fun stylePill(pill: TextView, selected: Boolean) {
         pill.setBackgroundResource(
-            if (selected) R.drawable.bg_message_filter_selected else R.drawable.bg_message_filter_unselected
+            if (selected) R.drawable.bg_k_chip_selected else R.drawable.bg_k_chip
         )
-        pill.setTextColor(requireContext().getColor(if (selected) R.color.karika_white else R.color.karika_gray2))
+        pill.setTextColor(requireContext().getColor(if (selected) R.color.k_white else R.color.k_ink))
     }
 
     private fun renderEmptyState() {

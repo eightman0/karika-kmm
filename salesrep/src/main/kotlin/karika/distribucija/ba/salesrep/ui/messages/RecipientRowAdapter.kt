@@ -34,6 +34,7 @@ class RecipientRowAdapter(
 
         fun bind(recipient: StaffRecipient, isLast: Boolean) {
             binding.textRecipientName.text = recipient.name
+            binding.textRecipientInitials.text = recipient.name.messageInitials()
             binding.textRecipientRole.text = recipient.displayRole()
             binding.divider.visibility = if (isLast) View.GONE else View.VISIBLE
             binding.contentRow.setOnClickListener { onClick(recipient) }

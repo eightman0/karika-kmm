@@ -44,7 +44,7 @@ class InternalConversationFragment : Fragment() {
         binding.editMessage.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             val canSend = !text.isNullOrBlank()
             binding.buttonSend.setBackgroundResource(
-                if (canSend) R.drawable.bg_message_send_active else R.drawable.bg_message_send_inactive
+                if (canSend) R.drawable.bg_k_msg_send_active else R.drawable.bg_k_msg_send_inactive
             )
             binding.buttonSend.isEnabled = canSend
         })
