@@ -14,6 +14,8 @@ import kotlin.system.exitProcess
 class SalesRepApp : Application() {
     lateinit var sessionManager: SessionManager
 
+    fun isSessionReady(): Boolean = ::sessionManager.isInitialized
+
     override fun onCreate() {
         super.onCreate()
         AppLogger.init(this)

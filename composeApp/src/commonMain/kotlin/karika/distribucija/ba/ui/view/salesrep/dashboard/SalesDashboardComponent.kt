@@ -10,6 +10,7 @@ import karika.distribucija.ba.domain.api.DeviceIdentifier
 import karika.distribucija.ba.domain.api.EmployeeLocationRepository
 import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.domain.model.EmployeeLocationSubmit
+import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.DiscountRule
 import karika.distribucija.ba.domain.model.OnBehalfOrder
 import karika.distribucija.ba.domain.model.OperationalCustomer
@@ -48,6 +49,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
 class SalesDashboardComponent(
@@ -69,24 +71,29 @@ class SalesDashboardComponent(
         stateHolder.vendorNotificationHandler.notificationReceived()
 
         val locationJob = scope.launch {
+            // Ask for the permission once, up front; later attempts just skip while it's missing.
+            runCatching { requestLocationPermission() }
             while (true) {
-                try {
+                val sent = try {
                     submitCurrentLocation()
                 } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    // Best-effort background telemetry - never let a GPS/network hiccup kill the hourly loop.
+                    // Best-effort background telemetry - never let a GPS/network hiccup kill the loop.
+                    false
                 }
-                delay(1.hours)
+                // Hourly after a successful send; a failed one (no fix, no network, no permission
+                // yet) is retried in a minute instead of waiting a whole hour.
+                delay(if (sent) 1.hours else 1.minutes)
             }
         }
         lifecycle.doOnDestroy { locationJob.cancel() }
     }
 
     @OptIn(ExperimentalTime::class)
-    private suspend fun submitCurrentLocation() {
-        if (!requestLocationPermission()) return
-        val fix = currentDeviceLocation() ?: return
+    private suspend fun submitCurrentLocation(): Boolean {
+        val fix = currentDeviceLocation() ?: return false
+        var sent = false
         locationRepository.submit(
             EmployeeLocationSubmit(
                 deviceId = DeviceIdentifier.deviceId(),
@@ -98,7 +105,8 @@ class SalesDashboardComponent(
                 heading = fix.heading,
                 timestamp = Clock.System.now().toString(),
             )
-        ).collect { }
+        ).collect { if (it is ResultState.Success) sent = true }
+        return sent
     }
 
     val stack: Value<ChildStack<*, SalesChild>> =
