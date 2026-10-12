@@ -27,10 +27,15 @@ object MaintenanceState {
             .apply()
     }
 
-    fun isActive(context: Context): Boolean {
+    fun isActive(context: Context): Boolean = remainingMs(context) > 0
+
+    /** How long until the auto-expiry above kicks in, 0 when not active. Expiry is only ever
+     * noticed on read - nothing is written when it happens - so LauncherActivity uses this to
+     * re-check at that moment instead of staying on the maintenance screen past it. */
+    fun remainingMs(context: Context): Long {
         val since = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getLong(KEY_SINCE, 0L)
-        if (since == 0L) return false
-        return System.currentTimeMillis() - since < MAX_AGE_MS
+        if (since == 0L) return 0L
+        return (MAX_AGE_MS - (System.currentTimeMillis() - since)).coerceAtLeast(0L)
     }
 
     /** Lets a visible LauncherActivity react the moment begin()/end() writes, instead of only

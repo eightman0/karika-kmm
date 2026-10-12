@@ -11,10 +11,11 @@ import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import karika.distribucija.ba.launcher.KnownApps
+import karika.distribucija.ba.launcher.LauncherActivity
 import karika.distribucija.ba.launcher.LauncherBatteryOptimization
 import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceHeartbeat
-import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
+import karika.distribucija.ba.launcher.provision.DeviceConfig
 
 /** Keeps KnownApps.primary() (salesrep or shop, per device) up to date - not the launcher itself. Whether to install is
  * decided by comparing the published APK's sha256 against the one this device last installed,
@@ -32,12 +33,20 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         if (!LauncherBatteryOptimization.isResolved(applicationContext)) {
             return Result.retry()
         }
+        // EnrollmentWorker triggers this again as soon as there's a device token.
+        if (!DeviceConfig.isEnrolled(applicationContext)) {
+            return Result.success()
+        }
         val primary = KnownApps.primary(applicationContext)
-        val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext), app = primary.key)
         val targetPackage = primary.packageName
         val (installedVersionCode, installedVersionName) = DeviceHeartbeat.installedVersion(applicationContext, targetPackage)
 
+        // Before the version call, so a version-side failure doesn't also cost the heartbeat.
         DeviceHeartbeat.report(applicationContext, targetPackage, installedVersionCode, installedVersionName)
+        // Fetched fresh on every run, never cached: apk_url is a signed URL that expires 60 min
+        // after this response. A download that fails on an expired/invalid signature (403) just
+        // retries, and the retry gets a new URL from here.
+        val latest = DeviceApi.fetchLatestVersion(applicationContext, app = primary.key)
 
         val alreadyInstalled = latest.apkSha256.isNotBlank() &&
             latest.apkSha256.equals(InstalledApkState.lastInstalledSha256(applicationContext, targetPackage), ignoreCase = true)
@@ -47,6 +56,17 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         } else {
             Log.i(TAG, "New build published for $targetPackage (${latest.versionName}), installing")
             runUpdate(targetPackage, latest)
+        }
+    } catch (e: DeviceApiException) {
+        MaintenanceState.end(applicationContext)
+        if (e.isRetryable) {
+            Log.w(TAG, "Update check failed: ${e.message}")
+            Result.retry()
+        } else {
+            // app_not_assigned, device_token_invalid (already handled in DeviceApi) and the like -
+            // asking again won't change the answer, the next periodic run asks anew.
+            Log.e(TAG, "Update check rejected: ${e.message}")
+            Result.success()
         }
     } catch (e: Exception) {
         Log.e(TAG, "Update check failed", e)
@@ -81,7 +101,11 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             // read MaintenanceState as active and report a device that just finished updating as
             // stuck "in maintenance". The finally block's end() becomes a harmless no-op here.
             MaintenanceState.end(applicationContext)
-            // Otherwise the dashboard keeps showing the pre-update version (and a stale
+            // The install killed the payload app, and whatever came up in its place may not be
+            // LauncherActivity (it can sit paused under another task and never notice the end()
+            // above). Bringing it forward re-runs its onResume(): lock task on, payload relaunched.
+            LauncherActivity.bringToFront(applicationContext)
+            // Otherwise Karika Ops keeps showing the pre-update version (and a stale
             // "lagging" tag) until whatever unrelated event triggers the next heartbeat -
             // there's no guarantee that happens soon after a real-time-triggered install.
             DeviceHeartbeat.report(applicationContext, targetPackage, latest.versionCode, latest.versionName)

@@ -8,22 +8,33 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.View
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import karika.distribucija.ba.launcher.provision.DeviceConfig
 import karika.distribucija.ba.launcher.provision.LauncherKiosk
 import karika.distribucija.ba.logging.AppLogger
 
 class LauncherActivity : AppCompatActivity() {
     private lateinit var kiosk: LauncherKiosk
     private lateinit var appGrid: RecyclerView
-    private lateinit var maintenanceBanner: View
+    private lateinit var statusPanel: View
+    private lateinit var statusTitle: TextView
+    private lateinit var statusMessage: TextView
 
-    /** Fires the moment UpdateWorker's begin()/end() writes, so the banner doesn't stay stuck
-     * showing "maintenance" if it ended while this Activity was already resumed and on screen. */
+    /** Fires the moment UpdateWorker's begin()/end() (or an enroll result) writes, so the panel
+     * doesn't stay stuck on a state that ended while this Activity was already on screen. Goes
+     * through kiosk.enter() too, not just the panel: lock task is switched off while maintenance
+     * is active (see LauncherKiosk.setKioskPolicies), and a payload install replacing the app in
+     * front resumes this Activity mid-maintenance - without re-entering here when maintenance
+     * ends, the freshly installed app would be launched with lock task still off. */
     private val maintenanceListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> refreshMaintenanceState() }
+        SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> reapplyKioskState() }
+
+    /** MaintenanceState's auto-expiry writes nothing, so the listener above never sees it. */
+    private val maintenanceExpiryCheck = Runnable { reapplyKioskState() }
 
     /** One-time, for THIS app's own package only - not salesrep's, see git history for why that
      * one was dropped entirely. Fires as early as the very first onResume() after provisioning,
@@ -45,7 +56,9 @@ class LauncherActivity : AppCompatActivity() {
         setContentView(R.layout.activity_launcher)
 
         appGrid = findViewById(R.id.app_grid)
-        maintenanceBanner = findViewById(R.id.maintenance_banner)
+        statusPanel = findViewById(R.id.status_panel)
+        statusTitle = findViewById(R.id.status_title)
+        statusMessage = findViewById(R.id.status_message)
         appGrid.layoutManager = GridLayoutManager(this, SPAN_COUNT)
         appGrid.adapter = AppTileAdapter(listOf(KnownApps.primary(this)), packageManager) { app ->
             launchApp(app.packageName, userInitiated = true)
@@ -63,12 +76,15 @@ class LauncherActivity : AppCompatActivity() {
         kiosk.enter()
         MaintenanceState.addChangeListener(this, maintenanceListener)
         RemoteMaintenanceState.addChangeListener(this, maintenanceListener)
+        DeviceConfig.addChangeListener(this, maintenanceListener)
         refreshMaintenanceState()
     }
 
     override fun onPause() {
         MaintenanceState.removeChangeListener(this, maintenanceListener)
         RemoteMaintenanceState.removeChangeListener(this, maintenanceListener)
+        DeviceConfig.removeChangeListener(this, maintenanceListener)
+        appGrid.removeCallbacks(maintenanceExpiryCheck)
         super.onPause()
     }
 
@@ -77,14 +93,44 @@ class LauncherActivity : AppCompatActivity() {
      * front of the locked task - i.e. the payload app crashed, finished, or isn't installed yet.
      * That's the natural trigger for auto-relaunch, no polling/foreground-detection needed.
      */
-    private fun refreshMaintenanceState() {
-        val inMaintenance = MaintenanceState.isActive(this) || RemoteMaintenanceState.isActive(this)
-        maintenanceBanner.visibility = if (inMaintenance) View.VISIBLE else View.GONE
-        appGrid.visibility = if (inMaintenance) View.GONE else View.VISIBLE
+    /** Same order as onResume(): lock task first, then whatever the panel/auto-launch decides. */
+    private fun reapplyKioskState() {
+        kiosk.enter()
+        refreshMaintenanceState()
+    }
 
-        if (!inMaintenance) {
+    private fun refreshMaintenanceState() {
+        appGrid.removeCallbacks(maintenanceExpiryCheck)
+        val expiresInMs = MaintenanceState.remainingMs(this)
+        if (expiresInMs > 0) appGrid.postDelayed(maintenanceExpiryCheck, expiresInMs + 1_000)
+
+        val status = currentStatus()
+        statusPanel.visibility = if (status != null) View.VISIBLE else View.GONE
+        appGrid.visibility = if (status != null) View.GONE else View.VISIBLE
+        if (status != null) {
+            statusTitle.setText(status.first)
+            statusMessage.setText(status.second)
+        } else {
             launchApp(KnownApps.primary(this).packageName, userInitiated = false)
         }
+    }
+
+    /** Title/message for whatever keeps the payload app from being launched, null when nothing
+     * does. Re-provisioning wins over maintenance: no update is coming without a device token. */
+    private fun currentStatus(): Pair<Int, Int>? = when {
+        DeviceConfig.reprovisionReason(this) == DeviceConfig.ReprovisionReason.QR_INVALID ->
+            R.string.qr_invalid_title to R.string.qr_invalid_message
+        DeviceConfig.reprovisionReason(this) == DeviceConfig.ReprovisionReason.DEVICE_REMOVED ->
+            R.string.device_removed_title to R.string.device_removed_message
+        MaintenanceState.isActive(this) || RemoteMaintenanceState.isActive(this) ->
+            R.string.maintenance_title to R.string.maintenance_message
+        DeviceConfig.hasPendingEnrollment(this) && !DeviceConfig.isEnrolled(this) ->
+            R.string.enrolling_title to R.string.enrolling_message
+        // Never enrolled and nothing pending: provisioned by a QR without enrollment extras, or
+        // a 2.x launcher's prefs - only a new QR scan gets this device onto the device API.
+        !DeviceConfig.isEnrolled(this) ->
+            R.string.device_removed_title to R.string.device_removed_message
+        else -> null
     }
 
     /** See batteryOptimizationLauncher's own doc comment. Guarded by LauncherBatteryOptimization's

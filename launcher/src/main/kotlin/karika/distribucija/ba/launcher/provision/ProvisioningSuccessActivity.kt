@@ -16,9 +16,9 @@ class ProvisioningSuccessActivity : Activity() {
         super.onCreate(icicle)
 
         PostProvisioningTask(this).performPostProvisioningOperations()
-        // See DeviceMapping.readFromProvisioningIntent() - FinalizeActivity also calls this,
+        // See DeviceConfig.readFromProvisioningIntent() - FinalizeActivity also calls this,
         // since which checkpoint's intent actually carries the admin extras bundle varies.
-        DeviceMapping.readFromProvisioningIntent(this)
+        DeviceConfig.readFromProvisioningIntent(this)
 
         startActivity(
             Intent(this, LauncherActivity::class.java)

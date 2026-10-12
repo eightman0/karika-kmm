@@ -4,7 +4,7 @@ import java.io.File
 import java.security.MessageDigest
 
 /** Shared by UpdateWorker (salesrep) and LauncherSelfUpdateWorker (launcher itself) - both verify
- * a downloaded APK's sha256 against what the dashboard published before installing it. */
+ * a downloaded APK's sha256 against what Karika Ops published before installing it. */
 object ApkChecksum {
     private const val DIGEST_BUFFER_SIZE = 8192
 

@@ -14,6 +14,7 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import karika.distribucija.ba.launcher.KnownApps
 import karika.distribucija.ba.launcher.LauncherActivity
+import karika.distribucija.ba.launcher.LauncherBatteryOptimization
 import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.RemoteDebugUnlock
 
@@ -66,13 +67,20 @@ class LauncherKiosk(private val context: ComponentActivity) {
         // skipped once - every onResume() (screen touch, app switch, anything) calls back in here,
         // so without this check the very next resume would silently re-pin it before they get a
         // chance to authorize the debugger. See RemoteDebugUnlock's own doc comment for why this
-        // is time-bound rather than a plain toggle. MaintenanceState is checked for the same
-        // underlying reason: LauncherActivity's one-time battery-optimization request for this
-        // app's own package (see its own comment) enters maintenance for exactly as long as that
-        // system dialog is open - a cross-app dialog like that cannot draw over a pinned kiosk
-        // activity either.
-        setLockTask(enable && !RemoteDebugUnlock.isActive(context) && !MaintenanceState.isActive(context))
+        // is time-bound rather than a plain toggle. The battery-optimization request is checked
+        // for the same underlying reason: LauncherActivity's one-time request for this app's own
+        // package (see its own comment) enters maintenance for exactly as long as that system
+        // dialog is open - a cross-app dialog like that cannot draw over a pinned kiosk activity
+        // either. Only that maintenance, not UpdateWorker's: a payload install replaces the app in
+        // front, which resumes LauncherActivity mid-install - unpinning there let whatever task
+        // was underneath (seen: a leftover Settings task) take the screen with no lock task at all.
+        setLockTask(enable && !RemoteDebugUnlock.isActive(context) && !isBatteryDialogOpen())
     }
+
+    /** UpdateWorker never installs before this prompt is resolved, so maintenance while it's
+     * still unresolved can only be the prompt's own. */
+    private fun isBatteryDialogOpen(): Boolean =
+        MaintenanceState.isActive(context) && !LauncherBatteryOptimization.isResolved(context)
 
     /** Only calls into DPM when the permission isn't already granted - see the long comment above
      * on why calling this unconditionally on every onResume() is actively harmful, not just

@@ -3,5 +3,11 @@
     <string name="app_name">Karika Launcher</string>
     <string name="maintenance_title">Održavanje u toku</string>
     <string name="maintenance_message">Aplikacija se ažurira. Ovo obično traje samo par minuta.</string>
+    <string name="enrolling_title">Registracija uređaja</string>
+    <string name="enrolling_message">Uređaj se registruje na server. Ovo obično traje samo par sekundi.</string>
+    <string name="qr_invalid_title">QR nije važeći</string>
+    <string name="qr_invalid_message">QR kod je istekao, opozvan ili iskorišten. Uradite factory reset i skenirajte novi QR kod iz Karika Ops.</string>
+    <string name="device_removed_title">Uređaj nije registrovan</string>
+    <string name="device_removed_message">Uređaj je uklonjen iz Karika Ops. Uradite factory reset i skenirajte novi QR kod.</string>
     <string name="tile_installing">Instalira se…</string>
 </resources>

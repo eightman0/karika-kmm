@@ -3,118 +3,95 @@ package karika.distribucija.ba.launcher.diagnostics
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.firebase.storage.storage
-import karika.distribucija.ba.launcher.update.DashboardApi
+import karika.distribucija.ba.launcher.update.DeviceApi
 import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.logging.AppLogger
-import kotlinx.coroutines.tasks.await
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 /**
- * Support-log pull: the admin dashboard sends an FCM push (see KioskMessagingService) instead of
- * setting a field a Firestore listener here used to watch for - every known app's local log (this
- * app's own via AppLogger, salesrep's via its LogProvider content URI) gets zipped and uploaded to
- * Storage, then the dashboard's device API is told where to find it. Storage itself (not
- * Firestore) still needs an authenticated client per storage.rules, hence the anonymous sign-in.
+ * Support-log and analytics pulls, both requested over FCM (see KioskMessagingService): every
+ * known app's local files (this app's own via AppLogger/AnalyticsTracker, salesrep's via its
+ * LogProvider content URI) get zipped and sent as a multipart upload straight to the device API.
+ * Both throw on failure, so the command's ack can report the error.
  */
 object LogUploadManager {
     private const val TAG = "LogUploadManager"
     private const val SALESREP_LOG_AUTHORITY = "karika.distribucija.ba.salesrep.logs"
 
-    suspend fun uploadNow(context: Context, requestedAt: String?) {
+    suspend fun uploadLogs(context: Context, requestId: String?, requestedAt: String?) {
         val appContext = context.applicationContext
+        val zipFile = File(appContext.cacheDir, "logs-upload.zip")
         try {
-            if (Firebase.auth.currentUser == null) {
-                Firebase.auth.signInAnonymously().await()
+            writeZip(zipFile) { zip ->
+                addFileToZip(zip, AppLogger.currentLogFile(), "launcher.log") or
+                    addFileToZip(zip, AppLogger.backupLogFile(), "launcher.log.1") or
+                    addUriToZip(appContext, zip, "content://$SALESREP_LOG_AUTHORITY/current", "salesrep.log") or
+                    addUriToZip(appContext, zip, "content://$SALESREP_LOG_AUTHORITY/backup", "salesrep.log.1")
             }
-            val deviceId = DeviceIdentity.id(appContext)
-            uploadLogs(appContext, deviceId, requestedAt)
-        } catch (e: Exception) {
-            Log.e(TAG, "Log upload failed", e)
-        }
-    }
-
-    private suspend fun uploadLogs(context: Context, deviceId: String, requestedAt: String?) {
-        val zipFile = File(context.cacheDir, "logs-upload.zip")
-        try {
-            ZipOutputStream(zipFile.outputStream()).use { zip ->
-                addFileToZip(zip, AppLogger.currentLogFile(), "launcher.log")
-                addFileToZip(zip, AppLogger.backupLogFile(), "launcher.log.1")
-                addUriToZip(context, zip, "content://$SALESREP_LOG_AUTHORITY/current", "salesrep.log")
-                addUriToZip(context, zip, "content://$SALESREP_LOG_AUTHORITY/backup", "salesrep.log.1")
-            }
-
-            val storagePath = "logs/$deviceId/${System.currentTimeMillis()}.zip"
-            val storageRef = Firebase.storage.reference.child(storagePath)
-            storageRef.putFile(Uri.fromFile(zipFile)).await()
-            val downloadUrl = storageRef.downloadUrl.await()
-
-            // downloadUrl only works for an authenticated Firebase client (subject to
-            // storage.rules); the admin dashboard reads the stored path instead and mints its own
-            // signed URL server-side, bypassing those rules entirely.
-            DashboardApi.reportLogUploaded(deviceId, downloadUrl.toString(), storagePath, requestedAt)
-            Log.i(TAG, "Log upload complete: $downloadUrl")
+            DeviceApi.uploadLogs(appContext, zipFile, requestId, requestedAt)
+            Log.i(TAG, "Log upload complete (${zipFile.length()} bytes)")
         } finally {
             zipFile.delete()
         }
     }
 
-    /** Fleet-wide broadcast, not a per-device request-then-fulfill flow like uploadNow() - every
-     * device that's on and connected uploads its own local analytics events independently. */
-    suspend fun uploadAnalyticsNow(context: Context) {
+    /** Fleet-wide broadcast, not a per-device request-then-fulfill flow like uploadLogs() - every
+     * device that's on and connected uploads its own local analytics events independently. Entry
+     * names are the four the server's analytics ingest reads. */
+    suspend fun uploadAnalytics(context: Context, requestId: String?) {
         val appContext = context.applicationContext
+        val zipFile = File(appContext.cacheDir, "analytics-upload.zip")
         try {
-            if (Firebase.auth.currentUser == null) {
-                Firebase.auth.signInAnonymously().await()
+            writeZip(zipFile) { zip ->
+                addFileToZip(zip, AnalyticsTracker.currentFile(), "launcher.jsonl") or
+                    addFileToZip(zip, AnalyticsTracker.currentBackupFile(), "launcher.jsonl.1") or
+                    addUriToZip(appContext, zip, "content://$SALESREP_LOG_AUTHORITY/analytics_current", "salesrep.jsonl") or
+                    addUriToZip(appContext, zip, "content://$SALESREP_LOG_AUTHORITY/analytics_backup", "salesrep.jsonl.1")
             }
-            val deviceId = DeviceIdentity.id(appContext)
-            uploadAnalytics(appContext, deviceId)
-        } catch (e: Exception) {
-            Log.e(TAG, "Analytics upload failed", e)
-        }
-    }
-
-    private suspend fun uploadAnalytics(context: Context, deviceId: String) {
-        val zipFile = File(context.cacheDir, "analytics-upload.zip")
-        try {
-            ZipOutputStream(zipFile.outputStream()).use { zip ->
-                addFileToZip(zip, AnalyticsTracker.currentFile(), "launcher.jsonl")
-                addFileToZip(zip, AnalyticsTracker.currentBackupFile(), "launcher.jsonl.1")
-                addUriToZip(context, zip, "content://$SALESREP_LOG_AUTHORITY/analytics_current", "salesrep.jsonl")
-                addUriToZip(context, zip, "content://$SALESREP_LOG_AUTHORITY/analytics_backup", "salesrep.jsonl.1")
-            }
-
-            val storagePath = "analytics/$deviceId/${System.currentTimeMillis()}.zip"
-            val storageRef = Firebase.storage.reference.child(storagePath)
-            storageRef.putFile(Uri.fromFile(zipFile)).await()
-            val downloadUrl = storageRef.downloadUrl.await()
-
-            DashboardApi.reportAnalyticsUploaded(deviceId, downloadUrl.toString(), storagePath)
-            Log.i(TAG, "Analytics upload complete: $downloadUrl")
+            DeviceApi.uploadAnalytics(appContext, zipFile, requestId)
+            Log.i(TAG, "Analytics upload complete (${zipFile.length()} bytes)")
         } finally {
             zipFile.delete()
         }
     }
 
-    private fun addFileToZip(zip: ZipOutputStream, file: File?, entryName: String) {
-        if (file == null || !file.exists()) return
+    /** [addEntries] returns whether it wrote anything - a zip with no entries can't be closed
+     * (ZipOutputStream throws), and the server would reject it as invalid_zip anyway. */
+    private fun writeZip(zipFile: File, addEntries: (ZipOutputStream) -> Boolean) {
+        val zip = ZipOutputStream(zipFile.outputStream())
+        val wroteAny = try {
+            addEntries(zip)
+        } catch (e: Exception) {
+            runCatching { zip.close() }
+            throw e
+        }
+        if (!wroteAny) {
+            runCatching { zip.close() }
+            throw IOException("Nothing to upload - none of the files exist on this device")
+        }
+        zip.close()
+    }
+
+    private fun addFileToZip(zip: ZipOutputStream, file: File?, entryName: String): Boolean {
+        if (file == null || !file.exists()) return false
         writeEntry(zip, entryName) { out -> file.inputStream().use { it.copyTo(out) } }
+        return true
     }
 
-    private fun addUriToZip(context: Context, zip: ZipOutputStream, uri: String, entryName: String) {
+    private fun addUriToZip(context: Context, zip: ZipOutputStream, uri: String, entryName: String): Boolean {
         val input: InputStream = try {
-            context.contentResolver.openInputStream(Uri.parse(uri)) ?: return
+            context.contentResolver.openInputStream(Uri.parse(uri)) ?: return false
         } catch (e: Exception) {
             Log.w(TAG, "Could not read $uri: ${e.message}")
-            return
+            return false
         }
         writeEntry(zip, entryName) { out -> input.use { it.copyTo(out) } }
+        return true
     }
 
     private fun writeEntry(zip: ZipOutputStream, name: String, write: (OutputStream) -> Unit) {

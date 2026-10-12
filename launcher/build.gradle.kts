@@ -14,8 +14,9 @@ android {
         applicationId = "karika.distribucija.ba.launcher"
         minSdk = 30
         targetSdk = 37
-        versionCode = 22
-        versionName = "2.10"
+        // 3.x talks only to the Laravel device API (enroll + bearer token) - 2.x and older can't.
+        versionCode = 26
+        versionName = "3.3"
         // Shared with salesrep (see its build.gradle.kts) - launcher and salesrep are signed with
         // different keys, so a signature-level permission can't gate the broadcasts between them.
         // This token is checked in code instead, the same way LogProvider now checks the calling
@@ -75,8 +76,6 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging.ktx)
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.storage)
 
     implementation(libs.androidx.work.runtime.ktx)
 

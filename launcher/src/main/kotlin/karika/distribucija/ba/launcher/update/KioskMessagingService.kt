@@ -9,7 +9,6 @@ import com.google.firebase.messaging.RemoteMessage
 import karika.distribucija.ba.launcher.LauncherActivity
 import karika.distribucija.ba.launcher.RemoteDebugUnlock
 import karika.distribucija.ba.launcher.RemoteMaintenanceState
-import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
 import karika.distribucija.ba.launcher.diagnostics.LogUploadManager
 import karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * Delivers pushes the admin dashboard sends: an update-check nudge on publish, or a device
+ * Delivers pushes Karika Ops (Laravel) sends: an update-check nudge on publish, or a device
  * command (log pull, analytics pull, factory reset, maintenance toggle, open settings, ping,
  * reboot, launcher self-update, temporary debug unlock).
  * Data-only messages (no `notification` payload), so Play Services wakes this process to hand
@@ -25,15 +24,19 @@ import kotlinx.coroutines.launch
  * lives in Play Services, not in our own process, so it isn't subject to the same cached-app
  * freezing our process is.
  *
- * Every command is logged with its requestId and acked back to the dashboard (best-effort - if
- * the ack itself fails to send, the command still ran; the dashboard just won't show a result)
- * so a command sent from the field has some visibility into whether it actually landed.
+ * Every command is logged with its requestId and acked to POST /command-ack (best-effort - if
+ * the ack itself fails to send, the command still ran; Karika Ops just won't show a result) so a
+ * command sent from the field has some visibility into whether it actually landed. Broadcasts
+ * (analytics_request, a "send to all" version_check) carry a requestId too and are acked the same.
  */
 class KioskMessagingService : FirebaseMessagingService() {
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    /** The server only learns the FCM token from a heartbeat, and a device it has no token for
+     * can't receive token-targeted commands - so send one right away instead of in 30 minutes. */
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        UpdateScheduler.triggerImmediateCheck(applicationContext)
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
@@ -48,10 +51,10 @@ class KioskMessagingService : FirebaseMessagingService() {
 
         when (command) {
             CMD_LOG_REQUEST -> runAcked(command, requestId) {
-                LogUploadManager.uploadNow(applicationContext, message.data["requestedAt"])
+                LogUploadManager.uploadLogs(applicationContext, requestId, message.data["requestedAt"])
             }
             CMD_ANALYTICS_REQUEST -> runAcked(command, requestId) {
-                LogUploadManager.uploadAnalyticsNow(applicationContext)
+                LogUploadManager.uploadAnalytics(applicationContext, requestId)
             }
             CMD_FACTORY_RESET -> scope.launch {
                 // Acked before wiping, not after - same reasoning as CMD_REBOOT below, wipeData()
@@ -139,9 +142,9 @@ class KioskMessagingService : FirebaseMessagingService() {
 
     private suspend fun ack(command: String, requestId: String?, status: String, message: String?) {
         runCatching {
-            DashboardApi.reportCommandAck(
-                DeviceIdentity.id(applicationContext), command, requestId, status, message
-            )
+            DeviceApi.reportCommandAck(applicationContext, command, requestId, status, message)
+        }.onFailure {
+            Log.w(TAG, "Ack failed for $command requestId=$requestId: ${it.message}")
         }
     }
 

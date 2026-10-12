@@ -31,12 +31,29 @@ object UpdateScheduler {
         .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()
 
-    /** Call once from Application.onCreate() - safe to call on every process start. REPLACE (not
+    /** Everything that calls the device API on a timer - LauncherApp on every process start once
+     * enrolled, and EnrollmentWorker right after a successful enroll. */
+    fun scheduleDeviceApiWork(context: Context) {
+        schedulePeriodic(context)
+        scheduleHeartbeatAlarm(context)
+    }
+
+    /** The other half of DeviceConfig.requireReprovisioning(): a device without a usable token
+     * has nothing left to call the API with, so stop every timer and pending one-off that would. */
+    fun cancelDeviceApiWork(context: Context) {
+        val workManager = WorkManager.getInstance(context)
+        workManager.cancelUniqueWork(PERIODIC_WORK_NAME)
+        workManager.cancelUniqueWork(IMMEDIATE_WORK_NAME)
+        workManager.cancelUniqueWork(LAUNCHER_SELF_UPDATE_WORK_NAME)
+        context.getSystemService(AlarmManager::class.java).cancel(heartbeatAlarmIntent(context))
+    }
+
+    /** Call from scheduleDeviceApiWork() - safe to call on every process start. REPLACE (not
      * KEEP) so every process start - cold boot, crash-recovery relaunch, reboot - runs a check
      * right away instead of waiting out whatever's left of a previously-scheduled interval; it
      * also means an interval change here takes effect on the next start rather than being stuck
      * on whatever was enqueued the first time the app ever ran. */
-    fun schedulePeriodic(context: Context) {
+    private fun schedulePeriodic(context: Context) {
         val request = PeriodicWorkRequestBuilder<UpdateWorker>(PERIODIC_INTERVAL_MINUTES, TimeUnit.MINUTES)
             .setConstraints(networkConstraints)
             .setBackoffCriteria(BackoffPolicy.LINEAR, WorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
@@ -48,8 +65,8 @@ object UpdateScheduler {
         )
     }
 
-    /** Fired when Remote Config's real-time listener sees a published change, so devices don't
-     * have to wait for the next periodic tick. */
+    /** Fired on every FCM push and right after enrolling, so devices don't have to wait for the
+     * next periodic tick. */
     fun triggerImmediateCheck(context: Context) {
         val request = OneTimeWorkRequestBuilder<UpdateWorker>()
             .setConstraints(networkConstraints)
@@ -96,18 +113,19 @@ object UpdateScheduler {
     }
 
     /** AlarmManager backstop for the heartbeat - see HeartbeatAlarmReceiver's own doc comment for
-     * why this exists as a separate path from schedulePeriodic()'s WorkManager-based one. Call
-     * once from Application.onCreate(); the receiver re-arms the next fire itself, so this never
+     * why this exists as a separate path from schedulePeriodic()'s WorkManager-based one. Started
+     * from scheduleDeviceApiWork(); the receiver re-arms the next fire itself, so this never
      * needs to run on a fixed repeating schedule the way a plain PeriodicWorkRequest would. */
     fun scheduleHeartbeatAlarm(context: Context) {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            HEARTBEAT_ALARM_REQUEST_CODE,
-            Intent(context, HeartbeatAlarmReceiver::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
         val triggerAt = SystemClock.elapsedRealtime() + TimeUnit.MINUTES.toMillis(HEARTBEAT_ALARM_INTERVAL_MINUTES)
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pendingIntent)
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, heartbeatAlarmIntent(context))
     }
+
+    private fun heartbeatAlarmIntent(context: Context): PendingIntent = PendingIntent.getBroadcast(
+        context,
+        HEARTBEAT_ALARM_REQUEST_CODE,
+        Intent(context, HeartbeatAlarmReceiver::class.java),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
 }

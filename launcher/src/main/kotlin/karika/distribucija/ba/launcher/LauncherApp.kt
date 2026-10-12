@@ -8,7 +8,9 @@ import android.os.Process
 import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
 import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
+import karika.distribucija.ba.launcher.provision.DeviceConfig
 import karika.distribucija.ba.launcher.provision.LauncherDeviceAdminReceiver
+import karika.distribucija.ba.launcher.update.EnrollmentWorker
 import karika.distribucija.ba.launcher.update.KioskMessagingService
 import karika.distribucija.ba.launcher.update.UpdateScheduler
 import karika.distribucija.ba.logging.AnalyticsTracker
@@ -23,8 +25,13 @@ class LauncherApp : Application() {
         AnalyticsTracker.init(this)
         Firebase.messaging.subscribeToTopic(KioskMessagingService.BROADCAST_TOPIC)
         Firebase.messaging.subscribeToTopic(KioskMessagingService.deviceTopic(DeviceIdentity.id(this)))
-        UpdateScheduler.schedulePeriodic(this)
-        UpdateScheduler.scheduleHeartbeatAlarm(this)
+        // Nothing on a timer until there's a device token to call the API with - EnrollmentWorker
+        // schedules it once enroll succeeds, and re-provisioning cancels it again.
+        if (DeviceConfig.isEnrolled(this)) {
+            UpdateScheduler.scheduleDeviceApiWork(this)
+        } else if (DeviceConfig.hasPendingEnrollment(this)) {
+            EnrollmentWorker.enqueue(this)
+        }
         installCrashRecovery()
     }
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug only: lets a debug launcher reach a local Laravel (Sail) over plain http on a LAN IP.
+     A raw IP can't be matched by a <domain> rule, hence the blanket base-config. Release builds
+     never merge this and stay HTTPS-only. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:networkSecurityConfig="@xml/network_security_config_debug" />
+</manifest>

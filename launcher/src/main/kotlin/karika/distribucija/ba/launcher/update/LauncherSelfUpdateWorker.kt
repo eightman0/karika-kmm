@@ -11,13 +11,12 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import karika.distribucija.ba.launcher.diagnostics.DeviceIdentity
+import karika.distribucija.ba.launcher.provision.DeviceConfig
 import karika.distribucija.ba.logging.AppLogger
 
 /**
- * Downloads and silently installs the launcher's own latest resolved version - published/staged
- * through launcher_version_config.py, a parallel track to salesrep's version_config.py (see that
- * file's schema comment for why they're separate rather than a generalized one). The only other
+ * Downloads and silently installs the launcher's own latest resolved version - GET /version with
+ * app=launcher, which every device may ask for regardless of its own app. The only other
  * way to update this Device Owner app is a full factory reset and QR re-scan, or a developer
  * connected over USB.
  *
@@ -42,7 +41,21 @@ class LauncherSelfUpdateWorker(context: Context, params: WorkerParameters) : Cor
 
     override suspend fun doWork(): Result {
         AppLogger.i(TAG, "doWork start")
-        val latest = DashboardApi.fetchLatestVersion(DeviceIdentity.id(applicationContext), app = "launcher")
+        if (!DeviceConfig.isEnrolled(applicationContext)) {
+            AppLogger.i(TAG, "Not enrolled, nothing to ask for")
+            return Result.success()
+        }
+        // Fetched on every attempt, never reused across retries - apk_url is signed for 60 minutes,
+        // and a retry after a 403 on an expired one needs a fresh URL.
+        val latest = try {
+            DeviceApi.fetchLatestVersion(applicationContext, app = "launcher")
+        } catch (e: DeviceApiException) {
+            AppLogger.e(TAG, "Version check failed: ${e.message}")
+            return if (e.isRetryable) Result.retry() else Result.success()
+        } catch (e: Exception) {
+            AppLogger.e(TAG, "Version check failed: ${e.message}")
+            return Result.retry()
+        }
         if (!latest.isPublished) {
             Log.i(TAG, "No launcher version published yet, nothing to install")
             return Result.success()
