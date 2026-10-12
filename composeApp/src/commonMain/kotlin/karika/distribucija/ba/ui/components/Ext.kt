@@ -3,6 +3,7 @@ package karika.distribucija.ba.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -13,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -77,13 +79,14 @@ fun Modifier.hideKeyboard(onlyClick: Boolean = false): Modifier {
     if (!onlyClick) {
         this.nestedScroll(nestedScrollConnection)
     }
+    // A tap gesture rather than clickable: clickable would merge the whole screen into one
+    // node for accessibility services (and the tests), as if it were a single button
     return this
-        .clickable(
-            interactionSource = null,
-            indication = null
-        ) {
-            keyboard?.hide()
-            focusManager.clearFocus()
+        .pointerInput(Unit) {
+            detectTapGestures {
+                keyboard?.hide()
+                focusManager.clearFocus()
+            }
         }
 }
 

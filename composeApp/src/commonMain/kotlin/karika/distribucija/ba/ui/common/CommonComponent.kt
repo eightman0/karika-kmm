@@ -237,38 +237,8 @@ open class CommonComponent(
                 return@launch
             }
 
-            cartRepository.addToCart(
-                AddToCart(
-                    CartItem(
-                        sku = product.sku ?: return@launch,
-                        qty = 1,
-                        quoteId = stateHolder.cartHandler.cartId
-                    )
-                )
-            ).collect { result ->
-                when (result) {
-                    is ResultState.Loading -> showLoader()
-                    is ResultState.Success -> {
-                        updateCart(product.copy(itemId = result.data.itemId), qty) {
-                            if (showSnack) {
-                                showMessage("Proizvod dodan u korpu!")
-                            }
-                        }
-                    }
-
-                    is ResultState.Error -> {
-                        hideLoader()
-                        if (result.message == "Current customer does not have an active cart.") {
-                            stateHolder.cartHandler.createCart {
-                                addToCartWithPut(product, qty, showSnack)
-                            }
-                            return@collect
-                        }
-
-                        showMessage(result.message ?: "")
-                    }
-                }
-            }
+            // A product that is not in the cart yet goes in with its whole quantity at once
+            addToCart(product, qty, showSnack)
         }
     }
 
