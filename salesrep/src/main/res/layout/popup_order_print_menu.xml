@@ -1,66 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors the print DropdownMenu in composeApp's SalesOrderDetailView: white 14dp card with
+     icon + label rows; "Pošalji predračun" in the blue accent. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_popup_menu_white"
-    android:elevation="8dp"
+    android:background="@drawable/bg_k_shell_popup"
+    android:elevation="10dp"
+    android:minWidth="220dp"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:paddingVertical="6dp">
 
     <TextView
         android:id="@+id/action_print_order"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:background="@drawable/bg_pill_outline_blue"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackground"
         android:clickable="true"
+        android:drawableStart="@drawable/ic_k_shell_menu_print"
+        android:drawablePadding="12dp"
+        android:drawableTint="@color/k_ink"
         android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="12dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:paddingHorizontal="16dp"
         android:text="@string/order_detail_print_order"
-        android:textColor="@color/karika_blue"
-        android:textSize="14sp"
-        android:textStyle="bold" />
-
-    <Space
-        android:layout_width="1dp"
-        android:layout_height="8dp" />
+        android:textColor="@color/k_ink"
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/action_print_estimate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:background="@drawable/bg_pill_outline_blue"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackground"
         android:clickable="true"
+        android:drawableStart="@drawable/ic_k_shell_menu_document"
+        android:drawablePadding="12dp"
+        android:drawableTint="@color/k_ink"
         android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="12dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:paddingHorizontal="16dp"
         android:text="@string/order_detail_print_estimate"
-        android:textColor="@color/karika_blue"
-        android:textSize="14sp"
-        android:textStyle="bold" />
-
-    <Space
-        android:layout_width="1dp"
-        android:layout_height="8dp" />
+        android:textColor="@color/k_ink"
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/action_send_estimate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:background="@drawable/bg_pill_filled_blue"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackground"
         android:clickable="true"
+        android:drawableStart="@drawable/ic_k_shell_menu_send"
+        android:drawablePadding="12dp"
+        android:drawableTint="@color/k_accent"
         android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="12dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:paddingHorizontal="16dp"
         android:text="@string/order_detail_send_estimate"
-        android:textColor="@color/karika_white"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textColor="@color/k_accent"
+        android:textSize="15sp" />
 
 </LinearLayout>

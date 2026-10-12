@@ -86,7 +86,7 @@ class LoginFragment : Fragment() {
                 View.GONE
             }
             binding.editEmail.setBackgroundResource(
-                if (isInvalid) R.drawable.bg_field_border_error else R.drawable.bg_field_border
+                if (isInvalid) R.drawable.bg_k_shell_field_filled_error else R.drawable.bg_k_shell_field_filled
             )
             updateFormValid()
         })

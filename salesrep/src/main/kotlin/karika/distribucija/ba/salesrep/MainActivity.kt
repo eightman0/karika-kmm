@@ -204,6 +204,7 @@ class MainActivity : AppCompatActivity() {
                 if (isLogin) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED
             )
             updateSelectedNavRow(destination)
+            styleToolbarFor(destination)
             notificationsMenuItem?.isVisible = destination.id in appBarConfig.topLevelDestinations
             if (destination.id == R.id.ordersListFragment) {
                 loadRepName()
@@ -327,22 +328,57 @@ class MainActivity : AppCompatActivity() {
     private fun updateSelectedNavRow(destination: NavDestination) {
         navRows.forEach { row ->
             val selected = destination.id == row.destinationId
+            // Main rows get the blue-soft highlight; analytics sub-rows (no icon) only turn blue
+            // with a blue dot, as in Compose's SalesNavItem / SalesSubNavItem.
+            val isSubRow = row.icon == null
             row.container.setBackgroundResource(
-                if (selected) R.drawable.bg_drawer_item_selected else R.drawable.bg_drawer_item_unselected
+                if (selected && !isSubRow) R.drawable.bg_k_shell_drawer_item_selected else R.drawable.bg_k_shell_drawer_item
             )
-            val color = getColor(if (selected) R.color.karika_white else R.color.karika_gray6)
+            val color = getColor(
+                when {
+                    selected -> R.color.k_accent
+                    isSubRow -> R.color.k_muted
+                    else -> R.color.k_ink
+                }
+            )
             row.icon?.setColorFilter(color)
             row.text.setTextColor(color)
-            row.text.setTypeface(row.text.typeface, if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+            if (isSubRow) {
+                row.text.compoundDrawableTintList = android.content.res.ColorStateList.valueOf(
+                    getColor(if (selected) R.color.k_accent else R.color.k_border)
+                )
+            }
+            row.text.typeface = android.graphics.Typeface.create(
+                if (selected) "sans-serif" else "sans-serif-medium",
+                if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
+            )
         }
 
         val analyticsActive = destination.id in analyticsDestinationIds
-        val analyticsColor = getColor(if (analyticsActive) R.color.karika_white else R.color.karika_gray6)
+        val analyticsColor = getColor(if (analyticsActive) R.color.k_accent else R.color.k_ink)
         findViewById<View>(R.id.row_nav_analytics).setBackgroundResource(
-            if (analyticsActive) R.drawable.bg_drawer_item_selected else R.drawable.bg_drawer_item_unselected
+            if (analyticsActive) R.drawable.bg_k_shell_drawer_item_selected else R.drawable.bg_k_shell_drawer_item
         )
         findViewById<ImageView>(R.id.icon_nav_analytics).setColorFilter(analyticsColor)
+        findViewById<ImageView>(R.id.icon_nav_analytics_chevron).setColorFilter(
+            getColor(if (analyticsActive) R.color.k_accent else R.color.k_muted)
+        )
         findViewById<TextView>(R.id.text_nav_analytics).setTextColor(analyticsColor)
+    }
+
+    /** Swaps the navigation icon NavigationUI just set (hamburger / up arrow) for the design's
+     * circle buttons, and uses the big root title only on top-level screens - SalesRootTopBar vs
+     * SalesDetailTopBar in composeApp. Must run after setupActionBarWithNavController's own
+     * destination listener, which is registered first. */
+    private fun styleToolbarFor(destination: NavDestination) {
+        val isTopLevel = destination.id in appBarConfig.topLevelDestinations
+        supportActionBar?.setHomeAsUpIndicator(
+            if (isTopLevel) R.drawable.bg_k_shell_nav_menu else R.drawable.bg_k_shell_nav_back
+        )
+        toolbar.setTitleTextAppearance(
+            this,
+            if (isTopLevel) R.style.k_shell_ToolbarTitle else R.style.k_shell_ToolbarTitle_Detail
+        )
     }
 
     override fun onSupportNavigateUp(): Boolean {

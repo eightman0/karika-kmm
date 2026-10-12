@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Toolbar title of the root screens (SalesRootTopBar: 22sp bold ink) -->
+    <style name="k_shell_ToolbarTitle">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/k_ink</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!-- Toolbar title of the detail screens (SalesDetailTopBar: 17sp bold ink) -->
+    <style name="k_shell_ToolbarTitle.Detail">
+        <item name="android:textSize">17sp</item>
+    </style>
+</resources>

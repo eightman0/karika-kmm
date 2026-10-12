@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="k_shell_drawer_messages_section">PORUKE</string>
+    <string name="k_shell_login_account_type">Dobavljač</string>
+    <string name="k_shell_login_subtitle">Dobrodošli nazad. Prijavite se na svoj račun.</string>
+</resources>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- Circle bell (KCircleButton) - the layered drawable carries its own colors, so no iconTint -->
     <item
         android:id="@+id/action_notifications"
-        android:icon="@drawable/ic_notifications"
+        android:icon="@drawable/bg_k_shell_nav_bell"
         android:title="@string/notifications_title"
-        app:iconTint="@color/karika_gray2"
         app:showAsAction="always" />
 </menu>

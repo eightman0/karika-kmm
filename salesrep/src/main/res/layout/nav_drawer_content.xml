@@ -1,73 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors the ModalDrawerSheet in composeApp's SalesDashboardView: white sheet with rounded
+     end corners, profile header, flat nav items (blue soft highlight when selected), a "PORUKE"
+     group and a soft red logout row. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="304dp"
     android:layout_height="match_parent"
-    android:background="@color/karika_gray20"
+    android:background="@drawable/bg_k_shell_drawer"
     android:orientation="vertical">
 
-    <!-- Header -->
+    <!-- Profile header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="14dp">
+
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_k_shell_avatar_accent">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_person"
+                app:tint="@color/k_white" />
+        </FrameLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="52dp"
-                android:layout_height="52dp"
-                android:contentDescription="@string/app_name"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_primary_logo" />
-
-            <LinearLayout
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/text_rep_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:textColor="@color/k_ink"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="Ime Prezime" />
 
-                <TextView
-                    android:id="@+id/text_rep_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/karika_gray2"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    tools:text="Ime Prezime" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/drawer_role_label"
-                    android:textColor="@color/karika_gray6"
-                    android:textSize="13sp" />
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/button_close_drawer"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/action_cancel"
-                android:padding="4dp"
-                android:src="@drawable/ic_tertiary"
-                app:tint="@color/karika_gray6" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/drawer_role_label"
+                android:textColor="@color/k_muted"
+                android:textSize="12sp" />
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="16dp"
-            android:background="@color/karika_gray9" />
+        <ImageView
+            android:id="@+id/button_close_drawer"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_k_circle_button"
+            android:contentDescription="@string/action_cancel"
+            android:padding="11dp"
+            android:src="@drawable/ic_k_shell_close"
+            app:tint="@color/k_ink" />
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/k_line" />
 
     <!-- Nav items -->
     <ScrollView
@@ -79,45 +89,49 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="8dp">
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="10dp">
 
             <LinearLayout
                 android:id="@+id/row_nav_analytics"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_drawer_item_unselected"
+                                android:background="@drawable/bg_k_shell_drawer_item"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="12dp">
 
                 <ImageView
                     android:id="@+id/icon_nav_analytics"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_analytics"
-                    app:tint="@color/karika_gray6" />
+                    android:src="@drawable/ic_k_shell_chart"
+                    app:tint="@color/k_ink" />
 
                 <TextView
                     android:id="@+id/text_nav_analytics"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="@string/drawer_analytics"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_ink"
                     android:textSize="15sp" />
 
                 <ImageView
                     android:id="@+id/icon_nav_analytics_chevron"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_arrow_down"
-                    app:tint="@color/karika_gray6" />
+                    app:tint="@color/k_muted" />
             </LinearLayout>
 
             <LinearLayout
@@ -132,14 +146,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:background="@drawable/bg_k_shell_drawer_item"
                     android:clickable="true"
+                    android:drawablePadding="12dp"
+                    android:drawableStart="@drawable/bg_k_shell_dot"
+                    android:drawableTint="@color/k_border"
+                    android:ellipsize="end"
                     android:focusable="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
                     android:paddingStart="46dp"
-                    android:paddingEnd="16dp"
-                    android:paddingVertical="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingVertical="10dp"
                     android:text="@string/analytics_overview_title"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_muted"
                     android:textSize="14sp" />
 
                 <TextView
@@ -147,14 +168,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:background="@drawable/bg_k_shell_drawer_item"
                     android:clickable="true"
+                    android:drawablePadding="12dp"
+                    android:drawableStart="@drawable/bg_k_shell_dot"
+                    android:drawableTint="@color/k_border"
+                    android:ellipsize="end"
                     android:focusable="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
                     android:paddingStart="46dp"
-                    android:paddingEnd="16dp"
-                    android:paddingVertical="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingVertical="10dp"
                     android:text="@string/analytics_trends_title"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_muted"
                     android:textSize="14sp" />
 
                 <TextView
@@ -162,14 +190,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:background="@drawable/bg_k_shell_drawer_item"
                     android:clickable="true"
+                    android:drawablePadding="12dp"
+                    android:drawableStart="@drawable/bg_k_shell_dot"
+                    android:drawableTint="@color/k_border"
+                    android:ellipsize="end"
                     android:focusable="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
                     android:paddingStart="46dp"
-                    android:paddingEnd="16dp"
-                    android:paddingVertical="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingVertical="10dp"
                     android:text="@string/analytics_reps_title"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_muted"
                     android:textSize="14sp"
                     android:visibility="gone" />
 
@@ -178,14 +213,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:background="@drawable/bg_k_shell_drawer_item"
                     android:clickable="true"
+                    android:drawablePadding="12dp"
+                    android:drawableStart="@drawable/bg_k_shell_dot"
+                    android:drawableTint="@color/k_border"
+                    android:ellipsize="end"
                     android:focusable="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
                     android:paddingStart="46dp"
-                    android:paddingEnd="16dp"
-                    android:paddingVertical="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingVertical="10dp"
                     android:text="@string/analytics_customers_title"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_muted"
                     android:textSize="14sp" />
 
                 <TextView
@@ -193,14 +235,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:background="@drawable/bg_k_shell_drawer_item"
                     android:clickable="true"
+                    android:drawablePadding="12dp"
+                    android:drawableStart="@drawable/bg_k_shell_dot"
+                    android:drawableTint="@color/k_border"
+                    android:ellipsize="end"
                     android:focusable="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
                     android:paddingStart="46dp"
-                    android:paddingEnd="16dp"
-                    android:paddingVertical="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingVertical="10dp"
                     android:text="@string/analytics_at_risk_title"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_muted"
                     android:textSize="14sp" />
 
                 <TextView
@@ -208,14 +257,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:background="@drawable/bg_drawer_item_unselected"
+                    android:background="@drawable/bg_k_shell_drawer_item"
                     android:clickable="true"
+                    android:drawablePadding="12dp"
+                    android:drawableStart="@drawable/bg_k_shell_dot"
+                    android:drawableTint="@color/k_border"
+                    android:ellipsize="end"
                     android:focusable="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
                     android:paddingStart="46dp"
-                    android:paddingEnd="16dp"
-                    android:paddingVertical="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingVertical="10dp"
                     android:text="@string/analytics_products_title"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_muted"
                     android:textSize="14sp" />
 
             </LinearLayout>
@@ -225,30 +281,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:background="@drawable/bg_drawer_item_unselected"
+                android:background="@drawable/bg_k_shell_drawer_item"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="12dp">
 
                 <ImageView
                     android:id="@+id/icon_nav_orders"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_orders"
-                    app:tint="@color/karika_gray6" />
+                    android:src="@drawable/ic_k_shell_cart"
+                    app:tint="@color/k_ink" />
 
                 <TextView
                     android:id="@+id/text_nav_orders"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="@string/drawer_orders"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_ink"
                     android:textSize="15sp" />
             </LinearLayout>
 
@@ -257,62 +316,81 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:background="@drawable/bg_drawer_item_unselected"
+                android:background="@drawable/bg_k_shell_drawer_item"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="12dp">
 
                 <ImageView
                     android:id="@+id/icon_nav_customers"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_customers"
-                    app:tint="@color/karika_gray6" />
+                    android:src="@drawable/ic_k_shell_users"
+                    app:tint="@color/k_ink" />
 
                 <TextView
                     android:id="@+id/text_nav_customers"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="@string/drawer_customers"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_ink"
                     android:textSize="15sp" />
             </LinearLayout>
+
+            <!-- Messages as their own group, as in the Compose drawer -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="6dp"
+                android:letterSpacing="0.04"
+                android:text="@string/k_shell_drawer_messages_section"
+                android:textColor="@color/k_subtle"
+                android:textSize="11sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:id="@+id/row_nav_customer_messages"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:background="@drawable/bg_drawer_item_unselected"
+                android:background="@drawable/bg_k_shell_drawer_item"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="12dp">
 
                 <ImageView
                     android:id="@+id/icon_nav_customer_messages"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_messages"
-                    app:tint="@color/karika_gray6" />
+                    android:src="@drawable/ic_k_shell_chat"
+                    app:tint="@color/k_ink" />
 
                 <TextView
                     android:id="@+id/text_nav_customer_messages"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="@string/drawer_customer_messages"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_ink"
                     android:textSize="15sp" />
             </LinearLayout>
 
@@ -321,30 +399,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:background="@drawable/bg_drawer_item_unselected"
+                android:background="@drawable/bg_k_shell_drawer_item"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="12dp">
 
                 <ImageView
                     android:id="@+id/icon_nav_admin_messages"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_email"
-                    app:tint="@color/karika_gray6" />
+                    android:src="@drawable/ic_k_shell_shield"
+                    app:tint="@color/k_ink" />
 
                 <TextView
                     android:id="@+id/text_nav_admin_messages"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="@string/drawer_admin_messages"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_ink"
                     android:textSize="15sp" />
             </LinearLayout>
 
@@ -353,30 +434,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:background="@drawable/bg_drawer_item_unselected"
+                android:background="@drawable/bg_k_shell_drawer_item"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="12dp">
 
                 <ImageView
                     android:id="@+id/icon_nav_internal_messages"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_messages"
-                    app:tint="@color/karika_gray6" />
+                    android:src="@drawable/ic_k_shell_inbox"
+                    app:tint="@color/k_ink" />
 
                 <TextView
                     android:id="@+id/text_nav_internal_messages"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="@string/drawer_internal_messages"
-                    android:textColor="@color/karika_gray6"
+                    android:textColor="@color/k_ink"
                     android:textSize="15sp" />
             </LinearLayout>
 
@@ -384,43 +468,44 @@
     </ScrollView>
 
     <!-- Footer -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/k_line" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="8dp">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/karika_gray9" />
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="12dp">
 
         <LinearLayout
             android:id="@+id/row_logout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="?attr/selectableItemBackground"
+            android:background="@drawable/bg_k_shell_logout"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp">
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="13dp">
 
             <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_logout"
-                app:tint="@color/karika_error" />
+                android:src="@drawable/ic_k_shell_logout_left"
+                app:tint="@color/k_red" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="@string/drawer_logout"
-                android:textColor="@color/karika_error"
+                android:textColor="@color/k_red"
                 android:textSize="15sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -428,30 +513,23 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="4dp">
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/text_app_version"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/karika_gray7"
+                android:textColor="@color/k_subtle"
                 android:textSize="12sp"
                 tools:text="v1.0.0(1)" />
 
             <View
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:background="@drawable/bg_status_dot" />
-
-            <View
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:layout_marginStart="4dp"
-                android:background="@drawable/bg_status_dot" />
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_k_shell_dot_green" />
         </LinearLayout>
     </LinearLayout>
 

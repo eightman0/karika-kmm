@@ -1,23 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors composeApp's SalesNotificationsView: page gray list of 14dp cards spaced 10dp,
+     and a centered empty placeholder with a blue bell tile. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_white">
+    android:background="@color/k_page">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_notifications"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="14dp" />
 
     <TextView
         android:id="@+id/text_notifications_empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingHorizontal="16dp"
+        android:drawablePadding="16dp"
+        android:drawableTop="@drawable/bg_k_shell_empty_bell"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:paddingHorizontal="32dp"
         android:text="@string/notifications_empty"
-        android:textColor="@color/karika_blue"
-        android:textSize="16sp"
+        android:textColor="@color/k_ink"
+        android:textSize="17sp"
         android:textStyle="bold"
         android:visibility="gone" />
 

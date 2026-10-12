@@ -6,9 +6,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
 
 /** Material3's default bottom sheet style paints a tonal surface color, not pure white - call
- * from onStart() so the sheet matches compose's ModalBottomSheet(containerColor = KarikaColors.White). */
+ * from onStart() so the sheet matches compose's ModalBottomSheet(containerColor = KarikaColors.White,
+ * shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)). */
 fun BottomSheetDialogFragment.applyWhiteSheetBackground() {
     (dialog as? BottomSheetDialog)
         ?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-        ?.setBackgroundResource(R.drawable.bg_bottom_sheet_white)
+        ?.setBackgroundResource(R.drawable.bg_k_sheet)
 }

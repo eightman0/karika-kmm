@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Page gray with a white band under the status bar, so the login's white header (which sits
+     below the status-bar padding of the fitsSystemWindows root) appears to run edge-to-edge. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/k_page" />
+        </shape>
+    </item>
+    <item android:height="48dp" android:gravity="top|fill_horizontal">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/k_white" />
+        </shape>
+    </item>
+</layer-list>

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors SalesNotificationItem: 14dp card (blue wash while unread), 40dp bell tile,
+     body + muted time, and a blue dot while unread. -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -6,16 +8,36 @@
     android:id="@+id/root_notification_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/bg_k_shell_notification_read"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:padding="14dp">
+
+    <FrameLayout
+        android:id="@+id/tile_k_shell_notification_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_k_shell_tile_field"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/icon_k_shell_notification"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_k_shell_bell"
+            app:tint="@color/k_muted" />
+    </FrameLayout>
 
     <View
         android:id="@+id/dot_unread"
         android:layout_width="8dp"
         android:layout_height="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/bg_notification_dot"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_k_shell_dot_accent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -23,39 +45,38 @@
         android:id="@+id/text_notification_body"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:lineSpacingExtra="3sp"
         android:maxLines="2"
-        android:textColor="@color/karika_gray18"
+        android:textColor="@color/k_ink"
         android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/dot_unread"
+        app:layout_constraintStart_toEndOf="@id/tile_k_shell_notification_icon"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_goneMarginEnd="0dp"
         tools:text="Nova narudžba je zaprimljena za obradu." />
 
     <TextView
         android:id="@+id/text_notification_time"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:textColor="@color/karika_gray13"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/k_muted"
         android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/text_notification_body"
+        app:layout_constraintStart_toStartOf="@id/text_notification_body"
         app:layout_constraintTop_toBottomOf="@id/text_notification_body"
         tools:text="2026-08-10 09:12:00" />
 
+    <!-- Kept for the binding; cards replace the old full-width dividers. -->
     <View
         android:id="@+id/divider_notification"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="16dp"
-        android:background="@color/karika_divider"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_notification_time" />
 

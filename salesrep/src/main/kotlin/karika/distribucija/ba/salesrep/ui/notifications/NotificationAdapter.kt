@@ -12,7 +12,7 @@ import karika.distribucija.ba.salesrep.model.Notification
 
 /** Mirrors composeApp's SalesNotificationItem in SalesNotificationsView.kt - only [Notification.body]
  * and [Notification.createdAt] are shown (title is never rendered there either, a genuine Compose
- * omission carried over here), with a pink wash + red dot while unread. */
+ * omission carried over here), with a blue wash, blue bell tile + blue dot while unread. */
 class NotificationAdapter(
     private val onClick: (Notification) -> Unit
 ) : ListAdapter<Notification, NotificationAdapter.ViewHolder>(DIFF) {
@@ -32,8 +32,19 @@ class NotificationAdapter(
         fun bind(item: Notification) {
             val isUnread = item.isRead == "false"
 
+            val context = binding.root.context
             binding.rootNotificationItem.setBackgroundResource(
-                if (isUnread) R.color.karika_red2 else android.R.color.transparent
+                if (isUnread) R.drawable.bg_k_shell_notification_unread else R.drawable.bg_k_shell_notification_read
+            )
+            binding.tileKShellNotificationIcon.setBackgroundResource(
+                if (isUnread) R.drawable.bg_k_icon_tile else R.drawable.bg_k_shell_tile_field
+            )
+            binding.iconKShellNotification.setColorFilter(
+                context.getColor(if (isUnread) R.color.k_accent else R.color.k_muted)
+            )
+            binding.textNotificationBody.typeface = android.graphics.Typeface.create(
+                if (isUnread) "sans-serif" else "sans-serif-medium",
+                if (isUnread) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL
             )
             binding.dotUnread.visibility = if (isUnread) View.VISIBLE else View.GONE
             binding.textNotificationBody.text = item.body

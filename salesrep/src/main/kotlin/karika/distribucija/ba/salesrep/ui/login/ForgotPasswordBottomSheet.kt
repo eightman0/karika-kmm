@@ -62,9 +62,8 @@ class ForgotPasswordBottomSheet(
     private fun renderConfirmEnabled() {
         val isValid = binding.editForgotEmail.text?.toString().orEmpty().isEmailFormatValid()
         binding.buttonConfirm.isEnabled = isValid
-        binding.buttonConfirm.setBackgroundResource(
-            if (isValid) R.drawable.bg_button_pill_primary else R.drawable.bg_button_pill_disabled
-        )
+        // bg_k_button_primary fades itself out through its state_enabled="false" item
+        binding.buttonConfirm.setBackgroundResource(R.drawable.bg_k_button_primary)
     }
 
     private fun hideKeyboard() {
