@@ -30,11 +30,26 @@ class DiscountFormViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     val isEdit: Boolean = ruleId != 0L
 
-    private val _itemSearch = MutableLiveData(savedStateHandle.get<String>("productName") ?: "")
+    /** Shown read-only in the "Kupac" field. */
+    val customerName: String = savedStateHandle.get<String>("customerName").orEmpty()
+
+    // Pre-filled from the rule being edited, like SalesDiscountFormComponent's initial state
+    private val _itemSearch = MutableLiveData(
+        savedStateHandle.get<String>("productName")?.takeIf { it.isNotBlank() }
+            ?: savedStateHandle.get<String>("categoryName")?.takeIf { it.isNotBlank() }
+            ?: ""
+    )
     val itemSearch: LiveData<String> = _itemSearch
 
     private var selectedProductId: Long? = savedStateHandle.get<Long>("productId")?.takeIf { it != 0L }
-    val hasSelectedItem: Boolean get() = selectedProductId != null
+
+    /** Only ever set from an edited category rule - the search itself finds products only. Kept
+     * so saving an edited category rule doesn't silently turn it into an all-items discount. */
+    private var selectedCategoryId: Long? =
+        savedStateHandle.get<Long>("categoryId")?.takeIf { it != 0L && selectedProductId == null }
+
+    val hasSelectedItem: Boolean get() = selectedProductId != null || selectedCategoryId != null
+    val isCategorySelected: Boolean get() = selectedCategoryId != null
 
     private val _searchResults = MutableLiveData<List<OnBehalfProduct>>(emptyList())
     val searchResults: LiveData<List<OnBehalfProduct>> = _searchResults
@@ -57,8 +72,11 @@ class DiscountFormViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     private var searchJob: Job? = null
 
     fun setItemSearch(query: String) {
+        // EditText restores (and re-emits) its own text on view recreation - not a user edit
+        if (query == _itemSearch.value) return
         _itemSearch.value = query
         selectedProductId = null
+        selectedCategoryId = null
         searchJob?.cancel()
 
         if (query.length < 2) {
@@ -78,12 +96,14 @@ class DiscountFormViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     fun selectProduct(product: OnBehalfProduct) {
         selectedProductId = product.entityId
+        selectedCategoryId = null
         _itemSearch.value = product.name
         _searchResults.value = emptyList()
     }
 
     fun clearItem() {
         selectedProductId = null
+        selectedCategoryId = null
         _itemSearch.value = ""
         _searchResults.value = emptyList()
     }
@@ -108,6 +128,7 @@ class DiscountFormViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
                 discountPercent = percent,
                 isActive = existingIsActive,
                 productId = selectedProductId,
+                categoryId = selectedCategoryId,
                 minQty = _minQty.value?.toFloatOrNull()
             )
         )

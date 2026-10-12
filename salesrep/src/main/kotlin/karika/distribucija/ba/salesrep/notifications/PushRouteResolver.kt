@@ -3,16 +3,13 @@ package karika.distribucija.ba.salesrep.notifications
 /** Where a notification's `route` field should navigate - shared by the in-app Notifications
  * list (NotificationsViewModel) and by push notification taps (KarikaFcmService/MainActivity),
  * since both receive the exact same route format from the backend. Mirrors composeApp's
- * PushHandler.handleNewPushIfExistsVendor() (the vendor/sales-rep branch only). */
+ * PushHandler.handleNewPushIfExistsSalesRep(). */
 sealed class NotificationDestination {
     data class OrderDetail(val orderId: String) : NotificationDestination()
-    data class Conversation(
-        val threadId: String,
-        val customerName: String,
-        val subject: String?,
-        val receiverId: Int,
-        val admin: Boolean
-    ) : NotificationDestination()
+
+    /** A Chat V2 conversation; which screen opens depends on its axis, so it is looked up first
+     * (see openChatConversation()). */
+    data class Conversation(val conversationId: Long) : NotificationDestination()
 }
 
 object PushRouteResolver {
@@ -27,24 +24,17 @@ object PushRouteResolver {
                 NotificationDestination.OrderDetail(it.groupValues[1])
             }
 
-        route.startsWith("route/messages") -> {
-            val params = Regex("""[?&]([^=]+)=([^&]*)""").findAll(route)
-                .associate { it.groupValues[1] to it.groupValues[2] }
-            val threadId = params["threadId"]
-            val receiverName = params["receiverName"]
-            val vendorId = params["vendorId"]
-            val admin = params["admin"]
-            val subject = params["subject"]
-            if (threadId != null && receiverName != null && vendorId != null && admin != null && subject != null) {
-                NotificationDestination.Conversation(
-                    threadId = threadId,
-                    customerName = receiverName,
-                    subject = subject,
-                    receiverId = vendorId.toIntOrNull() ?: -1,
-                    admin = admin == "1"
-                )
-            } else null
-        }
+        route.startsWith("route/chat") ->
+            Regex("""conversationId=(\d+)""").find(route)?.groupValues?.get(1)?.toLongOrNull()?.let {
+                NotificationDestination.Conversation(it)
+            }
+
+        // Legacy pre-Chat-V2 message notifications (`route/messages?threadId=...`) - the same id
+        // space as route/chat's conversationId, so they open the same way.
+        route.startsWith("route/messages") ->
+            Regex("""threadId=(\d+)""").find(route)?.groupValues?.get(1)?.toLongOrNull()?.let {
+                NotificationDestination.Conversation(it)
+            }
 
         else -> null
     }

@@ -74,7 +74,7 @@ class AnalyticsComponent(
                 if (result is ResultState.Success) _overview.update { result.data }
                 if (result is ResultState.Error) showMessage(result.message ?: "")
             }
-            repository.getTrends(dateFrom, dateTo, groupBy, _overview.value.revenueGrowth).collect { result ->
+            repository.getTrends(dateFrom, dateTo, groupBy).collect { result ->
                 if (result is ResultState.Success) _trends.update { result.data }
                 if (result is ResultState.Error) showMessage(result.message ?: "")
             }

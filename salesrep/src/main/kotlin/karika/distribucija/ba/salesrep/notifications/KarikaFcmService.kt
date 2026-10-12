@@ -32,7 +32,7 @@ class KarikaFcmService : FirebaseMessagingService() {
     private fun sendNotification(notification: RemoteMessage.Notification, data: Map<String, String>) {
         data["route"]?.let { route ->
             (PushRouteResolver.resolve(route) as? NotificationDestination.Conversation)?.let {
-                MessagePushBus.publish(it.threadId, it.admin)
+                MessagePushBus.publish(it.conversationId)
             }
         }
 

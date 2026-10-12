@@ -49,8 +49,14 @@ class DiscountsAdapter(
             }.joinToString(" · ")
             binding.textPercent.text = "${rule.discountPercent.toInt()}%"
 
-            binding.buttonEdit.visibility = if (canEdit) View.VISIBLE else View.GONE
-            binding.buttonDelete.visibility = if (canEdit) View.VISIBLE else View.GONE
+            binding.textCreatedBy.text = rule.createdByEmployeeName?.takeIf { it.isNotBlank() }
+                ?: context.getString(R.string.discount_created_by)
+
+            // Same rule as SalesCustomerDetailView.kt: edit/delete need the
+            // can_create_discount_for capability and a rule a sales rep (not an admin) created.
+            val editable = canEdit && !rule.createdByAdmin()
+            binding.buttonEdit.visibility = if (editable) View.VISIBLE else View.GONE
+            binding.buttonDelete.visibility = if (editable) View.VISIBLE else View.GONE
             binding.buttonEdit.setOnClickListener { onEdit(rule) }
             binding.buttonDelete.setOnClickListener { onDelete(rule) }
         }

@@ -1,11 +1,11 @@
 package karika.distribucija.ba.salesrep.ui.customers
 
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -125,7 +125,7 @@ class NewCustomerFragment : Fragment() {
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message)
         }
 
         viewModel.saved.observe(viewLifecycleOwner) { saved ->

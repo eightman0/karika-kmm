@@ -103,6 +103,7 @@
             app:tint="@color/k_subtle" />
 
         <TextView
+            android:id="@+id/text_created_by"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"

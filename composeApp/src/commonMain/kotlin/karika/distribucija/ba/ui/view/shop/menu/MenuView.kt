@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -197,7 +198,7 @@ fun MenuView(component: MenuComponent) {
     }
 }
 
-/** Navy "Kategorije proizvoda" card with a decorative pink circle. */
+/** Pink (primary) "Kategorije proizvoda" card with a decorative white circle, like KFeatureTile. */
 @Composable
 private fun CategoriesCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
@@ -205,7 +206,7 @@ private fun CategoriesCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(110.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(KarikaUiColors.Ink)
+            .background(KarikaUiColors.Pink)
             .clickable(onClick = onClick)
     ) {
         Box(
@@ -214,7 +215,7 @@ private fun CategoriesCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
                 .offset(x = 24.dp, y = 24.dp)
                 .size(110.dp)
                 .clip(CircleShape)
-                .background(KarikaUiColors.Pink.copy(alpha = 0.35f))
+                .background(Color.White.copy(alpha = 0.14f))
         )
         Column(
             modifier = Modifier

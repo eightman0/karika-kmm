@@ -1,12 +1,12 @@
 package karika.distribucija.ba.salesrep.ui.login
 
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -55,7 +55,6 @@ class LoginFragment : Fragment() {
 
         updateFormValid()
 
-        binding.textAppVersion.text = "v${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
 
         // No account can log in without a network, so this is the one screen where getting stuck
         // offline (e.g. the kiosk moved to a location with different WiFi) has no other way out.
@@ -104,7 +103,7 @@ class LoginFragment : Fragment() {
                 is ResultState.Error -> result.message
                 else -> null
             } ?: return@observe
-            Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+            showSnack(message)
         }
 
         binding.buttonLogin.setOnClickListener {
@@ -137,7 +136,7 @@ class LoginFragment : Fragment() {
                     }
                     sendLoginEventToLauncher(binding.editEmail.text?.toString()?.trim().orEmpty())
                     PushTokenRegistrar.register()
-                    findNavController().navigate(R.id.action_login_to_orders)
+                    findNavController().navigate(R.id.action_login_to_home)
                 }
 
                 is ResultState.Error -> {

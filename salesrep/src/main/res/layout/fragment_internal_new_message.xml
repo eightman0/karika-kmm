@@ -19,40 +19,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_k_field_outline"
-            android:gravity="center_vertical"
-            android:minHeight="48dp"
-            android:orientation="horizontal"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="@string/internal_message_subject_label"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="@color/k_muted"
-                android:textSize="13sp" />
-
-            <EditText
-                android:id="@+id/edit_subject"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@null"
-                android:hint="@string/internal_message_subject_hint"
-                android:maxLines="1"
-                android:padding="0dp"
-                android:textColor="@color/k_ink"
-                android:textColorHint="@color/k_subtle"
-                android:textSize="15sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -128,12 +94,11 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="16dp" />
 
-    <!-- Composer: white panel, round k_field input and a round blue send button (SalesChatInput). -->
+    <!-- Composer: white panel with rounded top, pill k_field input and the blue "Pošalji" button (SalesChatInput). -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_k_msg_composer"
-        android:elevation="8dp"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
         android:paddingVertical="12dp">
@@ -150,36 +115,54 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/bg_k_msg_input"
+                android:background="@drawable/bg_k_msg_composer_input"
                 android:gravity="center_vertical"
                 android:hint="@string/internal_message_input_hint"
                 android:inputType="textMultiLine"
                 android:maxLines="5"
-                android:minHeight="48dp"
+                android:minHeight="44dp"
                 android:paddingHorizontal="16dp"
-                android:paddingVertical="12dp"
+                android:paddingVertical="11dp"
                 android:textColor="@color/k_ink"
                 android:textColorHint="@color/k_subtle"
                 android:textCursorDrawable="@drawable/bg_k_msg_cursor"
                 android:textSize="15sp" />
 
-            <FrameLayout
+            <!-- KPrimaryButton "Pošalji": 44dp, 14dp corners, send icon + text; 40% blue when disabled. -->
+            <LinearLayout
                 android:id="@+id/button_send"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
                 android:layout_marginStart="8dp"
-                android:background="@drawable/bg_k_msg_send_inactive"
+                android:background="@drawable/bg_k_button_primary"
                 android:clickable="true"
-                android:focusable="true">
+                android:contentDescription="@string/k_msg_send"
+                android:enabled="false"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp">
 
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/internal_message_send_cd"
-                    android:src="@drawable/ic_send_receipt"
-                    app:tint="@color/k_white" />
-            </FrameLayout>
+                    android:contentDescription="@null"
+                    android:duplicateParentState="true"
+                    android:src="@drawable/ic_k_msg_send" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:duplicateParentState="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:text="@string/k_msg_send"
+                    android:textColor="@color/k_white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

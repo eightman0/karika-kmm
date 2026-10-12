@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Analitika grids: KPI value cards / trend chart cards per row (phone). -->
+    <integer name="ka2_value_card_columns">2</integer>
+    <integer name="ka2_chart_card_columns">1</integer>
+</resources>

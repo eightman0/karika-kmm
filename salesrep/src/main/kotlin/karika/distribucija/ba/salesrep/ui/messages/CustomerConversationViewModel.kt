@@ -5,28 +5,26 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import karika.distribucija.ba.salesrep.api.SalesRepository
-import karika.distribucija.ba.salesrep.model.Message
+import karika.distribucija.ba.salesrep.api.ChatRepository
+import karika.distribucija.ba.salesrep.api.toChatFiles
+import karika.distribucija.ba.salesrep.model.ChatMessage
 import karika.distribucija.ba.salesrep.model.ResultState
-import karika.distribucija.ba.salesrep.model.SendMessageRequest
 import karika.distribucija.ba.salesrep.notifications.MessagePushBus
 import kotlinx.coroutines.launch
 
-/** Mirrors composeApp's SalesCustomerConversationComponent.kt. Every message sent on an existing
- * thread re-sends the conversation's original subject (matching Compose's
- * `subject = conversation.subject ?: ""` on every send, not just the first). */
+/** Mirrors composeApp's SalesCustomerConversationComponent.kt (and, via
+ * [AdminConversationViewModel], SalesAdminConversationComponent.kt): every load marks the
+ * conversation read first, then fetches its messages; a send carries the pending attachment as
+ * a base64 Chat V2 file and reloads on success. */
 open class CustomerConversationViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    protected open val admin: Boolean = false
-    private val repository = SalesRepository()
+    private val repository = ChatRepository()
 
-    val threadId: String = savedStateHandle.get<String>("threadId").orEmpty()
-    val customerName: String = savedStateHandle.get<String>("customerName").orEmpty()
-    val subject: String? = savedStateHandle.get<String>("subject")
-    private val receiverId: Int? = savedStateHandle.get<Int>("receiverId")?.takeIf { it >= 0 }
+    val conversationId: Long = savedStateHandle.get<Long>("conversationId") ?: 0L
+    val counterpartName: String? = savedStateHandle.get<String>("counterpartName")
 
-    private val _messages = MutableLiveData<List<Message>>(emptyList())
-    val messages: LiveData<List<Message>> = _messages
+    private val _messages = MutableLiveData<List<ChatMessage>>(emptyList())
+    val messages: LiveData<List<ChatMessage>> = _messages
 
     private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
@@ -35,14 +33,10 @@ open class CustomerConversationViewModel(savedStateHandle: SavedStateHandle) : V
     val attachment: LiveData<Pair<String, ByteArray>?> = _attachment
 
     init {
-        markRead()
         load()
         viewModelScope.launch {
             MessagePushBus.events.collect { event ->
-                if (event.admin == admin && event.threadId == threadId) {
-                    markRead()
-                    load()
-                }
+                if (event.conversationId == conversationId) load()
             }
         }
     }
@@ -56,10 +50,12 @@ open class CustomerConversationViewModel(savedStateHandle: SavedStateHandle) : V
     }
 
     private fun load() {
+        if (conversationId == 0L) return
         viewModelScope.launch {
-            repository.getMessageThread(threadId, admin).collect { result ->
+            repository.markRead(conversationId).collect {}
+            repository.getMessages(conversationId).collect { result ->
                 if (result is ResultState.Success) {
-                    _messages.value = result.data
+                    _messages.value = result.data.items
                 } else if (result is ResultState.Error) {
                     _errorMessage.value = result.message
                 }
@@ -68,19 +64,10 @@ open class CustomerConversationViewModel(savedStateHandle: SavedStateHandle) : V
     }
 
     fun sendMessage(text: String) {
-        val message = text.trim()
-        if (message.isBlank() && _attachment.value == null) return
+        if (conversationId == 0L) return
+        if (text.isBlank() && _attachment.value == null) return
         viewModelScope.launch {
-            repository.sendMessage(
-                SendMessageRequest(
-                    sendToAdmin = admin,
-                    message = message,
-                    subject = subject ?: "",
-                    receiverId = receiverId,
-                    threadId = threadId.toIntOrNull(),
-                    file = _attachment.value
-                )
-            ).collect { result ->
+            repository.sendMessage(conversationId, text, _attachment.value.toChatFiles()).collect { result ->
                 if (result is ResultState.Success) {
                     _attachment.value = null
                     load()
@@ -88,12 +75,6 @@ open class CustomerConversationViewModel(savedStateHandle: SavedStateHandle) : V
                     _errorMessage.value = result.message
                 }
             }
-        }
-    }
-
-    private fun markRead() {
-        viewModelScope.launch {
-            repository.markMessageRead(threadId).collect {}
         }
     }
 }

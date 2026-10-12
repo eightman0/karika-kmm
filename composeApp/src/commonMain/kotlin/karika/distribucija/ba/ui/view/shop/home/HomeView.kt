@@ -211,7 +211,7 @@ private fun Shortcuts(component: HomeComponent) {
             KFeatureTile(
                 modifier = Modifier.weight(1f),
                 title = "Outlet",
-                subtitle = "Sniženo sa zaliha",
+                subtitle = null,
                 icon = vectorResource(Res.drawable.ic_k_outlet),
                 background = KarikaUiColors.Pink,
                 height = 96.dp,
@@ -229,7 +229,7 @@ private fun Shortcuts(component: HomeComponent) {
             KFeatureTile(
                 modifier = Modifier.weight(1f),
                 title = "Akcije",
-                subtitle = "Aktivne ponude",
+                subtitle = null,
                 icon = vectorResource(Res.drawable.ic_k_tag),
                 background = KarikaUiColors.Ink,
                 height = 96.dp,
@@ -486,26 +486,23 @@ private fun FeaturedVendorCard(modifier: Modifier, vendor: PromotedVendor, compo
     }
 }
 
-/** Quick filters of the recommended products, shown only when some product matches. */
+/** Quick filters of the recommended products, shown only when some product matches. No "Sve"
+ * chip: nothing selected shows everything, and tapping the selected chip again clears it. */
 private enum class RecommendedFilter(val title: String, val matches: (Product) -> Boolean) {
-    ALL("Sve", { true }),
     DISCOUNT("Na akciji", { it.hasSpecialPrice() }),
     NEW("Novo", { it.isNew() }),
     BONUS("Sa bonusom", { it.hasBonus() }),
-    IN_STOCK("Na stanju", { it.hasOnStock() }),
 }
 
 @Composable
 private fun KarikaProducts(component: HomeComponent) {
     val newArrivals by component.newArrivals.collectAsState()
-    var filter by remember { mutableStateOf(RecommendedFilter.ALL) }
+    var filter by remember { mutableStateOf<RecommendedFilter?>(null) }
 
     if (newArrivals.isNotEmpty()) {
-        val filters = RecommendedFilter.entries.filter { f ->
-            f == RecommendedFilter.ALL || newArrivals.any { f.matches(it) }
-        }
-        val selected = if (filter in filters) filter else RecommendedFilter.ALL
-        val products = newArrivals.filter { selected.matches(it) }
+        val filters = RecommendedFilter.entries.filter { f -> newArrivals.any { f.matches(it) } }
+        val selected = filter?.takeIf { it in filters }
+        val products = if (selected == null) newArrivals else newArrivals.filter { selected.matches(it) }
         val perRow = if (gridColumnCount() >= 4) 2 else 1
 
         Spacer(Modifier.height(24.dp))
@@ -525,13 +522,13 @@ private fun KarikaProducts(component: HomeComponent) {
             }
         )
         Spacer(Modifier.height(10.dp))
-        if (filters.size > 1) {
+        if (filters.isNotEmpty()) {
             KChipRow {
                 filters.forEach { f ->
                     KChip(
                         text = f.title,
                         selected = f == selected,
-                        onClick = { filter = f }
+                        onClick = { filter = if (f == selected) null else f }
                     )
                 }
             }

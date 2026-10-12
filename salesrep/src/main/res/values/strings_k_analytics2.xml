@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pregled prodaje / Trendovi prodaje / Statistika kupaca (web-parity redesign) -->
+    <string name="ka2_empty_value">—</string>
+    <string name="ka2_delta_unavailable">–</string>
+    <string name="ka2_vs_previous_period">vs prethodni period</string>
+    <string name="ka2_vs_previous_month">vs prethodni mjesec</string>
+    <string name="ka2_vs_previous_year">vs prethodna godina</string>
+
+    <string name="ka2_total_revenue">Ukupan prihod</string>
+    <string name="ka2_orders">Narudžbe</string>
+    <string name="ka2_avg_order_value">Prosječna vrijednost narudžbe</string>
+    <string name="ka2_active_customers">Aktivni kupci</string>
+    <string name="ka2_new_customers">Novi kupci</string>
+    <string name="ka2_distinct_products">Različiti proizvodi</string>
+    <string name="ka2_revenue_growth">Rast prihoda</string>
+    <string name="ka2_goal_achievement">Ostvarenje cilja</string>
+    <string name="ka2_at_risk_customers">Kupci u riziku</string>
+    <string name="ka2_at_risk_note">30+ dana bez narudžbe</string>
+
+    <string name="ka2_chart_revenue">Prihod</string>
+    <string name="ka2_chart_orders">Narudžbe</string>
+    <string name="ka2_chart_active_customers">Aktivni kupci</string>
+    <string name="ka2_chart_new_customers">Novi kupci</string>
+    <string name="ka2_chart_no_data">Nema podataka za odabrani period</string>
+    <string name="ka2_active_customers_info">Broj različitih kupaca koji su naručili u pojedinom periodu (danu, sedmici, mjesecu). Kupac aktivan u više perioda broji se u svakom od njih, pa se vrijednosti ne sabiraju.</string>
+    <string name="ka2_info">Informacija</string>
+
+    <string name="ka2_customers_title">Analitika kupaca</string>
+    <string name="ka2_in_period">U PERIODU</string>
+    <string name="ka2_total_caps">UKUPNO</string>
+    <string name="ka2_assigned_customers">Dodijeljeni kupci</string>
+    <string name="ka2_assigned_customers_note">Kupac može biti dodijeljen više komercijalista, pa se portfelji mogu preklapati.</string>
+    <string name="ka2_repeat_customers">Ponavljajući kupci (u periodu)</string>
+    <string name="ka2_repeat_purchase_rate">Stopa ponovljene kupovine (u periodu)</string>
+    <string name="ka2_revenue_per_customer">Prihod po kupcu</string>
+    <string name="ka2_avg_orders_per_customer">Prosječan broj narudžbi po kupcu</string>
+    <string name="ka2_customers_2plus_total">Kupci sa 2+ narudžbe ukupno</string>
+    <string name="ka2_customers_without_orders">Kupci bez narudžbe</string>
+</resources>

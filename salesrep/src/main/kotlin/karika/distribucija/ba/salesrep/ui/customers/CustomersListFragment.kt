@@ -1,12 +1,13 @@
 package karika.distribucija.ba.salesrep.ui.customers
 
+import karika.distribucija.ba.salesrep.util.KSnackbar
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -150,7 +151,7 @@ class CustomersListFragment : Fragment() {
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
             if (message != null) {
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                showSnack(message)
             }
         }
     }
@@ -277,7 +278,7 @@ class CustomersListFragment : Fragment() {
      * capability, with the same error message, before navigating. */
     private fun openDiscount(customer: OperationalCustomer) {
         if (CurrentUser.me?.capabilities?.canCreateDiscountFor != true) {
-            Toast.makeText(requireContext(), R.string.customers_discount_no_permission, Toast.LENGTH_SHORT).show()
+            showSnack(R.string.customers_discount_no_permission, KSnackbar.Type.WARNING)
             return
         }
         findNavController().navigate(
@@ -292,7 +293,11 @@ class CustomersListFragment : Fragment() {
         findNavController().navigate(
             R.id.ordersListFragment,
             null,
-            navOptions { popUpTo(R.id.ordersListFragment) { inclusive = true } }
+            navOptions {
+                // Analytics is the root now - replace everything above it with the Orders screen.
+                popUpTo(R.id.analyticsOverviewFragment) { inclusive = false }
+                launchSingleTop = true
+            }
         )
     }
 

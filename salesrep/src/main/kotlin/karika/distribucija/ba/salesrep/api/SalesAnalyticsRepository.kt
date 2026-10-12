@@ -4,9 +4,10 @@ import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import karika.distribucija.ba.logging.AppLogger
 import karika.distribucija.ba.salesrep.model.AnalyticsCategory
+import karika.distribucija.ba.salesrep.model.AnalyticsKpi
 import karika.distribucija.ba.salesrep.model.AnalyticsOverview
 import karika.distribucija.ba.salesrep.model.AnalyticsProduct
-import karika.distribucija.ba.salesrep.model.AnalyticsSeriesPoint
+import karika.distribucija.ba.salesrep.model.AnalyticsTrendSeries
 import karika.distribucija.ba.salesrep.model.AnalyticsTrends
 import karika.distribucija.ba.salesrep.model.AtRiskCustomer
 import karika.distribucija.ba.salesrep.model.AtRiskCustomers
@@ -17,21 +18,23 @@ import karika.distribucija.ba.salesrep.model.CustomerRiskEntryDto
 import karika.distribucija.ba.salesrep.model.CustomerRiskEntrySearchResultsDto
 import karika.distribucija.ba.salesrep.model.CustomerRiskLevel
 import karika.distribucija.ba.salesrep.model.CustomerRiskSummaryDto
+import karika.distribucija.ba.salesrep.model.KpiValueDto
 import karika.distribucija.ba.salesrep.model.ProductPerformanceSearchResultsDto
 import karika.distribucija.ba.salesrep.model.RepresentativePerformanceSearchResultsDto
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.model.SalesRepPerformance
 import karika.distribucija.ba.salesrep.model.SalesRepsPerformance
 import karika.distribucija.ba.salesrep.model.SalesSummaryDto
-import karika.distribucija.ba.salesrep.model.TrendPointDto
+import karika.distribucija.ba.salesrep.model.TrendBucketDto
 import karika.distribucija.ba.salesrep.model.TrendResponseDto
-import karika.distribucija.ba.salesrep.model.toCount
+import karika.distribucija.ba.salesrep.model.TrendSeriesDto
 import karika.distribucija.ba.salesrep.model.toMoney
 import karika.distribucija.ba.salesrep.util.toDisplayDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.datetime.LocalDate
 
 /**
  * Backs the native "Analitika" screens with the real `/V1/vendor-operations/analytics/...`
@@ -82,7 +85,6 @@ class SalesAnalyticsRepository internal constructor() {
         dateFrom: String? = null,
         dateTo: String? = null,
         groupBy: String = "day",
-        revenueGrowth: Double = 0.0,
         salesRepresentativeId: Long? = null,
         customerId: Long? = null,
         productId: Long? = null,
@@ -94,7 +96,7 @@ class SalesAnalyticsRepository internal constructor() {
                 dateFrom, dateTo, groupBy, salesRepresentativeId, customerId, productId, categoryId
             ).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
-                emit(ResultState.Success(response.body<TrendResponseDto>().toAnalyticsTrends(revenueGrowth)))
+                emit(ResultState.Success(response.body<TrendResponseDto>().toAnalyticsTrends()))
                 return@flow
             }
             emit(ResultState.Error(GENERIC_ERROR))
@@ -293,46 +295,56 @@ class SalesAnalyticsRepository internal constructor() {
     }.flowOn(Dispatchers.Default)
 }
 
-private fun SalesSummaryDto.toAnalyticsOverview(basis: String) = AnalyticsOverview(
-    totalRevenue = totalRevenue.value.toMoney(),
-    totalRevenueDelta = totalRevenue.deltaPercent(basis),
-    totalOrders = orderCount.value.toCount(),
-    totalOrdersDelta = orderCount.deltaPercent(basis),
-    avgOrderValue = averageOrderValue.value.toMoney(),
-    avgOrderValueDelta = averageOrderValue.deltaPercent(basis),
-    activeCustomers = activeCustomers.value.toCount(),
-    activeCustomersDelta = activeCustomers.deltaPercent(basis),
-    newCustomers = newCustomers.value.toCount(),
-    newCustomersDelta = newCustomers.deltaPercent(basis),
-    distinctProducts = distinctProductsSold.value.toCount(),
-    distinctProductsDelta = distinctProductsSold.deltaPercent(basis),
-    revenueGrowth = revenueGrowth.value.toMoney(),
-    revenueGrowthDelta = revenueGrowth.deltaPercent(basis),
-    goalAchievement = targetAchievement?.value.toMoney(),
-    goalAchievementDelta = targetAchievement?.deltaPercent(basis) ?: 0.0,
-    atRiskCustomers = customersAtRisk.value.toCount(),
+private fun KpiValueDto.toKpi(basis: String) = AnalyticsKpi(
+    value = value?.toDoubleOrNull(),
+    deltaPercent = deltaPercentOrNull(basis),
 )
 
-private fun TrendResponseDto.toAnalyticsTrends(revenueGrowth: Double): AnalyticsTrends {
-    fun labelFor(index: Int) = buckets.getOrNull(index)?.label ?: ""
-    fun points(values: List<TrendPointDto>) =
-        values.map { AnalyticsSeriesPoint(labelFor(it.index), it.value.toMoney().toFloat()) }
+private fun SalesSummaryDto.toAnalyticsOverview(basis: String) = AnalyticsOverview(
+    totalRevenue = totalRevenue.toKpi(basis),
+    totalOrders = orderCount.toKpi(basis),
+    avgOrderValue = averageOrderValue.toKpi(basis),
+    activeCustomers = activeCustomers.toKpi(basis),
+    newCustomers = newCustomers.toKpi(basis),
+    distinctProducts = distinctProductsSold.toKpi(basis),
+    // Growth has no meaningful value without data in both periods - the web shows "—" then.
+    revenueGrowth = revenueGrowth.toKpi(basis).let { if (revenueGrowth.hasData) it else it.copy(value = null) },
+    hasTarget = hasTarget,
+    goalAchievement = targetAchievement?.toKpi(basis) ?: AnalyticsKpi(),
+    atRiskCustomers = customersAtRisk.value?.toDoubleOrNull(),
+)
 
-    val revenuePoints = series.revenue.points
-    val newCustomersSum = series.newCustomers.points.sumOf { it.value.toMoney() }.toInt()
+private val bosnianShortMonths =
+    listOf("jan", "feb", "mar", "apr", "maj", "jun", "jul", "avg", "sep", "okt", "nov", "dec")
+
+/** Day buckets are labelled like the web ("13. sep"); other groupings keep the server label. */
+private fun TrendBucketDto.displayLabel(groupBy: String?): String {
+    if (groupBy == null || groupBy == "day") {
+        val date = period?.take(10)?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        if (date != null) return "${date.day}. ${bosnianShortMonths[date.month.ordinal]}"
+    }
+    return label ?: period ?: ""
+}
+
+private fun TrendResponseDto.toAnalyticsTrends(): AnalyticsTrends {
+    // One value per bucket, aligned by `index` (a bucket without a point is 0).
+    val allSeries = listOf(series.revenue, series.orders, series.activeCustomers, series.newCustomers)
+    val maxPointIndex = allSeries.flatMap { it.points }.maxOfOrNull { it.index } ?: -1
+    val size = maxOf(buckets.size, maxPointIndex + 1)
+    fun TrendSeriesDto.toSeries(): AnalyticsTrendSeries {
+        val values = MutableList(size) { 0.0 }
+        points.forEach { point ->
+            if (point.index in values.indices) values[point.index] = point.value.toMoney()
+        }
+        return AnalyticsTrendSeries(hasData = hasData && size > 0, values = values)
+    }
+    val sortedBuckets = buckets.sortedBy { it.index }
     return AnalyticsTrends(
-        revenueSeries = points(revenuePoints),
-        revenueTotal = revenuePoints.sumOf { it.value.toMoney() },
-        revenuePeak = revenuePoints.maxOfOrNull { it.value.toMoney() } ?: 0.0,
-        revenueGrowth = revenueGrowth,
-        ordersSeries = points(series.orders.points),
-        ordersTotal = series.orders.points.sumOf { it.value.toMoney() }.toInt(),
-        activeCustomersSeries = points(series.activeCustomers.points),
-        // Sum of active_customers buckets double-counts a customer active in two buckets - the
-        // API contract requires reading the latest bucket instead of summing.
-        activeCustomers = series.activeCustomers.points.lastOrNull()?.value.toCount(),
-        newCustomersSeries = points(series.newCustomers.points),
-        newCustomers = newCustomersSum,
+        labels = List(size) { i -> sortedBuckets.getOrNull(i)?.displayLabel(groupBy) ?: "" },
+        revenue = series.revenue.toSeries(),
+        orders = series.orders.toSeries(),
+        activeCustomers = series.activeCustomers.toSeries(),
+        newCustomers = series.newCustomers.toSeries(),
     )
 }
 
@@ -358,9 +370,9 @@ private fun CustomerAnalyticsDto.toCustomerAnalytics() = CustomerAnalytics(
     activeCustomers = activeCustomers,
     newCustomers = newCustomers,
     repeatCustomers = repeatCustomers,
-    repeatPurchaseRate = repeatPurchaseRate.value.toMoney(),
-    revenuePerCustomer = revenuePerCustomer.value.toMoney(),
-    avgOrdersPerCustomer = averageOrdersPerCustomer.value.toMoney(),
+    repeatPurchaseRate = repeatPurchaseRate.value?.toDoubleOrNull(),
+    revenuePerCustomer = revenuePerCustomer.value?.toDoubleOrNull(),
+    avgOrdersPerCustomer = averageOrdersPerCustomer.value?.toDoubleOrNull(),
     customersWith2PlusOrders = lifetimeRepeatCustomers,
     customersWithoutOrders = neverOrderedCustomers,
 )

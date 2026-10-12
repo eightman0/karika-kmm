@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Usluga dostave" foldable card - 16dp, amber fill and border -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/k_ord_amber_card" />
+    <corners android:radius="16dp" />
+    <stroke android:width="1dp" android:color="@color/k_ord_amber_border" />
+</shape>

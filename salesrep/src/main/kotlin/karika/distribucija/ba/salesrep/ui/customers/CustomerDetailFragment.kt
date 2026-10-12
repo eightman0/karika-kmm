@@ -1,12 +1,12 @@
 package karika.distribucija.ba.salesrep.ui.customers
 
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.app.AlertDialog
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -97,7 +97,7 @@ class CustomerDetailFragment : Fragment() {
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
             if (message != null) {
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                showSnack(message)
             }
         }
     }
@@ -141,17 +141,23 @@ class CustomerDetailFragment : Fragment() {
     }
 
     private fun openNewDiscount() {
-        findNavController().navigate(
-            R.id.action_customer_detail_to_discount_form,
-            bundleOf("customerId" to viewModel.customerId)
-        )
-    }
-
-    private fun openEditDiscount(rule: DiscountRule) {
+        if (!canCreateDiscount()) return
         findNavController().navigate(
             R.id.action_customer_detail_to_discount_form,
             bundleOf(
                 "customerId" to viewModel.customerId,
+                "customerName" to customerTitle()
+            )
+        )
+    }
+
+    private fun openEditDiscount(rule: DiscountRule) {
+        if (!canCreateDiscount()) return
+        findNavController().navigate(
+            R.id.action_customer_detail_to_discount_form,
+            bundleOf(
+                "customerId" to viewModel.customerId,
+                "customerName" to customerTitle(),
                 "ruleId" to (rule.ruleId ?: 0L),
                 "productId" to (rule.productId ?: 0L),
                 "productName" to rule.productName,
@@ -162,6 +168,15 @@ class CustomerDetailFragment : Fragment() {
                 "isActive" to rule.isActive
             )
         )
+    }
+
+    private fun customerTitle(): String = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName
+
+    /** Mirrors SalesCustomerDetailComponent.canCreateDiscount(): re-checks the capability on open. */
+    private fun canCreateDiscount(): Boolean {
+        if (CurrentUser.me?.capabilities?.canCreateDiscountFor == true) return true
+        showSnack(getString(R.string.k_cust2_no_discount_permission))
+        return false
     }
 
     private fun confirmDelete(rule: DiscountRule) {

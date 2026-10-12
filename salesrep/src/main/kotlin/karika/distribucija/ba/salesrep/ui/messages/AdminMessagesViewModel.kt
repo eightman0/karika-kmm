@@ -1,11 +1,9 @@
 package karika.distribucija.ba.salesrep.ui.messages
 
-import karika.distribucija.ba.salesrep.model.Conversation
+import karika.distribucija.ba.salesrep.model.ChatAxis
 
-/** Mirrors composeApp's SalesAdminMessagesComponent.kt/View.kt filter logic - same list/filter
- * mechanics as [CustomerMessagesViewModel], scoped to admin=true and filtered by
- * receiverId=="0" instead of sender=="vendor". */
+/** Mirrors composeApp's SalesAdminMessagesComponent.kt - same list/filter mechanics as
+ * [CustomerMessagesViewModel], on the vendor_admin axis. */
 class AdminMessagesViewModel : CustomerMessagesViewModel() {
-    override val admin: Boolean = true
-    override fun isSent(conversation: Conversation): Boolean = conversation.receiverId == "0"
+    override val axis: ChatAxis = ChatAxis.VENDOR_ADMIN
 }

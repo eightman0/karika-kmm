@@ -2,20 +2,15 @@ package karika.distribucija.ba.ui.view.salesrep.orders
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -27,17 +22,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,7 +48,6 @@ import karika.distribucija.ba.ui.components.KIcon
 import karika.distribucija.ba.ui.components.KInitials
 import karika.distribucija.ba.ui.components.KPill
 import karika.distribucija.ba.ui.components.KSecondaryButton
-import karika.distribucija.ba.ui.components.KSquareIconButton
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaText
 import karika.distribucija.ba.ui.components.KarikaUiColors
@@ -68,13 +55,10 @@ import karika.distribucija.ba.ui.components.karikaFonts
 import karika.distribucija.ba.ui.components.rememberKeyboardCloseOptions
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
-import karika.distribucija.ba.ui.view.distributer.orders.SheetHandle
 import karikav2.composeapp.generated.resources.Res
-import karikav2.composeapp.generated.resources.ic_k_check
 import karikav2.composeapp.generated.resources.ic_k_chevron_right
 import karikav2.composeapp.generated.resources.ic_k_filter
 import karikav2.composeapp.generated.resources.ic_k_search
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
 
 private val orderStatusOptions = listOf(
@@ -97,13 +81,8 @@ private fun statusPillColors(status: String): Pair<Color, Color> = when (status)
     else -> KarikaUiColors.Field to KarikaUiColors.Muted
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesOrdersView(component: SalesOrdersComponent) {
-    var showStatusSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val coroutineScope = rememberCoroutineScope()
-
     val orders by component.orders.collectAsState()
     val isLoadingMore by component.isLoadingMore.collectAsState()
     val searchText by component.searchQuery.collectAsState()
@@ -114,27 +93,16 @@ fun SalesOrdersView(component: SalesOrdersComponent) {
             .background(KarikaUiColors.Page)
             .fillMaxSize()
     ) {
-        // Search and the status filter
-        Row(
+        // Search
+        OrderSearchField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OrderSearchField(
-                modifier = Modifier.weight(1f),
-                value = searchText,
-                onValueChange = { component.setSearch(it) }
-            )
-            KSquareIconButton(
-                icon = vectorResource(Res.drawable.ic_k_filter),
-                background = if (selectedStatus != null) VendorAccent else KarikaUiColors.Ink,
-                onClick = { showStatusSheet = true }
-            )
-        }
+            value = searchText,
+            onValueChange = { component.setSearch(it) }
+        )
 
-        // Status chips: the same filter as the sheet
+        // Status chips
         KChipRow(modifier = Modifier.padding(top = 12.dp)) {
             KChip(
                 text = "Sve",
@@ -242,54 +210,6 @@ fun SalesOrdersView(component: SalesOrdersComponent) {
                                 textColor = VendorAccent,
                                 onClick = { component.loadNextPage() }
                             )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Status bottom sheet
-    if (showStatusSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showStatusSheet = false },
-            sheetState = sheetState,
-            containerColor = KarikaColors.White,
-            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-            contentWindowInsets = { WindowInsets.navigationBars.only(WindowInsetsSides.Bottom) },
-            dragHandle = { SheetHandle() }
-        ) {
-            Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 20.dp)) {
-                KarikaText(
-                    text = "Filtriraj po statusu",
-                    color = KarikaUiColors.Ink,
-                    textSize = 20.sp,
-                    lineHeight = 24.sp,
-                    fontWeight = FontWeight.W700,
-                    modifier = Modifier.padding(bottom = 10.dp)
-                )
-
-                StatusSheetRow(
-                    label = "Svi statusi",
-                    selected = selectedStatus == null
-                ) {
-                    coroutineScope.launch {
-                        sheetState.hide()
-                        showStatusSheet = false
-                        component.setStatus(null)
-                    }
-                }
-
-                orderStatusOptions.forEach { (value, label) ->
-                    KDivider()
-                    StatusSheetRow(
-                        label = label,
-                        selected = selectedStatus == value
-                    ) {
-                        coroutineScope.launch {
-                            sheetState.hide()
-                            showStatusSheet = false
-                            component.setStatus(value)
                         }
                     }
                 }
@@ -411,39 +331,6 @@ private fun OrderCard(order: OnBehalfOrder, onClick: () -> Unit = {}) {
                     tint = KarikaUiColors.Subtle,
                     size = 16.dp
                 )
-            }
-        }
-    }
-}
-
-// ── Status sheet row ──────────────────────────────────────────────────────────
-
-@Composable
-private fun StatusSheetRow(label: String, selected: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 14.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        KarikaText(
-            modifier = Modifier.weight(1f),
-            text = label,
-            color = if (selected) VendorAccent else KarikaUiColors.Ink,
-            textSize = 15.sp,
-            fontWeight = if (selected) FontWeight.W700 else FontWeight.W500
-        )
-        if (selected) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(VendorAccent),
-                contentAlignment = Alignment.Center
-            ) {
-                KIcon(icon = vectorResource(Res.drawable.ic_k_check), tint = KarikaColors.White, size = 14.dp)
             }
         }
     }

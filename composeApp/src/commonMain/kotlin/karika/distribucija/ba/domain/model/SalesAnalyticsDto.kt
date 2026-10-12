@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
 
 fun String?.toMoney(): Double = this?.toDoubleOrNull() ?: 0.0
 fun String?.toCount(): Int = this?.toDoubleOrNull()?.toInt() ?: 0
+fun String?.toMoneyOrNull(): Double? = this?.toDoubleOrNull()
 
 @Serializable
 data class KpiComparisonDto(
@@ -43,7 +44,12 @@ data class KpiValueDto(
     @SerialName("has_data") val hasData: Boolean = false,
     @SerialName("comparisons") val comparisons: KpiComparisonsDto? = null,
 ) {
-    fun deltaPercent(basis: String): Double = comparisons?.forBasis(basis)?.changePercent ?: 0.0
+    /** `change_percent` of the selected basis, or `null` when that comparison is not available. */
+    fun deltaPercent(basis: String): Double? =
+        comparisons?.forBasis(basis)?.takeIf { it.available }?.changePercent
+
+    /** The numeric value, or `null` when the KPI has no data / no value. */
+    fun valueOrNull(): Double? = if (hasData) value.toMoneyOrNull() else null
 }
 
 @Serializable
@@ -118,16 +124,16 @@ data class RepresentativePerformanceDto(
     @SerialName("role") val role: String? = null,
     @SerialName("status") val status: String? = null,
     @SerialName("revenue") val revenue: String? = null,
-    @SerialName("order_count") val orderCount: Int = 0,
+    @SerialName("order_count") val orderCount: Int? = null,
     @SerialName("average_order_value") val averageOrderValue: String? = null,
-    @SerialName("active_customers") val activeCustomers: Int = 0,
-    @SerialName("new_customers") val newCustomers: Int = 0,
+    @SerialName("active_customers") val activeCustomers: Int? = null,
+    @SerialName("new_customers") val newCustomers: Int? = null,
     @SerialName("revenue_growth") val revenueGrowth: KpiComparisonDto? = null,
     @SerialName("target_amount") val targetAmount: String? = null,
     @SerialName("target_achievement") val targetAchievement: String? = null,
     @SerialName("has_target") val hasTarget: Boolean = false,
     @SerialName("revenue_per_customer") val revenuePerCustomer: String? = null,
-    @SerialName("assigned_customers") val assignedCustomers: Int = 0,
+    @SerialName("assigned_customers") val assignedCustomers: Int? = null,
     @SerialName("repeat_purchase_rate") val repeatPurchaseRate: String? = null,
 )
 
@@ -173,13 +179,13 @@ data class CategoryPerformanceSearchResultsDto(
 
 @Serializable
 data class CustomerAnalyticsDto(
-    @SerialName("assigned_customers") val assignedCustomers: Int = 0,
-    @SerialName("active_customers") val activeCustomers: Int = 0,
-    @SerialName("purchasing_customers") val purchasingCustomers: Int = 0,
-    @SerialName("new_customers") val newCustomers: Int = 0,
-    @SerialName("repeat_customers") val repeatCustomers: Int = 0,
-    @SerialName("lifetime_repeat_customers") val lifetimeRepeatCustomers: Int = 0,
-    @SerialName("never_ordered_customers") val neverOrderedCustomers: Int = 0,
+    @SerialName("assigned_customers") val assignedCustomers: Int? = null,
+    @SerialName("active_customers") val activeCustomers: Int? = null,
+    @SerialName("purchasing_customers") val purchasingCustomers: Int? = null,
+    @SerialName("new_customers") val newCustomers: Int? = null,
+    @SerialName("repeat_customers") val repeatCustomers: Int? = null,
+    @SerialName("lifetime_repeat_customers") val lifetimeRepeatCustomers: Int? = null,
+    @SerialName("never_ordered_customers") val neverOrderedCustomers: Int? = null,
     @SerialName("repeat_purchase_rate") val repeatPurchaseRate: KpiValueDto = KpiValueDto(),
     @SerialName("revenue_per_customer") val revenuePerCustomer: KpiValueDto = KpiValueDto(),
     @SerialName("average_orders_per_customer") val averageOrdersPerCustomer: KpiValueDto = KpiValueDto(),

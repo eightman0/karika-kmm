@@ -4,27 +4,29 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import karika.distribucija.ba.salesrep.api.SalesRepository
-import karika.distribucija.ba.salesrep.model.Conversation
+import karika.distribucija.ba.salesrep.api.ChatRepository
+import karika.distribucija.ba.salesrep.model.ChatAxis
+import karika.distribucija.ba.salesrep.model.ChatConversation
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.notifications.MessagePushBus
 import kotlinx.coroutines.launch
 
-/** Mirrors composeApp's SalesCustomerMessagesComponent.kt. */
+/** Mirrors composeApp's SalesCustomerMessagesComponent.kt (Chat V2, vendor_customer axis, one
+ * page of 100) plus SalesConversationList's Sve / Poslano / Primljeno split. */
 open class CustomerMessagesViewModel : ViewModel() {
 
     enum class Filter { ALL, SENT, RECEIVED }
 
-    protected open val admin: Boolean = false
-    private val repository = SalesRepository()
+    protected open val axis: ChatAxis = ChatAxis.VENDOR_CUSTOMER
+    private val repository = ChatRepository()
 
-    private var allConversations: List<Conversation> = emptyList()
+    private var allConversations: List<ChatConversation> = emptyList()
 
     private val _filter = MutableLiveData(Filter.ALL)
     val filter: LiveData<Filter> = _filter
 
-    private val _filteredConversations = MutableLiveData<List<Conversation>>(emptyList())
-    val filteredConversations: LiveData<List<Conversation>> = _filteredConversations
+    private val _filteredConversations = MutableLiveData<List<ChatConversation>>(emptyList())
+    val filteredConversations: LiveData<List<ChatConversation>> = _filteredConversations
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
@@ -37,9 +39,7 @@ open class CustomerMessagesViewModel : ViewModel() {
     // The push subscription below only reacts to live events, it doesn't load anything itself.
     init {
         viewModelScope.launch {
-            MessagePushBus.events.collect { event ->
-                if (event.admin == admin) refresh()
-            }
+            MessagePushBus.events.collect { refresh() }
         }
     }
 
@@ -52,12 +52,12 @@ open class CustomerMessagesViewModel : ViewModel() {
 
     private fun load() {
         viewModelScope.launch {
-            repository.listMessages(admin).collect { result ->
+            repository.getConversations(axis = axis, pageSize = 100).collect { result ->
                 when (result) {
                     is ResultState.Loading -> _isLoading.value = true
                     is ResultState.Success -> {
                         _isLoading.value = false
-                        allConversations = result.data
+                        allConversations = result.data.items
                         applyFilter()
                     }
                     is ResultState.Error -> {
@@ -69,14 +69,11 @@ open class CustomerMessagesViewModel : ViewModel() {
         }
     }
 
-    /** Admin messages classify "sent" by receiverId=="0" instead of sender=="vendor" - same
-     * concept (did the vendor originate it), different field on the shared Conversation model. */
-    protected open fun isSent(conversation: Conversation): Boolean = conversation.sender == "vendor"
-
+    /** Sent = the last message came from one of our employees (sender_employee_name set). */
     private fun applyFilter() {
         _filteredConversations.value = when (_filter.value) {
-            Filter.SENT -> allConversations.filter { isSent(it) }
-            Filter.RECEIVED -> allConversations.filter { !isSent(it) }
+            Filter.SENT -> allConversations.filter { it.isLastSentByUs() }
+            Filter.RECEIVED -> allConversations.filterNot { it.isLastSentByUs() }
             else -> allConversations
         }
     }

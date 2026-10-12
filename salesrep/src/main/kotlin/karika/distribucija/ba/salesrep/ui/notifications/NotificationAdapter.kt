@@ -8,14 +8,15 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.ItemNotificationBinding
-import karika.distribucija.ba.salesrep.model.Notification
+import karika.distribucija.ba.salesrep.model.VendorNotification
+import karika.distribucija.ba.salesrep.util.inSarajevo
 
-/** Mirrors composeApp's SalesNotificationItem in SalesNotificationsView.kt - only [Notification.body]
- * and [Notification.createdAt] are shown (title is never rendered there either, a genuine Compose
+/** Mirrors composeApp's SalesNotificationItem in SalesNotificationsView.kt - only [VendorNotification.body]
+ * and [VendorNotification.createdAt] are shown (title is never rendered there either, a genuine Compose
  * omission carried over here), with a blue wash, blue bell tile + blue dot while unread. */
 class NotificationAdapter(
-    private val onClick: (Notification) -> Unit
-) : ListAdapter<Notification, NotificationAdapter.ViewHolder>(DIFF) {
+    private val onClick: (VendorNotification) -> Unit
+) : ListAdapter<VendorNotification, NotificationAdapter.ViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): ViewHolder {
         val binding = ItemNotificationBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -29,8 +30,8 @@ class NotificationAdapter(
     inner class ViewHolder(private val binding: ItemNotificationBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Notification) {
-            val isUnread = item.isRead == "false"
+        fun bind(item: VendorNotification) {
+            val isUnread = !item.isRead
 
             val context = binding.root.context
             binding.rootNotificationItem.setBackgroundResource(
@@ -48,17 +49,17 @@ class NotificationAdapter(
             )
             binding.dotUnread.visibility = if (isUnread) View.VISIBLE else View.GONE
             binding.textNotificationBody.text = item.body
-            binding.textNotificationTime.text = item.createdAt
+            binding.textNotificationTime.text = item.createdAt.inSarajevo()
             binding.root.setOnClickListener { onClick(item) }
         }
     }
 
     companion object {
-        private val DIFF = object : DiffUtil.ItemCallback<Notification>() {
-            override fun areItemsTheSame(oldItem: Notification, newItem: Notification) =
-                oldItem.id == newItem.id
+        private val DIFF = object : DiffUtil.ItemCallback<VendorNotification>() {
+            override fun areItemsTheSame(oldItem: VendorNotification, newItem: VendorNotification) =
+                oldItem.notificationId == newItem.notificationId
 
-            override fun areContentsTheSame(oldItem: Notification, newItem: Notification) =
+            override fun areContentsTheSame(oldItem: VendorNotification, newItem: VendorNotification) =
                 oldItem == newItem
         }
     }

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Top snackbar - mirrors KSnackbar in composeApp's KarikaScaffold.kt: a card in the accent
+     (red for errors) with a type icon in a translucent circle, the message, and a close mark.
+     Background tint is set in code per type. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/k_snackbar_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    android:background="@drawable/bg_k_snackbar"
+    android:clickable="true"
+    android:elevation="10dp"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="12dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="14dp"
+    android:paddingBottom="12dp">
+
+    <FrameLayout
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="@drawable/bg_k_snackbar_icon">
+
+        <ImageView
+            android:id="@+id/k_snackbar_icon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            app:tint="@color/k_white" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/k_snackbar_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:fontFamily="sans-serif-medium"
+        android:lineSpacingExtra="5sp"
+        android:textColor="@color/k_white"
+        android:textSize="14sp" />
+
+    <ImageView
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="10dp"
+        android:alpha="0.8"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_k_snack_close"
+        app:tint="@color/k_white" />
+</LinearLayout>

@@ -38,7 +38,10 @@ class AttachmentPicker(
 
     private val cameraLauncher =
         fragment.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+            if (result.resultCode != Activity.RESULT_OK) {
+                fragment.showSnack(result.data?.getStringExtra(CameraCaptureActivity.EXTRA_ERROR))
+                return@registerForActivityResult
+            }
             val path = result.data?.getStringExtra(CameraCaptureActivity.EXTRA_RESULT_PATH) ?: return@registerForActivityResult
             val file = File(path)
             if (!file.exists()) return@registerForActivityResult

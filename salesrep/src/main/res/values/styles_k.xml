@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Redesign text and widget styles, matching composeApp's KarikaUi kit (Gotham-like weights via sans-serif-medium) -->
 <resources>
+    <!-- Implicit parent of every K.* style below - aapt fails to link "K.Text" without it. -->
+    <style name="K" />
+
     <style name="K.Text">
         <item name="android:textColor">@color/k_ink</item>
         <item name="android:fontFamily">sans-serif</item>

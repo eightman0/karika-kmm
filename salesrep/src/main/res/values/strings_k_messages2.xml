@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="k_msg_send">Pošalji</string>
+    <string name="k_msg_role_vendor_owner">Vlasnik</string>
+    <string name="k_msg_role_vendor_employee">Zaposlenik</string>
+    <string name="k_msg_no_messages">Nema poruka</string>
+</resources>

@@ -2,42 +2,41 @@ package karika.distribucija.ba.salesrep.model
 
 /** Plain UI-facing analytics models, mirroring composeApp's domain/model/SalesAnalytics.kt. */
 
-data class AnalyticsOverview(
-    val totalRevenue: Double = 0.0,
-    val totalRevenueDelta: Double = 0.0,
-    val totalOrders: Int = 0,
-    val totalOrdersDelta: Double = 0.0,
-    val avgOrderValue: Double = 0.0,
-    val avgOrderValueDelta: Double = 0.0,
-    val activeCustomers: Int = 0,
-    val activeCustomersDelta: Double = 0.0,
-    val newCustomers: Int = 0,
-    val newCustomersDelta: Double = 0.0,
-    val distinctProducts: Int = 0,
-    val distinctProductsDelta: Double = 0.0,
-    val revenueGrowth: Double = 0.0,
-    val revenueGrowthDelta: Double = 0.0,
-    val goalAchievement: Double = 0.0,
-    val goalAchievementDelta: Double = 0.0,
-    val atRiskCustomers: Int = 0,
+/**
+ * One `/analytics/summary` KPI. [value] is null when the API sent no value (rendered as "—");
+ * [deltaPercent] is null when the selected comparison is unavailable or has no change_percent
+ * (rendered as "–"), so a missing comparison is never shown as a fake 0%.
+ */
+data class AnalyticsKpi(
+    val value: Double? = null,
+    val deltaPercent: Double? = null,
 )
 
-data class AnalyticsSeriesPoint(
-    val label: String,
-    val value: Float,
+data class AnalyticsOverview(
+    val totalRevenue: AnalyticsKpi = AnalyticsKpi(),
+    val totalOrders: AnalyticsKpi = AnalyticsKpi(),
+    val avgOrderValue: AnalyticsKpi = AnalyticsKpi(),
+    val activeCustomers: AnalyticsKpi = AnalyticsKpi(),
+    val newCustomers: AnalyticsKpi = AnalyticsKpi(),
+    val distinctProducts: AnalyticsKpi = AnalyticsKpi(),
+    val revenueGrowth: AnalyticsKpi = AnalyticsKpi(),
+    val hasTarget: Boolean = false,
+    val goalAchievement: AnalyticsKpi = AnalyticsKpi(),
+    val atRiskCustomers: Double? = null,
+)
+
+/** One `/analytics/trends` series, one value per bucket (index-aligned with [AnalyticsTrends.labels]). */
+data class AnalyticsTrendSeries(
+    val hasData: Boolean = false,
+    val values: List<Double> = emptyList(),
 )
 
 data class AnalyticsTrends(
-    val revenueSeries: List<AnalyticsSeriesPoint> = emptyList(),
-    val revenueTotal: Double = 0.0,
-    val revenuePeak: Double = 0.0,
-    val revenueGrowth: Double = 0.0,
-    val ordersSeries: List<AnalyticsSeriesPoint> = emptyList(),
-    val ordersTotal: Int = 0,
-    val activeCustomersSeries: List<AnalyticsSeriesPoint> = emptyList(),
-    val activeCustomers: Int = 0,
-    val newCustomersSeries: List<AnalyticsSeriesPoint> = emptyList(),
-    val newCustomers: Int = 0,
+    val labels: List<String> = emptyList(),
+    val revenue: AnalyticsTrendSeries = AnalyticsTrendSeries(),
+    val orders: AnalyticsTrendSeries = AnalyticsTrendSeries(),
+    val activeCustomers: AnalyticsTrendSeries = AnalyticsTrendSeries(),
+    val newCustomers: AnalyticsTrendSeries = AnalyticsTrendSeries(),
 )
 
 data class SalesRepPerformance(
@@ -57,16 +56,17 @@ data class SalesRepsPerformance(
     val unassignedRevenue: Double = 0.0,
 )
 
+/** `/analytics/customers`, null-safe: a null field means the API sent no value ("—"). */
 data class CustomerAnalytics(
-    val assignedCustomers: Int = 0,
-    val activeCustomers: Int = 0,
-    val newCustomers: Int = 0,
-    val repeatCustomers: Int = 0,
-    val repeatPurchaseRate: Double = 0.0,
-    val revenuePerCustomer: Double = 0.0,
-    val avgOrdersPerCustomer: Double = 0.0,
-    val customersWith2PlusOrders: Int = 0,
-    val customersWithoutOrders: Int = 0,
+    val assignedCustomers: Int? = null,
+    val activeCustomers: Int? = null,
+    val newCustomers: Int? = null,
+    val repeatCustomers: Int? = null,
+    val repeatPurchaseRate: Double? = null,
+    val revenuePerCustomer: Double? = null,
+    val avgOrdersPerCustomer: Double? = null,
+    val customersWith2PlusOrders: Int? = null,
+    val customersWithoutOrders: Int? = null,
 )
 
 enum class CustomerRiskLevel {

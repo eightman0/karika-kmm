@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Labels from the Compose customer detail / discount form (SalesCustomerDetailComponent.kt, SalesDiscountFormView.kt) -->
+<resources>
+    <string name="k_cust2_cancel">Odustani</string>
+    <string name="k_cust2_item_type_category">Kategorija</string>
+    <string name="k_cust2_item_type_product">Artikal</string>
+    <string name="k_cust2_no_discount_permission">Nemate dozvolu za kreiranje rabata za ovog kupca.</string>
+</resources>

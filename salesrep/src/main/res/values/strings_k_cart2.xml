@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cart title row - SalesOrderCartView.kt -->
+    <string name="k_cart2_items_title">Artikli (%1$d)</string>
+
+    <!-- Order review - SalesOrderReviewView.kt -->
+    <string name="k_cart2_required_mark"> *</string>
+    <string name="k_cart2_delivery_subtitle_expanded">Unesite adresu za utovar robe</string>
+    <string name="k_cart2_contact_name">Kontakt osoba</string>
+    <string name="k_cart2_email">Email adresa</string>
+    <string name="k_cart2_phone">Telefon</string>
+    <string name="k_cart2_city">Grad</string>
+    <string name="k_cart2_postal_code">Poštanski broj</string>
+    <string name="k_cart2_address">Adresa</string>
+    <string name="k_cart2_width">Ukupna širina</string>
+    <string name="k_cart2_height">Ukupna visina</string>
+    <string name="k_cart2_depth">Ukupna dubina</string>
+    <string name="k_cart2_weight">Ukupna težina</string>
+    <string name="k_cart2_delivery_note_hint">Napiši svoju napomenu za dostavu ovdje...</string>
+    <string name="k_cart2_note_hint">Napomena (opciono)</string>
+    <string name="k_cart2_warning_inactive">Narudžbu možete kreirati samo za kupce sa aktivnim partnerstvom.</string>
+    <string name="k_cart2_warning_no_shipping">Kupac nema zadanu adresu dostave.</string>
+    <string name="k_cart2_spec_discount_pill">Rabat %1$d%%</string>
+    <string name="k_cart2_spec_commission_pill">Provizija %1$d%%</string>
+    <string name="k_cart2_spec_price">Cijena VPC</string>
+    <string name="k_cart2_spec_qty">Količina</string>
+    <string name="k_cart2_spec_qty_format">%1$d %2$s</string>
+    <string name="k_cart2_spec_total_vpc">Ukupno VPC</string>
+    <string name="k_cart2_spec_total_with_pdv">Ukupno sa PDV</string>
+    <string name="k_cart2_spec_commission">Provizija</string>
+    <string name="k_cart2_spec_edit">Izmijeni</string>
+    <string name="k_cart2_default_unit">kom</string>
+</resources>

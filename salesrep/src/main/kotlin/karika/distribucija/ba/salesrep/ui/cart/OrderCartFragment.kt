@@ -1,16 +1,17 @@
 package karika.distribucija.ba.salesrep.ui.cart
 
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
@@ -39,11 +40,14 @@ class OrderCartFragment : Fragment() {
         val args = requireArguments()
         val customerName = args.getString("customerName").orEmpty()
         val customerCompany = args.getString("customerCompany")
+        // Company first, the person's name only when there is none - same as composeApp's
+        // SalesOrderCartView/SalesOrderCatalogView header.
+        val customerLabel = customerCompany?.takeIf { it.isNotBlank() } ?: customerName
         val customerEmail = args.getString("customerEmail")
         val partnershipStatus = args.getString("partnershipStatus").orEmpty()
         val customerActive = args.getBoolean("customerActive")
         val hasShippingAddress = args.getBoolean("hasShippingAddress")
-        (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.cart_title) + ": $customerName"
+        (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.cart_title) + ": $customerLabel"
 
         adapter = CartAdapter(
             lifecycleOwner = viewLifecycleOwner,
@@ -52,10 +56,7 @@ class OrderCartFragment : Fragment() {
             onDiscountChanged = { item, percent -> viewModel.updateDiscount(item, percent) },
             onRemove = { item -> viewModel.removeItem(item) }
         )
-        binding.recyclerCart.adapter = adapter
-        binding.recyclerCart.layoutManager = LinearLayoutManager(requireContext())
-
-        binding.buttonClear.setOnClickListener {
+        val titleRow = CartTitleAdapter(onClear = {
             AnalyticsTracker.trackClick("cart", "clear_cart")
             AlertDialog.Builder(requireContext())
                 .setTitle(R.string.cart_clear_title)
@@ -63,7 +64,10 @@ class OrderCartFragment : Fragment() {
                 .setNegativeButton(R.string.action_cancel, null)
                 .setPositiveButton(R.string.action_delete) { _, _ -> viewModel.clearCart() }
                 .show()
-        }
+        })
+        val customerHeader = CartCustomerHeaderAdapter(customerLabel, customerEmail)
+        binding.recyclerCart.adapter = ConcatAdapter(titleRow, customerHeader, adapter)
+        binding.recyclerCart.layoutManager = LinearLayoutManager(requireContext())
 
         binding.buttonReview.setOnClickListener {
             if (CartState.cart.value?.isEmpty != false) return@setOnClickListener
@@ -83,12 +87,14 @@ class OrderCartFragment : Fragment() {
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message)
         }
 
         CartState.cart.observe(viewLifecycleOwner) { cart ->
             val items = cart?.items.orEmpty()
             adapter.submitList(items)
+            titleRow.setCount(items.size)
+            customerHeader.visible = items.isNotEmpty()
             binding.layoutEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
             binding.layoutSummary.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
             binding.textSubtotal.text = cart?.subtotalString() ?: "0,00 KM"
@@ -98,7 +104,6 @@ class OrderCartFragment : Fragment() {
                 if (items.isNotEmpty()) R.drawable.bg_k_button_primary else R.drawable.bg_k_ord_button_disabled
             )
             binding.buttonReview.isEnabled = items.isNotEmpty()
-            binding.buttonClear.visibility = if (items.isNotEmpty()) View.VISIBLE else View.GONE
         }
     }
 

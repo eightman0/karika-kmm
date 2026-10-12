@@ -4,38 +4,33 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import karika.distribucija.ba.salesrep.api.SalesRepository
+import karika.distribucija.ba.salesrep.api.ChatRepository
+import karika.distribucija.ba.salesrep.model.ChatAxis
+import karika.distribucija.ba.salesrep.model.ChatMessage
+import karika.distribucija.ba.salesrep.model.ChatRecipient
 import karika.distribucija.ba.salesrep.model.ResultState
-import karika.distribucija.ba.salesrep.model.StaffRecipient
-import karika.distribucija.ba.salesrep.model.StaffThreadMessage
 import kotlinx.coroutines.launch
 
-/** Mirrors composeApp's SalesInternalNewMessageComponent.kt. Note: [subject] is captured but,
- * matching the Compose source exactly, never actually sent anywhere - startConversation() only
- * takes a counterpartEmployeeId, no subject field exists on that endpoint. */
+/** Mirrors composeApp's SalesInternalNewMessageComponent.kt: the colleagues come from Chat V2's
+ * staff recipients, filtered locally by name; the first send starts the staff conversation with
+ * the picked colleague and sends into it, after which the screen continues as that conversation. */
 class InternalNewMessageViewModel : ViewModel() {
 
-    private val repository = SalesRepository()
+    private val repository = ChatRepository()
 
-    private val _subject = MutableLiveData("")
-    val subject: LiveData<String> = _subject
+    private var allRecipients: List<ChatRecipient> = emptyList()
 
-    private val _recipientSearch = MutableLiveData("")
-    val recipientSearch: LiveData<String> = _recipientSearch
+    private val _filteredRecipients = MutableLiveData<List<ChatRecipient>>(emptyList())
+    val filteredRecipients: LiveData<List<ChatRecipient>> = _filteredRecipients
 
-    private var allRecipients: List<StaffRecipient> = emptyList()
+    private val _selectedRecipient = MutableLiveData<ChatRecipient?>(null)
+    val selectedRecipient: LiveData<ChatRecipient?> = _selectedRecipient
 
-    private val _filteredRecipients = MutableLiveData<List<StaffRecipient>>(emptyList())
-    val filteredRecipients: LiveData<List<StaffRecipient>> = _filteredRecipients
+    private val _conversationId = MutableLiveData<Long?>(null)
+    val conversationId: LiveData<Long?> = _conversationId
 
-    private val _selectedRecipient = MutableLiveData<StaffRecipient?>(null)
-    val selectedRecipient: LiveData<StaffRecipient?> = _selectedRecipient
-
-    private val _threadId = MutableLiveData<Long?>(null)
-    val threadId: LiveData<Long?> = _threadId
-
-    private val _messages = MutableLiveData<List<StaffThreadMessage>>(emptyList())
-    val messages: LiveData<List<StaffThreadMessage>> = _messages
+    private val _messages = MutableLiveData<List<ChatMessage>>(emptyList())
+    val messages: LiveData<List<ChatMessage>> = _messages
 
     private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
@@ -44,36 +39,29 @@ class InternalNewMessageViewModel : ViewModel() {
         loadRecipients()
     }
 
-    fun setSubject(value: String) {
-        _subject.value = value
-    }
-
     fun setRecipientSearch(text: String) {
-        _recipientSearch.value = text
         _selectedRecipient.value = null
-        val query = text.lowercase()
+        val query = text.trim().lowercase()
         _filteredRecipients.value = if (query.isBlank()) {
             allRecipients
         } else {
-            allRecipients.filter { it.name.lowercase().contains(query) }
+            allRecipients.filter { it.name?.lowercase()?.contains(query) == true }
         }
     }
 
-    fun selectRecipient(recipient: StaffRecipient) {
+    fun selectRecipient(recipient: ChatRecipient) {
         _selectedRecipient.value = recipient
-        _recipientSearch.value = recipient.name
         _filteredRecipients.value = emptyList()
     }
 
     fun clearRecipient() {
         _selectedRecipient.value = null
-        _recipientSearch.value = ""
         _filteredRecipients.value = allRecipients
     }
 
     private fun loadRecipients() {
         viewModelScope.launch {
-            repository.getConversationRecipients().collect { result ->
+            repository.getRecipients(ChatAxis.STAFF).collect { result ->
                 when (result) {
                     is ResultState.Loading -> Unit
                     is ResultState.Success -> {
@@ -89,22 +77,24 @@ class InternalNewMessageViewModel : ViewModel() {
     fun send(text: String) {
         val message = text.trim()
         if (message.isBlank()) return
-        val recipient = _selectedRecipient.value ?: return
 
-        val currentThread = _threadId.value
-        if (currentThread != null) {
-            doSend(currentThread, message)
+        val currentId = _conversationId.value
+        if (currentId != null) {
+            doSend(currentId, message)
             return
         }
 
+        val recipient = _selectedRecipient.value ?: return
         viewModelScope.launch {
-            repository.startConversation(recipient.employeeId).collect { result ->
+            repository.startConversation(ChatAxis.STAFF, recipient.counterpartId).collect { result ->
                 when (result) {
                     is ResultState.Loading -> Unit
                     is ResultState.Success -> {
-                        val newThreadId = result.data.threadId
-                        _threadId.value = newThreadId
-                        doSend(newThreadId, message)
+                        val newId = result.data.conversationId
+                        if (newId != null) {
+                            _conversationId.value = newId
+                            doSend(newId, message)
+                        }
                     }
                     is ResultState.Error -> _errorMessage.value = result.message
                 }
@@ -112,21 +102,21 @@ class InternalNewMessageViewModel : ViewModel() {
         }
     }
 
-    private fun doSend(threadId: Long, message: String) {
+    private fun doSend(conversationId: Long, message: String) {
         viewModelScope.launch {
-            repository.sendConversationMessage(threadId, message).collect { result ->
+            repository.sendMessage(conversationId, message).collect { result ->
                 when (result) {
                     is ResultState.Loading -> Unit
-                    is ResultState.Success -> loadMessages(threadId)
+                    is ResultState.Success -> loadMessages(conversationId)
                     is ResultState.Error -> _errorMessage.value = result.message
                 }
             }
         }
     }
 
-    private fun loadMessages(threadId: Long) {
+    private fun loadMessages(conversationId: Long) {
         viewModelScope.launch {
-            repository.getConversationMessages(threadId).collect { result ->
+            repository.getMessages(conversationId).collect { result ->
                 if (result is ResultState.Success) {
                     _messages.value = result.data.items
                 }

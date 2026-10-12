@@ -24,6 +24,49 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Kupac (fixed: the discount is for this customer) -->
+                <TextView
+                    style="@style/K.Text.Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/k_cust_section_customer" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="14dp"
+                    android:background="@drawable/bg_k_field"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_k_cust_user"
+                        app:tint="@color/k_muted" />
+
+                    <TextView
+                        android:id="@+id/text_customer_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textColor="@color/k_ink"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_k_shell_lock"
+                        app:tint="@color/k_subtle" />
+                </LinearLayout>
+
                 <!-- Artikal ili kategorija -->
                 <TextView
                     style="@style/K.Text.Label"
@@ -47,7 +90,7 @@
                         android:layout_width="18dp"
                         android:layout_height="18dp"
                         android:contentDescription="@null"
-                        android:src="@drawable/ic_search"
+                        android:src="@drawable/ic_k_cust_tag"
                         app:tint="@color/k_muted" />
 
                     <EditText
@@ -65,6 +108,17 @@
                         android:textColorHint="@color/k_subtle"
                         android:textSize="15sp" />
 
+                    <TextView
+                        android:id="@+id/text_selected_type"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:textColor="@color/k_accent"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
                     <ImageView
                         android:id="@+id/button_clear_item"
                         android:layout_width="24dp"
@@ -72,8 +126,8 @@
                         android:layout_marginStart="8dp"
                         android:background="@drawable/bg_k_circle_button"
                         android:contentDescription="@string/action_delete"
-                        android:padding="6dp"
-                        android:src="@drawable/ic_close"
+                        android:padding="5dp"
+                        android:src="@drawable/ic_k_ord_close"
                         android:visibility="gone"
                         app:tint="@color/k_muted" />
                 </LinearLayout>
@@ -266,7 +320,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
                 android:maxLines="1"
-                android:text="@string/action_cancel"
+                android:text="@string/k_cust2_cancel"
                 android:textColor="@color/k_ink"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -293,13 +347,6 @@
                 android:textColor="@color/k_white"
                 android:textSize="16sp"
                 android:textStyle="bold" />
-
-            <ProgressBar
-                android:id="@+id/progress_save"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:indeterminateTint="@color/k_white"
-                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

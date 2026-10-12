@@ -214,7 +214,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                         )
                         if (analyticsExpanded) {
                             SalesSubNavItem(
-                                text = "Pregled",
+                                text = "Pregled prodaje",
                                 selected = activeAnalyticsTab == AnalyticsTab.Overview,
                                 onClick = {
                                     component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Overview), true)
@@ -229,18 +229,8 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                                     coroutineScope.launch { drawerState.close() }
                                 }
                             )
-                            if (salesManager.capabilities.canSeeDashboard) {
-                                SalesSubNavItem(
-                                    text = "Komercijalisti",
-                                    selected = activeAnalyticsTab == AnalyticsTab.Reps,
-                                    onClick = {
-                                        component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Reps), true)
-                                        coroutineScope.launch { drawerState.close() }
-                                    }
-                                )
-                            }
                             SalesSubNavItem(
-                                text = "Analitika kupaca",
+                                text = "Statistika kupaca",
                                 selected = activeAnalyticsTab == AnalyticsTab.Customers,
                                 onClick = {
                                     component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Customers), true)
@@ -256,7 +246,7 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                                 }
                             )
                             SalesSubNavItem(
-                                text = "Proizvodi i kategorije",
+                                text = "Statistika proizvoda i kategorija",
                                 selected = navState.value.active.instance is SalesChild.AnalyticsProducts,
                                 onClick = {
                                     component.salesRepNavigate(SalesRepConfig.AnalyticsProducts, true)
@@ -662,7 +652,7 @@ private fun SalesSubNavItem(text: String, selected: Boolean, badge: Int = 0, onC
             color = if (selected) VendorAccent else KarikaUiColors.Muted,
             textSize = 14.sp,
             fontWeight = if (selected) FontWeight.W700 else FontWeight.W500,
-            maxLines = 1
+            maxLines = 2
         )
         if (badge > 0) {
             NavBadge(badge)

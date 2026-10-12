@@ -157,37 +157,39 @@
                         tools:text="25,00 KM" />
                 </LinearLayout>
 
+                <!-- Blue "− n +" stepper: pill (50%) with 30dp circles, as in composeApp's CartItemRow -->
                 <LinearLayout
                     android:id="@+id/layout_stepper"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/bg_k_ord_stepper"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:padding="3dp">
 
-                    <TextView
+                    <ImageView
                         android:id="@+id/button_minus"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:background="@drawable/bg_k_ord_step_circle"
                         android:contentDescription="@string/catalog_decrease_cd"
-                        android:gravity="center"
-                        android:includeFontPadding="false"
-                        android:text="−"
-                        android:textColor="@color/k_accent"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:padding="7dp"
+                        android:src="@drawable/ic_k_ord_minus"
+                        app:tint="@color/k_accent" />
 
                     <EditText
                         android:id="@+id/edit_qty"
                         android:layout_width="40dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="30dp"
                         android:background="@null"
                         android:fontFamily="sans-serif-medium"
                         android:gravity="center"
+                        android:importantForAutofill="no"
+                        android:includeFontPadding="false"
                         android:inputType="number"
                         android:maxLines="1"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
                         android:padding="0dp"
                         android:textColor="@color/k_ink"
                         android:textSize="15sp"
@@ -199,7 +201,7 @@
                         android:layout_height="30dp"
                         android:background="@drawable/bg_k_ord_step_plus"
                         android:contentDescription="@string/catalog_increase_cd"
-                        android:padding="8dp"
+                        android:padding="7dp"
                         android:src="@drawable/ic_k_ord_plus"
                         app:tint="@color/k_white" />
                 </LinearLayout>

@@ -13,6 +13,7 @@ fun SalesCustomerMessagesView(component: SalesCustomerMessagesComponent) {
         conversations = conversations,
         onOpen = { component.openConversation(it) },
         onNewMessage = { component.openNewMessage() },
+        showDirectionFilter = true,
         emptyMessage = "Ovdje će se prikazati vaše poruke sa kupcima."
     )
 }

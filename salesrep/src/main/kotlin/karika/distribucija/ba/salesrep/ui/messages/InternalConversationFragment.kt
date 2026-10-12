@@ -1,10 +1,10 @@
 package karika.distribucija.ba.salesrep.ui.messages
 
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -34,19 +34,15 @@ class InternalConversationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as? AppCompatActivity)?.supportActionBar?.title = viewModel.counterpartName
+        (activity as? AppCompatActivity)?.supportActionBar?.title = viewModel.counterpartName ?: "-"
         binding.root.applyImeBottomPadding()
 
-        adapter = InternalMessageAdapter { viewModel.counterpartName }
+        adapter = InternalMessageAdapter { viewModel.counterpartName ?: "-" }
         binding.recyclerMessages.adapter = adapter
         binding.recyclerMessages.layoutManager = LinearLayoutManager(requireContext())
 
         binding.editMessage.addTextChangedListener(onTextChanged = { text, _, _, _ ->
-            val canSend = !text.isNullOrBlank()
-            binding.buttonSend.setBackgroundResource(
-                if (canSend) R.drawable.bg_k_msg_send_active else R.drawable.bg_k_msg_send_inactive
-            )
-            binding.buttonSend.isEnabled = canSend
+            binding.buttonSend.isEnabled = !text.isNullOrBlank()
         })
 
         binding.buttonSend.setOnClickListener {
@@ -63,7 +59,7 @@ class InternalConversationFragment : Fragment() {
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message)
         }
     }
 

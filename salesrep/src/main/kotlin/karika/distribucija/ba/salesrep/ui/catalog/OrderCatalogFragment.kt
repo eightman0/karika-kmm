@@ -1,12 +1,12 @@
 package karika.distribucija.ba.salesrep.ui.catalog
 
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
@@ -44,11 +44,14 @@ class OrderCatalogFragment : Fragment() {
         val args = requireArguments()
         val customerName = args.getString("customerName").orEmpty()
         val customerCompany = args.getString("customerCompany")
+        // Company first, the person's name only when there is none - same as composeApp's
+        // SalesOrderCartView/SalesOrderCatalogView header.
+        val customerLabel = customerCompany?.takeIf { it.isNotBlank() } ?: customerName
         val customerEmail = args.getString("customerEmail")
         val partnershipStatus = args.getString("partnershipStatus").orEmpty()
         val customerActive = args.getBoolean("customerActive")
         val hasShippingAddress = args.getBoolean("hasShippingAddress")
-        (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.customers_order_for) + ": $customerName"
+        (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.customers_order_for) + ": $customerLabel"
 
         adapter = ProductCatalogAdapter(
             lifecycleOwner = viewLifecycleOwner,
@@ -118,7 +121,7 @@ class OrderCatalogFragment : Fragment() {
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message)
         }
 
         CartState.cart.observe(viewLifecycleOwner) { cart ->

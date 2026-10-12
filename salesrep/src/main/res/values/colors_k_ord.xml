@@ -8,4 +8,8 @@
     <color name="k_ord_amber_line">#FDE68A</color>
     <color name="k_ord_amber_title">#92400E</color>
     <color name="k_ord_table_header">#F9FAFB</color>
+    <!-- Order detail navy summary (SalesOrderDetailView NavyLabel, white 12% line, accent→white 45%) -->
+    <color name="k_ord_navy_label">#9AA1B4</color>
+    <color name="k_ord_on_navy_line">#1FFFFFFF</color>
+    <color name="k_ord_navy_commission">#90B3EF</color>
 </resources>

@@ -9,8 +9,8 @@
         android:name="karika.distribucija.ba.salesrep.ui.login.LoginFragment"
         android:label="@string/login_title">
         <action
-            android:id="@+id/action_login_to_orders"
-            app:destination="@id/ordersListFragment"
+            android:id="@+id/action_login_to_home"
+            app:destination="@id/analyticsOverviewFragment"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -208,7 +208,7 @@
         android:id="@+id/internalConversationFragment"
         android:name="karika.distribucija.ba.salesrep.ui.messages.InternalConversationFragment"
         android:label="@string/internal_messages_title">
-        <argument android:name="threadId" app:argType="long" />
+        <argument android:name="conversationId" app:argType="long" />
         <argument android:name="counterpartName" app:argType="string" app:nullable="true" />
     </fragment>
 
@@ -233,10 +233,8 @@
         android:id="@+id/customerConversationFragment"
         android:name="karika.distribucija.ba.salesrep.ui.messages.CustomerConversationFragment"
         android:label="@string/customer_messages_title">
-        <argument android:name="threadId" app:argType="string" />
-        <argument android:name="customerName" app:argType="string" app:nullable="true" />
-        <argument android:name="subject" app:argType="string" app:nullable="true" />
-        <argument android:name="receiverId" app:argType="integer" android:defaultValue="-1" />
+        <argument android:name="conversationId" app:argType="long" />
+        <argument android:name="counterpartName" app:argType="string" app:nullable="true" />
     </fragment>
 
     <fragment
@@ -265,10 +263,8 @@
         android:id="@+id/adminConversationFragment"
         android:name="karika.distribucija.ba.salesrep.ui.messages.AdminConversationFragment"
         android:label="@string/drawer_admin_messages">
-        <argument android:name="threadId" app:argType="string" />
-        <argument android:name="customerName" app:argType="string" app:nullable="true" />
-        <argument android:name="subject" app:argType="string" app:nullable="true" />
-        <argument android:name="receiverId" app:argType="integer" android:defaultValue="-1" />
+        <argument android:name="conversationId" app:argType="long" />
+        <argument android:name="counterpartName" app:argType="string" app:nullable="true" />
     </fragment>
 
     <fragment
@@ -283,11 +279,5 @@
         <action
             android:id="@+id/action_notifications_to_order_detail"
             app:destination="@id/orderDetailFragment" />
-        <action
-            android:id="@+id/action_notifications_to_customer_conversation"
-            app:destination="@id/customerConversationFragment" />
-        <action
-            android:id="@+id/action_notifications_to_admin_conversation"
-            app:destination="@id/adminConversationFragment" />
     </fragment>
 </navigation>

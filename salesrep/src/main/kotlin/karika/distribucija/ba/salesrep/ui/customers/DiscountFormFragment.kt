@@ -1,10 +1,11 @@
 package karika.distribucija.ba.salesrep.ui.customers
 
+import karika.distribucija.ba.salesrep.util.showSnack
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -48,6 +49,7 @@ class DiscountFormFragment : Fragment() {
         binding.recyclerSearchResults.adapter = searchAdapter
         binding.recyclerSearchResults.layoutManager = LinearLayoutManager(requireContext())
 
+        binding.textCustomerName.text = viewModel.customerName
         binding.editItemSearch.setText(viewModel.itemSearch.value)
         binding.editMinQty.setText(viewModel.minQty.value)
         binding.editDiscountPercent.setText(viewModel.discountPercent.value)
@@ -77,15 +79,14 @@ class DiscountFormFragment : Fragment() {
             renderSearchField()
         }
 
+        // Like KPrimaryButton(enabled = !isSaving): dimmed while saving, label stays
         viewModel.isSaving.observe(viewLifecycleOwner) { saving ->
             binding.buttonSave.isEnabled = !saving
-            binding.textSave.visibility = if (saving) View.GONE else View.VISIBLE
-            binding.progressSave.visibility = if (saving) View.VISIBLE else View.GONE
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
             if (message != null) {
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                showSnack(message)
             }
         }
 
@@ -122,6 +123,14 @@ class DiscountFormFragment : Fragment() {
         )
         binding.iconItemSearch.setColorFilter(accentColor)
         binding.editItemSearch.setTextColor(requireContext().getColor(R.color.k_ink))
+        binding.editItemSearch.typeface =
+            if (hasSelectedItem) Typeface.create("sans-serif-medium", Typeface.NORMAL) else Typeface.SANS_SERIF
+
+        // "Kategorija" / "Artikal" label of the chosen item (SelectedItemField)
+        binding.textSelectedType.visibility = if (hasSelectedItem) View.VISIBLE else View.GONE
+        binding.textSelectedType.setText(
+            if (viewModel.isCategorySelected) R.string.k_cust2_item_type_category else R.string.k_cust2_item_type_product
+        )
     }
 
     override fun onDestroyView() {

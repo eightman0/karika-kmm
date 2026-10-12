@@ -44,6 +44,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.SalesRep.FullScreenDialog" />
 
+        <activity
+            android:name=".ui.pdf.PdfViewerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SalesRep" />
+
         <service
             android:name=".notifications.KarikaFcmService"
             android:exported="false">

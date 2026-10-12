@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Courier option, selected: white, 1.5dp accent border, 14dp -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#143575E2">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/k_white" />
+            <corners android:radius="14dp" />
+            <stroke android:width="1.5dp" android:color="@color/k_accent" />
+        </shape>
+    </item>
+</ripple>

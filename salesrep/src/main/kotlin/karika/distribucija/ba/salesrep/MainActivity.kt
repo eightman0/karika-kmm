@@ -36,6 +36,7 @@ import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.network.PlatformEnv
 import karika.distribucija.ba.salesrep.notifications.NotificationDestination
 import karika.distribucija.ba.salesrep.notifications.PushRouteResolver
+import karika.distribucija.ba.salesrep.notifications.openChatConversation
 import karika.distribucija.ba.salesrep.notifications.PushTokenRegistrar
 import karika.distribucija.ba.salesrep.session.CurrentUser
 import kotlinx.coroutines.launch
@@ -175,7 +176,7 @@ class MainActivity : AppCompatActivity() {
 
         if ((application as SalesRepApp).sessionManager.hasToken()) {
             navController.navigate(
-                R.id.ordersListFragment,
+                R.id.analyticsOverviewFragment,
                 null,
                 navOptions { popUpTo(R.id.loginFragment) { inclusive = true } }
             )
@@ -206,7 +207,7 @@ class MainActivity : AppCompatActivity() {
             updateSelectedNavRow(destination)
             styleToolbarFor(destination)
             notificationsMenuItem?.isVisible = destination.id in appBarConfig.topLevelDestinations
-            if (destination.id == R.id.ordersListFragment) {
+            if (destination.id == R.id.analyticsOverviewFragment) {
                 loadRepName()
             }
         }
@@ -243,15 +244,9 @@ class MainActivity : AppCompatActivity() {
                 navOptions { popUpTo(R.id.notificationsFragment) { inclusive = true } }
             )
 
-            is NotificationDestination.Conversation -> navController.navigate(
-                if (destination.admin) R.id.action_notifications_to_admin_conversation
-                else R.id.action_notifications_to_customer_conversation,
-                bundleOf(
-                    "threadId" to destination.threadId,
-                    "customerName" to destination.customerName,
-                    "subject" to destination.subject,
-                    "receiverId" to destination.receiverId
-                ),
+            is NotificationDestination.Conversation -> openChatConversation(
+                navController,
+                destination.conversationId,
                 navOptions { popUpTo(R.id.notificationsFragment) { inclusive = true } }
             )
         }
@@ -281,7 +276,7 @@ class MainActivity : AppCompatActivity() {
                 destinationId,
                 null,
                 navOptions {
-                    popUpTo(R.id.ordersListFragment) { inclusive = false }
+                    popUpTo(R.id.analyticsOverviewFragment) { inclusive = false }
                     launchSingleTop = true
                 }
             )
@@ -398,10 +393,6 @@ class MainActivity : AppCompatActivity() {
                     AnalyticsTracker.setUser(result.data.employeeId?.toString())
                     findViewById<TextView>(R.id.text_rep_name).text =
                         result.data.name ?: getString(R.string.drawer_role_label)
-                    // GET /analytics/representatives is 403 forbidden without this capability -
-                    // hide the sub-item rather than let the screen error out.
-                    findViewById<View>(R.id.row_nav_analytics_reps).visibility =
-                        if (result.data.capabilities.canSeeDashboard) View.VISIBLE else View.GONE
                 }
             }
         }

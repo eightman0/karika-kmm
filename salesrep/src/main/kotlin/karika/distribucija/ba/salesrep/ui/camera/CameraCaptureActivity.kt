@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -15,6 +14,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.ActivityCameraCaptureBinding
+import karika.distribucija.ba.salesrep.util.KSnackbar
 import java.io.File
 
 /**
@@ -45,8 +45,7 @@ class CameraCaptureActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera()
         } else {
-            Toast.makeText(this, R.string.camera_permission_denied, Toast.LENGTH_SHORT).show()
-            finish()
+            finishWithError(R.string.camera_permission_denied)
         }
     }
 
@@ -63,8 +62,7 @@ class CameraCaptureActivity : AppCompatActivity() {
                 provider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, capture)
                 imageCapture = capture
             } catch (e: Exception) {
-                Toast.makeText(this, R.string.camera_start_failed, Toast.LENGTH_SHORT).show()
-                finish()
+                finishWithError(R.string.camera_start_failed)
             }
         }, ContextCompat.getMainExecutor(this))
     }
@@ -86,15 +84,21 @@ class CameraCaptureActivity : AppCompatActivity() {
 
                 override fun onError(exception: ImageCaptureException) {
                     binding.buttonShutter.isEnabled = true
-                    Toast.makeText(
-                        this@CameraCaptureActivity, R.string.camera_capture_failed, Toast.LENGTH_SHORT
-                    ).show()
+                    KSnackbar.show(this@CameraCaptureActivity, getString(R.string.camera_capture_failed))
                 }
             }
         )
     }
 
+    /** This screen closes right away here, so the message is shown by the caller (see
+     * AttachmentPicker) on the screen that opened the camera. */
+    private fun finishWithError(message: Int) {
+        setResult(Activity.RESULT_CANCELED, Intent().putExtra(EXTRA_ERROR, getString(message)))
+        finish()
+    }
+
     companion object {
         const val EXTRA_RESULT_PATH = "capture_path"
+        const val EXTRA_ERROR = "capture_error"
     }
 }

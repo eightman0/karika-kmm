@@ -1,43 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<!-- Order comment - mirrors CommentBubble in composeApp's SalesOrderDetailView.kt: own comments
+     as an accent bubble on the right, the customer's as a white bordered bubble with initials. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="10dp">
+    android:layout_marginBottom="10dp">
 
     <LinearLayout
-        android:id="@+id/bubble_column"
-        android:layout_width="0dp"
+        android:id="@+id/layout_mine"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginStart="42dp"
+        android:background="@drawable/bg_k_ord_comment_mine"
+        android:gravity="end"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.82">
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp"
+        android:visibility="gone">
 
         <TextView
-            android:id="@+id/text_comment_message"
+            android:id="@+id/text_mine_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:textSize="14sp"
-            tools:background="@drawable/bg_k_ord_bubble_other"
-            tools:text="Poruka komentara kupcu." />
+            android:lineSpacingExtra="4sp"
+            android:textColor="@color/k_white"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:id="@+id/layout_mine_files"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="vertical" />
 
         <TextView
-            android:id="@+id/text_comment_time"
+            android:id="@+id/text_mine_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
             android:layout_marginTop="4dp"
-            android:layout_marginHorizontal="4dp"
-            android:textColor="@color/k_subtle"
-            android:textSize="11sp"
-            tools:text="09.08.2026. 12:30" />
+            android:alpha="0.8"
+            android:textColor="@color/k_white"
+            android:textSize="11sp" />
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/layout_other"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/text_other_initials"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_k_avatar"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:textColor="@color/k_accent"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="32dp"
+            android:background="@drawable/bg_k_ord_comment_other"
+            android:orientation="vertical"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="10dp">
+
+            <TextView
+                android:id="@+id/text_other_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="4sp"
+                android:textColor="@color/k_ink"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:id="@+id/layout_other_files"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/text_other_footer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/k_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

@@ -26,7 +26,7 @@ class OrderReviewViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     val customerEmail: String? = savedStateHandle.get<String>("customerEmail")
     val partnershipStatus: String = savedStateHandle.get<String>("partnershipStatus").orEmpty()
     val customerActive: Boolean = savedStateHandle.get<Boolean>("customerActive") ?: false
-    private val hasShippingAddress: Boolean = savedStateHandle.get<Boolean>("hasShippingAddress") ?: false
+    val hasShippingAddress: Boolean = savedStateHandle.get<Boolean>("hasShippingAddress") ?: false
 
     val canPlaceOrderFor: Boolean
         get() = CurrentUser.me?.capabilities?.canPlaceOrderFor ?: false
@@ -36,14 +36,6 @@ class OrderReviewViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     val isEligible: Boolean
         get() = canPlaceOrderFor && customerActive && hasShippingAddress
-
-    val ineligibleReason: String?
-        get() = when {
-            !canPlaceOrderFor -> "no_capability"
-            !customerActive -> "inactive"
-            !hasShippingAddress -> "no_shipping"
-            else -> null
-        }
 
     private val _shippingDefaults = MutableLiveData<OnBehalfCartShippingDefaults?>(null)
     val shippingDefaults: LiveData<OnBehalfCartShippingDefaults?> = _shippingDefaults

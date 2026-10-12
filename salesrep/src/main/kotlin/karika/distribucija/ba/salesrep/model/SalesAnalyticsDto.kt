@@ -44,7 +44,10 @@ data class KpiValueDto(
     @SerialName("has_data") val hasData: Boolean = false,
     @SerialName("comparisons") val comparisons: KpiComparisonsDto? = null,
 ) {
-    fun deltaPercent(basis: String): Double = comparisons?.forBasis(basis)?.changePercent ?: 0.0
+    /** Percent change for [basis], or null (not 0) when that comparison is unavailable or has no
+     * percent - the web shows "–" in that case. */
+    fun deltaPercentOrNull(basis: String): Double? =
+        comparisons?.forBasis(basis)?.takeIf { it.available }?.changePercent
 }
 
 @Serializable
@@ -174,13 +177,13 @@ data class CategoryPerformanceSearchResultsDto(
 
 @Serializable
 data class CustomerAnalyticsDto(
-    @SerialName("assigned_customers") val assignedCustomers: Int = 0,
-    @SerialName("active_customers") val activeCustomers: Int = 0,
-    @SerialName("purchasing_customers") val purchasingCustomers: Int = 0,
-    @SerialName("new_customers") val newCustomers: Int = 0,
-    @SerialName("repeat_customers") val repeatCustomers: Int = 0,
-    @SerialName("lifetime_repeat_customers") val lifetimeRepeatCustomers: Int = 0,
-    @SerialName("never_ordered_customers") val neverOrderedCustomers: Int = 0,
+    @SerialName("assigned_customers") val assignedCustomers: Int? = null,
+    @SerialName("active_customers") val activeCustomers: Int? = null,
+    @SerialName("purchasing_customers") val purchasingCustomers: Int? = null,
+    @SerialName("new_customers") val newCustomers: Int? = null,
+    @SerialName("repeat_customers") val repeatCustomers: Int? = null,
+    @SerialName("lifetime_repeat_customers") val lifetimeRepeatCustomers: Int? = null,
+    @SerialName("never_ordered_customers") val neverOrderedCustomers: Int? = null,
     @SerialName("repeat_purchase_rate") val repeatPurchaseRate: KpiValueDto = KpiValueDto(),
     @SerialName("revenue_per_customer") val revenuePerCustomer: KpiValueDto = KpiValueDto(),
     @SerialName("average_orders_per_customer") val averageOrdersPerCustomer: KpiValueDto = KpiValueDto(),

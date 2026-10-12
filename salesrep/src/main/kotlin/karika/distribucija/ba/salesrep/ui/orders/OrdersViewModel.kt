@@ -29,8 +29,10 @@ class OrdersViewModel : ViewModel() {
 
     private var currentPage = 1
     private var totalCount = 0L
-    private var searchQuery = ""
-    private var statusFilter: String? = null
+    var searchQuery = ""
+        private set
+    var statusFilter: String? = null
+        private set
     private var searchJob: Job? = null
 
     private val hasMore: Boolean

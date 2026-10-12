@@ -220,7 +220,7 @@ fun DashboardView(component: DashboardComponent) {
                         }
                         if (analyticsExpanded) {
                             AnalyticsSubItem(
-                                text = "Pregled",
+                                text = "Pregled prodaje",
                                 selected = activeAnalyticsTab == AnalyticsTab.Overview
                             ) { go(DashConfig.Analytics(AnalyticsTab.Overview)) }
                             AnalyticsSubItem(
@@ -229,12 +229,12 @@ fun DashboardView(component: DashboardComponent) {
                             ) { go(DashConfig.Analytics(AnalyticsTab.Trends)) }
                             if (canSeeDashboard) {
                                 AnalyticsSubItem(
-                                    text = "Komercijalisti",
+                                    text = "Učinak komercijalista",
                                     selected = activeAnalyticsTab == AnalyticsTab.Reps
                                 ) { go(DashConfig.Analytics(AnalyticsTab.Reps)) }
                             }
                             AnalyticsSubItem(
-                                text = "Analitika kupaca",
+                                text = "Statistika kupaca",
                                 selected = activeAnalyticsTab == AnalyticsTab.Customers
                             ) { go(DashConfig.Analytics(AnalyticsTab.Customers)) }
                             AnalyticsSubItem(
@@ -242,7 +242,7 @@ fun DashboardView(component: DashboardComponent) {
                                 selected = activeInstance is DashChild.AnalyticsAtRisk
                             ) { go(DashConfig.AnalyticsAtRisk) }
                             AnalyticsSubItem(
-                                text = "Proizvodi i kategorije",
+                                text = "Statistika proizvoda i kategorija",
                                 selected = activeInstance is DashChild.AnalyticsProducts
                             ) { go(DashConfig.AnalyticsProducts) }
                         }
@@ -503,7 +503,7 @@ private fun AnalyticsSubItem(text: String, selected: Boolean, onClick: () -> Uni
             color = if (selected) VendorAccent else KarikaUiColors.Muted,
             textSize = 14.sp,
             fontWeight = if (selected) FontWeight.W700 else FontWeight.W500,
-            maxLines = 1
+            maxLines = 2
         )
     }
 }

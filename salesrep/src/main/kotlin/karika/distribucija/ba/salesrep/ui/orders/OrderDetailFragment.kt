@@ -1,33 +1,45 @@
 package karika.distribucija.ba.salesrep.ui.orders
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.graphics.Paint
-import android.graphics.Typeface
+import karika.distribucija.ba.salesrep.util.KSnackbar
+import karika.distribucija.ba.salesrep.util.showSnack
+import android.content.res.ColorStateList
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.StrikethroughSpan
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
-import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.net.toUri
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentOrderDetailBinding
 import karika.distribucija.ba.salesrep.databinding.ItemOrderCommentBinding
+import karika.distribucija.ba.salesrep.databinding.ItemOrderSpecItemBinding
 import karika.distribucija.ba.salesrep.model.Comment
+import karika.distribucija.ba.salesrep.model.CommentFile
 import karika.distribucija.ba.salesrep.model.VendorDeliveryServiceData
 import karika.distribucija.ba.salesrep.model.VendorOrder
 import karika.distribucija.ba.salesrep.model.VendorProduct
+import karika.distribucija.ba.salesrep.network.HttpClientProvider
+import karika.distribucija.ba.salesrep.ui.messages.ImagePreviewFragment
+import karika.distribucija.ba.salesrep.ui.messages.messageInitials
+import karika.distribucija.ba.salesrep.ui.pdf.PdfViewerActivity
 import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 import karika.distribucija.ba.salesrep.util.karikaPriceFormat
+import karika.distribucija.ba.salesrep.util.loadUrl
 import karika.distribucija.ba.salesrep.util.setHtmlText
 
 /** Mirrors composeApp's ui/view/salesrep/orders/detail/SalesOrderDetailView.kt. */
@@ -43,7 +55,6 @@ class OrderDetailFragment : Fragment() {
     private var shippingCostExpress: Double? = null
     private var shippingDefaultsApplied = false
 
-    private val specColumnWidthsDp = intArrayOf(140, 80, 100, 90, 110, 130, 150, 100, 90)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -126,7 +137,7 @@ class OrderDetailFragment : Fragment() {
         viewModel.comments.observe(viewLifecycleOwner) { comments -> renderComments(comments) }
 
         viewModel.infoMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message, KSnackbar.Type.SUCCESS)
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
@@ -135,80 +146,95 @@ class OrderDetailFragment : Fragment() {
 
         viewModel.isSendingComment.observe(viewLifecycleOwner) { sending ->
             binding.buttonSendComment.isEnabled = !sending
+            // composeApp swaps the button for a field-colored box with an accent spinner.
             binding.buttonSendComment.setBackgroundResource(
-                if (sending) R.drawable.bg_k_ord_button_disabled else R.drawable.bg_k_button_primary
+                if (sending) R.drawable.bg_k_field else R.drawable.bg_k_button_primary
             )
-            binding.iconSendComment.visibility = if (sending) View.GONE else View.VISIBLE
-            binding.textSendComment.visibility = if (sending) View.GONE else View.VISIBLE
+            binding.layoutSendCommentLabel.visibility = if (sending) View.GONE else View.VISIBLE
             binding.progressSendComment.visibility = if (sending) View.VISIBLE else View.GONE
         }
 
         viewModel.pdfUrl.observe(viewLifecycleOwner) { url ->
             if (url != null) {
-                try {
-                    startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-                } catch (e: ActivityNotFoundException) {
-                    Toast.makeText(requireContext(), R.string.login_error_generic, Toast.LENGTH_SHORT).show()
-                }
+                PdfViewerActivity.open(requireContext(), url, getString(R.string.order_detail_title_format, viewModel.vendorOrder.value?.orderId.orEmpty()))
                 viewModel.clearPdfUrl()
             }
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
             if (message != null) {
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                showSnack(message)
             }
         }
     }
 
     private fun renderOrder(order: VendorOrder) {
         val dash = getString(R.string.order_detail_dash)
+        val locked = order.locked()
+        val canEdit = order.isPending() && !locked
+
+        (activity as? AppCompatActivity)?.supportActionBar?.title =
+            getString(R.string.order_detail_title_format, order.orderId.orEmpty())
 
         binding.buttonPrint.visibility = if (order.isRejected()) View.GONE else View.VISIBLE
-        binding.buttonPrint.setImageResource(if (order.isPending()) R.drawable.ic_menu else R.drawable.ic_print)
+        binding.buttonPrint.setImageResource(if (order.isPending()) R.drawable.ic_k_ord_fab_menu else R.drawable.ic_print)
 
-        binding.textOrderNumber.text = "#${order.orderId}"
-        binding.textOrderDate.text = order.date()
+        binding.layoutLockedNotice.visibility = if (locked) View.VISIBLE else View.GONE
 
-        // order.orderTotal comes straight from the API and is the sum of undiscounted row
-        // totals (it ignores each product's discount_percent) - recompute from the line items
-        // instead, using the same discounted-row formula as the spec table below.
-        val vpcTotal = order.products.sumOf { product ->
-            val price = product.price?.toDoubleOrNull() ?: 0.0
-            val discountPercent = product.rabat().toIntOrNull() ?: 0
-            val discountedPrice = price * (1.0 - discountPercent / 100.0)
-            val qty = product.qtyOrdered?.toIntOrNull() ?: 0
-            discountedPrice * qty
-        }
+        // Same totals as composeApp's SalesOrderDetailView: the order's own VPC total + 17% PDV.
+        val vpcTotal = order.orderTotal?.toDoubleOrNull() ?: 0.0
         val pdvTotal = vpcTotal * 0.17
         val grandTotal = vpcTotal + pdvTotal
         val commission = order.shopCommissionFee?.toDoubleOrNull()
         val commissionText = if (commission != null) karikaPriceFormat(commission) + " KM" else dash
 
-        binding.textVpcTotal.text = karikaPriceFormat(vpcTotal) + " KM"
+        // ── OrderSummary ──
+        binding.textOrderNumber.text = "#${order.orderId.orEmpty()}"
+        binding.textOrderDate.text = order.date()
         binding.textGrandTotal.text = karikaPriceFormat(grandTotal) + " KM"
+        binding.textVpcTotal.text = karikaPriceFormat(vpcTotal) + " KM"
         binding.textCommissionTotal.text = commissionText
+        renderStatusPill(order)
 
-        binding.textCustomerName.text = order.billingName ?: "Kupac #${order.customerId}"
-        binding.textCustomerId.text = getString(R.string.order_detail_customer_id_format, order.customerId ?: "-")
+        // ── CustomerSection ──
+        val name = order.b2bPravnoLice ?: getString(R.string.order_detail_customer_fallback, order.customerId.orEmpty())
+        binding.textCustomerInitials.text = name.messageInitials()
+        binding.textCustomerName.text = name
+        binding.textCustomerContact.visibility = if (order.billingName.isNullOrBlank()) View.GONE else View.VISIBLE
+        binding.textCustomerContact.text = getString(R.string.order_detail_contact_person_suffix, order.billingName.orEmpty())
 
-        val address = order.address
-        val addressText = listOfNotNull(address?.street, address?.city, address?.postcode)
-            .filter { it.isNotBlank() }
-            .joinToString(", ")
-            .ifBlank { dash }
-        binding.textAddress.text = addressText
-        binding.textPhone.text = address?.telephone?.takeIf { it.isNotBlank() } ?: dash
+        val address = order.address?.let { a ->
+            listOfNotNull(a.street, a.city, a.postcode).filter { it.isNotBlank() }.joinToString(", ")
+        }.takeIf { !it.isNullOrBlank() } ?: dash
+        val phone = order.address?.telephone.takeIf { !it.isNullOrBlank() } ?: dash
+        // No Pozovi / Email buttons (composeApp has them): the app runs kiosk-locked and must
+        // not hand off to a dialer or mail app.
+        renderKeyValueRows(
+            binding.layoutCustomerInfo,
+            listOf(
+                getString(R.string.order_detail_kv_pdv) to (order.pdvNumber ?: "-"),
+                getString(R.string.order_detail_kv_id) to (order.idNumber ?: "-"),
+                getString(R.string.order_detail_kv_contact) to (order.billingName ?: "-"),
+                getString(R.string.order_detail_kv_email) to order.email(),
+                getString(R.string.order_detail_kv_phone) to phone,
+                getString(R.string.order_detail_kv_address) to address
+            )
+        )
 
+        // ── Specifikacija ──
         val products = order.products
-        val canEdit = order.isPending() && !order.locked()
-        binding.textItemsCount.text = getString(R.string.order_detail_items_count_format, products.size)
+        binding.textItemsCount.text = itemsLabel(products.size)
         renderSpecification(products, canEdit)
+        renderSpecTotals(vpcTotal, pdvTotal, grandTotal, commissionText)
 
-        binding.textStatVpc.text = karikaPriceFormat(vpcTotal) + " KM"
-        binding.textStatPdv.text = karikaPriceFormat(pdvTotal) + " KM"
-        binding.textStatTotal.text = karikaPriceFormat(grandTotal) + " KM"
-        binding.textStatCommission.text = commissionText
+        // Locked: the order's data stays blurred, as composeApp's lockedBlur().
+        listOf(
+            binding.textGrandTotal, binding.layoutSummaryCommission, binding.layoutCustomerHeader,
+            binding.layoutCustomerInfo, binding.layoutSpecCard
+        ).forEach { it.setLockedBlur(locked) }
+
+        binding.textCommentsArchived.visibility = if (order.commentsArchived()) View.VISIBLE else View.GONE
+        binding.layoutCommentForm.visibility = if (order.commentsArchived()) View.GONE else View.VISIBLE
 
         binding.layoutDeliverySection.visibility = if (canEdit) View.VISIBLE else View.GONE
         if (canEdit && !shippingDefaultsApplied) {
@@ -227,6 +253,115 @@ class OrderDetailFragment : Fragment() {
             binding.editDeliveryNote.setText(shipping?.note.orEmpty())
             selectedCarrierCode = order.code.orEmpty()
             renderProviderSelection()
+        }
+
+        // The customer's bubbles carry the company name from the order, which can arrive after
+        // the comments did.
+        viewModel.comments.value?.let { renderComments(it) }
+    }
+
+    /** KPill on the navy card - light status color at 15% behind a dot and the label. */
+    private fun renderStatusPill(order: VendorOrder) {
+        val color = when (order.realOrderStatus) {
+            "approved", "bill-sent" -> 0xFF86EFAC.toInt()
+            "pending", "estimate-sent" -> 0xFFFCD34D.toInt()
+            "rejected" -> 0xFFFCA5A5.toInt()
+            else -> 0xFFD1D5DB.toInt()
+        }
+        val translucent = (color and 0x00FFFFFF) or (0x26 shl 24)
+        binding.layoutStatusPill.background = GradientDrawable().apply {
+            cornerRadius = dp(50).toFloat()
+            setColor(translucent)
+        }
+        binding.viewStatusDot.background = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(color)
+        }
+        binding.textStatus.setTextColor(color)
+        binding.textStatus.text = order.status()
+    }
+
+    /** KKeyValueCard / KKeyValueRow: muted label left, bold value right, dividers between. */
+    private fun renderKeyValueRows(container: LinearLayout, rows: List<Pair<String, String?>>) {
+        container.removeAllViews()
+        rows.forEachIndexed { index, (label, value) ->
+            if (index > 0) container.addView(buildHorizontalDivider())
+            container.addView(buildKeyValueRow(label, value))
+        }
+    }
+
+    private fun buildKeyValueRow(
+        label: String,
+        value: String?,
+        labelColor: Int = R.color.k_muted,
+        bold: Boolean = false,
+        valueSizeSp: Float = 14f
+    ): View {
+        val context = requireContext()
+        val row = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(dp(14), dp(13), dp(14), dp(13))
+        }
+        row.addView(TextView(context).apply {
+            text = label
+            setTextColor(context.getColor(labelColor))
+            textSize = 14f
+            maxLines = 1
+            if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
+        })
+        row.addView(TextView(context).apply {
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
+                marginStart = dp(12)
+            }
+            text = value?.takeIf { it.isNotBlank() } ?: getString(R.string.order_detail_dash)
+            setTextColor(context.getColor(R.color.k_ink))
+            textSize = valueSizeSp
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            textAlignment = View.TEXT_ALIGNMENT_VIEW_END
+            maxLines = 2
+        })
+        return row
+    }
+
+    private fun renderSpecTotals(vpcTotal: Double, pdvTotal: Double, grandTotal: Double, commissionText: String) {
+        val container = binding.layoutSpecTotals
+        container.removeAllViews()
+        container.addView(buildHorizontalDivider())
+        container.addView(buildKeyValueRow(getString(R.string.order_detail_total_vpc), karikaPriceFormat(vpcTotal) + " KM"))
+        container.addView(buildHorizontalDivider())
+        container.addView(buildKeyValueRow(getString(R.string.order_detail_total_pdv17), karikaPriceFormat(pdvTotal) + " KM"))
+        container.addView(buildHorizontalDivider())
+        container.addView(buildKeyValueRow(getString(R.string.order_detail_karika_commission), commissionText))
+        container.addView(buildHorizontalDivider())
+        container.addView(
+            buildKeyValueRow(
+                getString(R.string.order_detail_total_with_pdv),
+                karikaPriceFormat(grandTotal) + " KM",
+                labelColor = R.color.k_ink,
+                bold = true,
+                valueSizeSp = 15f
+            )
+        )
+    }
+
+    private fun View.setLockedBlur(locked: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            setRenderEffect(
+                if (locked) RenderEffect.createBlurEffect(dp(5).toFloat(), dp(5).toFloat(), Shader.TileMode.CLAMP) else null
+            )
+        } else {
+            alpha = if (locked) 0.25f else 1f
+        }
+    }
+
+    private fun itemsLabel(count: Int): String {
+        val mod10 = count % 10
+        val mod100 = count % 100
+        return when {
+            mod10 == 1 && mod100 != 11 -> "$count artikal"
+            mod10 in 2..4 && mod100 !in 12..14 -> "$count artikla"
+            else -> "$count artikala"
         }
     }
 
@@ -250,11 +385,11 @@ class OrderDetailFragment : Fragment() {
         }
         menuView.findViewById<TextView>(R.id.action_print_estimate).setOnClickListener {
             popup.dismiss()
-            Toast.makeText(requireContext(), R.string.order_detail_coming_soon, Toast.LENGTH_SHORT).show()
+            showSnack(R.string.order_detail_coming_soon, KSnackbar.Type.WARNING)
         }
         menuView.findViewById<TextView>(R.id.action_send_estimate).setOnClickListener {
             popup.dismiss()
-            Toast.makeText(requireContext(), R.string.order_detail_coming_soon, Toast.LENGTH_SHORT).show()
+            showSnack(R.string.order_detail_coming_soon, KSnackbar.Type.WARNING)
         }
 
         menuView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
@@ -291,141 +426,61 @@ class OrderDetailFragment : Fragment() {
         )
     }
 
-    /** Mirrors composeApp's ProductSpecificationTable in SalesOrderDetailView.kt - a horizontally
-     * scrollable table (not per-item cards), with an "AKCIJE"/Izmijeni column only while [canEdit]. */
+    /** Mirrors composeApp's Specification/SpecificationItem - one row per item, dividers between. */
     private fun renderSpecification(products: List<VendorProduct>, canEdit: Boolean) {
         binding.textNoItems.visibility = if (products.isEmpty()) View.VISIBLE else View.GONE
-        binding.scrollSpecTable.visibility = if (products.isEmpty()) View.GONE else View.VISIBLE
-        if (products.isEmpty()) return
-
-        val widths = if (canEdit) specColumnWidthsDp else specColumnWidthsDp.dropLast(1).toIntArray()
-        renderSpecificationHeader(canEdit, widths)
-        renderSpecificationRows(products, canEdit, widths)
-    }
-
-    private fun renderSpecificationHeader(canEdit: Boolean, widths: IntArray) {
-        binding.rowSpecHeader.removeAllViews()
-        val headers = listOf(
-            getString(R.string.review_spec_header_item),
-            getString(R.string.review_spec_header_discount),
-            getString(R.string.review_spec_header_price),
-            getString(R.string.review_spec_header_qty),
-            getString(R.string.review_spec_header_total_vpc),
-            getString(R.string.review_spec_header_total_with_tax),
-            getString(R.string.review_spec_header_commission_percent),
-            getString(R.string.review_spec_header_commission)
-        ) + if (canEdit) listOf(getString(R.string.review_spec_header_actions)) else emptyList()
-
-        headers.forEachIndexed { index, header ->
-            binding.rowSpecHeader.addView(
-                buildSpecCell(header, widths[index], color = R.color.k_muted, bold = true, sizeSp = 10f)
-            )
-            if (index != headers.lastIndex) binding.rowSpecHeader.addView(buildVerticalDivider())
+        val container = binding.specItemsContainer
+        container.removeAllViews()
+        products.forEachIndexed { index, product ->
+            if (index > 0) container.addView(buildHorizontalDivider())
+            container.addView(buildSpecItem(product, canEdit))
         }
     }
 
-    private fun renderSpecificationRows(products: List<VendorProduct>, canEdit: Boolean, widths: IntArray) {
-        binding.tableRowsContainer.removeAllViews()
-        products.forEachIndexed { rowIndex, product ->
-            val price = product.price?.toDoubleOrNull() ?: 0.0
-            val discountPercent = product.rabat().toIntOrNull() ?: 0
-            val discountedPrice = price * (1.0 - discountPercent / 100.0)
-            val qty = product.qtyOrdered?.toIntOrNull() ?: 0
-            val rowTotalVpc = discountedPrice * qty
-            val rowTotalWithPdv = rowTotalVpc * 1.17
-            val commissionPercentText = karikaPriceFormat(product.commissionPercent?.toDoubleOrNull() ?: 0.0)
-            val commissionText = karikaPriceFormat(product.commission?.toDoubleOrNull() ?: 0.0) + " KM"
+    private fun buildSpecItem(product: VendorProduct, editable: Boolean): View {
+        val context = requireContext()
+        val item = ItemOrderSpecItemBinding.inflate(layoutInflater, binding.specItemsContainer, false)
 
-            val row = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        val price = product.price?.toDoubleOrNull() ?: 0.0
+        val discountPercent = product.rabat().toIntOrNull() ?: 0
+        val discountedPrice = price * (1.0 - discountPercent / 100.0)
+        val qty = product.qtyOrdered?.toIntOrNull() ?: 0
+        val rowTotalVpc = discountedPrice * qty
+        val rowTotalWithPdv = rowTotalVpc * 1.17
+        // Rabat also eats into Karika's commission on this row - e.g. a 50% rabat halves it.
+        val commissionAmount = (product.commission?.toDoubleOrNull() ?: 0.0) * (1.0 - discountPercent / 100.0)
+
+        val image = product.imagePath()?.let { HttpClientProvider.imageUrl(it) }
+        item.textImagePlaceholder.visibility = if (image == null) View.VISIBLE else View.GONE
+        item.imageProduct.visibility = if (image == null) View.GONE else View.VISIBLE
+        if (image != null) item.imageProduct.loadUrl(image, viewLifecycleOwner)
+
+        item.textName.text = product.name ?: "—"
+        item.textQtyLine.text = SpannableStringBuilder().apply {
+            val originalQty = product.originalQty()
+            if (originalQty.isNotEmpty()) {
+                val start = length
+                append(originalQty)
+                setSpan(StrikethroughSpan(), start, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                setSpan(ForegroundColorSpan(context.getColor(R.color.k_subtle)), start, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                append(" ")
             }
-            row.addView(buildSpecCell(product.name ?: "—", widths[0], bold = true))
-            row.addView(buildVerticalDivider())
-            row.addView(buildSpecCell(product.rabat(), widths[1]))
-            row.addView(buildVerticalDivider())
-            row.addView(buildSpecCell(karikaPriceFormat(discountedPrice) + " KM", widths[2]))
-            row.addView(buildVerticalDivider())
-            row.addView(buildQuantityCell(product, widths[3]))
-            row.addView(buildVerticalDivider())
-            row.addView(buildSpecCell(karikaPriceFormat(rowTotalVpc) + " KM", widths[4]))
-            row.addView(buildVerticalDivider())
-            row.addView(buildSpecCell(karikaPriceFormat(rowTotalWithPdv) + " KM", widths[5]))
-            row.addView(buildVerticalDivider())
-            row.addView(buildSpecCell(commissionPercentText, widths[6]))
-            row.addView(buildVerticalDivider())
-            row.addView(buildSpecCell(commissionText, widths[7]))
-            if (canEdit) {
-                row.addView(buildVerticalDivider())
-                row.addView(buildEditActionCell(widths[8]) { openEditItemSheet(product) })
-            }
-
-            binding.tableRowsContainer.addView(row)
-            if (rowIndex != products.lastIndex) {
-                binding.tableRowsContainer.addView(buildHorizontalDivider())
-            }
+            append(product.qty())
+            append(" × ")
+            append(karikaPriceFormat(discountedPrice) + " KM")
+            append(" · rabat ")
+            append(product.rabat() + "%")
         }
-    }
-
-    private fun buildSpecCell(
-        text: String,
-        widthDp: Int,
-        bold: Boolean = false,
-        color: Int = R.color.k_ink,
-        sizeSp: Float = 13f
-    ): TextView = TextView(requireContext()).apply {
-        layoutParams = LinearLayout.LayoutParams(dp(widthDp), LinearLayout.LayoutParams.WRAP_CONTENT)
-        this.text = text
-        setTextColor(requireContext().getColor(color))
-        textSize = sizeSp
-        if (bold) setTypeface(typeface, Typeface.BOLD)
-        maxLines = 2
-        setPadding(dp(8), dp(10), dp(8), dp(10))
-    }
-
-    /** Stacks the struck-through original qty (if the item was edited) above the current qty,
-     * matching composeApp's QuantityCell. */
-    private fun buildQuantityCell(product: VendorProduct, widthDp: Int): View {
-        val column = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(dp(widthDp), LinearLayout.LayoutParams.WRAP_CONTENT)
-            setPadding(dp(8), dp(10), dp(8), dp(10))
-        }
-        val original = product.originalQty()
-        if (original.isNotEmpty()) {
-            column.addView(TextView(requireContext()).apply {
-                text = original
-                setTextColor(requireContext().getColor(R.color.k_subtle))
-                textSize = 12f
-                maxLines = 1
-                paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            })
-        }
-        column.addView(TextView(requireContext()).apply {
-            text = product.qty()
-            setTextColor(requireContext().getColor(R.color.k_ink))
-            textSize = 13f
-            setTypeface(typeface, Typeface.BOLD)
-            maxLines = 1
-        })
-        return column
-    }
-
-    private fun buildEditActionCell(widthDp: Int, onClick: () -> Unit): TextView = TextView(requireContext()).apply {
-        layoutParams = LinearLayout.LayoutParams(dp(widthDp), LinearLayout.LayoutParams.WRAP_CONTENT)
-        text = getString(R.string.review_spec_edit_action)
-        setTextColor(requireContext().getColor(R.color.k_accent))
-        textSize = 13f
-        setTypeface(typeface, Typeface.BOLD)
-        setPadding(dp(8), dp(10), dp(8), dp(10))
-        isClickable = true
-        isFocusable = true
-        setOnClickListener { onClick() }
-    }
-
-    private fun buildVerticalDivider(): View = View(requireContext()).apply {
-        layoutParams = LinearLayout.LayoutParams(dp(1), LinearLayout.LayoutParams.MATCH_PARENT)
-        setBackgroundColor(requireContext().getColor(R.color.k_line))
+        item.textPdvLine.text = getString(
+            R.string.order_detail_row_with_pdv_format,
+            karikaPriceFormat(rowTotalWithPdv),
+            product.commissionPercentLabel(),
+            karikaPriceFormat(commissionAmount)
+        )
+        item.textRowTotal.text = karikaPriceFormat(rowTotalVpc) + " KM"
+        item.buttonEdit.visibility = if (editable) View.VISIBLE else View.GONE
+        item.buttonEdit.setOnClickListener { openEditItemSheet(product) }
+        return item.root
     }
 
     private fun buildHorizontalDivider(): View = View(requireContext()).apply {
@@ -450,30 +505,86 @@ class OrderDetailFragment : Fragment() {
 
     private fun renderComments(comments: List<Comment>) {
         binding.commentsContainer.removeAllViews()
-        comments.forEach { comment -> binding.commentsContainer.addView(buildCommentView(comment)) }
-        binding.commentsDivider.visibility = if (comments.isNotEmpty()) View.VISIBLE else View.GONE
+        binding.commentsContainer.setPadding(0, 0, 0, if (comments.isNotEmpty()) dp(2) else 0)
+        val customerName = viewModel.vendorOrder.value?.b2bPravnoLice
+        comments.forEach { comment -> binding.commentsContainer.addView(buildCommentView(comment, customerName)) }
     }
 
-    private fun buildCommentView(comment: Comment): View {
-        val itemBinding = ItemOrderCommentBinding.inflate(layoutInflater, binding.commentsContainer, false)
-        val isMine = comment.isMine()
+    /** Mirrors composeApp's CommentBubble. */
+    private fun buildCommentView(comment: Comment, customerName: String?): View {
+        val item = ItemOrderCommentBinding.inflate(layoutInflater, binding.commentsContainer, false)
+        val context = requireContext()
+        if (comment.isMine()) {
+            item.layoutMine.visibility = View.VISIBLE
+            item.textMineMessage.visibility = if (comment.message().isBlank()) View.GONE else View.VISIBLE
+            item.textMineMessage.setHtmlText(comment.message())
+            item.textMineTime.text = comment.createdAt()
+            comment.files.orEmpty().forEach { addCommentFile(item.layoutMineFiles, it, context.getColor(R.color.k_white)) }
+        } else {
+            item.layoutOther.visibility = View.VISIBLE
+            item.textOtherInitials.text = customerName.messageInitials()
+            item.textOtherMessage.visibility = if (comment.message().isBlank()) View.GONE else View.VISIBLE
+            item.textOtherMessage.setHtmlText(comment.message())
+            item.textOtherFooter.text = listOfNotNull(
+                customerName?.takeIf { it.isNotBlank() },
+                comment.createdAt().takeIf { it.isNotBlank() }
+            ).joinToString(" · ")
+            comment.files.orEmpty().forEach { addCommentFile(item.layoutOtherFiles, it, context.getColor(R.color.k_accent)) }
+        }
+        return item.root
+    }
 
-        itemBinding.textCommentMessage.setHtmlText(comment.message())
-        itemBinding.textCommentTime.text = comment.createdAt()
-        itemBinding.textCommentMessage.setBackgroundResource(
-            if (isMine) R.drawable.bg_k_ord_bubble_mine else R.drawable.bg_k_ord_bubble_other
-        )
-        itemBinding.textCommentMessage.setTextColor(
-            requireContext().getColor(if (isMine) R.color.k_white else R.color.k_ink)
-        )
+    /** CommentFileAttachment: images as a tappable preview, anything else as a PDF row. */
+    private fun addCommentFile(container: LinearLayout, file: CommentFile, color: Int) {
+        val path = file.url?.takeIf { it.isNotBlank() } ?: return
+        val url = HttpClientProvider.imageUrl(path)
+        val context = requireContext()
+        if ((file.name?.takeIf { it.isNotBlank() } ?: path).isImageFile()) {
+            container.addView(com.google.android.material.card.MaterialCardView(context).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(200), ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    topMargin = dp(8)
+                }
+                radius = dp(10).toFloat()
+                cardElevation = 0f
+                strokeWidth = 0
+                addView(ImageView(context).apply {
+                    adjustViewBounds = true
+                    scaleType = ImageView.ScaleType.FIT_CENTER
+                    loadUrl(url, viewLifecycleOwner)
+                })
+                setOnClickListener {
+                    ImagePreviewFragment.newInstance(url).show(childFragmentManager, "image_preview")
+                }
+            })
+        } else {
+            container.addView(LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(8) }
+                addView(ImageView(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(dp(18), dp(18))
+                    setImageResource(R.drawable.ic_pdf)
+                    imageTintList = ColorStateList.valueOf(color)
+                })
+                addView(TextView(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply { marginStart = dp(8) }
+                    text = file.name.orEmpty()
+                    setTextColor(color)
+                    textSize = 12f
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                })
+                setOnClickListener { PdfViewerActivity.open(context, url, file.name) }
+            })
+        }
+    }
 
-        val bias = if (isMine) 1f else 0f
-        val gravity = if (isMine) Gravity.END else Gravity.START
-        (itemBinding.bubbleColumn.layoutParams as ConstraintLayout.LayoutParams).horizontalBias = bias
-        (itemBinding.textCommentMessage.layoutParams as LinearLayout.LayoutParams).gravity = gravity
-        (itemBinding.textCommentTime.layoutParams as LinearLayout.LayoutParams).gravity = gravity
-
-        return itemBinding.root
+    private fun String.isImageFile() = lowercase().let {
+        it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".png") ||
+            it.endsWith(".gif") || it.endsWith(".webp")
     }
 
     override fun onDestroyView() {

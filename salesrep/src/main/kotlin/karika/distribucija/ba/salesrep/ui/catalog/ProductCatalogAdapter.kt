@@ -70,7 +70,7 @@ class ProductCatalogAdapter(
             )
             val stepperTextColor = context.getColor(if (inStock) R.color.k_ink else R.color.k_subtle)
             binding.buttonMinus.isEnabled = inStock
-            binding.buttonMinus.setTextColor(context.getColor(if (inStock) R.color.k_accent else R.color.k_subtle))
+            binding.buttonMinus.setColorFilter(context.getColor(if (inStock) R.color.k_accent else R.color.k_subtle))
             binding.editQty.isEnabled = inStock
             binding.editQty.setTextColor(stepperTextColor)
             binding.buttonPlus.isEnabled = inStock

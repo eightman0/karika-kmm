@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Order detail summary card - KarikaUiColors.Ink, 16dp (SalesOrderDetailView OrderSummary) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/k_ink" />
+    <corners android:radius="16dp" />
+</shape>

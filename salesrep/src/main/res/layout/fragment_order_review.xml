@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors composeApp's SalesOrderReviewView.kt: order info, specification cards, "Pregled"
+     summary, foldable "Usluga dostave", note, and the sticky bottom panel with the total. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -18,22 +20,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="4dp"
             android:paddingBottom="20dp">
 
-            <!-- Informacije o narudžbi -->
             <TextView
                 style="@style/K.Text.Section"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="18dp"
                 android:layout_marginBottom="12dp"
-                android:text="@string/review_info_title" />
+                android:maxLines="1"
+                android:text="@string/review_info_title"
+                android:textSize="18sp" />
 
+            <!-- Order info card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
                 android:background="@drawable/bg_k_card"
                 android:orientation="vertical">
 
@@ -45,14 +49,19 @@
                     android:paddingHorizontal="14dp"
                     android:paddingVertical="12dp">
 
-                    <ImageView
+                    <TextView
+                        android:id="@+id/text_customer_initials"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="@drawable/bg_k_icon_tile"
-                        android:contentDescription="@null"
-                        android:padding="10dp"
-                        android:src="@drawable/ic_storefront"
-                        app:tint="@color/k_accent" />
+                        android:background="@drawable/bg_k_cart2_initials_10"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:textColor="@color/k_accent"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        tools:text="FD" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -64,17 +73,19 @@
 
                         <TextView
                             android:id="@+id/text_customer_company"
+                            style="@style/K.Text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
+                            android:lineSpacingExtra="4sp"
                             android:maxLines="2"
-                            android:textColor="@color/k_ink"
                             android:textSize="15sp"
                             android:textStyle="bold"
                             tools:text="Firma d.o.o." />
 
                         <TextView
                             android:id="@+id/text_customer_email"
+                            style="@style/K.Text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
@@ -85,23 +96,20 @@
                             tools:text="kupac@firma.ba" />
                     </LinearLayout>
 
+                    <!-- PartnershipBadge (KPill, 11sp) -->
                     <TextView
                         android:id="@+id/text_partnership_badge"
+                        style="@style/K.Text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_k_pill_green_soft"
-                        android:drawableStart="@drawable/k_ord_dot"
-                        android:drawablePadding="6dp"
                         android:fontFamily="sans-serif-medium"
-                        android:gravity="center_vertical"
-                        android:includeFontPadding="false"
                         android:maxLines="1"
                         android:paddingHorizontal="10dp"
                         android:paddingVertical="5dp"
-                        android:textSize="11.5sp"
-                        android:textStyle="bold"
-                        tools:text="Aktivno"
-                        tools:textColor="@color/k_green" />
+                        android:textColor="@color/k_green"
+                        android:textSize="11sp"
+                        tools:text="Aktivno" />
                 </LinearLayout>
 
                 <View
@@ -109,241 +117,333 @@
                     android:layout_height="1dp"
                     android:background="@color/k_line" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="13dp">
+
+                    <TextView
+                        style="@style/K.Text"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="14dp"
-                        android:paddingVertical="13dp">
+                        android:maxLines="1"
+                        android:text="@string/k_ord_items"
+                        android:textColor="@color/k_muted"
+                        android:textSize="14sp" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/k_ord_items"
-                            android:textColor="@color/k_muted"
-                            android:textSize="13.5sp" />
-
-                        <TextView
-                            android:id="@+id/text_items_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:maxLines="1"
-                            android:textColor="@color/k_ink"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            tools:text="3" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/k_line" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/text_items_count"
+                        style="@style/K.Text"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="14dp"
-                        android:paddingVertical="13dp">
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:maxLines="2"
+                        android:textColor="@color/k_ink"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="3" />
+                </LinearLayout>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/order_detail_total_vpc"
-                            android:textColor="@color/k_muted"
-                            android:textSize="13.5sp" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/k_line" />
 
-                        <TextView
-                            android:id="@+id/text_total_vpc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:maxLines="1"
-                            android:textColor="@color/k_ink"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            tools:text="100,00 KM" />
-                    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="13dp">
 
+                    <TextView
+                        style="@style/K.Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/order_detail_total_vpc"
+                        android:textColor="@color/k_muted"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/text_total_vpc"
+                        style="@style/K.Text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:maxLines="2"
+                        android:textColor="@color/k_ink"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="0,00 KM" />
+                </LinearLayout>
             </LinearLayout>
 
-            <!-- Pregled: blue summary card -->
             <TextView
                 style="@style/K.Text.Section"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="18dp"
                 android:layout_marginBottom="12dp"
-                android:text="@string/k_ord_summary" />
+                android:maxLines="1"
+                android:text="@string/review_specification_title"
+                android:textSize="18sp" />
 
+            <!-- One SpecificationItem card per cart line (item_order_review_spec.xml), 10dp apart -->
+            <LinearLayout
+                android:id="@+id/layout_spec_items"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                style="@style/K.Text.Section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="12dp"
+                android:maxLines="1"
+                android:text="@string/k_ord_summary"
+                android:textSize="18sp" />
+
+            <!-- Summary card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:background="@drawable/bg_k_navy_card"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:background="@drawable/bg_k_card"
+                android:clipToOutline="true"
+                android:orientation="vertical">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="13dp">
+
+                    <TextView
+                        style="@style/K.Text"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="0dp"
-                        android:paddingVertical="7dp">
+                        android:maxLines="1"
+                        android:text="@string/cart_subtotal"
+                        android:textColor="@color/k_muted"
+                        android:textSize="14sp" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/cart_subtotal"
-                            android:textColor="@color/k_ord_on_blue_label"
-                            android:textSize="13.5sp" />
-
-                        <TextView
-                            android:id="@+id/text_review_subtotal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:maxLines="1"
-                            android:textColor="@color/k_white"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            tools:text="100,00 KM" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/text_review_subtotal"
+                        style="@style/K.Text"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="0dp"
-                        android:paddingVertical="7dp">
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:maxLines="2"
+                        android:textColor="@color/k_ink"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="0,00 KM" />
+                </LinearLayout>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/cart_discount"
-                            android:textColor="@color/k_ord_on_blue_label"
-                            android:textSize="13.5sp" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/k_line" />
 
-                        <TextView
-                            android:id="@+id/text_review_discount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:maxLines="1"
-                            android:textColor="@color/k_white"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            tools:text="-10,00 KM" />
-                    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="13dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        style="@style/K.Text"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="0dp"
-                        android:paddingVertical="7dp">
+                        android:maxLines="1"
+                        android:text="@string/cart_discount"
+                        android:textColor="@color/k_muted"
+                        android:textSize="14sp" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/k_ord_pdv"
-                            android:textColor="@color/k_ord_on_blue_label"
-                            android:textSize="13.5sp" />
-
-                        <TextView
-                            android:id="@+id/text_review_pdv"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:maxLines="1"
-                            android:textColor="@color/k_white"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            tools:text="17,00 KM" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/text_review_discount"
+                        style="@style/K.Text"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="0dp"
-                        android:paddingVertical="7dp">
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:maxLines="2"
+                        android:textColor="@color/k_red"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="-0,00 KM" />
+                </LinearLayout>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/order_detail_karika_commission"
-                            android:textColor="@color/k_ord_on_blue_label"
-                            android:textSize="13.5sp" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/k_line" />
 
-                        <TextView
-                            android:id="@+id/text_review_commission"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:maxLines="1"
-                            android:textColor="@color/k_white"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            tools:text="5,00 KM" />
-                    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="13dp">
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="12dp"
-                        android:background="@color/k_ord_on_blue_line" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        style="@style/K.Text"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:maxLines="1"
+                        android:text="@string/order_detail_total_vpc"
+                        android:textColor="@color/k_muted"
+                        android:textSize="14sp" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:fontFamily="sans-serif-medium"
-                            android:text="@string/order_detail_total_with_pdv"
-                            android:textColor="@color/k_white"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/text_review_total_vpc"
+                        style="@style/K.Text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:maxLines="2"
+                        android:textColor="@color/k_ink"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="0,00 KM" />
+                </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/text_review_total_with_tax"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxLines="1"
-                            android:textColor="@color/k_white"
-                            android:textSize="22sp"
-                            android:textStyle="bold"
-                            tools:text="107,00 KM" />
-                    </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/k_line" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="13dp">
+
+                    <TextView
+                        style="@style/K.Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/k_ord_pdv"
+                        android:textColor="@color/k_muted"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/text_review_pdv"
+                        style="@style/K.Text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:maxLines="2"
+                        android:textColor="@color/k_ink"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="0,00 KM" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/k_line" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="13dp">
+
+                    <TextView
+                        style="@style/K.Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/order_detail_karika_commission"
+                        android:textColor="@color/k_muted"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/text_review_commission"
+                        style="@style/K.Text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:maxLines="2"
+                        android:textColor="@color/k_ink"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="0,00 KM" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/k_line" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_k_cart2_total_row"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="13dp">
+
+                    <TextView
+                        style="@style/K.Text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/order_detail_total_with_pdv"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/text_review_total_with_tax"
+                        style="@style/K.Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:textColor="@color/k_accent"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        tools:text="117,00 KM" />
+                </LinearLayout>
             </LinearLayout>
 
-            <!-- ── Usluga dostave (foldable) ─────────────────────────────────── -->
+            <!-- Usluga dostave (foldable) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_k_ord_amber_card"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_k_cart2_amber_card"
                 android:clipToOutline="true"
                 android:orientation="vertical">
 
@@ -351,6 +451,7 @@
                     android:id="@+id/row_delivery_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
@@ -360,7 +461,6 @@
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:layout_marginEnd="12dp"
                         android:background="@drawable/bg_k_ord_amber_tile"
                         android:contentDescription="@null"
                         android:padding="10dp"
@@ -370,10 +470,12 @@
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
+                            style="@style/K.Text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans-serif-medium"
@@ -383,9 +485,12 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/text_delivery_subtitle"
+                            style="@style/K.Text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
+                            android:lineSpacingExtra="2sp"
                             android:text="@string/k_ord_delivery_subtitle"
                             android:textColor="@color/k_amber"
                             android:textSize="12sp" />
@@ -404,810 +509,924 @@
                     android:id="@+id/layout_delivery_expanded"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_k_ord_white_bottom_14"
+                    android:background="@drawable/bg_k_cart2_amber_body"
                     android:orientation="vertical"
-                    android:paddingTop="16dp"
+                    android:paddingHorizontal="14dp"
+                    android:paddingTop="17dp"
                     android:paddingBottom="16dp"
                     android:visibility="gone">
 
                     <TextView
+                        style="@style/K.Text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="14dp"
+                        android:fontFamily="sans-serif-medium"
                         android:text="@string/review_delivery_address_title"
-                        android:textColor="@color/k_ink"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
+
+                    <!-- OrderField -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:orientation="vertical">
+
+                        <!-- KFieldLabel -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                style="@style/K.Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/k_cart2_contact_name"
+                                android:textColor="@color/k_muted"
+                                android:textSize="13sp" />
+                            <TextView
+                                style="@style/K.Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/k_cart2_required_mark"
+                                android:textColor="@color/k_accent"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/edit_contact_name"
+                            style="@style/K.Text"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_k_field_outline"
+                            android:hint="@string/k_cart2_contact_name"
+                            android:importantForAutofill="no"
+                            android:inputType="textPersonName"
+                            android:maxLines="1"
+                            android:paddingHorizontal="14dp"
+                            android:paddingVertical="0dp"
+                            android:textColorHint="@color/k_subtle"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+
+                    <!-- OrderField -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:orientation="vertical">
+
+                        <!-- KFieldLabel -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                style="@style/K.Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/k_cart2_email"
+                                android:textColor="@color/k_muted"
+                                android:textSize="13sp" />
+                            <TextView
+                                style="@style/K.Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/k_cart2_required_mark"
+                                android:textColor="@color/k_accent"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/edit_contact_email"
+                            style="@style/K.Text"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_k_field_outline"
+                            android:hint="@string/k_cart2_email"
+                            android:importantForAutofill="no"
+                            android:inputType="textEmailAddress"
+                            android:maxLines="1"
+                            android:paddingHorizontal="14dp"
+                            android:paddingVertical="0dp"
+                            android:textColorHint="@color/k_subtle"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+
+                    <!-- OrderField -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:orientation="vertical">
+
+                        <!-- KFieldLabel -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                style="@style/K.Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/k_cart2_phone"
+                                android:textColor="@color/k_muted"
+                                android:textSize="13sp" />
+                            <TextView
+                                style="@style/K.Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/k_cart2_required_mark"
+                                android:textColor="@color/k_accent"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/edit_contact_phone"
+                            style="@style/K.Text"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_k_field_outline"
+                            android:hint="@string/k_cart2_phone"
+                            android:importantForAutofill="no"
+                            android:inputType="phone"
+                            android:maxLines="1"
+                            android:paddingHorizontal="14dp"
+                            android:paddingVertical="0dp"
+                            android:textColorHint="@color/k_subtle"
+                            android:textSize="15sp" />
+                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="14dp"
+                        android:orientation="horizontal">
+
+                        <!-- OrderField -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <!-- KFieldLabel -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="8dp"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_city"
+                                    android:textColor="@color/k_muted"
+                                    android:textSize="13sp" />
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_required_mark"
+                                    android:textColor="@color/k_accent"
+                                    android:textSize="13sp" />
+                            </LinearLayout>
+
+                            <EditText
+                                android:id="@+id/edit_city"
+                                style="@style/K.Text"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:background="@drawable/bg_k_field_outline"
+                                android:hint="@string/k_cart2_city"
+                                android:importantForAutofill="no"
+                                android:inputType="text"
+                                android:maxLines="1"
+                                android:paddingHorizontal="14dp"
+                                android:paddingVertical="0dp"
+                                android:textColorHint="@color/k_subtle"
+                                android:textSize="15sp" />
+                        </LinearLayout>
+
+                        <Space
+                            android:layout_width="10dp"
+                            android:layout_height="1dp" />
+
+                        <!-- OrderField -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <!-- KFieldLabel -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="8dp"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_postal_code"
+                                    android:textColor="@color/k_muted"
+                                    android:textSize="13sp" />
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_required_mark"
+                                    android:textColor="@color/k_accent"
+                                    android:textSize="13sp" />
+                            </LinearLayout>
+
+                            <EditText
+                                android:id="@+id/edit_postal_code"
+                                style="@style/K.Text"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:background="@drawable/bg_k_field_outline"
+                                android:hint="@string/k_cart2_postal_code"
+                                android:importantForAutofill="no"
+                                android:inputType="number"
+                                android:maxLines="1"
+                                android:paddingHorizontal="14dp"
+                                android:paddingVertical="0dp"
+                                android:textColorHint="@color/k_subtle"
+                                android:textSize="15sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- OrderField -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
                         android:orientation="vertical">
 
-                        <TextView
+                        <!-- KFieldLabel -->
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/review_delivery_contact_name"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:layout_marginBottom="8dp"
+                            android:orientation="horizontal">
 
-                        <Space android:layout_width="1dp" android:layout_height="5dp" />
-
-                        <EditText
-                            android:id="@+id/edit_contact_name"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_k_field"
-                            android:hint="@string/review_delivery_contact_name_hint"
-                            android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/k_ink"
-                            android:textColorHint="@color/k_subtle"
-                            android:textSize="14sp" />
-
-                        <Space android:layout_width="1dp" android:layout_height="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_delivery_email"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space android:layout_width="1dp" android:layout_height="5dp" />
-
-                        <EditText
-                            android:id="@+id/edit_contact_email"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_k_field"
-                            android:hint="@string/review_delivery_email_hint"
-                            android:inputType="textEmailAddress"
-                            android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/k_ink"
-                            android:textColorHint="@color/k_subtle"
-                            android:textSize="14sp" />
-
-                        <Space android:layout_width="1dp" android:layout_height="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_delivery_phone"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space android:layout_width="1dp" android:layout_height="5dp" />
-
-                        <EditText
-                            android:id="@+id/edit_contact_phone"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_k_field"
-                            android:hint="@string/review_delivery_phone_hint"
-                            android:inputType="phone"
-                            android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/k_ink"
-                            android:textColorHint="@color/k_subtle"
-                            android:textSize="14sp" />
-
-                        <Space android:layout_width="1dp" android:layout_height="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_delivery_city"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space android:layout_width="1dp" android:layout_height="5dp" />
-
-                        <EditText
-                            android:id="@+id/edit_city"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_k_field"
-                            android:hint="@string/review_delivery_city_hint"
-                            android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/k_ink"
-                            android:textColorHint="@color/k_subtle"
-                            android:textSize="14sp" />
-
-                        <Space android:layout_width="1dp" android:layout_height="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_delivery_address"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+                            <TextView
+                                style="@style/K.Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/k_cart2_address"
+                                android:textColor="@color/k_muted"
+                                android:textSize="13sp" />
+                            <TextView
+                                style="@style/K.Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/k_cart2_required_mark"
+                                android:textColor="@color/k_accent"
+                                android:textSize="13sp" />
+                        </LinearLayout>
 
                         <EditText
                             android:id="@+id/edit_delivery_address"
+                            style="@style/K.Text"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_k_field"
-                            android:hint="@string/review_delivery_address_hint"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_k_field_outline"
+                            android:hint="@string/k_cart2_address"
+                            android:importantForAutofill="no"
+                            android:inputType="textPostalAddress"
                             android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/k_ink"
+                            android:paddingHorizontal="14dp"
+                            android:paddingVertical="0dp"
                             android:textColorHint="@color/k_subtle"
-                            android:textSize="14sp" />
-
-                        <Space android:layout_width="1dp" android:layout_height="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_delivery_postal_code"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space android:layout_width="1dp" android:layout_height="5dp" />
-
-                        <EditText
-                            android:id="@+id/edit_postal_code"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_k_field"
-                            android:hint="@string/review_delivery_postal_code_hint"
-                            android:inputType="number"
-                            android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/k_ink"
-                            android:textColorHint="@color/k_subtle"
-                            android:textSize="14sp" />
+                            android:textSize="15sp" />
                     </LinearLayout>
 
                     <TextView
+                        style="@style/K.Text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="20dp"
+                        android:fontFamily="sans-serif-medium"
                         android:text="@string/review_delivery_calculator_title"
-                        android:textColor="@color/k_ink"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <TextView
+                        style="@style/K.Text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="14dp"
                         android:layout_marginTop="4dp"
+                        android:lineSpacingExtra="5sp"
                         android:text="@string/review_delivery_calculator_description"
-                        android:textColor="@color/k_ink"
+                        android:textColor="@color/k_muted"
                         android:textSize="13sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="16dp"
-                        android:orientation="vertical">
+                        android:layout_marginTop="14dp"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_delivery_width"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space android:layout_width="1dp" android:layout_height="5dp" />
-
+                        <!-- OrderField -->
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_k_field"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="12dp">
+                            android:orientation="vertical">
 
-                            <EditText
-                                android:id="@+id/edit_package_width"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:background="@null"
-                                android:hint="@string/review_delivery_width"
-                                android:inputType="numberDecimal"
-                                android:maxLines="1"
-                                android:paddingVertical="12dp"
-                                android:textColor="@color/k_ink"
-                                android:textColorHint="@color/k_subtle"
-                                android:textSize="14sp" />
-
-                            <TextView
+                            <!-- KFieldLabel -->
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/review_delivery_unit_cm"
-                                android:textColor="@color/k_muted"
-                                android:textSize="14sp" />
+                                android:layout_marginBottom="8dp"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_width"
+                                    android:textColor="@color/k_muted"
+                                    android:textSize="13sp" />
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_required_mark"
+                                    android:textColor="@color/k_accent"
+                                    android:textSize="13sp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:background="@drawable/bg_k_field_outline"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="14dp">
+
+                                <EditText
+                                    android:id="@+id/edit_package_width"
+                                    style="@style/K.Text"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:background="@null"
+                                    android:hint="@string/k_cart2_width"
+                                    android:importantForAutofill="no"
+                                    android:inputType="number"
+                                    android:maxLines="1"
+                                    android:padding="0dp"
+                                    android:textColorHint="@color/k_subtle"
+                                    android:textSize="15sp" />
+
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:text="@string/review_delivery_unit_cm"
+                                    android:textColor="@color/k_muted"
+                                    android:textSize="14sp" />
+                            </LinearLayout>
                         </LinearLayout>
 
-                        <Space android:layout_width="1dp" android:layout_height="16dp" />
+                        <Space
+                            android:layout_width="10dp"
+                            android:layout_height="1dp" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_delivery_height"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space android:layout_width="1dp" android:layout_height="5dp" />
-
+                        <!-- OrderField -->
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_k_field"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="12dp">
+                            android:orientation="vertical">
 
-                            <EditText
-                                android:id="@+id/edit_package_height"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:background="@null"
-                                android:hint="@string/review_delivery_height"
-                                android:inputType="numberDecimal"
-                                android:maxLines="1"
-                                android:paddingVertical="12dp"
-                                android:textColor="@color/k_ink"
-                                android:textColorHint="@color/k_subtle"
-                                android:textSize="14sp" />
-
-                            <TextView
+                            <!-- KFieldLabel -->
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/review_delivery_unit_cm"
-                                android:textColor="@color/k_muted"
-                                android:textSize="14sp" />
-                        </LinearLayout>
+                                android:layout_marginBottom="8dp"
+                                android:orientation="horizontal">
 
-                        <Space android:layout_width="1dp" android:layout_height="16dp" />
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_height"
+                                    android:textColor="@color/k_muted"
+                                    android:textSize="13sp" />
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_required_mark"
+                                    android:textColor="@color/k_accent"
+                                    android:textSize="13sp" />
+                            </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_delivery_depth"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:background="@drawable/bg_k_field_outline"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="14dp">
 
-                        <Space android:layout_width="1dp" android:layout_height="5dp" />
+                                <EditText
+                                    android:id="@+id/edit_package_height"
+                                    style="@style/K.Text"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:background="@null"
+                                    android:hint="@string/k_cart2_height"
+                                    android:importantForAutofill="no"
+                                    android:inputType="number"
+                                    android:maxLines="1"
+                                    android:padding="0dp"
+                                    android:textColorHint="@color/k_subtle"
+                                    android:textSize="15sp" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_k_field"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="12dp">
-
-                            <EditText
-                                android:id="@+id/edit_package_depth"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:background="@null"
-                                android:hint="@string/review_delivery_depth"
-                                android:inputType="numberDecimal"
-                                android:maxLines="1"
-                                android:paddingVertical="12dp"
-                                android:textColor="@color/k_ink"
-                                android:textColorHint="@color/k_subtle"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/review_delivery_unit_cm"
-                                android:textColor="@color/k_muted"
-                                android:textSize="14sp" />
-                        </LinearLayout>
-
-                        <Space android:layout_width="1dp" android:layout_height="16dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_delivery_weight"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space android:layout_width="1dp" android:layout_height="5dp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_k_field"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="12dp">
-
-                            <EditText
-                                android:id="@+id/edit_package_weight"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:background="@null"
-                                android:hint="@string/review_delivery_weight"
-                                android:inputType="numberDecimal"
-                                android:maxLines="1"
-                                android:paddingVertical="12dp"
-                                android:textColor="@color/k_ink"
-                                android:textColorHint="@color/k_subtle"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/review_delivery_unit_kg"
-                                android:textColor="@color/k_muted"
-                                android:textSize="14sp" />
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:text="@string/review_delivery_unit_cm"
+                                    android:textColor="@color/k_muted"
+                                    android:textSize="14sp" />
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
 
-                    <View
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@color/k_line" />
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:orientation="horizontal">
 
+                        <!-- OrderField -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <!-- KFieldLabel -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="8dp"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_depth"
+                                    android:textColor="@color/k_muted"
+                                    android:textSize="13sp" />
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_required_mark"
+                                    android:textColor="@color/k_accent"
+                                    android:textSize="13sp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:background="@drawable/bg_k_field_outline"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="14dp">
+
+                                <EditText
+                                    android:id="@+id/edit_package_depth"
+                                    style="@style/K.Text"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:background="@null"
+                                    android:hint="@string/k_cart2_depth"
+                                    android:importantForAutofill="no"
+                                    android:inputType="number"
+                                    android:maxLines="1"
+                                    android:padding="0dp"
+                                    android:textColorHint="@color/k_subtle"
+                                    android:textSize="15sp" />
+
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:text="@string/review_delivery_unit_cm"
+                                    android:textColor="@color/k_muted"
+                                    android:textSize="14sp" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <Space
+                            android:layout_width="10dp"
+                            android:layout_height="1dp" />
+
+                        <!-- OrderField -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <!-- KFieldLabel -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="8dp"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_weight"
+                                    android:textColor="@color/k_muted"
+                                    android:textSize="13sp" />
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/k_cart2_required_mark"
+                                    android:textColor="@color/k_accent"
+                                    android:textSize="13sp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:background="@drawable/bg_k_field_outline"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="14dp">
+
+                                <EditText
+                                    android:id="@+id/edit_package_weight"
+                                    style="@style/K.Text"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:background="@null"
+                                    android:hint="@string/k_cart2_weight"
+                                    android:importantForAutofill="no"
+                                    android:inputType="number"
+                                    android:maxLines="1"
+                                    android:padding="0dp"
+                                    android:textColorHint="@color/k_subtle"
+                                    android:textSize="15sp" />
+
+                                <TextView
+                                    style="@style/K.Text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:text="@string/review_delivery_unit_kg"
+                                    android:textColor="@color/k_muted"
+                                    android:textSize="14sp" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- ShippingProviderRow -->
                     <LinearLayout
                         android:id="@+id/row_provider_a2b"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="14dp"
+                        android:background="@drawable/bg_k_cart2_provider"
                         android:clickable="true"
                         android:focusable="true"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="10dp">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="14dp">
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                        <FrameLayout
+                            android:id="@+id/radio_a2b"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:background="@drawable/bg_k_cart2_radio_off">
 
                             <ImageView
-                                android:layout_width="93dp"
-                                android:layout_height="24dp"
+                                android:id="@+id/check_a2b"
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:layout_gravity="center"
                                 android:contentDescription="@null"
-                                android:scaleType="fitStart"
-                                android:src="@drawable/img_ab_post" />
+                                android:src="@drawable/ic_k_ord_check"
+                                android:visibility="gone"
+                                app:tint="@color/k_white" />
+                        </FrameLayout>
+
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:adjustViewBounds="true"
+                            android:contentDescription="@null"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/img_ab_post" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
                             <TextView
+                                style="@style/K.Text"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
+                                android:fontFamily="sans-serif-medium"
                                 android:text="@string/review_delivery_provider_a2b"
-                                android:textColor="@color/k_ink"
-                                android:textSize="14.5sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
+                                android:textSize="14sp" />
 
-                        <TextView
-                            android:id="@+id/text_price_a2b"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12.5sp"
-                            tools:text="Cijena dostave sa PDV: —" />
+                            <TextView
+                                android:id="@+id/text_price_a2b"
+                                style="@style/K.Text"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:lineSpacingExtra="3sp"
+                                android:textColor="@color/k_muted"
+                                android:textSize="12.5sp"
+                                tools:text="Cijena dostave sa PDV: —" />
+                        </LinearLayout>
                     </LinearLayout>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="12dp"
-                        android:background="@color/k_line" />
-
+                    <!-- ShippingProviderRow -->
                     <LinearLayout
                         android:id="@+id/row_provider_express"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="14dp"
+                        android:background="@drawable/bg_k_cart2_provider"
                         android:clickable="true"
                         android:focusable="true"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="10dp">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="14dp">
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                        <FrameLayout
+                            android:id="@+id/radio_express"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:background="@drawable/bg_k_cart2_radio_off">
 
                             <ImageView
-                                android:layout_width="93dp"
-                                android:layout_height="24dp"
+                                android:id="@+id/check_express"
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:layout_gravity="center"
                                 android:contentDescription="@null"
-                                android:scaleType="fitStart"
-                                android:src="@drawable/img_express_post" />
+                                android:src="@drawable/ic_k_ord_check"
+                                android:visibility="gone"
+                                app:tint="@color/k_white" />
+                        </FrameLayout>
+
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:adjustViewBounds="true"
+                            android:contentDescription="@null"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/img_express_post" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
                             <TextView
+                                style="@style/K.Text"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
+                                android:fontFamily="sans-serif-medium"
                                 android:text="@string/review_delivery_provider_express"
-                                android:textColor="@color/k_ink"
-                                android:textSize="14.5sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
+                                android:textSize="14sp" />
 
-                        <TextView
-                            android:id="@+id/text_price_express"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12.5sp"
-                            tools:text="Cijena dostave sa PDV: —" />
+                            <TextView
+                                android:id="@+id/text_price_express"
+                                style="@style/K.Text"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:lineSpacingExtra="3sp"
+                                android:textColor="@color/k_muted"
+                                android:textSize="12.5sp"
+                                tools:text="Cijena dostave sa PDV: —" />
+                        </LinearLayout>
                     </LinearLayout>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="12dp"
-                        android:background="@color/k_line" />
-
-                    <TextView
+                    <!-- OrderField (multiline, min 66dp) -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/review_delivery_note_title"
-                        android:textColor="@color/k_ink"
-                        android:textSize="16sp" />
+                        android:layout_marginTop="14dp"
+                        android:orientation="vertical">
 
-                    <EditText
-                        android:id="@+id/edit_delivery_note"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@drawable/bg_k_field"
-                        android:gravity="top|start"
-                        android:hint="@string/review_delivery_note_hint"
-                        android:inputType="textMultiLine"
-                        android:minLines="2"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="12dp"
-                        android:textColor="@color/k_ink"
-                        android:textColorHint="@color/k_subtle"
-                        android:textSize="14sp" />
+                        <!-- KFieldLabel -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                style="@style/K.Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/review_delivery_note_title"
+                                android:textColor="@color/k_muted"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/edit_delivery_note"
+                            style="@style/K.Text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_k_field_outline"
+                            android:gravity="top|start"
+                            android:hint="@string/k_cart2_delivery_note_hint"
+                            android:importantForAutofill="no"
+                            android:inputType="textMultiLine|textCapSentences"
+                            android:minHeight="66dp"
+                            android:paddingHorizontal="14dp"
+                            android:paddingVertical="12dp"
+                            android:textColorHint="@color/k_subtle"
+                            android:textSize="15sp" />
+                    </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/button_calculate_shipping"
                         android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginHorizontal="14dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_k_button_tonal"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="14dp"
+                        android:background="@drawable/bg_k_button_primary"
                         android:clickable="true"
                         android:focusable="true"
-                        android:gravity="center">
+                        android:gravity="center"
+                        android:paddingHorizontal="16dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1"
                             android:text="@string/review_delivery_calculate_button"
-                            android:textColor="@color/k_accent"
+                            android:textColor="@color/k_white"
                             android:textSize="15sp"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-
-            <!-- ── Specifikacija narudžbe ────────────────────────────────────── -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="18dp"
-                android:background="@drawable/bg_k_card"
-                android:orientation="vertical"
-                android:padding="14dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/review_specification_title"
-                    android:textColor="@color/k_ink"
-                    android:textSize="17sp"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="14dp"
-                    android:background="@color/k_line" />
-
-                <HorizontalScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:scrollbars="none">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:cardBackgroundColor="@color/k_white"
-                        app:cardCornerRadius="10dp"
-                        app:cardElevation="0dp"
-                        app:strokeColor="@color/k_line"
-                        app:strokeWidth="1dp">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
-
-                            <LinearLayout
-                                android:id="@+id/row_spec_header"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@color/k_ord_table_header"
-                                android:orientation="horizontal" />
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@color/k_line" />
-
-                            <LinearLayout
-                                android:id="@+id/table_rows_container"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-                </HorizontalScrollView>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_k_field"
-                        android:orientation="vertical"
-                        android:padding="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_spec_stat_vpc"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/text_stat_vpc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textColor="@color/k_ink"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            tools:text="100,00 KM" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_k_field"
-                        android:orientation="vertical"
-                        android:padding="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_spec_stat_pdv"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/text_stat_pdv"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textColor="@color/k_ink"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            tools:text="17,00 KM" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_k_field"
-                        android:orientation="vertical"
-                        android:padding="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_spec_stat_total"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/text_stat_total"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textColor="@color/k_ink"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            tools:text="107,00 KM" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_k_field"
-                        android:orientation="vertical"
-                        android:padding="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/review_spec_stat_commission"
-                            android:textColor="@color/k_muted"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/text_stat_commission"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textColor="@color/k_ink"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            tools:text="5,00 KM" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="18dp"
-                android:background="@drawable/bg_k_card"
-                android:orientation="vertical"
-                android:padding="14dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/review_note_title"
-                    android:textColor="@color/k_ink"
-                    android:textSize="17sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/edit_note"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_k_field"
-                    android:gravity="top|start"
-                    android:hint="@string/review_note_hint"
-                    android:inputType="textMultiLine"
-                    android:minLines="3"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="12dp"
-                    android:textColor="@color/k_ink"
-                    android:textColorHint="@color/k_subtle"
-                    android:textSize="14sp" />
             </LinearLayout>
 
             <TextView
-                android:id="@+id/text_warning"
+                style="@style/K.Text.Section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_k_ord_red_tonal"
-                android:paddingHorizontal="14dp"
-                android:paddingVertical="10dp"
-                android:textColor="@color/k_red"
-                android:textSize="13sp"
-                android:visibility="gone"
-                tools:text="Kupac nije aktivan, narudžba se ne može kreirati."
-                tools:visibility="visible" />
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="12dp"
+                android:maxLines="1"
+                android:text="@string/review_note_title"
+                android:textSize="18sp" />
 
+            <!-- OrderField (multiline, min 88dp) -->
+            <EditText
+                android:id="@+id/edit_note"
+                style="@style/K.Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_k_field_outline"
+                android:gravity="top|start"
+                android:hint="@string/k_cart2_note_hint"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minHeight="88dp"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="12dp"
+                android:textColorHint="@color/k_subtle"
+                android:textSize="15sp" />
         </LinearLayout>
     </ScrollView>
 
-    <!-- Sticky bottom actions (white panel) -->
+    <!-- Sticky bottom actions (KBottomPanel) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_k_ord_panel"
+        android:background="@drawable/bg_k_cart2_bottom_panel"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
-        android:paddingTop="14dp"
-        android:paddingBottom="10dp">
+        android:paddingVertical="14dp">
+
+        <TextView
+            android:id="@+id/text_warning"
+            style="@style/K.Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_k_cart2_warning"
+            android:fontFamily="sans-serif-medium"
+            android:lineSpacingExtra="4sp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:textColor="@color/k_red"
+            android:textSize="12.5sp"
+            android:visibility="gone"
+            tools:text="Kupac nema zadanu adresu dostave."
+            tools:visibility="visible" />
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/K.Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/order_detail_total_with_pdv"
+                android:textColor="@color/k_muted"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/text_bottom_total"
+                style="@style/K.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                tools:text="117,00 KM" />
+        </LinearLayout>
+
+        <FrameLayout
             android:id="@+id/button_confirm"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:background="@drawable/bg_k_button_primary"
             android:clickable="true"
-            android:focusable="true"
-            android:gravity="center">
+            android:focusable="true">
 
             <TextView
                 android:id="@+id/text_confirm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
                 android:text="@string/review_confirm"
                 android:textColor="@color/k_white"
                 android:textSize="16sp"
@@ -1217,29 +1436,29 @@
                 android:id="@+id/progress_confirm"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
+                android:layout_gravity="center"
                 android:indeterminateTint="@color/k_white"
                 android:visibility="gone" />
-        </LinearLayout>
+        </FrameLayout>
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/button_back"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginTop="6dp"
-            android:background="?attr/selectableItemBackground"
+            android:background="@drawable/bg_k_cart2_back_button"
             android:clickable="true"
-            android:focusable="true"
-            android:gravity="center">
+            android:focusable="true">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/review_back_to_cart"
                 android:textColor="@color/k_accent"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+                android:textSize="14sp" />
+        </FrameLayout>
     </LinearLayout>
 
 </LinearLayout>

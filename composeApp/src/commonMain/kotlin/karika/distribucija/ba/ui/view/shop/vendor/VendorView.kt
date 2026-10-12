@@ -100,8 +100,11 @@ private fun Vendors(component: VendorComponent) {
         item {
             Header(component)
         }
-        item {
-            ActiveFilter(component)
+        // Only as an item while a filter is on - an empty item still adds the 10dp list spacing.
+        if (component.selectedRegion.value.isNotEmpty()) {
+            item {
+                ActiveFilter(component)
+            }
         }
         item {
             FeaturedVendors(component)
@@ -201,7 +204,8 @@ private fun Header(component: VendorComponent) {
                 KSquareIconButton(
                     modifier = Modifier
                         .testTag(VENDOR_FILTER_TAG),
-                    icon = vectorResource(Res.drawable.ic_k_filter)
+                    icon = vectorResource(Res.drawable.ic_k_filter),
+                    background = KarikaUiColors.Pink
                 ) {
                     showState.negate()
                 }
@@ -357,7 +361,7 @@ private fun FeaturedVendors(component: VendorComponent) {
         ) {
             Row(
                 modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, top = 12.dp)
+                    .padding(start = 16.dp, end = 16.dp, top = 4.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically

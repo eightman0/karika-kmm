@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Mirrors composeApp's LoginView (supplier / blue variant): white header with rounded bottom
-     holding the logo and "Prijava" + "Dobavljač" pill, the form in a white card, and the primary
+     holding the logo and "Prijava" + "Komercijalista" pill, the form in a white card, and the primary
      button in a white bottom panel. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -291,15 +291,6 @@
                     android:visibility="gone" />
             </FrameLayout>
 
-            <TextView
-                android:id="@+id/text_app_version"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                android:textColor="@color/k_subtle"
-                android:textSize="12sp"
-                tools:text="v0.1.0(1)" />
         </LinearLayout>
     </LinearLayout>
 

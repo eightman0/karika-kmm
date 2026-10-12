@@ -5,16 +5,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import karika.distribucija.ba.salesrep.databinding.ItemCustomerRowBinding
-import karika.distribucija.ba.salesrep.model.OperationalCustomer
+import karika.distribucija.ba.salesrep.model.ChatRecipient
 
-/** Mirrors composeApp's CustomerRow in SalesCustomerNewMessageView.kt. */
+/** Mirrors composeApp's RecipientRow in SalesRecipientPicker, as used by
+ * SalesCustomerNewMessageView.kt - the Chat V2 recipient's name, no subtitle. */
 class CustomerRowAdapter(
-    private val onClick: (OperationalCustomer) -> Unit
+    private val onClick: (ChatRecipient) -> Unit
 ) : RecyclerView.Adapter<CustomerRowAdapter.ViewHolder>() {
 
-    private var items: List<OperationalCustomer> = emptyList()
+    private var items: List<ChatRecipient> = emptyList()
 
-    fun submitList(newItems: List<OperationalCustomer>) {
+    fun submitList(newItems: List<ChatRecipient>) {
         items = newItems
         notifyDataSetChanged()
     }
@@ -33,11 +34,9 @@ class CustomerRowAdapter(
     inner class ViewHolder(private val binding: ItemCustomerRowBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(customer: OperationalCustomer, isLast: Boolean) {
-            binding.textCustomerCompany.text = customer.company ?: customer.fullName
-            val hasCompany = !customer.company.isNullOrEmpty()
-            binding.textCustomerFullname.visibility = if (hasCompany) View.VISIBLE else View.GONE
-            if (hasCompany) binding.textCustomerFullname.text = customer.fullName
+        fun bind(customer: ChatRecipient, isLast: Boolean) {
+            binding.textCustomerCompany.text = customer.name ?: "-"
+            binding.textCustomerFullname.visibility = View.GONE
             binding.divider.visibility = if (isLast) View.GONE else View.VISIBLE
             binding.contentRow.setOnClickListener { onClick(customer) }
         }

@@ -39,9 +39,14 @@ data class DiscountRule(
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null,
     @SerialName("created_by_employee_id") val createdByEmployeeId: Long? = null,
+    /** Null when an administrator created the rule (not a sales rep) - such rules can't be
+     * edited or deleted from the sales rep app. */
+    @SerialName("created_by_employee_name") val createdByEmployeeName: String? = null,
     /** "approved" | "pending" | "rejected" */
     @SerialName("approval_status") val approvalStatus: String? = null
 ) {
+    fun createdByAdmin(): Boolean = createdByEmployeeName.isNullOrBlank()
+
     fun targetLabel(): String = when {
         productId != null -> productName ?: "Artikal #$productId"
         categoryId != null -> categoryName ?: "Kategorija #$categoryId"

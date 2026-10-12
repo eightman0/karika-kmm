@@ -1,10 +1,10 @@
 package karika.distribucija.ba.salesrep.ui.messages
 
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -12,10 +12,10 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomerConversationBinding
-import karika.distribucija.ba.salesrep.model.Message
+import karika.distribucija.ba.salesrep.model.ChatMessage
 import karika.distribucija.ba.salesrep.util.AttachmentPicker
 import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
-import karika.distribucija.ba.salesrep.util.isImageAttachmentFile
+import karika.distribucija.ba.salesrep.util.inSarajevo
 import karika.distribucija.ba.salesrep.util.openPdfExternally
 
 /** Mirrors composeApp's SalesCustomerConversationView.kt. */
@@ -26,19 +26,12 @@ open class CustomerConversationFragment : Fragment() {
     protected open val viewModel: CustomerConversationViewModel by viewModels()
     private lateinit var adapter: CustomerMessageAdapter
 
-    /** Admin's action-bar title is `conversation.subject ?: "Poruka"`, not the counterpart's
-     * name (unlike Customer, whose title IS the customer's name) - see SalesDashboardView.kt's
-     * AdminConversation vs CustomerConversation SalesDetailTopBar wiring. */
-    protected open val screenTitle: String get() = viewModel.customerName
+    /** The action-bar title: the customer's name ("-" without one); Admin falls back to "Poruka". */
+    protected open val screenTitle: String get() = viewModel.counterpartName ?: "-"
 
-    /** The bubble's "other party" label - Customer shows the customer's name, Admin hardcodes
-     * the literal "Administrator" (never derived from the conversation). */
-    protected open val counterpartDisplayName: String get() = viewModel.customerName
-
-    /** "Is this my message" - Customer's Compose view checks `sender == "vendor"`, Admin's
-     * checks `receiverId == "0" || sender == "customer"` (`Message.isVendorMessage()`) - a
-     * genuine difference between the two Compose source files, not a copy-paste slip. */
-    protected open val isMine: (Message) -> Boolean = { it.isVendor() }
+    /** The bubble's "other party" label - the message's sender_display_name for customers, the
+     * literal "Administrator" on Admin's screen. */
+    protected open val senderName: (ChatMessage) -> String? = { it.senderDisplayName }
 
     private val attachmentPicker = AttachmentPicker(this) { name, bytes -> viewModel.setAttachment(name, bytes) }
 
@@ -59,9 +52,8 @@ open class CustomerConversationFragment : Fragment() {
 
         adapter = CustomerMessageAdapter(
             lifecycleOwner = viewLifecycleOwner,
-            counterpartName = { counterpartDisplayName },
-            formatTimestamp = { it.orEmpty() },
-            isMine = isMine,
+            senderName = { senderName(it) },
+            formatTimestamp = { it?.inSarajevo().orEmpty() },
             onImageClick = { url -> ImagePreviewFragment.newInstance(url).show(childFragmentManager, "image_preview") },
             onPdfClick = { url -> requireContext().openPdfExternally(url) }
         )
@@ -95,22 +87,21 @@ open class CustomerConversationFragment : Fragment() {
         viewModel.attachment.observe(viewLifecycleOwner) { renderAttachment(it) }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message)
         }
     }
 
-    /** Mirrors the pending-attachment chip in SalesCustomerConversationView.kt: icon depends on
-     * file type, name is truncated to 32 chars, and the attach button's icon tints blue while a
-     * pick is pending - matching `attachment!!.first.take(32)` / `if (attachment != null) Blue
-     * else Gray6` exactly. */
+    /** Mirrors SalesChatInput's pending attachment (thumbnail or chip, see renderPendingAttachment);
+     * the attach button's icon tints blue while a pick is pending. */
     private fun renderAttachment(attachment: Pair<String, ByteArray>?) {
-        binding.layoutPendingAttachment.visibility = if (attachment != null) View.VISIBLE else View.GONE
-        if (attachment != null) {
-            binding.iconAttachmentType.setImageResource(
-                if (isImageAttachmentFile(attachment.first)) R.drawable.ic_photo else R.drawable.ic_attachment
-            )
-            binding.textAttachmentName.text = attachment.first.take(32)
-        }
+        renderPendingAttachment(
+            container = binding.layoutPendingAttachment,
+            preview = binding.imageAttachmentPreview,
+            chip = binding.chipAttachment,
+            icon = binding.iconAttachmentType,
+            name = binding.textAttachmentName,
+            attachment = attachment
+        )
         binding.iconAttach.setColorFilter(
             requireContext().getColor(if (attachment != null) R.color.k_accent else R.color.k_ink)
         )
@@ -119,9 +110,6 @@ open class CustomerConversationFragment : Fragment() {
 
     private fun updateSendButtonState() {
         val canSend = !binding.editMessage.text.isNullOrBlank() || viewModel.attachment.value != null
-        binding.buttonSend.setBackgroundResource(
-            if (canSend) R.drawable.bg_k_msg_send_active else R.drawable.bg_k_msg_send_inactive
-        )
         binding.buttonSend.isEnabled = canSend
     }
 

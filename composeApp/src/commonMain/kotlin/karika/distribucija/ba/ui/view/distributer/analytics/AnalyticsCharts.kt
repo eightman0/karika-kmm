@@ -1,7 +1,6 @@
 package karika.distribucija.ba.ui.view.distributer.analytics
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -12,12 +11,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.AnalyticsSeriesPoint
 import karika.distribucija.ba.ui.components.KarikaColors
-import karika.distribucija.ba.ui.components.KarikaText
+import karika.distribucija.ba.ui.components.KarikaUiColors
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.max
+import kotlin.math.pow
 
 private fun smoothPath(offsets: List<Offset>): Path {
     val path = Path()
@@ -32,121 +38,124 @@ private fun smoothPath(offsets: List<Offset>): Path {
     return path
 }
 
-@Composable
-private fun AxisLabels(points: List<AnalyticsSeriesPoint>) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        val visibleLabels = if (points.size <= 6) {
-            points.map { it.label }
-        } else {
-            val step = (points.size - 1) / 4
-            (0..4).map { points[(it * step).coerceAtMost(points.size - 1)].label }
-        }
-        visibleLabels.forEach { label ->
-            KarikaText(
-                modifier = Modifier.weight(1f),
-                text = label,
-                color = KarikaColors.Gray7,
-                textSize = 10.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
+/** "Nice" y-axis step (1/2/2.5/5 x 10^n) so that [ticks] steps cover [maxValue]. */
+private fun niceStep(maxValue: Double, ticks: Int, integer: Boolean): Double {
+    if (maxValue <= 0.0) return 1.0
+    val raw = maxValue / ticks
+    val magnitude = 10.0.pow(floor(log10(raw)))
+    val normalized = raw / magnitude
+    val nice = when {
+        normalized <= 1.0 -> 1.0
+        normalized <= 2.0 -> 2.0
+        normalized <= 2.5 -> 2.5
+        normalized <= 5.0 -> 5.0
+        else -> 10.0
+    } * magnitude
+    return if (integer) max(1.0, ceil(nice)) else nice
 }
 
+/**
+ * Line chart for the "Trendovi prodaje" tab, matching the web: light horizontal grid with y-axis
+ * labels, a smooth blue line with a dot per bucket, optional light fill under the line, and x
+ * labels thinned out so they never overlap. With [hasData] false (or no points) it draws just the
+ * empty grid with a centered "Nema podataka za odabrani period".
+ */
 @Composable
-fun AnalyticsAreaChart(
+fun AnalyticsLineChart(
     points: List<AnalyticsSeriesPoint>,
-    modifier: Modifier = Modifier.fillMaxWidth().height(130.dp),
+    hasData: Boolean,
+    modifier: Modifier = Modifier.fillMaxWidth().height(200.dp),
+    showFill: Boolean = false,
+    integerValues: Boolean = true,
+    yLabel: (Double) -> String = { formatNumber(it) },
     lineColor: Color = KarikaColors.Blue,
     fillColor: Color = KarikaColors.Blue.copy(alpha = 0.12f),
-    showAxisLabels: Boolean = true,
 ) {
-    if (points.isEmpty()) return
-    val maxValue = (points.maxOf { it.value }).coerceAtLeast(1f)
+    val textMeasurer = rememberTextMeasurer()
+    val axisStyle = TextStyle(color = KarikaUiColors.Muted, fontSize = 10.sp)
+    val emptyStyle = TextStyle(color = KarikaUiColors.Muted, fontSize = 13.sp)
+    val gridColor = KarikaUiColors.Line
+    val empty = !hasData || points.isEmpty()
 
     Canvas(modifier = modifier) {
-        val chartWidth = size.width
-        val chartHeight = size.height
-        val stepX = if (points.size > 1) chartWidth / (points.size - 1) else 0f
+        val gap = 6.dp.toPx()
+        val ticks = 4
+        val maxValue = if (empty) 0.0 else points.maxOf { it.value }.toDouble()
+        val step = niceStep(maxValue, ticks, integerValues)
+        val tickCount = if (empty) ticks else max(1, ceil(maxValue / step).toInt()).coerceAtMost(ticks)
+        val yMax = step * tickCount
 
-        val offsets = points.mapIndexed { index, point ->
-            Offset(
-                x = index * stepX,
-                y = chartHeight - (point.value / maxValue) * chartHeight
+        val yLabels = if (empty) emptyList() else (0..tickCount).map { textMeasurer.measure(yLabel(step * it), axisStyle) }
+        val leftPad = (yLabels.maxOfOrNull { it.size.width } ?: 0).toFloat() + if (empty) 0f else gap
+        val xLabelHeight = textMeasurer.measure("0", axisStyle).size.height.toFloat()
+        val topPad = xLabelHeight / 2f
+        val bottomPad = if (empty) topPad else xLabelHeight + gap
+        val plotWidth = size.width - leftPad
+        val plotHeight = size.height - topPad - bottomPad
+
+        // Grid + y labels
+        repeat(tickCount + 1) { i ->
+            val y = topPad + plotHeight - plotHeight * i / tickCount
+            drawLine(
+                color = gridColor,
+                start = Offset(leftPad, y),
+                end = Offset(size.width, y),
+                strokeWidth = 1.dp.toPx()
             )
-        }
-
-        if (showAxisLabels) {
-            val gridLines = 4
-            repeat(gridLines + 1) { i ->
-                val y = chartHeight * i / gridLines
-                drawLine(
-                    color = KarikaColors.Border.copy(alpha = 0.5f),
-                    start = Offset(0f, y),
-                    end = Offset(chartWidth, y),
-                    strokeWidth = 1.dp.toPx()
+            yLabels.getOrNull(i)?.let { layout ->
+                drawText(
+                    textLayoutResult = layout,
+                    topLeft = Offset(leftPad - gap - layout.size.width, y - layout.size.height / 2f)
                 )
             }
         }
 
-        val linePath = smoothPath(offsets)
-        val fillPath = Path().apply {
-            addPath(linePath)
-            lineTo(offsets.last().x, chartHeight)
-            lineTo(offsets.first().x, chartHeight)
-            close()
+        if (empty) {
+            val layout = textMeasurer.measure("Nema podataka za odabrani period", emptyStyle)
+            drawText(
+                textLayoutResult = layout,
+                topLeft = Offset((size.width - layout.size.width) / 2f, (size.height - layout.size.height) / 2f)
+            )
+            return@Canvas
         }
-        drawPath(path = fillPath, color = fillColor, style = Fill)
-        drawPath(path = linePath, color = lineColor, style = Stroke(width = 2.5.dp.toPx()))
 
-        offsets.forEach { offset ->
-            drawCircle(color = lineColor, radius = 3.dp.toPx(), center = offset)
-        }
-    }
-
-    if (showAxisLabels) {
-        AxisLabels(points = points)
-    }
-}
-
-@Composable
-fun AnalyticsStepChart(
-    points: List<AnalyticsSeriesPoint>,
-    modifier: Modifier = Modifier.fillMaxWidth().height(70.dp),
-    lineColor: Color = KarikaColors.Blue,
-    showAxisLabels: Boolean = true,
-) {
-    if (points.isEmpty()) return
-    val maxValue = (points.maxOf { it.value }).coerceAtLeast(1f)
-
-    Canvas(modifier = modifier) {
-        val chartWidth = size.width
-        val chartHeight = size.height
-        val stepX = if (points.size > 1) chartWidth / (points.size - 1) else 0f
-
+        val inset = 4.dp.toPx()
+        val usableWidth = plotWidth - inset * 2
+        val stepX = if (points.size > 1) usableWidth / (points.size - 1) else 0f
         val offsets = points.mapIndexed { index, point ->
             Offset(
-                x = index * stepX,
-                y = chartHeight - (point.value / maxValue) * chartHeight
+                x = leftPad + inset + if (points.size > 1) index * stepX else usableWidth / 2f,
+                y = topPad + plotHeight - (point.value / yMax.toFloat()) * plotHeight
             )
         }
 
-        val path = Path().apply {
-            moveTo(offsets.first().x, offsets.first().y)
-            for (i in 1 until offsets.size) {
-                val prev = offsets[i - 1]
-                val curr = offsets[i]
-                val midX = (prev.x + curr.x) / 2f
-                lineTo(midX, prev.y)
-                lineTo(midX, curr.y)
-                lineTo(curr.x, curr.y)
+        val linePath = smoothPath(offsets)
+        if (showFill && offsets.size > 1) {
+            val baseline = topPad + plotHeight
+            val fillPath = Path().apply {
+                addPath(linePath)
+                lineTo(offsets.last().x, baseline)
+                lineTo(offsets.first().x, baseline)
+                close()
             }
+            drawPath(path = fillPath, color = fillColor, style = Fill)
         }
-        drawPath(path = path, color = lineColor, style = Stroke(width = 2.dp.toPx()))
-    }
+        drawPath(path = linePath, color = lineColor, style = Stroke(width = 2.dp.toPx()))
+        offsets.forEach { offset ->
+            drawCircle(color = lineColor, radius = 2.5.dp.toPx(), center = offset)
+        }
 
-    if (showAxisLabels) {
-        AxisLabels(points = points)
+        // X labels, skipping some so they never overlap
+        val xLayouts = points.map { textMeasurer.measure(it.label, axisStyle) }
+        val widest = (xLayouts.maxOfOrNull { it.size.width } ?: 0).toFloat() + gap
+        val every = if (stepX <= 0f) 1 else max(1, ceil(widest / stepX).toInt())
+        val labelY = topPad + plotHeight + gap
+        xLayouts.forEachIndexed { index, layout ->
+            if (index % every != 0) return@forEachIndexed
+            val x = (offsets[index].x - layout.size.width / 2f)
+                .coerceIn(leftPad, size.width - layout.size.width)
+            drawText(textLayoutResult = layout, topLeft = Offset(x, labelY))
+        }
     }
 }
 

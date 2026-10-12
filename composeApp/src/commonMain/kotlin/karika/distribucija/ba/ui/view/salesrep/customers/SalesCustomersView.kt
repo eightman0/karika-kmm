@@ -619,7 +619,7 @@ private fun CustomerCard(
 ) {
     val status = partnershipStyle(customer.partnershipStatus)
     KCard(modifier = Modifier.fillMaxWidth(), onClick = onClick) {
-        // Header: initials, name, contact and status
+        // Header: initials, company name and status
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -645,21 +645,6 @@ private fun CustomerCard(
                     textOverflow = TextOverflow.Ellipsis,
                     maxLines = 2
                 )
-                val subtitle = listOfNotNull(
-                    customer.fullName.takeIf { it != "—" && !customer.company.isNullOrBlank() },
-                    customer.email?.takeIf { it.isNotBlank() }
-                ).joinToString(" · ")
-                if (subtitle.isNotEmpty()) {
-                    Spacer(Modifier.height(2.dp))
-                    KarikaText(
-                        text = subtitle,
-                        color = KarikaUiColors.Muted,
-                        textSize = 12.5.sp,
-                        lineHeight = 17.sp,
-                        textOverflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
-                }
             }
             KPill(
                 text = status.label,

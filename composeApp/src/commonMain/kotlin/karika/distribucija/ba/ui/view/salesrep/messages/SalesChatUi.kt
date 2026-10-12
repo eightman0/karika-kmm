@@ -31,7 +31,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +55,8 @@ import karika.distribucija.ba.domain.model.ChatAttachment
 import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.domain.model.ChatRecipient
 import karika.distribucija.ba.ui.common.HtmlTextWithStyles
+import karika.distribucija.ba.ui.components.KChip
+import karika.distribucija.ba.ui.components.KChipRow
 import karika.distribucija.ba.ui.components.KBottomPanel
 import karika.distribucija.ba.ui.components.KCard
 import karika.distribucija.ba.ui.components.KCircleButton
@@ -101,6 +106,17 @@ private fun String.isImageFileName() = lowercase().let {
 
 // ── Conversation list ──────────────────────────────────────────────────────────
 
+/** Sve / Poslano / Primljeno above the customer and admin inboxes. Chat V2 has no "who started
+ * it" field, so the split goes by the last message: sender_employee_name is set only when one of
+ * our employees sent it. Not offered for staff threads, where both sides are employees. */
+private enum class ConversationFilter(val label: String) {
+    ALL("Sve"),
+    SENT("Poslano"),
+    RECEIVED("Primljeno")
+}
+
+private fun ChatConversation.isLastSentByUs() = !senderEmployeeName.isNullOrBlank()
+
 @Composable
 fun SalesConversationList(
     conversations: List<ChatConversation>,
@@ -110,13 +126,34 @@ fun SalesConversationList(
     emptyTitle: String = "Još nema poruka",
     emptyMessage: String = "Započnite razgovor dugmetom „$newMessageText” ispod.",
     subtitle: (ChatConversation) -> String? = { null },
+    showDirectionFilter: Boolean = false,
 ) {
+    var filter by rememberSaveable { mutableStateOf(ConversationFilter.ALL) }
+    val visible = when (filter) {
+        ConversationFilter.ALL -> conversations
+        ConversationFilter.SENT -> conversations.filter { it.isLastSentByUs() }
+        ConversationFilter.RECEIVED -> conversations.filterNot { it.isLastSentByUs() }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(KarikaUiColors.Page)
     ) {
-        if (conversations.isEmpty()) {
+        if (showDirectionFilter) {
+            KChipRow(modifier = Modifier.padding(top = 16.dp)) {
+                ConversationFilter.entries.forEach { option ->
+                    KChip(
+                        text = option.label,
+                        selected = filter == option,
+                        selectedColor = VendorAccent,
+                        onClick = { filter = option }
+                    )
+                }
+            }
+        }
+
+        if (visible.isEmpty()) {
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -125,7 +162,11 @@ fun SalesConversationList(
             ) {
                 KEmptyPlaceholder(
                     icon = vectorResource(Res.drawable.ic_k_chat),
-                    title = emptyTitle,
+                    title = when (filter) {
+                        ConversationFilter.ALL -> emptyTitle
+                        ConversationFilter.SENT -> "Nema poslanih poruka"
+                        ConversationFilter.RECEIVED -> "Nema primljenih poruka"
+                    },
                     message = emptyMessage,
                     iconTint = VendorAccent,
                     iconBackground = VendorAccentSoft
@@ -139,7 +180,7 @@ fun SalesConversationList(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(conversations, key = { it.conversationId ?: 0L }) {
+                items(visible, key = { it.conversationId ?: 0L }) {
                     SalesConversationItem(it, subtitle(it), onOpen)
                 }
             }

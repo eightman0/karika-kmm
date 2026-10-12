@@ -144,37 +144,39 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
+        <!-- BlueQtyStepper: pill (50%) with a white "−" circle, typed qty and a blue "+" circle -->
         <LinearLayout
             android:id="@+id/layout_stepper"
             android:layout_width="wrap_content"
-            android:layout_height="38dp"
+            android:layout_height="wrap_content"
             android:background="@drawable/bg_k_ord_stepper"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="3dp">
 
-            <TextView
+            <ImageView
                 android:id="@+id/button_minus"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@drawable/bg_k_ord_step_circle"
                 android:contentDescription="@string/catalog_decrease_cd"
-                android:gravity="center"
-                android:includeFontPadding="false"
-                android:text="−"
-                android:textColor="@color/k_accent"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:padding="8dp"
+                android:src="@drawable/ic_k_ord_minus"
+                app:tint="@color/k_accent" />
 
             <EditText
                 android:id="@+id/edit_qty"
                 android:layout_width="42dp"
-                android:layout_height="wrap_content"
+                android:layout_height="32dp"
                 android:background="@null"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center"
+                android:importantForAutofill="no"
+                android:includeFontPadding="false"
                 android:inputType="number"
                 android:maxLines="1"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
                 android:padding="0dp"
                 android:textColor="@color/k_ink"
                 android:textSize="15sp"

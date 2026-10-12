@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Ukupno sa PDV" row of the summary card: VendorAccentSoft at 50% -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#80E7EFFC" />
+</shape>

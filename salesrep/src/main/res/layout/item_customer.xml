@@ -61,18 +61,7 @@
                     android:textStyle="bold"
                     tools:text="Ada Lovelace" />
 
-                <TextView
-                    android:id="@+id/text_k_subtitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="@color/k_muted"
-                    android:textSize="12.5sp"
-                    android:visibility="gone"
-                    tools:text="Ada Lovelace · ada@karika.ba"
-                    tools:visibility="visible" />
+                
             </LinearLayout>
 
             <TextView
@@ -162,7 +151,7 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:contentDescription="@null"
-                        android:src="@drawable/ic_messages"
+                        android:src="@drawable/ic_k_shell_chat"
                         app:tint="@color/k_accent" />
 
                     <TextView
@@ -194,7 +183,7 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:contentDescription="@null"
-                        android:src="@drawable/ic_gift"
+                        android:src="@drawable/ic_k_cust_gift"
                         app:tint="@color/k_accent" />
 
                     <TextView
@@ -226,7 +215,7 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:contentDescription="@null"
-                        android:src="@drawable/ic_orders"
+                        android:src="@drawable/ic_k_shell_document"
                         app:tint="@color/k_accent" />
 
                     <TextView
@@ -256,10 +245,10 @@
                 android:paddingHorizontal="16dp">
 
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_shopping_cart"
+                    android:src="@drawable/ic_k_shell_cart"
                     app:tint="@color/k_white" />
 
                 <TextView
@@ -271,7 +260,7 @@
                     android:maxLines="1"
                     android:text="@string/customers_order_for"
                     android:textColor="@color/k_white"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>

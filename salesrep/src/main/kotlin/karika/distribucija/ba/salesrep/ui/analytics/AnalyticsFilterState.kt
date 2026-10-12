@@ -3,7 +3,12 @@ package karika.distribucija.ba.salesrep.ui.analytics
 import androidx.lifecycle.MutableLiveData
 import karika.distribucija.ba.salesrep.util.toApiDate
 import karika.distribucija.ba.salesrep.util.toDisplayDate
-import java.util.concurrent.TimeUnit
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.minus
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 /**
  * Filters shared by every Analitika screen (Pregled/Trendovi/Komercijalisti/Analitika
@@ -18,8 +23,14 @@ import java.util.concurrent.TimeUnit
  * to refetch exactly once per filter visit, with no extra plumbing.
  */
 object AnalyticsFilterState {
-    private val defaultDateFrom = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(29)
-    private val defaultDateTo = System.currentTimeMillis()
+    // Web default: the last 30 days ending today, inclusive (today-29 .. today), where "today" is
+    // the Europe/Sarajevo calendar day. Stored as UTC-midnight millis - the same encoding the
+    // MaterialDatePicker selections use - so toApiDate()/toDisplayDate() (UTC) yield that exact day
+    // even between 00:00 and 02:00 local time.
+    private val defaultToday = Clock.System.todayIn(TimeZone.of("Europe/Sarajevo"))
+    private val defaultDateFrom =
+        defaultToday.minus(29, DateTimeUnit.DAY).atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
+    private val defaultDateTo = defaultToday.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
 
     val dateFromMillis = MutableLiveData(defaultDateFrom)
     val dateToMillis = MutableLiveData(defaultDateTo)

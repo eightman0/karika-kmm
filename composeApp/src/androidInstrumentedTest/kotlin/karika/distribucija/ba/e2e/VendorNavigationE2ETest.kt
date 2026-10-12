@@ -25,7 +25,7 @@ class VendorNavigationE2ETest : VendorE2ETest() {
     @Test
     fun startsOnTheAnalyticsOverview() {
         compose.onNodeWithText(VENDOR_HOME).assertIsDisplayed()
-        compose.onNodeWithText("Ukupan prihod:").assertIsDisplayed()
+        compose.onNodeWithText("Ukupan prihod").assertIsDisplayed()
         compose.onNodeWithText("Ukupan broj narudžbi:").assertIsDisplayed()
     }
 

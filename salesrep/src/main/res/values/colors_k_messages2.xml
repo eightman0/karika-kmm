@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Time inside the sales rep's own (blue) chat bubble: white at 80% (SalesChatBubble). -->
+    <color name="k_msg_time_mine">#CCFFFFFF</color>
+</resources>

@@ -1,10 +1,10 @@
 package karika.distribucija.ba.salesrep.ui.messages
 
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -12,7 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentInternalNewMessageBinding
-import karika.distribucija.ba.salesrep.model.StaffRecipient
+import karika.distribucija.ba.salesrep.model.ChatRecipient
 import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 
 /** Mirrors composeApp's SalesInternalNewMessageView.kt. */
@@ -49,10 +49,6 @@ class InternalNewMessageFragment : Fragment() {
         binding.recyclerRecipients.adapter = recipientAdapter
         binding.recyclerRecipients.layoutManager = LinearLayoutManager(requireContext())
 
-        binding.editSubject.addTextChangedListener(onTextChanged = { text, _, _, _ ->
-            viewModel.setSubject(text?.toString().orEmpty())
-        })
-
         binding.editRecipientSearch.setOnFocusChangeListener { _, hasFocus ->
             recipientFieldFocused = hasFocus
             renderRecipientField()
@@ -79,8 +75,8 @@ class InternalNewMessageFragment : Fragment() {
             renderRecipientField()
             renderSendButton()
         }
-        viewModel.threadId.observe(viewLifecycleOwner) { threadId ->
-            binding.layoutComposeHeader.visibility = if (threadId == null) View.VISIBLE else View.GONE
+        viewModel.conversationId.observe(viewLifecycleOwner) { conversationId ->
+            binding.layoutComposeHeader.visibility = if (conversationId == null) View.VISIBLE else View.GONE
         }
         viewModel.messages.observe(viewLifecycleOwner) { messages ->
             messageAdapter.submitList(messages) {
@@ -88,7 +84,7 @@ class InternalNewMessageFragment : Fragment() {
             }
         }
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message)
         }
 
         renderRecipientField()
@@ -100,10 +96,10 @@ class InternalNewMessageFragment : Fragment() {
      * clears the selection on every text change (that's how live-filtering-while-typing detects
      * "the user is typing something new"), so a watcher left attached during this programmatic
      * setText() would immediately undo the selection we just made. */
-    private fun selectRecipient(recipient: StaffRecipient) {
+    private fun selectRecipient(recipient: ChatRecipient) {
         viewModel.selectRecipient(recipient)
         recipientSearchWatcher?.let { binding.editRecipientSearch.removeTextChangedListener(it) }
-        binding.editRecipientSearch.setText(recipient.name)
+        binding.editRecipientSearch.setText(recipient.name.orEmpty())
         recipientSearchWatcher?.let { binding.editRecipientSearch.addTextChangedListener(it) }
         recipientFieldFocused = false
         binding.editRecipientSearch.clearFocus()
@@ -139,9 +135,6 @@ class InternalNewMessageFragment : Fragment() {
 
     private fun renderSendButton() {
         val canSend = !binding.editMessage.text.isNullOrBlank() && viewModel.selectedRecipient.value != null
-        binding.buttonSend.setBackgroundResource(
-            if (canSend) R.drawable.bg_k_msg_send_active else R.drawable.bg_k_msg_send_inactive
-        )
         binding.buttonSend.isEnabled = canSend
     }
 

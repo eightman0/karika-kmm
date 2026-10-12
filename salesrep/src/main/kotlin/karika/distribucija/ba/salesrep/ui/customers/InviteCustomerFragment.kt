@@ -1,11 +1,12 @@
 package karika.distribucija.ba.salesrep.ui.customers
 
+import karika.distribucija.ba.salesrep.util.KSnackbar
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -70,11 +71,11 @@ class InviteCustomerFragment : Fragment() {
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message)
         }
 
         viewModel.successMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message, KSnackbar.Type.SUCCESS)
         }
 
         viewModel.sent.observe(viewLifecycleOwner) { sent ->

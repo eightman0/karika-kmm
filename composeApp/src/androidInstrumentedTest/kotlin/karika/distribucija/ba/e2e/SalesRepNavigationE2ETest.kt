@@ -54,7 +54,7 @@ class SalesRepNavigationE2ETest : SalesRepE2ETest() {
     @Test
     fun pregledOpensTheAnalyticsOverview() {
         goTo("Pregled", "Analitika — Pregled", inAnalytics = true)
-        compose.onNodeWithText("Ukupan prihod:").assertExists()
+        compose.onNodeWithText("Ukupan prihod").assertExists()
     }
 
     @Test

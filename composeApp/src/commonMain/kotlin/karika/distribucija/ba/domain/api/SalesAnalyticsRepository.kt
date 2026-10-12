@@ -6,6 +6,7 @@ import karika.distribucija.ba.domain.model.AnalyticsCategory
 import karika.distribucija.ba.domain.model.AnalyticsOverview
 import karika.distribucija.ba.domain.model.AnalyticsProduct
 import karika.distribucija.ba.domain.model.AnalyticsSeriesPoint
+import karika.distribucija.ba.domain.model.AnalyticsTrendSeries
 import karika.distribucija.ba.domain.model.AnalyticsTrends
 import karika.distribucija.ba.domain.model.AtRiskCustomer
 import karika.distribucija.ba.domain.model.AtRiskCustomers
@@ -23,10 +24,12 @@ import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.SalesRepPerformance
 import karika.distribucija.ba.domain.model.SalesRepsPerformance
 import karika.distribucija.ba.domain.model.SalesSummaryDto
-import karika.distribucija.ba.domain.model.TrendPointDto
+import karika.distribucija.ba.domain.model.TrendBucketDto
 import karika.distribucija.ba.domain.model.TrendResponseDto
+import karika.distribucija.ba.domain.model.TrendSeriesDto
 import karika.distribucija.ba.domain.model.toCount
 import karika.distribucija.ba.domain.model.toMoney
+import karika.distribucija.ba.domain.model.toMoneyOrNull
 import karika.distribucija.ba.ui.view.distributer.orders.toDate1
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -78,7 +81,6 @@ class SalesAnalyticsRepository internal constructor() {
         dateFrom: String? = null,
         dateTo: String? = null,
         groupBy: String = "day",
-        revenueGrowth: Double = 0.0,
         salesRepresentativeId: Long? = null,
         customerId: Long? = null,
         productId: Long? = null,
@@ -91,7 +93,7 @@ class SalesAnalyticsRepository internal constructor() {
             ).getOrNoInternet()
             if (response.status == HttpStatusCode.OK) {
                 val dto = response.body<TrendResponseDto>()
-                emit(ResultState.Success(dto.toAnalyticsTrends(revenueGrowth)))
+                emit(ResultState.Success(dto.toAnalyticsTrends()))
                 return@flow
             }
             emit(ResultState.Error(response.body<ErrorResponse>().message))
@@ -297,33 +299,48 @@ private fun SalesSummaryDto.toAnalyticsOverview(basis: String) = AnalyticsOvervi
     newCustomersDelta = newCustomers.deltaPercent(basis),
     distinctProducts = distinctProductsSold.value.toCount(),
     distinctProductsDelta = distinctProductsSold.deltaPercent(basis),
-    revenueGrowth = revenueGrowth.value.toMoney(),
+    revenueGrowth = revenueGrowth.valueOrNull(),
     revenueGrowthDelta = revenueGrowth.deltaPercent(basis),
-    goalAchievement = targetAchievement?.value.toMoney(),
-    goalAchievementDelta = targetAchievement?.deltaPercent(basis) ?: 0.0,
+    hasTarget = hasTarget,
+    goalAchievement = targetAchievement?.valueOrNull(),
+    goalAchievementDelta = targetAchievement?.deltaPercent(basis),
     atRiskCustomers = customersAtRisk.value.toCount(),
 )
 
-private fun TrendResponseDto.toAnalyticsTrends(revenueGrowth: Double): AnalyticsTrends {
-    fun labelFor(index: Int) = buckets.getOrNull(index)?.label ?: ""
-    fun points(values: List<TrendPointDto>) =
-        values.map { AnalyticsSeriesPoint(labelFor(it.index), it.value.toMoney().toFloat()) }
+private val bsShortMonths = listOf("jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec")
 
-    val revenuePoints = series.revenue.points
-    val newCustomersSum = series.newCustomers.points.sumOf { it.value.toMoney() }.toInt()
+/** Axis label for a bucket like the web: `2026-09-13` -> "13. sep", `2026-09` -> "sep 2026";
+ * anything else falls back to the API's own label. */
+private fun TrendBucketDto.axisLabel(): String {
+    val period = period.orEmpty()
+    val parts = period.take(10).split('-')
+    val month = parts.getOrNull(1)?.toIntOrNull()?.takeIf { it in 1..12 }
+    if (parts.size == 3 && month != null) {
+        val day = parts[2].toIntOrNull()
+        if (day != null) return "$day. ${bsShortMonths[month - 1]}"
+    }
+    if (parts.size == 2 && month != null) return "${bsShortMonths[month - 1]} ${parts[0]}"
+    return label ?: period
+}
+
+private fun TrendResponseDto.toAnalyticsTrends(): AnalyticsTrends {
+    val sortedBuckets = buckets.sortedBy { it.index }
+    fun series(dto: TrendSeriesDto): AnalyticsTrendSeries {
+        val byIndex = dto.points.associateBy { it.index }
+        val points = if (sortedBuckets.isNotEmpty()) {
+            sortedBuckets.map { bucket ->
+                AnalyticsSeriesPoint(bucket.axisLabel(), byIndex[bucket.index]?.value.toMoney().toFloat())
+            }
+        } else {
+            dto.points.sortedBy { it.index }.map { AnalyticsSeriesPoint("", it.value.toMoney().toFloat()) }
+        }
+        return AnalyticsTrendSeries(points = points, hasData = dto.hasData)
+    }
     return AnalyticsTrends(
-        revenueSeries = points(revenuePoints),
-        revenueTotal = revenuePoints.sumOf { it.value.toMoney() },
-        revenuePeak = revenuePoints.maxOfOrNull { it.value.toMoney() } ?: 0.0,
-        revenueGrowth = revenueGrowth,
-        ordersSeries = points(series.orders.points),
-        ordersTotal = series.orders.points.sumOf { it.value.toMoney() }.toInt(),
-        activeCustomersSeries = points(series.activeCustomers.points),
-        // Sum of active_customers buckets double-counts a customer active in two buckets - the
-        // API contract requires reading the latest bucket instead of summing (see openapi notes).
-        activeCustomers = series.activeCustomers.points.lastOrNull()?.value.toCount(),
-        newCustomersSeries = points(series.newCustomers.points),
-        newCustomers = newCustomersSum,
+        revenue = series(series.revenue),
+        orders = series(series.orders),
+        activeCustomers = series(series.activeCustomers),
+        newCustomers = series(series.newCustomers),
     )
 }
 
@@ -331,17 +348,20 @@ private fun RepresentativePerformanceSearchResultsDto.toSalesRepsPerformance() =
     reps = items.map { item ->
         SalesRepPerformance(
             name = item.name ?: "",
-            revenue = item.revenue.toMoney(),
-            goalPercent = item.targetAchievement.toMoney(),
+            revenue = item.revenue.toMoneyOrNull(),
             orders = item.orderCount,
-            avgOrderValue = item.averageOrderValue.toMoney(),
+            avgOrderValue = item.averageOrderValue.toMoneyOrNull(),
             activeCustomers = item.activeCustomers,
-            totalCustomers = item.assignedCustomers,
-            growthPercent = item.revenueGrowth?.changePercent ?: 0.0,
+            newCustomers = item.newCustomers,
+            growthPercent = item.revenueGrowth?.changePercent,
+            goalPercent = if (item.hasTarget) item.targetAchievement.toMoneyOrNull() else null,
+            revenuePerCustomer = item.revenuePerCustomer.toMoneyOrNull(),
+            assignedCustomers = item.assignedCustomers,
+            repeatPurchaseRate = item.repeatPurchaseRate.toMoneyOrNull(),
             suspended = item.status != null && item.status != "active",
         )
     },
-    unassignedRevenue = unassignedRevenue.toMoney(),
+    unassignedRevenue = unassignedRevenue.toMoneyOrNull(),
 )
 
 private fun CustomerAnalyticsDto.toCustomerAnalytics() = CustomerAnalytics(
@@ -349,9 +369,9 @@ private fun CustomerAnalyticsDto.toCustomerAnalytics() = CustomerAnalytics(
     activeCustomers = activeCustomers,
     newCustomers = newCustomers,
     repeatCustomers = repeatCustomers,
-    repeatPurchaseRate = repeatPurchaseRate.value.toMoney(),
-    revenuePerCustomer = revenuePerCustomer.value.toMoney(),
-    avgOrdersPerCustomer = averageOrdersPerCustomer.value.toMoney(),
+    repeatPurchaseRate = repeatPurchaseRate.value.toMoneyOrNull(),
+    revenuePerCustomer = revenuePerCustomer.value.toMoneyOrNull(),
+    avgOrdersPerCustomer = averageOrdersPerCustomer.value.toMoneyOrNull(),
     customersWith2PlusOrders = lifetimeRepeatCustomers,
     customersWithoutOrders = neverOrderedCustomers,
 )

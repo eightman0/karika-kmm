@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One "Trendovi prodaje" chart card: title (+ optional info icon), a Vico line chart, and the
+     web's empty state (bare grid + "Nema podataka za odabrani period") when the series has no data. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_analytics_value_card"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/k_ink"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            tools:text="Aktivni kupci" />
+
+        <ImageView
+            android:id="@+id/image_info"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="2dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/ka2_info"
+            android:padding="6dp"
+            android:src="@drawable/ic_info"
+            android:visibility="gone"
+            app:tint="@color/k_subtle"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="10dp">
+
+        <com.patrykandpatrick.vico.views.cartesian.CartesianChartView
+            android:id="@+id/chart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:scrollEnabled="false"
+            app:zoomEnabled="false" />
+
+        <FrameLayout
+            android:id="@+id/layout_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <karika.distribucija.ba.salesrep.ui.analytics.AnalyticsEmptyGridView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/k_white"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:text="@string/ka2_chart_no_data"
+                android:textColor="@color/k_muted"
+                android:textSize="13sp" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+</LinearLayout>

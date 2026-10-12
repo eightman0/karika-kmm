@@ -29,7 +29,13 @@ object HttpClientProvider {
 
     fun urlV1(query: String): String = "https://${PlatformEnv.envPrefix()}karika.ba/api/V1/$query"
 
-    fun chatImage(name: String): String = "$HOST/media/csmessaging/chat_images/$name"
+    /** A Chat V2 attachment's `relpath` as a full media URL (composeApp's chatAttachment()). */
+    fun chatAttachment(relpath: String): String = "$HOST/media/$relpath"
+
+    /** Copied from composeApp's HttpClientProvider.imageUrl() - product photos come as a path
+     * under media/catalog/product, comment attachments as a full media/... path. */
+    fun imageUrl(name: String?): String =
+        if (name != null && name.contains("media")) "$HOST/$name" else "$HOST/media/catalog/product$name"
 
     var token: String? = PlatformEnv.envJwt()
 

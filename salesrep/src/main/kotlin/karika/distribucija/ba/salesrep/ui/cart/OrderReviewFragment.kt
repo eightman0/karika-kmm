@@ -1,14 +1,12 @@
 package karika.distribucija.ba.salesrep.ui.cart
 
-import android.graphics.Typeface
+import karika.distribucija.ba.salesrep.util.KSnackbar
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -17,9 +15,11 @@ import androidx.navigation.fragment.findNavController
 import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentOrderReviewBinding
+import karika.distribucija.ba.salesrep.databinding.ItemOrderReviewSpecBinding
 import karika.distribucija.ba.salesrep.model.OnBehalfCartResponseItem
 import karika.distribucija.ba.salesrep.model.VendorDeliveryServiceData
 import karika.distribucija.ba.salesrep.session.CartState
+import karika.distribucija.ba.salesrep.ui.messages.messageInitials
 import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 import karika.distribucija.ba.salesrep.util.karikaPriceFormat
 
@@ -35,8 +35,6 @@ class OrderReviewFragment : Fragment() {
     private var shippingCostA2b: Double? = null
     private var shippingCostExpress: Double? = null
     private var defaultsApplied = false
-
-    private val specColumnWidthsDp = intArrayOf(110, 85, 105, 95, 115, 140, 170, 100, 90)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,17 +52,16 @@ class OrderReviewFragment : Fragment() {
         (activity as? AppCompatActivity)?.supportActionBar?.title = getString(R.string.review_title)
         binding.scrollContent.applyImeBottomPadding()
 
+        // Same two warnings as Compose's bottom panel (no capability is only guarded in confirm).
         binding.textWarning.apply {
-            when (viewModel.ineligibleReason) {
-                "no_capability" -> { text = getString(R.string.review_warning_no_capability); visibility = View.VISIBLE }
-                "inactive" -> { text = getString(R.string.review_warning_inactive); visibility = View.VISIBLE }
-                "no_shipping" -> { text = getString(R.string.review_warning_no_shipping); visibility = View.VISIBLE }
+            when {
+                !viewModel.customerActive -> { text = getString(R.string.k_cart2_warning_inactive); visibility = View.VISIBLE }
+                !viewModel.hasShippingAddress -> { text = getString(R.string.k_cart2_warning_no_shipping); visibility = View.VISIBLE }
                 else -> visibility = View.GONE
             }
         }
         updateConfirmButtonState(isPlacingOrder = false)
         renderCustomerInfo()
-        renderSpecificationHeader()
         renderDeliveryExpanded()
         renderProviderSelection()
         renderProviderPrices()
@@ -101,21 +98,21 @@ class OrderReviewFragment : Fragment() {
 
         CartState.cart.observe(viewLifecycleOwner) { cart ->
             val items = cart?.items.orEmpty()
-            renderSpecificationRows(items)
+            renderSpecificationItems(items)
 
-            val vpcTotal = cart?.grandTotal ?: 0.0
+            // Per the cart response: grand_total is the post-discount VPC total, subtotal the
+            // pre-discount one, total_with_tax the final total - same mapping as Compose.
+            val vpcTotal = karikaPriceFormat(cart?.grandTotal ?: 0.0) + " KM"
+            val totalWithTax = karikaPriceFormat(cart?.totalWithTax ?: 0.0) + " KM"
             binding.textItemsCount.text = (cart?.itemsCount ?: items.size).toString()
-            binding.textTotalVpc.text = cart?.grandTotalString() ?: "0,00 KM"
-            binding.textReviewSubtotal.text = cart?.subtotalString() ?: "0,00 KM"
+            binding.textTotalVpc.text = vpcTotal
+            binding.textReviewSubtotal.text = karikaPriceFormat(cart?.subtotal ?: 0.0) + " KM"
+            binding.textReviewDiscount.text = "-" + karikaPriceFormat(cart?.discountAmount ?: 0.0) + " KM"
+            binding.textReviewTotalVpc.text = vpcTotal
             binding.textReviewPdv.text = karikaPriceFormat(cart?.totalTax ?: 0.0) + " KM"
-            binding.textReviewDiscount.text = "-" + (cart?.discountString() ?: "0,00 KM")
-            binding.textReviewTotalWithTax.text = karikaPriceFormat(cart?.totalWithTax ?: 0.0) + " KM"
             binding.textReviewCommission.text = karikaPriceFormat(cart?.fee ?: 0.0) + " KM"
-
-            binding.textStatVpc.text = karikaPriceFormat(vpcTotal) + " KM"
-            binding.textStatPdv.text = karikaPriceFormat(cart?.totalTax ?: 0.0) + " KM"
-            binding.textStatTotal.text = karikaPriceFormat(cart?.totalWithTax ?: 0.0) + " KM"
-            binding.textStatCommission.text = karikaPriceFormat(cart?.fee ?: 0.0) + " KM"
+            binding.textReviewTotalWithTax.text = totalWithTax
+            binding.textBottomTotal.text = totalWithTax
 
             updateConfirmButtonState(isPlacingOrder = viewModel.isPlacingOrder.value == true)
         }
@@ -144,7 +141,7 @@ class OrderReviewFragment : Fragment() {
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message)
         }
 
         viewModel.shouldGoBack.observe(viewLifecycleOwner) { shouldGoBack ->
@@ -158,7 +155,7 @@ class OrderReviewFragment : Fragment() {
                 } else {
                     "Narudžba ${order.incrementId} uspješno kreirana!"
                 }
-                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                showSnack(message, KSnackbar.Type.SUCCESS)
 
                 findNavController().navigate(
                     R.id.orderDetailFragment,
@@ -172,7 +169,7 @@ class OrderReviewFragment : Fragment() {
                         "createdAt" to null
                     ),
                     androidx.navigation.navOptions {
-                        popUpTo(R.id.ordersListFragment) { inclusive = false }
+                        popUpTo(R.id.analyticsOverviewFragment) { inclusive = false }
                     }
                 )
             }
@@ -218,18 +215,24 @@ class OrderReviewFragment : Fragment() {
 
     private fun renderDeliveryExpanded() {
         binding.layoutDeliveryExpanded.visibility = if (deliveryExpanded) View.VISIBLE else View.GONE
-        binding.iconDeliveryChevron.setImageResource(
-            if (deliveryExpanded) R.drawable.ic_k_ord_chevron_up else R.drawable.ic_k_ord_chevron_down
+        binding.textDeliverySubtitle.setText(
+            if (deliveryExpanded) R.string.k_cart2_delivery_subtitle_expanded else R.string.k_ord_delivery_subtitle
         )
+        binding.iconDeliveryChevron.rotation = if (deliveryExpanded) 180f else 0f
     }
 
+    /** Courier option: blue border and a filled blue check circle when selected. */
     private fun renderProviderSelection() {
-        binding.rowProviderA2b.setBackgroundResource(
-            if (selectedCarrierCode == "A2B") R.drawable.bg_k_ord_provider_selected else android.R.color.transparent
-        )
-        binding.rowProviderExpress.setBackgroundResource(
-            if (selectedCarrierCode == "EURO_EXPRESS") R.drawable.bg_k_ord_provider_selected else android.R.color.transparent
-        )
+        listOf(
+            Triple(binding.rowProviderA2b, binding.radioA2b, binding.checkA2b) to "A2B",
+            Triple(binding.rowProviderExpress, binding.radioExpress, binding.checkExpress) to "EURO_EXPRESS"
+        ).forEach { (views, code) ->
+            val (row, radio, check) = views
+            val selected = selectedCarrierCode == code
+            row.setBackgroundResource(if (selected) R.drawable.bg_k_cart2_provider_selected else R.drawable.bg_k_cart2_provider)
+            radio.setBackgroundResource(if (selected) R.drawable.bg_k_cart2_radio_on else R.drawable.bg_k_cart2_radio_off)
+            check.visibility = if (selected) View.VISIBLE else View.GONE
+        }
     }
 
     private fun renderProviderPrices() {
@@ -244,100 +247,39 @@ class OrderReviewFragment : Fragment() {
         )
     }
 
-    private fun renderSpecificationHeader() {
-        binding.rowSpecHeader.removeAllViews()
-        val headers = listOf(
-            R.string.review_spec_header_item,
-            R.string.review_spec_header_discount,
-            R.string.review_spec_header_price,
-            R.string.review_spec_header_qty,
-            R.string.review_spec_header_total_vpc,
-            R.string.review_spec_header_total_with_tax,
-            R.string.review_spec_header_commission_percent,
-            R.string.review_spec_header_commission,
-            R.string.review_spec_header_actions
-        )
-        headers.forEachIndexed { index, res ->
-            binding.rowSpecHeader.addView(
-                buildSpecCell(getString(res), specColumnWidthsDp[index], color = R.color.k_muted, bold = true, sizeSp = 10f)
-            )
-            if (index != headers.lastIndex) binding.rowSpecHeader.addView(buildVerticalDivider())
-        }
-    }
-
-    private fun renderSpecificationRows(items: List<OnBehalfCartResponseItem>) {
-        binding.tableRowsContainer.removeAllViews()
-        items.forEachIndexed { rowIndex, item ->
-            val row = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            }
-            // Mirrors composeApp's ProductSpecificationTable in SalesOrderReviewView.kt - CIJENA
-            // VPC/UKUPNO VPC/UKUPNO SA PDV are derived from price/discount/qty locally rather than
-            // the server's row_total, since that stays keyed to whatever was last committed while
-            // the rep is still typing a new qty/discount into this row's edit sheet.
-            val discountMultiplier = 1.0 - (item.discountPercent ?: 0) / 100.0
-            val discountedPrice = item.price * discountMultiplier
+    /** One SpecificationItem card per line, 10dp apart. VPC/PDV values are derived from
+     * price/discount/qty locally rather than the server's row_total, same as Compose. */
+    private fun renderSpecificationItems(items: List<OnBehalfCartResponseItem>) {
+        val container = binding.layoutSpecItems
+        container.removeAllViews()
+        val inflater = LayoutInflater.from(requireContext())
+        items.forEachIndexed { index, item ->
+            val card = ItemOrderReviewSpecBinding.inflate(inflater, container, false)
+            val discountPercent = item.discountPercent ?: 0
+            val discountedPrice = item.price * (1.0 - discountPercent / 100.0)
             val rowTotalVpc = discountedPrice * item.qty
             val rowTotalWithPdv = rowTotalVpc * 1.17
-            val cells = listOf(
-                item.name,
-                "${item.discountPercent ?: 0}",
-                karikaPriceFormat(discountedPrice) + " KM",
-                "${item.qty} ${item.quantityUnit ?: getString(R.string.review_spec_default_qty_unit)}",
-                karikaPriceFormat(rowTotalVpc) + " KM",
-                karikaPriceFormat(rowTotalWithPdv) + " KM",
-                "${item.commissionPercent.toInt()}",
-                karikaPriceFormat(item.commission) + " KM"
+
+            card.textName.text = item.name
+            card.textDiscountPill.text = getString(R.string.k_cart2_spec_discount_pill, discountPercent)
+            card.textCommissionPill.text = getString(R.string.k_cart2_spec_commission_pill, item.commissionPercent.toInt())
+            card.textPrice.text = karikaPriceFormat(discountedPrice) + " KM"
+            card.textQty.text = getString(
+                R.string.k_cart2_spec_qty_format,
+                item.qty,
+                item.quantityUnit ?: getString(R.string.k_cart2_default_unit)
             )
-            cells.forEachIndexed { colIndex, text ->
-                row.addView(buildSpecCell(text, specColumnWidthsDp[colIndex], bold = colIndex == 0))
-                row.addView(buildVerticalDivider())
+            card.textTotalVpc.text = karikaPriceFormat(rowTotalVpc) + " KM"
+            card.textTotalWithPdv.text = karikaPriceFormat(rowTotalWithPdv) + " KM"
+            card.textCommission.text = karikaPriceFormat(item.commission) + " KM"
+            card.buttonEdit.setOnClickListener { openEditItemSheet(item) }
+
+            if (index > 0) {
+                (card.root.layoutParams as LinearLayout.LayoutParams).topMargin =
+                    (10 * resources.displayMetrics.density).toInt()
             }
-            row.addView(buildEditActionCell(specColumnWidthsDp[8]) { openEditItemSheet(item) })
-            binding.tableRowsContainer.addView(row)
-            if (rowIndex != items.lastIndex) {
-                binding.tableRowsContainer.addView(buildHorizontalDivider())
-            }
+            container.addView(card.root)
         }
-    }
-
-    private fun buildSpecCell(
-        text: String,
-        widthDp: Int,
-        bold: Boolean = false,
-        color: Int = R.color.k_ink,
-        sizeSp: Float = 13f
-    ): TextView = TextView(requireContext()).apply {
-        layoutParams = LinearLayout.LayoutParams(dp(widthDp), LinearLayout.LayoutParams.WRAP_CONTENT)
-        this.text = text
-        setTextColor(requireContext().getColor(color))
-        textSize = sizeSp
-        if (bold) setTypeface(typeface, Typeface.BOLD)
-        maxLines = 2
-        setPadding(dp(8), dp(10), dp(8), dp(10))
-    }
-
-    private fun buildEditActionCell(widthDp: Int, onClick: () -> Unit): TextView = TextView(requireContext()).apply {
-        layoutParams = LinearLayout.LayoutParams(dp(widthDp), LinearLayout.LayoutParams.WRAP_CONTENT)
-        text = getString(R.string.review_spec_edit_action)
-        setTextColor(requireContext().getColor(R.color.k_accent))
-        textSize = 13f
-        setTypeface(typeface, Typeface.BOLD)
-        setPadding(dp(8), dp(10), dp(8), dp(10))
-        isClickable = true
-        isFocusable = true
-        setOnClickListener { onClick() }
-    }
-
-    private fun buildVerticalDivider(): View = View(requireContext()).apply {
-        layoutParams = LinearLayout.LayoutParams(dp(1), LinearLayout.LayoutParams.MATCH_PARENT)
-        setBackgroundColor(requireContext().getColor(R.color.k_line))
-    }
-
-    private fun buildHorizontalDivider(): View = View(requireContext()).apply {
-        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(1))
-        setBackgroundColor(requireContext().getColor(R.color.k_line))
     }
 
     private fun openEditItemSheet(item: OnBehalfCartResponseItem) {
@@ -349,16 +291,15 @@ class OrderReviewFragment : Fragment() {
         }.show(parentFragmentManager, "EditCartItemBottomSheet")
     }
 
-    /** Blocks the rest of the form and shows an in-button spinner while the order is being
-     * placed, mirroring Compose's CircularProgressIndicator-inside-the-button pattern. Also
-     * matches Compose's `canConfirm` requiring a non-empty cart - relevant if the rep empties
-     * the cart via the specification table's edit sheet without leaving this screen. */
+    /** Same `canConfirm` as Compose: items, an active partnership and a default shipping
+     * address; while placing, the button keeps its full color and shows a spinner. */
     private fun updateConfirmButtonState(isPlacingOrder: Boolean) {
         val hasItems = CartState.cart.value?.isEmpty == false
-        val canConfirm = viewModel.isEligible && hasItems && !isPlacingOrder
+        val canConfirm = hasItems && !isPlacingOrder &&
+            viewModel.customerActive && viewModel.hasShippingAddress
         binding.buttonConfirm.isEnabled = canConfirm
         binding.buttonConfirm.setBackgroundResource(
-            if (canConfirm) R.drawable.bg_k_button_primary else R.drawable.bg_k_ord_button_disabled
+            if (canConfirm || isPlacingOrder) R.drawable.bg_k_button_primary else R.drawable.bg_k_ord_button_disabled
         )
         binding.textConfirm.visibility = if (isPlacingOrder) View.GONE else View.VISIBLE
         binding.progressConfirm.visibility = if (isPlacingOrder) View.VISIBLE else View.GONE
@@ -367,38 +308,34 @@ class OrderReviewFragment : Fragment() {
         binding.editNote.isEnabled = !isPlacingOrder
     }
 
-    /** Mirrors the Compose Review screen's "Informacije o narudžbi" card: customer company/email,
-     * a two-state (active/not-active) partnership badge, and the items count. */
+    /** "Informacije o narudžbi" card: initials, company (person's name when there is none),
+     * email and the PartnershipBadge colors/labels from Compose. */
     private fun renderCustomerInfo() {
         val customerName = requireArguments().getString("customerName").orEmpty()
-        binding.textCustomerCompany.text = viewModel.customerCompany?.takeIf { it.isNotBlank() } ?: customerName
+        val label = viewModel.customerCompany?.takeIf { it.isNotBlank() } ?: customerName
+        binding.textCustomerInitials.text = label.messageInitials()
+        binding.textCustomerCompany.text = label
         binding.textCustomerEmail.text =
             viewModel.customerEmail?.takeIf { it.isNotBlank() } ?: getString(R.string.order_detail_dash)
 
-        val badgeLabel = when (viewModel.partnershipStatus) {
-            "active" -> R.string.review_badge_active
-            "pending" -> R.string.review_badge_pending
-            "rejected" -> R.string.review_badge_rejected
-            "revoked" -> R.string.review_badge_revoked
-            else -> R.string.review_badge_pending
+        val status = viewModel.partnershipStatus
+        binding.textPartnershipBadge.text = when (status) {
+            "active" -> getString(R.string.review_badge_active)
+            "pending" -> getString(R.string.review_badge_pending)
+            "revoked" -> getString(R.string.review_badge_revoked)
+            "rejected" -> getString(R.string.review_badge_rejected)
+            else -> status
         }
-        binding.textPartnershipBadge.text = getString(badgeLabel)
-        val (badgeBgRes, badgeColorRes) = if (viewModel.customerActive) {
-            R.drawable.bg_k_pill_green_soft to R.color.k_green
-        } else {
-            R.drawable.bg_k_pill_accent_soft to R.color.k_accent
+        val (badgeBgRes, badgeColorRes) = when {
+            viewModel.customerActive -> R.drawable.bg_k_pill_green_soft to R.color.k_green
+            status == "pending" -> R.drawable.bg_k_pill_amber_soft to R.color.k_amber
+            status == "rejected" -> R.drawable.bg_k_pill_red_soft to R.color.k_red
+            status == "revoked" -> R.drawable.bg_k_pill_field to R.color.k_muted
+            else -> R.drawable.bg_k_pill_accent_soft to R.color.k_accent
         }
         binding.textPartnershipBadge.setBackgroundResource(badgeBgRes)
         binding.textPartnershipBadge.setTextColor(requireContext().getColor(badgeColorRes))
-        binding.textPartnershipBadge.compoundDrawableTintList =
-            android.content.res.ColorStateList.valueOf(requireContext().getColor(badgeColorRes))
     }
-
-    private fun dp(value: Int): Int = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP,
-        value.toFloat(),
-        resources.displayMetrics
-    ).toInt()
 
     override fun onDestroyView() {
         super.onDestroyView()

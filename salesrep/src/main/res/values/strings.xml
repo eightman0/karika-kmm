@@ -27,10 +27,16 @@
     <string name="notifications_title">Obavijesti</string>
     <string name="wifi_settings_title">WiFi podešavanja</string>
     <string name="notifications_empty">Nema obavijesti</string>
+    <string name="notifications_empty_message">Ovdje će se pojaviti obavijesti o narudžbama i porukama.</string>
+    <string name="notifications_mark_all_read">Označi sve kao pročitano</string>
+    <string name="notifications_read_filter">Filter</string>
+    <string name="notifications_filter_all">Sve</string>
+    <string name="notifications_filter_unread">Nepročitano</string>
+    <string name="notifications_filter_read">Pročitano</string>
 
     <string name="internal_messages_title">Interne poruke</string>
-    <string name="internal_messages_empty_title">Nema internih poruka</string>
-    <string name="internal_messages_empty_subtitle">Ovdje će se prikazati vaše interne\nporuke s kolegama.</string>
+    <string name="internal_messages_empty_title">Još nema internih poruka</string>
+    <string name="internal_messages_empty_subtitle">Ovdje će se prikazati vaše interne poruke s kolegama.</string>
     <string name="internal_messages_fab">Nova interna poruka</string>
     <string name="internal_messages_unread_format">NOVO  %d</string>
     <string name="internal_new_message_title">Nova interna poruka</string>
@@ -47,10 +53,10 @@
     <string name="customer_messages_filter_all">Sve</string>
     <string name="customer_messages_filter_sent">Poslano</string>
     <string name="customer_messages_filter_received">Primljeno</string>
-    <string name="customer_messages_empty_all">Nema poruka</string>
+    <string name="customer_messages_empty_all">Još nema poruka</string>
     <string name="customer_messages_empty_sent">Nema poslanih poruka</string>
     <string name="customer_messages_empty_received">Nema primljenih poruka</string>
-    <string name="customer_messages_empty_subtitle">Ovdje će se prikazati vaše poruke\nsa kupcima.</string>
+    <string name="customer_messages_empty_subtitle">Ovdje će se prikazati vaše poruke sa kupcima.</string>
     <string name="customer_messages_fab">Pošalji novu poruku</string>
     <string name="customer_messages_badge_new">NOVO</string>
     <string name="customer_message_subject_label">Predmet:</string>
@@ -64,7 +70,7 @@
     <string name="customer_new_message_title">Nova poruka</string>
     <string name="customer_message_subject_missing">—</string>
 
-    <string name="admin_messages_empty_subtitle">Ovdje će se prikazati vaše poruke\nsa administratorom.</string>
+    <string name="admin_messages_empty_subtitle">Ovdje će se prikazati vaše poruke sa administratorom.</string>
     <string name="admin_conversation_default_title">Poruka</string>
     <string name="admin_conversation_counterpart_label">Administrator</string>
     <string name="admin_new_message_default_title">Nova poruka</string>
@@ -91,6 +97,16 @@
     <string name="orders_search_hint">Pretraži po broju narudžbe</string>
     <string name="orders_empty">Nema narudžbi.</string>
     <string name="orders_status_all">Sve</string>
+    <string name="orders_search_placeholder">Pretraži narudžbe…</string>
+    <string name="orders_empty_none">Nema narudžbi</string>
+    <string name="orders_empty_search">Nema narudžbi za „%1$s“</string>
+    <string name="orders_empty_status">Nema narudžbi sa statusom „%1$s“</string>
+    <string name="orders_empty_search_status">Nema narudžbi za „%1$s“ sa statusom „%2$s“</string>
+    <string name="orders_reset">Poništi</string>
+    <string name="pdf_viewer_title">Dokument</string>
+    <string name="pdf_viewer_back_cd">Nazad</string>
+    <string name="pdf_viewer_error">Dokument nije moguće otvoriti.</string>
+    <string name="pdf_viewer_page_cd">Stranica %1$d</string>
 
     <string name="order_detail_section_info">Informacije o narudžbi</string>
     <string name="order_detail_label_order_number">BROJ NARUDŽBE</string>
@@ -123,6 +139,23 @@
     <string name="order_detail_print_estimate">Printaj predračun</string>
     <string name="order_detail_send_estimate">Pošalji predračun</string>
     <string name="order_detail_coming_soon">Uskoro dostupno</string>
+    <string name="order_detail_title_format">Narudžba #%s</string>
+    <string name="order_detail_locked_text">Za prikaz detalja narudžbe, molimo Vas da zaključite prethodne narudžbe tako što ćete ih označiti kao odobrene ili odbijene!</string>
+    <string name="order_detail_total_with_pdv_label">Ukupno sa PDV</string>
+    <string name="order_detail_section_customer">Kupac</string>
+    <string name="order_detail_customer_fallback">Kupac #%s</string>
+    <string name="order_detail_contact_person_suffix">%s · kontakt osoba</string>
+    <string name="order_detail_call">Pozovi</string>
+    <string name="order_detail_email">Email</string>
+    <string name="order_detail_kv_pdv">PDV broj</string>
+    <string name="order_detail_kv_id">ID broj</string>
+    <string name="order_detail_kv_contact">Kontakt osoba</string>
+    <string name="order_detail_kv_email">Email</string>
+    <string name="order_detail_kv_phone">Telefon</string>
+    <string name="order_detail_kv_address">Adresa za isporuku</string>
+    <string name="order_detail_comments_archived">Komentari narudžbe su arhivirani</string>
+    <string name="order_detail_edit_item">Izmijeni</string>
+    <string name="order_detail_row_with_pdv_format">Sa PDV %1$s KM · Provizija %2$s%% (%3$s KM)</string>
 
     <string name="customers_title">Upravljanje kupcima</string>
     <string name="customers_tab_all">Svi kupci</string>
@@ -275,7 +308,8 @@
     <string name="category_sheet_clear_search_cd">Obriši</string>
 
     <string name="cart_title">Korpa</string>
-    <string name="cart_empty">Korpa je prazna.</string>
+    <string name="cart_empty">Korpa je prazna</string>
+    <string name="cart_empty_message">Dodajte artikle iz kataloga za ovog kupca.</string>
     <string name="cart_subtotal">Međuzbir</string>
     <string name="cart_discount">Popust</string>
     <string name="cart_grand_total">Ukupno</string>
@@ -368,12 +402,12 @@
     <string name="review_edit_item_confirm">Izmijeni</string>
 
     <!-- Analitika (mirrors composeApp's distributer/salesrep analytics screens) -->
-    <string name="analytics_overview_title">Pregled</string>
+    <string name="analytics_overview_title">Pregled prodaje</string>
     <string name="analytics_trends_title">Trendovi prodaje</string>
     <string name="analytics_reps_title">Komercijalisti</string>
-    <string name="analytics_customers_title">Analitika kupaca</string>
+    <string name="analytics_customers_title">Statistika kupaca</string>
     <string name="analytics_at_risk_title">Kupci koji zahtijevaju pažnju</string>
-    <string name="analytics_products_title">Proizvodi i kategorije</string>
+    <string name="analytics_products_title">Statistika proizvoda i kategorija</string>
     <string name="analytics_filters_title">Filteri</string>
     <string name="analytics_empty_state">Nema rezultata za odabrane filtere.</string>
     <string name="analytics_vs_previous_period">vs prethodni period</string>

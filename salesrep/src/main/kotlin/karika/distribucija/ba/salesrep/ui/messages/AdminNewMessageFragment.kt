@@ -1,10 +1,10 @@
 package karika.distribucija.ba.salesrep.ui.messages
 
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -14,10 +14,11 @@ import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentAdminNewMessageBinding
 import karika.distribucija.ba.salesrep.util.AttachmentPicker
 import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
-import karika.distribucija.ba.salesrep.util.isImageAttachmentFile
+import karika.distribucija.ba.salesrep.util.inSarajevo
+import karika.distribucija.ba.salesrep.util.openPdfExternally
 
-/** Mirrors composeApp's SalesAdminNewMessageView.kt - the subject-header + bubble-list + input
- * bar, with no recipient picker (unlike CustomerNewMessageFragment, which has one). */
+/** Mirrors composeApp's SalesAdminNewMessageView.kt - the bubble list + input bar, with no
+ * recipient picker (unlike CustomerNewMessageFragment, which has one). */
 class AdminNewMessageFragment : Fragment() {
 
     private var _binding: FragmentAdminNewMessageBinding? = null
@@ -43,16 +44,13 @@ class AdminNewMessageFragment : Fragment() {
 
         adapter = CustomerMessageAdapter(
             lifecycleOwner = viewLifecycleOwner,
-            counterpartName = { getString(R.string.admin_conversation_counterpart_label) },
+            senderName = { getString(R.string.admin_conversation_counterpart_label) },
             formatTimestamp = { formatTime(it) },
-            isMine = { it.isVendorMessage() }
+            onImageClick = { url -> ImagePreviewFragment.newInstance(url).show(childFragmentManager, "image_preview") },
+            onPdfClick = { url -> requireContext().openPdfExternally(url) }
         )
         binding.recyclerMessages.adapter = adapter
         binding.recyclerMessages.layoutManager = LinearLayoutManager(requireContext())
-
-        binding.editSubject.addTextChangedListener(onTextChanged = { text, _, _, _ ->
-            viewModel.setSubject(text?.toString().orEmpty())
-        })
 
         binding.editMessage.addTextChangedListener(onTextChanged = { _, _, _, _ -> renderSendButton() })
 
@@ -72,13 +70,6 @@ class AdminNewMessageFragment : Fragment() {
             binding.editMessage.setText("")
         }
 
-        viewModel.threadId.observe(viewLifecycleOwner) { threadId ->
-            binding.layoutComposeHeader.visibility = if (threadId == null) View.VISIBLE else View.GONE
-            val subject = viewModel.subject.value
-            (activity as? AppCompatActivity)?.supportActionBar?.title =
-                if (threadId != null && !subject.isNullOrBlank()) subject
-                else getString(R.string.admin_new_message_default_title)
-        }
         viewModel.messages.observe(viewLifecycleOwner) { messages ->
             adapter.submitList(messages) {
                 if (messages.isNotEmpty()) binding.recyclerMessages.scrollToPosition(messages.size - 1)
@@ -86,22 +77,22 @@ class AdminNewMessageFragment : Fragment() {
         }
         viewModel.attachment.observe(viewLifecycleOwner) { renderAttachment(it) }
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message)
         }
 
         renderSendButton()
     }
 
-    /** Mirrors the pending-attachment chip in SalesAdminNewMessageView.kt (see
-     * CustomerConversationFragment's identical renderAttachment for the exact Compose match). */
+    /** Mirrors SalesChatInput's pending attachment in SalesAdminNewMessageView.kt (see renderPendingAttachment). */
     private fun renderAttachment(attachment: Pair<String, ByteArray>?) {
-        binding.layoutPendingAttachment.visibility = if (attachment != null) View.VISIBLE else View.GONE
-        if (attachment != null) {
-            binding.iconAttachmentType.setImageResource(
-                if (isImageAttachmentFile(attachment.first)) R.drawable.ic_photo else R.drawable.ic_attachment
-            )
-            binding.textAttachmentName.text = attachment.first.take(32)
-        }
+        renderPendingAttachment(
+            container = binding.layoutPendingAttachment,
+            preview = binding.imageAttachmentPreview,
+            chip = binding.chipAttachment,
+            icon = binding.iconAttachmentType,
+            name = binding.textAttachmentName,
+            attachment = attachment
+        )
         binding.iconAttach.setColorFilter(
             requireContext().getColor(if (attachment != null) R.color.k_accent else R.color.k_ink)
         )
@@ -110,15 +101,12 @@ class AdminNewMessageFragment : Fragment() {
 
     private fun renderSendButton() {
         val canSend = !binding.editMessage.text.isNullOrBlank() || viewModel.attachment.value != null
-        binding.buttonSend.setBackgroundResource(
-            if (canSend) R.drawable.bg_k_msg_send_active else R.drawable.bg_k_msg_send_inactive
-        )
         binding.buttonSend.isEnabled = canSend
     }
 
     private fun formatTime(raw: String?): String {
         if (raw == null) return ""
-        val timePart = raw.split(" ").getOrNull(1) ?: return ""
+        val timePart = raw.inSarajevo().split(" ").getOrNull(1) ?: return ""
         val parts = timePart.split(":")
         return if (parts.size >= 2) "${parts[0]}:${parts[1]}" else timePart
     }

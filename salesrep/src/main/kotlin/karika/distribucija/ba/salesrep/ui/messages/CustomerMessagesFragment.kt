@@ -1,11 +1,11 @@
 package karika.distribucija.ba.salesrep.ui.messages
 
+import karika.distribucija.ba.salesrep.util.showSnack
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -14,7 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomerMessagesBinding
-import karika.distribucija.ba.salesrep.model.Conversation
+import karika.distribucija.ba.salesrep.model.ChatConversation
 
 /** Mirrors composeApp's SalesCustomerMessagesView.kt. */
 open class CustomerMessagesFragment : Fragment() {
@@ -27,9 +27,7 @@ open class CustomerMessagesFragment : Fragment() {
     protected open val screenTitleRes: Int = R.string.customer_messages_title
     protected open val newMessageActionId: Int = R.id.action_customer_messages_to_new_message
     protected open val conversationActionId: Int = R.id.action_customer_messages_to_conversation
-    protected open val emptyIconRes: Int = R.drawable.ic_messages
     protected open val emptySubtitleRes: Int = R.string.customer_messages_empty_subtitle
-    protected open fun displayName(conversation: Conversation): String = conversation.customerName()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,13 +42,9 @@ open class CustomerMessagesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         (activity as? AppCompatActivity)?.supportActionBar?.title = getString(screenTitleRes)
-        binding.iconEmpty.setImageResource(emptyIconRes)
         binding.textEmptySubtitle.text = getString(emptySubtitleRes)
 
-        adapter = ConversationCardAdapter(
-            displayName = { conversation -> displayName(conversation) },
-            onClick = { conversation -> openConversation(conversation) }
-        )
+        adapter = ConversationCardAdapter { conversation -> openConversation(conversation) }
         binding.recyclerConversations.adapter = adapter
         binding.recyclerConversations.layoutManager = LinearLayoutManager(requireContext())
 
@@ -74,7 +68,7 @@ open class CustomerMessagesFragment : Fragment() {
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            if (message != null) showSnack(message)
         }
     }
 
@@ -105,14 +99,13 @@ open class CustomerMessagesFragment : Fragment() {
         )
     }
 
-    private fun openConversation(conversation: Conversation) {
+    private fun openConversation(conversation: ChatConversation) {
+        val conversationId = conversation.conversationId ?: return
         findNavController().navigate(
             conversationActionId,
             bundleOf(
-                "threadId" to conversation.id.orEmpty(),
-                "customerName" to displayName(conversation),
-                "subject" to conversation.subject,
-                "receiverId" to (conversation.receiverIdInt() ?: -1)
+                "conversationId" to conversationId,
+                "counterpartName" to conversation.counterpartName
             )
         )
     }

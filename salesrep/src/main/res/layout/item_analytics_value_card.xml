@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Web-style KPI card shared by Pregled prodaje and Statistika kupaca: big value, optional muted
+     note under it, label with an optional right-aligned delta + "vs prethodni period" caption,
+     optional muted note under the label. Bound via AnalyticsValueCard. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_analytics_value_card"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <TextView
+        android:id="@+id/text_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textColor="@color/k_ink"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:autoSizeMaxTextSize="20sp"
+        android:autoSizeMinTextSize="13sp"
+        android:autoSizeTextType="uniform"
+        tools:text="405,00 KM" />
+
+    <TextView
+        android:id="@+id/text_value_note"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/k_muted"
+        android:textSize="11sp"
+        android:visibility="gone"
+        tools:text="30+ dana bez narudžbe"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/text_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/k_muted"
+            android:textSize="12sp"
+            tools:text="Ukupan prihod" />
+
+        <LinearLayout
+            android:id="@+id/layout_delta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:gravity="end"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/text_delta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                tools:text="+12,5%"
+                tools:textColor="@color/k_green" />
+
+            <TextView
+                android:id="@+id/text_delta_caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:maxWidth="72dp"
+                android:textColor="@color/k_subtle"
+                android:textSize="10sp"
+                tools:text="vs prethodni period" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/text_label_note"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/k_muted"
+        android:textSize="11sp"
+        android:visibility="gone"
+        tools:text="Kupac može biti dodijeljen više komercijalista, pa se portfelji mogu preklapati."
+        tools:visibility="visible" />
+
+</LinearLayout>

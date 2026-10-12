@@ -54,12 +54,6 @@ class CustomersAdapter(
             binding.textCustomerName.text = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName
             val title = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName
             binding.textKInitials.text = title.initials()
-            val subtitle = listOfNotNull(
-                customer.fullName.takeIf { it != "—" && !customer.company.isNullOrBlank() },
-                customer.email?.takeIf { it.isNotBlank() }
-            ).joinToString(" · ")
-            binding.textKSubtitle.text = subtitle
-            binding.textKSubtitle.visibility = if (subtitle.isNotEmpty()) View.VISIBLE else View.GONE
 
             // Status pill (soft background + dot), sentence case like the Compose KPill
             binding.textBadge.text = customer.badgeLabel().lowercase().replaceFirstChar { it.uppercase() }

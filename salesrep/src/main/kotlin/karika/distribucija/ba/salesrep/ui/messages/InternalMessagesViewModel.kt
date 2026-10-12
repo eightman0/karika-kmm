@@ -4,18 +4,20 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import karika.distribucija.ba.salesrep.api.SalesRepository
+import karika.distribucija.ba.salesrep.api.ChatRepository
+import karika.distribucija.ba.salesrep.model.ChatAxis
+import karika.distribucija.ba.salesrep.model.ChatConversation
 import karika.distribucija.ba.salesrep.model.ResultState
-import karika.distribucija.ba.salesrep.model.StaffThread
+import karika.distribucija.ba.salesrep.notifications.MessagePushBus
 import kotlinx.coroutines.launch
 
-/** Mirrors composeApp's SalesInternalMessagesComponent.kt. */
+/** Mirrors composeApp's SalesInternalMessagesComponent.kt (Chat V2, staff axis, one page of 100). */
 class InternalMessagesViewModel : ViewModel() {
 
-    private val repository = SalesRepository()
+    private val repository = ChatRepository()
 
-    private val _threads = MutableLiveData<List<StaffThread>>(emptyList())
-    val threads: LiveData<List<StaffThread>> = _threads
+    private val _threads = MutableLiveData<List<ChatConversation>>(emptyList())
+    val threads: LiveData<List<ChatConversation>> = _threads
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
@@ -25,11 +27,17 @@ class InternalMessagesViewModel : ViewModel() {
 
     // No init { load() } here - the fragment's onResume() already calls refresh() on first
     // display (and on every return to this screen), so an init-time load would double the call.
+    init {
+        viewModelScope.launch {
+            MessagePushBus.events.collect { refresh() }
+        }
+    }
+
     fun refresh() = load()
 
     private fun load() {
         viewModelScope.launch {
-            repository.listConversations().collect { result ->
+            repository.getConversations(axis = ChatAxis.STAFF, pageSize = 100).collect { result ->
                 when (result) {
                     is ResultState.Loading -> _isLoading.value = true
                     is ResultState.Success -> {

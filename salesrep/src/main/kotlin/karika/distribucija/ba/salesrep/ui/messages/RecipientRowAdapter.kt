@@ -5,15 +5,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import karika.distribucija.ba.salesrep.databinding.ItemRecipientRowBinding
-import karika.distribucija.ba.salesrep.model.StaffRecipient
+import karika.distribucija.ba.salesrep.model.ChatRecipient
 
 class RecipientRowAdapter(
-    private val onClick: (StaffRecipient) -> Unit
+    private val onClick: (ChatRecipient) -> Unit
 ) : RecyclerView.Adapter<RecipientRowAdapter.ViewHolder>() {
 
-    private var items: List<StaffRecipient> = emptyList()
+    private var items: List<ChatRecipient> = emptyList()
 
-    fun submitList(newItems: List<StaffRecipient>) {
+    fun submitList(newItems: List<ChatRecipient>) {
         items = newItems
         notifyDataSetChanged()
     }
@@ -32,10 +32,10 @@ class RecipientRowAdapter(
     inner class ViewHolder(private val binding: ItemRecipientRowBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(recipient: StaffRecipient, isLast: Boolean) {
-            binding.textRecipientName.text = recipient.name
+        fun bind(recipient: ChatRecipient, isLast: Boolean) {
+            binding.textRecipientName.text = recipient.name ?: "-"
             binding.textRecipientInitials.text = recipient.name.messageInitials()
-            binding.textRecipientRole.text = recipient.displayRole()
+            binding.textRecipientRole.text = binding.root.context.staffRoleLabel(recipient.counterpartType)
             binding.divider.visibility = if (isLast) View.GONE else View.VISIBLE
             binding.contentRow.setOnClickListener { onClick(recipient) }
         }

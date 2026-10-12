@@ -56,7 +56,7 @@ import org.jetbrains.compose.resources.vectorResource
 /** Test tag of a bottom navigation item, for the end-to-end tests. */
 fun bottomNavTag(text: String) = "bottom_nav_$text"
 
-/** Floating dark navigation bar of the customer app. */
+/** Floating pink navigation bar of the customer app. */
 @Composable
 fun BottomBar(
     component: MainComponent
@@ -75,7 +75,7 @@ fun BottomBar(
                 .fillMaxWidth()
                 .height(62.dp)
                 .clip(RoundedCornerShape(22.dp))
-                .background(KarikaUiColors.Navy)
+                .background(KarikaUiColors.Pink)
                 .selectableGroup(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -94,7 +94,7 @@ fun BottomBar(
                             modifier = Modifier.size(22.dp),
                             imageVector = icon,
                             contentDescription = text,
-                            tint = if (isSelected) KarikaColors.White else KarikaColors.White.copy(alpha = 0.6f)
+                            tint = if (isSelected) KarikaColors.White else KarikaColors.White.copy(alpha = 0.7f)
                         )
                         if (icon == cartIcon && totalCartItems > 0) {
                             Box(
@@ -103,12 +103,12 @@ fun BottomBar(
                                     .offset(x = 10.dp, y = (-8).dp)
                                     .size(18.dp)
                                     .clip(CircleShape)
-                                    .background(KarikaUiColors.Pink),
+                                    .background(KarikaColors.White),
                                 contentAlignment = Alignment.Center
                             ) {
                                 KarikaText(
                                     text = "$totalCartItems",
-                                    color = KarikaColors.White,
+                                    color = KarikaUiColors.Pink,
                                     fontWeight = FontWeight.W700,
                                     textSize = 10.sp,
                                     maxLines = 1
@@ -119,7 +119,7 @@ fun BottomBar(
                     Spacer(Modifier.height(4.dp))
                     KarikaText(
                         text = text,
-                        color = if (isSelected) KarikaColors.White else KarikaColors.White.copy(alpha = 0.6f),
+                        color = if (isSelected) KarikaColors.White else KarikaColors.White.copy(alpha = 0.7f),
                         fontWeight = if (isSelected) FontWeight.W700 else FontWeight.W500,
                         maxLines = 1,
                         textSize = 11.sp
@@ -129,7 +129,7 @@ fun BottomBar(
                         modifier = Modifier
                             .size(4.dp)
                             .clip(CircleShape)
-                            .background(if (isSelected) KarikaUiColors.Pink else Color.Transparent)
+                            .background(if (isSelected) KarikaColors.White else Color.Transparent)
                     )
                 }
             }

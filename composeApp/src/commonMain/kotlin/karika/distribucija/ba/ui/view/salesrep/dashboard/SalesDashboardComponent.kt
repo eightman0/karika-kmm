@@ -105,7 +105,7 @@ class SalesDashboardComponent(
         childStack(
             source = stateHolder.salesRepNavigation,
             serializer = SalesRepConfig.serializer(),
-            initialConfiguration = SalesRepConfig.Orders,
+            initialConfiguration = SalesRepConfig.Analytics(),
             handleBackButton = true,
             childFactory = ::child
         )

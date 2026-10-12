@@ -1124,7 +1124,7 @@ fun KConfirmDialog(
 @Composable
 fun KFeatureTile(
     title: String,
-    subtitle: String,
+    subtitle: String?,
     icon: ImageVector,
     background: Color,
     modifier: Modifier = Modifier,
@@ -1162,8 +1162,10 @@ fun KFeatureTile(
             }
             Column {
                 KarikaText(text = title, color = KarikaColors.White, textSize = 18.sp, lineHeight = 22.sp, fontWeight = FontWeight.W700, maxLines = 1)
-                Spacer(Modifier.height(2.dp))
-                KarikaText(text = subtitle, color = KarikaColors.White.copy(alpha = 0.85f), textSize = 12.sp, lineHeight = 16.sp, maxLines = 1)
+                if (subtitle != null) {
+                    Spacer(Modifier.height(2.dp))
+                    KarikaText(text = subtitle, color = KarikaColors.White.copy(alpha = 0.85f), textSize = 12.sp, lineHeight = 16.sp, maxLines = 1)
+                }
             }
         }
     }

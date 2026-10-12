@@ -64,3 +64,25 @@ fun Long.toDisplayDate(): String =
 /** For analytics payloads like `last_order_at` ("yyyy-MM-dd HH:mm:ss") shown as a plain date. */
 fun String.toDisplayDate(): String =
     LocalDateTime.parse(replace(" ", "T")).date.format(displayDateFormat)
+
+private val serverTimeFormat = LocalDateTime.Format {
+    year(); char('-'); monthNumber(); char('-'); day(); char(' ')
+    hour(); char(':'); minute(); char(':'); second()
+}
+
+/**
+ * Copied from composeApp's util/ServerTime.kt - a backend UTC timestamp moved to Sarajevo time,
+ * written back the way the backend writes it (`yyyy-MM-dd HH:mm:ss`). Text that is not a
+ * timestamp comes back unchanged.
+ */
+fun String.inSarajevo(): String = runCatching {
+    val text = trim()
+    val sarajevo = TimeZone.of("Europe/Sarajevo")
+    val hasZone = text.endsWith("Z") || Regex("""T.*[+-]\d{2}:?\d{2}$""").containsMatchIn(text)
+    val local = if (hasZone) {
+        Instant.parse(text).toLocalDateTime(sarajevo)
+    } else {
+        LocalDateTime.parse(text.replace(' ', 'T')).toInstant(TimeZone.UTC).toLocalDateTime(sarajevo)
+    }
+    local.format(serverTimeFormat)
+}.getOrDefault(this)

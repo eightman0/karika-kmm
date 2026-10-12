@@ -1,5 +1,7 @@
 package karika.distribucija.ba.salesrep.model
 
+import karika.distribucija.ba.salesrep.util.inSarajevo
+import karika.distribucija.ba.salesrep.util.karikaPriceFormat
 import karika.distribucija.ba.salesrep.util.toDateTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -22,7 +24,11 @@ data class VendorOrder(
     @SerialName("products") val products: List<VendorProduct> = emptyList(),
     @SerialName("shipping_details") val shippingDetails: ShippingDetails? = null,
     @SerialName("code") val code: String? = null,
-    @SerialName("is_locked") val locked: Boolean? = null
+    @SerialName("is_locked") val locked: Boolean? = null,
+    @SerialName("is_archived") val isArchived: Boolean? = false,
+    @SerialName("b2b_pravno_lice") val b2bPravnoLice: String? = null,
+    @SerialName("id_broj") val idNumber: String? = null,
+    @SerialName("pdv_broj") val pdvNumber: String? = null
 ) {
     fun date(): String = createdAt?.toDateTime() ?: "-"
 
@@ -34,6 +40,21 @@ data class VendorOrder(
 
     /** Mirrors composeApp's VendorOrder.isRejected() (Dashboard.kt). */
     fun isRejected(): Boolean = realOrderStatus == "rejected"
+
+    fun commentsArchived() = isArchived == true
+
+    fun email() = address?.email ?: "-"
+
+    /** Mirrors composeApp's VendorOrder.status() (Dashboard.kt). */
+    fun status(): String = when (realOrderStatus) {
+        "rejected" -> "Odbijeno"
+        "approved" -> "Odobreno"
+        "cancelled" -> "Otkazano"
+        "bill-sent" -> "Uplaćena"
+        "estimate-sent" -> "Čekanje na uplatu"
+        "pending" -> "Na čekanju"
+        else -> "Nepoznato"
+    }
 }
 
 @Serializable
@@ -41,7 +62,8 @@ data class ShopAddress(
     @SerialName("street") val street: String? = null,
     @SerialName("city") val city: String? = null,
     @SerialName("postcode") val postcode: String? = null,
-    @SerialName("telephone") val telephone: String? = null
+    @SerialName("telephone") val telephone: String? = null,
+    @SerialName("email") val email: String? = null
 )
 
 /** Mirrors composeApp's domain/model/Dashboard.kt ShippingDetails - the rep-filled shipping
@@ -74,8 +96,18 @@ data class VendorProduct(
     @SerialName("discount_percent") val discount: String? = "0",
     @SerialName("discount_amount") val discountAmount: String? = "0",
     @SerialName("commission_percent") val commissionPercent: String? = null,
-    @SerialName("commission") val commission: String? = null
+    @SerialName("commission") val commission: String? = null,
+    @SerialName("image") val image: String? = null,
+    @SerialName("thumbnail") val thumbnail: String? = null,
+    @SerialName("small_image") val smallImage: String? = null
 ) {
+    /** Mirrors composeApp's VendorProduct.commissionPercent() (Dashboard.kt). */
+    fun commissionPercentLabel(): String = karikaPriceFormat(commissionPercent?.toDoubleOrNull() ?: 0.0)
+
+    /** The row photo, as composeApp's SpecificationItem picks it - null when there is none. */
+    fun imagePath(): String? = (thumbnail ?: smallImage ?: image)
+        ?.takeIf { it.isNotBlank() && it != "no_selection" }
+
     fun rabat(): String = discount ?: "0"
 
     fun qty(): String = "${qtyOrdered ?: "0"} ${unit.orEmpty()}"
@@ -93,9 +125,18 @@ data class VendorProduct(
 data class Comment(
     @SerialName("message") val message: String? = "",
     @SerialName("created_at") val createdAt: String? = "",
-    @SerialName("is_mine") val isMine: Boolean? = false
+    @SerialName("is_mine") val isMine: Boolean? = false,
+    @SerialName("files") val files: List<CommentFile>? = emptyList()
 ) {
     fun isMine() = isMine ?: false
     fun message() = message ?: ""
-    fun createdAt() = createdAt ?: ""
+    fun createdAt() = createdAt?.inSarajevo() ?: ""
 }
+
+/** An order comment's attachment - composeApp's model/Order.kt `File`. */
+@Serializable
+data class CommentFile(
+    @SerialName("name") val name: String? = "",
+    @SerialName("url") val url: String? = "",
+    @SerialName("type") val type: String? = ""
+)
