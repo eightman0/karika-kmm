@@ -63,4 +63,24 @@
     <color name="status_rejected">#D32F2F</color>
     <color name="status_cancelled">#6B6B6B</color>
     <color name="status_default">#6B6B6B</color>
+
+    <!-- Redesign palette, matches composeApp's KarikaUiColors (ui/components/KarikaUi.kt) -->
+    <color name="k_accent">#3575E2</color>
+    <color name="k_accent_soft">#E7EFFC</color>
+    <color name="k_ink">#1A1F36</color>
+    <color name="k_navy">#1C2038</color>
+    <color name="k_muted">#6B7280</color>
+    <color name="k_subtle">#9CA3AF</color>
+    <color name="k_page">#F6F7F9</color>
+    <color name="k_field">#F1F3F6</color>
+    <color name="k_line">#ECEFF2</color>
+    <color name="k_border">#DFE3E8</color>
+    <color name="k_green">#15803D</color>
+    <color name="k_green_soft">#DCFCE7</color>
+    <color name="k_green_dot">#22C55E</color>
+    <color name="k_red">#DC2626</color>
+    <color name="k_red_soft">#FEF2F2</color>
+    <color name="k_amber">#B45309</color>
+    <color name="k_amber_soft">#FEF3C7</color>
+    <color name="k_white">#FFFFFF</color>
 </resources>

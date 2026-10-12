@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Redesign text and widget styles, matching composeApp's KarikaUi kit (Gotham-like weights via sans-serif-medium) -->
+<resources>
+    <style name="K.Text">
+        <item name="android:textColor">@color/k_ink</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="K.Text.ScreenTitle">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="K.Text.Title">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="K.Text.Section">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="K.Text.Body">
+        <item name="android:textSize">15sp</item>
+    </style>
+    <style name="K.Text.BodyStrong">
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="K.Text.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/k_muted</item>
+    </style>
+    <style name="K.Text.Label">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/k_muted</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="K.Button">
+        <item name="android:layout_height">52dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingHorizontal">18dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+    <style name="K.Button.Primary">
+        <item name="android:background">@drawable/bg_k_button_primary</item>
+        <item name="android:textColor">@color/k_white</item>
+    </style>
+    <style name="K.Button.Secondary">
+        <item name="android:background">@drawable/bg_k_button_secondary</item>
+        <item name="android:textColor">@color/k_ink</item>
+    </style>
+    <style name="K.Button.Tonal">
+        <item name="android:background">@drawable/bg_k_button_tonal</item>
+        <item name="android:textColor">@color/k_accent</item>
+    </style>
+</resources>
