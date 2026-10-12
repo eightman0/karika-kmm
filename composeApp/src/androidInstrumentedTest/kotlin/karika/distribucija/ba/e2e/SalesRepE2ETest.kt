@@ -13,13 +13,20 @@ import org.junit.Assume.assumeTrue
 /**
  * Base for the sales rep's end-to-end tests, see [DashboardE2ETest]: every test starts logged in
  * as the sales rep test account (KARIKA_STAGE_SALESREP_*, through the supplier login) on its
- * orders. Most tests only read and open screens; [SalesRepActionsE2ETest] changes the customer
- * test account's discounts, cart and orders, and cleans up after itself.
+ * orders (the app itself opens on the analytics, see [startOnOrders]). Most tests only read and
+ * open screens; [SalesRepActionsE2ETest] changes the customer test account's discounts, cart and
+ * orders, and cleans up after itself.
  */
 abstract class SalesRepE2ETest : DashboardE2ETest() {
     override val menuTag = SALES_MENU_TAG
 
-    override fun logInToDashboard() = logInAsSalesRep()
+    /** Whether the test starts on the orders rather than where the app opens, the analytics. */
+    protected open val startOnOrders = true
+
+    override fun logInToDashboard() {
+        logInAsSalesRep()
+        if (startOnOrders) goTo(SALES_REP_ORDERS)
+    }
 
     /**
      * The customer test account (KARIKA_STAGE_SHOP_*) as one of the sales rep's customers. Skips

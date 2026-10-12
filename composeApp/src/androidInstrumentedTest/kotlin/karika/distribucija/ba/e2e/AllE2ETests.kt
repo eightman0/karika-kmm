@@ -41,5 +41,6 @@ import org.junit.runners.Suite
     SalesRepActionsE2ETest::class,
     SalesRepMessagingE2ETest::class,
     SalesRepNewCustomerE2ETest::class,
+    SalesRepLocationE2ETest::class,
 )
 class AllE2ETests

@@ -33,7 +33,7 @@ import karika.distribucija.ba.ui.view.distributer.orders.MIN_ORDER_FIELD_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.MIN_ORDER_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_COMMENT_FIELD_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_COMMENT_SEND_TAG
-import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_DETAILS_BACK_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_DETAILS_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.vendorOrderTag
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
@@ -261,7 +261,7 @@ class VendorOrderActionsE2ETest : VendorE2ETest() {
         goTo("Narudžbe", "Minimalna vrijednost narudžbe")
         compose.waitUntilAtLeastOneExists(hasTestTag(vendorOrderTag(order)), SERVER_TIMEOUT_MS)
         compose.onNodeWithTag(vendorOrderTag(order)).performScrollTo().performClick()
-        compose.waitUntilAtLeastOneExists(hasTestTag(ORDER_DETAILS_BACK_TAG), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(ORDER_DETAILS_TAG), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         return order
     }

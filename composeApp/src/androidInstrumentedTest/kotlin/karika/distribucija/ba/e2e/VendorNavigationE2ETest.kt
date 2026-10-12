@@ -26,7 +26,7 @@ class VendorNavigationE2ETest : VendorE2ETest() {
     fun startsOnTheAnalyticsOverview() {
         compose.onNodeWithText(VENDOR_HOME).assertIsDisplayed()
         compose.onNodeWithText("Ukupan prihod").assertIsDisplayed()
-        compose.onNodeWithText("Ukupan broj narudžbi:").assertIsDisplayed()
+        compose.onNodeWithText("Prosječna vrijednost narudžbe").assertIsDisplayed()
     }
 
     @Test
@@ -51,8 +51,8 @@ class VendorNavigationE2ETest : VendorE2ETest() {
         compose.onNode(drawerItem("Analitika")).performClick()
 
         listOf(
-            "Pregled", "Trendovi prodaje", "Analitika kupaca", "Kupci koji zahtijevaju pažnju",
-            "Proizvodi i kategorije"
+            "Pregled prodaje", "Trendovi prodaje", "Statistika kupaca", "Kupci koji zahtijevaju pažnju",
+            "Statistika proizvoda i kategorija"
         ).forEach { compose.waitUntil(SCREEN_TIMEOUT_MS) { displayed(drawerItem(it)) } }
     }
 
@@ -64,7 +64,7 @@ class VendorNavigationE2ETest : VendorE2ETest() {
 
     @Test
     fun analitikaKupacaOpensTheCustomerAnalytics() {
-        goTo("Analitika kupaca", "Analitika — Analitika kupaca", inAnalytics = true)
+        goTo("Statistika kupaca", "Analitika — Analitika kupaca", inAnalytics = true)
         compose.onNodeWithText("Dodijeljeni kupci").assertExists()
     }
 
@@ -76,7 +76,7 @@ class VendorNavigationE2ETest : VendorE2ETest() {
 
     @Test
     fun proizvodiIKategorijeOpensTheProductAnalytics() {
-        goTo("Proizvodi i kategorije", inAnalytics = true)
+        goTo("Statistika proizvoda i kategorija", "Proizvodi i kategorije", inAnalytics = true)
         compose.onNodeWithText("Proizvodi").assertIsDisplayed()
         compose.onNodeWithText("Kategorije").assertIsDisplayed()
     }

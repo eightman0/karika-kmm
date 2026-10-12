@@ -242,7 +242,7 @@ class VendorScreensE2ETest : VendorE2ETest() {
 
     @Test
     fun productAnalyticsSwitchesToCategories() {
-        goTo("Proizvodi i kategorije", inAnalytics = true)
+        goTo("Statistika proizvoda i kategorija", "Proizvodi i kategorije", inAnalytics = true)
 
         compose.onNodeWithText("Kategorije").performClick()
 

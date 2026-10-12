@@ -90,7 +90,7 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
         }
         tapBack()
         compose.waitUntilDoesNotExist(hasText("Informacije o narudžbi"), SCREEN_TIMEOUT_MS)
-        assertTrue(displayed(hasText(SALES_REP_HOME)))
+        assertTrue(displayed(hasText(SALES_REP_ORDERS)))
     }
 
     // Upravljanje kupcima
@@ -169,10 +169,14 @@ class SalesRepScreensE2ETest : SalesRepE2ETest() {
         compose.onNodeWithText("Novi kupac").performClick()
 
         compose.waitUntilAtLeastOneExists(hasText("Informacije o pravnom licu"), SCREEN_TIMEOUT_MS)
-        listOf("Naziv pravnog lica", "ID broj", "Kontakt osoba", "Email adresa").forEach {
+        listOf("Naziv pravnog lica", "ID broj").forEach {
             assertTrue("\"$it\" is not in the form", exists(hasText(it), unmerged = true))
         }
-        compose.onNodeWithText("Odustani").performScrollTo().performClick()
+        // The form is long: the contact section is only there once scrolled to
+        scrollListTo(hasText("Kontakt osoba"), SCREEN_TIMEOUT_MS)
+        assertTrue("\"Email adresa\" is not in the form", exists(hasText("Email adresa"), unmerged = true))
+        // "Odustani" is in the bar under the form, not in the list
+        compose.onNodeWithText("Odustani").performClick()
         compose.waitUntilAtLeastOneExists(hasText("Pretraži kupce..."), SCREEN_TIMEOUT_MS)
     }
 

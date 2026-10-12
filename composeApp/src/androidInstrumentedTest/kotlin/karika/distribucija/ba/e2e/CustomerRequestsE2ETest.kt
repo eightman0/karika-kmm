@@ -41,6 +41,8 @@ class CustomerRequestsE2ETest : CustomerE2ETest() {
         assumeTrue("the customer has no unread notification", unread != null)
         openProfileButton("Notifikacije")
         compose.waitUntilAtLeastOneExists(hasText(unread!!.title), SERVER_TIMEOUT_MS)
+        // The loader takes taps while it is up
+        waitUntilLoaded()
 
         compose.onAllNodesWithText(unread.title).onFirst().performClick()
 

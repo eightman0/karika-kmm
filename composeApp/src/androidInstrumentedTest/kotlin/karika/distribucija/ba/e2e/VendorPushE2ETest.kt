@@ -27,7 +27,7 @@ import karika.distribucija.ba.domain.model.VendorOrder
 import karika.distribucija.ba.ui.components.DASHBOARD_NOTIFICATIONS_BADGE_TAG
 import karika.distribucija.ba.ui.components.conversationTag
 import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_COMMENT_FIELD_TAG
-import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_DETAILS_BACK_TAG
+import karika.distribucija.ba.ui.view.distributer.orders.details.ORDER_DETAILS_TAG
 import karika.distribucija.ba.ui.view.distributer.orders.vendorOrderTag
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.runBlocking
@@ -171,7 +171,7 @@ class VendorPushE2ETest : VendorE2ETest() {
         val tag = vendorOrderTag(VendorOrder(orderId = order.incrementId))
         compose.waitUntilAtLeastOneExists(hasTestTag(tag), SERVER_TIMEOUT_MS)
         compose.onNodeWithTag(tag).performScrollTo().performClick()
-        compose.waitUntilAtLeastOneExists(hasTestTag(ORDER_DETAILS_BACK_TAG), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasTestTag(ORDER_DETAILS_TAG), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         // The comment bar is pinned to the bottom, outside the scrolling content
         compose.waitUntilAtLeastOneExists(composer(), SCREEN_TIMEOUT_MS)

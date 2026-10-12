@@ -93,7 +93,7 @@ class CustomerBrowseE2ETest : CustomerE2ETest() {
         waitUntilLoaded()
         compose.onNodeWithText("Dodaj u korpu").performClick()
 
-        // The cart on stage gets two minimum quantities: the app adds the product, then sets how many
+        // The cart on stage gets two minimum quantities, in a single request
         var qty: Int? = null
         runCatching {
             compose.waitUntil(SERVER_TIMEOUT_MS) {

@@ -1,5 +1,6 @@
 package karika.distribucija.ba.e2e
 
+import androidx.compose.ui.state.ToggleableState
 import android.Manifest
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
@@ -15,7 +16,6 @@ import android.view.KeyEvent
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeTimeoutException
@@ -26,6 +26,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isToggleable
@@ -34,12 +35,14 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToString
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import karika.distribucija.ba.BuildConfig
+import karika.distribucija.ba.ui.components.bottomNavTag
 import karika.distribucija.ba.MainActivity
 import karika.distribucija.ba.domain.HttpClientProvider
 import karika.distribucija.ba.domain.api.CartRepository
@@ -165,7 +168,10 @@ abstract class StageE2ETest {
      * where the button was.
      */
     protected fun logIn(email: String, password: String) {
+        // After a logout the screen can still have the last email filled in
+        compose.onNodeWithTag(LOGIN_EMAIL_FIELD_TAG).performTextClearance()
         compose.onNodeWithTag(LOGIN_EMAIL_FIELD_TAG).performTextInput(email)
+        compose.onNodeWithTag(LOGIN_PASSWORD_FIELD_TAG).performTextClearance()
         compose.onNodeWithTag(LOGIN_PASSWORD_FIELD_TAG).performTextInput(password)
         closeKeyboard()
         compose.onNodeWithText("Prijavi se").assertIsEnabled().performClick()
@@ -334,7 +340,12 @@ abstract class StageE2ETest {
         val (email, password) = stageAccount(emailKey, passwordKey)
         compose.onNodeWithText(role).performScrollTo().performClick()
         compose.waitUntilAtLeastOneExists(hasText(loginTitle), SCREEN_TIMEOUT_MS)
-        compose.onNode(isToggleable()).performClick().assertIsOn()
+        // After a logout the screen remembers "Zapamti me" as it was
+        val zapamtiMe = compose.onNode(isToggleable())
+        if (zapamtiMe.fetchSemanticsNode().config.getOrNull(SemanticsProperties.ToggleableState) != ToggleableState.On) {
+            zapamtiMe.performClick()
+        }
+        zapamtiMe.assertIsOn()
         logIn(email, password)
     }
 
@@ -501,8 +512,7 @@ abstract class StageE2ETest {
     }
 
     /** A tab of the shop's bottom bar, which a screen can also have as a heading. */
-    protected fun bottomTab(label: String) =
-        hasText(label) and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)
+    protected fun bottomTab(label: String) = hasTestTag(bottomNavTag(label))
 
     protected fun pressBack() {
         scenario.onActivity { (it as ComponentActivity).onBackPressedDispatcher.onBackPressed() }
@@ -572,8 +582,10 @@ abstract class StageE2ETest {
         )
         /** Where a supplier lands after login: the analytics overview. */
         const val VENDOR_HOME = "Analitika — Pregled"
-        /** Where a sales rep lands after login: the orders. */
-        const val SALES_REP_HOME = "Upravljanje narudžbama"
+        /** Where a sales rep lands after login: the analytics overview, as for a supplier. */
+        const val SALES_REP_HOME = "Analitika — Pregled"
+        /** The title of the sales rep's orders. */
+        const val SALES_REP_ORDERS = "Upravljanje narudžbama"
     }
 }
 

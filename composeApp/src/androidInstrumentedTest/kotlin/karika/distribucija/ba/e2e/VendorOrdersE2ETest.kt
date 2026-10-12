@@ -111,7 +111,7 @@ class VendorOrdersE2ETest : VendorE2ETest() {
 
         compose.onNodeWithTag(ORDER_FILTER_TAG).performClick()
         compose.waitUntilAtLeastOneExists(hasText("Filteri"), SCREEN_TIMEOUT_MS)
-        compose.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(ORDER_FILTER_NUMBER_TAG))).performTextInput(order.orderId!!)
+        compose.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(ORDER_FILTER_NUMBER_TAG)), useUnmergedTree = true).performTextInput(order.orderId!!)
         closeKeyboard()
         waitUntilLoaded()
         compose.onNodeWithText("Prikaži narudžbe").performClick()
@@ -172,7 +172,7 @@ class VendorOrdersE2ETest : VendorE2ETest() {
             .forEach { assertTrue("\"$it\" is not shown", exists(hasText(it), unmerged = true)) }
         assertTrue(exists(hasText(order.orderId!!, substring = true), unmerged = true))
 
-        compose.onNodeWithTag(ORDER_DETAILS_BACK_TAG).performClick()
+        compose.onNodeWithTag(ORDER_DETAILS_BACK_TAG, useUnmergedTree = true).performClick()
         compose.waitUntilAtLeastOneExists(hasTestTag(vendorOrderTag(order)), SCREEN_TIMEOUT_MS)
     }
 
@@ -210,7 +210,7 @@ class VendorOrdersE2ETest : VendorE2ETest() {
     }
 
     private fun priceField(tag: String) =
-        compose.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(tag)))
+        compose.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag(tag)), useUnmergedTree = true)
 
     private fun orderList() =
         compose.onNode(hasScrollToNodeAction() and hasAnyDescendant(hasTestTagStartingWith("vendor_order_")))

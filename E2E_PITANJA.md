@@ -9,13 +9,17 @@ Otvorena pitanja koja su se pojavila dok su pisani E2E testovi. Uz svako je zapi
 
 3. **Stage povremeno ne radi kako treba** (8.10.): greške 500 (npr. `carts/mine/shipping-information`), stari podaci odmah poslije slanja (komentar ili poruka se pojavi na stage-u tek par sekundi kasnije) i red push poruka koji zna kasniti do minute ili zastati. Testovi zato čekaju na podatke na stage-u, a push testovi čekaju do 60 s. Ako padne više push testova odjednom, prvo provjeri red na stage-u.
 4. **Polovična narudžba `3000001022`** ostala je od runa koji je prekinuo pad ADB-a. U listi komercijaliste je `pending`, ali je stage ne može prikazati ni odbiti (`vendor/order` vraća 404 "Requested entity does not exist"). Treba je počistiti na backendu. Testovi komercijaliste sada biraju narudžbu koju stage može prikazati.
+5. **Push 12.10.: nijedna push poruka ne stiže** ni kupcu ni dobavljaču, pa svih 9 push testova pada. Token se uredno registruje (`POST mobile/push/token` → 200), podaci (poruke, komentari, narudžbe) su na stage-u, ali aplikacija ne dobije nijednu FCM poruku. Liči na raniji zastoj reda na stage-u. Provjeri red, pa ćemo ponovo pokrenuti `CustomerPushE2ETest` i `VendorPushE2ETest`.
+6. **Lokacija na emulatoru.** Aplikacija traži lokaciju s `PRIORITY_BALANCED_POWER_ACCURACY`, a to ne koristi GPS. Emulator nema mrežnu lokaciju, pa bez pomoći nikad ne pošalje lokaciju. Zato `SalesRepLocationE2ETest` daje fused provideru mock lokaciju. Na pravom telefonu lokaciju daje mreža. Ako komercijalista radi negdje bez mreže (npr. teren bez Wi-Fi-ja), lokacija se možda neće slati. Treba li `PRIORITY_HIGH_ACCURACY`?
+7. **Povremen pad u filteru regija (tab Dobavljači):** "Unsupported concurrent change during composition", u otprilike svakom drugom runu, bez ijednog reda iz koda aplikacije u stacku. Neki Compose state se mijenja van glavne niti dok se ekran crta. Uzrok još nije nađen.
 
 ## Aplikacija
 
 1. **Snackbar s greškom prekriva strelicu "Nazad".** Snackbar se crta na vrhu (`KarikaScaffold`, `Alignment.TopCenter`), preko gornje trake. Greške idu u red, pa kad stigne nekoliko grešaka zaredom (npr. detalji narudžbe i komentari ne mogu da se učitaju), strelica "Nazad" je prekrivena više sekundi, a klik na nju samo zatvori snackbar. Reproducirano kod komercijaliste na narudžbi `3000001022`. Odluka 8.10.: zasad ostaje ovako.
-2. **"Dodaj u korpu" s količinom većom od minimalne šalje dva zahtjeva:** prvo doda artikal s količinom 1 (`POST carts/mine/items`), pa je promijeni (`PUT`). Na kraju je količina tačna, ali korpa kratko ima pogrešnu količinu, a za isto se troše dva zahtjeva.
+2. **Ispravljeno: "Dodaj u korpu" na detaljima proizvoda** je za artikal kojeg nema u korpi slao dva zahtjeva: prvo `POST` s količinom 1, pa `PUT` s pravom količinom. Poruka "Proizvod dodan u korpu!" se pritom prikazivala samo kad `PUT` ne uspije. Sad ide jedan `POST` s cijelom količinom.
 3. **Ispravljeno 8.10.:** tekst korisnika u URL-u se sada enkodira (komentar sa `%` se ranije uopšte nije slao, a `&`, `#` i `+` su ga kvarili), dobavljač osvježava narudžbe na svaki push, a vrijeme sa servera se prikazuje u sarajevskoj zoni.
-
+4. **Ispravljeno 12.10. (redizajn):** `hideKeyboard()` je bio `clickable` preko cijelog ekrana, pa su TalkBack i testovi vidjeli cijeli ekran kao jedno dugme, a test tagovi unutra su se gubili. Sad je to obična detekcija tapa. `KCircleButton` (meni, nazad, zvono) je sada jedan čvor, pa njegov tag i opis ostaju na dugmetu.
+5. **Registracija: tap na sredinu reda za saglasnost otvori PDF.** U novom dizajnu cijeli red je kvadratić, a sredina reda je tekst s linkovima "uslovima korištenja" i "politikom privatnosti". Tap na red zato često otvori dokument umjesto da označi kvadratić. Test tapka sam kvadratić. Treba li da tap na tekst (osim linkova) označi kvadratić?
 
 ## Kupac
 
@@ -25,10 +29,10 @@ Otvorena pitanja koja su se pojavila dok su pisani E2E testovi. Uz svako je zapi
    - **Ostalo:** poruke adminu i dobavljaču, odgovor u razgovoru, "Označi sve kao pročitano", prava registracija novog kupca sa `@example.com` emailom.
 1c. **Bug sa obavijestima je popravljen** (7.10.). `AccountComponent.updateAddress` je pri spremanju adrese slao zadane vrijednosti prekidača obavijesti (sve uključeno) i tako ponovo uključivao obavijesti koje je kupac isključio. Sad spremanje adrese ne dira postavke obavijesti; test `savingAnAddressKeepsTheNotificationSettings` prolazi.
 1d. **Svaki run pravi nove podatke na stage-u:** 4–6 narudžbi (dio otkazan), komentare, poruke adminu i dobavljaču, novu adresu i jednog novog kupca na čekanju za odobrenje. Je li to u redu za admina stage-a, posebno novi kupci za odobrenje?
-1e. **Partnerstva i "Pošalji uplatnicu" zavise od dobavljača.** Zahtjev za partnerstvo i status "Čekanje na uplatu" pravi dobavljač ili komercijalista. Test nalog trenutno nema otvoren zahtjev, pa se ti testovi preskaču. Mogu li testovi komercijaliste poslati poziv test kupcu ("Pozovi kupca"), i dobavljača poslati predračun, da bi kupac imao šta prihvatiti i platiti?
-1a. **"Prikaži rasprodate"** na stranici dobavljača se preskače, jer dobavljač prvog preporučenog proizvoda nema rasprodatih artikala. Ako znaš dobavljača koji ih ima, napiši ga i test će koristiti njega.
+1e. **Partnerstva i "Pošalji uplatnicu" zavise od dobavljača.** Zahtjev za partnerstvo i status "Čekanje na uplatu" pravi dobavljač ili komercijalista. Test nalog trenutno nema otvoren zahtjev, pa se ti testovi preskaču. Mogu li testovi komercijaliste poslati poziv test kupcu ("Pozovi kupca"), i dobavljača poslati predračun, da bi kupac imao šta prihvatiti i platiti? Odluka: zasad ostaje ovako. Novi test kupac bi čekao odobrenje admina; kasnije možda brisanje partnerstva.
+1a. **"Prikaži rasprodate"** na stranici dobavljača se preskače, jer dobavljač prvog preporučenog proizvoda nema rasprodatih artikala. Odluka: ostaje tako.
 2. **Zaključavanje naloga.** 29.9. je stage odbijao prijavu kupca i s ispravnom šifrom: "Prijava na račun je bila pogrešna ili je Vaš račun privremeno onemogućen". Tome su prethodile dvije pogrešne prijave po pokretanju (kupac i dobavljač) i oko 80 prijava za 40 minuta. Ako nema limita na prijavu, da li je zaključavanje došlo od pogrešnih šifri? Treba li testove s pogrešnom šifrom premjestiti na poseban nalog?
-3. **Bug s "Odustani" u filteru regija** (tab Dobavljači) i dalje postoji. Test je isključen s `@Ignore`.
+3. **Ispravljeno: bug s "Odustani" u filteru regija** (tab Dobavljači). Sheet mijenja kopiju izbora, a primjenjuje je samo "Filtriraj"; test je ponovo uključen.
 
 ## Dobavljač
 
@@ -36,15 +40,15 @@ Pokriveno je: navigacija kroz fioku, analitika (tabovi, filteri, kupci u riziku,
 
 Od 7.10. `VendorOrderActionsE2ETest` i mijenja podatke. Svaki test prvo kao test kupac naruči jedan artikal dobavljača, pa na toj narudžbi u aplikaciji: odobri (bez dostave i sa A2B dostavom), odbije s razlogom, pošalje komentar, izmijeni količinu i rabat stavke, pošalje predračun i promijeni minimalnu narudžbu (pa je vrati). Starije narudžbe na čekanju, koje zaključavaju novu, test odbije.
 
-1. **Bug: dijalog "Obriši nalog" se pojavi dvaput.** U `ProfileView.kt` je `DeleteAccountConfirmation` nacrtan dvaput, pa se dva dijaloga slože jedan na drugi. Test je isključen s `@Ignore`. Da li da ga popravim?
+1. **Ispravljeno: dijalog "Obriši nalog" se pojavljivao dvaput** (`DeleteAccountConfirmation` je u `ProfileView.kt` bio nacrtan dvaput). Test je ponovo uključen.
 2. **Šta testovi smiju upisati na stage?** Sada ništa ne odobravaju, ne odbijaju, ne šalju (poruke, komentare, predračune) i ne čuvaju (pravila rabata, profil, minimalnu narudžbu). Smijem li napraviti pravilo rabata pa ga odmah obrisati? A minimalnu narudžbu promijeniti pa vratiti?
 3. **Otvaranje razgovora ga označi kao pročitan** (`POST chat/conversations/{id}/read`). Test otvori prvi razgovor s kupcem. Je li to u redu za test nalog dobavljača?
-4. **"Upravljanje artiklima" je zakomentarisan** u fioci, pa ekran artikala nije testiran. Da li je to namjerno?
+4. **"Upravljanje artiklima" je zakomentarisan** u fioci, pa ekran artikala nije testiran. Odluka: namjerno je, ostaje tako.
 5. **Pravilo rabata bez kupca važi za sve kupce** ("Svi kupci"). Test to uzima kao namjerno ponašanje, a ne kao grešku. Tačno?
 6. **Bug s filterom narudžbi je popravljen** (7.10.). `OrdersComponent.loadNextPage` je preskakao filter i "Očisti" dok je bio uključen loader, koji je zajednički za cijelu aplikaciju. Sad novi filter prekine učitavanje koje je u toku, a sljedeća stranica čeka samo na vlastito učitavanje.
 7. Ranije sam mislio da filter narudžbi po iznosu ne radi. Ispostavilo se da je test promašivao dugme "Filtriraj" zbog otvorene tastature, a **filter radi**.
 7. **Komercijalisti i historija lokacija su pokriveni** (`VendorEmployeesE2ETest`): stavka u fioci, lista tima, filter po statusu, pretraga po emailu, historija lokacija za "Danas" i "Zadnjih 30 dana" i povratak na listu. Mapa se ne provjerava, samo podaci ispod nje.
-8. **Magic link (`/magic-links/<token>`) nije testiran.** Za to treba pravi token iz emaila ili Vibera, a ne znam da li link poslije otvaranja prestaje važiti. Postoji li test token koji smijem otvarati više puta, ili da preskočimo?
+8. **Magic link (`/magic-links/<token>`) nije testiran.** Za to treba pravi token iz emaila ili Vibera, a ne znam da li link poslije otvaranja prestaje važiti. Postoji li test token koji smijem otvarati više puta, ili da preskočimo? Odluka: zasad se preskače, pitanje ostaje otvoreno.
 
 ## Komercijalista
 
@@ -56,7 +60,7 @@ Od 7.10. `SalesRepActionsE2ETest` i mijenja podatke, uvijek za test kupca (mora 
    - **Dodaj kupca** (`SalesRepNewCustomerE2ETest`): provjera obaveznih polja i formata emaila, pravi novi kupac (`e2e.komercijalista…@example.com`, "E2E Komercijalista …"), dijalog "Kupac već postoji" → "Pozovi", pretraga u "Pozovi kupca" (najmanje 3 znaka, "Nema korisnika…") i pravi zahtjev za partnerstvo.
    Pitanja 2 i 3 ispod su time odgovorena; ostavljena su radi historije.
 
-1. **Lokacija se šalje na stage.** Testovi sad unaprijed odobre dozvolu za lokaciju, jer bez nje sistemski dijalog prekrije aplikaciju i svi testovi komercijaliste padnu. Zato aplikacija, kao i kod pravog korisnika, poslije prijave šalje lokaciju emulatora na stage (`EmployeeLocationRepository.submit`). To je jedini upis kod komercijaliste. Je li to u redu, ili da testovi odbiju dozvolu i zatvore dijalog?
+1. **Lokacija se šalje na stage.** Testovi sad unaprijed odobre dozvolu za lokaciju, jer bez nje sistemski dijalog prekrije aplikaciju i svi testovi komercijaliste padnu. Zato aplikacija, kao i kod pravog korisnika, poslije prijave šalje lokaciju emulatora na stage (`EmployeeLocationRepository.submit`). To je jedini upis kod komercijaliste. Je li to u redu, ili da testovi odbiju dozvolu i zatvore dijalog? Odgovor: u redu je. `SalesRepLocationE2ETest` provjerava da svaka prijava pošalje lokaciju i da je dobavljač vidi u "Historija lokacija".
 2. **Šta testovi komercijaliste ne rade:** ne dodaju artikle u korpu kupca, jer se to upisuje u pravu korpu kupca na serveru. Ne potvrđuju narudžbe, ne šalju poruke, komentare ni predračune, ne prave kupce i ne šalju poziv za partnerstvo. Forme se samo otvore i zatvore s "Odustani". Smijem li ići dalje, npr. dodati artikal u korpu nekog test kupca pa ga ukloniti?
 3. **Postoji li test kupac** kod kojeg komercijalista smije praviti korpu i narudžbu? Narudžba bi se odmah otkazala.
 4. **Prema mapi koda, poziv kupca kaže "unesite najmanje 2 znaka", a kod traži 3** (`SalesInviteCustomerView`). Nije provjereno na stage-u.

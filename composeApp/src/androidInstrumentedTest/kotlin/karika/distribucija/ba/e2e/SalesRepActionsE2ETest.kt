@@ -271,7 +271,8 @@ class SalesRepActionsE2ETest : SalesRepE2ETest() {
         tapFirst(hasText("Dodaj") and hasClickAction())
         compose.waitUntil(SERVER_TIMEOUT_MS) { cart().items.any { it.sku == product.sku } }
         openCart()
-        compose.onNodeWithText("Pregledaj narudžbu").performScrollTo().performClick()
+        // In the bar under the cart, not in the list
+        compose.onNodeWithText("Pregledaj narudžbu").performClick()
         compose.waitUntilAtLeastOneExists(hasText("Specifikacija narudžbe"), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         assertTrue(exists(hasText(customer.email.orEmpty(), substring = true), unmerged = true))
@@ -297,7 +298,7 @@ class SalesRepActionsE2ETest : SalesRepE2ETest() {
 
         // A new order is first in the list
         scenario.recreate()
-        compose.waitUntilAtLeastOneExists(hasText(SALES_REP_HOME), SERVER_TIMEOUT_MS)
+        compose.waitUntilAtLeastOneExists(hasText(SALES_REP_ORDERS), SERVER_TIMEOUT_MS)
         waitUntilLoaded()
         scrollListTo(hasText("#${order.incrementId}", substring = true))
         compose.onAllNodesWithText("#${order.incrementId}", substring = true).onFirst().performClick()

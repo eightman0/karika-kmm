@@ -6,7 +6,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -17,9 +16,12 @@ import org.junit.Test
 @OptIn(ExperimentalTestApi::class)
 class SalesRepNavigationE2ETest : SalesRepE2ETest() {
 
+    override val startOnOrders = false
+
     @Test
-    fun startsOnTheOrders() {
+    fun startsOnTheAnalyticsOverview() {
         assertTrue(displayed(hasText(SALES_REP_HOME)))
+        compose.onNodeWithText("Ukupan prihod").assertExists()
     }
 
     @Test
@@ -39,21 +41,20 @@ class SalesRepNavigationE2ETest : SalesRepE2ETest() {
 
     @Test
     fun analitikaShowsOnlyWhatTheSalesRepMaySee() {
-        val canSeeDashboard = me().capabilities.canSeeDashboard
-
         openDrawer()
         compose.onNode(drawerItem("Analitika")).performClick()
 
         listOf(
-            "Pregled", "Trendovi prodaje", "Analitika kupaca", "Kupci koji zahtijevaju pažnju",
-            "Proizvodi i kategorije"
+            "Pregled prodaje", "Trendovi prodaje", "Statistika kupaca", "Kupci koji zahtijevaju pažnju",
+            "Statistika proizvoda i kategorija"
         ).forEach { compose.waitUntil(SCREEN_TIMEOUT_MS) { displayed(drawerItem(it)) } }
-        assertEquals(canSeeDashboard, displayed(drawerItem("Komercijalisti")))
+        // The reps' performance is only in the supplier's drawer
+        assertTrue(!exists(hasText("Učinak komercijalista")))
     }
 
     @Test
     fun pregledOpensTheAnalyticsOverview() {
-        goTo("Pregled", "Analitika — Pregled", inAnalytics = true)
+        goTo("Pregled prodaje", "Analitika — Pregled", inAnalytics = true)
         compose.onNodeWithText("Ukupan prihod").assertExists()
     }
 

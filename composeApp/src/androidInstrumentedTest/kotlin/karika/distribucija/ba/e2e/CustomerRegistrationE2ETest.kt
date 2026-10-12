@@ -1,5 +1,10 @@
 package karika.distribucija.ba.e2e
 
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
@@ -102,7 +107,10 @@ class CustomerRegistrationE2ETest : StageE2ETest() {
         typePassword(0, "Registracija123")
         typePassword(1, "Registracija123")
         closeKeyboard()
-        compose.onAllNodes(isToggleable()).onFirst().performScrollTo().performClick()
+        // The box itself: the middle of the row is the text, whose links open the documents
+        compose.onAllNodes(isToggleable()).onFirst().performScrollTo()
+            .performTouchInput { click(Offset(CHECKBOX_CENTER.toPx(), CHECKBOX_CENTER.toPx())) }
+            .assertIsOn()
 
         tapPrijaviSe()
 
@@ -163,5 +171,7 @@ class CustomerRegistrationE2ETest : StageE2ETest() {
 
     private companion object {
         const val CANTON = "Kanton Sarajevo"
+        /** The terms checkbox's middle: the row's 16 dp padding and half the 22 dp box. */
+        val CHECKBOX_CENTER = 27.dp
     }
 }
