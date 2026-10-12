@@ -219,16 +219,16 @@ class OrderReviewFragment : Fragment() {
     private fun renderDeliveryExpanded() {
         binding.layoutDeliveryExpanded.visibility = if (deliveryExpanded) View.VISIBLE else View.GONE
         binding.iconDeliveryChevron.setImageResource(
-            if (deliveryExpanded) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down
+            if (deliveryExpanded) R.drawable.ic_k_ord_chevron_up else R.drawable.ic_k_ord_chevron_down
         )
     }
 
     private fun renderProviderSelection() {
         binding.rowProviderA2b.setBackgroundResource(
-            if (selectedCarrierCode == "A2B") R.drawable.bg_provider_row_selected else android.R.color.transparent
+            if (selectedCarrierCode == "A2B") R.drawable.bg_k_ord_provider_selected else android.R.color.transparent
         )
         binding.rowProviderExpress.setBackgroundResource(
-            if (selectedCarrierCode == "EURO_EXPRESS") R.drawable.bg_provider_row_selected else android.R.color.transparent
+            if (selectedCarrierCode == "EURO_EXPRESS") R.drawable.bg_k_ord_provider_selected else android.R.color.transparent
         )
     }
 
@@ -259,7 +259,7 @@ class OrderReviewFragment : Fragment() {
         )
         headers.forEachIndexed { index, res ->
             binding.rowSpecHeader.addView(
-                buildSpecCell(getString(res), specColumnWidthsDp[index], color = R.color.karika_gray6, bold = true, sizeSp = 10f)
+                buildSpecCell(getString(res), specColumnWidthsDp[index], color = R.color.k_muted, bold = true, sizeSp = 10f)
             )
             if (index != headers.lastIndex) binding.rowSpecHeader.addView(buildVerticalDivider())
         }
@@ -306,7 +306,7 @@ class OrderReviewFragment : Fragment() {
         text: String,
         widthDp: Int,
         bold: Boolean = false,
-        color: Int = R.color.karika_gray2,
+        color: Int = R.color.k_ink,
         sizeSp: Float = 13f
     ): TextView = TextView(requireContext()).apply {
         layoutParams = LinearLayout.LayoutParams(dp(widthDp), LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -321,7 +321,7 @@ class OrderReviewFragment : Fragment() {
     private fun buildEditActionCell(widthDp: Int, onClick: () -> Unit): TextView = TextView(requireContext()).apply {
         layoutParams = LinearLayout.LayoutParams(dp(widthDp), LinearLayout.LayoutParams.WRAP_CONTENT)
         text = getString(R.string.review_spec_edit_action)
-        setTextColor(requireContext().getColor(R.color.karika_blue))
+        setTextColor(requireContext().getColor(R.color.k_accent))
         textSize = 13f
         setTypeface(typeface, Typeface.BOLD)
         setPadding(dp(8), dp(10), dp(8), dp(10))
@@ -332,12 +332,12 @@ class OrderReviewFragment : Fragment() {
 
     private fun buildVerticalDivider(): View = View(requireContext()).apply {
         layoutParams = LinearLayout.LayoutParams(dp(1), LinearLayout.LayoutParams.MATCH_PARENT)
-        setBackgroundColor(requireContext().getColor(R.color.karika_gray9))
+        setBackgroundColor(requireContext().getColor(R.color.k_line))
     }
 
     private fun buildHorizontalDivider(): View = View(requireContext()).apply {
         layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(1))
-        setBackgroundColor(requireContext().getColor(R.color.karika_gray9))
+        setBackgroundColor(requireContext().getColor(R.color.k_line))
     }
 
     private fun openEditItemSheet(item: OnBehalfCartResponseItem) {
@@ -358,7 +358,7 @@ class OrderReviewFragment : Fragment() {
         val canConfirm = viewModel.isEligible && hasItems && !isPlacingOrder
         binding.buttonConfirm.isEnabled = canConfirm
         binding.buttonConfirm.setBackgroundResource(
-            if (canConfirm) R.drawable.bg_fab_order_customer else R.drawable.bg_button_filled_disabled
+            if (canConfirm) R.drawable.bg_k_button_primary else R.drawable.bg_k_ord_button_disabled
         )
         binding.textConfirm.visibility = if (isPlacingOrder) View.GONE else View.VISIBLE
         binding.progressConfirm.visibility = if (isPlacingOrder) View.VISIBLE else View.GONE
@@ -384,12 +384,14 @@ class OrderReviewFragment : Fragment() {
         }
         binding.textPartnershipBadge.text = getString(badgeLabel)
         val (badgeBgRes, badgeColorRes) = if (viewModel.customerActive) {
-            R.drawable.bg_review_badge_active to R.color.karika_green3
+            R.drawable.bg_k_pill_green_soft to R.color.k_green
         } else {
-            R.drawable.bg_review_badge_pending to R.color.karika_blue
+            R.drawable.bg_k_pill_accent_soft to R.color.k_accent
         }
         binding.textPartnershipBadge.setBackgroundResource(badgeBgRes)
         binding.textPartnershipBadge.setTextColor(requireContext().getColor(badgeColorRes))
+        binding.textPartnershipBadge.compoundDrawableTintList =
+            android.content.res.ColorStateList.valueOf(requireContext().getColor(badgeColorRes))
     }
 
     private fun dp(value: Int): Int = TypedValue.applyDimension(

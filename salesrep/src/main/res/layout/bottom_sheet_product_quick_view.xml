@@ -5,14 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:background="@drawable/bg_k_sheet"
     android:paddingHorizontal="20dp"
-    android:paddingVertical="8dp">
+    android:paddingTop="10dp"
+    android:paddingBottom="20dp">
 
     <View
-        android:layout_width="36dp"
+        android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/bg_sheet_drag_handle" />
+        android:background="@drawable/bg_k_sheet_handle" />
 
     <Space
         android:layout_width="1dp"
@@ -28,22 +30,23 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/catalog_quick_view_title"
-            android:textColor="@color/karika_gray2"
-            android:textSize="16sp"
+            android:textColor="@color/k_ink"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/button_close"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="@drawable/bg_sheet_close_button"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_k_circle_button"
             android:clickable="true"
             android:contentDescription="@string/customers_sheet_close_cd"
             android:focusable="true"
             android:padding="8dp"
-            android:src="@drawable/ic_cancel"
-            app:tint="@color/karika_gray2" />
+            android:src="@drawable/ic_k_ord_close"
+            app:tint="@color/k_ink" />
     </LinearLayout>
 
     <Space
@@ -52,13 +55,14 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:background="@drawable/bg_catalog_image_box">
+        android:layout_height="200dp"
+        android:background="@drawable/bg_k_ord_image_box_16">
 
         <ImageView
             android:id="@+id/image_product"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/bg_k_ord_image_box_16"
             android:contentDescription="@null"
             android:scaleType="centerCrop" />
     </FrameLayout>
@@ -77,13 +81,18 @@
             android:id="@+id/text_stock_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableStart="@drawable/k_ord_dot"
+            android:drawablePadding="6dp"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
             android:paddingHorizontal="10dp"
-            android:paddingVertical="4dp"
-            android:textSize="10sp"
+            android:paddingVertical="5dp"
+            android:textSize="11sp"
             android:textStyle="bold"
-            tools:background="@drawable/bg_customer_badge_active"
+            tools:background="@drawable/bg_k_pill_green_soft"
             tools:text="NA ZALIHI"
-            tools:textColor="@color/karika_green3" />
+            tools:textColor="@color/k_green" />
 
         <Space
             android:layout_width="8dp"
@@ -93,9 +102,8 @@
             android:id="@+id/text_available_qty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/karika_gray6"
+            android:textColor="@color/k_muted"
             android:textSize="13sp"
-            android:textStyle="bold"
             tools:text="Dostupno: 0" />
     </LinearLayout>
 
@@ -107,7 +115,7 @@
         android:id="@+id/text_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/karika_gray2"
+        android:textColor="@color/k_ink"
         android:textSize="20sp"
         android:textStyle="bold"
         tools:text="brasno klas" />
@@ -120,7 +128,7 @@
         android:id="@+id/text_category"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/karika_gray6"
+        android:textColor="@color/k_muted"
         android:textSize="13sp"
         android:visibility="gone"
         tools:text="Kategorija: PREHRAMBENI PROIZVODI &gt; BRAŠNO I PROIZVODI OD BRAŠNA &gt; BRAŠNO"
@@ -140,24 +148,24 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_stat_card"
+            android:background="@drawable/bg_k_field"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="12dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/catalog_quick_view_sku_label"
-                android:textColor="@color/karika_gray6"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+                android:textColor="@color/k_muted"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/text_sku"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/karika_gray2"
+                android:textColor="@color/k_ink"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 tools:text="K-273-00000006" />
@@ -168,24 +176,24 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_stat_card"
+            android:background="@drawable/bg_k_field"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="12dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/catalog_quick_view_price_label"
-                android:textColor="@color/karika_gray6"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+                android:textColor="@color/k_muted"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/text_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/karika_gray2"
+                android:textColor="@color/k_ink"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 tools:text="3,00 KM" />
@@ -199,7 +207,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/karika_gray9" />
+        android:background="@color/k_line" />
 
     <Space
         android:layout_width="1dp"
@@ -209,8 +217,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/catalog_quick_view_description_label"
-        android:textColor="@color/karika_gray6"
-        android:textSize="11sp"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/k_ink"
+        android:textSize="15sp"
         android:textStyle="bold" />
 
     <TextView
@@ -218,7 +227,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:textColor="@color/karika_gray2"
+        android:lineSpacingExtra="4dp"
+        android:textColor="@color/k_muted"
         android:textSize="14sp"
         tools:text="Opis nije dostupan." />
 

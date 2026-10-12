@@ -4,14 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_k_sheet"
     android:orientation="vertical">
 
     <View
-        android:layout_width="36dp"
+        android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_sheet_drag_handle" />
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bg_k_sheet_handle" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,24 +21,29 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp">
+        android:paddingTop="4dp"
+        android:paddingBottom="12dp">
 
         <ImageView
             android:id="@+id/button_category_back"
             android:layout_width="36dp"
             android:layout_height="36dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_k_circle_button"
             android:contentDescription="@string/category_sheet_back_cd"
-            android:padding="8dp"
+            android:padding="9dp"
             android:src="@drawable/ic_back"
             android:visibility="gone"
-            app:tint="@color/karika_blue" />
+            app:tint="@color/k_ink" />
 
         <TextView
             android:id="@+id/text_category_sheet_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="@color/karika_gray2"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="2"
+            android:textColor="@color/k_ink"
             android:textSize="18sp"
             android:textStyle="bold"
             tools:text="Katalog" />
@@ -45,43 +52,46 @@
             android:id="@+id/button_category_close"
             android:layout_width="36dp"
             android:layout_height="36dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/bg_k_circle_button"
             android:contentDescription="@string/category_sheet_close_cd"
-            android:padding="9dp"
-            android:src="@drawable/ic_cancel"
-            app:tint="@color/karika_gray6" />
+            android:padding="10dp"
+            android:src="@drawable/ic_k_ord_close"
+            app:tint="@color/k_ink" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/bg_catalog_search_field"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_k_field"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp"
+        android:minHeight="46dp"
+        android:paddingHorizontal="14dp"
         android:paddingVertical="10dp">
 
         <ImageView
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:contentDescription="@null"
-            android:src="@drawable/ic_search"
-            app:tint="@color/karika_gray6" />
+            android:src="@drawable/ic_k_ord_search"
+            app:tint="@color/k_muted" />
 
         <EditText
             android:id="@+id/edit_category_search"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="10dp"
             android:layout_weight="1"
             android:background="@null"
             android:hint="@string/category_sheet_search_hint"
             android:maxLines="1"
             android:padding="0dp"
-            android:textColor="@color/karika_gray2"
-            android:textColorHint="@color/karika_gray7"
-            android:textSize="14sp" />
+            android:textColor="@color/k_ink"
+            android:textColorHint="@color/k_subtle"
+            android:textSize="15sp" />
 
         <ImageView
             android:id="@+id/button_clear_category_search"
@@ -89,9 +99,9 @@
             android:layout_height="16dp"
             android:layout_marginStart="8dp"
             android:contentDescription="@string/category_sheet_clear_search_cd"
-            android:src="@drawable/ic_cancel"
+            android:src="@drawable/ic_k_ord_close"
             android:visibility="gone"
-            app:tint="@color/karika_gray6" />
+            app:tint="@color/k_muted" />
     </LinearLayout>
 
     <LinearLayout
@@ -100,20 +110,21 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_category_header_row_unselected"
+        android:background="@drawable/bg_k_ord_row_field"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="14dp">
+        android:paddingVertical="13dp">
 
         <TextView
             android:id="@+id/text_category_header_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/karika_gray2"
-            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/k_ink"
+            android:textSize="14.5sp"
             android:textStyle="bold"
             tools:text="Sve kategorije" />
     </LinearLayout>
@@ -137,7 +148,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:textColor="@color/karika_gray6"
+            android:textColor="@color/k_muted"
             android:textSize="14sp"
             android:visibility="gone"
             tools:text="Nema rezultata za „mlijeko„"

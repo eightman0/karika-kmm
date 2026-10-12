@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
-    android:background="@drawable/bg_catalog_product_card"
-    android:clipToOutline="true"
+    android:background="@drawable/bg_k_card_14"
     android:orientation="vertical">
 
     <LinearLayout
@@ -17,35 +16,36 @@
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="10dp">
 
         <FrameLayout
-            android:layout_width="90dp"
-            android:layout_height="90dp"
-            android:background="@drawable/bg_catalog_image_box">
+            android:layout_width="84dp"
+            android:layout_height="84dp">
 
             <ImageView
                 android:id="@+id/image_product"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@drawable/bg_k_ord_image_box"
                 android:contentDescription="@null"
                 android:scaleType="centerCrop" />
 
             <FrameLayout
                 android:id="@+id/badge_in_cart"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:layout_gravity="top|end"
-                android:layout_margin="2dp"
-                android:background="@drawable/bg_catalog_check_badge"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_k_ord_check_badge"
                 android:visibility="gone">
 
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_check_circle_filled"
-                    app:tint="@color/karika_white" />
+                    android:padding="4dp"
+                    android:src="@drawable/ic_k_ord_check"
+                    app:tint="@color/k_white" />
             </FrameLayout>
         </FrameLayout>
 
@@ -57,90 +57,112 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/text_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/karika_gray2"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                tools:text="Artikal XY sa dužim nazivom" />
-
-            <TextView
-                android:id="@+id/text_sku"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:textColor="@color/karika_gray6"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:visibility="gone"
-                tools:text="#SKU-12345"
-                tools:visibility="visible" />
-
-            <TextView
                 android:id="@+id/text_category"
+                style="@style/K.Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:textColor="@color/karika_gray6"
-                android:textSize="11sp"
-                android:textStyle="bold"
+                android:layout_marginBottom="2dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/k_muted"
+                android:textSize="11.5sp"
                 android:visibility="gone"
                 tools:text="Kategorija"
                 tools:visibility="visible" />
 
             <TextView
-                android:id="@+id/text_price"
+                android:id="@+id/text_name"
+                style="@style/K.Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textColor="@color/karika_blue"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                tools:text="12,50 KM" />
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:lineSpacingExtra="2dp"
+                android:maxLines="2"
+                android:textSize="14sp"
+                tools:text="Artikal XY sa dužim nazivom" />
 
             <TextView
-                android:id="@+id/text_out_of_stock"
+                android:id="@+id/text_sku"
+                style="@style/K.Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/catalog_out_of_stock"
-                android:textColor="@color/karika_red4"
-                android:textSize="12sp"
-                android:textStyle="bold"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:textColor="@color/k_subtle"
+                android:textSize="11.5sp"
                 android:visibility="gone"
+                tools:text="#SKU-12345"
                 tools:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/text_price"
+                    style="@style/K.Text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="1"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    tools:text="12,50 KM" />
+
+                <TextView
+                    android:id="@+id/text_out_of_stock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_k_pill_red_soft"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp"
+                    android:text="@string/catalog_out_of_stock"
+                    android:textColor="@color/k_red"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/k_line" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="1dp"
-        android:layout_marginBottom="1dp"
-        android:background="@drawable/bg_catalog_product_footer"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="10dp">
+        android:padding="10dp">
 
         <LinearLayout
             android:id="@+id/layout_stepper"
             android:layout_width="wrap_content"
-            android:layout_height="44dp"
-            android:background="@drawable/bg_catalog_stepper_box"
+            android:layout_height="38dp"
+            android:background="@drawable/bg_k_ord_stepper"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="2dp">
+            android:padding="3dp">
 
             <TextView
                 android:id="@+id/button_minus"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_catalog_stepper_button"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_k_ord_step_circle"
                 android:contentDescription="@string/catalog_decrease_cd"
                 android:gravity="center"
+                android:includeFontPadding="false"
                 android:text="−"
-                android:textColor="@color/karika_gray2"
+                android:textColor="@color/k_accent"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -149,33 +171,33 @@
                 android:layout_width="42dp"
                 android:layout_height="wrap_content"
                 android:background="@null"
+                android:fontFamily="sans-serif-medium"
                 android:gravity="center"
                 android:inputType="number"
                 android:maxLines="1"
                 android:padding="0dp"
-                android:textColor="@color/karika_gray2"
-                android:textSize="14sp"
-                android:textStyle="bold"
+                android:textColor="@color/k_ink"
+                android:textSize="15sp"
                 tools:text="1" />
 
             <ImageView
                 android:id="@+id/button_plus"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_catalog_stepper_button"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_k_ord_step_plus"
                 android:contentDescription="@string/catalog_increase_cd"
-                android:padding="9dp"
-                android:src="@drawable/ic_add_plus"
-                app:tint="@color/karika_gray2" />
+                android:padding="8dp"
+                android:src="@drawable/ic_k_ord_plus"
+                app:tint="@color/k_white" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/button_add"
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="40dp"
             android:layout_marginStart="10dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_catalog_add_button"
+            android:background="@drawable/bg_k_square_button"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
@@ -183,20 +205,21 @@
 
             <ImageView
                 android:id="@+id/icon_add"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="17dp"
+                android:layout_height="17dp"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_cart_add"
-                app:tint="@color/karika_white" />
+                android:src="@drawable/ic_k_ord_cart_add"
+                app:tint="@color/k_white" />
 
             <TextView
                 android:id="@+id/text_add"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="@string/catalog_add"
-                android:textColor="@color/karika_white"
-                android:textSize="13sp"
+                android:textColor="@color/k_white"
+                android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>

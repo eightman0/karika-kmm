@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
-    android:background="@drawable/bg_category_row_unselected"
+    android:background="@drawable/bg_k_ord_row"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingHorizontal="16dp"
-    android:paddingVertical="14dp">
+    android:paddingVertical="13dp">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -23,17 +23,18 @@
             android:id="@+id/text_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/karika_gray2"
-            android:textSize="14sp"
-            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/k_ink"
+            android:textSize="14.5sp"
             tools:text="Mliječni proizvodi" />
 
         <TextView
             android:id="@+id/text_breadcrumb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/karika_gray7"
-            android:textSize="11sp"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/k_muted"
+            android:textSize="12sp"
             android:visibility="gone"
             tools:text="Hrana › Mliječni proizvodi"
             tools:visibility="visible" />
@@ -45,8 +46,8 @@
         android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:contentDescription="@null"
-        android:src="@drawable/ic_arrow_right"
+        android:src="@drawable/ic_k_ord_chevron_right"
         android:visibility="gone"
-        app:tint="@color/karika_gray6" />
+        app:tint="@color/k_subtle" />
 
 </LinearLayout>

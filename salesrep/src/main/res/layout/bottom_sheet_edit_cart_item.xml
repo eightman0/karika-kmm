@@ -4,41 +4,42 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_k_sheet"
     android:orientation="vertical"
-    android:paddingHorizontal="16dp"
-    android:paddingBottom="16dp">
+    android:paddingHorizontal="20dp"
+    android:paddingBottom="20dp">
 
     <View
-        android:layout_width="36dp"
+        android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_sheet_drag_handle" />
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_k_sheet_handle" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:gravity="center"
+        android:fontFamily="sans-serif-medium"
         android:text="@string/review_edit_item_title"
-        android:textColor="@color/karika_gray2"
-        android:textSize="18sp"
+        android:textColor="@color/k_ink"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="16dp"
-        android:background="@color/karika_gray9" />
+        android:background="@color/k_line" />
 
     <TextView
         android:id="@+id/text_item_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:textColor="@color/karika_gray2"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/k_ink"
         android:textSize="15sp"
-        android:textStyle="bold"
         tools:text="Artikal XY" />
 
     <LinearLayout
@@ -53,9 +54,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/review_edit_item_discount_label"
-            android:textColor="@color/karika_gray2"
-            android:textSize="13sp"
-            android:textStyle="bold" />
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/k_muted"
+            android:textSize="13sp" />
 
         <Space android:layout_width="1dp" android:layout_height="6dp" />
 
@@ -63,14 +64,15 @@
             android:id="@+id/edit_discount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_form_field"
+            android:background="@drawable/bg_k_field"
+            android:minHeight="46dp"
             android:inputType="number"
             android:maxLength="3"
             android:maxLines="1"
-            android:paddingHorizontal="12dp"
+            android:paddingHorizontal="14dp"
             android:paddingVertical="10dp"
-            android:textColor="@color/karika_gray2"
-            android:textSize="14sp"
+            android:textColor="@color/k_ink"
+            android:textSize="15sp"
             tools:text="10" />
     </LinearLayout>
 
@@ -79,7 +81,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:textColor="@color/karika_gray6"
+        android:textColor="@color/k_muted"
         android:textSize="13sp"
         android:visibility="gone"
         tools:text="Rabat: 10%" />
@@ -89,9 +91,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/review_edit_item_qty_label"
-        android:textColor="@color/karika_gray2"
-        android:textSize="13sp"
-        android:textStyle="bold" />
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/k_muted"
+        android:textSize="13sp" />
 
     <Space android:layout_width="1dp" android:layout_height="6dp" />
 
@@ -99,20 +101,21 @@
         android:id="@+id/edit_qty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_form_field"
+        android:background="@drawable/bg_k_field"
+            android:minHeight="46dp"
         android:inputType="number"
         android:maxLines="1"
-        android:paddingHorizontal="12dp"
+        android:paddingHorizontal="14dp"
         android:paddingVertical="10dp"
-        android:textColor="@color/karika_gray2"
-        android:textSize="14sp"
+        android:textColor="@color/k_ink"
+        android:textSize="15sp"
         tools:text="2" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="16dp"
-        android:background="@color/karika_gray9" />
+        android:background="@color/k_line" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -123,10 +126,10 @@
         <LinearLayout
             android:id="@+id/button_cancel"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="12dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_button_outline_blue"
+            android:background="@drawable/bg_k_button_secondary"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center">
@@ -134,8 +137,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
                 android:text="@string/review_edit_item_cancel"
-                android:textColor="@color/karika_blue"
+                android:textColor="@color/k_ink"
                 android:textSize="15sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -143,9 +147,9 @@
         <LinearLayout
             android:id="@+id/button_confirm"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="52dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_button_pill_primary"
+            android:background="@drawable/bg_k_button_primary"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center">
@@ -153,8 +157,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
                 android:text="@string/review_edit_item_confirm"
-                android:textColor="@color/karika_white"
+                android:textColor="@color/k_white"
                 android:textSize="15sp"
                 android:textStyle="bold" />
         </LinearLayout>

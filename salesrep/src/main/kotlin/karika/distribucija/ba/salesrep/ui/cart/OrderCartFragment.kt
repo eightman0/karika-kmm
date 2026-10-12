@@ -95,7 +95,7 @@ class OrderCartFragment : Fragment() {
             binding.textDiscount.text = "-" + (cart?.discountString() ?: "0,00 KM")
             binding.textGrandTotal.text = cart?.grandTotalString() ?: "0,00 KM"
             binding.buttonReview.setBackgroundResource(
-                if (items.isNotEmpty()) R.drawable.bg_cart_review_button else R.drawable.bg_cart_review_button_disabled
+                if (items.isNotEmpty()) R.drawable.bg_k_button_primary else R.drawable.bg_k_ord_button_disabled
             )
             binding.buttonReview.isEnabled = items.isNotEmpty()
             binding.buttonClear.visibility = if (items.isNotEmpty()) View.VISIBLE else View.GONE

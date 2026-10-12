@@ -158,10 +158,10 @@ class OrderCatalogFragment : Fragment() {
 
         binding.buttonCategoryFilter.visibility = if (isAllTab) View.VISIBLE else View.GONE
         binding.buttonCategoryFilter.setBackgroundResource(
-            if (selected != null) R.drawable.bg_catalog_category_button_active else R.drawable.bg_catalog_category_button_inactive
+            if (selected != null) R.drawable.bg_k_square_button else R.drawable.bg_k_ord_square_ink
         )
         binding.iconCategoryFilter.setColorFilter(
-            requireContext().getColor(if (selected != null) R.color.karika_white else R.color.karika_gray6)
+            requireContext().getColor(R.color.k_white)
         )
 
         val showChip = isAllTab && selected != null
@@ -178,8 +178,8 @@ class OrderCatalogFragment : Fragment() {
             val isLast = index == path.lastIndex
             container.addView(TextView(requireContext()).apply {
                 text = category.name
-                setTextColor(requireContext().getColor(R.color.karika_blue))
-                textSize = 12f
+                setTextColor(requireContext().getColor(R.color.k_accent))
+                textSize = 13f
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
                 if (!isLast) {
                     isClickable = true
@@ -189,9 +189,9 @@ class OrderCatalogFragment : Fragment() {
             })
             if (!isLast) {
                 container.addView(TextView(requireContext()).apply {
-                    text = "->"
-                    setTextColor(requireContext().getColor(R.color.karika_blue))
-                    textSize = 12f
+                    text = "›"
+                    setTextColor(requireContext().getColor(R.color.k_accent))
+                    textSize = 13f
                     setTypeface(typeface, android.graphics.Typeface.BOLD)
                     setPadding(dp(4), 0, dp(4), 0)
                 })
@@ -207,9 +207,9 @@ class OrderCatalogFragment : Fragment() {
 
     private fun stylePill(pill: android.widget.TextView, selected: Boolean) {
         pill.setBackgroundResource(
-            if (selected) R.drawable.bg_catalog_tab_selected else R.drawable.bg_catalog_tab_unselected
+            if (selected) R.drawable.bg_k_chip_selected else R.drawable.bg_k_chip
         )
-        pill.setTextColor(requireContext().getColor(if (selected) R.color.karika_white else R.color.karika_gray2))
+        pill.setTextColor(requireContext().getColor(if (selected) R.color.k_white else R.color.k_ink))
     }
 
     private fun renderEmptyState() {

@@ -20,11 +20,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_discount_badge_art"
-            android:paddingHorizontal="6dp"
+            android:background="@drawable/bg_k_pill_accent_soft"
+            android:paddingHorizontal="8dp"
             android:paddingVertical="3dp"
             android:text="@string/discount_form_badge_product"
-            android:textColor="@color/karika_gray6"
+            android:textColor="@color/k_accent"
             android:textSize="10sp"
             android:textStyle="bold" />
 
@@ -39,17 +39,18 @@
                 android:id="@+id/text_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/karika_gray2"
-                android:textSize="13sp"
-                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/k_ink"
+                android:textSize="14sp"
                 tools:text="Artikal XY" />
 
             <TextView
                 android:id="@+id/text_sku"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/karika_gray6"
-                android:textSize="11sp"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/k_muted"
+                android:textSize="12sp"
                 android:visibility="gone"
                 tools:text="SKU-12345"
                 tools:visibility="visible" />
@@ -61,6 +62,6 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginHorizontal="12dp"
-        android:background="@color/karika_gray10" />
+        android:background="@color/k_line" />
 
 </LinearLayout>

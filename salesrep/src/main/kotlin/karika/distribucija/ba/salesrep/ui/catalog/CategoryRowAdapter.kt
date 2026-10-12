@@ -51,10 +51,10 @@ class CategoryRowAdapter(
 
             val context = binding.root.context
             binding.root.setBackgroundResource(
-                if (row.isSelected) R.drawable.bg_category_row_selected else R.drawable.bg_category_row_unselected
+                if (row.isSelected) R.drawable.bg_k_ord_row_selected else R.drawable.bg_k_ord_row
             )
             binding.textName.setTextColor(
-                context.getColor(if (row.isSelected) R.color.karika_blue else R.color.karika_gray2)
+                context.getColor(if (row.isSelected) R.color.k_accent else R.color.k_ink)
             )
             binding.root.setOnClickListener { onClick(row) }
         }

@@ -36,15 +36,19 @@ class ProductQuickViewBottomSheet(
 
         view.findViewById<ImageView>(R.id.image_product).loadUrl(product.imageUrl, viewLifecycleOwner)
 
+        view.findViewById<ImageView>(R.id.image_product).clipToOutline = true
+
         view.findViewById<TextView>(R.id.text_stock_badge).apply {
             if (product.isInStock) {
                 text = getString(R.string.catalog_stock_in)
-                setBackgroundResource(R.drawable.bg_customer_badge_active)
-                setTextColor(context.getColor(R.color.karika_green3))
+                setBackgroundResource(R.drawable.bg_k_pill_green_soft)
+                setTextColor(context.getColor(R.color.k_green))
+                compoundDrawableTintList = android.content.res.ColorStateList.valueOf(context.getColor(R.color.k_green_dot))
             } else {
                 text = getString(R.string.catalog_stock_out)
-                setBackgroundResource(R.drawable.bg_detail_badge_rejected)
-                setTextColor(context.getColor(R.color.karika_error))
+                setBackgroundResource(R.drawable.bg_k_pill_red_soft)
+                setTextColor(context.getColor(R.color.k_red))
+                compoundDrawableTintList = android.content.res.ColorStateList.valueOf(context.getColor(R.color.k_red))
             }
         }
         view.findViewById<TextView>(R.id.text_available_qty).text = getString(

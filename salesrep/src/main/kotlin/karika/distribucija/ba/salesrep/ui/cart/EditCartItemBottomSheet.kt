@@ -71,7 +71,7 @@ class EditCartItemBottomSheet(
         val qtyValid = (binding.editQty.text?.toString()?.toIntOrNull() ?: 0) > 0
         binding.buttonConfirm.isEnabled = qtyValid
         binding.buttonConfirm.setBackgroundResource(
-            if (qtyValid) R.drawable.bg_button_pill_primary else R.drawable.bg_button_pill_disabled
+            if (qtyValid) R.drawable.bg_k_button_primary else R.drawable.bg_k_ord_button_disabled
         )
     }
 

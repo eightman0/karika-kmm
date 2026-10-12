@@ -5,28 +5,26 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
-    app:cardBackgroundColor="@color/karika_white"
+    app:cardBackgroundColor="@color/k_white"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
-    app:strokeColor="@color/karika_gray9"
+    app:strokeColor="@color/k_line"
     app:strokeWidth="1dp">
-
-    <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="top"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="14dp">
 
-        <FrameLayout
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="@drawable/bg_catalog_image_box">
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            app:cardBackgroundColor="@color/k_field"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <ImageView
                 android:id="@+id/image_product"
@@ -34,7 +32,7 @@
                 android:layout_height="match_parent"
                 android:contentDescription="@null"
                 android:scaleType="centerCrop" />
-        </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -43,196 +41,229 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/text_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/karika_gray2"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:text="Artikal XY sa dužim nazivom" />
-
-            <TextView
-                android:id="@+id/text_sku"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:textColor="@color/karika_gray6"
-                android:textSize="11sp"
-                android:visibility="gone"
-                tools:text="#SKU-12345"
-                tools:visibility="visible" />
-
+            <!-- Name + remove -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="center_vertical"
+                android:gravity="top"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/text_vpc_strike"
+                    android:id="@+id/text_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif-medium"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="2"
+                    android:textColor="@color/k_ink"
+                    android:textSize="14sp"
+                    tools:text="Artikal XY sa dužim nazivom" />
+
+                <FrameLayout
+                    android:id="@+id/button_remove"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_k_ord_circle_ripple"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/action_delete"
+                        android:src="@drawable/ic_k_ord_trash"
+                        app:tint="@color/k_subtle" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- SKU + read-only discount pills -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/text_sku"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="6dp"
-                    android:textColor="@color/karika_gray6"
-                    android:textSize="12sp"
+                    android:background="@drawable/bg_k_pill_field"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp"
+                    android:textColor="@color/k_muted"
+                    android:textSize="11sp"
                     android:visibility="gone"
-                    tools:text="30,00 KM"
+                    tools:text="#SKU-12345"
                     tools:visibility="visible" />
 
                 <TextView
-                    android:id="@+id/text_price"
+                    android:id="@+id/text_discount_readonly"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/karika_blue"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    tools:text="25,00 KM" />
+                    android:background="@drawable/bg_k_pill_accent_soft"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp"
+                    android:textColor="@color/k_accent"
+                    android:textSize="11sp"
+                    android:visibility="gone"
+                    tools:text="Rabat: 10%"
+                    tools:visibility="visible" />
+            </LinearLayout>
+
+            <!-- Price + stepper -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="bottom"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/text_vpc_strike"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:textColor="@color/k_subtle"
+                        android:textSize="11.5sp"
+                        android:visibility="gone"
+                        tools:text="30,00 KM"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/text_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:textColor="@color/k_ink"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        tools:text="25,00 KM" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_stepper"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_k_ord_stepper"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="3dp">
+
+                    <TextView
+                        android:id="@+id/button_minus"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:background="@drawable/bg_k_ord_step_circle"
+                        android:contentDescription="@string/catalog_decrease_cd"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:text="−"
+                        android:textColor="@color/k_accent"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edit_qty"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:padding="0dp"
+                        android:textColor="@color/k_ink"
+                        android:textSize="15sp"
+                        tools:text="2" />
+
+                    <ImageView
+                        android:id="@+id/button_plus"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:background="@drawable/bg_k_ord_step_plus"
+                        android:contentDescription="@string/catalog_increase_cd"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_k_ord_plus"
+                        app:tint="@color/k_white" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Editable discount -->
+            <LinearLayout
+                android:id="@+id/layout_discount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_k_ord_field_10"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="6dp"
+                android:paddingBottom="4dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/cart_discount_label"
+                    android:textColor="@color/k_muted"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_k_ord_white_8"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="6dp">
+
+                    <EditText
+                        android:id="@+id/edit_discount"
+                        android:layout_width="34dp"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:gravity="end"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:padding="0dp"
+                        android:textColor="@color/k_ink"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="10" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="2dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/discount_form_percent_suffix"
+                        android:textColor="@color/k_muted"
+                        android:textSize="14sp" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-
-        <FrameLayout
-            android:id="@+id/button_remove"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/bg_cart_delete_button"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_gravity="center"
-                android:contentDescription="@string/action_delete"
-                android:src="@drawable/ic_delete"
-                app:tint="@color/karika_red" />
-        </FrameLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="1dp"
-        android:layout_marginBottom="1dp"
-        android:background="@drawable/bg_catalog_product_footer"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="10dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/cart_quantity_label"
-            android:textColor="@color/karika_gray6"
-            android:textSize="13sp" />
-
-        <LinearLayout
-            android:id="@+id/layout_stepper"
-            android:layout_width="wrap_content"
-            android:layout_height="44dp"
-            android:layout_marginStart="10dp"
-            android:background="@drawable/bg_catalog_stepper_box"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="2dp">
-
-            <TextView
-                android:id="@+id/button_minus"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_catalog_stepper_button"
-                android:contentDescription="@string/catalog_decrease_cd"
-                android:gravity="center"
-                android:text="−"
-                android:textColor="@color/karika_gray2"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/edit_qty"
-                android:layout_width="46dp"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:gravity="center"
-                android:inputType="number"
-                android:maxLines="1"
-                android:padding="0dp"
-                android:textColor="@color/karika_gray2"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:text="2" />
-
-            <ImageView
-                android:id="@+id/button_plus"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_catalog_stepper_button"
-                android:contentDescription="@string/catalog_increase_cd"
-                android:padding="9dp"
-                android:src="@drawable/ic_add_plus"
-                app:tint="@color/karika_gray2" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
-            android:id="@+id/layout_discount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_catalog_stepper_box"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="6dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="@string/cart_discount_label"
-                android:textColor="@color/karika_gray6"
-                android:textSize="13sp" />
-
-            <EditText
-                android:id="@+id/edit_discount"
-                android:layout_width="30dp"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:gravity="end"
-                android:inputType="number"
-                android:maxLines="1"
-                android:padding="0dp"
-                android:textColor="@color/karika_gray2"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:text="10" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="@string/discount_form_percent_suffix"
-                android:textColor="@color/karika_gray6"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/text_discount_readonly"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/karika_gray6"
-            android:textSize="13sp"
-            android:visibility="gone"
-            tools:text="Rabat: 10%" />
-    </LinearLayout>
-
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

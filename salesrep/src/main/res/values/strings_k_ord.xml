@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="k_ord_section_customer">Kupac</string>
+    <string name="k_ord_delivery_subtitle">Karika preuzima i dostavlja robu kupcu</string>
+    <string name="k_ord_items">Stavki</string>
+    <string name="k_ord_pdv">PDV (17%)</string>
+    <string name="k_ord_summary">Pregled</string>
+</resources>

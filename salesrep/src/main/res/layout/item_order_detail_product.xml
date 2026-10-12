@@ -3,11 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
-    android:layout_marginBottom="4dp"
-    android:background="@drawable/bg_product_card"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/bg_k_card_14"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="14dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,7 +24,7 @@
                 android:id="@+id/text_product_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/karika_gray2"
+                android:textColor="@color/k_ink"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 tools:text="Naziv proizvoda" />
@@ -35,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="@color/karika_gray6"
+                android:textColor="@color/k_muted"
                 android:textSize="12sp"
                 tools:text="Količina: 5 kom" />
         </LinearLayout>
@@ -48,11 +47,11 @@
             android:id="@+id/text_product_rabat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_rabat_badge"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="3dp"
-            android:textColor="@color/karika_blue"
-            android:textSize="10sp"
+            android:background="@drawable/bg_k_pill_accent_soft"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:textColor="@color/k_accent"
+            android:textSize="11sp"
             android:textStyle="bold"
             tools:text="Rabat 10%" />
     </LinearLayout>
@@ -62,7 +61,7 @@
         android:layout_height="1dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="12dp"
-        android:background="@color/karika_gray9" />
+        android:background="@color/k_line" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -79,7 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/order_detail_price_vpc"
-                android:textColor="@color/karika_gray7"
+                android:textColor="@color/k_muted"
                 android:textSize="11sp" />
 
             <TextView
@@ -87,7 +86,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="@color/karika_gray2"
+                android:textColor="@color/k_ink"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 tools:text="12,50 KM" />
@@ -103,7 +102,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/order_detail_total_vpc"
-                android:textColor="@color/karika_gray7"
+                android:textColor="@color/k_muted"
                 android:textSize="11sp" />
 
             <TextView
@@ -111,7 +110,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="@color/karika_gray2"
+                android:textColor="@color/k_ink"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 tools:text="62,50 KM" />
@@ -137,7 +136,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/order_detail_total_with_pdv"
-                android:textColor="@color/karika_gray7"
+                android:textColor="@color/k_muted"
                 android:textSize="11sp" />
 
             <TextView
@@ -145,7 +144,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="@color/karika_gray2"
+                android:textColor="@color/k_ink"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 tools:text="73,13 KM" />
@@ -161,7 +160,7 @@
                 android:id="@+id/text_commission_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/karika_gray7"
+                android:textColor="@color/k_muted"
                 android:textSize="11sp"
                 tools:text="Provizija (5%)" />
 
@@ -170,7 +169,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="@color/karika_blue"
+                android:textColor="@color/k_accent"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 tools:text="3,13 KM" />

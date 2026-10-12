@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Orders/catalog/cart redesign colors (Compose SalesOrderDetailView / OrderDetailsView) -->
+<resources>
+    <color name="k_ord_on_blue_label">#CCFFFFFF</color>
+    <color name="k_ord_on_blue_line">#2EFFFFFF</color>
+    <color name="k_ord_amber_card">#FFFBEB</color>
+    <color name="k_ord_amber_border">#FCD34D</color>
+    <color name="k_ord_amber_line">#FDE68A</color>
+    <color name="k_ord_amber_title">#92400E</color>
+    <color name="k_ord_table_header">#F9FAFB</color>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quantity stepper pill (soft blue) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/k_accent_soft" />
+    <corners android:radius="999dp" />
+</shape>

@@ -141,10 +141,10 @@ class CategoryFilterBottomSheet(
                 getString(R.string.category_sheet_all_root)
             }
             binding.rowCategoryHeader.setBackgroundResource(
-                if (isParentSelected) R.drawable.bg_category_row_selected else R.drawable.bg_category_header_row_unselected
+                if (isParentSelected) R.drawable.bg_k_ord_row_selected else R.drawable.bg_k_ord_row_field
             )
             binding.textCategoryHeaderLabel.setTextColor(
-                requireContext().getColor(if (isParentSelected) R.color.karika_blue else R.color.karika_gray2)
+                requireContext().getColor(if (isParentSelected) R.color.k_accent else R.color.k_ink)
             )
 
             val currentCategories = if (navStack.isEmpty()) allCategories else navStack.last().childrenData

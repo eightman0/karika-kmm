@@ -136,7 +136,7 @@ class OrderDetailFragment : Fragment() {
         viewModel.isSendingComment.observe(viewLifecycleOwner) { sending ->
             binding.buttonSendComment.isEnabled = !sending
             binding.buttonSendComment.setBackgroundResource(
-                if (sending) R.drawable.bg_send_button_disabled else R.drawable.bg_send_button
+                if (sending) R.drawable.bg_k_ord_button_disabled else R.drawable.bg_k_button_primary
             )
             binding.iconSendComment.visibility = if (sending) View.GONE else View.VISIBLE
             binding.textSendComment.visibility = if (sending) View.GONE else View.VISIBLE
@@ -266,16 +266,16 @@ class OrderDetailFragment : Fragment() {
     private fun renderDeliveryExpanded() {
         binding.layoutDeliveryExpanded.visibility = if (deliveryExpanded) View.VISIBLE else View.GONE
         binding.iconDeliveryChevron.setImageResource(
-            if (deliveryExpanded) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down
+            if (deliveryExpanded) R.drawable.ic_k_ord_chevron_up else R.drawable.ic_k_ord_chevron_down
         )
     }
 
     private fun renderProviderSelection() {
         binding.rowProviderA2b.setBackgroundResource(
-            if (selectedCarrierCode == "A2B") R.drawable.bg_provider_row_selected else android.R.color.transparent
+            if (selectedCarrierCode == "A2B") R.drawable.bg_k_ord_provider_selected else android.R.color.transparent
         )
         binding.rowProviderExpress.setBackgroundResource(
-            if (selectedCarrierCode == "EURO_EXPRESS") R.drawable.bg_provider_row_selected else android.R.color.transparent
+            if (selectedCarrierCode == "EURO_EXPRESS") R.drawable.bg_k_ord_provider_selected else android.R.color.transparent
         )
     }
 
@@ -318,7 +318,7 @@ class OrderDetailFragment : Fragment() {
 
         headers.forEachIndexed { index, header ->
             binding.rowSpecHeader.addView(
-                buildSpecCell(header, widths[index], color = R.color.karika_gray6, bold = true, sizeSp = 10f)
+                buildSpecCell(header, widths[index], color = R.color.k_muted, bold = true, sizeSp = 10f)
             )
             if (index != headers.lastIndex) binding.rowSpecHeader.addView(buildVerticalDivider())
         }
@@ -371,7 +371,7 @@ class OrderDetailFragment : Fragment() {
         text: String,
         widthDp: Int,
         bold: Boolean = false,
-        color: Int = R.color.karika_gray2,
+        color: Int = R.color.k_ink,
         sizeSp: Float = 13f
     ): TextView = TextView(requireContext()).apply {
         layoutParams = LinearLayout.LayoutParams(dp(widthDp), LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -395,7 +395,7 @@ class OrderDetailFragment : Fragment() {
         if (original.isNotEmpty()) {
             column.addView(TextView(requireContext()).apply {
                 text = original
-                setTextColor(requireContext().getColor(R.color.karika_gray7))
+                setTextColor(requireContext().getColor(R.color.k_subtle))
                 textSize = 12f
                 maxLines = 1
                 paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
@@ -403,7 +403,7 @@ class OrderDetailFragment : Fragment() {
         }
         column.addView(TextView(requireContext()).apply {
             text = product.qty()
-            setTextColor(requireContext().getColor(R.color.karika_gray2))
+            setTextColor(requireContext().getColor(R.color.k_ink))
             textSize = 13f
             setTypeface(typeface, Typeface.BOLD)
             maxLines = 1
@@ -414,7 +414,7 @@ class OrderDetailFragment : Fragment() {
     private fun buildEditActionCell(widthDp: Int, onClick: () -> Unit): TextView = TextView(requireContext()).apply {
         layoutParams = LinearLayout.LayoutParams(dp(widthDp), LinearLayout.LayoutParams.WRAP_CONTENT)
         text = getString(R.string.review_spec_edit_action)
-        setTextColor(requireContext().getColor(R.color.karika_blue))
+        setTextColor(requireContext().getColor(R.color.k_accent))
         textSize = 13f
         setTypeface(typeface, Typeface.BOLD)
         setPadding(dp(8), dp(10), dp(8), dp(10))
@@ -425,12 +425,12 @@ class OrderDetailFragment : Fragment() {
 
     private fun buildVerticalDivider(): View = View(requireContext()).apply {
         layoutParams = LinearLayout.LayoutParams(dp(1), LinearLayout.LayoutParams.MATCH_PARENT)
-        setBackgroundColor(requireContext().getColor(R.color.karika_gray9))
+        setBackgroundColor(requireContext().getColor(R.color.k_line))
     }
 
     private fun buildHorizontalDivider(): View = View(requireContext()).apply {
         layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(1))
-        setBackgroundColor(requireContext().getColor(R.color.karika_gray9))
+        setBackgroundColor(requireContext().getColor(R.color.k_line))
     }
 
     private fun openEditItemSheet(item: VendorProduct) {
@@ -461,10 +461,10 @@ class OrderDetailFragment : Fragment() {
         itemBinding.textCommentMessage.setHtmlText(comment.message())
         itemBinding.textCommentTime.text = comment.createdAt()
         itemBinding.textCommentMessage.setBackgroundResource(
-            if (isMine) R.drawable.bg_comment_bubble_mine else R.drawable.bg_comment_bubble_other
+            if (isMine) R.drawable.bg_k_ord_bubble_mine else R.drawable.bg_k_ord_bubble_other
         )
         itemBinding.textCommentMessage.setTextColor(
-            requireContext().getColor(if (isMine) R.color.karika_white else R.color.karika_gray2)
+            requireContext().getColor(if (isMine) R.color.k_white else R.color.k_ink)
         )
 
         val bias = if (isMine) 1f else 0f

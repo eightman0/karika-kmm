@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_gray20">
+    android:background="@color/k_page">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,42 +14,41 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/karika_white"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp">
+            android:paddingTop="16dp">
 
             <LinearLayout
                 android:id="@+id/search_field_container"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="46dp"
                 android:layout_weight="1"
-                android:background="@drawable/bg_catalog_search_field"
+                android:background="@drawable/bg_k_field"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="10dp">
+                android:paddingHorizontal="14dp">
 
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_search"
-                    app:tint="@color/karika_gray6" />
+                    android:src="@drawable/ic_k_ord_search"
+                    app:tint="@color/k_muted" />
 
                 <EditText
                     android:id="@+id/edit_search"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="10dp"
                     android:layout_weight="1"
                     android:background="@null"
                     android:hint="@string/catalog_search_hint"
                     android:maxLines="1"
                     android:padding="0dp"
-                    android:textColor="@color/karika_gray2"
-                    android:textColorHint="@color/karika_gray7"
-                    android:textSize="14sp" />
+                    android:textColor="@color/k_ink"
+                    android:textColorHint="@color/k_subtle"
+                    android:textSize="15sp" />
 
                 <ImageView
                     android:id="@+id/button_clear_search"
@@ -57,17 +56,17 @@
                     android:layout_height="16dp"
                     android:layout_marginStart="8dp"
                     android:contentDescription="@string/catalog_clear_search_cd"
-                    android:src="@drawable/ic_cancel"
+                    android:src="@drawable/ic_k_ord_close"
                     android:visibility="gone"
-                    app:tint="@color/karika_gray6" />
+                    app:tint="@color/k_muted" />
             </LinearLayout>
 
             <FrameLayout
                 android:id="@+id/button_category_filter"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
                 android:layout_marginStart="10dp"
-                android:background="@drawable/bg_catalog_category_button_inactive"
+                android:background="@drawable/bg_k_ord_square_ink"
                 android:clickable="true"
                 android:focusable="true">
 
@@ -77,15 +76,15 @@
                     android:layout_height="20dp"
                     android:layout_gravity="center"
                     android:contentDescription="@string/catalog_category_filter_cd"
-                    android:src="@drawable/ic_navigation_category"
-                    app:tint="@color/karika_gray6" />
+                    android:src="@drawable/ic_k_ord_filter"
+                    app:tint="@color/k_white" />
             </FrameLayout>
         </LinearLayout>
 
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/karika_white"
+            android:clipToPadding="false"
             android:scrollbars="none">
 
             <LinearLayout
@@ -93,19 +92,20 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
-                android:paddingBottom="14dp">
+                android:paddingTop="12dp"
+                android:paddingBottom="4dp">
 
                 <TextView
                     android:id="@+id/pill_tab_all"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_catalog_tab_selected"
+                    android:background="@drawable/bg_k_chip_selected"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="9dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="10dp"
                     android:text="@string/catalog_tab_all"
-                    android:textColor="@color/karika_white"
+                    android:textColor="@color/k_white"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -114,13 +114,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_catalog_tab_unselected"
+                    android:background="@drawable/bg_k_chip"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="9dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="10dp"
                     android:text="@string/catalog_tab_sale"
-                    android:textColor="@color/karika_gray2"
+                    android:textColor="@color/k_ink"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -129,13 +129,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_catalog_tab_unselected"
+                    android:background="@drawable/bg_k_chip"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="9dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="10dp"
                     android:text="@string/catalog_tab_previous"
-                    android:textColor="@color/karika_gray2"
+                    android:textColor="@color/k_ink"
                     android:textSize="13sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -145,20 +145,19 @@
             android:id="@+id/row_category_chip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/karika_white"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="8dp"
             android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_category_chip"
+                android:background="@drawable/bg_k_pill_accent_soft"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="12dp"
-                android:paddingEnd="6dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="5dp"
                 android:paddingVertical="5dp">
 
                 <LinearLayout
@@ -169,20 +168,20 @@
 
                 <FrameLayout
                     android:id="@+id/button_category_chip_remove"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginStart="6dp"
-                    android:background="@drawable/bg_category_chip_close"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_k_ord_fab"
                     android:clickable="true"
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
                         android:layout_gravity="center"
                         android:contentDescription="@string/catalog_category_remove_cd"
-                        android:src="@drawable/ic_close"
-                        app:tint="@color/karika_white" />
+                        android:src="@drawable/ic_k_ord_close"
+                        app:tint="@color/k_white" />
                 </FrameLayout>
             </LinearLayout>
         </LinearLayout>
@@ -211,20 +210,24 @@
                 android:visibility="gone">
 
                 <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:background="@drawable/bg_k_avatar"
                     android:contentDescription="@null"
+                    android:padding="19dp"
                     android:src="@drawable/ic_products"
-                    app:tint="@color/karika_gray9" />
+                    app:tint="@color/k_accent" />
 
                 <TextView
                     android:id="@+id/text_empty"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginHorizontal="24dp"
                     android:gravity="center"
-                    android:textColor="@color/karika_gray6"
-                    android:textSize="15sp"
+                    android:textColor="@color/k_ink"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
                     tools:text="@string/catalog_empty" />
             </LinearLayout>
 
@@ -233,7 +236,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:indeterminateTint="@color/karika_blue"
+                android:indeterminateTint="@color/k_accent"
                 android:visibility="gone" />
 
             <ProgressBar
@@ -242,7 +245,7 @@
                 android:layout_height="24dp"
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_marginBottom="16dp"
-                android:indeterminateTint="@color/karika_blue"
+                android:indeterminateTint="@color/k_accent"
                 android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>
@@ -256,30 +259,33 @@
 
         <FrameLayout
             android:id="@+id/button_cart"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:background="@drawable/bg_catalog_cart_fab"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_margin="2dp"
+            android:background="@drawable/bg_k_ord_fab"
+            android:elevation="6dp"
             android:clickable="true"
             android:focusable="true">
 
             <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
                 android:layout_gravity="center"
                 android:contentDescription="@string/catalog_cart_cd"
-                android:src="@drawable/ic_shopping_cart"
-                app:tint="@color/karika_white" />
+                android:src="@drawable/ic_k_ord_cart"
+                app:tint="@color/k_white" />
         </FrameLayout>
 
         <TextView
             android:id="@+id/text_cart_badge"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_gravity="top|end"
-            android:background="@drawable/bg_catalog_cart_badge"
+            android:background="@drawable/bg_k_ord_badge_ink"
+            android:elevation="7dp"
             android:gravity="center"
-            android:textColor="@color/karika_white"
-            android:textSize="9sp"
+            android:textColor="@color/k_white"
+            android:textSize="10sp"
             android:textStyle="bold"
             android:visibility="gone"
             tools:text="3"

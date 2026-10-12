@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- White circle "-" inside the stepper -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#1A3575E2">
+    <item><shape android:shape="oval"><solid android:color="@color/k_white" /></shape></item>
+</ripple>

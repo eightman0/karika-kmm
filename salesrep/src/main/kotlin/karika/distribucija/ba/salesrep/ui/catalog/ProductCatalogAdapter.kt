@@ -66,21 +66,26 @@ class ProductCatalogAdapter(
             binding.textOutOfStock.visibility = if (inStock) View.GONE else View.VISIBLE
 
             binding.layoutStepper.setBackgroundResource(
-                if (inStock) R.drawable.bg_catalog_stepper_box else R.drawable.bg_catalog_stepper_box_disabled
+                if (inStock) R.drawable.bg_k_ord_stepper else R.drawable.bg_k_ord_stepper_disabled
             )
-            val stepperTextColor = context.getColor(if (inStock) R.color.karika_gray2 else R.color.karika_gray7)
+            val stepperTextColor = context.getColor(if (inStock) R.color.k_ink else R.color.k_subtle)
             binding.buttonMinus.isEnabled = inStock
-            binding.buttonMinus.setTextColor(stepperTextColor)
+            binding.buttonMinus.setTextColor(context.getColor(if (inStock) R.color.k_accent else R.color.k_subtle))
             binding.editQty.isEnabled = inStock
             binding.editQty.setTextColor(stepperTextColor)
             binding.buttonPlus.isEnabled = inStock
-            binding.buttonPlus.setColorFilter(stepperTextColor)
+            binding.buttonPlus.setBackgroundResource(
+                if (inStock) R.drawable.bg_k_ord_step_plus else R.drawable.bg_k_ord_step_plus_disabled
+            )
+            binding.buttonPlus.setColorFilter(context.getColor(R.color.k_white))
+            binding.imageProduct.clipToOutline = true
+            binding.imageProduct.alpha = if (inStock) 1f else 0.45f
 
             binding.buttonAdd.isEnabled = inStock
             binding.buttonAdd.setBackgroundResource(
-                if (inStock) R.drawable.bg_catalog_add_button else R.drawable.bg_catalog_add_button_disabled
+                if (inStock) R.drawable.bg_k_square_button else R.drawable.bg_k_ord_square_disabled
             )
-            val addContentColor = context.getColor(if (inStock) R.color.karika_white else R.color.karika_gray6)
+            val addContentColor = context.getColor(if (inStock) R.color.k_white else R.color.k_subtle)
             binding.iconAdd.setColorFilter(addContentColor)
             binding.textAdd.setTextColor(addContentColor)
 

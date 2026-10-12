@@ -5,119 +5,147 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:background="@drawable/bg_order_card"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/bg_k_card_14"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    android:padding="16dp">
+    android:padding="14dp">
 
+    <!-- Customer tile (stands in for the initials avatar) -->
     <ImageView
         android:id="@+id/icon_storefront"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_k_icon_tile"
         android:contentDescription="@null"
+        android:padding="10dp"
         android:src="@drawable/ic_storefront"
-        app:layout_constraintBottom_toBottomOf="@id/text_customer_name"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/text_customer_name"
-        app:tint="@color/karika_blue" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/k_accent" />
 
     <TextView
         android:id="@+id/text_customer_name"
+        style="@style/K.Text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="@color/karika_gray2"
         android:textSize="15sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/text_status"
+        app:layout_constraintBottom_toTopOf="@id/text_date"
+        app:layout_constraintEnd_toStartOf="@id/text_total"
         app:layout_constraintStart_toEndOf="@id/icon_storefront"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/icon_storefront"
+        app:layout_constraintVertical_chainStyle="packed"
         tools:text="Kupac d.o.o." />
 
     <TextView
-        android:id="@+id/text_increment_id"
+        android:id="@+id/text_date"
+        style="@style/K.Text.Caption"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintBottom_toBottomOf="@id/icon_storefront"
+        app:layout_constraintEnd_toEndOf="@id/text_customer_name"
+        app:layout_constraintStart_toStartOf="@id/text_customer_name"
+        app:layout_constraintTop_toBottomOf="@id/text_customer_name"
+        tools:text="09.08.2026. 12:30" />
+
+    <TextView
+        android:id="@+id/text_total"
+        style="@style/K.Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textColor="@color/karika_gray6"
-        android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="@id/icon_storefront"
-        app:layout_constraintTop_toBottomOf="@id/text_customer_name"
+        android:maxLines="1"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/icon_storefront"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/icon_storefront"
+        tools:text="123,45 KM" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/k_line"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/icon_storefront" />
+
+    <TextView
+        android:id="@+id/text_increment_id"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:ellipsize="end"
+        android:fontFamily="monospace"
+        android:maxLines="1"
+        android:textColor="@color/k_muted"
+        android:textSize="12.5sp"
+        app:layout_constraintBottom_toBottomOf="@id/text_status"
+        app:layout_constraintEnd_toStartOf="@id/text_status"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/text_status"
         tools:text="#100000123" />
 
     <TextView
         android:id="@+id/text_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_order_status_badge"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp"
-        android:textSize="10sp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_k_ord_status_pill"
+        android:drawableStart="@drawable/k_ord_dot"
+        android:drawablePadding="6dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:textSize="11.5sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="NA ČEKANJU"
-        tools:textColor="@color/karika_blue" />
-
-    <View
-        android:id="@+id/divider"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="16dp"
-        android:background="@color/karika_gray9"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_increment_id" />
+        app:layout_constraintEnd_toStartOf="@id/icon_chevron"
+        app:layout_constraintTop_toBottomOf="@id/divider"
+        tools:text="Na čekanju"
+        tools:textColor="@color/k_amber" />
 
     <ImageView
-        android:id="@+id/icon_total"
-        android:layout_width="14dp"
-        android:layout_height="14dp"
-        android:layout_marginTop="8dp"
+        android:id="@+id/icon_chevron"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
         android:contentDescription="@null"
-        android:src="@drawable/ic_orders"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider"
-        app:tint="@color/karika_gray6" />
-
-    <TextView
-        android:id="@+id/text_total"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:textColor="@color/karika_gray2"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/icon_total"
-        app:layout_constraintStart_toEndOf="@id/icon_total"
-        app:layout_constraintTop_toTopOf="@id/icon_total"
-        tools:text="123,45 KM" />
-
-    <TextView
-        android:id="@+id/text_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/karika_gray6"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@id/icon_total"
+        android:src="@drawable/ic_k_ord_chevron_right"
+        app:layout_constraintBottom_toBottomOf="@id/text_status"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/icon_total"
-        tools:text="09.08.2026. 12:30" />
+        app:layout_constraintTop_toTopOf="@id/text_status"
+        app:tint="@color/k_subtle" />
+
+    <!-- Kept for viewBinding; the redesign shows the total in the header row and no date icon -->
+    <ImageView
+        android:id="@+id/icon_total"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="@null"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/icon_date"
-        android:layout_width="14dp"
-        android:layout_height="14dp"
-        android:layout_marginEnd="4dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:contentDescription="@null"
-        android:src="@drawable/ic_calendar"
-        app:layout_constraintBottom_toBottomOf="@id/icon_total"
-        app:layout_constraintEnd_toStartOf="@id/text_date"
-        app:layout_constraintTop_toTopOf="@id/icon_total"
-        app:tint="@color/karika_gray6" />
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

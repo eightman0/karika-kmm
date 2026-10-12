@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:id="@+id/bubble_column"
@@ -24,7 +25,7 @@
             android:paddingHorizontal="12dp"
             android:paddingVertical="8dp"
             android:textSize="14sp"
-            tools:background="@drawable/bg_comment_bubble_other"
+            tools:background="@drawable/bg_k_ord_bubble_other"
             tools:text="Poruka komentara kupcu." />
 
         <TextView
@@ -32,9 +33,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:layout_marginTop="2dp"
-            android:textColor="@color/karika_gray7"
-            android:textSize="10sp"
+            android:layout_marginTop="4dp"
+            android:layout_marginHorizontal="4dp"
+            android:textColor="@color/k_subtle"
+            android:textSize="11sp"
             tools:text="09.08.2026. 12:30" />
     </LinearLayout>
 
