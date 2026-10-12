@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Short labels from the redesigned Compose customers screens (SalesCustomersView.kt) -->
+<resources>
+    <string name="k_cust_action_message">Poruka</string>
+    <string name="k_cust_action_discount">Rabat</string>
+    <string name="k_cust_action_history">Historija</string>
+    <string name="k_cust_contact_label">Kontakt osoba</string>
+    <string name="k_cust_section_customer">Kupac</string>
+    <string name="k_cust_required_mark">" *"</string>
+    <string name="k_cust_qty_suffix">kom</string>
+    <string name="k_cust_discount_info">Popust važi samo za ovog kupca. Bez odabranog artikla ili kategorije važi za sve artikle i kategorije.</string>
+</resources>

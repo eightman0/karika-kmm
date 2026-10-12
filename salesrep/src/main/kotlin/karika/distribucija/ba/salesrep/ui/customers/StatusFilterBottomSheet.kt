@@ -10,7 +10,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
-import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 /** Mirrors composeApp's SalesCustomersView.kt status ModalBottomSheet + StatusSheetItem. */
 class StatusFilterBottomSheet(
@@ -26,7 +25,7 @@ class StatusFilterBottomSheet(
 
     override fun onStart() {
         super.onStart()
-        applyWhiteSheetBackground()
+        applyKCustSheetBackground()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -48,8 +47,8 @@ class StatusFilterBottomSheet(
             val status = row.tag as? String
             val selected = status == selectedStatus
 
-            row.setBackgroundResource(if (selected) R.drawable.bg_status_sheet_selected else 0)
-            label.setTextColor(requireContext().getColor(if (selected) R.color.karika_blue else R.color.karika_gray2))
+            row.setBackgroundResource(if (selected) R.drawable.bg_k_cust_row_selected else R.drawable.bg_k_cust_row)
+            label.setTextColor(requireContext().getColor(if (selected) R.color.k_accent else R.color.k_ink))
             label.setTypeface(label.typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
             check.visibility = if (selected) View.VISIBLE else View.GONE
 

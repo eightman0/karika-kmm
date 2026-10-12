@@ -103,17 +103,23 @@ class CustomerDetailFragment : Fragment() {
     }
 
     private fun renderProfile() {
-        binding.textProfileName.text = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName
-        binding.textBadge.text = customer.detailBadgeLabel()
+        val profileName = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName
+        binding.textProfileName.text = profileName
+        binding.textKInitials.text = profileName.trim().split(" ").take(2)
+            .mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString("").ifEmpty { "?" }
+        // Status pill (soft background + dot), sentence case like the Compose KPill
+        binding.textBadge.text = customer.detailBadgeLabel().lowercase().replaceFirstChar { it.uppercase() }
         val (badgeBgRes, badgeColorRes) = when (customer.partnershipStatus) {
-            "active" -> R.drawable.bg_detail_badge_active to R.color.karika_green3
-            "pending" -> R.drawable.bg_detail_badge_pending to R.color.karika_blue
-            "rejected" -> R.drawable.bg_detail_badge_rejected to R.color.karika_error
-            "revoked" -> R.drawable.bg_detail_badge_revoked to R.color.karika_gray6
-            else -> R.drawable.bg_detail_badge_revoked to R.color.karika_gray6
+            "active" -> R.drawable.bg_k_pill_green_soft to R.color.k_green
+            "pending" -> R.drawable.bg_k_pill_amber_soft to R.color.k_amber
+            "rejected" -> R.drawable.bg_k_pill_red_soft to R.color.k_red
+            "revoked" -> R.drawable.bg_k_pill_field to R.color.k_muted
+            else -> R.drawable.bg_k_pill_field to R.color.k_muted
         }
         binding.textBadge.setBackgroundResource(badgeBgRes)
         binding.textBadge.setTextColor(requireContext().getColor(badgeColorRes))
+        binding.textBadge.compoundDrawableTintList =
+            android.content.res.ColorStateList.valueOf(requireContext().getColor(badgeColorRes))
 
         val hasEmail = !customer.email.isNullOrBlank()
         binding.rowEmail.visibility = if (hasEmail) View.VISIBLE else View.GONE

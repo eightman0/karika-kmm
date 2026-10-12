@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
-import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 class AddCustomerBottomSheet(
     private val onNewCustomer: () -> Unit,
@@ -21,7 +20,7 @@ class AddCustomerBottomSheet(
 
     override fun onStart() {
         super.onStart()
-        applyWhiteSheetBackground()
+        applyKCustSheetBackground()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

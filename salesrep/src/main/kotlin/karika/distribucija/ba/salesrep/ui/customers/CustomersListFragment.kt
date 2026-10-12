@@ -162,10 +162,10 @@ class CustomersListFragment : Fragment() {
 
     private fun updateTabSelection(tab: CustomersViewModel.Tab) {
         val allSelected = tab == CustomersViewModel.Tab.ALL
-        binding.tabAll.setBackgroundResource(if (allSelected) R.drawable.bg_tab_pill_selected else 0)
-        binding.tabMine.setBackgroundResource(if (!allSelected) R.drawable.bg_tab_pill_selected else 0)
-        binding.tabAll.setTextColor(requireContext().getColor(if (allSelected) R.color.karika_blue else R.color.karika_gray6))
-        binding.tabMine.setTextColor(requireContext().getColor(if (!allSelected) R.color.karika_blue else R.color.karika_gray6))
+        binding.tabAll.setBackgroundResource(if (allSelected) R.drawable.bg_k_chip_selected else R.drawable.bg_k_chip)
+        binding.tabMine.setBackgroundResource(if (!allSelected) R.drawable.bg_k_chip_selected else R.drawable.bg_k_chip)
+        binding.tabAll.setTextColor(requireContext().getColor(if (allSelected) R.color.k_white else R.color.k_ink))
+        binding.tabMine.setTextColor(requireContext().getColor(if (!allSelected) R.color.k_white else R.color.k_ink))
     }
 
     /** ViewModel.selectTab() already resets its own search/status state and triggers the
@@ -183,11 +183,12 @@ class CustomersListFragment : Fragment() {
     private fun updateStatusChip(status: String?) {
         val isFiltered = status != null
         binding.chipStatusFilter.setBackgroundResource(
-            if (isFiltered) R.drawable.bg_chip_filter_active else R.drawable.bg_chip_filter_inactive
+            if (isFiltered) R.drawable.bg_k_chip_selected else R.drawable.bg_k_chip
         )
-        val color = requireContext().getColor(if (isFiltered) R.color.karika_white else R.color.karika_gray2)
+        val color = requireContext().getColor(if (isFiltered) R.color.k_white else R.color.k_ink)
         binding.textStatusFilter.setTextColor(color)
         binding.iconStatusFilter.imageTintList = ColorStateList.valueOf(color)
+        binding.iconKStatusChevron.imageTintList = ColorStateList.valueOf(color)
         binding.textStatusFilter.text = status?.let { value ->
             statusOptions.firstOrNull { it.first == value }?.second?.let { getString(it) }
         } ?: getString(R.string.customers_status_all_sheet)
@@ -207,7 +208,7 @@ class CustomersListFragment : Fragment() {
             statusOptions.firstOrNull { it.first == value }?.second?.let { getString(it) }
         }
 
-        binding.iconEmptyState.setImageResource(if (hasSearch) R.drawable.ic_search else R.drawable.ic_filter_alt)
+        binding.iconEmptyState.setImageResource(if (hasSearch) R.drawable.ic_search else R.drawable.ic_customers)
         binding.textEmptyMessage.text = when {
             hasSearch -> getString(R.string.customers_empty_search, searchText)
             hasStatus -> getString(R.string.customers_empty_status, statusLabel)

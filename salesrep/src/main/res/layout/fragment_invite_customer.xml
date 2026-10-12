@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_gray20"
+    android:background="@color/k_page"
     android:orientation="vertical">
 
     <ScrollView
@@ -17,137 +17,169 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Info banner -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_info_banner"
+                android:background="@drawable/bg_k_cust_banner"
                 android:gravity="top"
                 android:orientation="horizontal"
-                android:padding="14dp">
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="12dp">
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_info"
-                    app:tint="@color/karika_blue" />
+                    app:tint="@color/k_accent" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="10dp"
                     android:layout_weight="1"
+                    android:lineSpacingExtra="4dp"
                     android:text="@string/invite_info_banner"
-                    android:textColor="@color/karika_gray2"
+                    android:textColor="@color/k_ink"
                     android:textSize="13sp" />
             </LinearLayout>
 
-            <Space
-                android:layout_width="1dp"
-                android:layout_height="16dp" />
-
+            <!-- Kupac -->
             <TextView
+                style="@style/K.Text.Section"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/invite_search_label"
-                android:textColor="@color/karika_gray2"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <Space
-                android:layout_width="1dp"
-                android:layout_height="6dp" />
+                android:layout_marginTop="22dp"
+                android:layout_marginBottom="12dp"
+                android:text="@string/k_cust_section_customer"
+                android:textSize="18sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_search_field_14"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="14dp"
-                android:paddingVertical="14dp">
+                android:background="@drawable/bg_k_card"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_search"
-                    app:tint="@color/karika_gray6" />
-
-                <EditText
-                    android:id="@+id/edit_customer_search"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:background="@null"
-                    android:hint="@string/invite_search_hint"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:padding="0dp"
-                    android:textColor="@color/karika_gray2"
-                    android:textColorHint="@color/karika_gray8"
-                    android:textSize="15sp" />
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
 
-                <ProgressBar
-                    android:id="@+id/progress_search"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:indeterminateTint="@color/karika_blue"
+                    <TextView
+                        style="@style/K.Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/invite_search_label" />
+
+                    <TextView
+                        style="@style/K.Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/k_cust_required_mark"
+                        android:textColor="@color/k_accent" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_k_field_outline"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_search"
+                        app:tint="@color/k_muted" />
+
+                    <EditText
+                        android:id="@+id/edit_customer_search"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/invite_search_hint"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:padding="0dp"
+                        android:textColor="@color/k_ink"
+                        android:textColorHint="@color/k_subtle"
+                        android:textSize="15sp" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_search"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="8dp"
+                        android:indeterminateTint="@color/k_accent"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/icon_clear_search"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_k_circle_button"
+                        android:contentDescription="@string/customers_search_clear_cd"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_close"
+                        android:visibility="gone"
+                        app:tint="@color/k_muted" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/results_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/bg_k_cust_dropdown"
+                    android:elevation="4dp"
+                    android:orientation="vertical"
+                    android:paddingVertical="4dp"
                     android:visibility="gone" />
-
-                <ImageView
-                    android:id="@+id/icon_clear_search"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:contentDescription="@string/customers_search_clear_cd"
-                    android:src="@drawable/ic_close"
-                    android:visibility="gone"
-                    app:tint="@color/karika_gray6" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/results_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:background="@drawable/bg_dropdown_card"
-                android:elevation="4dp"
-                android:orientation="vertical"
-                android:visibility="gone" />
-
-            <Space
-                android:layout_width="1dp"
-                android:layout_height="16dp" />
-
+            <!-- Napomena -->
             <TextView
+                style="@style/K.Text.Section"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:layout_marginBottom="12dp"
                 android:text="@string/invite_note_label"
-                android:textColor="@color/karika_gray2"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textSize="18sp" />
 
-            <Space
-                android:layout_width="1dp"
-                android:layout_height="6dp" />
-
-            <EditText
-                android:id="@+id/edit_note"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:background="@drawable/bg_search_field_14"
-                android:gravity="top|start"
-                android:hint="@string/invite_note_hint"
-                android:inputType="textMultiLine"
-                android:padding="14dp"
-                android:textColor="@color/karika_gray2"
-                android:textColorHint="@color/karika_gray8"
-                android:textSize="15sp" />
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_k_card"
+                android:padding="16dp">
+
+                <EditText
+                    android:id="@+id/edit_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:background="@drawable/bg_k_field_outline"
+                    android:fontFamily="sans-serif"
+                    android:gravity="top|start"
+                    android:hint="@string/invite_note_hint"
+                    android:inputType="textMultiLine"
+                    android:padding="14dp"
+                    android:textColor="@color/k_ink"
+                    android:textColorHint="@color/k_subtle"
+                    android:textSize="15sp" />
+            </FrameLayout>
 
             <Space
                 android:layout_width="1dp"
-                android:layout_height="32dp" />
+                android:layout_height="20dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -157,19 +189,22 @@
                 <LinearLayout
                     android:id="@+id/button_cancel"
                     android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_height="52dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="1"
-                    android:background="@drawable/bg_button_outline_blue"
+                    android:background="@drawable/bg_k_button_secondary"
                     android:clickable="true"
                     android:focusable="true"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:paddingHorizontal="16dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
                         android:text="@string/action_cancel"
-                        android:textColor="@color/karika_blue"
+                        android:textColor="@color/k_ink"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -177,19 +212,22 @@
                 <LinearLayout
                     android:id="@+id/button_send"
                     android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_fab_order_customer"
+                    android:layout_height="52dp"
+                    android:layout_weight="1.6"
+                    android:background="@drawable/bg_k_button_primary"
                     android:clickable="true"
                     android:focusable="true"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:paddingHorizontal="16dp">
 
                     <TextView
                         android:id="@+id/text_send"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
                         android:text="@string/invite_send"
-                        android:textColor="@color/karika_white"
+                        android:textColor="@color/k_white"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
@@ -197,7 +235,7 @@
                         android:id="@+id/progress_send"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:indeterminateTint="@color/karika_white"
+                        android:indeterminateTint="@color/k_white"
                         android:visibility="gone" />
                 </LinearLayout>
             </LinearLayout>

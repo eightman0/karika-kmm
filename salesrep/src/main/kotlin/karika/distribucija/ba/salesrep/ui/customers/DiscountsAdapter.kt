@@ -32,11 +32,21 @@ class DiscountsAdapter(
             val context = binding.root.context
 
             binding.textTarget.text = rule.targetLabel()
-            binding.textApproval.text = rule.approvalLabel()
+            binding.textApproval.text = rule.approvalLabel().lowercase().replaceFirstChar { it.uppercase() }
             binding.textApproval.setBackgroundResource(approvalBgRes(rule.approvalStatus))
             binding.textApproval.setTextColor(context.getColor(approvalColorRes(rule.approvalStatus)))
 
-            binding.textMinQty.text = rule.minQty?.toInt()?.toString() ?: "—"
+            // Detail line like the Compose DiscountCard: "Kategorija · min. 5 kom"
+            binding.textMinQty.text = buildList {
+                add(
+                    when {
+                        rule.productId != null -> "Artikal"
+                        rule.categoryId != null -> "Kategorija"
+                        else -> "Svi artikli"
+                    }
+                )
+                rule.minQty?.toInt()?.let { add("min. $it kom") }
+            }.joinToString(" · ")
             binding.textPercent.text = "${rule.discountPercent.toInt()}%"
 
             binding.buttonEdit.visibility = if (canEdit) View.VISIBLE else View.GONE
@@ -47,17 +57,17 @@ class DiscountsAdapter(
 
         // Mirrors SalesCustomerDetailView.kt's DiscountCard approval Triple.
         private fun approvalBgRes(status: String?): Int = when (status) {
-            "approved" -> R.drawable.bg_discount_badge_approved
-            "pending" -> R.drawable.bg_discount_badge_pending
-            "rejected" -> R.drawable.bg_discount_badge_rejected
-            else -> R.drawable.bg_discount_badge_default
+            "approved" -> R.drawable.bg_k_pill_green_soft
+            "pending" -> R.drawable.bg_k_pill_amber_soft
+            "rejected" -> R.drawable.bg_k_pill_red_soft
+            else -> R.drawable.bg_k_pill_field
         }
 
         private fun approvalColorRes(status: String?): Int = when (status) {
-            "approved" -> R.color.karika_green3
-            "pending" -> R.color.karika_yellow1
-            "rejected" -> R.color.karika_error
-            else -> R.color.karika_gray6
+            "approved" -> R.color.k_green
+            "pending" -> R.color.k_amber
+            "rejected" -> R.color.k_red
+            else -> R.color.k_muted
         }
     }
 

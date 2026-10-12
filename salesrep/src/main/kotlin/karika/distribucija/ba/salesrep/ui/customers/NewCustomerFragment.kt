@@ -52,7 +52,7 @@ class NewCustomerFragment : Fragment() {
             ) { value ->
                 viewModel.onEntitySelected(value)
                 binding.textEntityValue.text = value
-                binding.textEntityValue.setTextColor(requireContext().getColor(R.color.karika_gray2))
+                binding.textEntityValue.setTextColor(requireContext().getColor(R.color.k_ink))
                 renderCantonCity()
             }.show(childFragmentManager, "picker_entity")
         }
@@ -65,7 +65,7 @@ class NewCustomerFragment : Fragment() {
             ) { value ->
                 viewModel.storeSize = value
                 binding.textStoreSizeValue.text = value
-                binding.textStoreSizeValue.setTextColor(requireContext().getColor(R.color.karika_gray2))
+                binding.textStoreSizeValue.setTextColor(requireContext().getColor(R.color.k_ink))
             }.show(childFragmentManager, "picker_store_size")
         }
 
@@ -77,7 +77,7 @@ class NewCustomerFragment : Fragment() {
             ) { value ->
                 viewModel.storeType = value
                 binding.textStoreTypeValue.text = value
-                binding.textStoreTypeValue.setTextColor(requireContext().getColor(R.color.karika_gray2))
+                binding.textStoreTypeValue.setTextColor(requireContext().getColor(R.color.k_ink))
             }.show(childFragmentManager, "picker_store_type")
         }
 
@@ -91,7 +91,7 @@ class NewCustomerFragment : Fragment() {
             ) { value ->
                 viewModel.onCantonSelected(value)
                 binding.textCantonValue.text = value
-                binding.textCantonValue.setTextColor(requireContext().getColor(R.color.karika_gray2))
+                binding.textCantonValue.setTextColor(requireContext().getColor(R.color.k_ink))
                 renderCity()
             }.show(childFragmentManager, "picker_canton")
         }
@@ -105,7 +105,7 @@ class NewCustomerFragment : Fragment() {
             ) { value ->
                 viewModel.onCitySelected(value)
                 binding.textCityValue.text = value
-                binding.textCityValue.setTextColor(requireContext().getColor(R.color.karika_gray2))
+                binding.textCityValue.setTextColor(requireContext().getColor(R.color.k_ink))
             }.show(childFragmentManager, "picker_city")
         }
 
@@ -118,7 +118,7 @@ class NewCustomerFragment : Fragment() {
         viewModel.isSaving.observe(viewLifecycleOwner) { saving ->
             binding.buttonSave.isEnabled = !saving
             binding.buttonSave.setBackgroundResource(
-                if (saving) R.drawable.bg_button_filled_disabled else R.drawable.bg_fab_order_customer
+                R.drawable.bg_k_button_primary // its disabled state covers "saving"
             )
             binding.textSave.visibility = if (saving) View.GONE else View.VISIBLE
             binding.progressSave.visibility = if (saving) View.VISIBLE else View.GONE

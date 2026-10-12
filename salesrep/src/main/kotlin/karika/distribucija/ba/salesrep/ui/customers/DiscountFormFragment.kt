@@ -111,19 +111,17 @@ class DiscountFormFragment : Fragment() {
         binding.editItemSearch.isFocusableInTouchMode = !hasSelectedItem
 
         val fieldBg = when {
-            hasSelectedItem -> R.drawable.bg_discount_search_field_selected
-            showDropdown -> R.drawable.bg_discount_search_field_open
-            else -> R.drawable.bg_discount_search_field
+            hasSelectedItem -> R.drawable.bg_k_cust_field_selected
+            showDropdown -> R.drawable.bg_k_field_outline_focused
+            else -> R.drawable.bg_k_field_outline
         }
         binding.searchFieldContainer.setBackgroundResource(fieldBg)
 
         val accentColor = requireContext().getColor(
-            if (hasSelectedItem) R.color.karika_blue else R.color.karika_gray6
+            if (hasSelectedItem) R.color.k_accent else R.color.k_muted
         )
         binding.iconItemSearch.setColorFilter(accentColor)
-        binding.editItemSearch.setTextColor(
-            requireContext().getColor(if (hasSelectedItem) R.color.karika_blue else R.color.karika_gray2)
-        )
+        binding.editItemSearch.setTextColor(requireContext().getColor(R.color.k_ink))
     }
 
     override fun onDestroyView() {

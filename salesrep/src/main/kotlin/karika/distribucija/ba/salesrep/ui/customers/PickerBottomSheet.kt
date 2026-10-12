@@ -10,7 +10,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
-import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 /** Mirrors composeApp's SalesNewCustomerView.kt SimplePickerSheet. */
 class PickerBottomSheet(
@@ -28,7 +27,7 @@ class PickerBottomSheet(
 
     override fun onStart() {
         super.onStart()
-        applyWhiteSheetBackground()
+        applyKCustSheetBackground()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -44,15 +43,16 @@ class PickerBottomSheet(
                         marginStart = dp(20)
                         marginEnd = dp(20)
                     }
-                    setBackgroundColor(requireContext().getColor(R.color.karika_gray9))
+                    setBackgroundColor(requireContext().getColor(R.color.k_line))
                 })
             }
 
             val row = layoutInflater.inflate(R.layout.item_picker_row, container, false)
             val isSelected = option == selected
+            if (isSelected) row.setBackgroundColor(requireContext().getColor(R.color.k_accent_soft))
             row.findViewById<TextView>(R.id.text_option).apply {
                 text = option
-                setTextColor(requireContext().getColor(if (isSelected) R.color.karika_blue else R.color.karika_gray2))
+                setTextColor(requireContext().getColor(if (isSelected) R.color.k_accent else R.color.k_ink))
                 setTypeface(typeface, if (isSelected) Typeface.BOLD else Typeface.NORMAL)
             }
             row.findViewById<View>(R.id.check_option).visibility = if (isSelected) View.VISIBLE else View.GONE

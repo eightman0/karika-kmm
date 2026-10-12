@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_gray20"
+    android:background="@color/k_page"
     android:orientation="vertical">
 
     <ScrollView
@@ -14,200 +14,260 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:background="@drawable/bg_order_card"
             android:orientation="vertical"
-            android:padding="20dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/discount_form_item_label"
-                android:textColor="@color/karika_gray6"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <Space
-                android:layout_width="1dp"
-                android:layout_height="6dp" />
+            android:padding="16dp">
 
             <LinearLayout
-                android:id="@+id/search_field_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_discount_search_field"
-                android:gravity="center_vertical"
+                android:background="@drawable/bg_k_card_14"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Artikal ili kategorija -->
+                <TextView
+                    style="@style/K.Text.Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/discount_form_item_label" />
+
+                <LinearLayout
+                    android:id="@+id/search_field_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_k_field_outline"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="12dp">
+
+                    <ImageView
+                        android:id="@+id/icon_item_search"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_search"
+                        app:tint="@color/k_muted" />
+
+                    <EditText
+                        android:id="@+id/edit_item_search"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/discount_form_item_hint"
+                        android:maxLines="1"
+                        android:padding="0dp"
+                        android:textColor="@color/k_ink"
+                        android:textColorHint="@color/k_subtle"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:id="@+id/button_clear_item"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_k_circle_button"
+                        android:contentDescription="@string/action_delete"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_close"
+                        android:visibility="gone"
+                        app:tint="@color/k_muted" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_search_results"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_k_cust_dropdown"
+                    android:nestedScrollingEnabled="false"
+                    android:visibility="gone" />
+
+                <!-- Min. količina | Rabat -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/K.Text.Label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/discount_form_min_qty" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_k_field_outline"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="14dp">
+
+                            <EditText
+                                android:id="@+id/edit_min_qty"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:fontFamily="sans-serif"
+                                android:hint="@string/discount_form_min_qty_placeholder"
+                                android:inputType="number"
+                                android:maxLines="1"
+                                android:padding="0dp"
+                                android:textColor="@color/k_ink"
+                                android:textColorHint="@color/k_subtle"
+                                android:textSize="15sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/k_cust_qty_suffix"
+                                android:textColor="@color/k_muted"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <Space
+                        android:layout_width="10dp"
+                        android:layout_height="1dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                style="@style/K.Text.Label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/discount_form_percent" />
+
+                            <TextView
+                                style="@style/K.Text.Label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/k_cust_required_mark"
+                                android:textColor="@color/k_accent" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_k_field_outline"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="14dp">
+
+                            <EditText
+                                android:id="@+id/edit_discount_percent"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:fontFamily="sans-serif"
+                                android:hint="@string/discount_form_percent_placeholder"
+                                android:inputType="number"
+                                android:maxLines="1"
+                                android:padding="0dp"
+                                android:textColor="@color/k_ink"
+                                android:textColorHint="@color/k_subtle"
+                                android:textSize="15sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/discount_form_percent_suffix"
+                                android:textColor="@color/k_muted"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Info note -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_k_field"
+                android:gravity="top"
                 android:orientation="horizontal"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="14dp"
                 android:paddingVertical="12dp">
 
                 <ImageView
-                    android:id="@+id/icon_item_search"
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_search"
-                    app:tint="@color/karika_gray6" />
+                    android:src="@drawable/ic_info"
+                    app:tint="@color/k_muted" />
 
-                <EditText
-                    android:id="@+id/edit_item_search"
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="10dp"
                     android:layout_weight="1"
-                    android:background="@null"
-                    android:hint="@string/discount_form_item_hint"
-                    android:maxLines="1"
-                    android:padding="0dp"
-                    android:textColor="@color/karika_gray2"
-                    android:textColorHint="@color/karika_gray7"
-                    android:textSize="14sp" />
-
-                <ImageView
-                    android:id="@+id/button_clear_item"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_clear_button_circle"
-                    android:contentDescription="@string/action_delete"
-                    android:padding="4dp"
-                    android:src="@drawable/ic_tertiary"
-                    android:visibility="gone"
-                    app:tint="@color/karika_gray6" />
-            </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_search_results"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_discount_dropdown_results"
-                android:nestedScrollingEnabled="false"
-                android:visibility="gone" />
-
-            <Space
-                android:layout_width="1dp"
-                android:layout_height="16dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/discount_form_min_qty"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <Space
-                        android:layout_width="1dp"
-                        android:layout_height="6dp" />
-
-                    <EditText
-                        android:id="@+id/edit_min_qty"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_form_field"
-                        android:hint="@string/discount_form_min_qty_placeholder"
-                        android:inputType="number"
-                        android:maxLines="1"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="12dp"
-                        android:textColor="@color/karika_gray2"
-                        android:textColorHint="@color/karika_gray7"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <Space
-                    android:layout_width="12dp"
-                    android:layout_height="1dp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/discount_form_percent"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <Space
-                        android:layout_width="1dp"
-                        android:layout_height="6dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_form_field"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="12dp">
-
-                        <EditText
-                            android:id="@+id/edit_discount_percent"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:background="@null"
-                            android:hint="@string/discount_form_percent_placeholder"
-                            android:inputType="number"
-                            android:maxLines="1"
-                            android:padding="0dp"
-                            android:textColor="@color/karika_gray2"
-                            android:textColorHint="@color/karika_gray7"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:text="@string/discount_form_percent_suffix"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
+                    android:lineSpacingExtra="4dp"
+                    android:text="@string/k_cust_discount_info"
+                    android:textColor="@color/k_muted"
+                    android:textSize="12.5sp" />
             </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
 
+    <!-- Bottom panel: Odustani + Sačuvaj -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_k_cust_bottom_panel"
+        android:elevation="8dp"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
 
         <LinearLayout
             android:id="@+id/button_cancel"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="16dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_button_outline_blue"
+            android:background="@drawable/bg_k_button_secondary"
             android:clickable="true"
             android:focusable="true"
-            android:gravity="center">
+            android:gravity="center"
+            android:paddingHorizontal="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
                 android:text="@string/action_cancel"
-                android:textColor="@color/karika_blue"
+                android:textColor="@color/k_ink"
                 android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -215,19 +275,22 @@
         <LinearLayout
             android:id="@+id/button_save"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_fab_order_customer"
+            android:layout_height="52dp"
+            android:layout_weight="1.6"
+            android:background="@drawable/bg_k_button_primary"
             android:clickable="true"
             android:focusable="true"
-            android:gravity="center">
+            android:gravity="center"
+            android:paddingHorizontal="16dp">
 
             <TextView
                 android:id="@+id/text_save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
                 android:text="@string/discount_form_save"
-                android:textColor="@color/karika_white"
+                android:textColor="@color/k_white"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -235,7 +298,7 @@
                 android:id="@+id/progress_save"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:indeterminateTint="@color/karika_white"
+                android:indeterminateTint="@color/k_white"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>

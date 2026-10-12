@@ -107,7 +107,7 @@ class InviteCustomerFragment : Fragment() {
     private fun buildHintRow(textRes: Int): View {
         val row = layoutInflater.inflate(R.layout.item_customer_search, binding.resultsContainer, false) as TextView
         row.setText(textRes)
-        row.setTextColor(requireContext().getColor(R.color.karika_gray8))
+        row.setTextColor(requireContext().getColor(R.color.k_muted))
         row.isClickable = false
         row.isFocusable = false
         return row
@@ -116,7 +116,7 @@ class InviteCustomerFragment : Fragment() {
     private fun buildResultRow(customer: OperationalCustomer): View {
         val row = layoutInflater.inflate(R.layout.item_customer_search, binding.resultsContainer, false) as TextView
         row.text = customer.company ?: customer.fullName
-        row.setTextColor(requireContext().getColor(R.color.karika_gray2))
+        row.setTextColor(requireContext().getColor(R.color.k_ink))
         row.setOnClickListener {
             viewModel.selectCustomer(customer)
             suppressSearchWatcher = true

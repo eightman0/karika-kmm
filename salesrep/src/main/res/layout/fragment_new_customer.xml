@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_gray20"
+    android:background="@color/k_page"
     android:orientation="vertical">
 
     <ScrollView
@@ -15,105 +15,86 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="24dp">
 
+            <!-- Info banner -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:layout_marginBottom="0dp"
-                android:background="@drawable/bg_info_banner"
+                android:background="@drawable/bg_k_cust_banner"
                 android:gravity="top"
                 android:orientation="horizontal"
-                android:padding="14dp">
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="12dp">
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_info"
-                    app:tint="@color/karika_blue" />
+                    app:tint="@color/k_accent" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="10dp"
                     android:layout_weight="1"
+                    android:lineSpacingExtra="4dp"
                     android:text="@string/new_customer_info_banner"
-                    android:textColor="@color/karika_gray2"
+                    android:textColor="@color/k_ink"
                     android:textSize="13sp" />
             </LinearLayout>
 
             <!-- Section 1: Informacije o pravnom licu -->
+            <TextView
+                style="@style/K.Text.Section"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:layout_marginBottom="12dp"
+                android:text="@string/new_customer_section_legal"
+                android:textSize="18sp" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="@drawable/bg_order_card"
+                android:background="@drawable/bg_k_card"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_add_option_icon"
-                        android:contentDescription="@null"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_storefront"
-                        app:tint="@color/karika_blue" />
+                    android:orientation="vertical">
 
                     <TextView
+                        style="@style/K.Text.Label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/new_customer_section_legal"
-                        android:textColor="@color/karika_gray2"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_company" />
+
+                    <EditText
+                        android:id="@+id/edit_company"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_cust_input"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/new_customer_company"
+                        android:maxLines="1"
+                        android:paddingHorizontal="14dp"
+                        android:textColor="@color/k_ink"
+                        android:textColorHint="@color/k_subtle"
+                        android:textSize="15sp" />
                 </LinearLayout>
-
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="20dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/new_customer_company"
-                    android:textColor="@color/karika_gray6"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="5dp" />
-
-                <EditText
-                    android:id="@+id/edit_company"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_form_field"
-                    android:hint="@string/new_customer_company"
-                    android:maxLines="1"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="12dp"
-                    android:textColor="@color/karika_gray2"
-                    android:textColorHint="@color/karika_gray7"
-                    android:textSize="14sp" />
-
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="16dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -123,34 +104,29 @@
                         android:orientation="vertical">
 
                         <TextView
+                            style="@style/K.Text.Label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/new_customer_id_number"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="5dp" />
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/new_customer_id_number" />
 
                         <EditText
                             android:id="@+id/edit_id_number"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_form_field"
+                            android:layout_height="50dp"
+                            android:background="@drawable/bg_k_cust_input"
+                            android:fontFamily="sans-serif"
                             android:hint="@string/new_customer_id_number"
                             android:inputType="number"
                             android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/karika_gray2"
-                            android:textColorHint="@color/karika_gray7"
-                            android:textSize="14sp" />
+                            android:paddingHorizontal="14dp"
+                            android:textColor="@color/k_ink"
+                            android:textColorHint="@color/k_subtle"
+                            android:textSize="15sp" />
                     </LinearLayout>
 
                     <Space
-                        android:layout_width="12dp"
+                        android:layout_width="10dp"
                         android:layout_height="1dp" />
 
                     <LinearLayout
@@ -160,154 +136,126 @@
                         android:orientation="vertical">
 
                         <TextView
+                            style="@style/K.Text.Label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/new_customer_vat_number"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="5dp" />
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/new_customer_vat_number" />
 
                         <EditText
                             android:id="@+id/edit_vat_number"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_form_field"
+                            android:layout_height="50dp"
+                            android:background="@drawable/bg_k_cust_input"
+                            android:fontFamily="sans-serif"
                             android:hint="@string/new_customer_vat_number"
                             android:inputType="number"
                             android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/karika_gray2"
-                            android:textColorHint="@color/karika_gray7"
-                            android:textSize="14sp" />
+                            android:paddingHorizontal="14dp"
+                            android:textColor="@color/k_ink"
+                            android:textColorHint="@color/k_subtle"
+                            android:textSize="15sp" />
                     </LinearLayout>
                 </LinearLayout>
-
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="16dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/new_customer_street"
-                    android:textColor="@color/karika_gray6"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="5dp" />
-
-                <EditText
-                    android:id="@+id/edit_street"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_form_field"
-                    android:hint="@string/new_customer_street"
-                    android:maxLines="1"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="12dp"
-                    android:textColor="@color/karika_gray2"
-                    android:textColorHint="@color/karika_gray7"
-                    android:textSize="14sp" />
-
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="16dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/K.Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_street" />
+
+                    <EditText
+                        android:id="@+id/edit_street"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_cust_input"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/new_customer_street"
+                        android:maxLines="1"
+                        android:paddingHorizontal="14dp"
+                        android:textColor="@color/k_ink"
+                        android:textColorHint="@color/k_subtle"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/K.Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_postcode" />
+
+                    <EditText
+                        android:id="@+id/edit_postcode"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_cust_input"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/new_customer_postcode"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:paddingHorizontal="14dp"
+                        android:textColor="@color/k_ink"
+                        android:textColorHint="@color/k_subtle"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/K.Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_entity" />
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:id="@+id/picker_entity"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_field_outline"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="14dp">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:id="@+id/text_entity_value"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="@string/new_customer_postcode"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="5dp" />
-
-                        <EditText
-                            android:id="@+id/edit_postcode"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_form_field"
-                            android:hint="@string/new_customer_postcode"
-                            android:inputType="number"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
                             android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/karika_gray2"
-                            android:textColorHint="@color/karika_gray7"
-                            android:textSize="14sp" />
-                    </LinearLayout>
+                            android:text="@string/new_customer_pick_entity"
+                            android:textColor="@color/k_subtle"
+                            android:textSize="15sp" />
 
-                    <Space
-                        android:layout_width="12dp"
-                        android:layout_height="1dp" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/new_customer_entity"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="5dp" />
-
-                        <LinearLayout
-                            android:id="@+id/picker_entity"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_form_field"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp">
-
-                            <TextView
-                                android:id="@+id/text_entity_value"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/new_customer_pick_entity"
-                                android:textColor="@color/karika_gray7"
-                                android:textSize="14sp" />
-
-                            <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_arrow_down"
-                                app:tint="@color/karika_gray6" />
-                        </LinearLayout>
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="8dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_k_cust_chevron_down"
+                            app:tint="@color/k_muted" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -315,53 +263,48 @@
                     android:id="@+id/layout_canton_picker"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
-                    <Space
-                        android:layout_width="1dp"
-                        android:layout_height="16dp" />
-
                     <TextView
                         android:id="@+id/label_canton"
+                        style="@style/K.Text.Label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"
                         tools:text="Kanton*" />
-
-                    <Space
-                        android:layout_width="1dp"
-                        android:layout_height="5dp" />
 
                     <LinearLayout
                         android:id="@+id/picker_canton"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_form_field"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_field_outline"
                         android:clickable="true"
                         android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="12dp">
+                        android:paddingHorizontal="14dp">
 
                         <TextView
                             android:id="@+id/text_canton_value"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:textColor="@color/karika_gray7"
-                            android:textSize="14sp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textColor="@color/k_subtle"
+                            android:textSize="15sp"
                             tools:text="Odaberite kanton" />
 
                         <ImageView
                             android:layout_width="18dp"
                             android:layout_height="18dp"
+                            android:layout_marginStart="8dp"
                             android:contentDescription="@null"
-                            android:src="@drawable/ic_arrow_down"
-                            app:tint="@color/karika_gray6" />
+                            android:src="@drawable/ic_k_cust_chevron_down"
+                            app:tint="@color/k_muted" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -369,52 +312,47 @@
                     android:id="@+id/layout_city_picker"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
-                    <Space
-                        android:layout_width="1dp"
-                        android:layout_height="16dp" />
-
                     <TextView
+                        style="@style/K.Text.Label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/new_customer_city"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <Space
-                        android:layout_width="1dp"
-                        android:layout_height="5dp" />
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_city" />
 
                     <LinearLayout
                         android:id="@+id/picker_city"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_form_field"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_field_outline"
                         android:clickable="true"
                         android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="12dp">
+                        android:paddingHorizontal="14dp">
 
                         <TextView
                             android:id="@+id/text_city_value"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:text="@string/new_customer_pick_city"
-                            android:textColor="@color/karika_gray7"
-                            android:textSize="14sp" />
+                            android:textColor="@color/k_subtle"
+                            android:textSize="15sp" />
 
                         <ImageView
                             android:layout_width="18dp"
                             android:layout_height="18dp"
+                            android:layout_marginStart="8dp"
                             android:contentDescription="@null"
-                            android:src="@drawable/ic_arrow_down"
-                            app:tint="@color/karika_gray6" />
+                            android:src="@drawable/ic_k_cust_chevron_down"
+                            app:tint="@color/k_muted" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -422,224 +360,174 @@
                     android:id="@+id/layout_city_readonly"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
-                    <Space
-                        android:layout_width="1dp"
-                        android:layout_height="16dp" />
-
                     <TextView
+                        style="@style/K.Text.Label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/new_customer_city_label"
-                        android:textColor="@color/karika_gray6"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <Space
-                        android:layout_width="1dp"
-                        android:layout_height="5dp" />
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_city_label" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_form_field"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_field"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="12dp">
+                        android:paddingHorizontal="14dp">
 
                         <TextView
                             android:id="@+id/text_city_readonly"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/karika_gray2"
-                            android:textSize="14sp"
+                            android:layout_weight="1"
+                            android:maxLines="1"
+                            android:textColor="@color/k_ink"
+                            android:textSize="15sp"
                             tools:text="Brčko Grad" />
                     </LinearLayout>
                 </LinearLayout>
 
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="16dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/K.Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_store_size" />
+
+                    <LinearLayout
+                        android:id="@+id/picker_store_size"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_field_outline"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="14dp">
+
+                        <TextView
+                            android:id="@+id/text_store_size_value"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/new_customer_store_size_placeholder"
+                            android:textColor="@color/k_subtle"
+                            android:textSize="15sp" />
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="8dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_k_cust_chevron_down"
+                            app:tint="@color/k_muted" />
+                    </LinearLayout>
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/K.Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_store_type" />
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:id="@+id/picker_store_type"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_field_outline"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="14dp">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:id="@+id/text_store_type_value"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="@string/new_customer_store_size"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/new_customer_store_type_placeholder"
+                            android:textColor="@color/k_subtle"
+                            android:textSize="15sp" />
 
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="5dp" />
-
-                        <LinearLayout
-                            android:id="@+id/picker_store_size"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_form_field"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp">
-
-                            <TextView
-                                android:id="@+id/text_store_size_value"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/new_customer_store_size_placeholder"
-                                android:textColor="@color/karika_gray7"
-                                android:textSize="14sp" />
-
-                            <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_arrow_down"
-                                app:tint="@color/karika_gray6" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <Space
-                        android:layout_width="12dp"
-                        android:layout_height="1dp" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/new_customer_store_type"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="5dp" />
-
-                        <LinearLayout
-                            android:id="@+id/picker_store_type"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_form_field"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp">
-
-                            <TextView
-                                android:id="@+id/text_store_type_value"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/new_customer_store_type_placeholder"
-                                android:textColor="@color/karika_gray7"
-                                android:textSize="14sp" />
-
-                            <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_arrow_down"
-                                app:tint="@color/karika_gray6" />
-                        </LinearLayout>
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="8dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_k_cust_chevron_down"
+                            app:tint="@color/k_muted" />
                     </LinearLayout>
                 </LinearLayout>
 
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="16dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/new_customer_employee_count"
-                    android:textColor="@color/karika_gray6"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="5dp" />
-
-                <EditText
-                    android:id="@+id/edit_employee_count"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_form_field"
-                    android:hint="@string/new_customer_employee_count"
-                    android:inputType="number"
-                    android:maxLines="1"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="12dp"
-                    android:textColor="@color/karika_gray2"
-                    android:textColorHint="@color/karika_gray7"
-                    android:textSize="14sp" />
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
 
+                    <TextView
+                        style="@style/K.Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_employee_count" />
+
+                    <EditText
+                        android:id="@+id/edit_employee_count"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_cust_input"
+                        android:fontFamily="sans-serif"
+                        android:hint="@string/new_customer_employee_count"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:paddingHorizontal="14dp"
+                        android:textColor="@color/k_ink"
+                        android:textColorHint="@color/k_subtle"
+                        android:textSize="15sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Section 2: Kontakt osoba -->
+            <TextView
+                style="@style/K.Text.Section"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:layout_marginBottom="12dp"
+                android:text="@string/new_customer_section_contact"
+                android:textSize="18sp" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:layout_marginTop="0dp"
-                android:background="@drawable/bg_order_card"
+                android:background="@drawable/bg_k_card"
                 android:orientation="vertical"
-                android:padding="20dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_add_option_icon"
-                        android:contentDescription="@null"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_person"
-                        app:tint="@color/karika_blue" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/new_customer_section_contact"
-                        android:textColor="@color/karika_gray2"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="20dp" />
+                android:padding="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -653,33 +541,28 @@
                         android:orientation="vertical">
 
                         <TextView
+                            style="@style/K.Text.Label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/new_customer_firstname"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="5dp" />
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/new_customer_firstname" />
 
                         <EditText
                             android:id="@+id/edit_firstname"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_form_field"
+                            android:layout_height="50dp"
+                            android:background="@drawable/bg_k_cust_input"
+                            android:fontFamily="sans-serif"
                             android:hint="@string/new_customer_firstname"
                             android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/karika_gray2"
-                            android:textColorHint="@color/karika_gray7"
-                            android:textSize="14sp" />
+                            android:paddingHorizontal="14dp"
+                            android:textColor="@color/k_ink"
+                            android:textColorHint="@color/k_subtle"
+                            android:textSize="15sp" />
                     </LinearLayout>
 
                     <Space
-                        android:layout_width="12dp"
+                        android:layout_width="10dp"
                         android:layout_height="1dp" />
 
                     <LinearLayout
@@ -689,175 +572,152 @@
                         android:orientation="vertical">
 
                         <TextView
+                            style="@style/K.Text.Label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/new_customer_lastname"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="5dp" />
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/new_customer_lastname" />
 
                         <EditText
                             android:id="@+id/edit_lastname"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_form_field"
+                            android:layout_height="50dp"
+                            android:background="@drawable/bg_k_cust_input"
+                            android:fontFamily="sans-serif"
                             android:hint="@string/new_customer_lastname"
                             android:maxLines="1"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:textColor="@color/karika_gray2"
-                            android:textColorHint="@color/karika_gray7"
-                            android:textSize="14sp" />
+                            android:paddingHorizontal="14dp"
+                            android:textColor="@color/k_ink"
+                            android:textColorHint="@color/k_subtle"
+                            android:textSize="15sp" />
                     </LinearLayout>
                 </LinearLayout>
-
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="16dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/K.Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_phone" />
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_field_outline"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="14dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/new_customer_phone"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_phone"
+                            app:tint="@color/k_muted" />
 
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="5dp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_form_field"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp">
-
-                            <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_phone"
-                                app:tint="@color/karika_gray6" />
-
-                            <EditText
-                                android:id="@+id/edit_phone"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:layout_weight="1"
-                                android:background="@null"
-                                android:hint="@string/new_customer_phone"
-                                android:inputType="phone"
-                                android:maxLines="1"
-                                android:padding="0dp"
-                                android:textColor="@color/karika_gray2"
-                                android:textColorHint="@color/karika_gray7"
-                                android:textSize="14sp" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <Space
-                        android:layout_width="12dp"
-                        android:layout_height="1dp" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/new_customer_email"
-                            android:textColor="@color/karika_gray6"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <Space
-                            android:layout_width="1dp"
-                            android:layout_height="5dp" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_form_field"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp">
-
-                            <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_email"
-                                app:tint="@color/karika_gray6" />
-
-                            <EditText
-                                android:id="@+id/edit_email"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:layout_weight="1"
-                                android:background="@null"
-                                android:hint="@string/new_customer_email"
-                                android:inputType="textEmailAddress"
-                                android:maxLines="1"
-                                android:padding="0dp"
-                                android:textColor="@color/karika_gray2"
-                                android:textColorHint="@color/karika_gray7"
-                                android:textSize="14sp" />
-                        </LinearLayout>
+                        <EditText
+                            android:id="@+id/edit_phone"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight="1"
+                            android:background="@null"
+                            android:fontFamily="sans-serif"
+                            android:hint="@string/new_customer_phone"
+                            android:inputType="phone"
+                            android:maxLines="1"
+                            android:padding="0dp"
+                            android:textColor="@color/k_ink"
+                            android:textColorHint="@color/k_subtle"
+                            android:textSize="15sp" />
                     </LinearLayout>
                 </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/K.Text.Label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/new_customer_email" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_k_field_outline"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="14dp">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_email"
+                            app:tint="@color/k_muted" />
+
+                        <EditText
+                            android:id="@+id/edit_email"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight="1"
+                            android:background="@null"
+                            android:fontFamily="sans-serif"
+                            android:hint="@string/new_customer_email"
+                            android:inputType="textEmailAddress"
+                            android:maxLines="1"
+                            android:padding="0dp"
+                            android:textColor="@color/k_ink"
+                            android:textColorHint="@color/k_subtle"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
 
+    <!-- Bottom panel: Odustani + Sačuvaj kupca -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_k_cust_bottom_panel"
+        android:elevation="8dp"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
 
         <LinearLayout
             android:id="@+id/button_cancel"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_button_outline_blue"
+            android:background="@drawable/bg_k_button_secondary"
             android:clickable="true"
             android:focusable="true"
-            android:gravity="center">
+            android:gravity="center"
+            android:paddingHorizontal="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
                 android:text="@string/action_cancel"
-                android:textColor="@color/karika_blue"
+                android:textColor="@color/k_ink"
                 android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -865,19 +725,22 @@
         <LinearLayout
             android:id="@+id/button_save"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_fab_order_customer"
+            android:layout_height="52dp"
+            android:layout_weight="1.6"
+            android:background="@drawable/bg_k_button_primary"
             android:clickable="true"
             android:focusable="true"
-            android:gravity="center">
+            android:gravity="center"
+            android:paddingHorizontal="16dp">
 
             <TextView
                 android:id="@+id/text_save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
                 android:text="@string/new_customer_save"
-                android:textColor="@color/karika_white"
+                android:textColor="@color/k_white"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -885,7 +748,7 @@
                 android:id="@+id/progress_save"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:indeterminateTint="@color/karika_white"
+                android:indeterminateTint="@color/k_white"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>

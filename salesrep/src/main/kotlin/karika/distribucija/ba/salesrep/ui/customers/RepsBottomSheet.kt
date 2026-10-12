@@ -9,7 +9,6 @@ import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.model.AssignedEmployeeSummary
-import karika.distribucija.ba.salesrep.util.applyWhiteSheetBackground
 
 /** "Ada Lovelace" -> "AL", "Ada" -> "A". Mirrors SalesCustomersView.kt's private initials(). */
 private fun String?.initials(): String =
@@ -30,7 +29,7 @@ class RepsBottomSheet(
 
     override fun onStart() {
         super.onStart()
-        applyWhiteSheetBackground()
+        applyKCustSheetBackground()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -44,8 +43,9 @@ class RepsBottomSheet(
             row.findViewById<TextView>(R.id.text_avatar).apply {
                 text = employee.displayName.initials()
                 setBackgroundResource(
-                    if (idx % 2 == 0) R.drawable.bg_avatar_plain_blue else R.drawable.bg_avatar_plain_secondary
+                    if (idx % 2 == 0) R.drawable.bg_k_avatar else R.drawable.bg_k_cust_avatar_field
                 )
+                setTextColor(requireContext().getColor(if (idx % 2 == 0) R.color.k_accent else R.color.k_ink))
             }
             row.findViewById<TextView>(R.id.text_name).text = employee.displayName ?: "-"
             container.addView(row)

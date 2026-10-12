@@ -5,13 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/karika_gray20">
+    android:background="@color/k_page">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:clipToPadding="false"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/button_order_for_customer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -20,264 +20,266 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="96dp">
+            android:paddingTop="16dp"
+            android:paddingBottom="24dp">
 
+            <!-- Header card: initials, label, name and status -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="12dp">
+                android:layout_marginHorizontal="16dp"
+                android:background="@drawable/bg_k_card"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/text_k_initials"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_k_cust_avatar_tile"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/k_accent"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="AL" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/customer_detail_profile_label"
+                        android:textColor="@color/k_muted"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/text_profile_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:fontFamily="sans-serif-medium"
+                        android:lineSpacingExtra="4dp"
+                        android:maxLines="2"
+                        android:textColor="@color/k_ink"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        tools:text="Ada Lovelace" />
+
+                    <TextView
+                        android:id="@+id/text_badge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:drawableStart="@drawable/bg_k_cust_dot"
+                        android:drawablePadding="6dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
+                        android:textSize="12sp"
+                        tools:background="@drawable/bg_k_pill_green_soft"
+                        tools:text="Aktivno"
+                        tools:textColor="@color/k_green" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Info: key/value rows -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_k_card"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/row_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="13dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:text="@string/customer_detail_email_label"
+                            android:textColor="@color/k_muted"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/text_email"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="end"
+                            android:maxLines="2"
+                            android:textColor="@color/k_ink"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="ada@karika.ba" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/k_line" />
+                </LinearLayout>
+
+                <Space
+                    android:id="@+id/spacer_email"
+                    android:layout_width="1dp"
+                    android:layout_height="0dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_order_card"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="13dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/k_cust_contact_label"
+                        android:textColor="@color/k_muted"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/text_fullname"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="end"
+                        android:maxLines="2"
+                        android:textColor="@color/k_ink"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="Ada Lovelace" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/row_reps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/k_line" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/customer_detail_profile_label"
-                                android:textColor="@color/karika_blue"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/text_profile_name"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:textColor="@color/karika_gray2"
-                                android:textSize="20sp"
-                                android:textStyle="bold"
-                                tools:text="Ada Lovelace" />
-                        </LinearLayout>
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="13dp">
 
                         <TextView
-                            android:id="@+id/text_badge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="5dp"
-                            android:textSize="11sp"
+                            android:maxLines="1"
+                            android:text="@string/customers_reps_label"
+                            android:textColor="@color/k_muted"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/text_reps"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="end"
+                            android:maxLines="2"
+                            android:textColor="@color/k_ink"
+                            android:textSize="14sp"
                             android:textStyle="bold"
-                            tools:background="@drawable/bg_detail_badge_active"
-                            tools:text="AKTIVNO"
-                            tools:textColor="@color/karika_green3" />
+                            tools:text="Amir Amirović" />
                     </LinearLayout>
-
-                    <Space
-                        android:layout_width="1dp"
-                        android:layout_height="20dp" />
-
-                    <LinearLayout
-                        android:id="@+id/row_email"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/bg_info_icon_gray"
-                            android:contentDescription="@null"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_email"
-                            app:tint="@color/karika_blue" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/customer_detail_email_label"
-                                android:textColor="@color/karika_gray6"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/text_email"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:textColor="@color/karika_gray2"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                tools:text="ada@karika.ba" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <Space
-                        android:id="@+id/spacer_email"
-                        android:layout_width="1dp"
-                        android:layout_height="16dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/bg_info_icon_gray"
-                            android:contentDescription="@null"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_person"
-                            app:tint="@color/karika_blue" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/customer_detail_fullname_label"
-                                android:textColor="@color/karika_gray6"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/text_fullname"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:textColor="@color/karika_gray2"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                tools:text="Ada Lovelace" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/row_reps"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginTop="16dp"
-                            android:layout_marginBottom="16dp"
-                            android:background="@color/karika_gray9" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="40dp"
-                                android:layout_height="40dp"
-                                android:background="@drawable/bg_info_icon_blue"
-                                android:contentDescription="@null"
-                                android:padding="10dp"
-                                android:src="@drawable/ic_customers"
-                                app:tint="@color/karika_blue" />
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/customer_detail_reps_label"
-                                    android:textColor="@color/karika_gray6"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:id="@+id/text_reps"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:textColor="@color/karika_blue"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold"
-                                    tools:text="Amir Amirović" />
-                            </LinearLayout>
-                        </LinearLayout>
-                    </LinearLayout>
-
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Discounts header -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="22dp"
+                android:layout_marginBottom="12dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="4dp">
+                android:minHeight="32dp"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
                     android:text="@string/customer_detail_discounts"
-                    android:textColor="@color/karika_gray2"
+                    android:textColor="@color/k_ink"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
                     android:id="@+id/button_new_discount"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_new_discount_chip"
+                    android:layout_height="32dp"
+                    android:background="@drawable/bg_k_cust_soft_button"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp">
+                    android:paddingStart="10dp"
+                    android:paddingEnd="12dp">
 
                     <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_add_plus"
-                        app:tint="@color/karika_white" />
+                        app:tint="@color/k_accent" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
                         android:text="@string/customer_detail_new_discount"
-                        android:textColor="@color/karika_white"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
+                        android:textColor="@color/k_accent"
+                        android:textSize="12.5sp" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -291,46 +293,60 @@
                 android:id="@+id/text_empty"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:paddingVertical="32dp"
+                android:layout_marginHorizontal="16dp"
+                android:background="@drawable/bg_k_card_14"
+                android:padding="14dp"
                 android:text="@string/customer_detail_no_discounts"
-                android:textColor="@color/karika_gray6"
-                android:textSize="14sp"
+                android:textColor="@color/k_muted"
+                android:textSize="13sp"
                 android:visibility="gone" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- Bottom panel with the primary "Naruči za kupca" button -->
     <LinearLayout
         android:id="@+id/button_order_for_customer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:background="@drawable/bg_fab_order_customer"
+        android:background="@drawable/bg_k_cust_bottom_panel"
         android:clickable="true"
+        android:elevation="8dp"
         android:focusable="true"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingVertical="16dp"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_shopping_cart"
-            app:tint="@color/karika_white" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_k_button_primary"
+            android:duplicateParentState="true"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/customer_detail_order_for"
-            android:textColor="@color/karika_white"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_shopping_cart"
+                app:tint="@color/k_white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:text="@string/customer_detail_order_for"
+                android:textColor="@color/k_white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

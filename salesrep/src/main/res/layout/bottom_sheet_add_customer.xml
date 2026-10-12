@@ -3,125 +3,138 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_k_sheet"
     android:orientation="vertical"
     android:paddingHorizontal="20dp"
-    android:paddingVertical="8dp">
+    android:paddingTop="12dp"
+    android:paddingBottom="16dp">
 
     <View
-        android:layout_width="36dp"
+        android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/bg_sheet_drag_handle" />
-
-    <Space
-        android:layout_width="1dp"
-        android:layout_height="20dp" />
+        android:background="@drawable/bg_k_sheet_handle" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="sans-serif-medium"
         android:text="@string/customers_add_sheet_title"
-        android:textColor="@color/karika_gray2"
-        android:textSize="16sp"
+        android:textColor="@color/k_ink"
+        android:textSize="18sp"
         android:textStyle="bold" />
 
     <LinearLayout
         android:id="@+id/option_new_customer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_add_option_item"
+        android:background="@drawable/bg_k_card"
         android:clickable="true"
         android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="14dp">
+        android:padding="14dp">
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_add_option_icon"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_k_icon_tile"
             android:contentDescription="@null"
-            android:padding="10dp"
+            android:padding="11dp"
             android:src="@drawable/ic_add_plus"
-            app:tint="@color/karika_blue" />
+            app:tint="@color/k_accent" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
+            android:layout_marginHorizontal="14dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
                 android:text="@string/customers_add_new"
-                android:textColor="@color/karika_gray2"
+                android:textColor="@color/k_ink"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:lineSpacingExtra="3dp"
                 android:text="@string/customers_add_new_subtitle"
-                android:textColor="@color/karika_gray6"
-                android:textSize="12sp" />
+                android:textColor="@color/k_muted"
+                android:textSize="12.5sp" />
         </LinearLayout>
-    </LinearLayout>
 
-    <Space
-        android:layout_width="1dp"
-        android:layout_height="8dp" />
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_k_cust_chevron_right"
+            app:tint="@color/k_subtle" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/option_invite_customer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_add_option_item"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_k_card"
         android:clickable="true"
         android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="14dp">
+        android:padding="14dp">
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_add_option_icon"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_k_icon_tile"
             android:contentDescription="@null"
-            android:padding="10dp"
+            android:padding="11dp"
             android:src="@drawable/ic_email"
-            app:tint="@color/karika_blue" />
+            app:tint="@color/k_accent" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
+            android:layout_marginHorizontal="14dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
                 android:text="@string/customers_add_invite"
-                android:textColor="@color/karika_gray2"
+                android:textColor="@color/k_ink"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:lineSpacingExtra="3dp"
                 android:text="@string/customers_add_invite_subtitle"
-                android:textColor="@color/karika_gray6"
-                android:textSize="12sp" />
+                android:textColor="@color/k_muted"
+                android:textSize="12.5sp" />
         </LinearLayout>
-    </LinearLayout>
 
-    <Space
-        android:layout_width="1dp"
-        android:layout_height="8dp" />
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_k_cust_chevron_right"
+            app:tint="@color/k_subtle" />
+    </LinearLayout>
 
 </LinearLayout>

@@ -1,5 +1,6 @@
 package karika.distribucija.ba.salesrep.ui.customers
 
+import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.Gravity
@@ -51,14 +52,26 @@ class CustomersAdapter(
             val context = binding.root.context
 
             binding.textCustomerName.text = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName
-            binding.textBadge.text = customer.badgeLabel()
-            if (customer.isActive) {
-                binding.textBadge.setBackgroundResource(R.drawable.bg_customer_badge_active)
-                binding.textBadge.setTextColor(context.getColor(R.color.karika_green3))
-            } else {
-                binding.textBadge.setBackgroundResource(R.drawable.bg_customer_badge_other)
-                binding.textBadge.setTextColor(context.getColor(R.color.karika_blue))
+            val title = customer.company?.takeIf { it.isNotBlank() } ?: customer.fullName
+            binding.textKInitials.text = title.initials()
+            val subtitle = listOfNotNull(
+                customer.fullName.takeIf { it != "—" && !customer.company.isNullOrBlank() },
+                customer.email?.takeIf { it.isNotBlank() }
+            ).joinToString(" · ")
+            binding.textKSubtitle.text = subtitle
+            binding.textKSubtitle.visibility = if (subtitle.isNotEmpty()) View.VISIBLE else View.GONE
+
+            // Status pill (soft background + dot), sentence case like the Compose KPill
+            binding.textBadge.text = customer.badgeLabel().lowercase().replaceFirstChar { it.uppercase() }
+            val (badgeBg, badgeText, badgeDot) = when (customer.partnershipStatus) {
+                "active" -> Triple(R.drawable.bg_k_pill_green_soft, R.color.k_green, R.color.k_green_dot)
+                "pending" -> Triple(R.drawable.bg_k_pill_amber_soft, R.color.k_amber, R.color.k_amber)
+                "rejected" -> Triple(R.drawable.bg_k_pill_red_soft, R.color.k_red, R.color.k_red)
+                else -> Triple(R.drawable.bg_k_pill_field, R.color.k_muted, R.color.k_subtle)
             }
+            binding.textBadge.setBackgroundResource(badgeBg)
+            binding.textBadge.setTextColor(context.getColor(badgeText))
+            binding.textBadge.compoundDrawableTintList = ColorStateList.valueOf(context.getColor(badgeDot))
 
             val showFooter = customer.isActive || customer.partnershipStatus == "pending"
             val actionsEnabled = customer.isActive
@@ -92,7 +105,7 @@ class CustomersAdapter(
             if (!hasReps) return
 
             val avatarSizePx = 26.dpToPx(context)
-            val overlapPx = 10.dpToPx(context)
+            val overlapPx = 16.dpToPx(context)
             binding.repsAvatarContainer.layoutParams =
                 binding.repsAvatarContainer.layoutParams.apply {
                     width = avatarSizePx + overlapPx * (reps.size - 1)
@@ -104,12 +117,12 @@ class CustomersAdapter(
                         leftMargin = idx * overlapPx
                     }
                     setBackgroundResource(
-                        if (idx % 2 == 0) R.drawable.bg_avatar_blue else R.drawable.bg_avatar_secondary
+                        if (idx % 2 == 0) R.drawable.bg_k_cust_avatar_ring_accent else R.drawable.bg_k_cust_avatar_ring_ink
                     )
                     gravity = Gravity.CENTER
-                    setTextColor(context.getColor(R.color.karika_white))
+                    setTextColor(context.getColor(R.color.k_white))
                     setTypeface(typeface, Typeface.BOLD)
-                    textSize = 8f
+                    textSize = 9f
                     text = employee.displayName.initials()
                 }
                 binding.repsAvatarContainer.addView(avatar)
