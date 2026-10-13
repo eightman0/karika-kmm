@@ -16,6 +16,7 @@ import karika.distribucija.ba.launcher.LauncherBatteryOptimization
 import karika.distribucija.ba.launcher.MaintenanceState
 import karika.distribucija.ba.launcher.diagnostics.DeviceHeartbeat
 import karika.distribucija.ba.launcher.provision.DeviceConfig
+import karika.distribucija.ba.logging.AppLogger
 
 /** Keeps KnownApps.primary() (salesrep or shop, per device) up to date - not the launcher itself. Whether to install is
  * decided by comparing the published APK's sha256 against the one this device last installed,
@@ -89,6 +90,17 @@ class UpdateWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                 Log.e(TAG, "Checksum mismatch for downloaded APK (${latest.versionName}), discarding")
                 apkFile.delete()
                 return Result.retry()
+            }
+
+            // The QR's app_package decides which build this device runs (stage, demo or prod), so
+            // a build of another package published for this app is never installed: it would be
+            // another app next to the one the launcher starts. Asking again won't change what is
+            // published, so this waits for the next periodic run instead of retrying.
+            val apkPackage = applicationContext.packageManager.getPackageArchiveInfo(apkFile.path, 0)?.packageName
+            if (apkPackage != targetPackage) {
+                AppLogger.e(TAG, "Published APK (${latest.versionName}) is $apkPackage, this device runs $targetPackage - not installing")
+                apkFile.delete()
+                return Result.success()
             }
 
             val installed = ApkInstaller.install(applicationContext, apkFile)
