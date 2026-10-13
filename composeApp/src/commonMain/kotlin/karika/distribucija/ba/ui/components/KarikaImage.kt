@@ -3,15 +3,12 @@ package karika.distribucija.ba.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.LocalPlatformContext
-import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.size.Precision
@@ -42,7 +39,10 @@ fun KarikaImage(
         return
     }
 
-    SubcomposeAsyncImage(
+    // AsyncImage, not SubcomposeAsyncImage: a subcomposition per image in a lazy list could
+    // fail with "Unsupported concurrent change during composition" while scrolling. While it
+    // loads, the caller's background shows through.
+    AsyncImage(
         model = ImageRequest.Builder(LocalPlatformContext.current)
             .crossfade(true)
             .precision(Precision.EXACT)
@@ -50,27 +50,7 @@ fun KarikaImage(
             .diskCacheKey(model as? String?)
             .data(model)
             .build(),
-        error = {
-            Image(
-                modifier = Modifier
-                    .fillMaxSize(),
-                painter = imageVector,
-                contentDescription = "",
-                contentScale = ContentScale.Crop
-            )
-        },
-        loading = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = KarikaColors.White,
-                    strokeCap = StrokeCap.Butt
-                )
-            }
-        },
+        error = imageVector,
         contentDescription = null,
         contentScale = contentScale,
         modifier = modifier
