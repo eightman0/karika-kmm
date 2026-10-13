@@ -45,8 +45,9 @@ class VendorLoginE2ETest : StageE2ETest() {
     fun correctPasswordOpensTheDashboard() {
         logIn(email, password)
 
-        // A supplier starts on the analytics overview, with the dashboard menu in the drawer
-        compose.waitUntilAtLeastOneExists(hasText(DASHBOARD_TITLE, substring = true), SERVER_TIMEOUT_MS)
+        // A supplier starts on the analytics overview, with the dashboard menu in the drawer. When
+        // it does not come, the failure says what stage answered instead
+        waitAfterLogIn(hasText(DASHBOARD_TITLE, substring = true))
         waitUntilLoaded()
         compose.onNodeWithText(DASHBOARD_TITLE, substring = true).assertIsDisplayed()
         // "Narudžbe" is also a heading on the analytics overview, so any node with the text will do
