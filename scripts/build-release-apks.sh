@@ -14,8 +14,13 @@
 # shop is composeApp's kiosk flavor (karika.distribucija.ba.kiosk), published under app=shop -
 # signed with composeApp/keystore.properties.
 #
-# Usage: scripts/build-release-apks.sh [launcher|salesrep|shop|all]
-# Defaults to "all". Output APKs are copied to dist/ at the repo root.
+# salesrep and shop are built for one backend environment, the second argument (prod by default),
+# passed to Gradle as -PkarikaEnv. The package is the same for every environment: each Karika Ops
+# (stage, demo, prod) publishes its own build, and a tablet takes it from the Karika Ops its QR's
+# api_base_url points to. The launcher has no environment of its own.
+#
+# Usage: scripts/build-release-apks.sh [launcher|salesrep|shop|all] [prod|stage|demo]
+# Defaults to "all" and "prod". Output APKs are copied to dist/ at the repo root.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -23,12 +28,14 @@ cd "$REPO_ROOT"
 
 DIST_DIR="$REPO_ROOT/dist"
 TARGET="all"
+APP_ENV="prod"
 
 for arg in "$@"; do
   case "$arg" in
     launcher|salesrep|shop|all) TARGET="$arg" ;;
+    prod|stage|demo) APP_ENV="$arg" ;;
     *)
-      echo "Usage: $0 [launcher|salesrep|shop|all]" >&2
+      echo "Usage: $0 [launcher|salesrep|shop|all] [prod|stage|demo]" >&2
       exit 1
       ;;
   esac
@@ -74,8 +81,8 @@ done
 # ship something that wasn't compiled/packaged/signed fresh, this run, from what's on disk now.
 GRADLE_NO_CACHE_FLAGS=(--rerun-tasks --no-build-cache --no-configuration-cache)
 
-echo "Running: ./gradlew ${GRADLE_TASKS[*]} ${GRADLE_NO_CACHE_FLAGS[*]}"
-./gradlew "${GRADLE_TASKS[@]}" "${GRADLE_NO_CACHE_FLAGS[@]}" --console=plain
+echo "Running: ./gradlew ${GRADLE_TASKS[*]} -PkarikaEnv=$APP_ENV ${GRADLE_NO_CACHE_FLAGS[*]}"
+./gradlew "${GRADLE_TASKS[@]}" -PkarikaEnv="$APP_ENV" "${GRADLE_NO_CACHE_FLAGS[@]}" --console=plain
 
 # Locate apksigner (from the SDK local.properties already points Gradle at) to confirm each APK
 # actually got signed, rather than trusting the build succeeded silently with no signingConfig.
@@ -111,7 +118,10 @@ for module in "${MODULES[@]}"; do
   gradle_file="$REPO_ROOT/$(gradle_module "$module")/build.gradle.kts"
   version_name="$(grep -m1 'versionName' "$gradle_file" | sed -E 's/.*versionName = "([^"]*)".*/\1/')"
   version_code="$(grep -m1 'versionCode' "$gradle_file" | sed -E 's/[^0-9]*([0-9]+).*/\1/')"
-  dest="$DIST_DIR/${module}-release-v${version_code}-${version_name}.apk"
+  # The environment is in the name, since every environment's APK has the same package
+  name="$module"
+  [ "$module" != "launcher" ] && name="$module-$APP_ENV"
+  dest="$DIST_DIR/${name}-release-v${version_code}-${version_name}.apk"
   cp "$apk" "$dest"
 
   echo "[$module] sha256: $(shasum -a 256 "$dest" | awk '{print $1}')"

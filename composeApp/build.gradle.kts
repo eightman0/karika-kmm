@@ -118,6 +118,13 @@ android {
 
         versionName = "2.7.5"
 
+        // The kiosk flavor's backend environment, -PkarikaEnv=stage|demo|prod (scripts/
+        // build-release-apks.sh passes it), prod by default. The package stays the same, so every
+        // Karika Ops (stage, demo, prod) publishes its own build of the same app.
+        val kioskEnv = providers.gradleProperty("karikaEnv").orNull ?: "prod"
+        require(kioskEnv in listOf("stage", "demo", "prod")) { "karikaEnv must be stage, demo or prod, not $kioskEnv" }
+        buildConfigField("String", "KIOSK_ENV", "\"$kioskEnv\"")
+
         // Runs every E2E test once in the app's order when all of them are asked for, see E2ETestRunner
         testInstrumentationRunner = "karika.distribucija.ba.e2e.E2ETestRunner"
         // Stage test accounts for the login E2E tests, from the environment or ~/.gradle/gradle.properties

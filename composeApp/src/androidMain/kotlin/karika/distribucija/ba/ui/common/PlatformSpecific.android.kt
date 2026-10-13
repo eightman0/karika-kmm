@@ -89,14 +89,17 @@ actual fun openPdf(url: String) {
 }
 
 actual fun getEnvPrefix(): String {
-    val flavour = BuildConfig.FLAVOR
-    return when (flavour) {
-        "prod", "kiosk" -> ""
+    return when (envFlavor()) {
+        "prod" -> ""
         "demo" -> "demo."
         "stage" -> "stage."
         else -> "test."
     }
 }
+
+/** The flavor, except that the kiosk build takes its environment from KIOSK_ENV (-PkarikaEnv). */
+private fun envFlavor(): String =
+    if (BuildConfig.FLAVOR == "kiosk") BuildConfig.KIOSK_ENV else BuildConfig.FLAVOR
 
 actual fun isKiosk() = BuildConfig.FLAVOR.startsWith("kiosk")
 actual fun appVersion(): Int {
@@ -117,8 +120,8 @@ actual fun openPhoneCall(phoneNumber: String, error: (String) -> Unit) {
 }
 
 actual fun getEnvJwt(): String {
-    return when (BuildConfig.FLAVOR) {
-        "prod", "kiosk" -> "lbzgyy1qylr7unu707eblcphftb2fzha"
+    return when (envFlavor()) {
+        "prod" -> "lbzgyy1qylr7unu707eblcphftb2fzha"
         "demo", "stage" -> "hgy5au3paxuijsiv52nyt9w47fcxprbz"
         else -> "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"
     }

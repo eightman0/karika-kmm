@@ -7,6 +7,14 @@ plugins {
     alias(libs.plugins.gms)
 }
 
+
+/** Domain prefix and guest JWT of each backend environment, see karikaEnv below. */
+val KARIKA_ENVS = mapOf(
+    "stage" to ("stage." to "09kqzjtmz5cf1klm9hjxw9yt3uaa63hk"),
+    "demo" to ("demo." to "hgy5au3paxuijsiv52nyt9w47fcxprbz"),
+    "prod" to ("" to "lbzgyy1qylr7unu707eblcphftb2fzha"),
+)
+
 android {
     namespace = "karika.distribucija.ba.salesrep"
     compileSdk = 37
@@ -41,10 +49,20 @@ android {
         }
     }
 
+    // The backend environment: -PkarikaEnv=stage|demo|prod (scripts/build-release-apks.sh passes
+    // it), otherwise stage for debug and prod for release. The package stays the same, so every
+    // Karika Ops (stage, demo, prod) publishes its own build of the same app.
+    val karikaEnv = providers.gradleProperty("karikaEnv").orNull
+    fun com.android.build.api.dsl.ApplicationBuildType.karikaEnv(default: String) {
+        val env = karikaEnv ?: default
+        val (prefix, jwt) = KARIKA_ENVS[env] ?: error("karikaEnv must be one of ${KARIKA_ENVS.keys}, not $env")
+        buildConfigField("String", "ENV_PREFIX", "\"$prefix\"")
+        buildConfigField("String", "ENV_JWT", "\"$jwt\"")
+    }
+
     buildTypes {
         debug {
-            buildConfigField("String", "ENV_PREFIX", "\"stage.\"")
-            buildConfigField("String", "ENV_JWT", "\"09kqzjtmz5cf1klm9hjxw9yt3uaa63hk\"")
+            karikaEnv("stage")
         }
         release {
             isMinifyEnabled = true
@@ -53,8 +71,7 @@ android {
             if (keystorePropsFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            buildConfigField("String", "ENV_PREFIX", "\"\"")
-            buildConfigField("String", "ENV_JWT", "\"lbzgyy1qylr7unu707eblcphftb2fzha\"")
+            karikaEnv("prod")
         }
     }
 
