@@ -42,6 +42,7 @@ import karika.distribucija.ba.salesrep.notifications.PushRouteResolver
 import karika.distribucija.ba.salesrep.notifications.openChatConversation
 import karika.distribucija.ba.salesrep.notifications.PushTokenRegistrar
 import karika.distribucija.ba.salesrep.session.CurrentUser
+import karika.distribucija.ba.salesrep.util.EnvWatermark
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -73,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_main)
+        EnvWatermark.attach(this)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {

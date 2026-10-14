@@ -23,8 +23,8 @@ android {
         applicationId = "karika.distribucija.ba.salesrep"
         minSdk = 30
         targetSdk = 37
-        versionCode = 72
-        versionName = "2.4"
+        versionCode = 73
+        versionName = "2.5"
         // Shared with launcher (see its build.gradle.kts) - checked on both ends of the
         // launcher<->salesrep broadcasts instead of a signature-level permission, since the two
         // apps are signed with different keys.
@@ -58,6 +58,7 @@ android {
         val (prefix, jwt) = KARIKA_ENVS[env] ?: error("karikaEnv must be one of ${KARIKA_ENVS.keys}, not $env")
         buildConfigField("String", "ENV_PREFIX", "\"$prefix\"")
         buildConfigField("String", "ENV_JWT", "\"$jwt\"")
+        buildConfigField("String", "ENV_NAME", "\"$env\"")
     }
 
     buildTypes {
