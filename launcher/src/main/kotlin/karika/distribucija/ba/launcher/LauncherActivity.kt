@@ -1,16 +1,20 @@
 package karika.distribucija.ba.launcher
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import karika.distribucija.ba.launcher.provision.DeviceConfig
@@ -33,6 +37,16 @@ class LauncherActivity : AppCompatActivity() {
     private val maintenanceListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> reapplyKioskState() }
 
+    /** The payload landing (first install or update) while the launcher is in front: start it
+     * right away instead of waiting for some later resume. */
+    private val packageReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.data?.schemeSpecificPart != KnownApps.primary(context).packageName) return
+            AppLogger.i(TAG, "Payload installed: ${intent.action}")
+            reapplyKioskState()
+        }
+    }
+
     /** MaintenanceState's auto-expiry writes nothing, so the listener above never sees it. */
     private val maintenanceExpiryCheck = Runnable { reapplyKioskState() }
 
@@ -49,6 +63,16 @@ class LauncherActivity : AppCompatActivity() {
             MaintenanceState.end(this)
             refreshMaintenanceState()
         }
+
+    /** Hidden service gesture, for when the payload isn't up to offer it (see ServiceUnlockActivity). */
+    private val secretTaps by lazy {
+        SecretCornerTaps(cornerPx = 96 * resources.displayMetrics.density) { ServiceUnlockActivity.open(this) }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        secretTaps.onTouch(ev)
+        return super.dispatchTouchEvent(ev)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,10 +101,30 @@ class LauncherActivity : AppCompatActivity() {
         MaintenanceState.addChangeListener(this, maintenanceListener)
         RemoteMaintenanceState.addChangeListener(this, maintenanceListener)
         DeviceConfig.addChangeListener(this, maintenanceListener)
+        ContextCompat.registerReceiver(
+            this,
+            packageReceiver,
+            IntentFilter().apply {
+                addAction(Intent.ACTION_PACKAGE_ADDED)
+                addAction(Intent.ACTION_PACKAGE_REPLACED)
+                addDataScheme("package")
+            },
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
         refreshMaintenanceState()
     }
 
+    /** singleTop: bringToFront() on an already-resumed launcher (e.g. still showing a status panel
+     * right after provisioning, when UpdateWorker finishes the first payload install) lands here
+     * instead of onResume() - without this the payload was only started after a reboot. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        AppLogger.i(TAG, "onNewIntent")
+        reapplyKioskState()
+    }
+
     override fun onPause() {
+        runCatching { unregisterReceiver(packageReceiver) }
         MaintenanceState.removeChangeListener(this, maintenanceListener)
         RemoteMaintenanceState.removeChangeListener(this, maintenanceListener)
         DeviceConfig.removeChangeListener(this, maintenanceListener)

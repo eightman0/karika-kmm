@@ -163,6 +163,14 @@
 
         <!-- Targeted by salesrep via an explicit component (no intent-filter needed), see
              KioskIpc.kt - exported because it's a cross-app, cross-signing-key broadcast. -->
+        <!-- On-device service PIN unlock. Exported so the kiosk payload app's hidden gesture can
+             open it; the PIN (checked in the activity) is the only gate. -->
+        <activity
+            android:name=".ServiceUnlockActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.Launcher" />
+
         <receiver
             android:name=".ipc.KioskEventReceiver"
             android:exported="true" />

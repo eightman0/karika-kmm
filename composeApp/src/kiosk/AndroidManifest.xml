@@ -21,6 +21,11 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
+    <!-- The launcher's service PIN screen, opened from the hidden corner gesture. -->
+    <queries>
+        <package android:name="karika.distribucija.ba.launcher" />
+    </queries>
+
     <application
         android:name=".KarikaApp"
         android:icon="@mipmap/ic_launcher"

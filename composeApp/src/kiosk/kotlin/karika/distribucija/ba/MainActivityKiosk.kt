@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
+import android.view.MotionEvent
 import android.provider.Settings
 import android.view.WindowManager
 import android.widget.Toast
@@ -83,6 +85,43 @@ class MainActivityKiosk : KarikaActivity() {
         startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         })
+    }
+
+    private var secretTapCount = 0
+    private var secretFirstTapAt = 0L
+
+    /** Hidden service gesture: 7 taps in the top-left corner within 4 s open the launcher's
+     * service PIN screen (ServiceUnlockActivity), so a technician can take the tablet out of
+     * kiosk on site even when push / the server is no help. Same gesture as in the launcher. */
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN) {
+            val corner = 96 * resources.displayMetrics.density
+            if (ev.x <= corner && ev.y <= corner) {
+                val now = SystemClock.elapsedRealtime()
+                if (secretTapCount == 0 || now - secretFirstTapAt > 4_000L) {
+                    secretTapCount = 0
+                    secretFirstTapAt = now
+                }
+                if (++secretTapCount >= 7) {
+                    secretTapCount = 0
+                    openLauncherServiceUnlock()
+                }
+            } else {
+                secretTapCount = 0
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun openLauncherServiceUnlock() {
+        runCatching {
+            startActivity(
+                Intent().setClassName(
+                    "karika.distribucija.ba.launcher",
+                    "karika.distribucija.ba.launcher.ServiceUnlockActivity"
+                )
+            )
+        }
     }
 
     override fun onUserInteraction() {

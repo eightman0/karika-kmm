@@ -114,9 +114,9 @@ android {
         applicationId = "karika.distribucija.ba"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 275
+        versionCode = 276
 
-        versionName = "2.7.5"
+        versionName = "2.7.6"
 
         // The kiosk flavor's backend environment, -PkarikaEnv=stage|demo|prod (scripts/
         // build-release-apks.sh passes it), prod by default. The package stays the same, so every

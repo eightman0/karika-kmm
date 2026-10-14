@@ -18,6 +18,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
+    <!-- The launcher's service PIN screen, opened from the hidden corner gesture. -->
+    <queries>
+        <package android:name="karika.distribucija.ba.launcher" />
+    </queries>
+
     <application
         android:name=".SalesRepApp"
         android:allowBackup="true"

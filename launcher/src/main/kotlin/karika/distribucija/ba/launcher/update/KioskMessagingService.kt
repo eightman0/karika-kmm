@@ -6,6 +6,7 @@ import android.provider.Settings
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import karika.distribucija.ba.launcher.KioskUnlock
 import karika.distribucija.ba.launcher.LauncherActivity
 import karika.distribucija.ba.launcher.RemoteDebugUnlock
 import karika.distribucija.ba.launcher.RemoteMaintenanceState
@@ -98,14 +99,7 @@ class KioskMessagingService : FirebaseMessagingService() {
                 UpdateScheduler.triggerLauncherSelfUpdate(applicationContext)
             }
             CMD_DEBUG_UNLOCK -> runAcked(command, requestId) {
-                RemoteDebugUnlock.begin(applicationContext)
-                // Setting the flag alone only takes effect the next time LauncherActivity resumes
-                // on its own - could be indefinite with salesrep sitting in front. Force lock task
-                // off immediately: removing the current package from the allowlist is documented
-                // to stop lock task mode right away, regardless of which activity holds the pin.
-                val devicePolicyManager = getSystemService(DevicePolicyManager::class.java)
-                val admin = LauncherDeviceAdminReceiver.getReceiverComponentName(applicationContext)
-                devicePolicyManager.setLockTaskPackages(admin, arrayOf())
+                KioskUnlock.unlock(applicationContext)
             }
             CMD_DEBUG_LOCK -> runAcked(command, requestId) {
                 RemoteDebugUnlock.end(applicationContext)

@@ -23,8 +23,8 @@ android {
         applicationId = "karika.distribucija.ba.salesrep"
         minSdk = 30
         targetSdk = 37
-        versionCode = 71
-        versionName = "2.3"
+        versionCode = 72
+        versionName = "2.4"
         // Shared with launcher (see its build.gradle.kts) - checked on both ends of the
         // launcher<->salesrep broadcasts instead of a signature-level permission, since the two
         // apps are signed with different keys.

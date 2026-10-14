@@ -4,8 +4,10 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -31,6 +33,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.appbar.MaterialToolbar
 import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.logging.AppLogger
+import karika.distribucija.ba.logging.KioskIpc
 import karika.distribucija.ba.salesrep.api.SalesRepository
 import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.network.PlatformEnv
@@ -248,6 +251,41 @@ class MainActivity : AppCompatActivity() {
                 navController,
                 destination.conversationId,
                 navOptions { popUpTo(R.id.notificationsFragment) { inclusive = true } }
+            )
+        }
+    }
+
+    private var secretTapCount = 0
+    private var secretFirstTapAt = 0L
+
+    /** Hidden service gesture: 7 taps in the top-left corner within 4 s open the launcher's
+     * service PIN screen (ServiceUnlockActivity), so a technician can take the tablet out of
+     * kiosk on site even when push / the server is no help. Same gesture as the launcher and the
+     * shop kiosk app. */
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN) {
+            val corner = 96 * resources.displayMetrics.density
+            if (ev.x <= corner && ev.y <= corner) {
+                val now = SystemClock.elapsedRealtime()
+                if (secretTapCount == 0 || now - secretFirstTapAt > 4_000L) {
+                    secretTapCount = 0
+                    secretFirstTapAt = now
+                }
+                if (++secretTapCount >= 7) {
+                    secretTapCount = 0
+                    openLauncherServiceUnlock()
+                }
+            } else {
+                secretTapCount = 0
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun openLauncherServiceUnlock() {
+        runCatching {
+            startActivity(
+                Intent().setClassName(KioskIpc.LAUNCHER_PACKAGE, "${KioskIpc.LAUNCHER_PACKAGE}.ServiceUnlockActivity")
             )
         }
     }
