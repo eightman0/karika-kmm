@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -133,6 +134,7 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
     val isOrderLoaded by component.isOrderLoaded.collectAsState()
     val comments by component.comments.collectAsState()
     val isSendingComment by component.isSendingComment.collectAsState()
+    val isReordering by component.isReordering.collectAsState()
     var commentText by remember { mutableStateOf("") }
     var editingItem by component.editOrderItem.asState()
     var deliveryExpanded by remember { mutableStateOf(false) }
@@ -205,7 +207,10 @@ fun SalesOrderDetailView(component: SalesOrderDetailComponent) {
                         vpcTotal = vpcTotal,
                         grandTotal = grandTotal,
                         commission = commission,
-                        blurred = blurInfoFields
+                        blurred = blurInfoFields,
+                        canReorder = component.canReorder,
+                        isReordering = isReordering,
+                        onReorder = { component.reorder() }
                     )
                 }
             }
@@ -506,7 +511,10 @@ private fun OrderSummary(
     vpcTotal: Double,
     grandTotal: Double,
     commission: Double?,
-    blurred: Boolean
+    blurred: Boolean,
+    canReorder: Boolean = false,
+    isReordering: Boolean = false,
+    onReorder: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -530,25 +538,51 @@ private fun OrderSummary(
                 value = order.date()
             )
         }
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        val statusColor = statusOnNavy(order.realOrderStatus)
+        if (canReorder) {
+            // Status pill with "Naruči ponovo" next to it; "Ukupno sa PDV" moves below.
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                KPill(
+                    text = order.status(),
+                    background = statusColor.copy(alpha = 0.15f),
+                    color = statusColor,
+                    dot = statusColor,
+                    textSize = 11.5.sp
+                )
+                Spacer(Modifier.weight(1f))
+                ReorderButton(isLoading = isReordering, onClick = onReorder)
+            }
             KarikaText(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.padding(top = 14.dp),
                 text = "Ukupno sa PDV",
                 color = NavyLabel,
                 textSize = 12.sp,
                 fontWeight = FontWeight.W500
             )
-            val color = statusOnNavy(order.realOrderStatus)
-            KPill(
-                text = order.status(),
-                background = color.copy(alpha = 0.15f),
-                color = color,
-                dot = color,
-                textSize = 11.5.sp
-            )
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                KarikaText(
+                    modifier = Modifier.weight(1f),
+                    text = "Ukupno sa PDV",
+                    color = NavyLabel,
+                    textSize = 12.sp,
+                    fontWeight = FontWeight.W500
+                )
+                KPill(
+                    text = order.status(),
+                    background = statusColor.copy(alpha = 0.15f),
+                    color = statusColor,
+                    dot = statusColor,
+                    textSize = 11.5.sp
+                )
+            }
         }
         KarikaText(
             modifier = Modifier.padding(top = 4.dp).lockedBlur(blurred),
@@ -580,6 +614,37 @@ private fun OrderSummary(
                 label = "Karika provizija",
                 value = if (commission != null) karikaPriceFormat(commission) + " KM" else "—",
                 color = lerp(VendorAccent, KarikaColors.White, 0.45f)
+            )
+        }
+    }
+}
+
+/** "Naruči ponovo": solid blue pill; a small white spinner replaces the text while running. */
+@Composable
+private fun ReorderButton(isLoading: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .height(36.dp)
+            .clip(RoundedCornerShape(50))
+            .background(VendorAccent)
+            .clickable(enabled = !isLoading, onClick = onClick)
+            .padding(horizontal = 18.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Keeps the pill's width while the spinner shows.
+        KarikaText(
+            modifier = Modifier.alpha(if (isLoading) 0f else 1f),
+            text = "Naruči ponovo",
+            color = KarikaColors.White,
+            textSize = 15.sp,
+            fontWeight = FontWeight.W700,
+            maxLines = 1
+        )
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                color = KarikaColors.White,
+                strokeWidth = 2.dp
             )
         }
     }

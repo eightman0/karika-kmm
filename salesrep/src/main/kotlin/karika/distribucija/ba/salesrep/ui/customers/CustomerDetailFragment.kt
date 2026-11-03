@@ -16,6 +16,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
 import karika.distribucija.ba.salesrep.databinding.FragmentCustomerDetailBinding
+import karika.distribucija.ba.salesrep.databinding.ItemCustomerOrderBinding
+import karika.distribucija.ba.salesrep.model.OnBehalfOrder
+import karika.distribucija.ba.salesrep.util.inSarajevo
+import karika.distribucija.ba.salesrep.util.toDisplayDate
 import karika.distribucija.ba.salesrep.model.DiscountRule
 import karika.distribucija.ba.salesrep.model.OperationalCustomer
 import karika.distribucija.ba.salesrep.session.CurrentUser
@@ -90,6 +94,11 @@ class CustomerDetailFragment : Fragment() {
             )
         }
 
+        binding.buttonOrdersLoadMore.setOnClickListener { viewModel.loadOrders() }
+        viewModel.orders.observe(viewLifecycleOwner) { renderOrders() }
+        viewModel.ordersTotal.observe(viewLifecycleOwner) { renderOrders() }
+        viewModel.isLoadingOrders.observe(viewLifecycleOwner) { renderOrders() }
+
         viewModel.discounts.observe(viewLifecycleOwner) { discounts ->
             adapter.submitList(discounts)
             binding.textEmpty.visibility = if (discounts.isEmpty()) View.VISIBLE else View.GONE
@@ -100,6 +109,83 @@ class CustomerDetailFragment : Fragment() {
                 showSnack(message)
             }
         }
+    }
+
+    /** "Narudžbe" section - rows are inflated into a plain LinearLayout (the screen already
+     * scrolls). No reorder button here; "Otvori" opens the existing order screen. */
+    private fun renderOrders() {
+        val orders = viewModel.orders.value.orEmpty()
+        val loading = viewModel.isLoadingOrders.value == true
+        val loaded = viewModel.ordersTotal.value != null
+
+        val container = binding.layoutCustomerOrders
+        container.removeAllViews()
+        val inflater = LayoutInflater.from(requireContext())
+        orders.forEach { order ->
+            val row = ItemCustomerOrderBinding.inflate(inflater, container, false)
+            row.textIncrementId.text = getString(R.string.k_reorder_order_number, order.incrementId)
+            row.textDate.text = order.createdAt?.let { raw ->
+                runCatching { raw.inSarajevo().toDisplayDate() }.getOrDefault(raw)
+            }.orEmpty()
+            row.textTotal.text = order.totalString()
+            row.textStatus.text = statusLabel(order.status)
+            val color = requireContext().getColor(statusColorRes(order.status))
+            row.textStatus.background.mutate().setTint(requireContext().getColor(statusBgRes(order.status)))
+            row.textStatus.setTextColor(color)
+            row.textStatus.compoundDrawableTintList = android.content.res.ColorStateList.valueOf(color)
+            row.buttonOpen.setOnClickListener { openOrder(order) }
+            container.addView(row.root)
+        }
+
+        binding.textOrdersEmpty.visibility = if (loaded && !loading && orders.isEmpty()) View.VISIBLE else View.GONE
+        binding.progressOrders.visibility = if (loading) View.VISIBLE else View.GONE
+        binding.buttonOrdersLoadMore.visibility =
+            if (!loading && viewModel.hasMoreOrders()) View.VISIBLE else View.GONE
+    }
+
+    private fun statusLabel(status: String): String = when (status) {
+        "pending" -> getString(R.string.k_reorder_status_pending)
+        "approved" -> getString(R.string.k_reorder_status_approved)
+        "cancelled" -> getString(R.string.k_reorder_status_cancelled)
+        "rejected" -> getString(R.string.k_reorder_status_rejected)
+        "estimate-sent" -> getString(R.string.k_reorder_status_estimate_sent)
+        "bill-sent" -> getString(R.string.k_reorder_status_bill_sent)
+        else -> status.replaceFirstChar { it.uppercase() }
+    }
+
+    // Same pill colors as OrdersAdapter (SalesOrdersView.kt's statusPillColors()).
+    private fun statusBgRes(status: String): Int = when (status) {
+        "approved", "bill-sent" -> R.color.k_green_soft
+        "rejected" -> R.color.k_red_soft
+        "processing" -> R.color.k_accent_soft
+        "pending", "estimate-sent" -> R.color.k_amber_soft
+        else -> R.color.k_field
+    }
+
+    private fun statusColorRes(status: String): Int = when (status) {
+        "approved", "bill-sent" -> R.color.k_green
+        "rejected" -> R.color.k_red
+        "processing" -> R.color.k_accent
+        "pending", "estimate-sent" -> R.color.k_amber
+        else -> R.color.k_muted
+    }
+
+    /** Same nav args as OrdersListFragment.openOrder(). */
+    private fun openOrder(order: OnBehalfOrder) {
+        val nav = findNavController()
+        if (nav.currentDestination?.id != R.id.customerDetailFragment) return
+        nav.navigate(
+            R.id.action_customer_detail_to_order_detail,
+            bundleOf(
+                "orderId" to order.orderId,
+                "incrementId" to order.incrementId,
+                "customerId" to order.customerId,
+                "customerName" to (order.customerName ?: customerTitle()),
+                "grandTotal" to order.grandTotal,
+                "status" to order.status,
+                "createdAt" to order.createdAt
+            )
+        )
     }
 
     private fun renderProfile() {
@@ -138,6 +224,8 @@ class CustomerDetailFragment : Fragment() {
         // is recreated on back-navigation but the ViewModel survives, so its LiveData would
         // otherwise still hold the pre-edit list.
         viewModel.loadDiscounts()
+        // Also pick up orders placed meanwhile (e.g. after "Naruči ponovo" -> review -> confirm).
+        viewModel.loadOrders(reset = true)
     }
 
     private fun openNewDiscount() {

@@ -28,12 +28,16 @@ import karika.distribucija.ba.domain.model.OperationalCustomer
 import karika.distribucija.ba.domain.model.OperationalCustomerSearchResults
 import karika.distribucija.ba.domain.model.Partnership
 import karika.distribucija.ba.domain.model.PartnershipRequestBody
+import karika.distribucija.ba.domain.model.ReorderLine
+import karika.distribucija.ba.domain.model.ReorderOutcome
 import karika.distribucija.ba.domain.model.ResultState
+import karika.distribucija.ba.domain.model.VendorOperationsError
 import karika.distribucija.ba.domain.model.VendorOperationsMe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 
 internal class SalesApi {
 
@@ -345,6 +349,23 @@ internal class SalesApi {
         }
     }
 
+    /** GET /V1/vendor-operations/orders filtered to one customer, newest first (no employeeId). */
+    suspend fun getCustomerOrders(
+        customerId: Long,
+        page: Int,
+        pageSize: Int
+    ): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(url("vendor-operations/orders")) {
+            parameter("searchCriteria[current_page]", page)
+            parameter("searchCriteria[page_size]", pageSize)
+            parameter("searchCriteria[sort_orders][0][field]", "created_at")
+            parameter("searchCriteria[sort_orders][0][direction]", "DESC")
+            parameter("searchCriteria[filter_groups][0][filters][0][field]", "customer_id")
+            parameter("searchCriteria[filter_groups][0][filters][0][value]", customerId.toString())
+            parameter("searchCriteria[filter_groups][0][filters][0][condition_type]", "eq")
+        }
+    }
+
 }
 
 class SalesRepository internal constructor() {
@@ -385,6 +406,130 @@ class SalesRepository internal constructor() {
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
+
+    fun getCustomerOrders(
+        customerId: Long,
+        page: Int,
+        pageSize: Int = 12
+    ): Flow<ResultState<OnBehalfOrderSearchResults>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().getCustomerOrders(customerId, page, pageSize).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<OnBehalfOrderSearchResults>()))
+                return@flow
+            }
+            emit(ResultState.Error(response.vendorOperationsErrorMessage("Greška pri učitavanju narudžbi.")))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    /**
+     * "Naruči ponovo": replaces the customer's on-behalf cart with [lines].
+     * GET cart -> DELETE every line (stops on the first failure) -> POST each line without
+     * discount_percent, skipping empty SKUs, qty <= 0 and failed adds.
+     */
+    suspend fun reorderIntoCart(customerId: Long, lines: List<ReorderLine>): ReorderOutcome =
+        withContext(Dispatchers.Default) {
+            if (lines.isEmpty()) {
+                return@withContext ReorderOutcome.Failed("Nijedan artikal iz narudžbe nije dostupan.")
+            }
+            val api = SalesApi()
+            try {
+                // 1. Read the current cart.
+                val cartResponse = api.getCart(customerId).getOrNoInternet()
+                if (cartResponse.status != HttpStatusCode.OK) {
+                    return@withContext ReorderOutcome.Failed(
+                        cartResponse.vendorOperationsErrorMessage("Greška pri učitavanju korpe.")
+                    )
+                }
+                val currentCart = cartResponse.body<OnBehalfCartResponse>()
+
+                // 2. Clear it, one line at a time.
+                for (item in currentCart.items) {
+                    val deleteResponse = api.removeCartItem(customerId, item.itemId).getOrNoInternet()
+                    if (deleteResponse.status != HttpStatusCode.OK) {
+                        return@withContext ReorderOutcome.Failed(
+                            deleteResponse.vendorOperationsErrorMessage("Greška pri pražnjenju korpe.")
+                        )
+                    }
+                }
+
+                // 3. Add each order line.
+                val skipped = mutableListOf<String>()
+                var lastCart: OnBehalfCartResponse? = null
+                for (line in lines) {
+                    val unavailable = "Proizvod ${line.name?.takeIf { it.isNotBlank() } ?: line.sku ?: ""} više nije dostupan."
+                    val sku = line.sku?.trim()
+                    if (sku.isNullOrEmpty() || line.qty <= 0) {
+                        skipped += unavailable
+                        continue
+                    }
+                    val addResponse = api.addCartItem(customerId, sku, line.qty).getOrNoInternet()
+                    when {
+                        addResponse.status == HttpStatusCode.OK ->
+                            lastCart = addResponse.body<OnBehalfCartResponse>()
+
+                        addResponse.vendorOperationsError()?.code == "customer_not_partnered" ->
+                            return@withContext ReorderOutcome.Failed(
+                                localizeVendorOperationsError("customer_not_partnered", null)
+                            )
+
+                        else -> skipped += unavailable
+                    }
+                }
+
+                val cart = lastCart
+                if (cart == null) {
+                    ReorderOutcome.Failed(skipped.joinToString("\n"))
+                } else {
+                    ReorderOutcome.Added(cart, skipped)
+                }
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                ReorderOutcome.Failed(e.message ?: "Došlo je do greške. Pokušajte ponovo!")
+            }
+        }
+
+    /**
+     * Finds the [OperationalCustomer] with [customerId] in the caller's book (own customers, then
+     * all vendor customers when allowed). Used by "Naruči ponovo" to open the cart review when the
+     * order screen was not opened from the customer screen.
+     */
+    suspend fun findCustomer(
+        customerId: Long,
+        employeeId: Int,
+        canSeeAllVendorCustomers: Boolean
+    ): OperationalCustomer? = withContext(Dispatchers.Default) {
+        val api = SalesApi()
+        val pageSize = 100
+        val maxPages = 20
+
+        suspend fun scan(fetch: suspend (Int) -> HttpResponse): OperationalCustomer? {
+            for (page in 1..maxPages) {
+                val response = runCatching { fetch(page) }.getOrNull() ?: return null
+                if (response.status != HttpStatusCode.OK) return null
+                val result = runCatching { response.body<OperationalCustomerSearchResults>() }.getOrNull()
+                    ?: return null
+                result.items.firstOrNull { it.customerId == customerId }?.let { return it }
+                if (result.items.size < pageSize || page * pageSize >= result.totalCount) return null
+            }
+            return null
+        }
+
+        try {
+            (if (employeeId > 0) scan { api.getEmployeeCustomers(employeeId, it, pageSize).getOrNoInternet() } else null)
+                ?: (if (canSeeAllVendorCustomers) scan { api.getCustomers(it, pageSize).getOrNoInternet() } else null)
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     fun getInvitableCustomers(
         page: Int,
@@ -686,4 +831,22 @@ class SalesRepository internal constructor() {
             }
         }.flowOn(Dispatchers.Default)
 
+}
+
+private suspend fun HttpResponse.vendorOperationsError(): VendorOperationsError? =
+    runCatching { body<VendorOperationsError>() }.getOrNull()
+
+private suspend fun HttpResponse.vendorOperationsErrorMessage(fallback: String): String {
+    val error = vendorOperationsError()
+    return localizeVendorOperationsError(error?.code, error?.message?.takeIf { it.isNotBlank() } ?: fallback)
+}
+
+/** Bosnian message for a Vendor Operations `parameters.code`, falling back to [message]. */
+internal fun localizeVendorOperationsError(code: String?, message: String?): String = when (code) {
+    "customer_not_partnered" -> "Kupac nema aktivno partnerstvo sa vašom firmom."
+    "product_not_in_catalog" -> "Proizvod nije pronađen u katalogu."
+    "product_add_failed" -> "Proizvod nije moguće dodati u korpu."
+    "cart_item_not_found" -> "Stavka korpe više ne postoji. Osvježite korpu i pokušajte ponovo."
+    "forbidden" -> "Nemate dozvolu za ovu radnju."
+    else -> message ?: "Došlo je do greške. Pokušajte ponovo!"
 }

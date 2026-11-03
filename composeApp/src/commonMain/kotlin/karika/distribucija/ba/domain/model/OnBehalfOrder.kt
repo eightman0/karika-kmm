@@ -200,3 +200,25 @@ object OnBehalfCartShippingDefaultsSerializer : KSerializer<OnBehalfCartShipping
         throw SerializationException("OnBehalfCartShippingDefaults is response-only")
     }
 }
+
+/** Status labels the website uses on the customer's "Narudžbe" list. */
+fun OnBehalfOrder.customerOrderStatusLabel(): String = when (status) {
+    "pending"       -> "Na čekanju"
+    "approved"      -> "Odobrena"
+    "cancelled"     -> "Otkazana"
+    "rejected"      -> "Odbijena"
+    "estimate-sent" -> "Čekanje na uplatu"
+    "bill-sent"     -> "Uplaćena"
+    else            -> status.replaceFirstChar { it.uppercase() }
+}
+
+/** One order line to repeat into the on-behalf cart ("Naruči ponovo"). */
+data class ReorderLine(val sku: String?, val name: String?, val qty: Int)
+
+sealed class ReorderOutcome {
+    /** At least one line was added; [skipped] holds the "Proizvod X više nije dostupan." messages. */
+    data class Added(val cart: OnBehalfCartResponse, val skipped: List<String>) : ReorderOutcome()
+
+    /** Nothing was added - stay on the order screen and show [message] as an error. */
+    data class Failed(val message: String) : ReorderOutcome()
+}

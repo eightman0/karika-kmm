@@ -88,6 +88,7 @@ data class ShippingDetails(
 data class VendorProduct(
     @SerialName("item_id") val itemId: String? = null,
     @SerialName("product_id") val productId: String? = null,
+    @SerialName("sku") val sku: String? = null,
     @SerialName("name") val name: String? = null,
     @SerialName("price") val price: String? = null,
     @SerialName("qty_ordered") val qtyOrdered: String? = null,

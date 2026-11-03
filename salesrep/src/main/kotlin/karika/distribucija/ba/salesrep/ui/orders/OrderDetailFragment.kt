@@ -21,7 +21,10 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import karika.distribucija.ba.salesrep.model.ReorderOutcome
 import androidx.fragment.app.viewModels
 import karika.distribucija.ba.logging.AnalyticsTracker
 import karika.distribucija.ba.salesrep.R
@@ -133,6 +136,22 @@ class OrderDetailFragment : Fragment() {
             )
         }
 
+        binding.buttonReorder.setOnClickListener {
+            if (viewModel.isReordering.value == true) return@setOnClickListener
+            viewModel.reorder()
+        }
+        viewModel.isReordering.observe(viewLifecycleOwner) { running ->
+            binding.buttonReorder.isEnabled = !running
+            binding.textReorder.visibility = if (running) View.INVISIBLE else View.VISIBLE
+            binding.progressReorder.visibility = if (running) View.VISIBLE else View.GONE
+        }
+        viewModel.reorderOutcome.observe(viewLifecycleOwner) { outcome ->
+            if (outcome != null) {
+                viewModel.clearReorderOutcome()
+                handleReorderOutcome(outcome)
+            }
+        }
+
         viewModel.vendorOrder.observe(viewLifecycleOwner) { order -> renderOrder(order) }
         viewModel.comments.observe(viewLifecycleOwner) { comments -> renderComments(comments) }
 
@@ -195,6 +214,13 @@ class OrderDetailFragment : Fragment() {
         binding.textVpcTotal.text = karikaPriceFormat(vpcTotal) + " KM"
         binding.textCommissionTotal.text = commissionText
         renderStatusPill(order)
+        // Mirrors SalesOrderDetailView.kt: with "Naruči ponovo" the row is pill | spacer | button
+        // and "Ukupno sa PDV" moves below it; without it the original label | pill row stays.
+        val canReorder = viewModel.canReorder(order)
+        binding.buttonReorder.visibility = if (canReorder) View.VISIBLE else View.GONE
+        binding.spaceReorder.visibility = if (canReorder) View.VISIBLE else View.GONE
+        binding.textTotalLabelInline.visibility = if (canReorder) View.GONE else View.VISIBLE
+        binding.textTotalLabelBelow.visibility = if (canReorder) View.VISIBLE else View.GONE
 
         // ── CustomerSection ──
         val name = order.b2bPravnoLice ?: getString(R.string.order_detail_customer_fallback, order.customerId.orEmpty())
@@ -261,6 +287,59 @@ class OrderDetailFragment : Fragment() {
     }
 
     /** KPill on the navy card - light status color at 15% behind a dot and the label. */
+    private fun handleReorderOutcome(outcome: ReorderOutcome) {
+        when (outcome) {
+            is ReorderOutcome.Added -> {
+                val order = viewModel.vendorOrder.value ?: return
+                openCartReview(order)
+                if (outcome.skippedNames.isNotEmpty()) {
+                    showSnack(skippedMessage(outcome.skippedNames), KSnackbar.Type.WARNING)
+                }
+            }
+            is ReorderOutcome.AllSkipped -> showSnack(
+                if (outcome.skippedNames.isEmpty()) getString(R.string.k_reorder_no_lines)
+                else skippedMessage(outcome.skippedNames)
+            )
+            ReorderOutcome.NoLines -> showSnack(R.string.k_reorder_no_lines)
+            is ReorderOutcome.Failed -> showSnack(reorderErrorMessage(outcome))
+        }
+    }
+
+    private fun skippedMessage(names: List<String>): String =
+        names.joinToString(" ") { getString(R.string.k_reorder_product_unavailable, it) }
+
+    /** Localized from parameters.code; falls back to Magento's message. */
+    private fun reorderErrorMessage(failure: ReorderOutcome.Failed): String = when (failure.code) {
+        "customer_not_partnered" -> getString(R.string.k_reorder_error_customer_not_partnered)
+        "product_not_in_catalog" -> getString(R.string.k_reorder_error_product_not_in_catalog)
+        "product_add_failed" -> getString(R.string.k_reorder_error_product_add_failed)
+        "cart_item_not_found" -> getString(R.string.k_reorder_error_cart_item_not_found)
+        "forbidden" -> getString(R.string.k_reorder_error_forbidden)
+        else -> failure.message?.takeIf { it.isNotBlank() } ?: getString(R.string.k_reorder_error_generic)
+    }
+
+    /** Opens the existing on-behalf cart review (OrderReviewFragment), which reloads the cart.
+     * A successful cart POST implies an active partnership; the order's address stands in for
+     * the customer's default shipping address. */
+    private fun openCartReview(order: VendorOrder) {
+        val customerId = order.customerId?.trim()?.toLongOrNull() ?: return
+        val nav = findNavController()
+        if (nav.currentDestination?.id != R.id.orderDetailFragment) return
+        val company = order.b2bPravnoLice?.takeIf { it.isNotBlank() }
+        nav.navigate(
+            R.id.action_order_detail_to_review,
+            bundleOf(
+                "customerId" to customerId,
+                "customerName" to (company ?: order.billingName),
+                "customerCompany" to company,
+                "customerEmail" to order.address?.email,
+                "partnershipStatus" to "active",
+                "customerActive" to true,
+                "hasShippingAddress" to !order.address?.street.isNullOrBlank()
+            )
+        )
+    }
+
     private fun renderStatusPill(order: VendorOrder) {
         val color = when (order.realOrderStatus) {
             "approved", "bill-sent" -> 0xFF86EFAC.toInt()

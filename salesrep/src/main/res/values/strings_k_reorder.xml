@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- "Naruči ponovo" (reorder on behalf of a customer) - docs/vendor-reorder/mobile.md -->
+    <string name="k_reorder_button">Naruči ponovo</string>
+    <string name="k_reorder_product_unavailable">Proizvod %1$s više nije dostupan.</string>
+    <string name="k_reorder_no_lines">Nijedan artikal iz narudžbe nije dostupan.</string>
+    <string name="k_reorder_error_customer_not_partnered">Kupac nema aktivno partnerstvo s Vama. Narudžbu nije moguće ponoviti.</string>
+    <string name="k_reorder_error_product_not_in_catalog">Proizvod nije pronađen u katalogu.</string>
+    <string name="k_reorder_error_product_add_failed">Proizvod nije moguće dodati u korpu.</string>
+    <string name="k_reorder_error_cart_item_not_found">Stavka korpe više ne postoji. Pokušajte ponovo.</string>
+    <string name="k_reorder_error_forbidden">Nemate dozvolu da naručite za ovog kupca.</string>
+    <string name="k_reorder_error_generic">Narudžbu nije moguće ponoviti. Pokušajte ponovo.</string>
+
+    <!-- Customer detail: "Narudžbe" section -->
+    <string name="k_reorder_customer_orders_title">Narudžbe</string>
+    <string name="k_reorder_customer_orders_empty">Nema narudžbi.</string>
+    <string name="k_reorder_customer_orders_open">Otvori</string>
+    <string name="k_reorder_customer_orders_load_more">Učitaj još</string>
+    <string name="k_reorder_order_number">#%1$s</string>
+
+    <!-- Order status labels (same as the website) -->
+    <string name="k_reorder_status_pending">Na čekanju</string>
+    <string name="k_reorder_status_approved">Odobrena</string>
+    <string name="k_reorder_status_cancelled">Otkazana</string>
+    <string name="k_reorder_status_rejected">Odbijena</string>
+    <string name="k_reorder_status_estimate_sent">Čekanje na uplatu</string>
+    <string name="k_reorder_status_bill_sent">Uplaćena</string>
+</resources>

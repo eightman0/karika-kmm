@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,6 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import karika.distribucija.ba.domain.model.DiscountRule
+import karika.distribucija.ba.domain.model.OnBehalfOrder
+import karika.distribucija.ba.domain.model.customerOrderStatusLabel
 import karika.distribucija.ba.ui.components.KBottomPanel
 import karika.distribucija.ba.ui.components.KCard
 import karika.distribucija.ba.ui.components.KConfirmDialog
@@ -57,6 +60,10 @@ import org.jetbrains.compose.resources.vectorResource
 fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
     val customer = component.customer
     val discounts by component.discounts.collectAsState()
+    val orders by component.orders.collectAsState()
+    val ordersTotalCount by component.ordersTotalCount.collectAsState()
+    val isLoadingOrders by component.isLoadingOrders.collectAsState()
+    val isLoadingMoreOrders by component.isLoadingMoreOrders.collectAsState()
 
     var confirmDeleteRule by remember { mutableStateOf<DiscountRule?>(null) }
 
@@ -146,6 +153,67 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
                 )
             }
 
+            // ── Narudžbe ───────────────────────────────────────────────────────
+            item {
+                KSectionTitle(
+                    modifier = Modifier.padding(top = 12.dp, bottom = 2.dp),
+                    title = "Narudžbe"
+                )
+            }
+
+            items(orders, key = { "order_${it.orderId}_${it.incrementId}" }) { order ->
+                CustomerOrderCard(order = order, onOpen = { component.openOrder(order) })
+            }
+
+            if (isLoadingOrders) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = VendorAccent,
+                            strokeWidth = 2.dp
+                        )
+                    }
+                }
+            } else if (orders.isEmpty()) {
+                item {
+                    KCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+                        KarikaText(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            text = "Nema narudžbi.",
+                            color = KarikaUiColors.Muted,
+                            textSize = 13.sp
+                        )
+                    }
+                }
+            } else if (orders.size < ordersTotalCount) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isLoadingMoreOrders) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = VendorAccent,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            CardTextAction(
+                                text = "Učitaj još",
+                                color = VendorAccent,
+                                onClick = { component.loadMoreOrders() }
+                            )
+                        }
+                    }
+                }
+            }
+
             // ── Discounts header ───────────────────────────────────────────────
             item {
                 Row(
@@ -198,6 +266,67 @@ fun SalesCustomerDetailView(component: SalesCustomerDetailComponent) {
                     onClick = { component.openOrderCatalog() }
                 )
             }
+        }
+    }
+}
+
+// ── Order card ("Narudžbe") ──────────────────────────────────────────────────────
+
+private fun orderStatusColors(status: String): Pair<Color, Color> = when (status) {
+    "approved", "bill-sent" -> KarikaUiColors.GreenSoft to KarikaUiColors.Green
+    "rejected" -> KarikaUiColors.RedSoft to KarikaUiColors.Red
+    "cancelled" -> KarikaUiColors.Field to KarikaUiColors.Muted
+    "pending", "estimate-sent" -> KarikaUiColors.AmberSoft to KarikaUiColors.Amber
+    else -> KarikaUiColors.Field to KarikaUiColors.Muted
+}
+
+@Composable
+private fun CustomerOrderCard(order: OnBehalfOrder, onOpen: () -> Unit) {
+    KCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 14.dp, top = 12.dp, bottom = 12.dp, end = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    KarikaText(
+                        modifier = Modifier.weight(1f, fill = false),
+                        text = "#${order.incrementId}",
+                        color = KarikaUiColors.Ink,
+                        textSize = 14.5.sp,
+                        fontWeight = FontWeight.W700,
+                        maxLines = 1
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    KarikaText(
+                        text = order.totalString(),
+                        color = KarikaUiColors.Ink,
+                        textSize = 14.5.sp,
+                        fontWeight = FontWeight.W700,
+                        maxLines = 1
+                    )
+                }
+                Spacer(Modifier.height(3.dp))
+                KarikaText(
+                    text = order.date(),
+                    color = KarikaUiColors.Muted,
+                    textSize = 12.5.sp,
+                    maxLines = 1
+                )
+                Spacer(Modifier.height(6.dp))
+                val (background, color) = orderStatusColors(order.status)
+                KPill(
+                    text = order.customerOrderStatusLabel(),
+                    background = background,
+                    color = color,
+                    dot = color,
+                    textSize = 11.sp
+                )
+            }
+            CardTextAction(text = "Otvori", color = VendorAccent, onClick = onOpen)
         }
     }
 }

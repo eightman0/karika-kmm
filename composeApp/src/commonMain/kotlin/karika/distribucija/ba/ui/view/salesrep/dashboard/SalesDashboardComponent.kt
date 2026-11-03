@@ -175,7 +175,7 @@ class SalesDashboardComponent(
             )
 
             is SalesRepConfig.OrderDetail -> SalesChild.OrderDetail(
-                SalesOrderDetailComponent(componentContext, stateHolder, config.order)
+                SalesOrderDetailComponent(componentContext, stateHolder, config.order, config.customer)
             )
 
             is SalesRepConfig.DiscountForm -> SalesChild.DiscountForm(
@@ -270,7 +270,11 @@ sealed class SalesRepConfig {
     @Serializable
     data class CustomerDetail(val customer: OperationalCustomer) : SalesRepConfig()
     @Serializable
-    data class OrderDetail(val order: OnBehalfOrder) : SalesRepConfig()
+    data class OrderDetail(
+        val order: OnBehalfOrder,
+        /** Customer screen the order was opened from, if any (used by "Naruči ponovo"). */
+        val customer: OperationalCustomer? = null
+    ) : SalesRepConfig()
     @Serializable
     data class DiscountForm(
         val customer: OperationalCustomer,

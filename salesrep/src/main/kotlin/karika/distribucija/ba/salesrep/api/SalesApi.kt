@@ -19,6 +19,9 @@ import karika.distribucija.ba.salesrep.model.Config
 import karika.distribucija.ba.salesrep.model.DiscountRule
 import karika.distribucija.ba.salesrep.model.DiscountRuleBody
 import karika.distribucija.ba.salesrep.model.DiscountRuleSearchResults
+import karika.distribucija.ba.salesrep.model.MagentoError
+import karika.distribucija.ba.salesrep.model.ReorderLine
+import karika.distribucija.ba.salesrep.model.ReorderOutcome
 import karika.distribucija.ba.salesrep.model.NewCustomerRequest
 import karika.distribucija.ba.salesrep.model.OnBehalfCartItemInput
 import karika.distribucija.ba.salesrep.model.OnBehalfCartItemRequest
@@ -41,6 +44,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -93,6 +97,24 @@ internal class SalesApi {
                     "eq"
                 )
             }
+        }
+    }
+
+    /** GET /V1/vendor-operations/orders filtered to one customer (customer_id eq), newest first.
+     * Never sends employeeId - Magento scopes the rows to the caller. */
+    suspend fun getCustomerOrders(
+        customerId: Long,
+        page: Int,
+        pageSize: Int
+    ): Result<HttpResponse> = runCatching {
+        HttpClientProvider.client.get(HttpClientProvider.url("vendor-operations/orders")) {
+            parameter("searchCriteria[current_page]", page)
+            parameter("searchCriteria[page_size]", pageSize)
+            parameter("searchCriteria[sort_orders][0][field]", "created_at")
+            parameter("searchCriteria[sort_orders][0][direction]", "DESC")
+            parameter("searchCriteria[filter_groups][0][filters][0][field]", "customer_id")
+            parameter("searchCriteria[filter_groups][0][filters][0][value]", customerId.toString())
+            parameter("searchCriteria[filter_groups][0][filters][0][condition_type]", "eq")
         }
     }
 
@@ -518,6 +540,77 @@ class SalesRepository internal constructor() {
             emit(ResultState.Error(e.message))
         }
     }.flowOn(Dispatchers.Default)
+
+    fun getCustomerOrders(
+        customerId: Long,
+        page: Int,
+        pageSize: Int = 12
+    ): Flow<ResultState<OnBehalfOrderSearchResults>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = SalesApi().getCustomerOrders(customerId, page, pageSize).getOrNoInternet()
+            if (response.status == HttpStatusCode.OK) {
+                emit(ResultState.Success(response.body<OnBehalfOrderSearchResults>()))
+                return@flow
+            }
+            emit(ResultState.Error(MagentoError.parse(response.bodyAsText())?.message ?: "Došlo je do greške. Pokušajte ponovo!"))
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.e(TAG, "Network call failed", e)
+            emit(ResultState.Error(e.message))
+        }
+    }.flowOn(Dispatchers.Default)
+
+    /**
+     * "Naruči ponovo": replaces the on-behalf cart with [lines] (see docs/vendor-reorder/mobile.md).
+     * GET cart -> DELETE every line one at a time (stop on the first failure) -> POST each line
+     * without discount_percent, skipping lines that fail. A 422 (customer_not_partnered) or 403
+     * aborts the whole flow.
+     */
+    suspend fun reorderIntoCart(customerId: Long, lines: List<ReorderLine>, skipped: List<String>): ReorderOutcome =
+        withContext(Dispatchers.Default) {
+            val api = SalesApi()
+            try {
+                val cartResponse = api.getCart(customerId).getOrNoInternet()
+                if (cartResponse.status != HttpStatusCode.OK) return@withContext cartResponse.toFailed()
+                var cart: OnBehalfCartResponse? = cartResponse.body<OnBehalfCartResponse>()
+
+                for (item in cart?.items.orEmpty()) {
+                    val deleteResponse = api.removeCartItem(customerId, item.itemId).getOrNoInternet()
+                    if (deleteResponse.status != HttpStatusCode.OK) return@withContext deleteResponse.toFailed()
+                    cart = runCatching { deleteResponse.body<OnBehalfCartResponse>() }.getOrNull() ?: cart
+                }
+
+                val skippedNames = skipped.toMutableList()
+                var added = 0
+                for (line in lines) {
+                    val addResponse = api.addCartItem(customerId, line.sku, line.qty).getOrNoInternet()
+                    when (addResponse.status) {
+                        HttpStatusCode.OK -> {
+                            added++
+                            cart = runCatching { addResponse.body<OnBehalfCartResponse>() }.getOrNull() ?: cart
+                        }
+                        HttpStatusCode.UnprocessableEntity, HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized ->
+                            return@withContext addResponse.toFailed()
+                        else -> skippedNames += line.name
+                    }
+                }
+
+                if (added > 0) ReorderOutcome.Added(cart, skippedNames)
+                else ReorderOutcome.AllSkipped(cart, skippedNames)
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                AppLogger.e(TAG, "Reorder failed", e)
+                ReorderOutcome.Failed(code = null, message = e.message)
+            }
+        }
+
+    private suspend fun HttpResponse.toFailed(): ReorderOutcome.Failed {
+        val error = MagentoError.parse(runCatching { bodyAsText() }.getOrNull())
+        return ReorderOutcome.Failed(code = error?.code, message = error?.message, status = status.value)
+    }
 
     fun getCustomers(
         page: Int,

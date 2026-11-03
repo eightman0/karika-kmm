@@ -3,6 +3,7 @@ package karika.distribucija.ba.ui.view.salesrep.customers.detail
 import com.arkivanov.decompose.ComponentContext
 import karika.distribucija.ba.domain.api.SalesRepository
 import karika.distribucija.ba.domain.model.DiscountRule
+import karika.distribucija.ba.domain.model.OnBehalfOrder
 import karika.distribucija.ba.domain.model.OperationalCustomer
 import karika.distribucija.ba.ui.view.salesrep.dashboard.SalesRepConfig
 import karika.distribucija.ba.domain.model.ResultState
@@ -23,11 +24,28 @@ class SalesCustomerDetailComponent(
     private val _discounts = MutableStateFlow<List<DiscountRule>>(emptyList())
     val discounts = _discounts.asStateFlow()
 
+    // ── "Narudžbe": this customer's orders, newest first ─────────────────────
+    private val _orders = MutableStateFlow<List<OnBehalfOrder>>(emptyList())
+    val orders = _orders.asStateFlow()
+
+    private val _ordersTotalCount = MutableStateFlow(0L)
+    val ordersTotalCount = _ordersTotalCount.asStateFlow()
+
+    /** True while the first page loads (before anything is known). */
+    private val _isLoadingOrders = MutableStateFlow(true)
+    val isLoadingOrders = _isLoadingOrders.asStateFlow()
+
+    private val _isLoadingMoreOrders = MutableStateFlow(false)
+    val isLoadingMoreOrders = _isLoadingMoreOrders.asStateFlow()
+
+    private var ordersPage = 0
+
     val canCreateDiscountFor: Boolean
         get() = stateHolder.salesSpecificHandler.me.value.capabilities.canCreateDiscountFor
 
     init {
         loadDiscounts()
+        loadOrders(page = 1)
         scope.launch {
             stateHolder.refreshDiscounts.collect { loadDiscounts() }
         }
@@ -49,6 +67,37 @@ class SalesCustomerDetailComponent(
                 }
             }
         }
+    }
+
+    private fun loadOrders(page: Int) {
+        scope.launch {
+            repository.getCustomerOrders(customer.customerId, page, ORDERS_PAGE_SIZE).collect { result ->
+                when (result) {
+                    is ResultState.Loading -> if (page > 1) _isLoadingMoreOrders.value = true
+                    is ResultState.Success -> {
+                        ordersPage = page
+                        _ordersTotalCount.value = result.data.totalCount
+                        _orders.value = if (page == 1) result.data.items else _orders.value + result.data.items
+                        _isLoadingOrders.value = false
+                        _isLoadingMoreOrders.value = false
+                    }
+                    is ResultState.Error -> {
+                        _isLoadingOrders.value = false
+                        _isLoadingMoreOrders.value = false
+                        showErrorMessage(result.message)
+                    }
+                }
+            }
+        }
+    }
+
+    fun loadMoreOrders() {
+        if (_isLoadingMoreOrders.value || _orders.value.size >= _ordersTotalCount.value) return
+        loadOrders(ordersPage + 1)
+    }
+
+    fun openOrder(order: OnBehalfOrder) {
+        salesRepPush(SalesRepConfig.OrderDetail(order, customer))
     }
 
     fun openNewDiscount() {
@@ -91,4 +140,8 @@ class SalesCustomerDetailComponent(
     }
 
     fun goBack() = salesRepBack()
+
+    private companion object {
+        const val ORDERS_PAGE_SIZE = 12
+    }
 }

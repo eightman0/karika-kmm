@@ -7,9 +7,13 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import karika.distribucija.ba.domain.HttpClientProvider.imageUrl
 import karika.distribucija.ba.domain.api.DashRepository
+import karika.distribucija.ba.domain.api.SalesRepository
 import karika.distribucija.ba.domain.model.Comment
 import karika.distribucija.ba.domain.model.File
 import karika.distribucija.ba.domain.model.OnBehalfOrder
+import karika.distribucija.ba.domain.model.OperationalCustomer
+import karika.distribucija.ba.domain.model.ReorderLine
+import karika.distribucija.ba.domain.model.ReorderOutcome
 import karika.distribucija.ba.domain.model.ResultState
 import karika.distribucija.ba.domain.model.VendorDeliveryServiceData
 import karika.distribucija.ba.domain.model.VendorOrder
@@ -24,14 +28,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 class SalesOrderDetailComponent(
     componentContext: ComponentContext,
     stateHolder: KarikaStateHolder,
-    order: OnBehalfOrder
+    order: OnBehalfOrder,
+    /** Set when the order was opened from the customer screen - "Naruči ponovo" reuses it for review. */
+    private val customer: OperationalCustomer? = null
 ) : CommonComponent(componentContext, stateHolder) {
 
     private val repository = DashRepository()
+    private val salesRepository = SalesRepository()
 
     private val _vendorOrder = MutableStateFlow(order.toVendorOrderSeed())
     val vendorOrder = _vendorOrder.asStateFlow()
@@ -51,6 +59,18 @@ class SalesOrderDetailComponent(
 
     val canCreateDiscountFor: Boolean
         get() = stateHolder.salesSpecificHandler.me.value.capabilities.canCreateDiscountFor
+
+    private val _isReordering = MutableStateFlow(false)
+    val isReordering = _isReordering.asStateFlow()
+
+    /** "Naruči ponovo" is shown for every status, when the caller may place orders and the
+     * order belongs to a customer. */
+    val canReorder: Boolean
+        get() = stateHolder.salesSpecificHandler.me.value.capabilities.canPlaceOrderFor &&
+            reorderCustomerId() != null
+
+    private fun reorderCustomerId(): Long? =
+        vendorOrder.value.customerId?.toLongOrNull()?.takeIf { it > 0 }
 
     val contactName = mutableStateOf("")
     val contactEmail = mutableStateOf("")
@@ -221,6 +241,62 @@ class SalesOrderDetailComponent(
                 }
             }
         }
+    }
+
+    /**
+     * "Naruči ponovo": replaces the customer's on-behalf cart with this order's lines
+     * (GET cart -> DELETE each line -> POST each line) and opens the cart review.
+     * The lines come from the already loaded GET /V1/mobile/vendor/order payload.
+     */
+    fun reorder() {
+        if (_isReordering.value || !canReorder || !isOrderLoaded.value) return
+        val customerId = reorderCustomerId() ?: return
+        _isReordering.value = true
+        scope.launch {
+            try {
+                val lines = vendorOrder.value.products.map { product ->
+                    ReorderLine(
+                        sku = product.sku,
+                        name = product.name,
+                        qty = product.qtyOrdered?.toDoubleOrNull()?.roundToInt() ?: 0
+                    )
+                }
+                when (val outcome = salesRepository.reorderIntoCart(customerId, lines)) {
+                    is ReorderOutcome.Failed -> showErrorMessage(outcome.message)
+                    is ReorderOutcome.Added -> {
+                        // The server cart now holds only the repeated order.
+                        stateHolder.salesSpecificHandler.cart.value = outcome.cart
+                        val reviewCustomer = resolveCustomer(customerId)
+                        salesRepPush(SalesRepConfig.OrderReview(reviewCustomer))
+                        if (outcome.skipped.isNotEmpty()) {
+                            showMessage(outcome.skipped.joinToString("\n"))
+                        }
+                    }
+                }
+            } finally {
+                _isReordering.value = false
+            }
+        }
+    }
+
+    private suspend fun resolveCustomer(customerId: Long): OperationalCustomer {
+        customer?.takeIf { it.customerId == customerId }?.let { return it }
+        val me = stateHolder.salesSpecificHandler.me.value
+        salesRepository.findCustomer(
+            customerId = customerId,
+            employeeId = stateHolder.salesSpecificHandler.employeeId,
+            canSeeAllVendorCustomers = me.capabilities.canSeeAllVendorCustomers
+        )?.let { return it }
+        // Not found in the caller's lists: the cart calls just succeeded, so the partnership is
+        // active. Without the address id the review screen won't allow placing the order.
+        val order = vendorOrder.value
+        return OperationalCustomer(
+            customerId = customerId,
+            email = order.address?.email,
+            company = order.billingName,
+            partnershipId = 0,
+            partnershipStatus = "active"
+        )
     }
 
     fun goBack() {

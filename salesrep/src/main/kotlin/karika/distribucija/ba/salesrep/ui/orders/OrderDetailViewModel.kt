@@ -13,8 +13,13 @@ import karika.distribucija.ba.salesrep.model.ResultState
 import karika.distribucija.ba.salesrep.model.VendorDeliveryServiceData
 import karika.distribucija.ba.salesrep.model.VendorOrder
 import karika.distribucija.ba.salesrep.model.VendorProduct
+import karika.distribucija.ba.salesrep.model.ReorderLine
+import karika.distribucija.ba.salesrep.model.ReorderOutcome
+import karika.distribucija.ba.salesrep.session.CartState
 import karika.distribucija.ba.salesrep.session.CurrentUser
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /** Mirrors composeApp's ui/view/salesrep/orders/detail/SalesOrderDetailComponent.kt. */
 class OrderDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
@@ -59,6 +64,75 @@ class OrderDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     val canCreateDiscountFor: Boolean
         get() = CurrentUser.me?.capabilities?.canCreateDiscountFor ?: false
 
+    /** True once GET /V1/mobile/vendor/order has returned (the nav-arg seed has no lines). */
+    private var orderLoaded = false
+
+    private val _isReordering = MutableLiveData(false)
+    val isReordering: LiveData<Boolean> = _isReordering
+
+    /** One-shot "Naruči ponovo" result, consumed by the fragment via [clearReorderOutcome]. */
+    private val _reorderOutcome = MutableLiveData<ReorderOutcome?>(null)
+    val reorderOutcome: LiveData<ReorderOutcome?> = _reorderOutcome
+
+    /** "Naruči ponovo" shows only with can_place_order_for and an order customer_id. */
+    fun canReorder(order: VendorOrder): Boolean =
+        CurrentUser.me?.capabilities?.canPlaceOrderFor == true && order.reorderCustomerId() != null
+
+    fun reorder() {
+        if (_isReordering.value == true) return
+        _isReordering.value = true
+        viewModelScope.launch {
+            val order = if (orderLoaded) _vendorOrder.value else fetchOrder()
+            val customerId = order?.reorderCustomerId()
+            if (order == null || customerId == null) {
+                _isReordering.value = false
+                _reorderOutcome.value = ReorderOutcome.Failed(code = null, message = null)
+                return@launch
+            }
+            if (order.products.isEmpty()) {
+                _isReordering.value = false
+                _reorderOutcome.value = ReorderOutcome.NoLines
+                return@launch
+            }
+
+            val lines = mutableListOf<ReorderLine>()
+            val skipped = mutableListOf<String>()
+            order.products.forEach { product ->
+                val sku = product.sku?.trim().orEmpty()
+                val qty = product.qtyOrdered?.toDoubleOrNull()?.roundToInt() ?: 0
+                val name = product.name?.takeIf { it.isNotBlank() } ?: sku
+                if (sku.isEmpty() || qty <= 0) skipped += name else lines += ReorderLine(sku, name, qty)
+            }
+
+            // Nothing can be added: leave the current cart alone and stay here.
+            val outcome = if (lines.isEmpty()) {
+                ReorderOutcome.AllSkipped(cart = null, skippedNames = skipped)
+            } else {
+                repository.reorderIntoCart(customerId, lines, skipped)
+            }
+
+            when (outcome) {
+                is ReorderOutcome.Added -> outcome.cart?.let { CartState.cart.value = it }
+                is ReorderOutcome.AllSkipped -> outcome.cart?.let { CartState.cart.value = it }
+                else -> Unit
+            }
+            _isReordering.value = false
+            _reorderOutcome.value = outcome
+        }
+    }
+
+    fun clearReorderOutcome() {
+        _reorderOutcome.value = null
+    }
+
+    private suspend fun fetchOrder(): VendorOrder? {
+        val result = repository.getOrder(orderIdParam()).first { it !is ResultState.Loading }
+        return (result as? ResultState.Success)?.data?.also {
+            orderLoaded = true
+            _vendorOrder.value = it
+        }
+    }
+
     private var deliveryConfig: Config? = null
 
     init {
@@ -78,6 +152,7 @@ class OrderDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
                     is ResultState.Loading -> _isLoading.value = true
                     is ResultState.Success -> {
                         _isLoading.value = false
+                        orderLoaded = true
                         _vendorOrder.value = result.data
                     }
 
@@ -217,3 +292,5 @@ private fun OnBehalfOrder.toVendorOrderSeed(): VendorOrder = VendorOrder(
     realOrderStatus = status,
     createdAt = createdAt
 )
+
+private fun VendorOrder.reorderCustomerId(): Long? = customerId?.trim()?.toLongOrNull()?.takeIf { it > 0 }

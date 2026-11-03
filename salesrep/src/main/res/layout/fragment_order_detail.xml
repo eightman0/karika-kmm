@@ -148,6 +148,7 @@
                         android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/text_total_label_inline"
                             style="@style/K.Text"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -182,7 +183,61 @@
                                 android:maxLines="1"
                                 android:textSize="11.5sp" />
                         </LinearLayout>
+
+                        <!-- With "Naruči ponovo" (SalesOrderDetailView.kt): pill | spacer | button,
+                             and "Ukupno sa PDV" moves below this row. -->
+                        <Space
+                            android:id="@+id/space_reorder"
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:visibility="gone" />
+
+                        <FrameLayout
+                            android:id="@+id/button_reorder"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="8dp"
+                            android:background="@drawable/bg_k_reorder_pill"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:paddingHorizontal="18dp"
+                            android:visibility="gone"
+                            tools:visibility="visible">
+
+                            <TextView
+                                android:id="@+id/text_reorder"
+                                style="@style/K.Text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:maxLines="1"
+                                android:text="@string/k_reorder_button"
+                                android:textColor="@color/k_white"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <ProgressBar
+                                android:id="@+id/progress_reorder"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_gravity="center"
+                                android:indeterminateTint="@color/k_white"
+                                android:visibility="gone" />
+                        </FrameLayout>
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/text_total_label_below"
+                        style="@style/K.Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/order_detail_total_with_pdv_label"
+                        android:textColor="@color/k_ord_navy_label"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/text_grand_total"
