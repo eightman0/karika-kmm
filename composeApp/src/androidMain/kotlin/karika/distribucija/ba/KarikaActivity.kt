@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -44,7 +45,6 @@ import karika.distribucija.ba.util.PushHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import java.lang.ref.WeakReference
 
@@ -299,11 +299,17 @@ open class KarikaActivity : ComponentActivity(), KarikaHandler {
     }
 
     override fun getPushHandle(callback: (String, String) -> Unit) {
-        CoroutineScope(Dispatchers.Default).launch {
-            runBlocking(Dispatchers.Main) {
+        // Best-effort: without a reachable FCM (no/blocked Play Services, no network - seen on
+        // Xiaomi as SERVICE_NOT_AVAILABLE) token.await() throws, which used to crash the app.
+        CoroutineScope(Dispatchers.Main).launch {
+            runCatching {
                 val fId = FirebaseInstallations.getInstance().id.await()
                 val token = FirebaseMessaging.getInstance().token.await()
+                fId to token
+            }.onSuccess { (fId, token) ->
                 callback(fId, token)
+            }.onFailure {
+                Log.w("KarikaActivity", "Push token unavailable: ${it.message}")
             }
         }
     }
