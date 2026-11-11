@@ -1,5 +1,6 @@
 package karika.distribucija.ba.salesrep.ui.analytics
 
+import karika.distribucija.ba.salesrep.session.CurrentUser
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,6 +27,9 @@ class AnalyticsOverviewViewModel : ViewModel() {
      * refresh - errors are logged only, the existing data (or the default zeroed model) stays on
      * screen rather than showing a toast. */
     fun load() {
+        // Nothing is fetched until `me` is known to allow analytics - MainActivity re-applies
+        // the filters once it is, which reloads the visible screen.
+        if (CurrentUser.analyticsAccess != true) return
         viewModelScope.launch {
             repository.getOverview(
                 AnalyticsFilterState.dateFromApi(),

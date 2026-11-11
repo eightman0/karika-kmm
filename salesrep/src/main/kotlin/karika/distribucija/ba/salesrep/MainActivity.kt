@@ -42,6 +42,7 @@ import karika.distribucija.ba.salesrep.notifications.PushRouteResolver
 import karika.distribucija.ba.salesrep.notifications.openChatConversation
 import karika.distribucija.ba.salesrep.notifications.PushTokenRegistrar
 import karika.distribucija.ba.salesrep.session.CurrentUser
+import karika.distribucija.ba.salesrep.ui.analytics.AnalyticsFilterState
 import karika.distribucija.ba.salesrep.util.EnvWatermark
 import kotlinx.coroutines.launch
 
@@ -168,16 +169,11 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<View>(R.id.row_logout).setOnClickListener {
             AnalyticsTracker.trackClick("drawer", "logout")
-            drawerLayout.closeDrawer(GravityCompat.START)
-            PushTokenRegistrar.unregister()
-            (application as SalesRepApp).sessionManager.logout()
-            navController.navigate(
-                R.id.loginFragment,
-                null,
-                navOptions { popUpTo(navController.graph.id) { inclusive = true } }
-            )
+            logout()
         }
         findViewById<TextView>(R.id.text_app_version).text = PlatformEnv.appVersionName()
+        // Analytics stays out of the drawer until `me` confirms access.
+        applyAnalyticsAccess()
 
         if ((application as SalesRepApp).sessionManager.hasToken()) {
             navController.navigate(
@@ -204,10 +200,11 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             AnalyticsTracker.trackScreen(resources.getResourceEntryName(destination.id))
-            val isLogin = destination.id == R.id.loginFragment
-            toolbar.visibility = if (isLogin) View.GONE else View.VISIBLE
+            // Login and the "Nije dostupno" screen stand alone: no toolbar, no drawer.
+            val isBare = destination.id == R.id.loginFragment || destination.id == R.id.vendorOpsUnavailableFragment
+            toolbar.visibility = if (isBare) View.GONE else View.VISIBLE
             drawerLayout.setDrawerLockMode(
-                if (isLogin) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED
+                if (isBare) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED
             )
             updateSelectedNavRow(destination)
             styleToolbarFor(destination)
@@ -316,7 +313,7 @@ class MainActivity : AppCompatActivity() {
                 destinationId,
                 null,
                 navOptions {
-                    popUpTo(R.id.analyticsOverviewFragment) { inclusive = false }
+                    popUpTo(CurrentUser.rootDestinationId) { inclusive = false }
                     launchSingleTop = true
                 }
             )
@@ -422,17 +419,99 @@ class MainActivity : AppCompatActivity() {
 
     private var repNameLoaded = false
 
+    fun logout() {
+        drawerLayout.closeDrawer(GravityCompat.START)
+        PushTokenRegistrar.unregister()
+        CurrentUser.me = null
+        CurrentUser.vendorOpsEnabled = null
+        CurrentUser.analyticsAccess = null
+        repNameLoaded = false
+        applyAnalyticsAccess()
+        (application as SalesRepApp).sessionManager.logout()
+        navController.navigate(
+            R.id.loginFragment,
+            null,
+            navOptions { popUpTo(navController.graph.id) { inclusive = true } }
+        )
+    }
+
+    /** "Pokušaj ponovo" on the "Nije dostupno" screen: re-read `me` (the vendor may have been switched on). */
+    fun retryMe() {
+        CurrentUser.vendorOpsEnabled = null
+        CurrentUser.analyticsAccess = null
+        repNameLoaded = false
+        loadRepName()
+    }
+
+    /** Analytics needs `vendor_operations_enabled` and `can_see_own_analytics` (a failed `me` counts as no): without them the
+     * drawer group is hidden and an analytics screen (the default start) is replaced by orders. */
+    private fun applyAnalyticsAccess() {
+        val destinationId = navController.currentDestination?.id
+        val onUnavailable = destinationId == R.id.vendorOpsUnavailableFragment
+        // Vendor Operations off (or `me` failed): the whole app is a vendor-ops feature, replace it.
+        if (CurrentUser.vendorOpsEnabled == false) {
+            findViewById<View>(R.id.row_nav_analytics).visibility = View.GONE
+            findViewById<View>(R.id.group_nav_analytics_sub).visibility = View.GONE
+            if (!onUnavailable && destinationId != R.id.loginFragment) {
+                navController.navigate(
+                    R.id.vendorOpsUnavailableFragment,
+                    null,
+                    navOptions { popUpTo(navController.graph.id) { inclusive = true } }
+                )
+            }
+            return
+        }
+        if (CurrentUser.vendorOpsEnabled == true && onUnavailable) {
+            navController.navigate(
+                R.id.analyticsOverviewFragment,
+                null,
+                navOptions { popUpTo(R.id.vendorOpsUnavailableFragment) { inclusive = true } }
+            )
+        }
+        val allowed = CurrentUser.analyticsAccess != false
+        findViewById<View>(R.id.row_nav_analytics).visibility =
+            if (CurrentUser.analyticsAccess == true) View.VISIBLE else View.GONE
+        if (!allowed) findViewById<View>(R.id.group_nav_analytics_sub).visibility = View.GONE
+        val onAnalytics = navController.currentDestination?.id in analyticsDestinationIds
+        // The visible analytics screen skipped its first load while `me` was unknown - reload it.
+        if (CurrentUser.analyticsAccess == true && onAnalytics) AnalyticsFilterState.apply()
+        if (!allowed && onAnalytics) {
+            navController.navigate(
+                R.id.ordersListFragment,
+                null,
+                navOptions { popUpTo(R.id.analyticsOverviewFragment) { inclusive = true } }
+            )
+        }
+    }
+
     private fun loadRepName() {
         if (repNameLoaded) return
         repNameLoaded = true
         lifecycleScope.launch {
-            SalesRepository().getMe().collect { result ->
-                if (result is ResultState.Success) {
-                    CurrentUser.me = result.data
-                    AppLogger.setUser(result.data.employeeId?.toString())
-                    AnalyticsTracker.setUser(result.data.employeeId?.toString())
-                    findViewById<TextView>(R.id.text_rep_name).text =
-                        result.data.name ?: getString(R.string.drawer_role_label)
+            try {
+                SalesRepository().getMe().collect { result ->
+                    if (result is ResultState.Success) {
+                        CurrentUser.me = result.data
+                        CurrentUser.vendorOpsEnabled = result.data.vendorOperationsEnabled
+                        CurrentUser.analyticsAccess = result.data.canSeeAnalytics
+                        applyAnalyticsAccess()
+                        AppLogger.setUser(result.data.employeeId?.toString())
+                        AnalyticsTracker.setUser(result.data.employeeId?.toString())
+                        findViewById<TextView>(R.id.text_rep_name).text =
+                            result.data.name ?: getString(R.string.drawer_role_label)
+                    }
+                    if (result is ResultState.Error) {
+                        CurrentUser.vendorOpsEnabled = false
+                        CurrentUser.analyticsAccess = false
+                        applyAnalyticsAccess()
+                    }
+                }
+            } finally {
+                // A failed `me` call means no analytics.
+                if (CurrentUser.analyticsAccess == null && !isDestroyed) {
+                    CurrentUser.vendorOpsEnabled = false
+                    CurrentUser.analyticsAccess = false
+                    applyAnalyticsAccess()
                 }
             }
         }

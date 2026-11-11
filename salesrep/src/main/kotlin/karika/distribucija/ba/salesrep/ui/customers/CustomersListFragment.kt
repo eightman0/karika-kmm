@@ -294,8 +294,8 @@ class CustomersListFragment : Fragment() {
             R.id.ordersListFragment,
             null,
             navOptions {
-                // Analytics is the root now - replace everything above it with the Orders screen.
-                popUpTo(R.id.analyticsOverviewFragment) { inclusive = false }
+                // Replace everything above the root (analytics, or orders) with the Orders screen.
+                popUpTo(CurrentUser.rootDestinationId) { inclusive = false }
                 launchSingleTop = true
             }
         )

@@ -71,6 +71,7 @@ import karika.distribucija.ba.ui.components.hideKeyboard
 import karika.distribucija.ba.ui.components.onClick
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsAccessGate
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsFiltersView
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsTab
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsView
@@ -122,6 +123,12 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
     val navState = component.stack.subscribeAsState()
     val salesManager by component.stateHolder.salesSpecificHandler.me.collectAsState()
+    val analyticsAccess by component.stateHolder.salesSpecificHandler.analyticsAccess.collectAsState()
+    val vendorOpsEnabled by component.stateHolder.salesSpecificHandler.vendorOpsEnabled.collectAsState()
+    if (vendorOpsEnabled == false) {
+        VendorOpsUnavailableView(onRetry = component::retryMe, onLogout = component::logout)
+        return
+    }
     val notificationBadge by component.stateHolder.vendorNotificationHandler.notificationCount.collectAsState()
     val messageState by component.stateHolder.vendorNotificationHandler.chatUnreadCount.asState()
     val activeInstance = navState.value.active.instance
@@ -205,54 +212,56 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
                             .padding(horizontal = 10.dp, vertical = 10.dp),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        SalesExpandableNavItem(
-                            icon = vectorResource(Res.drawable.ic_k_chart),
-                            text = "Analitika",
-                            expanded = analyticsExpanded,
-                            selected = isAnalyticsActive,
-                            onClick = { analyticsExpanded = !analyticsExpanded }
-                        )
-                        if (analyticsExpanded) {
-                            SalesSubNavItem(
-                                text = "Pregled prodaje",
-                                selected = activeAnalyticsTab == AnalyticsTab.Overview,
-                                onClick = {
-                                    component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Overview), true)
-                                    coroutineScope.launch { drawerState.close() }
-                                }
+                        if (analyticsAccess == true) {
+                            SalesExpandableNavItem(
+                                icon = vectorResource(Res.drawable.ic_k_chart),
+                                text = "Analitika",
+                                expanded = analyticsExpanded,
+                                selected = isAnalyticsActive,
+                                onClick = { analyticsExpanded = !analyticsExpanded }
                             )
-                            SalesSubNavItem(
-                                text = "Trendovi prodaje",
-                                selected = activeAnalyticsTab == AnalyticsTab.Trends,
-                                onClick = {
-                                    component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Trends), true)
-                                    coroutineScope.launch { drawerState.close() }
-                                }
-                            )
-                            SalesSubNavItem(
-                                text = "Statistika kupaca",
-                                selected = activeAnalyticsTab == AnalyticsTab.Customers,
-                                onClick = {
-                                    component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Customers), true)
-                                    coroutineScope.launch { drawerState.close() }
-                                }
-                            )
-                            SalesSubNavItem(
-                                text = "Kupci koji zahtijevaju pažnju",
-                                selected = navState.value.active.instance is SalesChild.AnalyticsAtRisk,
-                                onClick = {
-                                    component.salesRepNavigate(SalesRepConfig.AnalyticsAtRisk, true)
-                                    coroutineScope.launch { drawerState.close() }
-                                }
-                            )
-                            SalesSubNavItem(
-                                text = "Statistika proizvoda i kategorija",
-                                selected = navState.value.active.instance is SalesChild.AnalyticsProducts,
-                                onClick = {
-                                    component.salesRepNavigate(SalesRepConfig.AnalyticsProducts, true)
-                                    coroutineScope.launch { drawerState.close() }
-                                }
-                            )
+                            if (analyticsExpanded) {
+                                SalesSubNavItem(
+                                    text = "Pregled prodaje",
+                                    selected = activeAnalyticsTab == AnalyticsTab.Overview,
+                                    onClick = {
+                                        component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Overview), true)
+                                        coroutineScope.launch { drawerState.close() }
+                                    }
+                                )
+                                SalesSubNavItem(
+                                    text = "Trendovi prodaje",
+                                    selected = activeAnalyticsTab == AnalyticsTab.Trends,
+                                    onClick = {
+                                        component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Trends), true)
+                                        coroutineScope.launch { drawerState.close() }
+                                    }
+                                )
+                                SalesSubNavItem(
+                                    text = "Statistika kupaca",
+                                    selected = activeAnalyticsTab == AnalyticsTab.Customers,
+                                    onClick = {
+                                        component.salesRepNavigate(SalesRepConfig.Analytics(AnalyticsTab.Customers), true)
+                                        coroutineScope.launch { drawerState.close() }
+                                    }
+                                )
+                                SalesSubNavItem(
+                                    text = "Kupci koji zahtijevaju pažnju",
+                                    selected = navState.value.active.instance is SalesChild.AnalyticsAtRisk,
+                                    onClick = {
+                                        component.salesRepNavigate(SalesRepConfig.AnalyticsAtRisk, true)
+                                        coroutineScope.launch { drawerState.close() }
+                                    }
+                                )
+                                SalesSubNavItem(
+                                    text = "Statistika proizvoda i kategorija",
+                                    selected = navState.value.active.instance is SalesChild.AnalyticsProducts,
+                                    onClick = {
+                                        component.salesRepNavigate(SalesRepConfig.AnalyticsProducts, true)
+                                        coroutineScope.launch { drawerState.close() }
+                                    }
+                                )
+                            }
                         }
                         SalesNavItem(
                             icon = vectorResource(Res.drawable.ic_k_cart),
@@ -483,10 +492,10 @@ fun SalesDashboardView(component: SalesDashboardComponent) {
             ) {
                 Children(stack = component.stack) {
                     when (val child = it.instance) {
-                        is SalesChild.Analytics -> AnalyticsView(child.component)
-                        is SalesChild.AnalyticsProducts -> AnalyticsProductsView(child.component)
-                        is SalesChild.AnalyticsAtRisk -> AnalyticsAtRiskView(child.component)
-                        is SalesChild.AnalyticsFilters -> AnalyticsFiltersView(child.component)
+                        is SalesChild.Analytics -> AnalyticsAccessGate(component.stateHolder) { AnalyticsView(child.component) }
+                        is SalesChild.AnalyticsProducts -> AnalyticsAccessGate(component.stateHolder) { AnalyticsProductsView(child.component) }
+                        is SalesChild.AnalyticsAtRisk -> AnalyticsAccessGate(component.stateHolder) { AnalyticsAtRiskView(child.component) }
+                        is SalesChild.AnalyticsFilters -> AnalyticsAccessGate(component.stateHolder) { AnalyticsFiltersView(child.component) }
                         is SalesChild.Orders -> SalesOrdersView(child.component)
                         is SalesChild.Customers -> SalesCustomersView(child.component)
                         is SalesChild.CustomerMessages -> SalesCustomerMessagesView(child.component)

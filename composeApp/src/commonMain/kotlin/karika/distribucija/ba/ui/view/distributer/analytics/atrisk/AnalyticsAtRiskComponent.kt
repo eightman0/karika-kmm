@@ -34,6 +34,7 @@ class AnalyticsAtRiskComponent(
 
     init {
         scope.launch {
+            if (!stateHolder.salesSpecificHandler.awaitAnalyticsAccess()) return@launch
             snapshotFlow { filters.applyTrigger.value }
                 .collectLatest {
                     showLoader()

@@ -75,7 +75,8 @@ class SalesDashboardComponent(
             runCatching { requestLocationPermission() }
             while (true) {
                 val sent = try {
-                    submitCurrentLocation()
+                    // Location is a Vendor Operations endpoint - skip while it's off for this vendor.
+                    stateHolder.salesSpecificHandler.vendorOpsEnabled.value == true && submitCurrentLocation()
                 } catch (e: kotlin.coroutines.cancellation.CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -88,6 +89,11 @@ class SalesDashboardComponent(
             }
         }
         lifecycle.doOnDestroy { locationJob.cancel() }
+    }
+
+    /** "Pokušaj ponovo" on the unavailable screen: re-read `me` (the vendor may have been switched on). */
+    fun retryMe() {
+        stateHolder.salesSpecificHandler.getMe()
     }
 
     @OptIn(ExperimentalTime::class)
@@ -117,6 +123,24 @@ class SalesDashboardComponent(
             handleBackButton = true,
             childFactory = ::child
         )
+
+    init {
+        // Analytics is the start screen; without access (or if `me` failed) fall back to orders.
+        val analyticsGate = scope.launch {
+            stateHolder.salesSpecificHandler.analyticsAccess.collect { access ->
+                val active = stack.value.active.instance
+                val onAnalytics = active is SalesChild.Analytics || active is SalesChild.AnalyticsProducts ||
+                    active is SalesChild.AnalyticsAtRisk || active is SalesChild.AnalyticsFilters
+                // With Vendor Operations off the whole app is replaced by VendorOpsUnavailableView,
+                // so don't open Orders behind it (it would only 403).
+                val vendorOps = stateHolder.salesSpecificHandler.vendorOpsEnabled.value == true
+                if (access == false && vendorOps && onAnalytics) {
+                    salesRepNavigate(SalesRepConfig.Orders, replace = true)
+                }
+            }
+        }
+        lifecycle.doOnDestroy { analyticsGate.cancel() }
+    }
 
     private fun child(config: SalesRepConfig, componentContext: ComponentContext): SalesChild =
         when (config) {

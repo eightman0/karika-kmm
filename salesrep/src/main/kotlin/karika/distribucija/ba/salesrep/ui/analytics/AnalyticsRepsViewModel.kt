@@ -28,6 +28,9 @@ class AnalyticsRepsViewModel : ViewModel() {
      * `can_see_dashboard` - the drawer entry to this screen is already hidden for such users, but
      * this is a defensive second layer: never call the repository unless the capability is present. */
     fun load() {
+        // Nothing is fetched until `me` is known to allow analytics - MainActivity re-applies
+        // the filters once it is, which reloads the visible screen.
+        if (CurrentUser.analyticsAccess != true) return
         if (CurrentUser.me?.capabilities?.canSeeDashboard != true) {
             _reps.value = SalesRepsPerformance()
             _loading.value = false

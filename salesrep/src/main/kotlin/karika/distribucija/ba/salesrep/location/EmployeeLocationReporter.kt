@@ -13,6 +13,7 @@ import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import karika.distribucija.ba.salesrep.session.CurrentUser
 import karika.distribucija.ba.salesrep.SalesRepApp
 import karika.distribucija.ba.salesrep.api.EmployeeLocationRepository
 import karika.distribucija.ba.salesrep.model.EmployeeLocationSubmit
@@ -58,7 +59,8 @@ object EmployeeLocationReporter {
                     if (!isLoggedIn(appContext)) {
                         // Logged out: the next login gets an immediate send.
                         lastSentAt = 0L
-                    } else if (isDue()) {
+                    } else if (CurrentUser.vendorOpsEnabled == true && isDue()) {
+                        // Location is a Vendor Operations endpoint - skipped while it's off.
                         runCatching { submitCurrentLocation(appContext) }
                     }
                     delay(CHECK_EVERY)

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_ops_unavailable_title">Nije dostupno</string>
+    <string name="vendor_ops_unavailable_message">Ova funkcionalnost trenutno nije uključena za vašeg dobavljača. Obratite se administratoru.</string>
+    <string name="vendor_ops_unavailable_retry">Pokušaj ponovo</string>
+    <string name="vendor_ops_unavailable_logout">Odjavi se</string>
+</resources>

@@ -20,6 +20,7 @@ import karika.distribucija.ba.salesrep.model.OnBehalfCartResponseItem
 import karika.distribucija.ba.salesrep.model.VendorDeliveryServiceData
 import karika.distribucija.ba.salesrep.session.CartState
 import karika.distribucija.ba.salesrep.ui.messages.messageInitials
+import karika.distribucija.ba.salesrep.session.CurrentUser
 import karika.distribucija.ba.salesrep.util.applyImeBottomPadding
 import karika.distribucija.ba.salesrep.util.karikaPriceFormat
 
@@ -169,7 +170,7 @@ class OrderReviewFragment : Fragment() {
                         "createdAt" to null
                     ),
                     androidx.navigation.navOptions {
-                        popUpTo(R.id.analyticsOverviewFragment) { inclusive = false }
+                        popUpTo(CurrentUser.rootDestinationId) { inclusive = false }
                     }
                 )
             }

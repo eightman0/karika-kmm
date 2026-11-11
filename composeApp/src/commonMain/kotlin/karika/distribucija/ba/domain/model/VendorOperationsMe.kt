@@ -35,7 +35,11 @@ data class VendorOperationsMe(
 
     @SerialName("capabilities")
     val capabilities: MeCapabilities = MeCapabilities()
-)
+) {
+    /** Analytics is shown only with `vendor_operations_enabled` and `can_see_own_analytics`. */
+    val canSeeAnalytics: Boolean
+        get() = vendorOperationsEnabled && capabilities.canSeeOwnAnalytics
+}
 
 @Serializable
 data class MeCapabilities(

@@ -61,6 +61,7 @@ import karika.distribucija.ba.ui.components.TopBarDashboard
 import karika.distribucija.ba.ui.components.asState
 import karika.distribucija.ba.ui.view.distributer.VendorAccent
 import karika.distribucija.ba.ui.view.distributer.VendorAccentSoft
+import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsAccessGate
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsFiltersView
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsTab
 import karika.distribucija.ba.ui.view.distributer.analytics.AnalyticsView
@@ -103,6 +104,8 @@ fun DashboardView(component: DashboardComponent) {
     val me by component.stateHolder.salesSpecificHandler.me.collectAsState()
     val canSeeDashboard = me.capabilities.canSeeDashboard
     val canViewEmployees = me.vendorOperationsEnabled && me.capabilities.canViewEmployees
+    val analyticsAccess = component.stateHolder.salesSpecificHandler.analyticsAccess.collectAsState().value
+    val canSeeAnalytics = analyticsAccess == true
     val navState = component.stack.subscribeAsState()
     val messageState = component.stateHolder.vendorNotificationHandler.chatUnreadCount.asState()
     val activeInstance = navState.value.active.instance
@@ -216,9 +219,18 @@ fun DashboardView(component: DashboardComponent) {
                                 )
                             }
                         ) {
-                            analyticsExpanded = !analyticsExpanded
+                            when (analyticsAccess) {
+                                true -> analyticsExpanded = !analyticsExpanded
+                                false -> {
+                                    closeDrawer()
+                                    component.showWarningMessage(
+                                        "Nemate pristup ovoj funkcionalnosti, molimo vas kontaktirajte Kariku."
+                                    )
+                                }
+                                null -> Unit
+                            }
                         }
-                        if (analyticsExpanded) {
+                        if (canSeeAnalytics && analyticsExpanded) {
                             AnalyticsSubItem(
                                 text = "Pregled prodaje",
                                 selected = activeAnalyticsTab == AnalyticsTab.Overview
@@ -356,10 +368,10 @@ fun DashboardView(component: DashboardComponent) {
 
                 Children(stack = component.stack) {
                     when (val child = it.instance) {
-                        is DashChild.Analytics -> AnalyticsView(child.component)
-                        is DashChild.AnalyticsProducts -> AnalyticsProductsView(child.component)
-                        is DashChild.AnalyticsAtRisk -> AnalyticsAtRiskView(child.component)
-                        is DashChild.AnalyticsFilters -> AnalyticsFiltersView(child.component)
+                        is DashChild.Analytics -> AnalyticsAccessGate(component.stateHolder) { AnalyticsView(child.component) }
+                        is DashChild.AnalyticsProducts -> AnalyticsAccessGate(component.stateHolder) { AnalyticsProductsView(child.component) }
+                        is DashChild.AnalyticsAtRisk -> AnalyticsAccessGate(component.stateHolder) { AnalyticsAtRiskView(child.component) }
+                        is DashChild.AnalyticsFilters -> AnalyticsAccessGate(component.stateHolder) { AnalyticsFiltersView(child.component) }
 
                         is DashChild.Orders -> OrdersView(child.component)
                         is DashChild.OrderDetails -> OrderDetailsView(child.component)

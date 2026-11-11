@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Replaces the whole app when vendor_operations_enabled is false (or /me failed): every
+     sales rep screen is a Vendor Operations feature and would only answer 403. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/k_page"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingVertical="24dp">
+
+    <ImageView
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:background="@drawable/bg_k_ord_empty_circle"
+        android:contentDescription="@null"
+        android:padding="21dp"
+        android:src="@drawable/ic_k_shell_lock"
+        app:tint="@color/k_accent" />
+
+    <TextView
+        style="@style/K.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="@string/vendor_ops_unavailable_title"
+        android:textColor="@color/k_ink"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        style="@style/K.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:lineSpacingExtra="6sp"
+        android:text="@string/vendor_ops_unavailable_message"
+        android:textColor="@color/k_muted"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/button_retry"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_k_button_primary"
+        android:gravity="center"
+        android:text="@string/vendor_ops_unavailable_retry"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/button_logout"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_k_button_secondary"
+        android:gravity="center"
+        android:text="@string/vendor_ops_unavailable_logout"
+        android:textColor="@color/k_red"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

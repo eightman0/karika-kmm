@@ -16,6 +16,11 @@
     </fragment>
 
     <fragment
+        android:id="@+id/vendorOpsUnavailableFragment"
+        android:name="karika.distribucija.ba.salesrep.ui.unavailable.VendorOpsUnavailableFragment"
+        android:label="@string/vendor_ops_unavailable_title" />
+
+    <fragment
         android:id="@+id/analyticsOverviewFragment"
         android:name="karika.distribucija.ba.salesrep.ui.analytics.AnalyticsOverviewFragment"
         android:label="@string/analytics_overview_title" />

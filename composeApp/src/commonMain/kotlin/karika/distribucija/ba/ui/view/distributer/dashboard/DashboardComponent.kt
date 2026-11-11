@@ -5,6 +5,7 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackCallback
+import com.arkivanov.essenty.lifecycle.doOnDestroy
 import karika.distribucija.ba.domain.model.ChatConversation
 import karika.distribucija.ba.domain.model.VendorEmployee
 import karika.distribucija.ba.domain.model.VendorOrder
@@ -32,6 +33,7 @@ import karika.distribucija.ba.ui.view.distributer.orders.details.OrderDetailsCom
 import karika.distribucija.ba.ui.view.distributer.products.ProductsComponent
 import karika.distribucija.ba.ui.view.distributer.products.details.ProductDetailsComponent
 import karika.distribucija.ba.ui.view.distributer.profile.ProfileComponent
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 class DashboardComponent(componentContext: ComponentContext, stateHolder: KarikaStateHolder) :
@@ -63,6 +65,21 @@ class DashboardComponent(componentContext: ComponentContext, stateHolder: Karika
             handleBackButton = true,
             childFactory = ::child
         )
+
+    init {
+        // Analytics is the start screen; without access (or if `me` failed) fall back to orders.
+        val analyticsGate = scope.launch {
+            stateHolder.salesSpecificHandler.analyticsAccess.collect { access ->
+                val active = stack.value.active.instance
+                val onAnalytics = active is DashChild.Analytics || active is DashChild.AnalyticsProducts ||
+                    active is DashChild.AnalyticsAtRisk || active is DashChild.AnalyticsFilters
+                if (access == false && onAnalytics) {
+                    dashNavigate(DashConfig.Orders, replace = true)
+                }
+            }
+        }
+        lifecycle.doOnDestroy { analyticsGate.cancel() }
+    }
 
     private fun child(appConfig: DashConfig, componentContext: ComponentContext): DashChild =
         when (appConfig) {

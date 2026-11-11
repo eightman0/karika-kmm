@@ -363,6 +363,7 @@ fun TopBarDashboard(
     action: () -> Unit
 ) {
     val badge by component.stateHolder.vendorNotificationHandler.notificationCount.collectAsState()
+    val vendorOpsEnabled by component.stateHolder.salesSpecificHandler.vendorOpsEnabled.collectAsState()
 
     Row(
         modifier = Modifier
@@ -387,31 +388,34 @@ fun TopBarDashboard(
             fontWeight = FontWeight.W700,
             maxLines = 1
         )
-        Box {
-            KCircleButton(
-                modifier = Modifier.testTag(DASHBOARD_NOTIFICATIONS_TAG),
-                icon = vectorResource(Res.drawable.ic_k_bell),
-                onClick = action
-            )
-            if (badge > 0) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .offset(x = 4.dp, y = (-2).dp)
-                        .defaultMinSize(minWidth = 18.dp, minHeight = 18.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(KarikaUiColors.Blue)
-                        .padding(horizontal = 5.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    KarikaText(
-                        modifier = Modifier.testTag(DASHBOARD_NOTIFICATIONS_BADGE_TAG),
-                        text = if (badge > 9) "9+" else "$badge",
-                        textSize = 10.sp,
-                        fontWeight = FontWeight.W700,
-                        color = KarikaColors.White,
-                        maxLines = 1
-                    )
+        // Notifications are a Vendor Operations feature.
+        if (vendorOpsEnabled == true) {
+            Box {
+                KCircleButton(
+                    modifier = Modifier.testTag(DASHBOARD_NOTIFICATIONS_TAG),
+                    icon = vectorResource(Res.drawable.ic_k_bell),
+                    onClick = action
+                )
+                if (badge > 0) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 4.dp, y = (-2).dp)
+                            .defaultMinSize(minWidth = 18.dp, minHeight = 18.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(KarikaUiColors.Blue)
+                            .padding(horizontal = 5.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        KarikaText(
+                            modifier = Modifier.testTag(DASHBOARD_NOTIFICATIONS_BADGE_TAG),
+                            text = if (badge > 9) "9+" else "$badge",
+                            textSize = 10.sp,
+                            fontWeight = FontWeight.W700,
+                            color = KarikaColors.White,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }

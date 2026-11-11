@@ -16,7 +16,11 @@ data class VendorOperationsMe(
     @SerialName("vendor_operations_enabled") val vendorOperationsEnabled: Boolean = false,
     @SerialName("is_full_access") val isFullAccess: Boolean = false,
     @SerialName("capabilities") val capabilities: MeCapabilities = MeCapabilities()
-)
+) {
+    /** Analytics is shown only with `vendor_operations_enabled` and `can_see_own_analytics`. */
+    val canSeeAnalytics: Boolean
+        get() = vendorOperationsEnabled && capabilities.canSeeOwnAnalytics
+}
 
 @Serializable
 data class MeCapabilities(
@@ -36,6 +40,7 @@ data class MeCapabilities(
     @SerialName("can_place_order_for") val canPlaceOrderFor: Boolean = false,
     @SerialName("can_see_all_activity") val canSeeAllActivity: Boolean = false,
     @SerialName("can_see_dashboard") val canSeeDashboard: Boolean = false,
+    @SerialName("can_see_own_analytics") val canSeeOwnAnalytics: Boolean = false,
     @SerialName("is_scoped_manager") val isScopedManager: Boolean = false,
     @SerialName("can_use_messages") val canUseMessages: Boolean = false,
     @SerialName("can_message_staff") val canMessageStaff: Boolean = false
