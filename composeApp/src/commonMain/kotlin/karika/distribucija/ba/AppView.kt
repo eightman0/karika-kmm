@@ -25,6 +25,7 @@ import karika.distribucija.ba.ui.components.ImagePreview
 import karika.distribucija.ba.ui.components.InfoModal
 import karika.distribucija.ba.ui.components.KarikaColors
 import karika.distribucija.ba.ui.components.KarikaScaffold
+import karika.distribucija.ba.ui.components.KarikaSplash
 import karika.distribucija.ba.ui.view.prelogin.PreLoginChild
 import karika.distribucija.ba.ui.components.KarikaUiColors
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
@@ -115,6 +116,7 @@ fun App(component: AppComponent) {
         ImagePreview(component)
         LoadingView1(component)
         ScreenSaver(component)
+        KarikaSplash()
         getEnvPrefix()
             .replace(".", "")
             .takeIf { it.isNotEmpty() }
