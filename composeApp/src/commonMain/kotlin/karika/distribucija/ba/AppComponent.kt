@@ -1,5 +1,6 @@
 package karika.distribucija.ba
 
+import karika.distribucija.ba.domain.HttpClientProvider
 import androidx.compose.runtime.mutableStateOf
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
@@ -40,6 +41,7 @@ import karika.distribucija.ba.ui.view.shop.profile.order.comments.CommentsCompon
 import karika.distribucija.ba.ui.view.shop.profile.order.details.OrderDetailsComponent
 import karika.distribucija.ba.ui.view.shop.profile.points.PointsComponent
 import karika.distribucija.ba.ui.view.shop.vendor.details.VendorDetailsComponent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -173,6 +175,16 @@ class AppComponent(
         }
         screensaverHandler = { showScreenSaver.value = true }
         stateHolder.commonHandler.init()
+        HttpClientProvider.onUnauthorized = {
+            scope.launch {
+                if (stateHolder.sessionHandler.hasJWT()) {
+                    logout()
+                    // after the failing call's own error snackbar, so ours wins
+                    delay(500)
+                    showWarningMessage("Sesija je istekla. Molimo prijavite se ponovo.")
+                }
+            }
+        }
         if (stateHolder.sessionHandler.mainConfig() !is AppConfig.PreLogin) {
             syncPushHandle()
         }

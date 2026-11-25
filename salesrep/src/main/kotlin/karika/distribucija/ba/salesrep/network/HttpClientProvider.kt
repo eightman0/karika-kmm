@@ -10,6 +10,9 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.client.request.header
+import io.ktor.client.statement.HttpReceivePipeline
+import io.ktor.client.statement.request
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
@@ -39,6 +42,9 @@ object HttpClientProvider {
 
     var token: String? = PlatformEnv.envJwt()
 
+    /** Called (on a ktor thread) when an authenticated call gets 401, i.e. the JWT was revoked/expired. */
+    var onUnauthorized: (() -> Unit)? = null
+
     val client: HttpClient by lazy {
         HttpClient(OkHttp) {
             defaultRequest {
@@ -67,6 +73,21 @@ object HttpClientProvider {
                     val currentToken = token
                     if (!currentToken.isNullOrBlank()) {
                         context.headers.append(HttpHeaders.Authorization, "Bearer $currentToken")
+                    }
+                    proceed()
+                }
+            }
+
+            install("UnauthorizedLogout") {
+                receivePipeline.intercept(HttpReceivePipeline.State) { response ->
+                    val sentWith = response.request.headers[HttpHeaders.Authorization]
+                    val current = token
+                    if (response.status == HttpStatusCode.Unauthorized &&
+                        !current.isNullOrBlank() && current != PlatformEnv.envJwt() &&
+                        sentWith == "Bearer $current" &&
+                        !response.request.url.encodedPath.contains("integration/customer/token")
+                    ) {
+                        onUnauthorized?.invoke()
                     }
                     proceed()
                 }

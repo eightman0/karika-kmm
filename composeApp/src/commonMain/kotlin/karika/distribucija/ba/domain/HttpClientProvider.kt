@@ -5,6 +5,7 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.observer.ResponseObserver
+import io.ktor.client.statement.HttpReceivePipeline
 import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
@@ -12,6 +13,7 @@ import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpHeaders.Authorization
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.serialization.kotlinx.json.json
 import karika.distribucija.ba.ui.common.getEnvJwt
@@ -32,6 +34,9 @@ object HttpClientProvider {
     }
 
     var token: String? = getEnvJwt()
+
+    /** Called (on a ktor thread) when an authenticated call gets 401, i.e. the JWT was revoked/expired. */
+    var onUnauthorized: (() -> Unit)? = null
     fun imageUrl(name: String?): String {
         return if (name != null && name.contains("media")) {
             "$HOST/$name"
@@ -102,6 +107,21 @@ object HttpClientProvider {
                     val token = token
                     if (!token.isNullOrBlank()) {
                         context.headers.append(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                    proceed()
+                }
+            }
+
+            install("UnauthorizedLogout") {
+                receivePipeline.intercept(HttpReceivePipeline.State) { response ->
+                    val sentWith = response.request.headers[HttpHeaders.Authorization]
+                    val current = token
+                    if (response.status == HttpStatusCode.Unauthorized &&
+                        !current.isNullOrBlank() && current != getEnvJwt() &&
+                        sentWith == "Bearer $current" &&
+                        !response.request.url.encodedPath.contains("integration/customer/token")
+                    ) {
+                        onUnauthorized?.invoke()
                     }
                     proceed()
                 }

@@ -1,5 +1,6 @@
 package karika.distribucija.ba.salesrep
 
+import karika.distribucija.ba.salesrep.network.HttpClientProvider
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -105,6 +106,16 @@ class MainActivity : AppCompatActivity() {
 
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHost.navController
+        HttpClientProvider.onUnauthorized = {
+            runOnUiThread {
+                if ((application as SalesRepApp).sessionManager.hasToken()) {
+                    logout()
+                    drawerLayout.postDelayed({
+                        android.widget.Toast.makeText(this, "Sesija je istekla. Molimo prijavite se ponovo.", android.widget.Toast.LENGTH_LONG).show()
+                    }, 500)
+                }
+            }
+        }
 
         appBarConfig = AppBarConfiguration(
             setOf(R.id.ordersListFragment, R.id.customersListFragment, R.id.customerMessagesFragment, R.id.adminMessagesFragment, R.id.internalMessagesFragment) + analyticsDestinationIds,
